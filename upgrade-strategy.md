@@ -69,14 +69,28 @@ If an upstream API change is detected:
 
 ---
 
-## Branch Protection Rules (to configure on GitHub)
+## Write Access Control (Credential Isolation)
 
-- `main` is protected
-- Direct pushes to `main` are blocked
-- All changes require a PR
-- No agent (OpenClaw, Jules, Codex) is authorized to push to `main`
-- The human is the only merge authority for this repo
+GitHub branch protection requires Pro for private repos. The equivalent
+control is enforced at the credential layer instead — which is stronger.
 
-This is the most important security control in the system.
-The config repo defines how agents behave.
-Agents must not be able to rewrite the rules of their own execution.
+**Rule: no agent ever receives a token or key with write access to this repo.**
+
+- Big Pi / Small Pi: read-only deploy keys only
+- OpenClaw, Jules, Codex: no credentials for this repo at all
+- Human (you): only party with push access via SSH
+
+To add a read-only deploy key to the Pi:
+```bash
+# on the Pi
+ssh-keygen -t ed25519 -C "bigpi-readonly" -f ~/.ssh/gddp_config_deploy
+cat ~/.ssh/gddp_config_deploy.pub
+# paste the public key into:
+# GitHub → gddp-config → Settings → Deploy keys → Add key → read-only ✓
+```
+
+Why this is stronger than branch protection:
+Branch protection blocks unauthorized pushes.
+Credential isolation means agents cannot even attempt a push.
+The config repo defines how agents behave — agents must not be able to
+rewrite the rules of their own execution.
