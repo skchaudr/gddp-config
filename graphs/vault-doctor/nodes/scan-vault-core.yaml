@@ -1,0 +1,45 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: scan-vault-core
+title: Implement VaultDoctor scan_vault foundation
+type: capability
+
+why: |
+  All other vault-doctor features (duplicates, stale TODOs, performance check)
+  depend on a working scan_vault() that can walk a vault directory and return
+  structured file metadata. Nothing else can be built until this exists.
+
+depends_on: []
+
+acceptance:
+  - VaultDoctor class exists in src/doctor.py
+  - scan_vault(vault_path) walks the directory tree and returns a list of file metadata dicts
+  - each metadata dict contains at minimum: path, size_bytes, extension, modified_at
+  - scan_vault correctly ignores .obsidian/ system files
+  - at least 3 passing tests in tests/test_doctor.py covering scan output structure
+  - tests use the existing mock vault at vault_doctor/mock_vault/ as fixture
+
+constraints:
+  - implement in src/doctor.py only — do not modify triage.py
+  - do not delete or modify the mock vault files Jules added in the previous PR
+  - use only libraries already in requirements.txt (python-frontmatter, rich, pyyaml)
+  - do not add new dependencies
+  - keep the implementation simple — this is a foundation, not a full feature
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: ready
+priority: high
+
+unlocks:
+  - find-duplicates
+  - find-stale-todos
+  - check-performance
