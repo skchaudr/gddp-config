@@ -1,0 +1,45 @@
+schema_version: "1.0"
+schema_type: result
+
+# ---------------------------------------------------------------------------
+# Result Schema
+# Every executor returns into this shared contract.
+# Downstream stages do not care which executor produced the result.
+# ---------------------------------------------------------------------------
+
+result_id: res_2026_03_11_014
+job_id: job_2026_03_11_014
+executor: jules
+received_at: 2026-03-11T19:22:41Z
+execution_duration_seconds: 340
+
+outcome: success                        # success | failure | partial | error
+status: completed                       # completed | failed | needs_review
+
+changed_files:
+  - middleware.ts
+  - server/auth.ts
+  - tests/auth-boundary.test.ts
+
+patch_path: /var/opclaw/jobs/job_2026_03_11_014/patch.diff
+summary_path: /var/opclaw/jobs/job_2026_03_11_014/result-summary.md
+logs_path: /var/opclaw/jobs/job_2026_03_11_014/logs/
+
+acceptance_check:
+  protected_routes_reject_unauthenticated: pass    # pass | fail | untested
+  authenticated_requests_succeed: pass
+  tests_present: pass
+  summary_present: pass
+
+risks:
+  - role-based permissions deferred
+  - edge case around token refresh remains untested
+
+followup_candidates:
+  - role-permission-layer
+  - auth-refresh-tests
+
+github_action:
+  type: comment_or_pr_update           # comment_only | pr_update | open_pr | close_issue | none
+  target_pr: 48
+  target_issue: null

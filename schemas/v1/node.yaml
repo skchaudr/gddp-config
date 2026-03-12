@@ -1,0 +1,61 @@
+schema_version: "1.0"
+schema_type: node
+
+# ---------------------------------------------------------------------------
+# Node Schema
+# A node is a capability, milestone, or bounded project state.
+# Nodes are authored by the human. OpenClaw only reads and advances them.
+# ---------------------------------------------------------------------------
+
+node_id: auth-boundary
+title: Establish authenticated request boundary
+type: capability                        # capability | milestone | constraint
+
+why: Protected actions must only execute for verified users
+
+depends_on:
+  - user-session-model
+  - route-classification
+
+acceptance:
+  - protected routes reject unauthenticated requests
+  - authenticated users can access protected actions
+  - tests exist for both allowed and denied cases
+
+constraints:
+  - do not couple auth logic to UI components
+  - preserve future support for role-based permissions
+
+allowed_execution_modes:
+  - jules
+  - vm_worker
+  - human
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: ready                           # see status values below
+priority: high                          # low | medium | high | critical
+
+unlocks:
+  - role-permission-layer
+  - protected-route-audit
+
+# ---------------------------------------------------------------------------
+# Node type values
+# ---------------------------------------------------------------------------
+# capability  — a system behavior that must exist
+# milestone   — a checkpoint that groups capabilities
+# constraint  — a rule that scopes other nodes (not directly executable)
+#
+# Status values
+# ---------------------------------------------------------------------------
+# pending     — exists but prerequisites not yet met
+# ready       — all dependencies complete, can be issued
+# running     — an active job is working on this node
+# complete    — acceptance criteria verified, all required_artifacts present
+# failed      — execution attempted and rejected after max retries
+# deferred    — intentionally postponed

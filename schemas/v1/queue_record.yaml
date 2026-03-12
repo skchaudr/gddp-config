@@ -1,0 +1,32 @@
+schema_version: "1.0"
+schema_type: queue_record
+
+# ---------------------------------------------------------------------------
+# Queue Record Schema
+# Minimal record stored in SQLite for job lifecycle tracking.
+# Leasing prevents two workers from picking up the same job.
+# ---------------------------------------------------------------------------
+
+queue_item_id: qi_00014
+job_id: job_2026_03_11_014
+queue: ready                            # see queue state values below
+available_at: 2026-03-11T18:43:10Z
+lease_owner: null                       # null | worker_id
+lease_expires_at: null                  # null | ISO timestamp
+retry_count: 0
+last_error: null
+
+# ---------------------------------------------------------------------------
+# Queue state values
+# ---------------------------------------------------------------------------
+# intake          — webhook received, not yet normalized or classified
+# classified      — intent known, graph/scope checks may still be pending
+# blocked         — job exists but a dependency node is not yet unlocked
+# ready           — can be handed to jules / vertex / worker now
+# running         — executor has accepted the job
+# awaiting_result — task launched; polling or waiting for callback
+# awaiting_review — result produced but needs human or validator check
+# complete        — result accepted and graph updated
+# failed          — execution failed after max retries
+# deferred        — intentionally postponed
+# cancelled       — superseded or manually killed

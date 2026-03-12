@@ -1,0 +1,63 @@
+schema_version: "1.0"
+schema_type: job
+
+# ---------------------------------------------------------------------------
+# Job Schema
+# A job is "here is the bounded work to perform."
+# One event can create zero, one, or multiple jobs.
+# ---------------------------------------------------------------------------
+
+job_id: job_2026_03_11_014
+created_at: 2026-03-11T18:43:10Z
+event_id: evt_2026_03_11_001
+
+project_id: project-x
+repo: saboorkc/project-x
+node_id: auth-boundary
+
+job_type: implementation                # implementation | review | reasoning | context_update
+executor: jules                         # jules | vertex | pi_worker | vm_worker | human
+queue: ready
+
+title: Implement authenticated request boundary for protected actions
+goal: Move node auth-boundary from ready to complete
+why: Protected actions must reject unauthenticated requests
+
+source_context:
+  repo_source: sources/github/saboorkc/project-x
+  starting_branch: feature/auth-boundary
+  target_branch: main
+  relevant_paths:
+    - app/
+    - middleware.ts
+    - server/
+    - tests/
+  related_pr: 48
+  related_issue: null
+
+constraints:
+  - do not couple auth enforcement to UI components
+  - preserve future role-based access support
+  - prefer minimal surface-area change
+  - do not modify unrelated files
+
+acceptance_criteria:
+  - protected routes reject unauthenticated requests
+  - authenticated requests still succeed
+  - tests cover allow and deny paths
+  - PR summary explains implementation choice
+
+dependencies:
+  - node:user-session-model
+  - node:route-classification
+
+priority: high
+risk_level: medium
+estimated_effort: medium
+
+status: ready
+attempt: 0
+max_attempts: 3
+
+artifacts_dir: /var/opclaw/jobs/job_2026_03_11_014/
+result_summary_path: null

@@ -1,0 +1,63 @@
+schema_version: "1.0"
+schema_type: event
+
+# ---------------------------------------------------------------------------
+# Event Schema
+# An event is "something happened."
+# GitHub webhook payloads are normalized into this format before any routing.
+# Raw webhooks never directly trigger execution.
+# ---------------------------------------------------------------------------
+
+event_id: evt_2026_03_11_001
+received_at: 2026-03-11T18:42:13Z
+source: github                          # github | transcript | manual
+event_type: pull_request.opened         # see controlled values below
+action: opened
+actor: github_user_name
+branch: feature/auth-boundary
+base_branch: main
+pr_number: 48
+issue_number: null
+commit_sha: abc123
+url: https://github.com/org/repo/pull/48
+
+project_id: project-x
+project_node_candidates:
+  - auth-boundary
+  - request-guard-coverage
+
+scope_status: pending                   # pending | in_scope | out_of_scope
+priority: pending                       # pending | low | medium | high | critical
+risk_level: pending                     # pending | low | medium | high
+
+raw_payload_path: /var/opclaw/events/raw/evt_2026_03_11_001.json
+normalized_payload_path: /var/opclaw/events/normalized/evt_2026_03_11_001.yaml
+
+classification:
+  category: pending                     # see classifier schema
+  intent: pending
+  requires_code_execution: pending
+  requires_reasoning: pending
+  requires_human_review: pending
+
+routing:
+  selected_executor: pending            # pending | jules | vertex | pi_worker | vm_worker | human
+  selected_queue: intake
+
+status: received
+
+# ---------------------------------------------------------------------------
+# Controlled event_type values
+# ---------------------------------------------------------------------------
+# issue.opened
+# issue.commented
+# pull_request.opened
+# pull_request.updated
+# pull_request.review_commented
+# push.branch_updated
+# workflow.failed
+# workflow.succeeded
+# manual.triggered
+# transcript.captured
+# transcript.reviewed
+# transcript.dismissed
