@@ -1,0 +1,48 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: performance-dashboard
+title: Implement live performance dashboard
+type: capability
+
+why: |
+  Raw scan output is hard to act on. A live terminal dashboard using rich
+  gives users an at-a-glance view of vault health: file count, total size,
+  large files, plugin count, stale TODOs — all in one screen. "Live" means
+  it can refresh on demand, not that it continuously polls. This is the
+  primary output surface before the interactive triage CLI ships.
+
+depends_on:
+  - scan-vault-core
+  - check-performance
+
+acceptance:
+  - VaultDoctor has a generate_dashboard(vault_path) method in src/doctor.py
+  - generate_dashboard prints a rich-formatted table or panel to the terminal
+  - dashboard shows at minimum: total files, total size (human readable), large file count, plugin count
+  - if find_duplicates is implemented, duplicate count is included; if absent, row is omitted gracefully
+  - if find_stale_todos is implemented, stale TODO count is included; if absent, row is omitted gracefully
+  - dashboard is callable from the CLI via a --dashboard flag or dashboard subcommand
+  - at least 2 passing tests verifying generate_dashboard runs without error given a valid vault path
+  - tests use the existing mock vault fixture
+
+constraints:
+  - use rich (already in requirements.txt) for all terminal output — no new display dependencies
+  - implement generate_dashboard in src/doctor.py, wire CLI entry point in triage.py or a cli.py entry script
+  - dashboard must not crash if optional features (find_duplicates, find_stale_todos) are not yet implemented
+  - do not implement auto-refresh/polling — static render on call is sufficient for this node
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: ready
+priority: high
+
+unlocks:
+  - triage-cli-core

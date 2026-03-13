@@ -1,0 +1,44 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: find-duplicates
+title: Implement duplicate file detection
+type: capability
+
+why: |
+  Duplicate files are one of the most common vault health problems — same content
+  saved multiple times under different names or in different folders. scan_vault()
+  already returns file metadata including size_bytes; the next step is adding MD5
+  hashing to detect content-identical files and surface them to the user.
+
+depends_on:
+  - scan-vault-core
+
+acceptance:
+  - VaultDoctor has a find_duplicates(vault_path) method in src/doctor.py
+  - find_duplicates computes MD5 hash for each file returned by scan_vault()
+  - find_duplicates returns a list of duplicate groups — each group is a list of file paths with identical content
+  - files with unique content are not included in the output
+  - at least 2 passing tests covering detection of duplicates and correct handling of no-duplicate case
+  - tests use the existing mock vault fixture
+
+constraints:
+  - implement in src/doctor.py only — do not modify triage.py
+  - use only hashlib (stdlib) for MD5 — no new dependencies
+  - call scan_vault() internally — do not re-walk the directory
+  - keep it simple — return path strings, not metadata dicts
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: ready
+priority: high
+
+unlocks:
+  - triage-cli-core

@@ -1,0 +1,46 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: find-stale-todos
+title: Implement stale TODO identification
+type: capability
+
+why: |
+  Obsidian users accumulate TODO items in note frontmatter that never get actioned.
+  A "stale" TODO is one in a file that hasn't been modified in over 2 years.
+  scan_vault() already returns modified_at timestamps; the next step is parsing
+  frontmatter to find notes with TODO tags and flagging the ones that are stale.
+
+depends_on:
+  - scan-vault-core
+
+acceptance:
+  - VaultDoctor has a find_stale_todos(vault_path, stale_days=730) method in src/doctor.py
+  - find_stale_todos filters scan_vault() results to .md files only
+  - find_stale_todos uses python-frontmatter to parse YAML frontmatter from each file
+  - a file is considered a stale TODO if its frontmatter contains a "tags" field including "todo" (case-insensitive) AND modified_at is older than stale_days
+  - find_stale_todos returns a list of file path strings for stale TODO files
+  - at least 2 passing tests — one with a stale TODO file, one with a recent file
+  - tests use the existing mock vault fixture
+
+constraints:
+  - implement in src/doctor.py only — do not modify triage.py
+  - use python-frontmatter (already in requirements.txt) for frontmatter parsing
+  - call scan_vault() internally — do not re-walk the directory
+  - stale_days must be configurable with a default of 730 (2 years)
+  - handle files with no frontmatter gracefully — do not raise exceptions
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: ready
+priority: normal
+
+unlocks:
+  - triage-cli-core

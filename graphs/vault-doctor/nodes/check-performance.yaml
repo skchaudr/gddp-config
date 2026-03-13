@@ -1,0 +1,46 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: check-performance
+title: Implement vault performance check
+type: capability
+
+why: |
+  Large vaults slow down Obsidian — too many plugins, oversized files, or
+  deeply nested folders all contribute. scan_vault() already returns size_bytes
+  per file; the next step is aggregating that data into a performance report:
+  plugin count from .obsidian/plugins/, files over a size threshold, and
+  total file count.
+
+depends_on:
+  - scan-vault-core
+
+acceptance:
+  - VaultDoctor has a check_performance(vault_path) method in src/doctor.py
+  - check_performance returns a dict with at minimum these keys: total_files, large_files, plugin_count
+  - large_files is a list of file path strings where size_bytes > 5MB (5_242_880 bytes)
+  - plugin_count counts subdirectories inside .obsidian/plugins/ (0 if the folder does not exist)
+  - total_files is the count of all files returned by scan_vault()
+  - at least 2 passing tests covering the returned dict structure and large file detection
+  - tests use the existing mock vault fixture
+
+constraints:
+  - implement in src/doctor.py only — do not modify triage.py
+  - call scan_vault() internally — do not re-walk the directory
+  - plugin_count reads .obsidian/plugins/ directly using pathlib — do not rely on scan_vault for .obsidian contents
+  - use only stdlib — no new dependencies
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: ready
+priority: normal
+
+unlocks:
+  - triage-cli-core
