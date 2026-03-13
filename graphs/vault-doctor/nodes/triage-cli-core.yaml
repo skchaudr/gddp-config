@@ -1,0 +1,49 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: triage-cli-core
+title: Implement interactive triage CLI
+type: capability
+
+why: |
+  The analysis features (scan, duplicates, stale TODOs, performance, .obsidian audit)
+  are only useful if users can act on the results. triage-cli-core wires everything
+  into an interactive terminal session: show findings, let users choose actions
+  (delete duplicate, archive stale, open file), and confirm before any destructive operation.
+  This is the feature that makes vault-doctor a tool users actually run, not just a script.
+
+depends_on:
+  - find-duplicates
+  - find-stale-todos
+  - check-performance
+  - obsidian-audit
+  - performance-dashboard
+
+acceptance:
+  - A CLI entry point exists (triage.py or cli.py) that can be run as: python3 -m vault_doctor or vault-doctor
+  - Running with no args shows the dashboard and prompts for an action
+  - At minimum two interactive actions are implemented: review duplicates, review stale TODOs
+  - Each action shows findings and asks for confirmation before any file operation
+  - A --dry-run flag suppresses all file writes and prints what would have happened
+  - All destructive operations (delete, move, archive) are behind a confirmation prompt
+  - At least 3 passing tests covering: CLI invocation, dry-run flag, confirmation prompt bypass via flag
+
+constraints:
+  - use rich and click (or argparse if click unavailable) for CLI structure
+  - never perform a destructive file operation without explicit user confirmation or --force flag
+  - --dry-run must be respected at every file operation site — not just at the top level
+  - do not implement undo/rollback in this node — that is a future node
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: pending
+priority: high
+
+unlocks: []

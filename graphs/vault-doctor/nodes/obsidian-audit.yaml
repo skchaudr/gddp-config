@@ -1,0 +1,49 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: obsidian-audit
+title: Implement .obsidian folder audit and process detection
+type: capability
+
+why: |
+  The .obsidian folder contains the full configuration state of a vault —
+  which plugins are enabled, hotkeys, themes, and workspace layout. Auditing
+  it surfaces hidden performance and health problems that a file scan alone
+  can't find. Process detection checks whether Obsidian is currently running
+  so the tool can warn before making changes to live vault config.
+
+depends_on:
+  - scan-vault-core
+
+acceptance:
+  - VaultDoctor has an obsidian_audit(vault_path) method in src/doctor.py
+  - obsidian_audit returns a dict with at minimum: community_plugins, core_plugins, theme, hotkeys_customized, process_running
+  - community_plugins is a list of enabled plugin IDs parsed from .obsidian/community-plugins.json (empty list if file absent)
+  - core_plugins is a list of enabled plugin IDs parsed from .obsidian/core-plugins.json (empty list if file absent)
+  - theme is the active theme name parsed from .obsidian/appearance.json, or "default" if absent
+  - hotkeys_customized is a bool — True if .obsidian/hotkeys.json exists and is non-empty
+  - process_running is a bool — True if an Obsidian process is detected on the system
+  - process detection uses psutil or a subprocess ps check — no platform-specific assumptions
+  - at least 3 passing tests covering: full audit dict structure, missing .obsidian files handled gracefully, process detection mocked
+  - tests use the existing mock vault fixture
+
+constraints:
+  - implement in src/doctor.py only — do not modify triage.py in this node
+  - handle missing .obsidian subfiles gracefully — return empty/default values, never raise
+  - if psutil is not installed, fall back to subprocess ps grep — do not hard-fail on import
+  - do not scan inside plugin subdirectories — only read the top-level JSON config files
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: ready
+priority: high
+
+unlocks:
+  - triage-cli-core
