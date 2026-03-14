@@ -17,43 +17,43 @@ why: |
 
 depends_on: []
 
-# ── Design decisions documented here ──────────────────────────────────────
+# Design decisions documented here:
 # 1. graph: field dropped from PR body contract — redundant, derived from repo
-# 2. graph_updater uses GitHub Contents API (not git-on-Pi) — no write key needed on Pi
-# 3. results row written BEFORE graph update attempt — gives replay log without retries
+# 2. graph_updater uses GitHub Contents API, not git-on-Pi — no write key on Pi needed
+# 3. result row written as pending BEFORE graph update — gives replay log without retries
 # 4. ALLOWED_REPOS validated first — cheapest check, fail fast
 # 5. auto-dispatch next node explicitly excluded — scope discipline
-# ──────────────────────────────────────────────────────────────────────────
 
 acceptance:
-  - classifier.py handles pull_request.closed events and routes them with route=return when merged==true
+  - classifier.py handles pull_request.closed events and routes them with route=return when merged is true
   - return_router.py exists at scripts/runtime/return_router.py
-  - return_router.handle_merged_pr(event) validates repo, parses node_id, calls graph_updater, writes result
-  - parse_node_id(pr_body) extracts node id using regex matching "node: <id>" on its own line
-  - validate_repo rejects repos not in ALLOWED_REPOS (initially ["skchaudr/vault-doctor"])
+  - handle_merged_pr validates repo allowlist, parses node_id from PR body, calls graph_updater, writes result row
+  - parse_node_id extracts node id using regex matching "node: <id>" on its own line (case-insensitive, multiline)
+  - validate_repo rejects repos not in ALLOWED_REPOS module-level constant (initially skchaudr/vault-doctor)
   - graph_updater.py exists at scripts/runtime/graph_updater.py
-  - graph_updater.update_graph_node_complete(node_id, pr_number, merged_at) reads YAML via GitHub Contents API, sets status=complete, sets completed_at and merged_pr, commits back
-  - graph_updater returns {"ok": True, "commit_sha": "..."} on success, {"ok": False, "reason": "..."} on failure with reason in [node_not_found, already_complete, github_commit_failed]
+  - update_graph_node_complete reads project YAML via GitHub Contents API, sets status to complete, sets completed_at and merged_pr, commits back
+  - graph_updater returns ok=True with commit_sha on success, ok=False with reason on failure
+  - failure reasons include node_not_found, already_complete, github_commit_failed
   - results_store.py exists at scripts/runtime/results_store.py
-  - results_store.write_result(repo_name, node_id, pr_number, merged_at, status, reason, commit_sha) inserts one row
-  - results table schema matches the specified schema (id, repo_name, node_id, pr_number, merged_at, status, reason, commit_sha, created_at)
+  - write_result inserts one row into the results table
+  - results table has columns id, repo_name, node_id, pr_number, merged_at, status, reason, commit_sha, created_at
   - result row is written with status=pending before graph update is attempted, then updated to completed or failed
-  - at least 3 tests covering: node_id parsed correctly from PR body, missing node tag returns rejected, repo not in allowlist returns rejected
+  - at least 3 tests covering node_id parsed correctly, missing node tag returns rejected, repo not in allowlist returns rejected
 
 constraints:
   - new files only: scripts/runtime/return_router.py, scripts/runtime/graph_updater.py, scripts/runtime/results_store.py
-  - the ONLY existing file to modify is scripts/runtime/heartbeat/classifier.py — add pull_request.closed handling
+  - the ONLY existing file to modify is scripts/runtime/heartbeat/classifier.py — add pull_request.closed routing
   - DO NOT touch runner.py, dispatcher.py, job_factory.py, scope_checker.py, state_recorder.py, or any other existing file
-  - DO NOT implement auto-dispatch of next node — that is explicitly out of scope
+  - DO NOT implement auto-dispatch of next node — explicitly out of scope
   - DO NOT implement retries, rollback, or partial completion handling
   - DO NOT implement multi-node PR handling — one PR closes exactly one node
-  - graph_updater MUST use the GitHub Contents API (requests + GITHUB_TOKEN env var) — do not use git subprocess calls
+  - graph_updater MUST use the GitHub Contents API via requests and GITHUB_TOKEN env var — no git subprocess calls
   - graph_updater MUST read the current file SHA before writing (required by GitHub API for conflict detection)
   - GITHUB_TOKEN must be read from environment — never hardcoded
   - ALLOWED_REPOS must be a module-level constant list, not hardcoded inside functions
   - DO NOT touch vault_doctor/src/ or any path outside scripts/runtime/
   - DO NOT commit __pycache__ or .pyc files
-  - include "node: <node_id>" and "job: <job_id>" metadata block in PR description (required by return router)
+  - include the node and job metadata block in the PR description as required by the dispatch template
 
 allowed_execution_modes:
   - jules
