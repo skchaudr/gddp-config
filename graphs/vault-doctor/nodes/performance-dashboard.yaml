@@ -27,8 +27,12 @@ acceptance:
   - tests use the existing mock vault fixture
 
 constraints:
+  - implement generate_dashboard in src/doctor.py ONLY — this is the one and only canonical file for VaultDoctor
+  - DO NOT touch vault_doctor/src/doctor.py — that path is not used and must not be modified
+  - DO NOT touch any file under vault_doctor/src/
+  - DO NOT commit __pycache__ directories or any .pyc files — these must be in .gitignore
+  - CLI entry point may be wired in triage.py or a new cli.py at the repo root — not inside vault_doctor/
   - use rich (already in requirements.txt) for all terminal output — no new display dependencies
-  - implement generate_dashboard in src/doctor.py, wire CLI entry point in triage.py or a cli.py entry script
   - dashboard must not crash if optional features (find_duplicates, find_stale_todos) are not yet implemented
   - do not implement auto-refresh/polling — static render on call is sufficient for this node
 
