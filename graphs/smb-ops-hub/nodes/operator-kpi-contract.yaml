@@ -1,0 +1,42 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: operator-kpi-contract
+title: Define operator KPIs and exception thresholds
+type: capability
+
+why: |
+  A dashboard without clear operator questions becomes generic reporting. This node defines which
+  numbers and thresholds matter each day so later source and UI work produce an actionable hub.
+
+depends_on: []
+
+acceptance:
+  - The project documents the core KPIs for cash, staffing, schedule coverage, and unresolved exceptions
+  - Each KPI includes a clear business definition, source expectation, and refresh cadence
+  - Exception thresholds are explicit enough to drive alerts or highlighted states later
+  - The operator loop defines what should be reviewed each morning and what requires immediate action
+  - The repo identifies which outputs belong in the dashboard versus the daily brief
+
+constraints:
+  - Focus on a narrow owner-operator workflow, not a generic analytics suite
+  - Keep KPI definitions sourceable from the connected systems
+  - Do not introduce speculative metrics that cannot be measured from planned integrations
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: ready
+priority: high
+
+unlocks:
+  - canonical-ops-model
+  - exception-rules-engine
+  - ops-dashboard
+  - daily-ops-brief

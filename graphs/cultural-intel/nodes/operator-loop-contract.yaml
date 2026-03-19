@@ -1,0 +1,43 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: operator-loop-contract
+title: Define operator loop and canonical outputs
+type: capability
+
+why: |
+  The repo currently mixes research, ingestion scripts, and an API scaffold without a single
+  agreed operating loop. This node defines what the operator does each day, which interface is
+  canonical, and which artifacts count as success so later implementation nodes do not optimize
+  for the wrong surface area.
+
+depends_on: []
+
+acceptance:
+  - The repo documents one canonical workflow for Phase 0 from refresh to review to decision
+  - The project defines exactly three outcomes for the operator: ranked watchlist, anomaly brief, and one backtest result
+  - The canonical interface is explicit: CLI and markdown artifacts are first-class, the current API is either scoped down or clearly marked non-canonical
+  - Output locations and file names for the brief, scorecards, and backtest artifacts are documented
+  - A smoke-run command sequence exists that a human can execute locally end to end
+
+constraints:
+  - Build on the existing repo instead of rewriting it into a different product
+  - Do not add cloud infrastructure, queues, or a frontend in this node
+  - Keep the Phase 0 workflow local-first and reproducible from one machine
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: ready
+priority: high
+
+unlocks:
+  - watchlist-entity-map
+  - operator-brief
+  - phase-0-backtest

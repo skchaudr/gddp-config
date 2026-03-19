@@ -1,0 +1,42 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: phase-0-backtest
+title: Run the first reproducible Phase 0 backtest
+type: capability
+
+why: |
+  The project needs one falsifiable proof point, not just monitoring infrastructure. This node
+  executes the first hypothesis test against the assembled data and produces a result the operator
+  can evaluate directly.
+
+depends_on:
+  - operator-loop-contract
+  - watchlist-entity-map
+  - signal-scorecard
+
+acceptance:
+  - One specific hypothesis is chosen as the Phase 0 test and documented in the repo
+  - A reproducible local command produces the backtest result from the current datasets
+  - The output includes the metric tested, the timeframe, and the conclusion or failure mode
+  - Confounders or known data gaps are stated explicitly in the result artifact
+  - The result is strong enough to decide whether the project proceeds, pivots, or needs more data
+
+constraints:
+  - Keep the first test simple enough to run locally without orchestration infrastructure
+  - Prefer transparent statistical methods over complex ML for the first proof point
+  - Do not claim predictive validity unless the result artifact shows the actual evidence
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: pending
+priority: normal
+
+unlocks: []

@@ -1,0 +1,41 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: daily-ops-brief
+title: Generate a daily operations brief
+type: capability
+
+why: |
+  The operator may not always be in the dashboard. This node creates a compact daily brief that
+  summarizes the KPIs and exceptions which need action before the day starts.
+
+depends_on:
+  - operator-kpi-contract
+  - canonical-ops-model
+  - exception-rules-engine
+
+acceptance:
+  - A repeatable command generates a daily brief from current local data
+  - The brief summarizes KPI state, highest-priority exceptions, and recommended next checks
+  - The output is readable in a terminal or markdown without opening the dashboard
+  - The brief points back to affected entities or records so the operator can follow up quickly
+  - The brief format is stable enough to compare one day to the next
+
+constraints:
+  - Keep the brief tightly scoped to operational action
+  - Avoid duplicating the full dashboard in text form
+  - Do not add outbound notification channels in this node
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: pending
+priority: normal
+
+unlocks: []

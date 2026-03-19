@@ -1,0 +1,41 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: github-ingestion-hardening
+title: Harden GitHub ingestion and snapshot schema
+type: capability
+
+why: |
+  GitHub is one of the two primary source streams and already has a seed poller in the repo.
+  That poller needs a stable schema, idempotent refresh behavior, and enough metrics to support
+  both the daily brief and the first hypothesis test.
+
+depends_on: []
+
+acceptance:
+  - The GitHub ingestion path writes repeatable DuckDB snapshots for a defined watchlist of repositories
+  - Snapshot rows include enough fields to support stars, forks, issues, and update recency analysis
+  - The refresh path is idempotent and can be rerun without duplicate logical records
+  - A documented smoke test exists for refreshing a small watchlist locally
+  - Failure behavior for missing token, rate limit, and partial fetch is explicit and user-visible
+
+constraints:
+  - Use GitHub REST APIs and a local DuckDB store only
+  - Do not attempt global GitHub search or ingest all repositories
+  - Keep the watchlist explicit and operator-editable
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: ready
+priority: high
+
+unlocks:
+  - watchlist-entity-map
+  - signal-scorecard

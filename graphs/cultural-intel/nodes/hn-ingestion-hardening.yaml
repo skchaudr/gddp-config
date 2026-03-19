@@ -1,0 +1,41 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: hn-ingestion-hardening
+title: Harden Hacker News ingestion and snapshot schema
+type: capability
+
+why: |
+  Hacker News is the second primary source stream and carries the lead-lag signal the research
+  documents center on. The repo already has a basic poller, but it needs a stable schema and
+  repeatable refresh behavior before scorecards or backtests can trust it.
+
+depends_on: []
+
+acceptance:
+  - The Hacker News ingestion path stores repeatable story snapshots in DuckDB for tracked items
+  - The schema preserves fields needed for score velocity, comment depth, and source URL analysis
+  - The refresh path is idempotent across reruns and does not rely on manual database cleanup
+  - A documented smoke test exists for ingesting a bounded sample locally
+  - Failure behavior for network errors and malformed story payloads is explicit and user-visible
+
+constraints:
+  - Use the public Hacker News Firebase API only
+  - Keep Phase 0 limited to bounded polling and local storage
+  - Do not expand scope to broad social-network ingestion in this node
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: ready
+priority: high
+
+unlocks:
+  - watchlist-entity-map
+  - signal-scorecard

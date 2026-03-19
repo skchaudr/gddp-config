@@ -1,0 +1,43 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: resume-and-verification
+title: Add resume and verification workflow
+type: capability
+
+why: |
+  Personal data exports are often slow, flaky, and privacy-sensitive. The operator needs a way to
+  resume interrupted work and verify archive completeness without manually diffing raw folders.
+
+depends_on:
+  - auth-and-secrets-boundary
+  - claude-export-adapter
+  - linkedin-export-adapter
+  - google-export-adapter
+  - normalized-manifest
+
+acceptance:
+  - The tool can resume or safely retry an interrupted export session without corrupting prior results
+  - Verification output shows which provider exports are complete, partial, or unverifiable
+  - The runbook explains how an operator confirms a provider export is done
+  - Resume logic distinguishes between retryable failures and hard stops that need manual intervention
+  - At least one end-to-end example demonstrates rerun behavior after a partial failure
+
+constraints:
+  - Never overwrite a successful raw export silently
+  - Prefer append-only or versioned archive behavior where practical
+  - Do not claim completeness unless the verification artifact shows the evidence
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: pending
+priority: high
+
+unlocks: []

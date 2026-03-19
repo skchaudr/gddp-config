@@ -1,0 +1,39 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: quickbooks-ingestion
+title: Ingest accounting data from QuickBooks
+type: capability
+
+why: |
+  Cash position, receivables, and invoice aging are core parts of the operator view. This node
+  brings accounting data into the hub in a form the rest of the graph can trust.
+
+depends_on: []
+
+acceptance:
+  - The project can fetch or ingest the bounded accounting records needed for the agreed KPI set
+  - Data refresh behavior is documented and repeatable
+  - The ingestion path preserves source identifiers needed for reconciliation
+  - Failure behavior for auth and partial sync is explicit and user-visible
+  - A smoke test proves the ingestion path can populate local development data
+
+constraints:
+  - Keep scope to the accounting entities needed for the first KPI set
+  - Do not build invoicing or bookkeeping workflows in this node
+  - Preserve enough source fidelity to reconcile hub values back to QuickBooks
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: ready
+priority: high
+
+unlocks:
+  - canonical-ops-model

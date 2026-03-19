@@ -1,0 +1,61 @@
+schema_version: "1.0"
+schema_type: project_graph
+
+project_id: export-tool
+project_name: Export Tool
+description: Personal data export CLI for collecting, normalizing, and verifying archives from multiple providers
+repo: skchaudr/export-tool
+
+blueprint:
+  vision: Give one operator a trustworthy local CLI for exporting personal data from multiple providers into a structured archive
+  architecture_notes: |
+    This project should stay CLI-first, local-first, and privacy-preserving. Provider adapters are
+    independent workstreams once the archive layout and secrets boundary exist, so the graph should
+    allow parallel implementation of Claude, LinkedIn, and Google exports. The archive manifest is
+    the source of truth for what was collected, when, and how it can be verified.
+  major_capabilities:
+    - CLI contract for running exports and resuming failed work
+    - provider adapters for Claude, LinkedIn, and Google
+    - normalized archive manifest across provider outputs
+    - export verification and resume-safe reruns
+
+graph_version: "1.0"
+created_at: 2026-03-19
+last_updated: 2026-03-19
+
+nodes_dir: nodes/
+
+nodes:
+  - id: cli-contract-and-archive-layout
+    title: Define CLI contract and archive layout
+    status: ready
+    type: capability
+  - id: auth-and-secrets-boundary
+    title: Establish auth and secrets boundary
+    status: ready
+    type: capability
+  - id: claude-export-adapter
+    title: Implement Claude export adapter
+    status: pending
+    type: capability
+  - id: linkedin-export-adapter
+    title: Implement LinkedIn export adapter
+    status: pending
+    type: capability
+  - id: google-export-adapter
+    title: Implement Google export adapter
+    status: pending
+    type: capability
+  - id: normalized-manifest
+    title: Build normalized manifest across providers
+    status: pending
+    type: capability
+  - id: resume-and-verification
+    title: Add resume and verification workflow
+    status: pending
+    type: capability
+
+execution_policy:
+  default_executor: jules
+  require_human_review_before_overnight: true
+  artifact_gate_enforced: true

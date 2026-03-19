@@ -1,0 +1,66 @@
+schema_version: "1.0"
+schema_type: project_graph
+
+project_id: smb-ops-hub
+project_name: SMB Ops Hub
+description: Small-business operations dashboard for accounting, scheduling, and workforce visibility
+repo: skchaudr/smb-ops-hub
+
+blueprint:
+  vision: Give an owner-operator one place to see cash, staffing, and schedule risk before it becomes a fire drill
+  architecture_notes: |
+    This project should unify a small set of operational systems instead of becoming a generic BI
+    platform. Source connectors for accounting, scheduling, and workforce data should be developed
+    as parallel tracks. The hub's value comes from a canonical operations model, a small set of KPI
+    views, and explicit exception handling rather than from elaborate visualization alone.
+  major_capabilities:
+    - KPI contract for cash, staffing, and schedule health
+    - source ingestion from QuickBooks, scheduling, and workforce systems
+    - canonical operations model joining those sources
+    - exception rules for invoices, staffing gaps, and schedule conflicts
+    - operator-facing dashboard and daily brief
+
+graph_version: "1.0"
+created_at: 2026-03-19
+last_updated: 2026-03-19
+
+nodes_dir: nodes/
+
+nodes:
+  - id: operator-kpi-contract
+    title: Define operator KPIs and exception thresholds
+    status: ready
+    type: capability
+  - id: quickbooks-ingestion
+    title: Ingest accounting data from QuickBooks
+    status: ready
+    type: capability
+  - id: scheduling-ingestion
+    title: Ingest schedule data from the scheduling system
+    status: ready
+    type: capability
+  - id: workforce-ingestion
+    title: Ingest workforce roster and shift-state data
+    status: ready
+    type: capability
+  - id: canonical-ops-model
+    title: Build the canonical operations model
+    status: pending
+    type: capability
+  - id: exception-rules-engine
+    title: Evaluate operational exceptions and risk states
+    status: pending
+    type: capability
+  - id: ops-dashboard
+    title: Ship the operator dashboard view
+    status: pending
+    type: capability
+  - id: daily-ops-brief
+    title: Generate a daily operations brief
+    status: pending
+    type: capability
+
+execution_policy:
+  default_executor: jules
+  require_human_review_before_overnight: true
+  artifact_gate_enforced: true

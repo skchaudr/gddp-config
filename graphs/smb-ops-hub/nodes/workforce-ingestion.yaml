@@ -1,0 +1,39 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: workforce-ingestion
+title: Ingest workforce roster and shift-state data
+type: capability
+
+why: |
+  Staffing risk depends on who is available, assigned, absent, or overloaded. This node captures
+  the workforce-side data needed to interpret schedule gaps and operational risk correctly.
+
+depends_on: []
+
+acceptance:
+  - The project can fetch or ingest the bounded workforce records needed for the agreed KPI set
+  - Data refresh behavior is documented and repeatable
+  - Workforce records preserve identifiers needed to join people, roles, and assignments
+  - Failure behavior for auth and partial sync is explicit and user-visible
+  - A smoke test proves the ingestion path can populate local development data
+
+constraints:
+  - Keep scope to operational roster visibility, not full HR system replacement
+  - Preserve enough source fidelity to reconcile hub values back to the workforce source
+  - Avoid payroll or compliance automation in this node
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: ready
+priority: high
+
+unlocks:
+  - canonical-ops-model

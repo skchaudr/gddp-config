@@ -1,0 +1,64 @@
+schema_version: "1.0"
+schema_type: project_graph
+
+project_id: cultural-intel
+project_name: Cultural Intel
+description: Local-first cultural signal monitor for open-source dev tools using GitHub and Hacker News data
+repo: skchaudr/cultural-intel
+
+blueprint:
+  vision: Turn GitHub and Hacker News activity into a daily operator brief and one falsifiable backtest for dev-tool cultural signals
+  architecture_notes: |
+    The existing repo is not a Codex CLI extension today. It already contains Python ingestion
+    scripts, DuckDB storage, research docs, and a thin Node/Express API scaffold. Build from
+    that foundation instead of rewriting it. Stay local-first, keep DuckDB as the system of
+    record for Phase 0, and prefer a CLI or markdown brief over expanding the web API surface.
+    Parallel work should come from independent source and analysis nodes; depends_on is the
+    concurrency constraint.
+  major_capabilities:
+    - GitHub and Hacker News source ingestion with repeatable local refresh
+    - watchlist and story-to-repo linking for tracked dev tools
+    - derived scorecards for behavioral adoption, identity alignment, and cultural momentum
+    - operator-facing brief with ranked signals and anomalies
+    - one reproducible backtest for the first hypothesis
+
+graph_version: "1.0"
+created_at: 2026-03-19
+last_updated: 2026-03-19
+
+nodes_dir: nodes/
+
+nodes:
+  - id: operator-loop-contract
+    title: Define operator loop and canonical outputs
+    status: ready
+    type: capability
+  - id: github-ingestion-hardening
+    title: Harden GitHub ingestion and snapshot schema
+    status: ready
+    type: capability
+  - id: hn-ingestion-hardening
+    title: Harden Hacker News ingestion and snapshot schema
+    status: ready
+    type: capability
+  - id: watchlist-entity-map
+    title: Establish watchlist and story-to-repo linking
+    status: pending
+    type: capability
+  - id: signal-scorecard
+    title: Derive the three cultural signal scorecards
+    status: pending
+    type: capability
+  - id: operator-brief
+    title: Generate a daily operator brief from the scorecards
+    status: pending
+    type: capability
+  - id: phase-0-backtest
+    title: Run the first reproducible Phase 0 backtest
+    status: pending
+    type: capability
+
+execution_policy:
+  default_executor: jules
+  require_human_review_before_overnight: true
+  artifact_gate_enforced: true

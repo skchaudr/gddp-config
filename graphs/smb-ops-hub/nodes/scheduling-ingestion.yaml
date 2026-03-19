@@ -1,0 +1,39 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: scheduling-ingestion
+title: Ingest schedule data from the scheduling system
+type: capability
+
+why: |
+  The hub needs current schedule state to detect coverage gaps and conflicts before they become
+  customer-facing problems. This node brings the scheduling source into the shared model.
+
+depends_on: []
+
+acceptance:
+  - The project can fetch or ingest the bounded schedule records needed for the agreed KPI set
+  - Data refresh behavior is documented and repeatable
+  - Schedule records preserve identifiers needed to trace shifts, locations, and assignments
+  - Failure behavior for auth and partial sync is explicit and user-visible
+  - A smoke test proves the ingestion path can populate local development data
+
+constraints:
+  - Keep scope to schedule visibility, not full schedule editing workflows
+  - Preserve enough source fidelity to reconcile hub values back to the scheduling system
+  - Avoid broad calendar-sync features in Phase 1
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: ready
+priority: high
+
+unlocks:
+  - canonical-ops-model

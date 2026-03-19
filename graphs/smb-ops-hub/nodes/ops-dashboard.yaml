@@ -1,0 +1,41 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: ops-dashboard
+title: Ship the operator dashboard view
+type: capability
+
+why: |
+  The hub needs a single visual surface where the owner-operator can see current KPI state and drill
+  into the exceptions that matter. This node delivers that primary dashboard experience.
+
+depends_on:
+  - operator-kpi-contract
+  - canonical-ops-model
+  - exception-rules-engine
+
+acceptance:
+  - The dashboard surfaces the agreed KPI set and current exception states in one place
+  - The operator can move from a summary metric to the underlying affected records
+  - The layout makes it clear what is healthy, what is at risk, and what needs action now
+  - The dashboard can render from local development data without manual hand-editing
+  - At least one end-to-end example demonstrates the dashboard handling mixed healthy and unhealthy states
+
+constraints:
+  - Keep the dashboard focused on operational decision support, not generic analytics
+  - Prefer clear information hierarchy over decorative visualization work
+  - Do not add broad customization systems in the first dashboard node
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: pending
+priority: normal
+
+unlocks: []

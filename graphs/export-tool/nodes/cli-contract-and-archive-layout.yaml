@@ -1,0 +1,43 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: cli-contract-and-archive-layout
+title: Define CLI contract and archive layout
+type: capability
+
+why: |
+  Provider adapters can be built in parallel only if they target a stable command surface and a
+  shared archive structure. This node defines how exports are invoked, where artifacts land, and
+  how operators inspect what was collected.
+
+depends_on: []
+
+acceptance:
+  - The project documents canonical CLI commands for running single-provider and multi-provider exports
+  - The archive layout defines where raw downloads, normalized outputs, logs, and manifests live
+  - The CLI contract distinguishes between fresh export, retry, and inspect operations
+  - The path layout is stable across providers and safe for local backup
+  - A sample manifest or runbook shows what a successful export session should look like
+
+constraints:
+  - Keep the tool local-first and single-operator friendly
+  - Do not require cloud storage or a web app
+  - Archive paths must avoid provider-specific assumptions where possible
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: ready
+priority: high
+
+unlocks:
+  - claude-export-adapter
+  - linkedin-export-adapter
+  - google-export-adapter
+  - normalized-manifest

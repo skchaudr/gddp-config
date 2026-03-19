@@ -1,0 +1,44 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: watchlist-entity-map
+title: Establish watchlist and story-to-repo linking
+type: capability
+
+why: |
+  Cultural intel is only useful if the system can consistently connect tracked dev tools to the
+  source activity that mentions them. This node turns raw GitHub and Hacker News snapshots into a
+  canonical watchlist with stable entity mapping.
+
+depends_on:
+  - operator-loop-contract
+  - github-ingestion-hardening
+  - hn-ingestion-hardening
+
+acceptance:
+  - A canonical watchlist exists for tracked tools with owner/repo identity and any needed aliases
+  - Hacker News stories can be linked to watched repositories by URL or documented matching rules
+  - Link decisions are persisted or reproducible rather than hand-waved in ad hoc code
+  - The repo includes a small validation sample showing correct matches and intentional non-matches
+  - The watchlist can be extended without rewriting the matching pipeline
+
+constraints:
+  - Prefer deterministic matching rules before heuristic NLP
+  - Do not build cross-platform person identity resolution in Phase 0
+  - Keep the watchlist format human-editable in the repo
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: pending
+priority: normal
+
+unlocks:
+  - signal-scorecard
+  - phase-0-backtest

@@ -1,0 +1,43 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: normalized-manifest
+title: Build normalized manifest across providers
+type: capability
+
+why: |
+  The archive becomes useful only when the operator can see, search, and verify what each export
+  run produced across providers. This node creates the common manifest that unifies those outputs.
+
+depends_on:
+  - cli-contract-and-archive-layout
+  - claude-export-adapter
+  - linkedin-export-adapter
+  - google-export-adapter
+
+acceptance:
+  - The tool produces a normalized manifest that lists exported assets across all supported providers
+  - The manifest captures provider, capture time, file location, size, and normalization status
+  - The manifest format is stable enough for later verification and search tooling
+  - An operator can tell from the manifest which providers succeeded, failed, or are incomplete
+  - The manifest can be regenerated without duplicating logical entries
+
+constraints:
+  - Keep the manifest machine-readable and human-inspectable
+  - Do not discard provider-specific provenance needed for debugging
+  - Avoid a schema that assumes all providers expose the same fields
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: pending
+priority: high
+
+unlocks:
+  - resume-and-verification

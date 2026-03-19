@@ -1,0 +1,41 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: operator-brief
+title: Generate a daily operator brief from the scorecards
+type: capability
+
+why: |
+  Day-to-day value comes from a fast operator readout, not from raw database tables. This node
+  turns the scorecards into a repeatable brief that tells the operator what changed, what matters,
+  and where to look next.
+
+depends_on:
+  - operator-loop-contract
+  - signal-scorecard
+
+acceptance:
+  - A single command or script generates a daily brief from current local data
+  - The brief includes a ranked watchlist, notable deltas, and explicit links back to source evidence
+  - The output is readable in the terminal or as markdown without requiring a web dashboard
+  - The brief format is stable enough to compare runs over time
+  - An operator can tell from the brief which repo or story needs follow-up next
+
+constraints:
+  - Keep the delivery surface CLI-first or markdown-first
+  - Do not depend on a browser dashboard for Phase 0 completion
+  - Avoid decorative visualization work unless it materially improves the operator loop
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: pending
+priority: normal
+
+unlocks: []

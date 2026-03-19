@@ -1,0 +1,43 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: exception-rules-engine
+title: Evaluate operational exceptions and risk states
+type: capability
+
+why: |
+  Owner-operators need to know what needs action now, not just what the numbers are. This node
+  turns the canonical model into explicit risk states such as overdue invoices, coverage gaps, and
+  assignment conflicts.
+
+depends_on:
+  - operator-kpi-contract
+  - canonical-ops-model
+
+acceptance:
+  - The hub can compute the agreed high-priority exception states from the canonical model
+  - Each exception rule maps back to a documented threshold or business rule
+  - Exception output identifies the affected entity, why it is in violation, and what source data supports it
+  - The rules can be rerun deterministically on the same input data
+  - At least one example output demonstrates more than one exception category
+
+constraints:
+  - Keep the first rule set small and high-value
+  - Prefer transparent deterministic rules over heuristic scoring initially
+  - Do not implement notification channels in this node
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: pending
+priority: high
+
+unlocks:
+  - ops-dashboard
+  - daily-ops-brief

@@ -1,0 +1,46 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: canonical-ops-model
+title: Build the canonical operations model
+type: capability
+
+why: |
+  The hub only becomes coherent when accounting, schedule, and workforce data join into one model
+  with stable keys and shared semantics. This node defines that model so later rule and UI nodes do
+  not each invent their own partial joins.
+
+depends_on:
+  - operator-kpi-contract
+  - quickbooks-ingestion
+  - scheduling-ingestion
+  - workforce-ingestion
+
+acceptance:
+  - A canonical data model exists that joins the source systems needed for the KPI contract
+  - The model preserves source provenance so values can be reconciled back to origin systems
+  - The repo documents how core business entities map across the source systems
+  - Local development data can be loaded into the canonical model without manual ad hoc fixes
+  - At least one example output proves the model supports more than one KPI from the contract
+
+constraints:
+  - Prefer explicit mapping rules over magical inference
+  - Do not let UI needs distort the core data model prematurely
+  - Keep the model small enough to reason about and test
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: pending
+priority: high
+
+unlocks:
+  - exception-rules-engine
+  - ops-dashboard
+  - daily-ops-brief

@@ -1,0 +1,44 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: signal-scorecard
+title: Derive the three cultural signal scorecards
+type: capability
+
+why: |
+  The project research already defines the three signals conceptually. This node operationalizes
+  them into reproducible metrics so the project can produce ranked observations instead of raw
+  tables and intuition.
+
+depends_on:
+  - github-ingestion-hardening
+  - hn-ingestion-hardening
+  - watchlist-entity-map
+
+acceptance:
+  - The repo computes scorecards for behavioral adoption, identity alignment, and cultural momentum for watched tools
+  - Each scorecard metric is tied back to a documented source field or derivation rule
+  - Scorecard output is persisted or emitted in a machine-readable form that later nodes can consume
+  - At least one example run demonstrates more than one watched tool being ranked or compared
+  - Missing or sparse source data is handled explicitly rather than silently dropped
+
+constraints:
+  - Reuse the signal definitions already documented in docs/signal_dictionary.md
+  - Prefer transparent formulas over opaque model scoring in Phase 0
+  - Do not introduce paid data or speculative psychographic inference in this node
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: pending
+priority: high
+
+unlocks:
+  - operator-brief
+  - phase-0-backtest

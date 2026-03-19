@@ -1,0 +1,42 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: claude-export-adapter
+title: Implement Claude export adapter
+type: capability
+
+why: |
+  Claude is one of the named target providers for the tool. This node implements the bounded logic
+  needed to collect Claude export data into the shared archive structure.
+
+depends_on:
+  - cli-contract-and-archive-layout
+  - auth-and-secrets-boundary
+
+acceptance:
+  - One CLI path can export or capture the targeted Claude data into the archive layout
+  - The adapter records provenance such as provider, export timestamp, and source method
+  - Operator-visible failure messages exist for auth failure, unsupported data shape, and partial download
+  - Raw provider output is preserved separately from any normalized representation
+  - The adapter can be rerun without corrupting an existing successful export session
+
+constraints:
+  - Do not intermingle provider-specific raw files with normalized outputs
+  - Preserve original files when possible before transformation
+  - Keep provider-specific logic isolated from other adapters
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: pending
+priority: normal
+
+unlocks:
+  - normalized-manifest
+  - resume-and-verification
