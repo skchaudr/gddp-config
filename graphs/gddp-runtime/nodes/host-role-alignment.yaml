@@ -1,0 +1,35 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: host-role-alignment
+title: Stabilize host roles
+type: capability
+
+why: Lock Small Pi / Big Pi / Mac roles so runtime assumptions stop drifting
+
+depends_on: []
+
+acceptance:
+  - one source-of-truth doc identifies the intended role of mac, ssd-big, and ssd-small
+  - the doc includes verification commands for each host
+  - current service state on each host is checked against the documented role
+  - any mismatches are either corrected or explicitly recorded as unresolved drift
+
+constraints: []
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - graph-update.yaml
+  - patch.diff
+  - merged_pr
+
+status: pending
+priority: high
+
+unlocks:
+  - gateway-operating-baseline
+  - repo-truth-alignment

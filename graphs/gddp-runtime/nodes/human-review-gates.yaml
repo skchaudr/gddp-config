@@ -1,0 +1,33 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: human-review-gates
+title: Human review gates
+type: capability
+
+why: Define exactly where human approval is mandatory vs optional
+
+depends_on: 
+  - dispatch-contract-freeze
+
+acceptance:
+  - nodes that mutate production have an explicit review policy field or documented equivalent
+  - unattended execution halts on review-required nodes
+
+constraints: []
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - graph-update.yaml
+  - patch.diff
+  - merged_pr
+
+status: pending
+priority: high
+
+unlocks:
+  - first-overnight-run

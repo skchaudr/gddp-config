@@ -1,0 +1,36 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: first-overnight-run
+title: First overnight run
+type: capability
+
+why: One unattended bounded run that actually closes end to end
+
+depends_on: 
+  - runtime-health-surface
+  - failure-replay
+  - human-review-gates
+
+acceptance:
+  - A complete cycle (intake -> queue -> execution -> return PR) runs end-to-end overnight
+  - 0 human interventions required for a non-mutating node
+
+constraints:
+  - Ensure the run is safely bounded and restricted to read-only or non-mutating actions
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - graph-update.yaml
+  - patch.diff
+  - merged_pr
+
+status: pending
+priority: high
+
+unlocks:
+  - multi-project-routing
