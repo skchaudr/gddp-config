@@ -52,6 +52,12 @@ cp -r graphs/_template graphs/<project-id>
 # add node files to graphs/<project-id>/nodes/
 ```
 
+Before authoring or onboarding a new graph, use:
+
+- [Project Graph Quality](project-graph-quality.md)
+- [Repo Onboarding Checklist](repo-onboarding-checklist.md)
+- [Supervised Rep Template](supervised-rep-template.md)
+
 ---
 
 ## Branch Protection
