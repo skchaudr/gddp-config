@@ -1,0 +1,105 @@
+schema_version: "1.0"
+schema_type: wake_state
+description: |
+  Minimal operational context bundle for OpenClaw decision cycles.
+  OpenClaw wakes cold, reads this bundle, makes exactly one decision.
+  If this is insufficient for reliable judgment, the missing field
+  belongs in this schema — not in a broader context load.
+
+# ---------------------------------------------------------------------------
+# 1. Node Identity
+# ---------------------------------------------------------------------------
+node_id: string                    # e.g. "design-cli-architecture"
+project_id: string                 # e.g. "export-tool"
+node_status: enum                  # pending | in_progress | complete | failed | blocked | escalated
+time_in_status_hours: float        # how long in current status
+
+# ---------------------------------------------------------------------------
+# 2. Dependency State
+# ---------------------------------------------------------------------------
+depends_on:
+  - node_id: string
+    status: enum                   # pending | in_progress | complete | failed | blocked
+
+# ---------------------------------------------------------------------------
+# 3. Latest Decisive Result
+# ---------------------------------------------------------------------------
+last_result:
+  type: enum                       # pr_merged | pr_failed | pr_open | timeout | dispatch_failed | none
+  summary: string                  # 1-2 sentence human-readable summary of what happened
+  signal: enum                     # pass | fail | none
+  recorded_at: ISO8601
+
+# ---------------------------------------------------------------------------
+# 4. Blockers
+# ---------------------------------------------------------------------------
+blockers:
+  - reason: string                 # e.g. "dep:audit-codex not complete"
+    since: ISO8601                 # when this blocker appeared
+    resolvable_by: enum            # system | human | time
+
+# ---------------------------------------------------------------------------
+# 5. Artifact References (evidence — not the content)
+# ---------------------------------------------------------------------------
+artifact_refs:
+  - label: string                  # e.g. "Jules PR #42"
+    type: enum                     # pr | issue | file | decision_doc | result_summary
+    url: string                    # pointer to the artifact
+    signal: enum                   # pass | fail | partial | none
+
+# ---------------------------------------------------------------------------
+# 6. Next Actions with Conditions
+# ---------------------------------------------------------------------------
+next_actions:
+  - action: enum                   # advance | retry | block | escalate | wait
+    condition: string              # what must be true for this action to be valid
+    unlocks: list[string]          # which node_ids become eligible if this action is taken
+    requires_human: bool           # does this action need a human decision before execution
+
+# ---------------------------------------------------------------------------
+# Example Bundle
+# ---------------------------------------------------------------------------
+example:
+  node_id: implement-parsers
+  project_id: export-tool
+  node_status: in_progress
+  time_in_status_hours: 6.5
+
+  depends_on:
+    - node_id: design-cli-architecture
+      status: complete
+
+  last_result:
+    type: pr_open
+    summary: Jules opened PR #12 with JSON parser. CSV parser stubbed but not implemented.
+    signal: none
+    recorded_at: "2026-03-18T14:30:00Z"
+
+  blockers: []
+
+  artifact_refs:
+    - label: Jules PR #12
+      type: pr
+      url: https://github.com/skchaudr/export-tool/pull/12
+      signal: none
+
+  next_actions:
+    - action: wait
+      condition: PR #12 is open and has not been merged or closed
+      unlocks: []
+      requires_human: false
+
+    - action: advance
+      condition: PR #12 merges and all acceptance criteria pass
+      unlocks: [implement-transforms]
+      requires_human: false
+
+    - action: retry
+      condition: PR #12 is closed without merge OR signal=fail
+      unlocks: []
+      requires_human: false
+
+    - action: escalate
+      condition: time_in_status_hours > 24 OR signal=fail on second attempt
+      unlocks: []
+      requires_human: true
