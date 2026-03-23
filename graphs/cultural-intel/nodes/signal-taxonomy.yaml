@@ -1,0 +1,47 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: signal-taxonomy
+title: Define signal taxonomy for all 4 domains
+type: capability
+why: |
+  OpenClaw cannot classify signals it cannot name.
+  This node produces the controlled vocabulary Jules and the classifier
+  will use for every downstream decision. No taxonomy = no system.
+
+depends_on: []
+
+acceptance:
+  - Commit taxonomy.yaml to repo root of cultural-intel
+  - taxonomy.yaml must parse without errors
+  - Must contain exactly 4 top-level domain keys: creator_economy, gaming, open_source, developer_tools
+  - Each domain must contain an array of signal objects with >= 5 entries (>= 20 total)
+  - Each signal object must include: id, name, description, type (leading|lagging|coincident), financial_hypothesis (non-empty string), noise_risk (low|medium|high)
+  - Commit signal-taxonomy-decision.md explaining the classification rationale
+
+constraints:
+  - Output must be YAML not prose — OpenClaw will parse it programmatically
+  - financial_hypothesis must be specific (e.g. "surge in creator tool signups precedes ad spend increase by 6-8 weeks") not vague ("relates to money")
+  - No placeholder or lorem ipsum entries — every signal must be real
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - taxonomy.yaml
+  - signal-taxonomy-decision.md
+
+artifact_verification:
+  - artifact: taxonomy.yaml
+    method: content_check
+    rules:
+      - parse: yaml
+      - keys_required: [creator_economy, gaming, open_source, developer_tools]
+      - min_total_signals: 20
+      - each_signal_requires: [id, name, description, type, financial_hypothesis, noise_risk]
+      - financial_hypothesis_min_length: 30
+
+priority: high
+status: pending
+unlocks:
+  - domain-classifier

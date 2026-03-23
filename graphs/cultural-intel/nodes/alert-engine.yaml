@@ -1,0 +1,61 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: alert-engine
+title: Build threshold-based alert engine
+type: capability
+why: |
+  Classified signals only matter when they breach a threshold worth acting on.
+  This node watches indicator values, fires alerts when thresholds are crossed,
+  and is the single output tap for both dashboard and weekly-report.
+
+depends_on:
+  - ingestion-pipeline
+  - domain-classifier
+
+acceptance:
+  - Alert rules defined in alerts.yaml — each rule: {id, indicator_id, condition (gt|lt|change_pct), threshold, severity (low|medium|high|critical), cooldown_hours}
+  - At least 5 alert rules defined covering >= 3 different indicators
+  - Alert engine evaluates rules on a configurable schedule (default: hourly)
+  - Fired alerts written to alerts table: {id, rule_id, indicator_id, triggered_value, severity, fired_at, acknowledged_at (nullable)}
+  - Commit alert_engine_test_report.json from a simulated run against synthetic data
+  - alert_engine_test_report.json must contain: rules_evaluated, alerts_fired (>= 1), alerts_by_severity
+  - Deduplication: same rule cannot fire twice within cooldown_hours window
+
+constraints:
+  - indicator_id in rules must reference valid indicators.yaml entries
+  - cooldown_hours must be >= 1 — no spam alerts
+  - severity enum strictly enforced: low|medium|high|critical only
+  - Alert state must be persisted — not in-memory only
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - alerts.yaml (rule definitions)
+  - alert_engine/ (engine modules)
+  - alert_engine_test_report.json
+  - tests/test_alert_engine.py
+
+artifact_verification:
+  - artifact: alerts.yaml
+    method: content_check
+    rules:
+      - parse: yaml
+      - min_rules: 5
+      - each_rule_requires: [id, indicator_id, condition, threshold, severity, cooldown_hours]
+      - condition_enum: [gt, lt, change_pct]
+      - severity_enum: [low, medium, high, critical]
+
+  - artifact: alert_engine_test_report.json
+    method: content_check
+    rules:
+      - parse: json
+      - keys_required: [rules_evaluated, alerts_fired, alerts_by_severity]
+      - alerts_fired_min: 1
+
+priority: high
+status: pending
+unlocks:
+  - dashboard
+  - weekly-report

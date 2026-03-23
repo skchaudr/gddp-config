@@ -1,0 +1,54 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: financial-indicator-schema
+title: Design financial and behavioral indicator schema
+type: capability
+why: |
+  Cultural signals only matter when mapped to financial reality.
+  This node defines the indicators we track — what we measure, what type it is,
+  and where it comes from. The domain-classifier maps signals to these indicators.
+  Without this schema, classification produces nothing actionable.
+
+depends_on: []
+
+acceptance:
+  - Commit schema.sql (or schema.prisma or models.py — one canonical schema file) to db/ directory
+  - Schema file must pass syntax check (valid SQL / Prisma / SQLAlchemy — no broken syntax)
+  - Commit indicators.yaml defining >= 10 financial/behavioral indicators
+  - Each indicator in indicators.yaml must include: id, name, description, data_type (int|float|string|bool|timestamp), unit (e.g. USD|count|percent|index), source (data origin), lag_weeks (int — how many weeks after signal this typically moves), signal_ids (array — which taxonomy signals map to this indicator)
+  - Commit data-dictionary.md with a human-readable definition of every indicator
+
+constraints:
+  - Schema must be normalized — no denormalized blobs for indicator values
+  - lag_weeks must be an integer >= 0 — no vague "varies" entries
+  - signal_ids must reference valid ids from taxonomy.yaml — cross-repo consistency required
+  - data_type must use allowed enum values only
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - db/schema.sql (or equivalent)
+  - indicators.yaml
+  - data-dictionary.md
+
+artifact_verification:
+  - artifact: db/schema.sql
+    method: file_exists
+    rules:
+      - syntax_check: sql
+
+  - artifact: indicators.yaml
+    method: content_check
+    rules:
+      - parse: yaml
+      - min_indicators: 10
+      - each_indicator_requires: [id, name, description, data_type, unit, source, lag_weeks, signal_ids]
+      - data_type_enum: [int, float, string, bool, timestamp]
+      - lag_weeks_type: int
+
+priority: high
+status: pending
+unlocks:
+  - domain-classifier

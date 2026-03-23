@@ -2,63 +2,83 @@ schema_version: "1.0"
 schema_type: project_graph
 
 project_id: cultural-intel
-project_name: Cultural Intel
-description: Local-first cultural signal monitor for open-source dev tools using GitHub and Hacker News data
+project_name: Cultural Intelligence Monitor
+description: |
+  Monitors creator economy, gaming, open source, and developer tools domains.
+  Maps cultural signals and noise to financial and behavioral indicators.
+  Produces alerts, a dashboard, and weekly reports for clients and teams.
 repo: skchaudr/cultural-intel
 
 blueprint:
-  vision: Turn GitHub and Hacker News activity into a daily operator brief and one falsifiable backtest for dev-tool cultural signals
+  vision: Map what culture is doing to what markets will do next
   architecture_notes: |
-    The existing repo is not a Codex CLI extension today. It already contains Python ingestion
-    scripts, DuckDB storage, research docs, and a thin Node/Express API scaffold. Build from
-    that foundation instead of rewriting it. Stay local-first, keep DuckDB as the system of
-    record for Phase 0, and prefer a CLI or markdown brief over expanding the web API surface.
-    Parallel work should come from independent source and analysis nodes; depends_on is the
-    concurrency constraint.
+    Three independent entry nodes — all dispatchable simultaneously.
+    Signal taxonomy, data sources, and financial schema are parallel tracks.
+    They converge at domain-classifier, then flow into alert-engine.
+    Dashboard and weekly-report are sibling outputs of alert-engine.
+    Every node must produce machine-readable artifacts. No prose-only PRs.
   major_capabilities:
-    - GitHub and Hacker News source ingestion with repeatable local refresh
-    - watchlist and story-to-repo linking for tracked dev tools
-    - derived scorecards for behavioral adoption, identity alignment, and cultural momentum
-    - operator-facing brief with ranked signals and anomalies
-    - one reproducible backtest for the first hypothesis
+    - Signal taxonomy across 4 domains (creator, gaming, open source, dev tools)
+    - Multi-source data ingestion pipeline
+    - Financial/behavioral indicator schema
+    - Domain classifier (signal → financial implication)
+    - Alert engine (threshold-based, configurable)
+    - Dashboard (real-time signal view)
+    - Weekly report generator
 
 graph_version: "1.0"
-created_at: 2026-03-19
-last_updated: 2026-03-19
+created_at: "2026-03-23"
+last_updated: "2026-03-23"
 
 nodes_dir: nodes/
 
 nodes:
-  - id: operator-loop-contract
-    title: Define operator loop and canonical outputs
-    status: ready
-    type: capability
-  - id: github-ingestion-hardening
-    title: Harden GitHub ingestion and snapshot schema
-    status: ready
-    type: capability
-  - id: hn-ingestion-hardening
-    title: Harden Hacker News ingestion and snapshot schema
-    status: ready
-    type: capability
-  - id: watchlist-entity-map
-    title: Establish watchlist and story-to-repo linking
+  # --- Entry tier (no dependencies — dispatch all three simultaneously) ---
+  - id: signal-taxonomy
+    title: Define signal taxonomy for all 4 domains
     status: pending
     type: capability
-  - id: signal-scorecard
-    title: Derive the three cultural signal scorecards
+
+  - id: data-source-map
+    title: Map data sources per domain with access methods
     status: pending
     type: capability
-  - id: operator-brief
-    title: Generate a daily operator brief from the scorecards
+
+  - id: financial-indicator-schema
+    title: Design financial and behavioral indicator schema
     status: pending
     type: capability
-  - id: phase-0-backtest
-    title: Run the first reproducible Phase 0 backtest
+
+  # --- Second tier ---
+  - id: ingestion-pipeline
+    title: Build multi-source data ingestion pipeline
+    status: pending
+    type: capability
+
+  - id: domain-classifier
+    title: Build domain classifier — signal to financial implication
+    status: pending
+    type: capability
+
+  # --- Third tier ---
+  - id: alert-engine
+    title: Build threshold-based alert engine
+    status: pending
+    type: capability
+
+  # --- Output tier (siblings — dispatch simultaneously after alert-engine) ---
+  - id: dashboard
+    title: Build real-time signal dashboard
+    status: pending
+    type: capability
+
+  - id: weekly-report
+    title: Build weekly report generator
     status: pending
     type: capability
 
 execution_policy:
   default_executor: jules
-  require_human_review_before_overnight: true
+  max_concurrent_jobs: 3
+  require_human_review_before_overnight: false
   artifact_gate_enforced: true

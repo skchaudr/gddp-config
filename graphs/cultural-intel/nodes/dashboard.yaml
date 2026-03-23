@@ -1,0 +1,46 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: dashboard
+title: Build real-time signal dashboard
+type: capability
+why: |
+  Alerts tell you something happened. The dashboard tells you what's happening now
+  and what has been happening. Client-facing, team-facing, and operator-facing.
+  First visual surface of the system.
+
+depends_on:
+  - alert-engine
+
+acceptance:
+  - Dashboard displays: active alerts (by severity), signal volume by domain (last 7 days), top 5 classified signals (last 24h), indicator trend lines (last 30 days)
+  - Data sourced exclusively from alerts table and ClassifiedSignal records — no direct source API calls
+  - Commit screenshot.png or dashboard_spec.json showing all 4 required views
+  - dashboard_spec.json must contain: views (array of >= 4), data_sources (array), refresh_interval_seconds
+  - Routes: GET /dashboard (HTML), GET /api/dashboard/summary (JSON), GET /api/alerts/active (JSON)
+  - All 3 routes return 200 with valid content in integration test
+
+constraints:
+  - No client-side API keys — all data served through backend routes
+  - Dashboard must render with zero live data (empty state handled gracefully)
+  - Mobile-readable (single column layout at < 768px width)
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - dashboard/ (frontend + backend modules)
+  - dashboard_spec.json
+  - tests/test_dashboard_routes.py
+
+artifact_verification:
+  - artifact: dashboard_spec.json
+    method: content_check
+    rules:
+      - parse: json
+      - keys_required: [views, data_sources, refresh_interval_seconds]
+      - views_min: 4
+
+priority: medium
+status: pending
+unlocks: []

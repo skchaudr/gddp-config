@@ -1,0 +1,59 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: weekly-report
+title: Build weekly report generator
+type: capability
+why: |
+  Alerts are real-time. The weekly report is the narrative layer —
+  what shifted this week, what it means financially, what to watch next.
+  This is the client-deliverable output of the system.
+
+depends_on:
+  - alert-engine
+
+acceptance:
+  - Report generator produces a structured report from the last 7 days of data
+  - Commit report_schema.yaml defining the report structure
+  - report_schema.yaml must contain sections array with >= 5 named sections (e.g. executive_summary, top_signals, domain_breakdown, financial_implications, watch_list)
+  - Each section must define: title, data_source, format (text|table|chart_data)
+  - Generator produces report in two formats: Markdown and JSON
+  - Commit sample_report.md and sample_report.json generated from synthetic data
+  - sample_report.md must be >= 500 words and contain all 5 sections
+  - sample_report.json must parse and contain all section keys from report_schema.yaml
+  - Scheduler: runs every Monday at 08:00 UTC (configurable)
+
+constraints:
+  - Report content sourced from database only — no live API calls at generation time
+  - All financial implications must reference specific indicator_ids — no vague assertions
+  - Watch list must list >= 3 signals to monitor in the coming week with rationale
+  - Report generation must complete in < 30 seconds
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - report_schema.yaml
+  - report_generator/ (generator modules)
+  - sample_report.md
+  - sample_report.json
+  - tests/test_report_generator.py
+
+artifact_verification:
+  - artifact: report_schema.yaml
+    method: content_check
+    rules:
+      - parse: yaml
+      - sections_min: 5
+      - each_section_requires: [title, data_source, format]
+      - format_enum: [text, table, chart_data]
+
+  - artifact: sample_report.json
+    method: content_check
+    rules:
+      - parse: json
+      - all_schema_sections_present: true
+
+priority: medium
+status: pending
+unlocks: []

@@ -1,0 +1,51 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: domain-classifier
+title: Build domain classifier — signal to financial implication
+type: capability
+why: |
+  Raw ingested data becomes a signal only when classified.
+  This node maps RawSignal records to taxonomy signal types and financial indicators.
+  It is the translation layer between cultural noise and financial intelligence.
+
+depends_on:
+  - signal-taxonomy
+  - financial-indicator-schema
+
+acceptance:
+  - Classifier reads RawSignal records and outputs ClassifiedSignal: {id, raw_signal_id, domain, signal_id (from taxonomy), confidence (0.0-1.0), indicator_ids (from indicators.yaml), classified_at}
+  - Commit classification_report.json after running against >= 50 sample records
+  - classification_report.json must contain: total_processed, classified_count, unclassified_count, confidence_distribution, per_domain_counts
+  - classified_count must be >= 60% of total_processed (minimum viable accuracy)
+  - All 4 domains must appear in per_domain_counts with count >= 1
+  - Unit tests cover: known signal classification, low-confidence handling, unknown signal handling
+
+constraints:
+  - signal_id must reference a valid entry in taxonomy.yaml — no freeform labels
+  - indicator_ids must reference valid entries in indicators.yaml
+  - confidence < 0.4 must be flagged as unclassified — no forced classification
+  - Classifier logic must be explainable (rules-based or annotated ML — no black box)
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - classifier/ (directory with classification modules)
+  - classification_report.json (from sample run)
+  - tests/test_classifier.py
+
+artifact_verification:
+  - artifact: classification_report.json
+    method: content_check
+    rules:
+      - parse: json
+      - keys_required: [total_processed, classified_count, unclassified_count, confidence_distribution, per_domain_counts]
+      - total_processed_min: 50
+      - classified_ratio_min: 0.6
+      - all_domains_present: [creator_economy, gaming, open_source, developer_tools]
+
+priority: high
+status: pending
+unlocks:
+  - alert-engine

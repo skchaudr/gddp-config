@@ -1,0 +1,47 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: ingestion-pipeline
+title: Build multi-source data ingestion pipeline
+type: capability
+why: |
+  sources.yaml defines where data lives. This node builds the code that fetches it,
+  normalizes it, and stores it. Without ingestion, the classifier has nothing to classify.
+
+depends_on:
+  - data-source-map
+
+acceptance:
+  - Implement ingestor for each source defined in sources.yaml (all access_method types covered)
+  - Each ingestor normalizes output to a shared RawSignal schema: {id, source_id, domain, raw_text, url, collected_at, metadata}
+  - Commit ingestion_manifest.json after a successful dry run — must contain: sources_attempted, sources_succeeded, records_collected (>= 1 per source), errors (array)
+  - Scheduler implemented (cron or APScheduler) — configurable interval per source
+  - Failed sources retry once before logging to errors table
+  - Unit tests cover: fetch, normalize, store for at least 2 sources
+
+constraints:
+  - Every ingestor must read from sources.yaml — no hardcoded URLs
+  - RawSignal schema must be strictly enforced — no optional required fields
+  - No credentials in code — all secrets via environment variables
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - ingestion/ (directory with ingestor modules)
+  - ingestion_manifest.json (from dry run)
+  - tests/test_ingestion.py
+
+artifact_verification:
+  - artifact: ingestion_manifest.json
+    method: content_check
+    rules:
+      - parse: json
+      - keys_required: [sources_attempted, sources_succeeded, records_collected, errors]
+      - sources_succeeded_min: 3
+      - records_collected_min_per_source: 1
+
+priority: high
+status: pending
+unlocks:
+  - alert-engine

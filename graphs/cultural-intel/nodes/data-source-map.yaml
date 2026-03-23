@@ -1,0 +1,48 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: data-source-map
+title: Map data sources per domain with access methods
+type: capability
+why: |
+  The ingestion pipeline needs to know where to pull data before it can pull anything.
+  This node produces the routing config Jules will implement in ingestion-pipeline.
+  Without it, the pipeline has nowhere to point.
+
+depends_on: []
+
+acceptance:
+  - Commit sources.yaml to repo root of cultural-intel
+  - sources.yaml must parse without errors
+  - Must contain >= 12 source definitions total (minimum 3 per domain)
+  - Each source object must include: id, domain (one of the 4), name, url_or_endpoint, access_method (api|scrape|rss|webhook), auth_required (bool), rate_limit_notes, signal_coverage (array of signal ids from taxonomy)
+  - Commit data-source-decision.md explaining why each source was chosen and any access risks
+  - At least one source per domain must be free/public access
+
+constraints:
+  - access_method must be one of the allowed enum values — no freeform strings
+  - signal_coverage must reference valid signal ids (from taxonomy.yaml) — no orphan references
+  - No sources requiring paid API keys without noting a free alternative or fallback
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - sources.yaml
+  - data-source-decision.md
+
+artifact_verification:
+  - artifact: sources.yaml
+    method: content_check
+    rules:
+      - parse: yaml
+      - min_total_sources: 12
+      - min_per_domain: 3
+      - domains_required: [creator_economy, gaming, open_source, developer_tools]
+      - each_source_requires: [id, domain, name, url_or_endpoint, access_method, auth_required, signal_coverage]
+      - access_method_enum: [api, scrape, rss, webhook]
+
+priority: high
+status: pending
+unlocks:
+  - ingestion-pipeline
