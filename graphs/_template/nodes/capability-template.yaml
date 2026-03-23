@@ -2,23 +2,60 @@ schema_version: "1.0"
 schema_type: node
 
 # Copy to graphs/<project-id>/nodes/<node-id>.yaml
-# See templates/node-template.yaml for full field reference.
+# All fields marked REPLACE_ME are required.
+# See gddp-config/rules/graph-rules.md before authoring.
 
 node_id: REPLACE_ME
 title: REPLACE_ME
 type: capability
-why: REPLACE_ME
-depends_on: []
+why: REPLACE_ME        # Why this node exists. One paragraph. Justify its place in the graph.
+
+depends_on: []         # node_ids that must be complete before this node is eligible
+
+# ---------------------------------------------------------------------------
+# Acceptance criteria — Rule 4: every criterion must be script-checkable
+# ---------------------------------------------------------------------------
 acceptance:
-  - REPLACE_ME
+  - REPLACE_ME         # e.g. "File taxonomy.yaml parses as valid YAML with >= 20 entries"
+
 constraints:
-  - REPLACE_ME
+  - REPLACE_ME         # What Jules must not do
+
 allowed_execution_modes:
   - jules
+
+# ---------------------------------------------------------------------------
+# Success artifact — Rule 1: smallest artifact that proves the claim
+# ---------------------------------------------------------------------------
+success_artifact:
+  file: REPLACE_ME              # e.g. result_manifest.json
+  verification: REPLACE_ME      # e.g. "parse:json, keys_required:[x,y,z], count_min:N"
+
+# ---------------------------------------------------------------------------
+# Failure artifact — Rule 2: required on every executable node
+# Jules must emit this if the work fails, stalls, or produces partial output.
+# OpenClaw reads error_type to decide: retry | partial retry | escalate
+# ---------------------------------------------------------------------------
+failure_artifact:
+  file: failure_report.json
+  fields_required:
+    - error_type        # retryable | partial | escalate
+    - reason            # specific explanation of what failed
+    - partial_artifacts # list of files produced before failure (can be empty list)
+    - failed_at         # ISO8601 timestamp
+
+# ---------------------------------------------------------------------------
+# Artifact verification (programmatic gate — runs before node → complete)
+# ---------------------------------------------------------------------------
+artifact_verification:
+  - artifact: REPLACE_ME
+    method: REPLACE_ME          # file_exists | content_check | syntax_check
+    rules:
+      - REPLACE_ME
+
 required_artifacts:
-  - decision.md
-  - result-summary.md
-  - graph-update.yaml
+  - REPLACE_ME                  # List all files Jules must commit for this node
+
+priority: medium                # high | medium | low
 status: pending
-priority: medium
-unlocks: []
+unlocks: []                     # node_ids that become eligible when this node completes
