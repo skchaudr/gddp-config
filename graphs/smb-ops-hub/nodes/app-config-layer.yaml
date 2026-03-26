@@ -1,0 +1,56 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: app-config-layer
+title: Add in-app configuration layer for operators and clients
+type: capability
+
+why: |
+  The ops-dashboard ships with hardcoded defaults. This node adds the layer
+  that lets operators and clients configure the tool without touching code.
+  Toggles for integrations, threshold sliders, role-based view switching,
+  and UI preference controls. Both user types (owner-operator and client)
+  need to be able to adjust what they see and how without a developer present.
+
+depends_on:
+  - ops-dashboard
+
+acceptance:
+  - Integration toggles: each connected source (QuickBooks, scheduling, workforce) can be enabled or disabled from the UI without editing config files
+  - Threshold sliders: exception rule thresholds from exception-rules-engine are adjustable per-operator from the UI
+  - Role-based views: operator view and client view are distinct and switchable without code changes
+  - Config persisted: all settings survive app restart (stored in local config file or DB, not in memory)
+  - No code deployment required for any config change made through the UI
+  - Commit config_schema.json defining all configurable fields, their types, defaults, and allowed ranges
+
+constraints:
+  - Config changes must not require a server restart
+  - Client view must not expose internal exception thresholds or raw data sources
+  - All configurable values must have documented defaults — nothing undefined
+  - Do not build a general-purpose admin panel — only expose what operators actually need to change
+
+allowed_execution_modes:
+  - jules
+
+success_artifact:
+  file: config_schema.json
+  verification: "parse:json, keys_required:[fields], each_field_requires:[id,type,default,role_access], min_fields:8"
+
+failure_artifact:
+  file: failure_report.json
+  fields_required:
+    - error_type       # retryable | partial | escalate
+    - reason
+    - partial_artifacts
+    - failed_at
+
+required_artifacts:
+  - config_schema.json
+  - decision.md
+  - result-summary.md
+  - patch.diff
+
+status: pending
+priority: normal
+
+unlocks: []
