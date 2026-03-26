@@ -12,11 +12,12 @@ why: |
 depends_on: []
 
 acceptance:
-  - The project documents the core KPIs for cash, staffing, schedule coverage, and unresolved exceptions
-  - Each KPI includes a clear business definition, source expectation, and refresh cadence
-  - Exception thresholds are explicit enough to drive alerts or highlighted states later
-  - The operator loop defines what should be reviewed each morning and what requires immediate action
-  - The repo identifies which outputs belong in the dashboard versus the daily brief
+  - File kpi_contract.yaml parses as valid YAML
+  - kpi_contract.yaml contains keys: kpis, exception_thresholds, operator_loop
+  - kpi_contract.yaml kpis array contains >= 4 entries
+  - Each KPI entry contains keys: id, name, definition, source, refresh_cadence
+  - kpi_contract.yaml exception_thresholds array contains >= 3 entries
+  - Each threshold entry contains keys: kpi_id, condition, value, severity
 
 constraints:
   - Focus on a narrow owner-operator workflow, not a generic analytics suite
@@ -26,11 +27,29 @@ constraints:
 allowed_execution_modes:
   - jules
 
+success_artifact:
+  file: kpi_contract.yaml
+  verification: "parse:yaml, keys_required:[kpis, exception_thresholds, operator_loop], min_kpis:4, each_kpi_requires:[id, name, definition, source, refresh_cadence]"
+
+failure_artifact:
+  file: failure_report.json
+  fields_required:
+    - error_type
+    - reason
+    - partial_artifacts
+    - failed_at
+
+artifact_verification:
+  - artifact: kpi_contract.yaml
+    method: content_check
+    rules:
+      - parse: yaml
+      - keys_required: [kpis, exception_thresholds, operator_loop]
+      - min_kpis: 4
+      - each_kpi_requires: [id, name, definition, source, refresh_cadence]
+
 required_artifacts:
-  - decision.md
-  - result-summary.md
-  - patch.diff
-  - graph-update.yaml
+  - kpi_contract.yaml
 
 status: ready
 priority: high

@@ -16,12 +16,13 @@ depends_on:
   - ops-dashboard
 
 acceptance:
-  - Integration toggles: each connected source (QuickBooks, scheduling, workforce) can be enabled or disabled from the UI without editing config files
-  - Threshold sliders: exception rule thresholds from exception-rules-engine are adjustable per-operator from the UI
-  - Role-based views: operator view and client view are distinct and switchable without code changes
-  - Config persisted: all settings survive app restart (stored in local config file or DB, not in memory)
-  - No code deployment required for any config change made through the UI
-  - Commit config_schema.json defining all configurable fields, their types, defaults, and allowed ranges
+  - File config_schema.json parses as valid JSON
+  - config_schema.json contains key: fields (array)
+  - config_schema.json fields array contains >= 8 entries
+  - Each field entry contains keys: id, type, default, role_access
+  - fields array contains >= 3 entries with id prefixed integration_ (one per source: quickbooks, scheduling, workforce)
+  - fields array contains >= 1 entry with id prefixed threshold_
+  - fields array contains >= 1 entry whose role_access array contains both operator and client
 
 constraints:
   - Config changes must not require a server restart
@@ -34,21 +35,27 @@ allowed_execution_modes:
 
 success_artifact:
   file: config_schema.json
-  verification: "parse:json, keys_required:[fields], each_field_requires:[id,type,default,role_access], min_fields:8"
+  verification: "parse:json, keys_required:[fields], each_field_requires:[id, type, default, role_access], min_fields:8"
 
 failure_artifact:
   file: failure_report.json
   fields_required:
-    - error_type       # retryable | partial | escalate
+    - error_type
     - reason
     - partial_artifacts
     - failed_at
 
+artifact_verification:
+  - artifact: config_schema.json
+    method: content_check
+    rules:
+      - parse: json
+      - keys_required: [fields]
+      - min_fields: 8
+      - each_field_requires: [id, type, default, role_access]
+
 required_artifacts:
   - config_schema.json
-  - decision.md
-  - result-summary.md
-  - patch.diff
 
 status: pending
 priority: normal

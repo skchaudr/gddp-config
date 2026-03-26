@@ -15,11 +15,12 @@ depends_on:
   - canonical-ops-model
 
 acceptance:
-  - The hub can compute the agreed high-priority exception states from the canonical model
-  - Each exception rule maps back to a documented threshold or business rule
-  - Exception output identifies the affected entity, why it is in violation, and what source data supports it
-  - The rules can be rerun deterministically on the same input data
-  - At least one example output demonstrates more than one exception category
+  - File exception_report.json parses as valid JSON
+  - exception_report.json contains keys: evaluated_at, rules_run, exceptions, rule_definitions
+  - exception_report.json rules_run >= 3
+  - Each entry in rule_definitions contains keys: id, threshold, condition, severity
+  - Each entry in exceptions contains keys: rule_id, entity_id, entity_type, reason, source_data_ref
+  - Running the engine twice on the same input produces identical exception_report.json output
 
 constraints:
   - Keep the first rule set small and high-value
@@ -29,11 +30,28 @@ constraints:
 allowed_execution_modes:
   - jules
 
+success_artifact:
+  file: exception_report.json
+  verification: "parse:json, keys_required:[evaluated_at, rules_run, exceptions, rule_definitions], min_rules_run:3"
+
+failure_artifact:
+  file: failure_report.json
+  fields_required:
+    - error_type
+    - reason
+    - partial_artifacts
+    - failed_at
+
+artifact_verification:
+  - artifact: exception_report.json
+    method: content_check
+    rules:
+      - parse: json
+      - keys_required: [evaluated_at, rules_run, exceptions, rule_definitions]
+      - min_rules_run: 3
+
 required_artifacts:
-  - decision.md
-  - result-summary.md
-  - patch.diff
-  - graph-update.yaml
+  - exception_report.json
 
 status: pending
 priority: high

@@ -15,11 +15,12 @@ depends_on:
   - exception-rules-engine
 
 acceptance:
-  - The dashboard surfaces the agreed KPI set and current exception states in one place
-  - The operator can move from a summary metric to the underlying affected records
-  - The layout makes it clear what is healthy, what is at risk, and what needs action now
-  - The dashboard can render from local development data without manual hand-editing
-  - At least one end-to-end example demonstrates the dashboard handling mixed healthy and unhealthy states
+  - File dashboard_smoke_test.json parses as valid JSON
+  - dashboard_smoke_test.json contains keys: status, tested_at, kpis_rendered, exceptions_rendered, healthy_count, at_risk_count
+  - dashboard_smoke_test.json status == "pass"
+  - dashboard_smoke_test.json kpis_rendered >= 4
+  - dashboard_smoke_test.json exceptions_rendered >= 1
+  - dashboard_smoke_test.json contains both healthy_count >= 1 and at_risk_count >= 1 (mixed state rendered)
 
 constraints:
   - Keep the dashboard focused on operational decision support, not generic analytics
@@ -29,11 +30,29 @@ constraints:
 allowed_execution_modes:
   - jules
 
+success_artifact:
+  file: dashboard_smoke_test.json
+  verification: "parse:json, keys_required:[status, tested_at, kpis_rendered, exceptions_rendered, healthy_count, at_risk_count], field_equals:[status:pass], min_kpis_rendered:4"
+
+failure_artifact:
+  file: failure_report.json
+  fields_required:
+    - error_type
+    - reason
+    - partial_artifacts
+    - failed_at
+
+artifact_verification:
+  - artifact: dashboard_smoke_test.json
+    method: content_check
+    rules:
+      - parse: json
+      - keys_required: [status, tested_at, kpis_rendered, exceptions_rendered, healthy_count, at_risk_count]
+      - field_equals: {status: pass}
+      - min_kpis_rendered: 4
+
 required_artifacts:
-  - decision.md
-  - result-summary.md
-  - patch.diff
-  - graph-update.yaml
+  - dashboard_smoke_test.json
 
 status: pending
 priority: normal

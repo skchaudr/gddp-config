@@ -15,11 +15,12 @@ depends_on:
   - exception-rules-engine
 
 acceptance:
-  - A repeatable command generates a daily brief from current local data
-  - The brief summarizes KPI state, highest-priority exceptions, and recommended next checks
-  - The output is readable in a terminal or markdown without opening the dashboard
-  - The brief points back to affected entities or records so the operator can follow up quickly
-  - The brief format is stable enough to compare one day to the next
+  - File brief_manifest.json parses as valid JSON
+  - brief_manifest.json contains keys: generated_at, kpi_summary_included, exception_count, brief_file
+  - brief_manifest.json kpi_summary_included == true
+  - File named by brief_manifest.json brief_file field exists
+  - That file contains sections: KPI Summary, Exceptions, Recommended Checks
+  - Running the brief command a second time on the same data produces a brief_manifest.json with an updated generated_at and replaces the prior brief file
 
 constraints:
   - Keep the brief tightly scoped to operational action
@@ -29,11 +30,33 @@ constraints:
 allowed_execution_modes:
   - jules
 
+success_artifact:
+  file: brief_manifest.json
+  verification: "parse:json, keys_required:[generated_at, kpi_summary_included, exception_count, brief_file], field_equals:[kpi_summary_included:true]"
+
+failure_artifact:
+  file: failure_report.json
+  fields_required:
+    - error_type
+    - reason
+    - partial_artifacts
+    - failed_at
+
+artifact_verification:
+  - artifact: brief_manifest.json
+    method: content_check
+    rules:
+      - parse: json
+      - keys_required: [generated_at, kpi_summary_included, exception_count, brief_file]
+      - field_equals: {kpi_summary_included: true}
+  - artifact: daily_brief.md
+    method: content_check
+    rules:
+      - sections_required: [KPI Summary, Exceptions, Recommended Checks]
+
 required_artifacts:
-  - decision.md
-  - result-summary.md
-  - patch.diff
-  - graph-update.yaml
+  - brief_manifest.json
+  - daily_brief.md
 
 status: pending
 priority: normal

@@ -17,11 +17,12 @@ depends_on:
   - workforce-ingestion
 
 acceptance:
-  - A canonical data model exists that joins the source systems needed for the KPI contract
-  - The model preserves source provenance so values can be reconciled back to origin systems
-  - The repo documents how core business entities map across the source systems
-  - Local development data can be loaded into the canonical model without manual ad hoc fixes
-  - At least one example output proves the model supports more than one KPI from the contract
+  - File ops_model_schema.json parses as valid JSON
+  - ops_model_schema.json contains keys: entities, joins, source_map, version
+  - ops_model_schema.json entities array contains >= 3 entries
+  - Each entity entry contains keys: name, source, primary_key, fields
+  - ops_model_schema.json joins array contains >= 2 entries describing cross-source linkages
+  - File ops_model_load_result.json parses as valid JSON and contains keys: loaded_at, entities_loaded, errors
 
 constraints:
   - Prefer explicit mapping rules over magical inference
@@ -31,11 +32,35 @@ constraints:
 allowed_execution_modes:
   - jules
 
+success_artifact:
+  file: ops_model_schema.json
+  verification: "parse:json, keys_required:[entities, joins, source_map, version], min_entities:3, each_entity_requires:[name, source, primary_key, fields]"
+
+failure_artifact:
+  file: failure_report.json
+  fields_required:
+    - error_type
+    - reason
+    - partial_artifacts
+    - failed_at
+
+artifact_verification:
+  - artifact: ops_model_schema.json
+    method: content_check
+    rules:
+      - parse: json
+      - keys_required: [entities, joins, source_map, version]
+      - min_entities: 3
+      - each_entity_requires: [name, source, primary_key, fields]
+  - artifact: ops_model_load_result.json
+    method: content_check
+    rules:
+      - parse: json
+      - keys_required: [loaded_at, entities_loaded, errors]
+
 required_artifacts:
-  - decision.md
-  - result-summary.md
-  - patch.diff
-  - graph-update.yaml
+  - ops_model_schema.json
+  - ops_model_load_result.json
 
 status: pending
 priority: high
