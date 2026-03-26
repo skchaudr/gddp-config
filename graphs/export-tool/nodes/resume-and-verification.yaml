@@ -17,11 +17,11 @@ depends_on:
   - normalized-manifest
 
 acceptance:
-  - The tool can resume or safely retry an interrupted export session without corrupting prior results
-  - Verification output shows which provider exports are complete, partial, or unverifiable
-  - The runbook explains how an operator confirms a provider export is done
-  - Resume logic distinguishes between retryable failures and hard stops that need manual intervention
-  - At least one end-to-end example demonstrates rerun behavior after a partial failure
+  - File verification_report.json parses as valid JSON
+  - verification_report.json contains keys: checked_at, providers, summary
+  - Each entry in providers contains keys: name, status, complete_count, partial_count, unverifiable_count
+  - verification_report.json summary contains keys: total_providers, fully_complete, partial, failed
+  - Resume CLI command exits 0 on rerun after a prior complete session without overwriting prior raw exports
 
 constraints:
   - Never overwrite a successful raw export silently
@@ -31,11 +31,28 @@ constraints:
 allowed_execution_modes:
   - jules
 
+success_artifact:
+  file: verification_report.json
+  verification: "parse:json, keys_required:[checked_at, providers, summary], each_provider_requires:[name, status, complete_count, partial_count, unverifiable_count]"
+
+failure_artifact:
+  file: failure_report.json
+  fields_required:
+    - error_type
+    - reason
+    - partial_artifacts
+    - failed_at
+
+artifact_verification:
+  - artifact: verification_report.json
+    method: content_check
+    rules:
+      - parse: json
+      - keys_required: [checked_at, providers, summary]
+      - each_provider_requires: [name, status, complete_count, partial_count, unverifiable_count]
+
 required_artifacts:
-  - decision.md
-  - result-summary.md
-  - patch.diff
-  - graph-update.yaml
+  - verification_report.json
 
 status: pending
 priority: high

@@ -13,11 +13,11 @@ why: |
 depends_on: []
 
 acceptance:
-  - The project documents canonical CLI commands for running single-provider and multi-provider exports
-  - The archive layout defines where raw downloads, normalized outputs, logs, and manifests live
-  - The CLI contract distinguishes between fresh export, retry, and inspect operations
-  - The path layout is stable across providers and safe for local backup
-  - A sample manifest or runbook shows what a successful export session should look like
+  - File archive_layout.yaml parses as valid YAML
+  - archive_layout.yaml contains keys: raw, normalized, logs, manifests
+  - File cli_contract.md exists and contains sections: Usage, Commands, Archive Layout, Retry Behavior
+  - cli_contract.md contains entries for at least these three commands: export, retry, inspect
+  - No path value in archive_layout.yaml contains a provider-specific string (claude, linkedin, google)
 
 constraints:
   - Keep the tool local-first and single-operator friendly
@@ -27,11 +27,32 @@ constraints:
 allowed_execution_modes:
   - jules
 
+success_artifact:
+  file: archive_layout.yaml
+  verification: "parse:yaml, keys_required:[raw, normalized, logs, manifests]"
+
+failure_artifact:
+  file: failure_report.json
+  fields_required:
+    - error_type
+    - reason
+    - partial_artifacts
+    - failed_at
+
+artifact_verification:
+  - artifact: archive_layout.yaml
+    method: content_check
+    rules:
+      - parse: yaml
+      - keys_required: [raw, normalized, logs, manifests]
+  - artifact: cli_contract.md
+    method: content_check
+    rules:
+      - sections_required: [Usage, Commands, Archive Layout, Retry Behavior]
+
 required_artifacts:
-  - decision.md
-  - result-summary.md
-  - patch.diff
-  - graph-update.yaml
+  - archive_layout.yaml
+  - cli_contract.md
 
 status: ready
 priority: high

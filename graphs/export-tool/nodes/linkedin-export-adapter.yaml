@@ -15,11 +15,11 @@ depends_on:
   - auth-and-secrets-boundary
 
 acceptance:
-  - One CLI path can export or ingest the targeted LinkedIn data into the archive layout
-  - The adapter records provenance such as provider, export timestamp, and source method
-  - Operator-visible failure messages exist for auth failure, delayed export delivery, and partial archive ingest
-  - Raw provider output is preserved separately from any normalized representation
-  - The adapter can be rerun without corrupting an existing successful export session
+  - File linkedin_export_manifest.json parses as valid JSON
+  - linkedin_export_manifest.json contains keys: provider, export_timestamp, source_method, raw_path, status
+  - linkedin_export_manifest.json status == "complete"
+  - Raw provider output exists at path referenced by raw_path field
+  - CLI command exits 0 on rerun when a prior complete session already exists (no corruption)
 
 constraints:
   - Handle delayed or asynchronous provider delivery if LinkedIn requires it
@@ -29,11 +29,28 @@ constraints:
 allowed_execution_modes:
   - jules
 
+success_artifact:
+  file: linkedin_export_manifest.json
+  verification: "parse:json, keys_required:[provider, export_timestamp, source_method, raw_path, status], field_equals:[status:complete]"
+
+failure_artifact:
+  file: failure_report.json
+  fields_required:
+    - error_type
+    - reason
+    - partial_artifacts
+    - failed_at
+
+artifact_verification:
+  - artifact: linkedin_export_manifest.json
+    method: content_check
+    rules:
+      - parse: json
+      - keys_required: [provider, export_timestamp, source_method, raw_path, status]
+      - field_equals: {status: complete}
+
 required_artifacts:
-  - decision.md
-  - result-summary.md
-  - patch.diff
-  - graph-update.yaml
+  - linkedin_export_manifest.json
 
 status: pending
 priority: normal

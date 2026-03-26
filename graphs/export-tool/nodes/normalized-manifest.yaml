@@ -16,11 +16,12 @@ depends_on:
   - google-export-adapter
 
 acceptance:
-  - The tool produces a normalized manifest that lists exported assets across all supported providers
-  - The manifest captures provider, capture time, file location, size, and normalization status
-  - The manifest format is stable enough for later verification and search tooling
-  - An operator can tell from the manifest which providers succeeded, failed, or are incomplete
-  - The manifest can be regenerated without duplicating logical entries
+  - File normalized_manifest.json parses as valid JSON
+  - normalized_manifest.json contains keys: providers, entries, generated_at
+  - normalized_manifest.json entries array contains >= 1 item
+  - Each entry contains keys: provider, captured_at, file_path, size_bytes, normalization_status
+  - normalized_manifest.json providers array contains all three providers: claude, linkedin, google
+  - Running the manifest build command a second time does not duplicate entries for an unchanged session
 
 constraints:
   - Keep the manifest machine-readable and human-inspectable
@@ -30,11 +31,29 @@ constraints:
 allowed_execution_modes:
   - jules
 
+success_artifact:
+  file: normalized_manifest.json
+  verification: "parse:json, keys_required:[providers, entries, generated_at], min_entries:1, each_entry_requires:[provider, captured_at, file_path, size_bytes, normalization_status]"
+
+failure_artifact:
+  file: failure_report.json
+  fields_required:
+    - error_type
+    - reason
+    - partial_artifacts
+    - failed_at
+
+artifact_verification:
+  - artifact: normalized_manifest.json
+    method: content_check
+    rules:
+      - parse: json
+      - keys_required: [providers, entries, generated_at]
+      - min_entries: 1
+      - each_entry_requires: [provider, captured_at, file_path, size_bytes, normalization_status]
+
 required_artifacts:
-  - decision.md
-  - result-summary.md
-  - patch.diff
-  - graph-update.yaml
+  - normalized_manifest.json
 
 status: pending
 priority: high
