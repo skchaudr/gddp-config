@@ -1,9 +1,10 @@
 # gddp-config
 
-Source of truth for the Graph-Driven Agentic Development (GDAD) system.
+Source of truth for the Graph-Driven Agentic Development (GDDP) system.
 
-This repo defines the schemas, graphs, and templates that the Agentic Graph Engine (AGE)
-and OpenClaw orchestrator operate against. Agents read from this repo. They do not write to it.
+This repo defines the schemas, graphs, and templates that the runtime and
+executors operate against. Agents and runtime read from this repo. They do not
+write to it.
 
 ---
 
@@ -14,9 +15,6 @@ and OpenClaw orchestrator operate against. Agents read from this repo. They do n
 | `schemas/v1/` | Canonical YAML schemas for all system objects |
 | `graphs/` | Project graphs — one folder per project |
 | `templates/` | Node and job authoring templates |
-| `scripts/` | Validation and utility scripts (future) |
-| `rules/` | OpenClaw rule configs (future) |
-| `workflows/` | OpenClaw workflow configs (future) |
 
 ---
 
@@ -25,8 +23,9 @@ and OpenClaw orchestrator operate against. Agents read from this repo. They do n
 > Graphs define projects. Agents do not.
 
 Nodes in `graphs/` define what the project is, what order it progresses,
-and what counts as done. OpenClaw maps events to nodes and dispatches
-bounded work. It does not invent direction.
+and what counts as done. Runtime maps events to nodes and dispatches bounded
+work. It does not invent direction, and it does not mutate graph truth on the
+return path.
 
 ---
 
@@ -65,4 +64,4 @@ See `upgrade-strategy.md` for the full rationale.
 ## Related
 
 - Obsidian vault: `01 Projects/GDDP/GDD-Control-Center/` — design docs and v1 schema references
-- `openclaw-ops` repo — OpenClaw agent behavior config (separate from this repo)
+- `gddp-runtime` repo — execution/orchestration layer (separate from this repo)

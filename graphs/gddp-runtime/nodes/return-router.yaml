@@ -2,57 +2,51 @@ schema_version: "1.0"
 schema_type: node
 
 node_id: return-router
-title: Implement return router — merged PR closes the loop
+title: Implement return router — merged PR creates review receipt
 type: infrastructure
 
 why: |
   The forward loop already works: an event arrives, the graph is read,
-  Jules is dispatched. But when Jules merges a PR, nothing happens automatically.
-  A human must notice, review, merge, and manually advance the graph node.
-  The return router closes this gap. When a PR merges, a webhook fires,
-  the classifier routes it, the return router parses the node tag from the
-  PR body, validates it, updates the graph node to complete via the GitHub
-  Contents API, and writes a result row to SQLite. After this ships,
-  the system can complete work while unattended.
+  an executor is dispatched. When a PR merges or an executor returns,
+  runtime must not mark graph truth complete. That would collapse
+  execution machinery into project truth ownership.
+
+  The return router exists to make the return path reviewable instead of
+  automatic. When a PR merges, runtime should parse the node/job metadata,
+  validate the linkage, write a structured result receipt to SQLite, and
+  move the matching job into review-needed state. A human then decides
+  whether the graph should change.
 
 depends_on: []
 
 # Design decisions documented here:
-# 1. graph: field dropped from PR body contract — redundant, derived from repo
-# 2. graph_updater uses GitHub Contents API, not git-on-Pi — no write key on Pi needed
-# 3. result row written as pending BEFORE graph update — gives replay log without retries
+# 1. graph: field dropped from PR body contract — redundant, derived from repo/job
+# 2. job metadata is required so merged PR receipts can be linked to persisted runtime work
+# 3. results table is the canonical review receipt surface; no graph mutation artifact is required
 # 4. ALLOWED_REPOS validated first — cheapest check, fail fast
-# 5. auto-dispatch next node explicitly excluded — scope discipline
+# 5. graph truth remains human-owned and outside direct runtime mutation
 
 acceptance:
-  - classifier.py handles pull_request.closed events and routes them with route=return when merged is true
   - return_router.py exists at scripts/runtime/return_router.py
-  - handle_merged_pr validates repo allowlist, parses node_id from PR body, calls graph_updater, writes result row
+  - handle_merged_pr validates repo allowlist, parses node_id and job_id from PR body, validates them against the persisted job, writes a review receipt, and never mutates gddp-config
   - parse_node_id extracts node id using regex matching "node: <id>" on its own line (case-insensitive, multiline)
+  - parse_job_id extracts job id using regex matching "job: <id>" on its own line (case-insensitive, multiline)
   - validate_repo rejects repos not in ALLOWED_REPOS module-level constant (initially skchaudr/vault-doctor)
-  - graph_updater.py exists at scripts/runtime/graph_updater.py
-  - update_graph_node_complete reads project YAML via GitHub Contents API, sets status to complete, sets completed_at and merged_pr, commits back
-  - graph_updater returns ok=True with commit_sha on success, ok=False with reason on failure
-  - failure reasons include node_not_found, already_complete, github_commit_failed
+  - graph_updater.py is not an active runtime mechanism; if present, it is explicitly disabled
   - results_store.py exists at scripts/runtime/results_store.py
-  - write_result inserts one row into the results table
-  - results table has columns id, repo_name, node_id, pr_number, merged_at, status, reason, commit_sha, created_at
-  - result row is written with status=pending before graph update is attempted, then updated to completed or failed
-  - at least 3 tests covering node_id parsed correctly, missing node tag returns rejected, repo not in allowlist returns rejected
+  - write_result inserts or updates one row in the canonical results table using the existing result schema surface
+  - merged PR receipts are recorded with status=needs_review
+  - matching jobs and queue records are moved to awaiting_review
+  - no runtime path writes completion into project.yaml or implies automatic node advancement
+  - tests cover node_id parsed correctly, missing node tag returns rejected, missing job tag returns rejected, and valid merged PRs create review receipts instead of graph updates
 
 constraints:
-  - new files only: scripts/runtime/return_router.py, scripts/runtime/graph_updater.py, scripts/runtime/results_store.py
-  - the ONLY existing file to modify is scripts/runtime/heartbeat/classifier.py — add pull_request.closed routing
-  - DO NOT touch runner.py, dispatcher.py, job_factory.py, scope_checker.py, state_recorder.py, or any other existing file
-  - DO NOT implement auto-dispatch of next node — explicitly out of scope
-  - DO NOT implement retries, rollback, or partial completion handling
-  - DO NOT implement multi-node PR handling — one PR closes exactly one node
-  - graph_updater MUST use the GitHub Contents API via requests and GITHUB_TOKEN env var — no git subprocess calls
-  - graph_updater MUST read the current file SHA before writing (required by GitHub API for conflict detection)
-  - GITHUB_TOKEN must be read from environment — never hardcoded
-  - ALLOWED_REPOS must be a module-level constant list, not hardcoded inside functions
-  - DO NOT touch vault_doctor/src/ or any path outside scripts/runtime/
-  - DO NOT commit __pycache__ or .pyc files
+  - DO NOT repair automatic return completion through the heartbeat runner
+  - DO NOT add new graph states
+  - DO NOT expand schema shape aggressively
+  - DO NOT implement auto-dispatch of next nodes from return handling
+  - DO NOT allow runtime to write completion state into gddp-config
+  - ALLOWED_REPOS must remain a module-level constant list, not hardcoded inside functions
   - include the node and job metadata block in the PR description as required by the dispatch template
 
 allowed_execution_modes:

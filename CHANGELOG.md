@@ -7,6 +7,17 @@ Schema tags use the format: `schema/<type>@<version>` (e.g., `schema/node@1.1`)
 
 ---
 
+## [1.0.1] - 2026-04-07
+
+### Changed
+- `graphs/gddp-runtime/project.yaml` now describes the return path as receipt-and-review routing instead of automatic graph advancement
+- `graphs/gddp-runtime/nodes/return-router.yaml` now defines the runtime boundary as: merged PRs create structured review receipts and move jobs to review; graph truth remains human-owned
+- `schemas/v1/job.yaml` example wording now frames job goals as producing reviewable results rather than directly moving node truth
+
+### Notes
+- No schema shape expansion in this change
+- `schemas/v1/result.yaml` already supported `status: needs_review`; that contract remains the review receipt surface
+
 ## [1.0.0] - 2026-03-12
 
 ### Added
