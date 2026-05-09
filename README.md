@@ -61,6 +61,17 @@ See `upgrade-strategy.md` for the full rationale.
 
 ---
 
+## Current Graph State
+
+| Project | Status |
+|---|---|
+| `vault-doctor` | 7/7 nodes complete |
+| `gddp-runtime` | 1/1 nodes complete (`return-router`); OpenClaw expansion pending on `feat/openclaw-nodes` |
+
+See `graphs/<project-id>/project.yaml` for the canonical per-project status.
+
+---
+
 ## Related
 
 - Obsidian vault: `01 Projects/GDDP/GDD-Control-Center/` — design docs and v1 schema references
