@@ -50,7 +50,7 @@ Current branch: `main`, clean and pushed to `origin/main`.
 
 What works:
 
-- Runtime tests pass locally: `python3 -m pytest -q` -> `40 passed`.
+- Runtime tests pass locally: `python3 -m pytest -q` -> `42 passed`.
 - `scripts/init_db.py` initializes the SQLite schema.
 - `scripts/intake_server.py` handles GitHub webhook intake and optional `GITHUB_WEBHOOK_SECRET` signature validation.
 - `scripts/runtime/heartbeat/runner.py` is the canonical graph-driven heartbeat entrypoint.
