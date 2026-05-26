@@ -21,7 +21,7 @@ Recommended README placement:
 
 ### gddp-config
 
-Current branch: `feat/openclaw-nodes`, clean and pushed to `origin/feat/openclaw-nodes`.
+Current branch name: `feat/openclaw-nodes`. The active graph objects now use decision-loop naming; the branch name is historical.
 
 Top-level structure:
 
@@ -39,9 +39,9 @@ What works:
 - `graphs/vault-doctor` is complete with 7/7 nodes complete.
 - `graphs/gddp-runtime/project.yaml` currently maps:
   - `return-router`: complete
-  - `openclaw-spec`: complete
-  - `openclaw-v0-runtime`: pending
-  - `openclaw-v0-review-gate`: pending
+  - `decision-loop-spec`: complete
+  - `decision-loop-runtime`: pending
+  - `decision-loop-review-gate`: pending
 - Node files under `graphs/gddp-runtime/nodes/` hold the real acceptance criteria, constraints, allowed execution modes, and required artifacts.
 
 ### gddp-runtime
@@ -65,7 +65,7 @@ What is intentionally incomplete or frozen:
 - Merged PRs create structured receipts and move work to review-needed states; human review decides whether graph truth changes.
 - `scripts/runtime/graph_updater.py` remains only as a disabled compatibility stub.
 - No auto-review, richer graph state machine, or automatic return-path completion in the frozen phase.
-- OpenClaw review/accept powers are draft/future, not the current stable contract.
+- Decision-loop review/accept powers are draft/future, not the current stable contract.
 
 ## Portfolio framing (Pi agent voice — quote verbatim)
 
@@ -91,7 +91,7 @@ Paths:
 Environment variables:
 
 - `GDDP_CONFIG_PATH`: path to this repo for graph reads.
-- `OPCLAW_ROOT`: runtime state root, normally `~/opclaw` on Big Pi.
+- `GDDP_RUNTIME_ROOT`: runtime state root. Legacy `OPCLAW_ROOT` may still be accepted by older scripts as a compatibility fallback.
 - `GITHUB_TOKEN` or `GH_TOKEN`: required for Jules GitHub issue dispatch.
 - `GITHUB_WEBHOOK_SECRET`: optional webhook signature validation secret for runtime webhook intake.
 

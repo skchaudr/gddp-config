@@ -3,7 +3,7 @@
 Source of truth for the Graph-Driven Agentic Development (GDAD) system.
 
 This repo defines the schemas, graphs, and templates that the Agentic Graph Engine (AGE)
-and OpenClaw orchestrator operate against. Agents read from this repo. They do not write to it.
+and the runtime decision loop operate against. Agents read from this repo. They do not write to it.
 
 ---
 
@@ -15,8 +15,8 @@ and OpenClaw orchestrator operate against. Agents read from this repo. They do n
 | `graphs/` | Project graphs — one folder per project |
 | `templates/` | Node and job authoring templates |
 | `scripts/` | Validation and utility scripts (future) |
-| `rules/` | OpenClaw rule configs (future) |
-| `workflows/` | OpenClaw workflow configs (future) |
+| `rules/` | Decision-loop rule configs (future) |
+| `workflows/` | Decision-loop workflow configs (future) |
 
 ---
 
@@ -25,7 +25,7 @@ and OpenClaw orchestrator operate against. Agents read from this repo. They do n
 > Graphs define projects. Agents do not.
 
 Nodes in `graphs/` define what the project is, what order it progresses,
-and what counts as done. OpenClaw maps events to nodes and dispatches
+and what counts as done. The decision loop maps events to nodes and dispatches
 bounded work. It does not invent direction.
 
 ---
@@ -65,4 +65,4 @@ See `upgrade-strategy.md` for the full rationale.
 ## Related
 
 - Obsidian vault: `01 Projects/GDDP/GDD-Control-Center/` — design docs and v1 schema references
-- `openclaw-ops` repo — OpenClaw agent behavior config (separate from this repo)
+- runtime decision-loop behavior config (separate from this repo)
