@@ -20,8 +20,7 @@ curl -N "$RELAY_URL/events" -H "Authorization: Bearer $RELAY_TOKEN" &
 ```
 
 Behavior rules:
-- Post `STATE:` before any high-risk or irreversible step (deploy, migration,
-  destructive file ops, network calls with side effects).
+- Post STATE at task start and task finish only. No checkpoints.
 - If a message arrives with `from=m1` and `kind=ASK`, **pause the specific
   gated decision it refers to** until an `ACK` arrives from `m1`, or until
   the relay becomes unreachable. Continue everything else.
