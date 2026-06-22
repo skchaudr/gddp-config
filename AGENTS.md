@@ -8,7 +8,8 @@ Portfolio brief + system narrative: [`../gddp-runtime/PROJECT-BRIEF.md`](../gddp
 
 ## Project snapshot
 
-- **Language:** YAML / Markdown only — no code to build or test
-- **Install:** none
-- **Validate schemas:** `python3 -c "import yaml; yaml.safe_load(open('rules/*.yml'))"` (manual)
-- **Key dirs:** `rules/`, `schemas/`, `templates/`, `workflows/`, `graphs/`
+- **Language:** YAML / Markdown (primary) + a small `scripts/` Python package (validator + TUI scaffold). No runtime code, no build step.
+- **Install:** `python3 -m venv .venv && .venv/bin/pip install pyyaml rich` (for `scripts/` tooling only)
+- **Validate schemas:** `.venv/bin/python scripts/validate.py` (strict, global, exits 1 on drift)
+- **Scaffold a node:** `.venv/bin/python scripts/new_node.py` (TUI; writes node + patches project.yaml)
+- **Key dirs:** `schemas/`, `templates/`, `graphs/`, `scripts/` (active) · `rules/`, `workflows/` (future)

@@ -14,7 +14,7 @@ and the runtime decision loop operate against. Agents read from this repo. They 
 | `schemas/v1/` | Canonical YAML schemas for all system objects |
 | `graphs/` | Project graphs — one folder per project |
 | `templates/` | Node and job authoring templates |
-| `scripts/` | Validation and utility scripts (future) |
+| `scripts/` | `validate.py` (strict schema validator) · `new_node.py` (TUI scaffold) · `terminal.py` (shared input helper) — see `scripts/README.md` |
 | `rules/` | Decision-loop rule configs (future) |
 | `workflows/` | Decision-loop workflow configs (future) |
 
@@ -51,6 +51,35 @@ cp -r graphs/_template graphs/<project-id>
 # edit graphs/<project-id>/project.yaml
 # add node files to graphs/<project-id>/nodes/
 ```
+
+## Node Tooling
+
+Two scripts under `scripts/` replace hand-typing node YAML. Both standalone,
+stdlib + `rich` + `pyyaml`. See `scripts/README.md` for install + flags.
+
+**Validate** — strict global schema check, catches drift before commit:
+
+```bash
+.venv/bin/python scripts/validate.py                 # human report
+.venv/bin/python scripts/validate.py --json          # machine-readable
+.venv/bin/python scripts/validate.py --project vault-doctor
+```
+
+**Scaffold a new node** — keyboard-driven TUI, writes the YAML file and
+patches the project's `project.yaml` index (with `.bak` backup):
+
+```bash
+.venv/bin/python scripts/new_node.py
+```
+
+Keymap: number keys pick, `←`/`→` paginate, `m` manual, `s` skip, `q` quit,
+`Enter` = default. Review screen before write. Post-write: runs `validate.py`
+loudly but exits non-zero only if the new node or the `project.yaml` patch is
+the cause — pre-existing repo drift surfaces visibly but doesn't block.
+
+For the prose-heavy fields (`why`, `acceptance`, `constraints`), see
+`templates/draft-node-prompt.md` — a saved prompt for drafting those fields
+with an LLM in the established voice.
 
 ---
 
