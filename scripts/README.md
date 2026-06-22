@@ -81,6 +81,31 @@ overwrite an existing project dir. Cap output size with `--max-nodes 20`.
 **What it cannot infer:** `why`, `acceptance`, `constraints` are human-only.
 The tool gives you the edge skeleton; you fill in execution semantics.
 
+## enrich_graph.py — add GDDP metadata back into graphify output
+
+Graphify extracts the graph skeleton from code but drops our node semantics
+(status, priority, type, why, etc.). This post-processor reads each node YAML
+referenced in `graphify-out/graph.json` and merges its metadata onto the
+corresponding graphify node. Output is `graphify-out/graph-enriched.json`.
+
+```bash
+.venv/bin/python scripts/enrich_graph.py
+.venv/bin/python scripts/enrich_graph.py --force    # overwrite existing
+```
+
+Fields added to each node-YAML-representing graphify node:
+- `status`, `priority`, `node_type`, `gddp_node_id`, `why`
+- `depends_on_count`, `unlocks_count`, `acceptance_count`,
+  `constraints_count`, `required_artifacts_count`
+- `execution_modes`, `required_artifacts` (lists)
+
+Fields added to each project-YAML-representing node:
+- `project_id`, `description`, `repo`, `node_count`
+
+The graph dict is marked with `graph.gddp_enriched = true` so viz tools can
+detect enrichment. Pair this with a graph viewer (e.g., the Lovable
+inspect-graph app) to color/filter/annotate nodes by GDDP metadata.
+
 ## terminal.py — ported from context_refinery
 
 Single keypress reader with arrow-key decoding. Pure stdlib (`tty`,
