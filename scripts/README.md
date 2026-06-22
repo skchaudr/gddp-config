@@ -53,6 +53,34 @@ Post-write: runs `validate.py` globally. Loud on all findings, but exits
 non-zero only if the new node or `project.yaml` regression is the cause.
 Pre-existing repo drift won't block the scaffold.
 
+## graphify_to_nodes.py — bootstrap a project from graphify output
+
+Takes any `graphify-out/graph.json` and emits a starter `graphs/<project-id>/`
+skeleton. Lifts `depends_on` / `unlocks` edges graphify extracted from your
+code; leaves semantic fields (`why`, `acceptance`, `constraints`) as
+`REPLACE_ME` placeholders. Best for adopting existing repos into GDDP form.
+
+```bash
+.venv/bin/python scripts/graphify_to_nodes.py \
+    --input graphify-out/graph.json \
+    --project-id my-project \
+    --repo org/repo \
+    --dry-run
+```
+
+Filter modes (default: `smart`):
+- `smart` — one node per source_file (collapses functions/classes into their
+  containing file) + concept nodes; drops rationale
+- `files` — one node per source_file, no concepts
+- `documents` — only graphify `file_type=document`
+- `all` — every graphify node (noisy)
+
+Always run with `--dry-run` first to inspect the plan. Add `--force` to
+overwrite an existing project dir. Cap output size with `--max-nodes 20`.
+
+**What it cannot infer:** `why`, `acceptance`, `constraints` are human-only.
+The tool gives you the edge skeleton; you fill in execution semantics.
+
 ## terminal.py — ported from context_refinery
 
 Single keypress reader with arrow-key decoding. Pure stdlib (`tty`,
