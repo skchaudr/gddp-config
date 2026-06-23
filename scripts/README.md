@@ -1,6 +1,6 @@
 # scripts/
 
-Utility scripts for `gddp-config`. Two tools, both standalone Python.
+CLI tools and utilities for `gddp-config`. Entry point: `gddp.py`.
 
 ## Setup
 
@@ -13,10 +13,94 @@ python3 -m venv .venv
 
 Or use your system Python if it's not PEP-668-locked.
 
+## gddp.py — unified CLI
+
+```bash
+.venv/bin/python scripts/gddp.py node rapid --project my-app --repo org/repo
+.venv/bin/python scripts/gddp.py node import --file draft.yaml --project my-app
+.venv/bin/python scripts/gddp.py node validate
+.venv/bin/python scripts/gddp.py node status
+.venv/bin/python scripts/gddp.py project new --from-outline outline.md --project-id my-app --repo org/repo
+```
+
+### node subcommands
+
+| Command | What | Keystrokes |
+|---|---|---|
+| `node rapid` | Minimal-keystroke adder | Type name, Enter, number keys for deps |
+| `node new` | Full TUI scaffold (field-by-field editor) | Number keys, m/s/q/Enter |
+| `node batch` | Walk through REPLACE_ME nodes | Edit acceptance/constraints/why |
+| `node import` | Import YAML from file or stdin | No TUI — JSON output, exit codes |
+| `node validate` | Validate all nodes against schema | No TUI |
+| `node list` | List nodes in a project | No TUI |
+| `node status` | Completion summary for all projects | No TUI |
+
+### project subcommands
+
+| Command | What |
+|---|---|
+| `project new --project-id X --repo Y` | Create empty project shell |
+| `project new --from-outline outline.md --project-id X --repo Y` | Bootstrap from markdown outline |
+| `project new --from-graphify graph.json --project-id X --repo Y` | Bootstrap from graphify AST output |
+| `project validate` | Check project.yaml integrity |
+
+## rapid_add.py — minimal-keystroke node adder
+
+Designed for hand preservation. Most interactions are single keypresses.
+
+```bash
+.venv/bin/python scripts/gddp.py node rapid --project my-app --repo org/repo
+.venv/bin/python scripts/gddp.py node rapid --project my-app --llm-draft   # hybrid mode
+```
+
+Flow: type short name → Enter → auto-kebab → pick deps with number keys → next node. Blank line = done. No markdown, no YAML.
+
+## import_node.py — agent pipeline node import
+
+For agent-assisted workflows. Accepts YAML, validates, writes, patches.
+
+```bash
+.venv/bin/python scripts/gddp.py node import --file draft.yaml --project my-app
+echo '<yaml>' | .venv/bin/python scripts/gddp.py node import --stdin --project my-app
+.venv/bin/python scripts/gddp.py node import --file draft.yaml --project my-app --dry-run
+```
+
+Returns JSON findings on stdout. Exit codes: 0=imported, 1=validation errors, 2=exists, 3=project not found.
+
+## new_node.py — full TUI scaffold
+
+Field-by-field interactive editor. Number keys, paginated pickers, review screen.
+
+```bash
+.venv/bin/python scripts/new_node.py
+```
+
+## batch_fill.py — walk through REPLACE_ME nodes
+
+Sequential field-by-field fill for nodes with placeholder values.
+
+```bash
+.venv/bin/python scripts/gddp.py node batch --project my-app
+```
+
+## outline_to_nodes.py — markdown outline to project skeleton
+
+Converts a markdown checklist with dependency arrows into node YAMLs.
+
+```bash
+.venv/bin/python scripts/gddp.py project new --from-outline outline.md --project-id my-app --repo org/repo
+```
+
+Outline format:
+```markdown
+- [ ] node-name
+- [ ] dependent-node -> node-name
+- [ ] multi-dep -> node-a, node-b
+```
+
 ## validate.py — strict global validator
 
-Walks `graphs/*/nodes/*.yaml` (skips `graphs/_template/`) and checks every
-node against `schemas/v1/node.yaml`. Catches schema drift before it ships.
+Walks all node YAMLs, checks schema compliance, enum values, cross-references.
 
 ```bash
 .venv/bin/python scripts/validate.py                  # human report
@@ -25,40 +109,9 @@ node against `schemas/v1/node.yaml`. Catches schema drift before it ships.
 .venv/bin/python scripts/validate.py --strict         # warnings -> errors
 ```
 
-Exit code 1 if any errors. Usable as a pre-commit hook.
+## graphify_to_nodes.py — bootstrap from graphify AST output
 
-The schema constants are mirrored inline from `schemas/v1/node.yaml`. If the
-schema changes, update both files.
-
-## new_node.py — TUI scaffold for new node YAML
-
-Interactive, keyboard-driven creator. Modeled on the V4SchemaPass TUI from
-`context_refinery`. Writes `graphs/<project>/nodes/<node_id>.yaml` + patches
-`project.yaml` (with `.bak` backup).
-
-```bash
-.venv/bin/python scripts/new_node.py
-```
-
-Keymap:
-- Number keys `1-9` — pick from list
-- `←`/`→` or `↑`/`↓` — paginate long lists
-- `m` — manual text entry
-- `s` — skip field
-- `q` — quit
-- `Enter` — accept default
-- `y`/`e`/`q` at review screen — write / edit / quit
-
-Post-write: runs `validate.py` globally. Loud on all findings, but exits
-non-zero only if the new node or `project.yaml` regression is the cause.
-Pre-existing repo drift won't block the scaffold.
-
-## graphify_to_nodes.py — bootstrap a project from graphify output
-
-Takes any `graphify-out/graph.json` and emits a starter `graphs/<project-id>/`
-skeleton. Lifts `depends_on` / `unlocks` edges graphify extracted from your
-code; leaves semantic fields (`why`, `acceptance`, `constraints`) as
-`REPLACE_ME` placeholders. Best for adopting existing repos into GDDP form.
+Extracts a graph skeleton from code, creates project nodes. Best for brownfield adoption.
 
 ```bash
 .venv/bin/python scripts/graphify_to_nodes.py \
@@ -68,45 +121,16 @@ code; leaves semantic fields (`why`, `acceptance`, `constraints`) as
     --dry-run
 ```
 
-Filter modes (default: `smart`):
-- `smart` — one node per source_file (collapses functions/classes into their
-  containing file) + concept nodes; drops rationale
-- `files` — one node per source_file, no concepts
-- `documents` — only graphify `file_type=document`
-- `all` — every graphify node (noisy)
+## llm_draft.py — LLM-assisted field drafting (stub)
 
-Always run with `--dry-run` first to inspect the plan. Add `--force` to
-overwrite an existing project dir. Cap output size with `--max-nodes 20`.
+Drafts `why`, `acceptance`, `constraints` via LLM. Used by `node rapid --llm-draft`.
 
-**What it cannot infer:** `why`, `acceptance`, `constraints` are human-only.
-The tool gives you the edge skeleton; you fill in execution semantics.
+Env vars: `GDDP_LLM_PROVIDER` (deepseek|openai|anthropic|ollama), `GDDP_LLM_API_KEY`, `GDDP_LLM_MODEL`.
 
-## enrich_graph.py — add GDDP metadata back into graphify output
+## enrich_graph.py — add GDDP metadata to graphify output
 
-Graphify extracts the graph skeleton from code but drops our node semantics
-(status, priority, type, why, etc.). This post-processor reads each node YAML
-referenced in `graphify-out/graph.json` and merges its metadata onto the
-corresponding graphify node. Output is `graphify-out/graph-enriched.json`.
+Post-processes graphify output with node semantics for visualization.
 
-```bash
-.venv/bin/python scripts/enrich_graph.py
-.venv/bin/python scripts/enrich_graph.py --force    # overwrite existing
-```
+## terminal.py — shared keypress helper
 
-Fields added to each node-YAML-representing graphify node:
-- `status`, `priority`, `node_type`, `gddp_node_id`, `why`
-- `depends_on_count`, `unlocks_count`, `acceptance_count`,
-  `constraints_count`, `required_artifacts_count`
-- `execution_modes`, `required_artifacts` (lists)
-
-Fields added to each project-YAML-representing node:
-- `project_id`, `description`, `repo`, `node_count`
-
-The graph dict is marked with `graph.gddp_enriched = true` so viz tools can
-detect enrichment. Pair this with a graph viewer (e.g., the Lovable
-inspect-graph app) to color/filter/annotate nodes by GDDP metadata.
-
-## terminal.py — ported from context_refinery
-
-Single keypress reader with arrow-key decoding. Pure stdlib (`tty`,
-`termios`) + `rich`. Verbatim port of the battle-tested original.
+Single keypress + arrow key decoding. Used by all TUI scripts.
