@@ -3,7 +3,7 @@ schema_type: node
 
 node_id: return-router
 title: Implement return router — merged PR creates review receipt
-type: infrastructure
+type: capability
 
 why: |
   The forward loop already works: an event arrives, the graph is read,
@@ -29,8 +29,8 @@ depends_on: []
 acceptance:
   - return_router.py exists at scripts/runtime/return_router.py
   - handle_merged_pr validates repo allowlist, parses node_id and job_id from PR body, validates them against the persisted job, writes a review receipt, and never mutates gddp-config
-  - parse_node_id extracts node id using regex matching "node: <id>" on its own line (case-insensitive, multiline)
-  - parse_job_id extracts job id using regex matching "job: <id>" on its own line (case-insensitive, multiline)
+  - 'parse_node_id extracts node id using regex matching "node: <id>" on its own line (case-insensitive, multiline)'
+  - 'parse_job_id extracts job id using regex matching "job: <id>" on its own line (case-insensitive, multiline)'
   - validate_repo rejects repos not in ALLOWED_REPOS module-level constant (initially skchaudr/vault-doctor)
   - graph_updater.py is not an active runtime mechanism; if present, it is explicitly disabled
   - results_store.py exists at scripts/runtime/results_store.py

@@ -1,0 +1,39 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: decision-loop-spec
+title: Write decision loop v0 spec — purpose, inputs, outputs, decision loop, failure modes
+type: capability
+
+why: |
+  The GDAD system has a dispatch loop and a return loop, but no persistent
+  reasoning layer deciding what to do next. The decision loop fills this gap. Before
+  building it, the spec defines what it is, what it reads, what it decides,
+  what actions it can take, and how it fails safely. This spec is the contract
+  between the human and the system.
+
+depends_on:
+  - return-router
+
+acceptance:
+  - docs/decision-loop-spec.md exists in gddp-runtime
+  - spec defines purpose, trigger model, context window, decision logic, 4 powers, output format, failure modes, human escalation rules, stale state handling, runtime architecture, and v0 scope limits
+  - '4 powers documented with inputs, actions, output JSON schema: dispatch_next, review_pr, accept_node, escalate'
+  - failure mode table covers all error paths with explicit decision-loop behavior
+
+constraints:
+  - spec must be a single markdown file in gddp-runtime/docs/
+  - spec must not prescribe implementation details — only contract and behavior
+  - v0 scope limits must be explicitly stated so Phase 2 cannot silently expand
+
+allowed_execution_modes:
+  - human
+
+required_artifacts:
+  - decision.md
+
+status: complete
+priority: medium
+
+unlocks:
+  - decision-loop-runtime

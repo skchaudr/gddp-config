@@ -1,0 +1,51 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: decision-loop-review-gate
+title: Build decision loop v0 review gate — lightweight PR eval before accepting node
+type: capability
+
+why: |
+  Without a review gate, the system blindly accepts any PR Jules merges.
+  The review gate adds the minimum viable quality check: did the PR touch
+  expected files, avoid forbidden paths, include the required metadata block,
+  and pass CI checks? If yes, the decision loop writes an acceptance candidate.
+  If no, it posts
+  a review comment with specific feedback and escalates. This closes the
+  quality loop without requiring a human to read every PR.
+
+depends_on:
+  - decision-loop-runtime
+
+acceptance:
+  - scripts/runtime/decision_loop/powers/review_pr.py exists with run(context, pr_payload) function
+  - scripts/runtime/decision_loop/powers/accept_node.py exists with run(context, node_id, pr_number) function
+  - 'review_pr checks: expected files touched (keyword match against acceptance criteria), forbidden paths absent (keyword match against constraints), node metadata block present in PR body, CI checks passed (via GitHub Checks API)'
+  - review_pr returns verdict pass or fail with reason string
+  - accept_node writes a result row with status=acceptance_candidate and does not mutate gddp-config
+  - engine.py updated to call review_pr when event is pull_request.closed merged=true, then accept_node if verdict is pass
+  - on verdict fail, engine posts a GitHub PR review comment with the failure reason and writes result row with status=review_failed
+  - 'at least 3 tests: verdict pass when all checks met, verdict fail when forbidden file present, verdict fail when metadata block missing'
+
+constraints:
+  - 'new files only: scripts/runtime/decision_loop/powers/review_pr.py and scripts/runtime/decision_loop/powers/accept_node.py'
+  - the ONLY existing file to modify is scripts/runtime/decision_loop/engine.py — wire in review_pr and accept_node to the decision loop
+  - DO NOT modify any file outside scripts/runtime/decision_loop/
+  - DO NOT implement ML-based code quality review — v0 checks are structural only (files, paths, metadata, CI status)
+  - DO NOT implement line-by-line diff analysis
+  - DO NOT commit __pycache__ or .pyc files
+  - CI check evaluation reads GitHub Checks API — if no checks exist, treat as pass (Jules runs no CI in v0)
+  - use only requests for HTTP calls
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+
+status: pending
+priority: high
+
+unlocks: []
