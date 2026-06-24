@@ -42,7 +42,7 @@ from terminal import console, getch, getline
 # ── Schema constants (mirror schemas/v1/node.yaml) ─────────────────────────
 
 VALID_TYPES = ["capability", "milestone", "constraint"]
-VALID_STATUSES = ["pending", "ready", "running", "complete", "failed", "deferred"]
+VALID_STATUSES = ["pending", "ready", "complete", "deferred"]
 VALID_PRIORITIES = ["low", "medium", "high", "critical"]
 VALID_EXEC_MODES = ["jules", "vertex", "pi_worker", "vm_worker", "human"]
 ALL_ARTIFACTS = ["decision.md", "result-summary.md", "patch.diff",
