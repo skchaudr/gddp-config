@@ -13,3 +13,70 @@ Portfolio brief + system narrative: [`../gddp-runtime/PROJECT-BRIEF.md`](../gddp
 - **Validate schemas:** `.venv/bin/python scripts/validate.py` (strict, global, exits 1 on drift)
 - **Scaffold a node:** `.venv/bin/python scripts/new_node.py` (TUI; writes node + patches project.yaml)
 - **Key dirs:** `schemas/`, `templates/`, `graphs/`, `scripts/` (active) · `rules/`, `workflows/` (future)
+
+## Agent-driven development workflow
+
+The default reader of this repo is often another agent. Optimize for the next
+session being able to start immediately, not for the current session merely
+appearing done.
+
+### Start-of-session contract
+
+1. Run `git status --short --branch` before editing. If it is not clean, stop
+   and classify the existing state as tracked changes, untracked files, ignored
+   generated files, or branch divergence.
+2. Do not overwrite, delete, rename, reformat, or "clean up" inherited changes
+   until you know whether they are user work, another agent's work, or generated
+   noise. If unsure, ask.
+3. Verify branch and upstream before work: `git branch --show-current`,
+   `git rev-parse --abbrev-ref --symbolic-full-name @{u}` when available, and
+   `git fetch --prune` before merge/rebase decisions.
+4. If work continues from another branch, first understand whether it should be
+   merged, rebased, abandoned, or left as a PR branch. Do not create parallel
+   branches for the same task without a reason recorded in the handoff.
+
+### During-work rules
+
+- Keep changes scoped to the requested task. Separate formatting-only churn from
+  functional/doc changes unless the formatter is the task.
+- Update `.gitignore` as soon as a tool creates repeatable local noise
+  (`node_modules/`, `dist/`, caches, local logs, generated media, temp exports),
+  but do not hide meaningful source artifacts just to get a clean status.
+- Make small commits at coherent checkpoints. A repo with hours of uncommitted
+  agent work is an unsafe handoff state.
+- Prefer existing project commands from this file. If a command is missing or
+  dependencies are unavailable, run the smallest relevant validation you can and
+  record the limitation.
+- Never force-push, rewrite shared history, delete remote branches, or discard
+  worktree changes unless the operator explicitly authorizes that exact action.
+
+### End-of-session contract
+
+Before saying "done":
+
+1. Run the relevant validation/build/test commands documented above, or explain
+   exactly why they could not run.
+2. Run `git status --short --branch`. The target state is clean and synced with
+   upstream. If anything remains, it must be intentionally ignored or explicitly
+   called out with a path and reason.
+3. Commit all intended changes. Do not leave staged, unstaged, or untracked task
+   artifacts for the next session to interpret.
+4. Push the working branch. If the task is meant to land on `main`, merge it to
+   `main`, push `main`, and verify local `main` equals `origin/main`.
+5. Leave a concise handoff in the final response: branch, commit, pushed status,
+   validation run, changed surfaces, and any residual risk.
+
+### Not-done triggers
+
+Do not report completion if any of these are true:
+
+- uncommitted task changes remain;
+- local commits are not pushed;
+- the branch is diverged and unresolved;
+- merge conflicts or stash entries remain;
+- validation failed and no explicit follow-up decision exists;
+- generated files, logs, caches, screenshots, or media are untracked and
+  unclassified.
+
+The standard is: the next agent can clone/pull, read this file, run the listed
+commands, and continue without first becoming a repository janitor.
