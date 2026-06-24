@@ -49,6 +49,8 @@ appearing done.
   record the limitation.
 - Never force-push, rewrite shared history, delete remote branches, or discard
   worktree changes unless the operator explicitly authorizes that exact action.
+- Inherited uncommitted changes are evidence, not debris. Commit and push them
+  unless you can prove they are noise. They may be the only copy.
 
 
 ### Handoff requirement
