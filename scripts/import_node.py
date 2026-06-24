@@ -59,8 +59,8 @@ REQUIRED_FIELDS = {
     "unlocks": list,
 }
 
-LIST_FIELDS = ("depends_on", "unlocks", "acceptance", "constraints",
-               "allowed_execution_modes", "required_artifacts")
+LIST_FIELDS = ("depends_on", "unlocks", "constraints",
+                "allowed_execution_modes", "required_artifacts")
 
 KEBAB_RE = __import__("re").compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
 
@@ -115,6 +115,42 @@ def validate_node_yaml(doc: dict, source_label: str = "input") -> list[dict]:
             findings.append({"severity": "error", "rule": "id_format",
                               "message": f"node_id {node_id!r} not kebab-case",
                               "source": source_label})
+
+    acceptance = doc.get("acceptance")
+    if acceptance is not None:
+        if not isinstance(acceptance, list):
+            findings.append({"severity": "error", "rule": "acceptance_type",
+                              "message": f"acceptance must be a list, got {type(acceptance).__name__}",
+                              "source": source_label})
+        elif not acceptance:
+            findings.append({"severity": "error", "rule": "acceptance_empty",
+                              "message": "acceptance must have at least one entry",
+                              "source": source_label})
+        else:
+            for idx, entry in enumerate(acceptance):
+                if not isinstance(entry, dict):
+                    findings.append({"severity": "error", "rule": "acceptance_shape",
+                                      "message": f"acceptance[{idx}] must be a dict with id and criterion",
+                                      "source": source_label})
+                    continue
+                if "id" not in entry or "criterion" not in entry:
+                    findings.append({"severity": "error", "rule": "acceptance_shape",
+                                      "message": f"acceptance[{idx}] missing 'id' or 'criterion' key",
+                                      "source": source_label})
+                    continue
+                acc_id = entry["id"]
+                if not isinstance(acc_id, str):
+                    findings.append({"severity": "error", "rule": "acceptance_id_type",
+                                      "message": f"acceptance[{idx}].id must be string",
+                                      "source": source_label})
+                elif not KEBAB_RE.match(acc_id):
+                    findings.append({"severity": "error", "rule": "acceptance_id_format",
+                                      "message": f"acceptance[{idx}].id {acc_id!r} not kebab-case",
+                                      "source": source_label})
+                if not isinstance(entry["criterion"], str):
+                    findings.append({"severity": "error", "rule": "acceptance_criterion_type",
+                                      "message": f"acceptance[{idx}].criterion must be string",
+                                      "source": source_label})
 
     for fname in LIST_FIELDS:
         val = doc.get(fname)

@@ -15,12 +15,18 @@ depends_on:
   - scan-vault-core
 
 acceptance:
-  - VaultDoctor has a find_duplicates(vault_path) method in src/doctor.py
-  - find_duplicates computes MD5 hash for each file returned by scan_vault()
-  - find_duplicates returns a list of duplicate groups — each group is a list of file paths with identical content
-  - files with unique content are not included in the output
-  - at least 2 passing tests covering detection of duplicates and correct handling of no-duplicate case
-  - tests use the existing mock vault fixture
+  - id: find-duplicates-method-exists
+    criterion: VaultDoctor has a find_duplicates(vault_path) method in src/doctor.py
+  - id: find-duplicates-computes-md5
+    criterion: find_duplicates computes MD5 hash for each file returned by scan_vault()
+  - id: find-duplicates-returns-groups
+    criterion: find_duplicates returns a list of duplicate groups — each group is a list of file paths with identical content
+  - id: unique-files-excluded
+    criterion: files with unique content are not included in the output
+  - id: at-least-2-passing-tests-duplicates
+    criterion: at least 2 passing tests covering detection of duplicates and correct handling of no-duplicate case
+  - id: tests-use-mock-vault-fixture
+    criterion: tests use the existing mock vault fixture
 
 constraints:
   - implement in src/doctor.py only — do not modify triage.py

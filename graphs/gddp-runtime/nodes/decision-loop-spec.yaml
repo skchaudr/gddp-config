@@ -16,10 +16,14 @@ depends_on:
   - return-router
 
 acceptance:
-  - docs/decision-loop-spec.md exists in gddp-runtime
-  - spec defines purpose, trigger model, context window, decision logic, 4 powers, output format, failure modes, human escalation rules, stale state handling, runtime architecture, and v0 scope limits
-  - '4 powers documented with inputs, actions, output JSON schema: dispatch_next, review_pr, accept_node, escalate'
-  - failure mode table covers all error paths with explicit decision-loop behavior
+  - id: spec-file-exists
+    criterion: docs/decision-loop-spec.md exists in gddp-runtime
+  - id: spec-defines-required-sections
+    criterion: spec defines purpose, trigger model, context window, decision logic, 4 powers, output format, failure modes, human escalation rules, stale state handling, runtime architecture, and v0 scope limits
+  - id: four-powers-documented
+    criterion: '4 powers documented with inputs, actions, output JSON schema: dispatch_next, review_pr, accept_node, escalate'
+  - id: failure-mode-table-complete
+    criterion: failure mode table covers all error paths with explicit decision-loop behavior
 
 constraints:
   - spec must be a single markdown file in gddp-runtime/docs/

@@ -57,8 +57,8 @@ REQUIRED_FIELDS = {
     "unlocks": list,
 }
 
-LIST_FIELDS = ("depends_on", "unlocks", "acceptance", "constraints",
-               "allowed_execution_modes", "required_artifacts")
+LIST_FIELDS = ("depends_on", "unlocks", "constraints",
+                "allowed_execution_modes", "required_artifacts")
 
 KEBAB_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
 
@@ -130,6 +130,37 @@ def validate_node(path: Path, rel: str, doc: dict) -> list[Finding]:
         if not KEBAB_RE.match(node_id):
             findings.append(Finding(rel, 0, "error", "id_format",
                                      f"node_id {node_id!r} not kebab-case"))
+
+    # Acceptance shape: list of {id: str, criterion: str}
+    acceptance = doc.get("acceptance")
+    if acceptance is not None:
+        if not isinstance(acceptance, list):
+            findings.append(Finding(rel, 0, "error", "acceptance_type",
+                                     f"acceptance must be a list, got {type(acceptance).__name__}"))
+        elif not acceptance:
+            findings.append(Finding(rel, 0, "error", "acceptance_empty",
+                                     "acceptance must have at least one entry"))
+        else:
+            for idx, entry in enumerate(acceptance):
+                if not isinstance(entry, dict):
+                    findings.append(Finding(rel, 0, "error", "acceptance_shape",
+                                             f"acceptance[{idx}] must be a dict with id and criterion, "
+                                             f"got {type(entry).__name__}"))
+                    continue
+                if "id" not in entry or "criterion" not in entry:
+                    findings.append(Finding(rel, 0, "error", "acceptance_shape",
+                                             f"acceptance[{idx}] missing 'id' or 'criterion' key"))
+                    continue
+                acc_id = entry["id"]
+                if not isinstance(acc_id, str):
+                    findings.append(Finding(rel, 0, "error", "acceptance_id_type",
+                                             f"acceptance[{idx}].id must be string"))
+                elif not KEBAB_RE.match(acc_id):
+                    findings.append(Finding(rel, 0, "error", "acceptance_id_format",
+                                             f"acceptance[{idx}].id {acc_id!r} not kebab-case"))
+                if not isinstance(entry["criterion"], str):
+                    findings.append(Finding(rel, 0, "error", "acceptance_criterion_type",
+                                             f"acceptance[{idx}].criterion must be string"))
 
     # Lists must contain only strings (unquoted colon mid-item parses as dict)
     for fname in LIST_FIELDS:

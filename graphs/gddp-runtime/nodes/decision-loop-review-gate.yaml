@@ -18,14 +18,22 @@ depends_on:
   - decision-loop-runtime
 
 acceptance:
-  - scripts/runtime/decision_loop/powers/review_pr.py exists with run(context, pr_payload) function
-  - scripts/runtime/decision_loop/powers/accept_node.py exists with run(context, node_id, pr_number) function
-  - 'review_pr checks: expected files touched (keyword match against acceptance criteria), forbidden paths absent (keyword match against constraints), node metadata block present in PR body, CI checks passed (via GitHub Checks API)'
-  - review_pr returns verdict pass or fail with reason string
-  - accept_node writes a result row with status=acceptance_candidate and does not mutate gddp-config
-  - engine.py updated to call review_pr when event is pull_request.closed merged=true, then accept_node if verdict is pass
-  - on verdict fail, engine posts a GitHub PR review comment with the failure reason and writes result row with status=review_failed
-  - 'at least 3 tests: verdict pass when all checks met, verdict fail when forbidden file present, verdict fail when metadata block missing'
+  - id: review-pr-exists
+    criterion: scripts/runtime/decision_loop/powers/review_pr.py exists with run(context, pr_payload) function
+  - id: accept-node-exists
+    criterion: scripts/runtime/decision_loop/powers/accept_node.py exists with run(context, node_id, pr_number) function
+  - id: review-pr-checks-listed
+    criterion: 'review_pr checks: expected files touched (keyword match against acceptance criteria), forbidden paths absent (keyword match against constraints), node metadata block present in PR body, CI checks passed (via GitHub Checks API)'
+  - id: review-pr-returns-verdict
+    criterion: review_pr returns verdict pass or fail with reason string
+  - id: accept-node-writes-candidate
+    criterion: accept_node writes a result row with status=acceptance_candidate and does not mutate gddp-config
+  - id: engine-wires-review-accept
+    criterion: engine.py updated to call review_pr when event is pull_request.closed merged=true, then accept_node if verdict is pass
+  - id: engine-handles-verdict-fail
+    criterion: on verdict fail, engine posts a GitHub PR review comment with the failure reason and writes result row with status=review_failed
+  - id: at-least-3-passing-tests-review
+    criterion: 'at least 3 tests: verdict pass when all checks met, verdict fail when forbidden file present, verdict fail when metadata block missing'
 
 constraints:
   - 'new files only: scripts/runtime/decision_loop/powers/review_pr.py and scripts/runtime/decision_loop/powers/accept_node.py'

@@ -17,14 +17,22 @@ depends_on:
   - check-performance
 
 acceptance:
-  - VaultDoctor has a generate_dashboard(vault_path) method in src/doctor.py
-  - generate_dashboard prints a rich-formatted table or panel to the terminal
-  - 'dashboard shows at minimum: total files, total size (human readable), large file count, plugin count'
-  - if find_duplicates is implemented, duplicate count is included; if absent, row is omitted gracefully
-  - if find_stale_todos is implemented, stale TODO count is included; if absent, row is omitted gracefully
-  - dashboard is callable from the CLI via a --dashboard flag or dashboard subcommand
-  - at least 2 passing tests verifying generate_dashboard runs without error given a valid vault path
-  - tests use the existing mock vault fixture
+  - id: generate-dashboard-method-exists
+    criterion: VaultDoctor has a generate_dashboard(vault_path) method in src/doctor.py
+  - id: dashboard-prints-to-terminal
+    criterion: generate_dashboard prints a rich-formatted table or panel to the terminal
+  - id: dashboard-minimum-fields
+    criterion: 'dashboard shows at minimum: total files, total size (human readable), large file count, plugin count'
+  - id: dashboard-duplicates-optional
+    criterion: if find_duplicates is implemented, duplicate count is included; if absent, row is omitted gracefully
+  - id: dashboard-stale-todos-optional
+    criterion: if find_stale_todos is implemented, stale TODO count is included; if absent, row is omitted gracefully
+  - id: dashboard-cli-callable
+    criterion: dashboard is callable from the CLI via a --dashboard flag or dashboard subcommand
+  - id: at-least-2-passing-tests-dashboard
+    criterion: at least 2 passing tests verifying generate_dashboard runs without error given a valid vault path
+  - id: tests-use-mock-vault-fixture
+    criterion: tests use the existing mock vault fixture
 
 constraints:
   - implement generate_dashboard in src/doctor.py ONLY — this is the one and only canonical file for VaultDoctor

@@ -16,13 +16,20 @@ depends_on:
   - scan-vault-core
 
 acceptance:
-  - VaultDoctor has a check_performance(vault_path) method in src/doctor.py
-  - 'check_performance returns a dict with at minimum these keys: total_files, large_files, plugin_count'
-  - large_files is a list of file path strings where size_bytes > 5MB (5_242_880 bytes)
-  - plugin_count counts subdirectories inside .obsidian/plugins/ (0 if the folder does not exist)
-  - total_files is the count of all files returned by scan_vault()
-  - at least 2 passing tests covering the returned dict structure and large file detection
-  - tests use the existing mock vault fixture
+  - id: check-performance-method-exists
+    criterion: VaultDoctor has a check_performance(vault_path) method in src/doctor.py
+  - id: check-performance-returns-dict
+    criterion: 'check_performance returns a dict with at minimum these keys: total_files, large_files, plugin_count'
+  - id: large-files-size-threshold
+    criterion: large_files is a list of file path strings where size_bytes > 5MB (5_242_880 bytes)
+  - id: plugin-count-from-obsidian
+    criterion: plugin_count counts subdirectories inside .obsidian/plugins/ (0 if the folder does not exist)
+  - id: total-files-from-scan-vault
+    criterion: total_files is the count of all files returned by scan_vault()
+  - id: at-least-2-passing-tests-performance
+    criterion: at least 2 passing tests covering the returned dict structure and large file detection
+  - id: tests-use-mock-vault-fixture
+    criterion: tests use the existing mock vault fixture
 
 constraints:
   - implement in src/doctor.py ONLY — this is the one and only canonical file for VaultDoctor

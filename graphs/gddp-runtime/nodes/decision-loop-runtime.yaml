@@ -16,19 +16,32 @@ depends_on:
   - decision-loop-spec
 
 acceptance:
-  - scripts/runtime/decision_loop/__init__.py exists
-  - scripts/runtime/decision_loop/engine.py exists with handle_event(payload) and handle_cron() functions
-  - scripts/runtime/decision_loop/context_reader.py exists with read_context(event) that returns graph state, recent SQLite rows, and current event
-  - scripts/runtime/decision_loop/powers/__init__.py exists
-  - scripts/runtime/decision_loop/powers/dispatch_next.py exists — creates GitHub issue for Jules using dispatch template, writes job row to SQLite
-  - scripts/runtime/decision_loop/powers/escalate.py exists — writes escalation result row, logs to stdout
-  - 'engine.py decision logic follows priority order from spec: stale state cleanup → PR merged → dispatch next → stuck job → escalate'
-  - engine.py never dispatches if a job is already in_progress for the same project
-  - all actions write a result row to SQLite via results_store
-  - output JSON format matches spec schema for each action
-  - stale state handler marks jobs and events older than 6 hours as expired on first run
-  - GITHUB_TOKEN, GDDP_RUNTIME_ROOT, and GDDP_CONFIG_PATH all read from environment; legacy OPCLAW_ROOT may remain as compatibility fallback
-  - 'at least 3 tests: context_reader returns expected shape, dispatch blocked when job in_progress, escalate writes result row'
+  - id: decision-loop-init-exists
+    criterion: scripts/runtime/decision_loop/__init__.py exists
+  - id: engine-file-exists
+    criterion: scripts/runtime/decision_loop/engine.py exists with handle_event(payload) and handle_cron() functions
+  - id: context-reader-exists
+    criterion: scripts/runtime/decision_loop/context_reader.py exists with read_context(event) that returns graph state, recent SQLite rows, and current event
+  - id: powers-init-exists
+    criterion: scripts/runtime/decision_loop/powers/__init__.py exists
+  - id: dispatch-next-exists
+    criterion: scripts/runtime/decision_loop/powers/dispatch_next.py exists — creates GitHub issue for Jules using dispatch template, writes job row to SQLite
+  - id: escalate-exists
+    criterion: scripts/runtime/decision_loop/powers/escalate.py exists — writes escalation result row, logs to stdout
+  - id: engine-follows-priority-order
+    criterion: 'engine.py decision logic follows priority order from spec: stale state cleanup → PR merged → dispatch next → stuck job → escalate'
+  - id: engine-no-duplicate-dispatch
+    criterion: engine.py never dispatches if a job is already in_progress for the same project
+  - id: actions-write-result-row
+    criterion: all actions write a result row to SQLite via results_store
+  - id: output-matches-spec-schema
+    criterion: output JSON format matches spec schema for each action
+  - id: stale-state-handler
+    criterion: stale state handler marks jobs and events older than 6 hours as expired on first run
+  - id: env-vars-configured
+    criterion: GITHUB_TOKEN, GDDP_RUNTIME_ROOT, and GDDP_CONFIG_PATH all read from environment; legacy OPCLAW_ROOT may remain as compatibility fallback
+  - id: at-least-3-passing-tests-engine
+    criterion: 'at least 3 tests: context_reader returns expected shape, dispatch blocked when job in_progress, escalate writes result row'
 
 constraints:
   - 'new files only: scripts/runtime/decision_loop/ tree'

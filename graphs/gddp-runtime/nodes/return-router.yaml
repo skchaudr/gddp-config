@@ -27,18 +27,30 @@ depends_on: []
 # 5. graph truth remains human-owned and outside direct runtime mutation
 
 acceptance:
-  - return_router.py exists at scripts/runtime/return_router.py
-  - handle_merged_pr validates repo allowlist, parses node_id and job_id from PR body, validates them against the persisted job, writes a review receipt, and never mutates gddp-config
-  - 'parse_node_id extracts node id using regex matching "node: <id>" on its own line (case-insensitive, multiline)'
-  - 'parse_job_id extracts job id using regex matching "job: <id>" on its own line (case-insensitive, multiline)'
-  - validate_repo rejects repos not in ALLOWED_REPOS module-level constant (initially skchaudr/vault-doctor)
-  - graph_updater.py is not an active runtime mechanism; if present, it is explicitly disabled
-  - results_store.py exists at scripts/runtime/results_store.py
-  - write_result inserts or updates one row in the canonical results table using the existing result schema surface
-  - merged PR receipts are recorded with status=needs_review
-  - matching jobs and queue records are moved to awaiting_review
-  - no runtime path writes completion into project.yaml or implies automatic node advancement
-  - tests cover node_id parsed correctly, missing node tag returns rejected, missing job tag returns rejected, and valid merged PRs create review receipts instead of graph updates
+  - id: return-router-file-exists
+    criterion: return_router.py exists at scripts/runtime/return_router.py
+  - id: handle-merged-pr-validates
+    criterion: handle_merged_pr validates repo allowlist, parses node_id and job_id from PR body, validates them against the persisted job, writes a review receipt, and never mutates gddp-config
+  - id: parse-node-id-regex
+    criterion: 'parse_node_id extracts node id using regex matching "node: <id>" on its own line (case-insensitive, multiline)'
+  - id: parse-job-id-regex
+    criterion: 'parse_job_id extracts job id using regex matching "job: <id>" on its own line (case-insensitive, multiline)'
+  - id: validate-repo-allowlist
+    criterion: validate_repo rejects repos not in ALLOWED_REPOS module-level constant (initially skchaudr/vault-doctor)
+  - id: graph-updater-disabled
+    criterion: graph_updater.py is not an active runtime mechanism; if present, it is explicitly disabled
+  - id: results-store-exists
+    criterion: results_store.py exists at scripts/runtime/results_store.py
+  - id: write-result-inserts-row
+    criterion: write_result inserts or updates one row in the canonical results table using the existing result schema surface
+  - id: receipts-needs-review
+    criterion: merged PR receipts are recorded with status=needs_review
+  - id: jobs-moved-to-awaiting-review
+    criterion: matching jobs and queue records are moved to awaiting_review
+  - id: no-runtime-completion-write
+    criterion: no runtime path writes completion into project.yaml or implies automatic node advancement
+  - id: tests-cover-return-router
+    criterion: tests cover node_id parsed correctly, missing node tag returns rejected, missing job tag returns rejected, and valid merged PRs create review receipts instead of graph updates
 
 constraints:
   - DO NOT repair automatic return completion through the heartbeat runner

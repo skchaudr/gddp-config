@@ -15,13 +15,20 @@ depends_on:
   - scan-vault-core
 
 acceptance:
-  - VaultDoctor has a find_stale_todos(vault_path, stale_days=730) method in src/doctor.py
-  - find_stale_todos filters scan_vault() results to .md files only
-  - find_stale_todos uses python-frontmatter to parse YAML frontmatter from each file
-  - a file is considered a stale TODO if its frontmatter contains a "tags" field including "todo" (case-insensitive) AND modified_at is older than stale_days
-  - find_stale_todos returns a list of file path strings for stale TODO files
-  - at least 2 passing tests — one with a stale TODO file, one with a recent file
-  - tests use the existing mock vault fixture
+  - id: find-stale-todos-method-exists
+    criterion: VaultDoctor has a find_stale_todos(vault_path, stale_days=730) method in src/doctor.py
+  - id: stale-todos-filters-md-files
+    criterion: find_stale_todos filters scan_vault() results to .md files only
+  - id: stale-todos-uses-frontmatter
+    criterion: find_stale_todos uses python-frontmatter to parse YAML frontmatter from each file
+  - id: stale-todo-definition
+    criterion: a file is considered a stale TODO if its frontmatter contains a "tags" field including "todo" (case-insensitive) AND modified_at is older than stale_days
+  - id: stale-todos-returns-paths
+    criterion: find_stale_todos returns a list of file path strings for stale TODO files
+  - id: at-least-2-passing-tests-stale
+    criterion: at least 2 passing tests — one with a stale TODO file, one with a recent file
+  - id: tests-use-mock-vault-fixture
+    criterion: tests use the existing mock vault fixture
 
 constraints:
   - implement in src/doctor.py only — do not modify triage.py
