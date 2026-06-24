@@ -1,6 +1,6 @@
 # Handoff for Pi README Agent
 
-This is the `gddp-config` repo entrypoint for the Pi agent. The matching runtime-side handoff lives in `../gddp-runtime/.handoffs/`; this file repeats the essentials so a cold agent can start from either repo root.
+This is the `gddp-config` repo entrypoint for the Pi agent. The matching runtime-side handoff lives at `../gddp-runtime/HANDOFF-PI-README.md`; this file repeats the essentials so a cold agent can start from either repo root.
 
 ## Project identity
 

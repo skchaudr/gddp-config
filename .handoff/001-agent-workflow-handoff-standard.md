@@ -13,13 +13,13 @@ Branch: main
 
 ## Empirical Reality (2-3 sentences max, anything more must be critically justifiable)
 
-Root `AGENTS.md` now requires agents to create concise handoffs at natural checkpoints and before completion when repo state would otherwise be costly to rediscover. Root `.handoffss/000-template.md` is the canonical template for future handoffs.
+Root `AGENTS.md` now requires agents to create concise handoffs at natural checkpoints and before completion when repo state would otherwise be costly to rediscover. Root `.handoff/000-template.md` is the canonical template for future handoffs.
 
 ### Scope touched (One file per line, +/- for only what was changed)
 
 +/- AGENTS.md
-+ .handoffs/000-template.md
-+ .handoffs/001-agent-workflow-handoff-standard.md
++ .handoff/000-template.md
++ .handoff/001-agent-workflow-handoff-standard.md
 
 ### Current Git state (2-3 sentences max, anything more must be critically justifiable)
 
@@ -27,12 +27,12 @@ This handoff is part of the same policy/template commit being prepared on `main`
 
 ### Artifacts (Filepath - Description, 1 line max per artifact)
 
-.handoffs/000-template.md - Canonical minimal handoff template for this repo.
-.handoffs/001-agent-workflow-handoff-standard.md - Handoff for the policy/template installation session.
+.handoff/000-template.md - Canonical minimal handoff template for this repo.
+.handoff/001-agent-workflow-handoff-standard.md - Handoff for the policy/template installation session.
 
 ### Resume point (2-3 sentences max, anything more must be critically justifiable)
 
-Next agent should read `AGENTS.md`, use `.handoffs/000-template.md` for substantive session handoffs, and preserve the Sab-only section. No further action is required for this policy unless the handoff format needs revision.
+Next agent should read `AGENTS.md`, use `.handoff/000-template.md` for substantive session handoffs, and preserve the Sab-only section. No further action is required for this policy unless the handoff format needs revision.
 
 ------------------------------------------------ Agent Section END
 
