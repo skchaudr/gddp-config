@@ -36,6 +36,8 @@ from typing import Optional
 
 try:
     import yaml
+
+    from acceptance_items import acceptance_text, normalize_acceptance_items
 except ImportError:
     pass
 
@@ -79,7 +81,10 @@ def _load_existing_node_summaries(root: Path, project_id: str,
         if doc.get("why") and "REPLACE_ME" not in str(doc["why"]):
             entry += f"\n  Why: {doc['why'][:200]}"
         if doc.get("acceptance"):
-            real = [a for a in doc["acceptance"] if isinstance(a, str) and "REPLACE_ME" not in a]
+            real = [
+                text for text in (acceptance_text(a) for a in doc["acceptance"])
+                if text and "REPLACE_ME" not in text
+            ]
             if real:
                 entry += f"\n  Acceptance ({len(real)} items): {real[:3]}"
         parts.append(entry)
@@ -105,7 +110,7 @@ Draft the three human-only fields for this node. Be specific, verifiable, and gr
 
 1. **why**: One paragraph explaining why this capability must exist. Reference what it enables downstream.
 
-2. **acceptance**: A list of 3-7 verifiable bullets. Each must be testable. Use specific file paths, function names, or behavior descriptions where possible.
+2. **acceptance**: A list of 3-7 verifiable keyed objects. Each criterion must be testable. Use specific file paths, function names, or behavior descriptions where possible.
 
 3. **constraints**: A list of 2-5 hard limits. These are non-negotiable rules the executor must follow. Include file path constraints, dependency constraints, and scope boundaries.
 
@@ -114,7 +119,7 @@ Return ONLY valid JSON with exactly these three keys:
 ```json
 {{
   "why": "...",
-  "acceptance": ["...", "..."],
+  "acceptance": [{"id": "kebab-case-id", "criterion": "..."}, {"id": "another-id", "criterion": "..."}],
   "constraints": ["...", "..."]
 }}
 ```
@@ -259,7 +264,7 @@ def draft_fields(project_id: str, root: Path, node_id: str, node_title: str,
     if "why" in parsed and isinstance(parsed["why"], str):
         result["why"] = parsed["why"]
     if "acceptance" in parsed and isinstance(parsed["acceptance"], list):
-        result["acceptance"] = [str(x) for x in parsed["acceptance"] if str(x).strip()]
+        result["acceptance"] = normalize_acceptance_items(parsed["acceptance"])
     if "constraints" in parsed and isinstance(parsed["constraints"], list):
         result["constraints"] = [str(x) for x in parsed["constraints"] if str(x).strip()]
 

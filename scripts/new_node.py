@@ -36,6 +36,7 @@ except ImportError:
 
 # Sibling terminal helper
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from acceptance_items import acceptance_text, normalize_acceptance_items
 from terminal import console, getch, getline
 
 
@@ -87,9 +88,10 @@ def gather_inspiration_bullets(root: Path, project_id: str) -> list[str]:
             continue
         for field in ("acceptance", "constraints"):
             for item in doc.get(field) or []:
-                if isinstance(item, str) and item not in seen:
-                    seen.add(item)
-                    bullets.append(item)
+                text = acceptance_text(item) if field == "acceptance" else item
+                if isinstance(text, str) and text not in seen:
+                    seen.add(text)
+                    bullets.append(text)
     return bullets
 
 
@@ -392,7 +394,7 @@ def gather_fields(root: Path) -> tuple[Optional[str], Optional[dict]]:
         "type": type_val or "capability",
         "why": why,
         "depends_on": depends or [],
-        "acceptance": acceptance,
+        "acceptance": normalize_acceptance_items(acceptance),
         "constraints": constraints,
         "allowed_execution_modes": modes or ["jules"],
         "required_artifacts": artifacts or DEFAULT_ARTIFACTS,
@@ -486,9 +488,12 @@ def edit_one_field(node: dict, field: str, root: Path, project: str) -> None:
             node[field] = v
     elif field in ("acceptance", "constraints"):
         suggestions = gather_inspiration_bullets(root, project)
-        v = edit_list_items(field, node.get(field) or [], suggestions)
+        current = node.get(field) or []
+        if field == "acceptance":
+            current = [text for text in (acceptance_text(item) for item in current) if text]
+        v = edit_list_items(field, current, suggestions)
         if v and v != "__quit__":
-            node[field] = v
+            node[field] = normalize_acceptance_items(v) if field == "acceptance" else v
     else:
         console.print(f"[yellow]no inline editor for {field}[/yellow]")
 

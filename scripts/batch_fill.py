@@ -31,6 +31,11 @@ except ImportError:
     sys.exit(1)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from acceptance_items import (
+    acceptance_has_placeholder,
+    acceptance_text,
+    normalize_acceptance_items,
+)
 from terminal import console, getch, getline
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
@@ -71,9 +76,10 @@ def gather_inspiration_bullets(root: Path, project_id: str) -> list[str]:
             continue
         for field in ("acceptance", "constraints"):
             for item in doc.get(field) or []:
-                if isinstance(item, str) and "REPLACE_ME" not in item and item not in seen:
-                    seen.add(item)
-                    bullets.append(item)
+                text = acceptance_text(item) if field == "acceptance" else item
+                if isinstance(text, str) and "REPLACE_ME" not in text and text not in seen:
+                    seen.add(text)
+                    bullets.append(text)
     return bullets
 
 
@@ -83,7 +89,7 @@ def needs_batch(node: dict) -> bool:
         if isinstance(val, str) and "REPLACE_ME" in val:
             return True
         if isinstance(val, list):
-            if any("REPLACE_ME" in str(x) for x in val if isinstance(x, str)):
+            if acceptance_has_placeholder(val):
                 return True
             if not val and field in ("acceptance", "constraints"):
                 return True
@@ -104,12 +110,12 @@ def show_node_card(node: dict, idx: int, total: int):
         if isinstance(val, str) and "REPLACE_ME" in val:
             needs.append(f"{field}: needs input")
         elif isinstance(val, list):
-            if any("REPLACE_ME" in str(x) for x in val if isinstance(x, str)):
+            if acceptance_has_placeholder(val):
                 needs.append(f"{field}: has REPLACE_ME items")
             elif not val and field in ("acceptance", "constraints"):
                 needs.append(f"{field}: empty")
             else:
-                count = len([x for x in val if isinstance(x, str)])
+                count = len(val)
                 needs.append(f"{field}: {count} items [green]✓[/green]")
     lines.append("[bold]Fields:[/bold]")
     for n in needs:
@@ -196,11 +202,11 @@ def fill_node_fields(node: dict, root: Path, project: str) -> dict:
             node["why"] = why
 
     acceptance = node.get("acceptance", [])
-    has_placeholder = any(isinstance(x, str) and "REPLACE_ME" in x for x in acceptance)
+    has_placeholder = acceptance_has_placeholder(acceptance)
     if not acceptance or has_placeholder:
         result = edit_list_items("Acceptance (verifiable bullets)", [], suggestions)
         if result:
-            node["acceptance"] = result
+            node["acceptance"] = normalize_acceptance_items(result)
 
     constraints = node.get("constraints", [])
     has_placeholder = any(isinstance(x, str) and "REPLACE_ME" in x for x in constraints)
@@ -254,7 +260,7 @@ def review_and_write(node: dict, root: Path, project: str) -> bool:
     if ch.lower() == "e":
         field_name = getline("Edit which field:").strip()
         if field_name in PLACEHOLDER_FIELDS:
-            node = fill_node_fields({**node, "why": "REPLACE_ME", "acceptance": ["REPLACE_ME"], "constraints": ["REPLACE_ME"]}, root, project)
+            node = fill_node_fields({**node, "why": "REPLACE_ME", "acceptance": normalize_acceptance_items(["REPLACE_ME"]), "constraints": ["REPLACE_ME"]}, root, project)
         else:
             console.print(f"[yellow]only human fields editable in batch (why, acceptance, constraints)[/yellow]")
         return review_and_write(node, root, project)

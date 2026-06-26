@@ -37,6 +37,7 @@ except ImportError:
     sys.exit(1)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from acceptance_items import normalize_acceptance_items
 from terminal import console, getch, getline
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -123,7 +124,7 @@ def make_node_dict(node_id: str, title: str, depends_on: list[str],
         "type": "capability",
         "why": "REPLACE_ME",
         "depends_on": depends_on,
-        "acceptance": ["REPLACE_ME"],
+        "acceptance": normalize_acceptance_items(["REPLACE_ME"]),
         "constraints": ["REPLACE_ME"],
         "allowed_execution_modes": ["jules"],
         "required_artifacts": list(DEFAULT_ARTIFACTS),
@@ -290,6 +291,7 @@ def main(project: str, repo: str = "", project_name: str | None = None,
                     for k, v in drafted.items():
                         if v:
                             node[k] = v
+                    node["acceptance"] = normalize_acceptance_items(node.get("acceptance", []))
                     console.print("  [green]draft applied[/green]")
             except Exception as e:
                 console.print(f"  [yellow]LLM draft failed: {e} — using placeholders[/yellow]")
@@ -313,10 +315,10 @@ def main(project: str, repo: str = "", project_name: str | None = None,
         console.print(f"  [green]✓[/green] {nid}")
     console.print()
     if llm_draft:
-        console.print("Next: [bold]gddp node validate --project {project}[/bold]")
+        console.print(f"Next: [bold]gddp node validate --project {project}[/bold]")
     else:
-        console.print("Next: [bold]gddp node batch --project {project}[/bold]  (fill why/acceptance/constraints)")
-        console.print("      [bold]gddp node validate --project {project}[/bold]")
+        console.print(f"Next: [bold]gddp node batch --project {project}[/bold]  (fill why/acceptance/constraints)")
+        console.print(f"      [bold]gddp node validate --project {project}[/bold]")
     return 0
 
 

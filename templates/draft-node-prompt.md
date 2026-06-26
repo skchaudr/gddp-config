@@ -30,12 +30,12 @@ acceptance, constraints — in the established voice of this repo.
 Voice rules (non-negotiable):
 - why: one short paragraph (2-4 sentences). Explains the *capability gap* —
   what can't be done today, and why it matters. Never explains implementation.
-- acceptance: a list of 3-8 bullets. Each bullet must be mechanically
+- acceptance: a list of 3-8 keyed objects. Each `criterion` must be mechanically
   verifiable — a file existence check, a function signature, a test that
   passes, a behavior observable in output. Avoid vague verbs ("supports",
   "handles"); prefer concrete ones ("exists at <path>", "returns <shape>",
-  "<N> tests pass in <file>"). If a bullet can't be checked by a script or
-  a quick grep, rewrite it.
+  "<N> tests pass in <file>"). Each `id` must be stable kebab-case. If a
+  criterion can't be checked by a script or a quick grep, rewrite it.
 - constraints: a list of 2-6 bullets. Each is a hard limit the executor
   (an autonomous coding agent) must respect: which files NOT to touch, which
   deps NOT to add, what NOT to refactor. Constraints scope blast radius;
@@ -47,8 +47,10 @@ why: |
   <paragraph>
 
 acceptance:
-  - <bullet>
-  - <bullet>
+  - id: <stable-kebab-id>
+    criterion: <bullet>
+  - id: <stable-kebab-id>
+    criterion: <bullet>
 
 constraints:
   - <bullet>
@@ -62,11 +64,16 @@ why: |
   structured file metadata. Nothing else can be built until this exists.
 
 acceptance:
-  - VaultDoctor class exists in src/doctor.py
-  - scan_vault(vault_path) walks the directory tree and returns a list of file metadata dicts
-  - each metadata dict contains at minimum: path, size_bytes, extension, modified_at
-  - scan_vault correctly ignores .obsidian/ system files
-  - at least 3 passing tests in tests/test_doctor.py covering scan output structure
+  - id: vaultdoctor-class-exists
+    criterion: VaultDoctor class exists in src/doctor.py
+  - id: scan-vault-walks-directory
+    criterion: scan_vault(vault_path) walks the directory tree and returns a list of file metadata dicts
+  - id: metadata-dict-minimum-fields
+    criterion: each metadata dict contains at minimum: path, size_bytes, extension, modified_at
+  - id: obsidian-system-files-ignored
+    criterion: scan_vault correctly ignores .obsidian/ system files
+  - id: scan-output-tests-pass
+    criterion: at least 3 passing tests in tests/test_doctor.py covering scan output structure
 
 constraints:
   - implement in src/doctor.py only — do not modify triage.py
@@ -101,5 +108,5 @@ Existing context (optional): <what's already built that this depends on>
   yourself before committing.
 - Replace `<TBD: ...>` placeholders with real paths.
 - Delete any bullet you don't actually need — LLMs over-generate.
-- The TUI's `acceptance`/`constraints` list editors support `a` (add) and
-  `d#` (delete) for quick adjustments after paste.
+- The TUI's `acceptance` editor lets you enter criterion text; it writes keyed
+  `{id, criterion}` objects. `constraints` remains plain text.
