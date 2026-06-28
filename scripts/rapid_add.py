@@ -38,6 +38,7 @@ except ImportError:
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from terminal import console, getch, getline
+import acceptance_items
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -123,7 +124,7 @@ def make_node_dict(node_id: str, title: str, depends_on: list[str],
         "type": "capability",
         "why": "REPLACE_ME",
         "depends_on": depends_on,
-        "acceptance": ["REPLACE_ME"],
+        "acceptance": [acceptance_items.text_to_item("REPLACE_ME")],
         "constraints": ["REPLACE_ME"],
         "allowed_execution_modes": ["jules"],
         "required_artifacts": list(DEFAULT_ARTIFACTS),
@@ -289,7 +290,10 @@ def main(project: str, repo: str = "", project_name: str | None = None,
                 if drafted:
                     for k, v in drafted.items():
                         if v:
-                            node[k] = v
+                            if k == "acceptance":
+                                node[k] = acceptance_items.ensure_list_of_items(v)
+                            else:
+                                node[k] = v
                     console.print("  [green]draft applied[/green]")
             except Exception as e:
                 console.print(f"  [yellow]LLM draft failed: {e} — using placeholders[/yellow]")
