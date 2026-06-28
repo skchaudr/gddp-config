@@ -37,6 +37,7 @@ except ImportError:
 # Sibling terminal helper
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from terminal import console, getch, getline
+import acceptance_items
 
 
 # ── Schema constants (mirror schemas/v1/node.yaml) ─────────────────────────
@@ -86,10 +87,12 @@ def gather_inspiration_bullets(root: Path, project_id: str) -> list[str]:
         except Exception:
             continue
         for field in ("acceptance", "constraints"):
-            for item in doc.get(field) or []:
-                if isinstance(item, str) and item not in seen:
-                    seen.add(item)
-                    bullets.append(item)
+            items = doc.get(field) or []
+            for item in items:
+                text = item["criterion"] if isinstance(item, dict) and "criterion" in item else item
+                if isinstance(text, str) and text not in seen:
+                    seen.add(text)
+                    bullets.append(text)
     return bullets
 
 
@@ -231,15 +234,18 @@ def pick_many(label: str, options: list[str], current: list[str],
         notice = "key not mapped"
 
 
-def edit_list_items(label: str, items: list[str], suggestions: list[str]) -> Optional[list[str]]:
+def edit_list_items(label: str, items: list, suggestions: list[str]) -> Optional[list]:
     """List editor: add (suggestion or manual), delete by number, Enter done."""
     items = list(items)
+    is_acceptance = (label.lower() == "acceptance")
+
     while True:
         console.clear()
         body = f"[bold cyan]{label}[/bold cyan]  ({len(items)} item{'s' if len(items) != 1 else ''})\n"
         if items:
             for i, x in enumerate(items, 1):
-                body += f"  [bold]{i}[/bold] {x}\n"
+                text = x["criterion"] if isinstance(x, dict) and "criterion" in x else x
+                body += f"  [bold]{i}[/bold] {text}\n"
         else:
             body += "[dim]none yet[/dim]\n"
         body += "[dim]a add  d# delete  Enter done  q quit[/dim]"
@@ -272,11 +278,18 @@ def edit_list_items(label: str, items: list[str], suggestions: list[str]) -> Opt
             if sub.lower() == "m":
                 val = manual_text(f"add to {label}")
                 if val:
-                    items.append(val)
+                    if is_acceptance:
+                        items.append(acceptance_items.text_to_item(val))
+                    else:
+                        items.append(val)
             elif sub.lower() == "s":
                 continue
             elif sub.isdigit() and 1 <= int(sub) <= min(len(suggestions), PAGE_SIZE):
-                items.append(suggestions[int(sub) - 1])
+                text = suggestions[int(sub) - 1]
+                if is_acceptance:
+                    items.append(acceptance_items.text_to_item(text))
+                else:
+                    items.append(text)
             continue
 
 

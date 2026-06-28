@@ -30,12 +30,12 @@ acceptance, constraints — in the established voice of this repo.
 Voice rules (non-negotiable):
 - why: one short paragraph (2-4 sentences). Explains the *capability gap* —
   what can't be done today, and why it matters. Never explains implementation.
-- acceptance: a list of 3-8 bullets. Each bullet must be mechanically
-  verifiable — a file existence check, a function signature, a test that
-  passes, a behavior observable in output. Avoid vague verbs ("supports",
-  "handles"); prefer concrete ones ("exists at <path>", "returns <shape>",
-  "<N> tests pass in <file>"). If a bullet can't be checked by a script or
-  a quick grep, rewrite it.
+- acceptance: a list of 3-8 objects. Each object has `id` (a short stable
+  kebab-case identifier) and `criterion` (verifiable text). Each criterion
+  must be mechanically verifiable — a file existence check, a function
+  signature, a test that passes, a behavior observable in output. Avoid
+  vague verbs ("supports", "handles"); prefer concrete ones ("exists at
+  <path>", "returns <shape>", "<N> tests pass in <file>").
 - constraints: a list of 2-6 bullets. Each is a hard limit the executor
   (an autonomous coding agent) must respect: which files NOT to touch, which
   deps NOT to add, what NOT to refactor. Constraints scope blast radius;
@@ -47,8 +47,8 @@ why: |
   <paragraph>
 
 acceptance:
-  - <bullet>
-  - <bullet>
+  - id: <stable-id>
+    criterion: <verifiable-text>
 
 constraints:
   - <bullet>
@@ -62,11 +62,16 @@ why: |
   structured file metadata. Nothing else can be built until this exists.
 
 acceptance:
-  - VaultDoctor class exists in src/doctor.py
-  - scan_vault(vault_path) walks the directory tree and returns a list of file metadata dicts
-  - each metadata dict contains at minimum: path, size_bytes, extension, modified_at
-  - scan_vault correctly ignores .obsidian/ system files
-  - at least 3 passing tests in tests/test_doctor.py covering scan output structure
+  - id: vault-doctor-class-exists
+    criterion: VaultDoctor class exists in src/doctor.py
+  - id: scan-vault-returns-metadata
+    criterion: scan_vault(vault_path) walks the directory tree and returns a list of file metadata dicts
+  - id: metadata-fields-complete
+    criterion: each metadata dict contains at minimum: path, size_bytes, extension, modified_at
+  - id: ignores-obsidian-system
+    criterion: scan_vault correctly ignores .obsidian/ system files
+  - id: tests-cover-scan-structure
+    criterion: at least 3 passing tests in tests/test_doctor.py covering scan output structure
 
 constraints:
   - implement in src/doctor.py only — do not modify triage.py

@@ -32,6 +32,7 @@ except ImportError:
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from terminal import console, getch, getline
+import acceptance_items
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPTS_DIR.parent
@@ -70,10 +71,12 @@ def gather_inspiration_bullets(root: Path, project_id: str) -> list[str]:
         except Exception:
             continue
         for field in ("acceptance", "constraints"):
-            for item in doc.get(field) or []:
-                if isinstance(item, str) and "REPLACE_ME" not in item and item not in seen:
-                    seen.add(item)
-                    bullets.append(item)
+            items = doc.get(field) or []
+            for item in items:
+                text = item["criterion"] if isinstance(item, dict) and "criterion" in item else item
+                if isinstance(text, str) and "REPLACE_ME" not in text and text not in seen:
+                    seen.add(text)
+                    bullets.append(text)
     return bullets
 
 
@@ -83,8 +86,10 @@ def needs_batch(node: dict) -> bool:
         if isinstance(val, str) and "REPLACE_ME" in val:
             return True
         if isinstance(val, list):
-            if any("REPLACE_ME" in str(x) for x in val if isinstance(x, str)):
-                return True
+            for item in val:
+                text = item["criterion"] if isinstance(item, dict) and "criterion" in item else item
+                if isinstance(text, str) and "REPLACE_ME" in text:
+                    return True
             if not val and field in ("acceptance", "constraints"):
                 return True
     return False
@@ -143,14 +148,20 @@ def manual_text(label: str, multi_line: bool = False):
     return getline("") or None
 
 
-def edit_list_items(label: str, items: list[str], suggestions: list[str]):
-    items = [x for x in items if isinstance(x, str) and "REPLACE_ME" not in x]
+def edit_list_items(label: str, items: list, suggestions: list[str]):
+    is_acceptance = (label.lower() == "acceptance")
+    if is_acceptance:
+        items = [x for x in items if isinstance(x, dict) and "criterion" in x and "REPLACE_ME" not in x["criterion"]]
+    else:
+        items = [x for x in items if isinstance(x, str) and "REPLACE_ME" not in x]
+
     while True:
         console.clear()
         body = f"[bold cyan]{label}[/bold cyan]  ({len(items)} items)\n"
         if items:
             for i, x in enumerate(items, 1):
-                body += f"  [bold]{i}[/bold] {x}\n"
+                text = x["criterion"] if isinstance(x, dict) and "criterion" in x else x
+                body += f"  [bold]{i}[/bold] {text}\n"
         else:
             body += "[dim]none yet[/dim]\n"
         body += "[dim]a add  d# delete  Enter done[/dim]"
@@ -178,11 +189,18 @@ def edit_list_items(label: str, items: list[str], suggestions: list[str]):
             if sub.lower() == "m":
                 val = manual_text(f"add to {label}")
                 if val:
-                    items.append(val)
+                    if is_acceptance:
+                        items.append(acceptance_items.text_to_item(val))
+                    else:
+                        items.append(val)
             elif sub.lower() == "s":
                 continue
             elif sub.isdigit() and 1 <= int(sub) <= min(len(suggestions), PAGE_SIZE):
-                items.append(suggestions[int(sub) - 1])
+                text = suggestions[int(sub) - 1]
+                if is_acceptance:
+                    items.append(acceptance_items.text_to_item(text))
+                else:
+                    items.append(text)
             continue
 
 
@@ -196,7 +214,11 @@ def fill_node_fields(node: dict, root: Path, project: str) -> dict:
             node["why"] = why
 
     acceptance = node.get("acceptance", [])
-    has_placeholder = any(isinstance(x, str) and "REPLACE_ME" in x for x in acceptance)
+    has_placeholder = any(
+        (isinstance(x, str) and "REPLACE_ME" in x) or
+        (isinstance(x, dict) and "criterion" in x and "REPLACE_ME" in x["criterion"])
+        for x in acceptance
+    )
     if not acceptance or has_placeholder:
         result = edit_list_items("Acceptance (verifiable bullets)", [], suggestions)
         if result:
