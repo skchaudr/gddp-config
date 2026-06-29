@@ -1,35 +1,55 @@
 schema_version: "1.0"
-schema_type: project
+schema_type: project_graph
 
 project_id: gddp-runtime
-title: GDAD Runtime Engine
+project_name: GDAD Runtime Engine
+description: The GDDP control plane that dispatches executors and turns their outputs into reviewable receipts while keeping graph truth human-owned
 repo: skchaudr/gddp-runtime
 
-# Why this project exists in the graph:
-# gddp-runtime is the control plane itself. Nodes here represent
-# infrastructure capabilities the system needs to become self-operating.
-# The forward loop (dispatch) already works. The return path must remain
-# operationally useful without allowing runtime to mutate project truth.
-# Merged PRs and executor outputs should become review receipts, while
-# graph truth remains human-owned in gddp-config.
+blueprint:
+  vision: A self-operating control plane where the forward dispatch loop runs autonomously while the return path stays reviewable, never letting runtime mutate project truth
+  architecture_notes: |
+    gddp-runtime is the execution engine; graph truth lives in gddp-config and is human-owned.
+    The forward loop (read graph, dispatch executor) already works. The return path must remain
+    operationally useful without allowing runtime to write completion state into project.yaml.
+    Merged PRs and executor outputs become review receipts (SQLite results store), and matching
+    jobs move into awaiting_review. A decision loop reasons over events and a lightweight review
+    gate evaluates PRs before a node is accepted, but graph mutation stays a human decision.
+  major_capabilities:
+    - return router (merged PR creates a review receipt, no graph mutation)
+    - decision loop v0 spec (purpose, inputs, outputs, failure modes)
+    - decision loop v0 runtime (event-driven reasoning module)
+    - decision loop v0 review gate (lightweight PR eval before accepting a node)
+
+graph_version: "1.0"
+created_at: 2026-03-12
+last_updated: 2026-06-29
+
+nodes_dir: nodes/
 
 nodes:
   - id: return-router
     title: Implement return router — merged PR creates review receipt
     status: complete
-    type: infrastructure
+    type: capability
 
   - id: decision-loop-spec
     title: Write decision loop v0 spec — purpose, inputs, outputs, decision loop, failure modes
     status: complete
-    type: infrastructure
+    type: capability
 
   - id: decision-loop-runtime
     title: Build decision loop v0 runtime — event-driven reasoning module in gddp-runtime
     status: pending
-    type: infrastructure
+    type: capability
 
   - id: decision-loop-review-gate
     title: Build decision loop v0 review gate — lightweight PR eval before accepting node
     status: pending
-    type: infrastructure
+    type: capability
+
+execution_policy:
+  default_executor: jules
+  max_concurrent_jobs: 1
+  require_human_review_before_overnight: false
+  artifact_gate_enforced: true
