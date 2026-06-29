@@ -1,0 +1,38 @@
+schema_version: '1.0'
+schema_type: node
+node_id: studio-recording
+title: Track final studio performances for all album songs
+type: capability
+why: Mixing requires consolidated multitrack stems with final vocals and instruments
+  captured at the agreed sample rate and gain staging
+depends_on:
+- arrangement
+acceptance:
+- id: multitrack-stems-per-song
+  criterion: Every album track has a labeled multitrack session folder with drums,
+    bass, keys, guitars, and lead vocal stems
+- id: consistent-sample-rate
+  criterion: All studio sessions were recorded at the same sample rate documented
+    in the session plan
+- id: no-clipping-stems
+  criterion: Peak levels on delivered stems stay below -1 dBFS with no clipped files
+    in the final take folders
+- id: session-logs-complete
+  criterion: result-summary.md records take numbers, punch-in notes, and any missing
+    overdubs scheduled
+- id: producer-signoff
+  criterion: decision.md confirms all planned instruments for each track were captured
+    or explicitly deferred with a follow-up date
+constraints:
+- do not print mixes from studio sessions — mixing is a separate node
+- keep raw studio files immutable; edits happen only in mix sessions
+- archive session files to durable storage before marking complete
+allowed_execution_modes:
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+status: pending
+priority: high
+unlocks:
+- mixing

@@ -1,0 +1,37 @@
+schema_version: '1.0'
+schema_type: node
+node_id: mastering
+title: Master album tracks to distribution-ready loudness and format
+type: capability
+why: Distribution platforms require mastered files meeting loudness, true-peak, and
+  format specs before upload and metadata binding
+depends_on:
+- mixing
+acceptance:
+- id: mastered-wav-per-track
+  criterion: Each track has a 16-bit or 24-bit mastered WAV under audio/masters/<track-slug>.wav
+    ready for aggregator upload
+- id: integrated-loudness-target
+  criterion: Masters target integrated loudness between -14 and -10 LUFS per platform
+    guidance documented in decision.md
+- id: true-peak-limit
+  criterion: True peak on all masters stays at or below -1 dBTP
+- id: album-sequence-ddp-or-reference
+  criterion: Album playback sequence document lists track order, ISRC placeholders,
+    and crossfade notes if any
+- id: mastering-qc-pass
+  criterion: decision.md records QC listen on studio monitors and earbuds with no
+    clicks, pops, or uncaught mix regressions
+constraints:
+- do not remaster from demo or studio stems — only from approved stereo mixes
+- keep mastering session separate from mix session archives
+- no public release of unmastered mixes
+allowed_execution_modes:
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+status: pending
+priority: high
+unlocks:
+- distribution

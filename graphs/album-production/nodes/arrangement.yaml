@@ -1,0 +1,40 @@
+schema_version: '1.0'
+schema_type: node
+node_id: arrangement
+title: Finalize arrangements and studio session plans
+type: capability
+why: Studio recording sessions need finalized instrument parts, section maps, and
+  click-track tempos so tracking days stay on schedule
+depends_on:
+- demo-recording
+acceptance:
+- id: arrangement-charts-per-track
+  criterion: Each track has an arrangement chart documenting intro, verse, chorus,
+    bridge, and outro instrument roles
+- id: click-tracks-exported
+  criterion: Studio-ready click tracks or tempo maps are exported for every track
+    under audio/clicks/
+- id: session-plan-document
+  criterion: A studio session plan assigns tracks to recording days with musician
+    roles and estimated hours per song
+- id: arrangement-matches-demo-structure
+  criterion: Arrangement charts preserve song form from approved demos unless decision.md
+    documents an intentional structural change
+- id: scratch-vocal-retained
+  criterion: Scratch vocal reference from demo is archived for comparison against
+    studio takes
+constraints:
+- no studio booking changes without updating the session plan artifact
+- arrangement must not add new songs beyond the locked track list without reopening
+  songwriting
+- keep arrangement PDFs or charts in docs/arrangement/
+allowed_execution_modes:
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+status: pending
+priority: high
+unlocks:
+- studio-recording
+- marketing-campaign

@@ -1,0 +1,38 @@
+schema_version: '1.0'
+schema_type: node
+node_id: demo-recording
+title: Record reference demos for every album track
+type: capability
+why: Arrangement decisions need audible reference performances to evaluate structure,
+  tempo feel, and vocal delivery before committing studio time
+depends_on:
+- songwriting
+acceptance:
+- id: demo-wav-per-track
+  criterion: Each locked track has a 24-bit WAV demo at project sample rate under
+    audio/demos/<track-slug>.wav
+- id: demo-matches-locked-tempo
+  criterion: Demo BPM matches the tempo documented in songwriting chord charts within
+    ±2 BPM
+- id: vocal-reference-takes
+  criterion: Lead vocal is present on every demo even if scratch quality, sufficient
+    for arrangement critique
+- id: demo-session-notes
+  criterion: result-summary.md lists gear, mic chain, and any structural deviations
+    discovered during demo sessions
+- id: demo-playback-review
+  criterion: decision.md confirms all demos were reviewed in full before marking complete
+constraints:
+- demos are reference only — do not master or release demo files publicly
+- use consistent project sample rate across all demo WAV files
+- do not begin arrangement until every track on the locked list has a demo
+allowed_execution_modes:
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+status: pending
+priority: high
+unlocks:
+- arrangement
+- album-art-design

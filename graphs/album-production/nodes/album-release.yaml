@@ -1,0 +1,38 @@
+schema_version: '1.0'
+schema_type: node
+node_id: album-release
+title: Execute coordinated album release day launch
+type: capability
+why: Public release requires distribution go-live plus marketing campaign activation
+  on the same day so listeners find the album wherever teasers pointed them
+depends_on:
+- distribution
+- marketing-campaign
+acceptance:
+- id: streaming-links-live
+  criterion: Album is playable on at least two target platforms (e.g. Spotify and
+    Apple Music) with matching metadata and artwork
+- id: marketing-posts-published
+  criterion: Release-day social posts from the campaign calendar are published with
+    correct streaming links
+- id: website-or-linktree-updated
+  criterion: Artist link page lists current album with UPC or album URL verified working
+- id: release-day-metrics-baseline
+  criterion: result-summary.md captures Day-0 save count, presave conversion, or available
+    analytics baseline
+- id: post-release-retro-scheduled
+  criterion: decision.md schedules a one-week post-release review to evaluate campaign
+    performance and playlist pitches
+constraints:
+- do not mark complete if distribution is live but marketing campaign was not activated
+  — both dependencies must be satisfied
+- keep emergency takedown contact for distributor documented in result-summary.md
+- graph status complete does not imply endless marketing — only release day coordination
+allowed_execution_modes:
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+status: pending
+priority: critical
+unlocks: []

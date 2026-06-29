@@ -1,0 +1,37 @@
+schema_version: '1.0'
+schema_type: node
+node_id: distribution
+title: Upload masters and metadata to distribution aggregator
+type: capability
+why: Album release cannot go live until mastered audio and cover art are ingested
+  by the distributor with correct ISRC, UPC, and territory settings
+depends_on:
+- mastering
+- album-art-design
+acceptance:
+- id: aggregator-upload-complete
+  criterion: All mastered tracks and cover art uploaded to chosen distributor with
+    album-level metadata saved
+- id: isrc-per-track
+  criterion: Each track has an assigned ISRC recorded in docs/distribution/isrc-registry.yaml
+- id: upc-assigned
+  criterion: Album UPC or EAN is assigned and documented before release scheduling
+- id: territories-and-date-set
+  criterion: Distribution dashboard shows release territories and earliest go-live
+    date matching marketing calendar
+- id: preview-qc-on-platform
+  criterion: decision.md confirms distributor preview playback passed on at least
+    one mobile and one desktop client
+constraints:
+- do not set public release live until album-release node approves coordinated launch
+- only use mastered files from mastering node — never upload mixes or demos
+- keep distributor login credentials out of the graph repo
+allowed_execution_modes:
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+status: pending
+priority: high
+unlocks:
+- album-release

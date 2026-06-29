@@ -1,0 +1,38 @@
+schema_version: '1.0'
+schema_type: node
+node_id: songwriting
+title: Complete album songwriting and lyric lock
+type: capability
+why: Demo recording cannot start until each track has a finalized chord structure,
+  melody sketch, and lyric sheet approved for the album concept
+depends_on: []
+acceptance:
+- id: track-list-locked
+  criterion: Album track list is documented with working titles, keys, and tempos
+    for every planned song
+- id: lyric-sheets-per-track
+  criterion: Each track has a lyric sheet file with final verses, chorus, and bridge
+    text marked ready for demo
+- id: chord-charts-present
+  criterion: Each track has a chord chart or lead sheet sufficient for a solo demo
+    performance
+- id: album-concept-note
+  criterion: A one-page album concept note defines sonic direction, narrative arc,
+    and target song count
+- id: songwriting-review-signoff
+  criterion: decision.md records human signoff that lyrics will not change during
+    demo without reopening this node
+constraints:
+- no studio booking until songwriting node is complete
+- lyric changes after demo require reopening songwriting, not patching downstream
+  nodes silently
+- keep all songwriting artifacts under project docs/songwriting/ in version control
+allowed_execution_modes:
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+status: pending
+priority: high
+unlocks:
+- demo-recording

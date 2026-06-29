@@ -1,0 +1,38 @@
+schema_version: '1.0'
+schema_type: node
+node_id: mixing
+title: Mix all album tracks to approved reference balances
+type: capability
+why: Mastering needs stereo mixes with settled levels, panning, and effects decisions
+  so loudness and tonal work happens on stable sources
+depends_on:
+- studio-recording
+acceptance:
+- id: stereo-mix-wav-per-track
+  criterion: Each track has a 24-bit stereo mix WAV at project sample rate under audio/mixes/<track-slug>.wav
+- id: mix-version-labeled
+  criterion: Mix files include version suffix or session notes identifying the approved
+    revision (e.g. mix-v3)
+- id: vocal-intelligibility-check
+  criterion: Lead vocal sits clearly above instrumental bed on every mix per artist
+    review notes in decision.md
+- id: no-mastering-processing
+  criterion: Mix bus has no limiting, loudness maximizer, or mastering chain applied
+    — mixes are pre-master headroom
+- id: artist-mix-approval
+  criterion: decision.md records artist approval on every track mix before mastering
+    begins
+constraints:
+- mix revisions stay in audio/mixes/ with version labels — do not overwrite prior
+  mixes silently
+- do not distribute mix WAVs publicly; only mastered files ship to distribution
+- keep mix session files separate from mastering session files
+allowed_execution_modes:
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+status: pending
+priority: high
+unlocks:
+- mastering
