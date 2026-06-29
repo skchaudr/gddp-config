@@ -10,6 +10,8 @@ Subcommands:
     node list         List nodes in a project
     node status       Show status summary for all projects
 
+    verify node       Run semantic verification for one node; emit a receipt
+
     project new       Create project skeleton (from graphify, outline, or empty shell)
     project validate  Validate project.yaml structure
 
@@ -115,6 +117,16 @@ def cmd_node_list(args):
 
 def cmd_node_status(args):
     show_status()
+
+
+def cmd_verify_node(args):
+    verify_node = _import_module("verify_node")
+    argv = ["node", "--project", args.project, "--node", args.node]
+    if args.repo_path:
+        argv += ["--repo-path", args.repo_path]
+    if args.json:
+        argv += ["--json"]
+    sys.exit(verify_node.main(argv))
 
 
 def cmd_project_new(args):
@@ -354,6 +366,20 @@ def main():
 
     node_status = node_sub.add_parser("status", help="Status summary for all projects")
     node_status.set_defaults(func=cmd_node_status)
+
+    verify_p = sub.add_parser("verify", help="Node verification harness")
+    verify_sub = verify_p.add_subparsers(dest="subcommand")
+
+    verify_node = verify_sub.add_parser(
+        "node", help="Run semantic verification for one node; emit a receipt")
+    verify_node.add_argument("--project", required=True, help="Project ID")
+    verify_node.add_argument("--node", required=True, help="Node ID")
+    verify_node.add_argument("--repo-path", default=None,
+                             help="Path to the source repo checkout "
+                                  "(overrides auto-resolve)")
+    verify_node.add_argument("--json", action="store_true",
+                             help="Print result.json to stdout")
+    verify_node.set_defaults(func=cmd_verify_node)
 
     proj_p = sub.add_parser("project", help="Project operations")
     proj_sub = proj_p.add_subparsers(dest="subcommand")

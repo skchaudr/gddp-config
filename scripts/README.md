@@ -20,6 +20,7 @@ Or use your system Python if it's not PEP-668-locked.
 .venv/bin/python scripts/gddp.py node import --file draft.yaml --project my-app
 .venv/bin/python scripts/gddp.py node validate
 .venv/bin/python scripts/gddp.py node status
+.venv/bin/python scripts/gddp.py verify node --project aa-cli --node common-core
 .venv/bin/python scripts/gddp.py project new --from-outline outline.md --project-id my-app --repo org/repo
 ```
 
@@ -34,6 +35,33 @@ Or use your system Python if it's not PEP-668-locked.
 | `node validate` | Validate all nodes against schema | No TUI |
 | `node list` | List nodes in a project | No TUI |
 | `node status` | Completion summary for all projects | No TUI |
+
+### verify subcommand
+
+| Command | What |
+|---|---|
+| `verify node --project X --node Y` | Run semantic verification for one node; write `verification/X/Y/result.json` + `transcript.md` |
+
+`verify node` (`scripts/verify_node.py`) is the node verification harness:
+deterministic, repeatable, no LLM, no network. It maps each acceptance
+criterion id to a deterministic check (symbol/function presence in the
+referenced source files), scans each constraint for forbidden patterns, checks
+the graph dependency context and required artifacts, and emits a transparent
+receipt.
+
+Source repo resolution: the project's `repo:` field (e.g. `skchaudr/aa-cli`)
+resolves to a local checkout in order: `--repo-path`, `$GDDP_REPO_ROOT/<name>`,
+or `../<name>` relative to this repo root.
+
+Verdicts: `pass` · `fail` · `blocked` · `needs-human-review` ·
+`needs-more-evidence` · `out-of-scope-change-detected`. Exit code 0 on `pass`,
+1 on any other verdict, 2 on setup error (missing node/project).
+
+```bash
+.venv/bin/python scripts/gddp.py verify node --project aa-cli --node common-core
+.venv/bin/python scripts/gddp.py verify node --project aa-cli --node common-core --json
+.venv/bin/python scripts/gddp.py verify node --project aa-cli --node common-core --repo-path /path/to/aa-cli
+```
 
 ### project subcommands
 
