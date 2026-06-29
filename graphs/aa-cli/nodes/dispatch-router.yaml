@@ -1,0 +1,50 @@
+schema_version: '1.0'
+schema_type: node
+node_id: dispatch-router
+title: Implement aa_fire_packet routing and run directory setup
+type: capability
+why: Firing a packet requires validating input, composing the prompt, creating a run
+  directory, looking up the target, and branching to the correct executor handler
+depends_on:
+- target-registry
+- ledger-system
+acceptance:
+- id: validate-before-fire
+  criterion: aa_fire_packet calls aa_validate_packet and aborts before creating a
+    run when the packet is invalid
+- id: run-dir-artifacts
+  criterion: each fire copies packet.json, writes prompt.txt via aa_compose_prompt,
+    and reserves output.log under AA_STATE_HOME/runs/<id>
+- id: target-lookup-branch
+  criterion: aa_fire_packet calls aa_target_lookup with packet target and tier to
+    obtain mode and command
+- id: sync-inline-path
+  criterion: sync targets run the resolved command with prompt on stdin inside workdir
+    and record done or error in the ledger
+- id: async-placeholder-branch
+  criterion: async targets with __codex_async, __jules_async, or __pi_async delegate
+    to dedicated dispatch handlers instead of eval-ing the placeholder literally
+- id: receipt-and-toast
+  criterion: successful fires print a receipt line and write AA_STATE_HOME/.toast
+    via aa_fire_toast
+constraints:
+- respect packet workdir — default to PWD when workdir is empty
+- honor mutations flag when choosing codex sandbox mode
+- skip clipboard re-copy when the wrapped command owns clipboard (aa_command_owns_clipboard)
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: high
+unlocks:
+- dispatch-grok
+- dispatch-pi-cli
+- dispatch-gemini
+- dispatch-droid
+- dispatch-codex
+- dispatch-jules
+- dispatch-pi-harness

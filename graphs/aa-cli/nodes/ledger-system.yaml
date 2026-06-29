@@ -1,0 +1,40 @@
+schema_version: '1.0'
+schema_type: node
+node_id: ledger-system
+title: Implement TSV ledger append, update, and display
+type: capability
+why: Every fired packet must leave a durable ledger row so deck, reconcile, and the
+  operator can see open, done, error, and stale runs
+depends_on:
+- common-core
+acceptance:
+- id: ledger-append-row
+  criterion: aa_ledger_append writes ISO timestamp, id, target, state, ref, and title
+    as tab-separated fields to ledger.tsv
+- id: ledger-update-or-append
+  criterion: aa_ledger_update_or_append updates an existing id row instead of duplicating
+    on refire
+- id: ledger-state-for-id
+  criterion: aa_ledger_state_for_id returns the current state for a packet id
+- id: stale-detection
+  criterion: aa_is_stale marks open rows older than AA_STALE_HOURS as stale in glyph
+    rendering
+- id: ledger-print-formatted
+  criterion: aa_ledger_print renders a human-readable table with state glyphs when
+    stdout is a TTY
+constraints:
+- ledger format stays TSV with six columns — do not migrate to JSON or SQLite
+- update operations must be atomic via temp file + mv
+- do not mutate packet JSON from ledger helpers
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: high
+unlocks:
+- dispatch-router
+- reconciliation

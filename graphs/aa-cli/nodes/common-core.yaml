@@ -1,0 +1,42 @@
+schema_version: '1.0'
+schema_type: node
+node_id: common-core
+title: Implement shared aa path, init, and packet validation helpers
+type: capability
+why: Every aa module depends on consistent XDG paths, directory bootstrap, jq-backed
+  packet validation, and small string/time utilities before targets, ledger, or fire
+  can run
+depends_on: []
+acceptance:
+- id: aa-root-and-state-paths
+  criterion: AA_ROOT, AA_DATA_HOME, AA_STATE_HOME, and AA_SCHEMA resolve to repo-local
+    defaults with env override support in lib/fire.zsh
+- id: aa-init-dirs-creates-state
+  criterion: aa_init_dirs creates packets and runs directories under AA_DATA_HOME
+    and AA_STATE_HOME
+- id: aa-validate-packet-schema
+  criterion: aa_validate_packet rejects missing packets and invalid JSON against schema/packet.schema.json
+    via jq
+- id: aa-require-jq-errors
+  criterion: aa_require_jq prints a clear error and returns non-zero when jq is not
+    installed
+- id: slug-and-iso-helpers
+  criterion: aa_slug, aa_now_iso, aa_now_id, and aa_title_from_prompt produce filesystem-safe
+    slugs and UTC timestamps
+constraints:
+- implement helpers in lib/fire.zsh and lib/common.zsh only — do not add runtime dependencies
+  beyond jq and zsh builtins
+- keep AA_TARGETS_CONF default pointing at repo targets.conf
+- do not source executor-specific modules from common-core
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: high
+unlocks:
+- target-registry
+- ledger-system

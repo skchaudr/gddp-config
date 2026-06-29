@@ -1,0 +1,37 @@
+schema_version: '1.0'
+schema_type: node
+node_id: dispatch-gemini
+title: Wire sync gemini (agy) target dispatch
+type: capability
+why: Gemini runs through the agy wrapper as a sync target and must integrate with
+  the shared fire path and ledger semantics
+depends_on:
+- dispatch-router
+acceptance:
+- id: gemini-target-registered
+  criterion: targets.conf lists gemini default sync agy
+- id: sync-eval-in-workdir
+  criterion: aa_fire_packet evals agy with prompt on stdin inside packet workdir for
+    gemini packets
+- id: ledger-terminal-state
+  criterion: gemini sync completion sets ledger state to done on exit 0 and error
+    otherwise
+- id: run-artifacts-present
+  criterion: gemini fires leave packet.json, prompt.txt, and output.log in the run
+    directory
+- id: no-async-placeholder
+  criterion: gemini does not use __codex_async or other async placeholders
+constraints:
+- keep gemini as sync agy — no background pid tracking
+- do not add gemini-specific ledger columns
+- rely on existing aa_fire_packet sync branch only
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: medium
+unlocks: []

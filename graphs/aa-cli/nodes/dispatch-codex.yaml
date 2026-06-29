@@ -1,0 +1,39 @@
+schema_version: '1.0'
+schema_type: node
+node_id: dispatch-codex
+title: Wire async codex (__codex_async) background dispatch
+type: capability
+why: Codex runs are long-lived and must fire in the background with a pid ref so reconciliation
+  can later flip open rows to done or error
+depends_on:
+- dispatch-router
+acceptance:
+- id: cdx-async-placeholder
+  criterion: targets.conf maps cdx and codex tiers to async __codex_async
+- id: codex-nohup-wrapper
+  criterion: aa_fire_packet launches codex exec via nohup wrapper, stores pid in runs/<id>/pid
+    and exit_status file
+- id: mutations-sandbox-flag
+  criterion: codex exec receives --sandbox workspace-write when mutations is true
+    and read-only otherwise
+- id: ledger-open-with-pid-ref
+  criterion: async codex fire appends ledger row with state open and ref equal to
+    background pid
+- id: receipt-shows-run-dir
+  criterion: codex async receipt prints target, title, and runs/<id> path without
+    waiting for completion
+constraints:
+- use AA_CODEX_BIN override for codex binary path
+- do not block aa_fire_packet on codex completion — reconciliation owns terminal state
+- keep cdx and codex as aliases in targets.conf
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: high
+unlocks:
+- reconciliation

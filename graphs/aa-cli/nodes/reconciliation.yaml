@@ -1,0 +1,43 @@
+schema_version: '1.0'
+schema_type: node
+node_id: reconciliation
+title: Implement aa_reconcile for async codex and jules ledger rows
+type: capability
+why: Async dispatches leave ledger rows in open state until reconcile inspects process
+  exit or Jules session status and promotes rows to done or error
+depends_on:
+- ledger-system
+- dispatch-codex
+- dispatch-jules
+- dispatch-pi-harness
+acceptance:
+- id: reconcile-codex-open-rows
+  criterion: aa_reconcile leaves codex rows open while pid is alive, sets done when
+    exit_status is 0, and error otherwise
+- id: reconcile-jules-session-status
+  criterion: aa_reconcile checks jules remote list for session ref and promotes Complete
+    sessions to done after pulling output
+- id: jules-pull-artifacts
+  criterion: completed jules reconcile writes output.log and diff.patch under runs/<id>
+    and prints file count to stderr
+- id: jules-failed-sessions
+  criterion: jules sessions marked Failed reconcile to ledger state error
+- id: atomic-ledger-rewrite
+  criterion: aa_reconcile rewrites ledger.tsv atomically via temp file and mv without
+    dropping non-open rows
+- id: acceptance-test-async-path
+  criterion: tests/acceptance.zsh covers async codex reconcile promoting open to done
+constraints:
+- only mutate open rows for codex and jules targets — leave sync targets unchanged
+- do not delete run directories during reconcile
+- pi-harness reconciliation may remain future scope if not yet implemented in lib/reconcile.zsh
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: high
+unlocks: []

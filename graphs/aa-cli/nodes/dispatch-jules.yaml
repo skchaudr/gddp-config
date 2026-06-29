@@ -1,0 +1,39 @@
+schema_version: '1.0'
+schema_type: node
+node_id: dispatch-jules
+title: Wire async jules (__jules_async) remote session dispatch
+type: capability
+why: Jules remote sessions are async and need a session id ref in the ledger so reconcile
+  can pull output when the session completes
+depends_on:
+- dispatch-router
+acceptance:
+- id: jules-async-placeholder
+  criterion: targets.conf maps jules default async __jules_async
+- id: github-origin-required
+  criterion: jules dispatch derives OWNER/REPO from workdir git origin and errors
+    when origin is missing
+- id: jules-remote-new
+  criterion: aa_fire_packet runs jules remote new with composed prompt and captures
+    dispatch.log
+- id: session-id-extracted
+  criterion: numeric jules session id is parsed from dispatch.log and stored as ledger
+    ref
+- id: ledger-open-on-success
+  criterion: successful jules dispatch writes ledger state open with session id ref;
+    failure writes error with ref '-'
+constraints:
+- use AA_JULES_BIN override for jules binary path
+- require github.com origin URL parsing compatible with existing sed transform
+- do not wait for jules completion in aa_fire_packet
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: high
+unlocks:
+- reconciliation

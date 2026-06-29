@@ -1,0 +1,41 @@
+schema_version: '1.0'
+schema_type: node
+node_id: target-registry
+title: Implement targets.conf registry and aa_target_lookup
+type: capability
+why: aa_fire_packet must resolve a packet target and tier to a sync or async command
+  before any executor dispatch branch can run
+depends_on:
+- common-core
+acceptance:
+- id: parse-four-column-rows
+  criterion: aa_target_parse_row parses name tier mode command rows from targets.conf
+- id: legacy-three-column-default-tier
+  criterion: legacy three-column rows (target mode command) are treated as tier=default
+- id: lookup-exact-tier
+  criterion: aa_target_lookup returns mode and command tab-separated for an exact
+    name+tier match
+- id: lookup-fallback-default-tier
+  criterion: aa_target_lookup falls back to tier=default when the requested tier is
+    missing
+- id: list-target-names
+  criterion: aa_target_names prints deduplicated target names from targets.conf ignoring
+    comments and blank lines
+- id: unknown-target-errors
+  criterion: aa_target_lookup errors with aa_die when the target name is not registered
+constraints:
+- keep targets.conf as the single source of truth for executor routing — no hardcoded
+  target table in fire.zsh
+- support both sync and async mode values only
+- preserve existing target aliases (cdx and codex both map to __codex_async)
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: high
+unlocks:
+- dispatch-router

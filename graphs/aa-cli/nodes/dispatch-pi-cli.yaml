@@ -1,0 +1,38 @@
+schema_version: '1.0'
+schema_type: node
+node_id: dispatch-pi-cli
+title: Wire sync pi-cli (pir) target dispatch
+type: capability
+why: The pir target is the inline Pi CLI path for fast local model runs and must behave
+  like other sync executors in aa_fire_packet
+depends_on:
+- dispatch-router
+acceptance:
+- id: pir-default-tier
+  criterion: targets.conf registers pir default sync pir and aa_target_lookup resolves
+    it
+- id: pir-tier-variants
+  criterion: pir speed and frontier tiers map to pir --model glm-5 and pir --model
+    claude-sonnet-4.6 respectively
+- id: sync-fire-records-ledger
+  criterion: firing a pir packet writes done or error ledger state after inline command
+    completion
+- id: output-captured
+  criterion: pir stdout/stderr land in runs/<id>/output.log
+- id: clipboard-ownership
+  criterion: pir wrapper commands are listed in aa_command_owns_clipboard so aa does
+    not double-copy clipboard output
+constraints:
+- pir stays sync — background dispatch belongs to dispatch-pi-harness
+- do not require pi-packet binary for pir sync fires
+- preserve existing pir tier naming from targets.conf
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: medium
+unlocks: []

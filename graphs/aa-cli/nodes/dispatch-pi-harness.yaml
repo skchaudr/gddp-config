@@ -1,0 +1,42 @@
+schema_version: '1.0'
+schema_type: node
+node_id: dispatch-pi-harness
+title: Wire async pi-harness (__pi_async) background dispatch
+type: capability
+why: Pi harness runs via pi-packet are async and must record an artifact slug ref
+  so reconcile and the operator can find the run output later
+depends_on:
+- dispatch-router
+acceptance:
+- id: pi-async-placeholder
+  criterion: targets.conf maps pi default async __pi_async
+- id: pi-packet-binary-check
+  criterion: aa_fire_packet errors clearly when AA_PI_PACKET_BIN is missing or not
+    executable
+- id: inline-packet-yaml-built
+  criterion: when packet_slug is empty, aa_fire_packet writes runs/<id>/packet.yaml
+    with slug aa-<id> and goal from prompt.txt
+- id: referenced-packet-slug
+  criterion: when packet_slug is set, aa_fire_packet uses the referenced YAML from
+    AA_PI_PACKETS without rebuilding goal text
+- id: background-pi-packet-run
+  criterion: pi-packet run executes in background via nohup wrapper with pid and exit_status
+    files
+- id: pi-artifact-ref-recorded
+  criterion: runs/<id>/pi_artifact stores slug ref and ledger open row uses that ref
+constraints:
+- default pi-packet path is $HOME/.pi/harness/bin/pi-packet unless AA_PI_PACKET_BIN
+  is set
+- honor packet mutations field in generated inline packet YAML
+- do not block on pi-packet completion in aa_fire_packet
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: high
+unlocks:
+- reconciliation

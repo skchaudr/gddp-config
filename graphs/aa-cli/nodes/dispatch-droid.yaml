@@ -1,0 +1,37 @@
+schema_version: '1.0'
+schema_type: node
+node_id: dispatch-droid
+title: Wire sync droid target dispatch
+type: capability
+why: Droid exec is a first-class sync executor in targets.conf and must fire through
+  the standard inline command path
+depends_on:
+- dispatch-router
+acceptance:
+- id: droid-target-registered
+  criterion: targets.conf lists droid default sync droid exec
+- id: sync-eval-command
+  criterion: aa_fire_packet runs droid exec with composed prompt on stdin inside workdir
+- id: ledger-on-completion
+  criterion: droid fires update ledger.tsv to done or error when the inline process
+    exits
+- id: output-log-capture
+  criterion: droid stdout and stderr are captured in runs/<id>/output.log
+- id: receipt-line-printed
+  criterion: successful droid fires print the standard receipt line with target and
+    run name
+constraints:
+- droid remains sync — no pid file or reconcile hook
+- do not fork a separate dispatch module outside lib/fire.zsh unless required for
+  testing
+- preserve droid exec command string exactly unless upstream CLI changes
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: medium
+unlocks: []
