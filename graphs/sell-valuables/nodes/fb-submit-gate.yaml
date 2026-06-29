@@ -1,0 +1,38 @@
+schema_version: '1.0'
+schema_type: node
+node_id: fb-submit-gate
+title: Add explicit human-reviewed submit gate before Publish click
+type: capability
+why: Accidental live posts are costly; submit must stay behind dry_run default and
+  a deliberate operator opt-in after form fill is verified
+depends_on:
+- fb-playwright-form-fill
+acceptance:
+- id: dry-run-default-true
+  criterion: post_with_playwright defaults dry_run=True and sell-post-fb --playwright
+    always passes dry_run=True
+- id: submit-not-implemented-guard
+  criterion: when dry_run=False code path returns note that submit is not implemented
+    until selectors and review gate are wired
+- id: publish-click-scaffold
+  criterion: commented page.get_by_role button Publish click exists as the final step
+    after form fill
+- id: submitted-flag-false-until-wired
+  criterion: result submitted stays False until explicit submit gate is implemented
+    and tested
+- id: human-review-required-policy
+  criterion: project execution_policy require_human_review_before_overnight remains
+    true for this graph
+constraints:
+- never auto-submit in CI or overnight jobs without human review artifact
+- require a merged decision.md approving selector map before enabling dry_run=False
+- log enough context in result dict for operator to verify title and photo_count pre-submit
+allowed_execution_modes:
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: high
+unlocks: []

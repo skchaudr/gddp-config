@@ -1,0 +1,78 @@
+schema_version: '1.0'
+schema_type: project_graph
+project_id: sell-valuables
+project_name: Sell Valuables Pipeline
+description: iMessage intake folders to listing markdown to Facebook Marketplace posting
+  hooks
+repo: skchaudr/Automating-Selling-Random-Valuables
+blueprint:
+  vision: Turn Chris's junk-removal finds into local marketplace listings with minimal
+    operator friction
+  architecture_notes: 'Intake is folder-based under incoming/<item-id>/ with description.txt,
+    optional meta.yaml, and photos/.
+
+    Core is Python CLI scripts (sell-listing, sell-post-fb), not a monolithic app.
+
+    Facebook Marketplace has no public API; browser automation lives behind explicit
+    hooks with dry_run before submit.
+
+    One item per folder; listing evidence is listing.md written beside intake files.
+
+    '
+  major_capabilities:
+  - intake folder convention and ItemIntake loader
+  - listing title/body/markdown generation
+  - sell-listing CLI
+  - Facebook post hook and Playwright session/form-fill path
+  - iMessage-to-folder operator workflow
+  - pytest coverage for intake and listing
+graph_version: '1.0'
+created_at: 2026-06-29
+last_updated: '2026-06-29'
+nodes_dir: nodes/
+nodes:
+- id: intake-folder-convention
+  title: Document and enforce incoming folder layout convention
+  status: pending
+  type: capability
+- id: intake-loader
+  title: Implement ItemIntake dataclass and load_item
+  status: pending
+  type: capability
+- id: listing-text-builder
+  title: Implement build_title, build_body, and build_listing_markdown
+  status: pending
+  type: capability
+- id: listing-cli
+  title: Implement sell-listing CLI that writes listing.md
+  status: pending
+  type: capability
+- id: fb-post-hook
+  title: Implement sell-post-fb CLI hook with listing generation and browser open
+  status: pending
+  type: capability
+- id: fb-playwright-session
+  title: Implement Playwright session bootstrap with storage_state.json
+  status: pending
+  type: capability
+- id: fb-playwright-form-fill
+  title: Wire Playwright Marketplace create form fill from ItemIntake
+  status: pending
+  type: capability
+- id: fb-submit-gate
+  title: Add explicit human-reviewed submit gate before Publish click
+  status: pending
+  type: capability
+- id: imessage-intake-path
+  title: Document iMessage and Shortcuts path into incoming folders
+  status: pending
+  type: capability
+- id: test-suite
+  title: Add pytest coverage for intake loader and listing builders
+  status: pending
+  type: capability
+execution_policy:
+  default_executor: jules
+  max_concurrent_jobs: 1
+  require_human_review_before_overnight: true
+  artifact_gate_enforced: true

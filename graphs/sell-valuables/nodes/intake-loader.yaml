@@ -1,0 +1,41 @@
+schema_version: '1.0'
+schema_type: node
+node_id: intake-loader
+title: Implement ItemIntake dataclass and load_item
+type: capability
+why: Listing generation and FB hooks need a single typed loader that reads description,
+  photos, and meta from an intake folder
+depends_on:
+- intake-folder-convention
+acceptance:
+- id: item-intake-dataclass
+  criterion: ItemIntake frozen dataclass exposes item_id, root, description, photos
+    tuple, and meta dict in src/sell_valuables/intake.py
+- id: load-item-requires-description
+  criterion: load_item raises FileNotFoundError when description.txt is missing and
+    ValueError when it is empty
+- id: photos-filtered-by-extension
+  criterion: load_item collects sorted photos from photos/ accepting .jpg, .jpeg,
+    .png, .heic, and .webp only
+- id: meta-yaml-parsed
+  criterion: load_item parses optional meta.yaml into a dict mapping and rejects non-mapping
+    YAML with ValueError
+- id: resolve-incoming-root
+  criterion: resolve_incoming_root returns repo_root/incoming defaulting to package
+    parents[2]
+constraints:
+- implement in src/sell_valuables/intake.py only for this node
+- use pathlib and pyyaml already declared in pyproject.toml
+- do not add network calls or Facebook logic to intake loader
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: high
+unlocks:
+- listing-text-builder
+- test-suite

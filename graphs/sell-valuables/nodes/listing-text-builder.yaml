@@ -1,0 +1,39 @@
+schema_version: '1.0'
+schema_type: node
+node_id: listing-text-builder
+title: Implement build_title, build_body, and build_listing_markdown
+type: capability
+why: Operators need marketplace-ready title, body, and markdown derived from ItemIntake
+  without hand-editing FB fields each time
+depends_on:
+- intake-loader
+acceptance:
+- id: build-title-first-line
+  criterion: build_title uses the first line of description trimmed to max_len default
+    80 with ellipsis when truncated
+- id: build-body-condition-shipping
+  criterion: build_body appends Condition and pickup/shipping lines from meta.condition
+    and meta.shipping when present
+- id: build-body-photo-count
+  criterion: build_body includes a photo count line when item.photos is non-empty
+- id: listing-markdown-structure
+  criterion: build_listing_markdown outputs title heading, price from meta.price_hint
+    default TBD, FB create URL, and body text
+- id: fb-create-url-constant
+  criterion: FB_MARKETPLACE_CREATE_URL constant points to facebook.com/marketplace/create/item
+constraints:
+- keep listing builders pure functions in src/sell_valuables/listing.py
+- do not embed Playwright or browser code in listing.py
+- price_hint stays a string hint — no payment processing
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: high
+unlocks:
+- listing-cli
+- test-suite

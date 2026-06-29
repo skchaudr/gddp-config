@@ -1,0 +1,41 @@
+schema_version: '1.0'
+schema_type: node
+node_id: test-suite
+title: Add pytest coverage for intake loader and listing builders
+type: capability
+why: Practice graph validation requires executable proof that load_item, build_title,
+  and build_listing_markdown behave against a stable fixture
+depends_on:
+- intake-loader
+- listing-text-builder
+- fb-post-hook
+acceptance:
+- id: sample-item-fixture
+  criterion: tests/fixtures/sample-item/ contains description.txt and meta.yaml usable
+    by load_item
+- id: test-load-item-fixture
+  criterion: test_load_item_fixture asserts item_id, description content, and meta
+    price_hint from fixture
+- id: test-build-title-first-line
+  criterion: test_build_title_from_first_line asserts build_title matches first description
+    line for fixture
+- id: test-listing-markdown-content
+  criterion: test_listing_markdown_includes_price_and_fb_url asserts price line, FB
+    URL, and pickup wording in markdown
+- id: pytest-dev-extra
+  criterion: pyproject.toml dev optional extra includes pytest and README quick start
+    documents pip install -e '.[dev]' && pytest
+constraints:
+- tests must not require Playwright or live Facebook access
+- use tests/fixtures/sample-item only — do not depend on real incoming/ item folders
+- keep testpaths limited to tests/ per pyproject.toml
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: medium
+unlocks: []

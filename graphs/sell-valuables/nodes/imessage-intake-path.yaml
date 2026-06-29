@@ -1,0 +1,39 @@
+schema_version: '1.0'
+schema_type: node
+node_id: imessage-intake-path
+title: Document iMessage and Shortcuts path into incoming folders
+type: capability
+why: Chris's photos and descriptions arrive via iMessage; operators need a documented
+  v0 manual path and recommended Shortcuts automation into incoming/
+depends_on:
+- intake-folder-convention
+acceptance:
+- id: imessage-shortcuts-doc-exists
+  criterion: docs/imessage-shortcuts.md explains Apple does not expose iMessage to
+    Python and documents manual folder workflow
+- id: manual-steps-documented
+  criterion: docs/imessage-shortcuts.md lists create incoming/<item-id>/, save photos
+    to photos/, paste description.txt, run sell-listing and sell-post-fb --open
+- id: shortcuts-recommended-flow
+  criterion: docs/imessage-shortcuts.md describes Shortcuts steps for Share sheet
+    images, slug generation, iCloud save path, and description append
+- id: later-options-noted
+  criterion: docs/imessage-shortcuts.md mentions Twilio and BlueBubbles as heavier
+    later options without implementing them
+- id: incoming-readme-cross-link
+  criterion: incoming/README.md links to docs/imessage-shortcuts.md for the iMessage
+    path
+constraints:
+- v0 is documentation and operator workflow only — no Messages.app automation in Python
+- Shortcuts paths must target Automating-Selling-Random-Valuables/incoming/<slug>/
+  layout
+- do not store Chris's PII in committed fixtures beyond sample-item test data
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+status: pending
+priority: medium
+unlocks: []

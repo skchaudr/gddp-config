@@ -1,0 +1,39 @@
+schema_version: '1.0'
+schema_type: node
+node_id: listing-cli
+title: Implement sell-listing CLI that writes listing.md
+type: capability
+why: Operators need a one-command path from an intake folder to an on-disk listing.md
+  artifact before any Facebook step
+depends_on:
+- listing-text-builder
+acceptance:
+- id: console-script-entrypoint
+  criterion: pyproject.toml registers sell-listing entry point to sell_valuables.generate_listing:main
+- id: generate-listing-writes-file
+  criterion: generate_listing loads the item and writes listing.md inside the item
+    folder using build_listing_markdown
+- id: item-id-argument
+  criterion: CLI accepts item_id folder name under incoming/ and errors when incoming/
+    is missing
+- id: auto-single-candidate
+  criterion: when item_id is omitted CLI selects the sole non-underscore folder in
+    incoming/ or errors if count is not exactly one
+- id: incoming-override-flag
+  criterion: --incoming flag overrides default resolve_incoming_root path for fixtures
+    and tests
+constraints:
+- CLI must exit non-zero on FileNotFoundError and ValueError from load_item
+- print the output path on success to stdout
+- do not open a browser from sell-listing
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: high
+unlocks:
+- fb-post-hook

@@ -1,0 +1,41 @@
+schema_version: '1.0'
+schema_type: node
+node_id: intake-folder-convention
+title: Document and enforce incoming folder layout convention
+type: capability
+why: Every downstream loader and CLI assumes one item per incoming/<item-id>/ folder
+  with description.txt and optional photos/ and meta.yaml
+depends_on: []
+acceptance:
+- id: incoming-readme-documents-layout
+  criterion: incoming/README.md documents description.txt (required), photos/, meta.yaml
+    (optional), and item-id slug format YYYY-MM-DD-short-slug
+- id: example-folder-present
+  criterion: incoming/_example/ demonstrates the layout with description.txt, meta.yaml,
+    and photos/.gitkeep
+- id: meta-yaml-fields-documented
+  criterion: incoming/README.md documents price_hint, shipping, condition, and category_hint
+    meta fields
+- id: underscore-folders-ignored
+  criterion: CLIs skip directories whose names start with underscore when auto-selecting
+    a single intake folder
+- id: gitignore-incoming-artifacts
+  criterion: incoming/.gitignore excludes real item photos while keeping _example
+    and README tracked
+constraints:
+- do not require a database or API for intake — filesystem folders are the source
+  of truth
+- item-id must stay lowercase kebab-case with date prefix
+- do not store Facebook credentials inside intake folders
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: high
+unlocks:
+- intake-loader
+- imessage-intake-path

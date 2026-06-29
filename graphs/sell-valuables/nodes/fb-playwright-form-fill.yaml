@@ -1,0 +1,38 @@
+schema_version: '1.0'
+schema_type: node
+node_id: fb-playwright-form-fill
+title: Wire Playwright Marketplace create form fill from ItemIntake
+type: capability
+why: Manual copy-paste from listing.md is error-prone; automation should fill title,
+  price, description, and photo inputs from intake data
+depends_on:
+- fb-playwright-session
+acceptance:
+- id: result-dict-fields
+  criterion: post_with_playwright returns dict with item_id, title, photo_count, dry_run,
+    and submitted keys
+- id: title-from-build-title
+  criterion: result title uses build_title(item) derived from loaded intake
+- id: form-fill-selectors-scaffold
+  criterion: post_with_playwright contains commented selector scaffold for Title,
+    Price, Description fields and photo file inputs
+- id: photo-loop-scaffold
+  criterion: commented code iterates item.photos for set_input_files on file input
+- id: dry-run-stops-before-submit
+  criterion: dry_run=True sets submitted False and note explains stopped before submit
+constraints:
+- keep selectors commented until validated by a manual recording session — do not
+  guess live selectors in production path without review
+- fill logic must use build_title and build_body from listing.py
+- photo uploads must reference absolute paths from item.photos
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: medium
+unlocks:
+- fb-submit-gate

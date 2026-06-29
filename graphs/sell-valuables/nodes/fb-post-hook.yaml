@@ -1,0 +1,40 @@
+schema_version: '1.0'
+schema_type: node
+node_id: fb-post-hook
+title: Implement sell-post-fb CLI hook with listing generation and browser open
+type: capability
+why: After listing.md exists, the operator needs a single command that regenerates
+  the listing and opens Facebook Marketplace or starts automation hooks
+depends_on:
+- listing-cli
+acceptance:
+- id: console-script-entrypoint
+  criterion: pyproject.toml registers sell-post-fb entry point to sell_valuables.post_to_fb:main
+- id: generates-listing-first
+  criterion: sell-post-fb always calls generate_listing before any browser action
+    and prints Wrote listing.md path
+- id: open-flag-browser
+  criterion: --open opens FB_MARKETPLACE_CREATE_URL via webbrowser.open and on macOS
+    reveals photos/ with open command
+- id: playwright-flag-skeleton
+  criterion: --playwright invokes post_with_playwright with dry_run=True and prints
+    result dict
+- id: default-manual-instructions
+  criterion: when neither --open nor --playwright is passed CLI prints manual Marketplace
+    URL and rerun hints
+constraints:
+- require explicit item_id argument — no auto-single-folder selection in sell-post-fb
+- do not submit listings from the default CLI path
+- keep post_to_fb.py separate from generate_listing.py concerns
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: high
+unlocks:
+- fb-playwright-session
+- test-suite

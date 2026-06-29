@@ -1,0 +1,40 @@
+schema_version: '1.0'
+schema_type: node
+node_id: fb-playwright-session
+title: Implement Playwright session bootstrap with storage_state.json
+type: capability
+why: Facebook login cannot run headless on every post; persisted session state under
+  .fb-session enables reuse across dry-run automation
+depends_on:
+- fb-post-hook
+acceptance:
+- id: optional-browser-extra
+  criterion: pyproject.toml browser optional extra installs playwright and documents
+    pip install -e '.[browser]' requirement
+- id: storage-state-path
+  criterion: post_with_playwright loads .fb-session/storage_state.json from repo root
+    when the file exists
+- id: playwright-import-error
+  criterion: missing playwright raises RuntimeError with install instructions instead
+    of crashing import time
+- id: chromium-launch
+  criterion: post_with_playwright launches chromium with headless flag support and
+    opens FB_MARKETPLACE_CREATE_URL
+- id: session-dir-created
+  criterion: automation creates .fb-session parent directory when missing to support
+    future storage_state save
+constraints:
+- .fb-session/ must stay gitignored — never commit Facebook session cookies
+- session bootstrap must work with dry_run=True without submitting
+- do not hardcode operator credentials in source
+allowed_execution_modes:
+- jules
+- human
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: pending
+priority: medium
+unlocks:
+- fb-playwright-form-fill
