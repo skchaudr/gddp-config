@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Minimal node verification harness for gddp-config.
+"""Minimal node evaluation harness for gddp-config.
 
-Runs semantic verification for ONE graph node against the node's source repo
+Runs deterministic evaluation for ONE graph node against the node's source repo
 and writes a transparent receipt (result.json + transcript.md).
 
 Inputs:
@@ -145,7 +145,7 @@ class VerificationResult:
     human_review_questions: list[HumanReviewQuestion] = field(default_factory=list)
 
 
-# ── Probe registry (deterministic semantic checks) ─────────────────────────
+# ── Probe registry (deterministic checks) ──────────────────────────────────
 
 # Map a criterion id (node.yaml) -> probe. Probe types:
 #   symbol       — regex(s) must appear in named files (all=True: every pattern)
@@ -156,7 +156,8 @@ class VerificationResult:
 #                  `alias_of` lists alias rows that must point at the same
 #                  command as the canonical target.
 #
-# This is the semantic layer: it says what "met" means in code terms.
+# This is the deterministic layer: it checks literal evidence that can be
+# reduced without an LLM. Judgment about meaning belongs to semantic evaluation.
 # Each probe can also carry a `mismatch_kind` so the receipt can classify the
 # uncertainty (wording | source_path | alias_integration | tier_distinct).
 CHECK_PROBES = {
@@ -240,7 +241,353 @@ CHECK_PROBES = {
         "human_question": ("cdx and codex are aliases for __codex_async. "
                            "Does reconciliation handle both refs cleanly?"),
     },
+
+    # ── sell-valuables: intake + listing ──
+    "incoming-readme-documents-layout": {
+        "type": "symbol",
+        "files": ["incoming/README.md"],
+        "patterns": [r"description\.txt", r"photos/", r"meta\.yaml",
+                     r"YYYY-MM-DD-short-slug"],
+        "all": True,
+    },
+    "example-folder-present": {
+        "type": "paths",
+        "paths": ["incoming/_example/description.txt",
+                  "incoming/_example/meta.yaml",
+                  "incoming/_example/photos/.gitkeep"],
+    },
+    "meta-yaml-fields-documented": {
+        "type": "symbol",
+        "files": ["incoming/README.md"],
+        "patterns": [r"price_hint", r"shipping", r"condition",
+                     r"category_hint"],
+        "all": True,
+    },
+    "underscore-folders-ignored": {
+        "type": "symbol",
+        "files": ["src/sell_valuables/generate_listing.py"],
+        "patterns": [r"not d\.name\.startswith\(\"_\"\)"],
+        "all": True,
+    },
+    "gitignore-incoming-artifacts": {
+        "type": "symbol",
+        "files": ["incoming/.gitignore"],
+        "patterns": [r"\*", r"!README\.md", r"!_example/", r"!_example/\*\*"],
+        "all": True,
+    },
+    "item-intake-dataclass": {
+        "type": "symbol",
+        "files": ["src/sell_valuables/intake.py"],
+        "patterns": [r"@dataclass\(frozen=True\)", r"class ItemIntake",
+                     r"item_id: str", r"root: Path", r"description: str",
+                     r"photos: tuple\[Path, \.\.\.\]", r"meta: dict"],
+        "all": True,
+    },
+    "load-item-requires-description": {
+        "type": "func",
+        "files": ["src/sell_valuables/intake.py"],
+        "name": "load_item",
+        "patterns": [r"description\.txt", r"FileNotFoundError",
+                     r"if not description", r"ValueError"],
+    },
+    "photos-filtered-by-extension": {
+        "type": "symbol",
+        "files": ["src/sell_valuables/intake.py"],
+        "patterns": [r"PHOTO_EXTENSIONS", r"\.jpg", r"\.jpeg", r"\.png",
+                     r"\.heic", r"\.webp", r"suffix\.lower\(\)"],
+        "all": True,
+    },
+    "meta-yaml-parsed": {
+        "type": "func",
+        "files": ["src/sell_valuables/intake.py"],
+        "name": "load_item",
+        "patterns": [r"meta\.yaml", r"yaml\.safe_load",
+                     r"isinstance\(meta, dict\)", r"ValueError"],
+    },
+    "resolve-incoming-root": {
+        "type": "func",
+        "files": ["src/sell_valuables/intake.py"],
+        "name": "resolve_incoming_root",
+        "patterns": [r"parents\[2\]", r"return root / \"incoming\""],
+    },
+    "build-title-first-line": {
+        "type": "func",
+        "files": ["src/sell_valuables/listing.py"],
+        "name": "build_title",
+        "patterns": [r"splitlines\(\)\[0\]", r"max_len: int = 80",
+                     r"\.\.\."],
+    },
+    "build-body-condition-shipping": {
+        "type": "func",
+        "files": ["src/sell_valuables/listing.py"],
+        "name": "build_body",
+        "patterns": [r"condition", r"shipping", r"Local pickup only",
+                     r"Shipping available"],
+    },
+    "build-body-photo-count": {
+        "type": "func",
+        "files": ["src/sell_valuables/listing.py"],
+        "name": "build_body",
+        "patterns": [r"if item\.photos", r"Photos:", r"len\(item\.photos\)"],
+    },
+    "listing-markdown-structure": {
+        "type": "func",
+        "files": ["src/sell_valuables/listing.py"],
+        "name": "build_listing_markdown",
+        "patterns": [r"\*\*Price:\*\*", r"FB_MARKETPLACE_CREATE_URL",
+                     r"build_body"],
+    },
+    "fb-create-url-constant": {
+        "type": "symbol",
+        "files": ["src/sell_valuables/listing.py"],
+        "patterns": [r"FB_MARKETPLACE_CREATE_URL",
+                     r"facebook\.com/marketplace/create/item"],
+        "all": True,
+    },
+    "listing-cli:console-script-entrypoint": {
+        "type": "symbol",
+        "files": ["pyproject.toml"],
+        "patterns": [r"sell-listing\s*=\s*\"sell_valuables\.generate_listing:main\""],
+        "all": True,
+    },
+    "generate-listing-writes-file": {
+        "type": "func",
+        "files": ["src/sell_valuables/generate_listing.py"],
+        "name": "generate_listing",
+        "patterns": [r"load_item", r"listing\.md", r"build_listing_markdown",
+                     r"write_text"],
+    },
+    "item-id-argument": {
+        "type": "func",
+        "files": ["src/sell_valuables/generate_listing.py"],
+        "name": "main",
+        "patterns": [r"item_id", r"incoming/ not found", r"incoming / args\.item_id"],
+    },
+    "auto-single-candidate": {
+        "type": "symbol",
+        "files": ["src/sell_valuables/generate_listing.py"],
+        "patterns": [r"candidates", r"not d\.name\.startswith\(\"_\"\)",
+                     r"len\(candidates\) != 1"],
+        "all": True,
+    },
+    "incoming-override-flag": {
+        "type": "symbol",
+        "files": ["src/sell_valuables/generate_listing.py"],
+        "patterns": [r"--incoming", r"args\.incoming or resolve_incoming_root"],
+        "all": True,
+    },
+
+    # ── sell-valuables: FB hook + Playwright ──
+    "fb-post-hook:console-script-entrypoint": {
+        "type": "symbol",
+        "files": ["pyproject.toml"],
+        "patterns": [r"sell-post-fb\s*=\s*\"sell_valuables\.post_to_fb:main\""],
+        "all": True,
+    },
+    "generates-listing-first": {
+        "type": "func",
+        "files": ["src/sell_valuables/post_to_fb.py"],
+        "name": "main",
+        "patterns": [r"generate_listing\(item_dir\)", r"Wrote"],
+    },
+    "open-flag-browser": {
+        "type": "symbol",
+        "files": ["src/sell_valuables/post_to_fb.py"],
+        "patterns": [r"--open", r"webbrowser\.open", r"FB_MARKETPLACE_CREATE_URL",
+                     r"subprocess\.run\(\[\"open\""],
+        "all": True,
+    },
+    "playwright-flag-skeleton": {
+        "type": "symbol",
+        "files": ["src/sell_valuables/post_to_fb.py"],
+        "patterns": [r"--playwright", r"post_with_playwright", r"dry_run=True",
+                     r"print\(result\)"],
+        "all": True,
+    },
+    "default-manual-instructions": {
+        "type": "symbol",
+        "files": ["src/sell_valuables/post_to_fb.py"],
+        "patterns": [r"Open manually:", r"--open or --playwright"],
+        "all": True,
+    },
+    "optional-browser-extra": {
+        "type": "symbol",
+        "files": ["pyproject.toml", "src/sell_valuables/post_to_fb.py"],
+        "patterns": [r"browser\s*=", r"playwright",
+                     r"pip install -e '\.\[browser\]'"],
+        "all": True,
+    },
+    "storage-state-path": {
+        "type": "symbol",
+        "files": ["src/sell_valuables/post_to_fb.py"],
+        "patterns": [r"\.fb-session", r"storage_state\.json",
+                     r"storage_state"],
+        "all": True,
+    },
+    "playwright-import-error": {
+        "type": "func",
+        "files": ["src/sell_valuables/post_to_fb.py"],
+        "name": "post_with_playwright",
+        "patterns": [r"except ImportError", r"RuntimeError",
+                     r"Playwright not installed"],
+    },
+    "chromium-launch": {
+        "type": "func",
+        "files": ["src/sell_valuables/post_to_fb.py"],
+        "name": "post_with_playwright",
+        "patterns": [r"chromium\.launch\(headless=headless\)",
+                     r"page\.goto\(FB_MARKETPLACE_CREATE_URL"],
+    },
+    "session-dir-created": {
+        "type": "func",
+        "files": ["src/sell_valuables/post_to_fb.py"],
+        "name": "post_with_playwright",
+        "patterns": [r"session_dir\.mkdir\(parents=True, exist_ok=True\)"],
+    },
+    "result-dict-fields": {
+        "type": "func",
+        "files": ["src/sell_valuables/post_to_fb.py"],
+        "name": "post_with_playwright",
+        "patterns": [r"\"item_id\"", r"\"title\"", r"\"photo_count\"",
+                     r"\"dry_run\"", r"\"submitted\""],
+    },
+    "title-from-build-title": {
+        "type": "func",
+        "files": ["src/sell_valuables/post_to_fb.py"],
+        "name": "post_with_playwright",
+        "patterns": [r"\"title\": build_title\(item\)"],
+    },
+    "form-fill-selectors-scaffold": {
+        "type": "func",
+        "files": ["src/sell_valuables/post_to_fb.py"],
+        "name": "_fill_marketplace_form",
+        "patterns": [r"_try_fill\(\"Title\"", r"_try_fill\(\"Price\"",
+                     r"_try_fill\(\"Description\"",
+                     r"set_input_files"],
+        "human_question": ("Selectors are active code now, but live Facebook "
+                           "selector drift still needs a headed logged-in run."),
+    },
+    "photo-loop-scaffold": {
+        "type": "func",
+        "files": ["src/sell_valuables/post_to_fb.py"],
+        "name": "_fill_marketplace_form",
+        "patterns": [r"if item\.photos", r"for p in item\.photos",
+                     r"set_input_files"],
+        "human_question": ("Photo upload path is wired; live headed run should "
+                           "confirm Facebook accepts the selector."),
+    },
+    "dry-run-stops-before-submit": {
+        "type": "func",
+        "files": ["src/sell_valuables/post_to_fb.py"],
+        "name": "post_with_playwright",
+        "patterns": [r"dry_run", r"submitted\": False",
+                     r"Stopped before submit"],
+    },
+    "dry-run-default-true": {
+        "type": "symbol",
+        "files": ["src/sell_valuables/post_to_fb.py"],
+        "patterns": [r"dry_run: bool = True", r"dry_run=True"],
+        "all": True,
+    },
+    "submit-not-implemented-guard": {
+        "type": "symbol",
+        "files": ["src/sell_valuables/post_to_fb.py"],
+        "patterns": [r"Submit not implemented", r"decision\.md selector approval"],
+        "all": True,
+    },
+    "publish-click-scaffold": {
+        "type": "human_review",
+        "reason": ("No Publish click scaffold should be enabled until selector "
+                   "approval exists; confirm whether a commented final-step "
+                   "placeholder is desired before treating this as missing."),
+        "human_question": ("Should the graph require a commented Publish-click "
+                           "placeholder, or is the stronger not-implemented "
+                           "submit guard the intended evidence?"),
+    },
+    "submitted-flag-false-until-wired": {
+        "type": "symbol",
+        "files": ["src/sell_valuables/post_to_fb.py"],
+        "patterns": [r"\"submitted\": False", r"Submit not implemented"],
+        "all": True,
+    },
+    "human-review-required-policy": {
+        "type": "project_policy",
+        "path": "graphs/sell-valuables/project.yaml",
+        "patterns": [r"require_human_review_before_overnight:\s*true"],
+    },
+
+    # ── sell-valuables: docs + tests ──
+    "imessage-shortcuts-doc-exists": {
+        "type": "symbol",
+        "files": ["docs/imessage-shortcuts.md"],
+        "patterns": [r"Apple does not expose iMessage to Python",
+                     r"manual folder workflow|Manual"],
+        "all": True,
+    },
+    "manual-steps-documented": {
+        "type": "symbol",
+        "files": ["docs/imessage-shortcuts.md"],
+        "patterns": [r"incoming/YYYY-MM-DD-slug", r"photos/",
+                     r"description\.txt", r"sell-listing", r"sell-post-fb"],
+        "all": True,
+    },
+    "shortcuts-recommended-flow": {
+        "type": "symbol",
+        "files": ["docs/imessage-shortcuts.md"],
+        "patterns": [r"Shortcuts", r"Share sheet", r"slug", r"iCloud Drive",
+                     r"description\.txt"],
+        "all": True,
+    },
+    "later-options-noted": {
+        "type": "symbol",
+        "files": ["docs/imessage-shortcuts.md"],
+        "patterns": [r"Twilio", r"BlueBubbles"],
+        "all": True,
+    },
+    "incoming-readme-cross-link": {
+        "type": "symbol",
+        "files": ["incoming/README.md"],
+        "patterns": [r"docs/imessage-shortcuts\.md"],
+        "all": True,
+    },
+    "sample-item-fixture": {
+        "type": "paths",
+        "paths": ["tests/fixtures/sample-item/description.txt",
+                  "tests/fixtures/sample-item/meta.yaml"],
+    },
+    "test-load-item-fixture": {
+        "type": "symbol",
+        "files": ["tests/test_listing.py"],
+        "patterns": [r"def test_load_item_fixture", r"item_id",
+                     r"description", r"price_hint"],
+        "all": True,
+    },
+    "test-build-title-first-line": {
+        "type": "symbol",
+        "files": ["tests/test_listing.py"],
+        "patterns": [r"def test_build_title_from_first_line", r"build_title"],
+        "all": True,
+    },
+    "test-listing-markdown-content": {
+        "type": "symbol",
+        "files": ["tests/test_listing.py"],
+        "patterns": [r"test_listing_markdown_includes_price_and_fb_url",
+                     r"\*\*Price:\*\*", r"facebook\.com/marketplace/create",
+                     r"pickup"],
+        "all": True,
+    },
+    "pytest-dev-extra": {
+        "type": "symbol",
+        "files": ["pyproject.toml", "README.md"],
+        "patterns": [r"dev\s*=", r"pytest", r"pip install -e '\.\[dev\]'"],
+        "all": True,
+    },
 }
+
+
+def _probe_for(node_id: str, criterion_id: str) -> dict | None:
+    """Return node-specific probe first, then shared criterion probe."""
+    return CHECK_PROBES.get(f"{node_id}:{criterion_id}") or CHECK_PROBES.get(criterion_id)
 
 
 def _slug_keywords(criterion_text: str) -> list[str]:
@@ -360,10 +707,10 @@ def parse_targets_conf(text: str) -> dict[str, dict[str, str]]:
 
 # ── Criterion evaluation ───────────────────────────────────────────────────
 
-def evaluate_criterion(item: dict, repo: Path) -> CriterionCheck:
+def evaluate_criterion(item: dict, repo: Path, node_id: str = "") -> CriterionCheck:
     cid = item.get("id", "<no-id>")
     text = item.get("criterion", "")
-    probe = CHECK_PROBES.get(cid)
+    probe = _probe_for(node_id, cid)
 
     if probe is None:
         # Fallback: keyword probe across lib/*.zsh
@@ -409,6 +756,15 @@ def evaluate_criterion(item: dict, repo: Path) -> CriterionCheck:
     if ptype == "tier_distinct":
         return _eval_tier_distinct(cid, text, probe, repo, mk, hq)
 
+    if ptype == "human_review":
+        reason = probe.get("reason", "This criterion requires human review.")
+        return CriterionCheck(
+            id=cid, criterion=text, status="indeterminate",
+            confidence=0.8, method=ptype, evidence=[reason],
+            reasoning=reason, mismatch_kind=mk or "human_review",
+            mismatch_detail=reason,
+            human_question=hq or probe.get("human_question", ""))
+
     if ptype == "path":
         rel = probe["path"]
         exists = (repo / rel).exists()
@@ -442,6 +798,50 @@ def evaluate_criterion(item: dict, repo: Path) -> CriterionCheck:
             mismatch_kind=mk, mismatch_detail=mismatch_detail,
             needs_evidence=needs_evidence, human_question=hq)
 
+    if ptype == "paths":
+        paths = probe["paths"]
+        missing_paths = [p for p in paths if not (repo / p).exists()]
+        evidence = [f"{p} {'exists' if (repo / p).exists() else 'absent'}"
+                    for p in paths]
+        return CriterionCheck(
+            id=cid, criterion=text,
+            status="pass" if not missing_paths else "fail",
+            confidence=0.95 if not missing_paths else 0.7,
+            method=ptype, evidence=evidence,
+            reasoning=("All required paths exist." if not missing_paths
+                       else "Missing required path(s): "
+                       + ", ".join(missing_paths)),
+            mismatch_kind=mk or ("source_path" if missing_paths else ""),
+            mismatch_detail=", ".join(missing_paths),
+            human_question=hq)
+
+    if ptype == "project_policy":
+        rel = probe["path"]
+        policy_file = ROOT / rel
+        body = policy_file.read_text(errors="replace") if policy_file.is_file() else None
+        evidence = [f"{rel} {'exists' if body is not None else 'absent'}"]
+        if body is None:
+            return CriterionCheck(
+                id=cid, criterion=text, status="fail", confidence=0.6,
+                method=ptype, evidence=evidence,
+                reasoning=f"Project policy file {rel} is missing.",
+                mismatch_kind=mk or "source_path",
+                mismatch_detail=f"{rel} missing", human_question=hq)
+        matched, ev = _grep_all([body], probe["patterns"], want_all=True)
+        evidence.extend(ev)
+        return CriterionCheck(
+            id=cid, criterion=text,
+            status="pass" if matched else "fail",
+            confidence=0.9 if matched else 0.7, method=ptype,
+            evidence=evidence[:12],
+            reasoning=(f"Checked project policy in {rel}. "
+                       + ("Policy present." if matched
+                          else "Policy marker missing.")),
+            mismatch_kind=mk or ("" if matched else "project_policy"),
+            mismatch_detail=("" if matched
+                             else f"{rel} lacks {probe['patterns']}"),
+            human_question=hq)
+
     files = probe["files"]
     contents = [(f, read_repo_file(repo, f)) for f in files]
     missing = [f for f, c in contents if c is None]
@@ -469,7 +869,7 @@ def evaluate_criterion(item: dict, repo: Path) -> CriterionCheck:
                                         else "Pattern(s) missing."))
     elif ptype == "func":
         fname = probe["name"]
-        patterns = [rf"\b{re.escape(fname)}\s*\(\)", *probe.get("patterns", [])]
+        patterns = [rf"\b{re.escape(fname)}\s*\(", *probe.get("patterns", [])]
         matched, ev = _grep_all(bodies, patterns, want_all=True)
         for f, _ in present:
             evidence.append(f"in {f}")
@@ -735,8 +1135,9 @@ def load_yaml(path: Path) -> dict:
 def collect_constraint_files(node_yaml: dict, repo: Path) -> list[str]:
     """Files the constraints scope: explicit probe files + all lib/*.zsh."""
     files: set[str] = set()
+    node_id = node_yaml.get("node_id", "")
     for item in node_yaml.get("acceptance", []):
-        probe = CHECK_PROBES.get(item.get("id", ""))
+        probe = _probe_for(node_id, item.get("id", ""))
         if probe:
             files.update(probe.get("files", []))
             if probe.get("file"):
@@ -803,7 +1204,7 @@ def verify(project_id: str, node_id: str, *,
             criteria_checked=criteria, constraints_checked=constraints,
             files_inspected=sorted(files_inspected),
             commands_run=commands,
-            evidence_summary="Source repo not found; no semantic checks ran.",
+            evidence_summary="Source repo not found; no deterministic checks ran.",
             reasoning_summary=action, required_next_action=action,
         )
 
@@ -811,9 +1212,9 @@ def verify(project_id: str, node_id: str, *,
     commands.append(run_command(repo, ["test", "-f", "schema/packet.schema.json"]))
 
     for item in node_yaml.get("acceptance", []):
-        cc = evaluate_criterion(item, repo)
+        cc = evaluate_criterion(item, repo, node_id)
         criteria.append(cc)
-        probe = CHECK_PROBES.get(item.get("id", ""))
+        probe = _probe_for(node_id, item.get("id", ""))
         if probe:
             for f in probe.get("files", []):
                 files_inspected.add(f"{repo.name}/{f}")
@@ -822,6 +1223,11 @@ def verify(project_id: str, node_id: str, *,
             single = probe.get("file")
             if single:
                 files_inspected.add(f"{repo.name}/{single}")
+            for f in probe.get("paths", []):
+                files_inspected.add(f"{repo.name}/{f}")
+            policy_path = probe.get("path") if probe.get("type") == "project_policy" else None
+            if policy_path:
+                files_inspected.add(policy_path)
 
     constraint_files = collect_constraint_files(node_yaml, repo)
     for f in constraint_files:

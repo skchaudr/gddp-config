@@ -10,7 +10,7 @@ Subcommands:
     node list         List nodes in a project
     node status       Show status summary for all projects
 
-    verify node       Run semantic verification for one node; emit a receipt
+    verify node       Run deterministic node evaluation; emit a receipt
 
     project new       Create project skeleton (from graphify, outline, or empty shell)
     project validate  Validate project.yaml structure
@@ -367,11 +367,11 @@ def main():
     node_status = node_sub.add_parser("status", help="Status summary for all projects")
     node_status.set_defaults(func=cmd_node_status)
 
-    verify_p = sub.add_parser("verify", help="Node verification harness")
+    verify_p = sub.add_parser("verify", help="Node evaluation harness")
     verify_sub = verify_p.add_subparsers(dest="subcommand")
 
     verify_node = verify_sub.add_parser(
-        "node", help="Run semantic verification for one node; emit a receipt")
+        "node", help="Run deterministic node evaluation; emit a receipt")
     verify_node.add_argument("--project", required=True, help="Project ID")
     verify_node.add_argument("--node", required=True, help="Node ID")
     verify_node.add_argument("--repo-path", default=None,

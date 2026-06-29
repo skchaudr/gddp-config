@@ -40,14 +40,15 @@ Or use your system Python if it's not PEP-668-locked.
 
 | Command | What |
 |---|---|
-| `verify node --project X --node Y` | Run semantic verification for one node; write `verification/X/Y/result.json` + `transcript.md` |
+| `verify node --project X --node Y` | Run deterministic evaluation for one node; write `verification/X/Y/result.json` + `transcript.md` |
 
-`verify node` (`scripts/verify_node.py`) is the node verification harness:
+`verify node` (`scripts/verify_node.py`) is the node evaluation harness:
 deterministic, repeatable, no LLM, no network. It maps each acceptance
 criterion id to a deterministic check (symbol/function presence in the
 referenced source files), scans each constraint for forbidden patterns, checks
 the graph dependency context and required artifacts, and emits a transparent
-receipt.
+receipt. Semantic evaluation remains a later judgment layer; this command only
+records what the deterministic layer can prove.
 
 Source repo resolution: the project's `repo:` field (e.g. `skchaudr/aa-cli`)
 resolves to a local checkout in order: `--repo-path`, `$GDDP_REPO_ROOT/<name>`,
