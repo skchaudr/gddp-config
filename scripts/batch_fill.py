@@ -19,6 +19,7 @@ Keys (same as new_node.py):
 
 from __future__ import annotations
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -249,18 +250,41 @@ def review_and_write(node: dict, root: Path, project: str) -> bool:
         console.print("[dim]skipped[/dim]")
         return False
     if ch.lower() == "y":
+        if not node.get("acceptance"):
+            console.print("[red]at least one acceptance bullet required — refusing to write[/red]")
+            return False
         nodes_dir = root / "graphs" / project / "nodes"
         nodes_dir.mkdir(parents=True, exist_ok=True)
         path = nodes_dir / f"{node['node_id']}.yaml"
         path.write_text(yaml_text, encoding="utf-8")
         console.print(f"\n[green]WROTE[/green] {path.relative_to(root)}")
 
-        validate_run(root)
+        findings = validate_run(root)
+        for f in findings:
+            sev = "ERROR" if f.severity == "error" else "WARN"
+            console.print(f"  {sev} — {f.rule} — {f.message}")
+        if not findings:
+            console.print("  [green]OK — all nodes valid[/green]")
         return True
     if ch.lower() == "e":
         field_name = getline("Edit which field:").strip()
-        if field_name in PLACEHOLDER_FIELDS:
-            node = fill_node_fields({**node, "why": "REPLACE_ME", "acceptance": normalize_acceptance_items(["REPLACE_ME"]), "constraints": ["REPLACE_ME"]}, root, project)
+        if field_name == "why":
+            node["why"] = "REPLACE_ME"
+            why = manual_text("Why (why this capability must exist)", multi_line=True)
+            if why:
+                node["why"] = why
+        elif field_name == "acceptance":
+            suggestions = gather_inspiration_bullets(root, project)
+            node["acceptance"] = normalize_acceptance_items(["REPLACE_ME"])
+            result = edit_list_items("Acceptance (verifiable bullets)", [], suggestions)
+            if result:
+                node["acceptance"] = normalize_acceptance_items(result)
+        elif field_name == "constraints":
+            suggestions = gather_inspiration_bullets(root, project)
+            node["constraints"] = ["REPLACE_ME"]
+            result = edit_list_items("Constraints (hard limits)", [], suggestions)
+            if result:
+                node["constraints"] = result
         else:
             console.print(f"[yellow]only human fields editable in batch (why, acceptance, constraints)[/yellow]")
         return review_and_write(node, root, project)
