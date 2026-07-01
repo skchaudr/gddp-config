@@ -1,0 +1,55 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: semantic-submit-verdict-tool
+title: Make the semantic verdict a terminal tool call, not free-text JSON
+type: capability
+
+why: |
+  A practice run surfaced the core harness weakness: the semantic agent
+  investigates with tools, then is expected to STOP and emit a JSON object as
+  free text. That is where everything broke — deepseek-chat looped until the
+  turn budget was exhausted (never self-terminating), and model output arrived
+  wrapped in prose, markdown fences, and stray brace groups that the parser had
+  to reverse-engineer.
+
+  Making the terminal action an explicit `submit_verdict` tool fixes both by
+  construction: concluding becomes an obvious action a weak model can take (it
+  stops looping), and the verdict arrives as a validated tool-call payload
+  instead of parsed prose. This is the backbone pattern of every serious agent
+  harness (smolagents final-answer, pydantic-ai typed output).
+
+depends_on: []
+
+acceptance:
+  - id: submit-verdict-schema
+    criterion: TOOL_SCHEMAS in scripts/runtime/verification/semantic/tools.py includes a submit_verdict tool whose input_schema matches the SemanticOutput fields (judgments[], overall_reasoning, risks, followup_candidates, budget_exhausted)
+  - id: loop-terminates-on-submit
+    criterion: the agent loop in scripts/runtime/verification/semantic/agent.py returns the SemanticOutput built from the submit_verdict tool call arguments and stops the loop when that tool is called
+  - id: forced-conclusion-on-low-budget
+    criterion: when the tool-call or token budget is nearly exhausted, the loop injects an instruction that the model must call submit_verdict now (no further investigation tools), guaranteeing termination with a structured result
+  - id: legacy-freetext-fallback-retained
+    criterion: if the model still ends its turn with free text instead of calling submit_verdict, the existing _parse_semantic_output path is used as a fallback so no regression
+  - id: at-least-3-passing-tests-terminal
+    criterion: 'at least 3 tests using a fake runner: submit_verdict tool call yields the expected SemanticOutput and ends the loop; forced-conclusion instruction is injected when budget is low; free-text fallback still parses'
+
+constraints:
+  - only modify scripts/runtime/verification/semantic/tools.py and scripts/runtime/verification/semantic/agent.py
+  - DO NOT modify the SemanticOutput schema in this node (a sibling node owns calibration/schema changes)
+  - DO NOT remove the _parse_semantic_output fallback — keep it as a safety net
+  - keep the runner model-agnostic — no hardcoded provider or model id
+  - DO NOT commit __pycache__ or .pyc files
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+
+status: pending
+priority: high
+
+unlocks:
+  - semantic-validation-retry

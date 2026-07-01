@@ -1,0 +1,63 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: verdict-confidence-split
+title: Split verdict confidence into criteria-confidence and completeness so the score is trustable
+type: capability
+
+why: |
+  A practice run exposed a calibration bug that directly undermines the goal of
+  trusting the loop at face value. A node whose code fully satisfied every
+  criterion (semantic judgments all pass at 0.9-0.99 with line-level evidence)
+  received an overall confidence of 0.18. Two distortions caused this:
+
+  1. The blend uses min(deterministic_floor, semantic). When the deterministic
+     floor is indeterminate-dominated — which is precisely WHY the semantic phase
+     was invoked — that low, admittedly-uncertain floor overrides the semantic
+     phase built to decide. The weakest signal wins, backwards.
+  2. Missing execution artifacts correctly gate the VERDICT to needs-more-evidence,
+     but the single confidence scalar then conflates "unsure the code works"
+     (false here) with "paperwork/trail missing" (true here).
+
+  Fix: report two axes instead of one scalar — (a) criteria_confidence: how sure
+  we are the code meets the spec; (b) completeness/verdict gating: whether the
+  required trail is present. And when the floor is indeterminate-dominated, defer
+  to the semantic confidence rather than min()-ing it away. This makes a
+  built-but-untrailed node read as ~0.95 criteria-confidence with a
+  needs-more-evidence verdict — honest, not 0.18.
+
+depends_on: []
+
+acceptance:
+  - id: receipt-exposes-two-axes
+    criterion: VerdictReceipt in scripts/runtime/verification/schemas.py exposes a criteria_confidence field (confidence the code meets the criteria) distinct from a completeness/artifact-gate indicator, in addition to the existing overall confidence
+  - id: blend-defers-to-semantic-when-floor-indeterminate
+    criterion: _confidence_semantic_blend in scripts/runtime/verification/decision_engine.py no longer lets an indeterminate-dominated deterministic floor drag the score below the semantic confidence; when the floor is indeterminate it weights/defers to semantic instead of min()
+  - id: artifact-gate-still-caps-verdict-only
+    criterion: missing required artifacts still force verdict needs-more-evidence (matrix rows unchanged) but no longer collapse criteria_confidence for a semantically-passing node
+  - id: passing-node-reads-high-confidence
+    criterion: the vault-doctor scan-vault-core scenario (all semantic judgments pass, artifacts missing) yields criteria_confidence >= 0.85 with verdict needs-more-evidence
+  - id: orchestrator-populates-new-fields
+    criterion: scripts/runtime/verification/orchestrator.py populates the new receipt fields from the decision engine output
+  - id: at-least-3-passing-tests-calibration
+    criterion: 'at least 3 tests: semantic-pass + artifacts-missing gives high criteria_confidence and needs-more-evidence verdict; indeterminate floor does not lower a confident semantic result; a genuine semantic fail still yields low criteria_confidence'
+
+constraints:
+  - only modify scripts/runtime/verification/decision_engine.py, scripts/runtime/verification/schemas.py, and scripts/runtime/verification/orchestrator.py
+  - DO NOT change the set of possible verdicts or the decision matrix rows — only the confidence computation and receipt shape
+  - preserve backward compatibility — keep the existing overall confidence field populated
+  - DO NOT weaken the artifact gate — it must still block PASS
+  - DO NOT commit __pycache__ or .pyc files
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+
+status: pending
+priority: high
+
+unlocks: []

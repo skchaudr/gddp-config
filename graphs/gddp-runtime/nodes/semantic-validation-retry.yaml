@@ -1,0 +1,54 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: semantic-validation-retry
+title: Re-prompt the model on invalid verdict output instead of failing the receipt
+type: capability
+
+why: |
+  Today when the model returned a verdict that did not match the SemanticOutput
+  schema, the pipeline gave up and wrote a needs-more-evidence receipt with zero
+  judgments — throwing away a run that had already spent tokens investigating the
+  repo. A trustworthy harness should do what pydantic-ai does: catch the
+  validation error and hand it back to the model ("your output failed validation
+  because X; return corrected JSON via submit_verdict"), giving it a bounded
+  number of retries before conceding.
+
+  This turns transient format drift (a dict where a string was expected, a missing
+  field) into a self-correcting step instead of a wasted run, which is essential
+  for using cheaper/weaker models reliably.
+
+depends_on:
+  - semantic-submit-verdict-tool
+
+acceptance:
+  - id: retry-on-invalid-verdict
+    criterion: when a submit_verdict payload (or free-text fallback) fails SemanticOutput validation, the loop appends a corrective message containing the validation error and asks the model to resubmit, rather than immediately returning a parse-failure result
+  - id: bounded-retries
+    criterion: retries are bounded by a configurable max (default 2); after the limit the loop returns the graceful parse-failure SemanticOutput as it does today
+  - id: retry-budget-accounted
+    criterion: retry turns count against the existing tool-call/token budget so a retry loop cannot run unbounded
+  - id: successful-retry-produces-judgments
+    criterion: a run where the first output is invalid and the second is valid returns the valid SemanticOutput with its judgments (verified with a fake runner)
+  - id: at-least-3-passing-tests-retry
+    criterion: 'at least 3 tests: invalid-then-valid yields judgments; exceeding max retries returns graceful failure; the corrective message includes the validation error text'
+
+constraints:
+  - only modify scripts/runtime/verification/semantic/agent.py
+  - DO NOT modify the SemanticOutput schema here (calibration node owns schema)
+  - retries must be bounded and budget-accounted — no unbounded loops
+  - keep model-agnostic; no provider-specific handling
+  - DO NOT commit __pycache__ or .pyc files
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+
+status: pending
+priority: high
+
+unlocks: []
