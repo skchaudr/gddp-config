@@ -1,0 +1,59 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: ane-verifier-read-tool-eval
+title: Evaluate ANE exec read/navigation chords as verifier read tooling
+type: capability
+
+why: |
+  The semantic verifier inspects code to judge whether a node's acceptance
+  criteria are met, using blunt tools: read_file (dumps whole files) and
+  grep_code (regex). Those are token-heavy and imprecise — and they were exactly
+  the fiddly, expensive part of the first live verification run.
+
+  ANE (github.com/prettysmartdev/ane) advertises exec-mode read/navigation chords
+  — list symbols/functions in a file, yank a single function or class body —
+  backed by LSP/tree-sitter for Python/JS/Rust/Go. That maps cleanly onto
+  augmenting or replacing read_file/grep_code with structural, low-token reads.
+
+  This is the surface of ANE that is relevant NOW, because it serves the
+  verification harness we are actively hardening and needs no executor. It is a
+  bounded, abandonable evaluation: a no-go with clear reasoning fully satisfies
+  the node.
+
+  Explicitly NOT this node: using ANE to write edits, emit patches, or replace
+  implementer patch generation. That executor/editing surface needs a local edit
+  lane and is deferred to a later node.
+
+depends_on: []
+
+acceptance:
+  - id: ane-lists-symbols
+    criterion: decision.md shows ANE exec listing the relevant symbols/functions in a target source file (concrete command + output excerpt)
+  - id: ane-reads-single-body
+    criterion: decision.md shows ANE exec reading one function or class body without dumping the whole file (concrete command + output excerpt)
+  - id: toolbox-wrapper-callable
+    criterion: a small wrapper lets the semantic verifier toolbox (scripts/runtime/verification/semantic/tools.py) invoke ANE reads; decision.md documents the wrapper interface and shows it returning results
+  - id: comparison-on-real-cases
+    criterion: 'decision.md compares ANE reads vs read_file/grep_code on 2-3 existing verifier cases (e.g. vault-doctor nodes), reporting output size (token/byte) and usefulness for judging criteria'
+  - id: go-no-go-recommendation
+    criterion: decision.md ends with an explicit go / no-go / defer recommendation on adopting ANE reads in the verifier toolbox, with reasoning grounded in the comparison
+
+constraints:
+  - scope is verifier READ tooling only — do NOT use ANE to write edits or generate patches in this node
+  - do NOT make ANE a hard dependency of gddp-runtime; the wrapper must degrade gracefully (fall back to read_file/grep_code) if ANE is absent
+  - keep any proof/wrapper code minimal and clearly disposable if the outcome is no-go
+  - allowed_execution_modes is human because ANE exec must run locally to produce the comparison
+  - DO NOT commit build artifacts or vendored ANE binaries
+
+allowed_execution_modes:
+  - human
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+
+status: pending
+priority: medium
+
+unlocks: []
