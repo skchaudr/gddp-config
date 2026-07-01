@@ -1,0 +1,59 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: ane-edit-surface-eval
+title: Evaluate ANE exec mode as a token-efficient edit surface for a local executor
+type: capability
+
+why: |
+  ANE (github.com/prettysmartdev/ane) is a Rust, LSP-aware, chord-based editor
+  with a headless `exec` mode that emits unified diffs — designed to cut the
+  token cost of an agent reading and rewriting whole files. That is directly
+  relevant to us on two fronts: (1) it is the "hands" a local executor could use
+  to make precise, low-token edits, and (2) its diff output is exactly the
+  patch.diff artifact our verifier already requires.
+
+  But it only pays off with a LOCAL-edit executor, which we do not have — our only
+  wired executor is Jules (a GitHub cloud agent that files PRs and never touches
+  our tools). So this node is a bounded evaluation, not an integration: prove or
+  disprove ANE as an edit surface and produce a go/no-go decision. It is
+  explicitly abandonable — a negative result is a successful node.
+
+  A useful side effect: this node cannot be dispatched to Jules (it needs a local
+  binary run), so it will surface the missing local-executor capability that any
+  real ANE integration would depend on.
+
+depends_on: []
+
+acceptance:
+  - id: ane-installed-and-runs
+    criterion: ANE is built/installed locally and its exec (headless) mode runs against a sample source file, captured in the decision artifact
+  - id: diff-output-matches-contract
+    criterion: decision.md documents whether ANE exec's unified-diff output can serve directly as our patch.diff artifact (format, paths, applies cleanly with git apply) with a concrete example
+  - id: token-cost-measured
+    criterion: decision.md records a rough token-cost comparison of an ANE chord edit vs a naive read-whole-file-then-rewrite edit on the same change
+  - id: glm-drives-chords
+    criterion: decision.md reports whether GLM can reliably drive ANE's 4-part chord grammar to perform a target edit (this is the model-tool-reliability signal we care about), with the prompt used and the outcome
+  - id: go-no-go-recommendation
+    criterion: decision.md ends with an explicit go / no-go / defer recommendation and, if go, the shape of the follow-on integration node and its dependency on a local-edit executor
+  - id: proof-script-present
+    criterion: a runnable proof script (or documented command sequence) reproduces the ANE exec edit + diff capture used in the evaluation
+
+constraints:
+  - this is an evaluation — do NOT build a production ANE integration or a local executor in this node
+  - do NOT add ANE as a dependency of gddp-runtime; keep any proof code isolated (e.g. a scratch/ or eval/ path) and clearly disposable
+  - the deliverable is the decision — a no-go outcome with clear reasoning fully satisfies this node
+  - allowed_execution_modes is human because ANE exec must run locally; note if/when a local executor could take this over
+  - DO NOT commit build artifacts or vendored ANE binaries
+
+allowed_execution_modes:
+  - human
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+
+status: pending
+priority: medium
+
+unlocks: []
