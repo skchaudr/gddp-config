@@ -19,7 +19,7 @@ Started from a clean `main` worktree tracking `origin/main`. Added one declarati
 
 ### Current Git state (2-3 sentences max, anything more must be critically justifiable)
 
-Committed on `main`; push pending at handoff update time. Validation reports 0 errors and the existing `return-router` future-node warning for `first-overnight-run`.
+Committed and pushed on `main`. Validation reports 0 errors and the existing `return-router` future-node warning for `first-overnight-run`.
 
 ### Artifacts (Filepath - Description, 1 line max per artifact)
 
