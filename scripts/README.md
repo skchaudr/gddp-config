@@ -41,11 +41,12 @@ Or use your system Python if it's not PEP-668-locked.
 
 | Command | What |
 |---|---|
-| `obsidian export` | One-way YAML → Obsidian markdown in `obsidian-vault/GDDP/graphs/` |
+| `obsidian export` | One-way YAML → markdown in `~/Obsidian/gddp/GDDP/graphs/` |
 | `obsidian export --project X` | Export one project only |
+| `obsidian export --vault /path` | Override vault location |
 
 YAML stays source of truth. Re-export overwrites generated notes but preserves
-frontmatter `verified` and `owned`. Open `obsidian-vault/` as its own vault in
+frontmatter `verified` and `owned`. Open `~/Obsidian/gddp` as a vault in
 Obsidian; filter Graph View with `path:GDDP/graphs/aa-cli`.
 
 ### verify subcommand

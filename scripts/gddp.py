@@ -402,7 +402,7 @@ def main():
         "export", help="One-way YAML nodes → Obsidian markdown vault")
     obs_export.add_argument("--project", default=None, help="Only export this project")
     obs_export.add_argument("--vault", type=Path, default=None,
-                            help="Vault directory (default: obsidian-vault/)")
+                            help="Vault directory (default: ~/Obsidian/gddp)")
     obs_export.add_argument("--dry-run", action="store_true")
     obs_export.set_defaults(func=cmd_obsidian_export)
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """obsidian_export.py — one-way YAML nodes → Obsidian markdown vault.
 
-YAML in graphs/ stays source of truth. Generated notes land in
-obsidian-vault/GDDP/graphs/<project>/<node>.md for Graph View filtering
-(e.g. path:GDDP/graphs/aa-cli).
+YAML in graphs/ stays source of truth. Generated notes land in your Obsidian
+vault (default ~/Obsidian/gddp/GDDP/graphs/<project>/<node>.md) for Graph
+View filtering (e.g. path:GDDP/graphs/aa-cli).
 
 The only user-owned field preserved across regeneration is frontmatter
 `verified` (and optional `owned`). Do not edit status/type/priority here —
@@ -32,8 +32,19 @@ except ImportError:
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPTS_DIR.parent
-DEFAULT_VAULT = ROOT / "obsidian-vault"
+DEFAULT_VAULT = Path.home() / "Obsidian" / "gddp"
 GENERATED_ROOT = "GDDP/graphs"
+GRAPH_JSON = """{
+  "collapse-filter": false,
+  "search": "path:GDDP/graphs",
+  "colorGroups": [
+    {"query": "status:complete", "color": {"a": 1, "rgb": 4521796}},
+    {"query": "status:ready", "color": {"a": 1, "rgb": 4492031}},
+    {"query": "status:pending", "color": {"a": 1, "rgb": 16753920}},
+    {"query": "status:deferred", "color": {"a": 1, "rgb": 10066329}}
+  ]
+}
+"""
 PRESERVE_KEYS = ("verified", "owned")
 BANNER = "> **Auto-generated** from `graphs/` YAML. Regenerate with `gddp obsidian export`. Only edit `verified` / `owned` in frontmatter."
 
@@ -267,6 +278,31 @@ def render_project_index(
     return "\n".join(parts)
 
 
+def ensure_vault_scaffold(vault_dir: Path, dry_run: bool) -> None:
+    """Write starter Obsidian config on first export (outside gddp-config)."""
+    graph_path = vault_dir / ".obsidian" / "graph.json"
+    readme_path = vault_dir / "README.md"
+    if dry_run:
+        if not graph_path.exists():
+            print(f"would write {graph_path}")
+        if not readme_path.exists():
+            print(f"would write {readme_path}")
+        return
+    if not graph_path.exists():
+        graph_path.parent.mkdir(parents=True, exist_ok=True)
+        graph_path.write_text(GRAPH_JSON)
+    if not readme_path.exists():
+        readme_path.write_text(
+            "# GDDP graph vault\n\n"
+            "Auto-generated from gddp-config YAML. Regenerate:\n\n"
+            "```bash\n"
+            "cd ~/repos/gddp-config\n"
+            ".venv/bin/python scripts/gddp.py obsidian export\n"
+            "```\n\n"
+            "Open this folder as an Obsidian vault. Graph filter: `path:GDDP/graphs/aa-cli`\n"
+        )
+
+
 def export_vault(
     *,
     root: Path,
@@ -274,6 +310,7 @@ def export_vault(
     project_filter: str | None = None,
     dry_run: bool = False,
 ) -> dict:
+    ensure_vault_scaffold(vault_dir, dry_run)
     graphs_dir = root / "graphs"
     out_root = vault_dir / GENERATED_ROOT
     generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -341,7 +378,10 @@ def export_vault(
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Export graph nodes to Obsidian markdown vault")
     parser.add_argument("--root", type=Path, default=ROOT, help="gddp-config root")
-    parser.add_argument("--vault", type=Path, default=DEFAULT_VAULT, help="Obsidian vault directory")
+    parser.add_argument(
+        "--vault", type=Path, default=DEFAULT_VAULT,
+        help="Obsidian vault directory (default: ~/Obsidian/gddp)",
+    )
     parser.add_argument("--project", default=None, help="Only export this project")
     parser.add_argument("--dry-run", action="store_true", help="Print paths without writing")
     args = parser.parse_args(argv)
