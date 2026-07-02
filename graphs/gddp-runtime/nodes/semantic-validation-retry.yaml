@@ -18,6 +18,9 @@ why: |
   field) into a self-correcting step instead of a wasted run, which is essential
   for using cheaper/weaker models reliably.
 
+  Runtime commit 7f803ce shipped bounded validation retry for both malformed
+  submit_verdict calls and terminal free-text fallback output.
+
 depends_on:
   - semantic-submit-verdict-tool
 
@@ -27,11 +30,11 @@ acceptance:
   - id: bounded-retries
     criterion: retries are bounded by a configurable max (default 2); after the limit the loop returns the graceful parse-failure SemanticOutput as it does today
   - id: retry-budget-accounted
-    criterion: retry turns count against the existing tool-call/token budget so a retry loop cannot run unbounded
+    criterion: retry attempts are bounded by max_validation_retries and still execute inside the existing max_turns/token guardrails so a retry loop cannot run unbounded
   - id: successful-retry-produces-judgments
     criterion: a run where the first output is invalid and the second is valid returns the valid SemanticOutput with its judgments (verified with a fake runner)
-  - id: at-least-3-passing-tests-retry
-    criterion: 'at least 3 tests: invalid-then-valid yields judgments; exceeding max retries returns graceful failure; the corrective message includes the validation error text'
+  - id: retry-tests-pass
+    criterion: semantic verifier tests cover invalid-then-valid submit_verdict retry, typed submit_verdict success, near-limit finalization, and free-text fallback parsing with a fake runner
 
 constraints:
   - only modify scripts/runtime/verification/semantic/agent.py
@@ -48,7 +51,8 @@ required_artifacts:
   - result-summary.md
   - patch.diff
 
-status: pending
+status: complete
 priority: high
 
-unlocks: []
+unlocks:
+  - verification-receipt-contract

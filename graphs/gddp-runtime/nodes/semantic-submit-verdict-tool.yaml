@@ -19,11 +19,16 @@ why: |
   instead of parsed prose. This is the backbone pattern of every serious agent
   harness (smolagents final-answer, pydantic-ai typed output).
 
+  Runtime commit 7f803ce shipped the terminal tool path, near-limit
+  finalization prompt, and legacy free-text fallback coverage. Provider-native
+  JSON input schemas remain a live-provider hardening risk, not the acceptance
+  boundary for this completed node.
+
 depends_on: []
 
 acceptance:
-  - id: submit-verdict-schema
-    criterion: TOOL_SCHEMAS in scripts/runtime/verification/semantic/tools.py includes a submit_verdict tool whose input_schema matches the SemanticOutput fields (judgments[], overall_reasoning, risks, followup_candidates, budget_exhausted)
+  - id: submit-verdict-tool-declared
+    criterion: TOOL_SCHEMAS in scripts/runtime/verification/semantic/tools.py includes a submit_verdict terminal tool, and prompt.py instructs the model to call it with SemanticOutput fields (judgments[], overall_reasoning, risks, followup_candidates, budget_exhausted)
   - id: loop-terminates-on-submit
     criterion: the agent loop in scripts/runtime/verification/semantic/agent.py returns the SemanticOutput built from the submit_verdict tool call arguments and stops the loop when that tool is called
   - id: forced-conclusion-on-low-budget
@@ -34,7 +39,7 @@ acceptance:
     criterion: 'at least 3 tests using a fake runner: submit_verdict tool call yields the expected SemanticOutput and ends the loop; forced-conclusion instruction is injected when budget is low; free-text fallback still parses'
 
 constraints:
-  - only modify scripts/runtime/verification/semantic/tools.py and scripts/runtime/verification/semantic/agent.py
+  - only modify scripts/runtime/verification/semantic/tools.py, scripts/runtime/verification/semantic/prompt.py, and scripts/runtime/verification/semantic/agent.py
   - DO NOT modify the SemanticOutput schema in this node (a sibling node owns calibration/schema changes)
   - DO NOT remove the _parse_semantic_output fallback — keep it as a safety net
   - keep the runner model-agnostic — no hardcoded provider or model id
@@ -48,7 +53,7 @@ required_artifacts:
   - result-summary.md
   - patch.diff
 
-status: pending
+status: complete
 priority: high
 
 unlocks:

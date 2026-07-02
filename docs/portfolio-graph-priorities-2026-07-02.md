@@ -6,16 +6,21 @@ visualization can consume, but does not define UI structure.
 
 ## Priority Order
 
-1. Harden the GDDP verifier receipt contract.
-   - First node: `graphs/gddp-runtime/nodes/verification-receipt-contract.yaml`
-   - Why first: every portfolio claim about human-owned graph truth depends on
-     receipts that separate code judgment from artifact completeness and graph
-     advancement.
+1. Finish the GDDP verifier receipt contract.
+   - Current ready node: `graphs/gddp-runtime/nodes/verification-receipt-contract.yaml`
+   - Why first: runtime commit `7f803ce` shipped terminal semantic submission
+     and bounded validation retry, but only partial receipt fields. The contract
+     still has to define how consumers distinguish criteria judgment, artifact
+     completeness, graph readiness, and next action.
 
-2. Execute the semantic harness hardening lane.
-   - First implementation node: `semantic-submit-verdict-tool`
-   - Then: `semantic-validation-retry`
-   - Then: `verdict-confidence-split`, after the receipt contract exists
+2. Calibrate the receipt after the contract is explicit.
+   - Next implementation node after the contract: `verdict-confidence-split`
+   - Current blocker: runtime still aliases `criteria_confidence` to overall
+     `confidence`, and `_confidence_semantic_blend` still lets an indeterminate
+     deterministic floor drag down a strong semantic pass.
+   - Residual hardening risk: provider-native JSON input schemas for semantic
+     tools are still worth testing against a live provider, but they are not the
+     graph blocker for receipt calibration.
    - Optional spike: `ane-verifier-read-tool-eval` only if verifier reads stay
      token-heavy after the terminal verdict and retry fixes.
 
