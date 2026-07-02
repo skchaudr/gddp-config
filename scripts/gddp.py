@@ -12,7 +12,7 @@ Subcommands:
 
     verify node       Run deterministic node evaluation; emit a receipt
 
-    obsidian export   One-way YAML nodes → Obsidian markdown vault
+    obsidian export   Export one graph to ~/Obsidian/gdd-<project>/
 
     project new       Create project skeleton (from graphify, outline, or empty shell)
     project validate  Validate project.yaml structure
@@ -133,9 +133,7 @@ def cmd_verify_node(args):
 
 def cmd_obsidian_export(args):
     obsidian_export = _import_module("obsidian_export")
-    argv = []
-    if args.project:
-        argv += ["--project", args.project]
+    argv = ["--project", args.project]
     if args.vault:
         argv += ["--vault", str(args.vault)]
     if args.dry_run:
@@ -399,10 +397,11 @@ def main():
     obs_sub = obs_p.add_subparsers(dest="subcommand")
 
     obs_export = obs_sub.add_parser(
-        "export", help="One-way YAML nodes → Obsidian markdown vault")
-    obs_export.add_argument("--project", default=None, help="Only export this project")
+        "export", help="Export one graph to an Obsidian vault folder")
+    obs_export.add_argument("--project", required=True,
+                            help="Graph to export (graphs/<project>/)")
     obs_export.add_argument("--vault", type=Path, default=None,
-                            help="Vault directory (default: ~/Obsidian/gddp)")
+                            help="Destination vault (default: ~/Obsidian/gdd-<project>)")
     obs_export.add_argument("--dry-run", action="store_true")
     obs_export.set_defaults(func=cmd_obsidian_export)
 

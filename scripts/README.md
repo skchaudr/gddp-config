@@ -21,7 +21,7 @@ Or use your system Python if it's not PEP-668-locked.
 .venv/bin/python scripts/gddp.py node validate
 .venv/bin/python scripts/gddp.py node status
 .venv/bin/python scripts/gddp.py verify node --project aa-cli --node common-core
-.venv/bin/python scripts/gddp.py obsidian export
+.venv/bin/python scripts/gddp.py obsidian export --project aa-cli
 .venv/bin/python scripts/gddp.py project new --from-outline outline.md --project-id my-app --repo org/repo
 ```
 
@@ -41,13 +41,12 @@ Or use your system Python if it's not PEP-668-locked.
 
 | Command | What |
 |---|---|
-| `obsidian export` | One-way YAML → markdown in `~/Obsidian/gddp/GDDP/graphs/` |
-| `obsidian export --project X` | Export one project only |
-| `obsidian export --vault /path` | Override vault location |
+| `obsidian export --project X` | Export one graph → `~/Obsidian/gdd-X/` |
+| `obsidian export --project X --vault /path` | Override destination folder |
 
-YAML stays source of truth. Re-export overwrites generated notes but preserves
-frontmatter `verified` and `owned`. Open `~/Obsidian/gddp` as a vault in
-Obsidian; filter Graph View with `path:GDDP/graphs/aa-cli`.
+One graph per run. YAML stays source of truth. Re-export overwrites generated
+notes but preserves frontmatter `verified` and `owned`. Open `~/Obsidian/gdd-aa-cli`
+as a vault — Graph View shows that project's dependency graph only.
 
 ### verify subcommand
 

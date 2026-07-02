@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
-"""obsidian_export.py — one-way YAML nodes → Obsidian markdown vault.
+"""obsidian_export.py — one-way YAML graph → Obsidian markdown vault.
 
-YAML in graphs/ stays source of truth. Generated notes land in your Obsidian
-vault (default ~/Obsidian/gddp/GDDP/graphs/<project>/<node>.md) for Graph
-View filtering (e.g. path:GDDP/graphs/aa-cli).
+Exports ONE graph (graphs/<project>/) per run. Notes land in a destination
+vault folder (default ~/Obsidian/gdd-<project>/<node>.md).
 
-The only user-owned field preserved across regeneration is frontmatter
-`verified` (and optional `owned`). Do not edit status/type/priority here —
-that is graph drift.
+YAML in gddp-config stays source of truth. The only user-owned fields
+preserved across regeneration are frontmatter `verified` and `owned`.
 
 Usage:
-    .venv/bin/python scripts/obsidian_export.py
     .venv/bin/python scripts/obsidian_export.py --project aa-cli
     .venv/bin/python scripts/gddp.py obsidian export --project aa-cli
 """
@@ -32,11 +29,9 @@ except ImportError:
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPTS_DIR.parent
-DEFAULT_VAULT = Path.home() / "Obsidian" / "gddp"
-GENERATED_ROOT = "GDDP/graphs"
+OBSIDIAN_ROOT = Path.home() / "Obsidian"
 GRAPH_JSON = """{
   "collapse-filter": false,
-  "search": "path:GDDP/graphs",
   "colorGroups": [
     {"query": "status:complete", "color": {"a": 1, "rgb": 4521796}},
     {"query": "status:ready", "color": {"a": 1, "rgb": 4492031}},
@@ -46,24 +41,27 @@ GRAPH_JSON = """{
 }
 """
 PRESERVE_KEYS = ("verified", "owned")
-BANNER = "> **Auto-generated** from `graphs/` YAML. Regenerate with `gddp obsidian export`. Only edit `verified` / `owned` in frontmatter."
+BANNER = (
+    "> **Auto-generated** from `graphs/` YAML. "
+    "Regenerate with `gddp obsidian export --project <id>`. "
+    "Only edit `verified` / `owned` in frontmatter."
+)
 
 FM_RE = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
 
 
-def iter_node_files(graphs_dir: Path, project_filter: str | None):
-    if not graphs_dir.exists():
+def vault_dir_for_project(project_id: str, vault_override: Path | None) -> Path:
+    if vault_override is not None:
+        return vault_override
+    return OBSIDIAN_ROOT / f"gdd-{project_id}"
+
+
+def iter_graph_nodes(graphs_dir: Path, project_id: str):
+    nodes_dir = graphs_dir / project_id / "nodes"
+    if not nodes_dir.exists():
         return
-    for project_dir in sorted(graphs_dir.iterdir()):
-        if not project_dir.is_dir() or project_dir.name == "_template":
-            continue
-        if project_filter and project_dir.name != project_filter:
-            continue
-        nodes_dir = project_dir / "nodes"
-        if not nodes_dir.exists():
-            continue
-        for path in sorted(nodes_dir.glob("*.yaml")):
-            yield project_dir.name, path
+    for path in sorted(nodes_dir.glob("*.yaml")):
+        yield path
 
 
 def load_project_meta(graphs_dir: Path, project_id: str) -> dict:
@@ -164,7 +162,7 @@ def render_node_note(
         "verified": preserved.get("verified"),
         "owned": preserved.get("owned"),
         "repo": repo,
-        "tags": ["gddp/auto-generated", f"gddp/project/{project_id}"],
+        "tags": ["gdd/auto-generated", f"gdd/graph/{project_id}"],
         "source_yaml": yaml_path,
         "generated_at": generated_at,
     }
@@ -253,7 +251,7 @@ def render_project_index(
         "title": name,
         "type": "project-index",
         "status": "index",
-        "tags": ["gddp/auto-generated", "gddp/project-index", f"gddp/project/{project_id}"],
+        "tags": ["gdd/auto-generated", "gdd/graph-index", f"gdd/graph/{project_id}"],
         "repo": repo,
         "generated_at": generated_at,
     }
@@ -278,62 +276,50 @@ def render_project_index(
     return "\n".join(parts)
 
 
-def ensure_vault_scaffold(vault_dir: Path, dry_run: bool) -> None:
-    """Write starter Obsidian config on first export (outside gddp-config)."""
+def ensure_vault_scaffold(vault_dir: Path, project_id: str, dry_run: bool) -> None:
     graph_path = vault_dir / ".obsidian" / "graph.json"
-    readme_path = vault_dir / "README.md"
     if dry_run:
         if not graph_path.exists():
             print(f"would write {graph_path}")
-        if not readme_path.exists():
-            print(f"would write {readme_path}")
         return
     if not graph_path.exists():
         graph_path.parent.mkdir(parents=True, exist_ok=True)
         graph_path.write_text(GRAPH_JSON)
-    if not readme_path.exists():
-        readme_path.write_text(
-            "# GDDP graph vault\n\n"
-            "Auto-generated from gddp-config YAML. Regenerate:\n\n"
-            "```bash\n"
-            "cd ~/repos/gddp-config\n"
-            ".venv/bin/python scripts/gddp.py obsidian export\n"
-            "```\n\n"
-            "Open this folder as an Obsidian vault. Graph filter: `path:GDDP/graphs/aa-cli`\n"
-        )
 
 
-def export_vault(
+def export_graph(
     *,
     root: Path,
+    project_id: str,
     vault_dir: Path,
-    project_filter: str | None = None,
     dry_run: bool = False,
 ) -> dict:
-    ensure_vault_scaffold(vault_dir, dry_run)
     graphs_dir = root / "graphs"
-    out_root = vault_dir / GENERATED_ROOT
+    project_yaml = graphs_dir / project_id / "project.yaml"
+    if not project_yaml.exists():
+        print(f"ERROR: graph not found: graphs/{project_id}/", file=sys.stderr)
+        return {"nodes": 0, "preserved": 0, "error": True}
+
+    ensure_vault_scaffold(vault_dir, project_id, dry_run)
     generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     written: set[Path] = set()
-    counts = {"projects": 0, "nodes": 0, "preserved": 0}
+    counts = {"nodes": 0, "preserved": 0, "error": False}
+    node_ids: list[str] = []
+    project_meta = load_project_meta(graphs_dir, project_id)
 
-    projects_seen: dict[str, list[str]] = {}
-
-    for project_id, yaml_path in iter_node_files(graphs_dir, project_filter):
+    for yaml_path in iter_graph_nodes(graphs_dir, project_id):
         with open(yaml_path) as f:
             node = yaml.safe_load(f) or {}
         if not isinstance(node, dict):
             continue
 
         node_id = node.get("node_id") or yaml_path.stem
-        projects_seen.setdefault(project_id, []).append(node_id)
-
-        note_path = out_root / project_id / f"{node_id}.md"
+        node_ids.append(node_id)
+        note_path = vault_dir / f"{node_id}.md"
         preserved = read_preserved_frontmatter(note_path)
         if preserved:
             counts["preserved"] += 1
 
-        project_meta = load_project_meta(graphs_dir, project_id)
         content = render_node_note(
             project_id=project_id,
             node=node,
@@ -344,31 +330,29 @@ def export_vault(
         )
 
         if dry_run:
-            print(f"would write {note_path.relative_to(vault_dir)}")
+            print(f"would write {note_path}")
         else:
-            note_path.parent.mkdir(parents=True, exist_ok=True)
+            vault_dir.mkdir(parents=True, exist_ok=True)
             note_path.write_text(content)
         written.add(note_path)
         counts["nodes"] += 1
 
-    for project_id, node_ids in sorted(projects_seen.items()):
-        counts["projects"] += 1
-        index_path = out_root / project_id / "_project.md"
-        content = render_project_index(
-            project_id=project_id,
-            project_meta=load_project_meta(graphs_dir, project_id),
-            node_ids=node_ids,
-            generated_at=generated_at,
-        )
-        if dry_run:
-            print(f"would write {index_path.relative_to(vault_dir)}")
-        else:
-            index_path.parent.mkdir(parents=True, exist_ok=True)
-            index_path.write_text(content)
-        written.add(index_path)
+    index_path = vault_dir / "_project.md"
+    index_content = render_project_index(
+        project_id=project_id,
+        project_meta=project_meta,
+        node_ids=node_ids,
+        generated_at=generated_at,
+    )
+    if dry_run:
+        print(f"would write {index_path}")
+    else:
+        vault_dir.mkdir(parents=True, exist_ok=True)
+        index_path.write_text(index_content)
+    written.add(index_path)
 
-    if not dry_run and out_root.exists():
-        for path in out_root.rglob("*.md"):
+    if not dry_run and vault_dir.exists():
+        for path in vault_dir.glob("*.md"):
             if path not in written:
                 path.unlink()
 
@@ -376,28 +360,30 @@ def export_vault(
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Export graph nodes to Obsidian markdown vault")
-    parser.add_argument("--root", type=Path, default=ROOT, help="gddp-config root")
-    parser.add_argument(
-        "--vault", type=Path, default=DEFAULT_VAULT,
-        help="Obsidian vault directory (default: ~/Obsidian/gddp)",
+    parser = argparse.ArgumentParser(
+        description="Export one gddp-config graph to an Obsidian vault folder",
     )
-    parser.add_argument("--project", default=None, help="Only export this project")
+    parser.add_argument("--root", type=Path, default=ROOT, help="gddp-config root")
+    parser.add_argument("--project", required=True, help="Graph to export (graphs/<project>/)")
+    parser.add_argument(
+        "--vault", type=Path, default=None,
+        help="Destination vault folder (default: ~/Obsidian/gdd-<project>)",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Print paths without writing")
     args = parser.parse_args(argv)
 
-    counts = export_vault(
+    vault_dir = vault_dir_for_project(args.project, args.vault)
+    counts = export_graph(
         root=args.root,
-        vault_dir=args.vault,
-        project_filter=args.project,
+        project_id=args.project,
+        vault_dir=vault_dir,
         dry_run=args.dry_run,
     )
+    if counts.get("error"):
+        return 2
+
     action = "Would export" if args.dry_run else "Exported"
-    scope = args.project or "all projects"
-    print(
-        f"{action} {counts['nodes']} node(s) across {counts['projects']} project(s) "
-        f"→ {args.vault / GENERATED_ROOT} ({scope})"
-    )
+    print(f"{action} {counts['nodes']} node(s) from graphs/{args.project}/ → {vault_dir}")
     if counts["preserved"]:
         print(f"Preserved verified/owned on {counts['preserved']} note(s)")
     return 0
