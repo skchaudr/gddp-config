@@ -21,6 +21,7 @@ Or use your system Python if it's not PEP-668-locked.
 .venv/bin/python scripts/gddp.py node validate
 .venv/bin/python scripts/gddp.py node status
 .venv/bin/python scripts/gddp.py verify node --project aa-cli --node common-core
+.venv/bin/python scripts/gddp.py obsidian export
 .venv/bin/python scripts/gddp.py project new --from-outline outline.md --project-id my-app --repo org/repo
 ```
 
@@ -35,6 +36,17 @@ Or use your system Python if it's not PEP-668-locked.
 | `node validate` | Validate all nodes against schema | No TUI |
 | `node list` | List nodes in a project | No TUI |
 | `node status` | Completion summary for all projects | No TUI |
+
+### obsidian subcommand
+
+| Command | What |
+|---|---|
+| `obsidian export` | One-way YAML → Obsidian markdown in `obsidian-vault/GDDP/graphs/` |
+| `obsidian export --project X` | Export one project only |
+
+YAML stays source of truth. Re-export overwrites generated notes but preserves
+frontmatter `verified` and `owned`. Open `obsidian-vault/` as its own vault in
+Obsidian; filter Graph View with `path:GDDP/graphs/aa-cli`.
 
 ### verify subcommand
 

@@ -12,6 +12,8 @@ Subcommands:
 
     verify node       Run deterministic node evaluation; emit a receipt
 
+    obsidian export   One-way YAML nodes → Obsidian markdown vault
+
     project new       Create project skeleton (from graphify, outline, or empty shell)
     project validate  Validate project.yaml structure
 
@@ -127,6 +129,18 @@ def cmd_verify_node(args):
     if args.json:
         argv += ["--json"]
     sys.exit(verify_node.main(argv))
+
+
+def cmd_obsidian_export(args):
+    obsidian_export = _import_module("obsidian_export")
+    argv = []
+    if args.project:
+        argv += ["--project", args.project]
+    if args.vault:
+        argv += ["--vault", str(args.vault)]
+    if args.dry_run:
+        argv.append("--dry-run")
+    sys.exit(obsidian_export.main(argv))
 
 
 def cmd_project_new(args):
@@ -380,6 +394,17 @@ def main():
     verify_node.add_argument("--json", action="store_true",
                              help="Print result.json to stdout")
     verify_node.set_defaults(func=cmd_verify_node)
+
+    obs_p = sub.add_parser("obsidian", help="Obsidian vault export")
+    obs_sub = obs_p.add_subparsers(dest="subcommand")
+
+    obs_export = obs_sub.add_parser(
+        "export", help="One-way YAML nodes → Obsidian markdown vault")
+    obs_export.add_argument("--project", default=None, help="Only export this project")
+    obs_export.add_argument("--vault", type=Path, default=None,
+                            help="Vault directory (default: obsidian-vault/)")
+    obs_export.add_argument("--dry-run", action="store_true")
+    obs_export.set_defaults(func=cmd_obsidian_export)
 
     proj_p = sub.add_parser("project", help="Project operations")
     proj_sub = proj_p.add_subparsers(dest="subcommand")
