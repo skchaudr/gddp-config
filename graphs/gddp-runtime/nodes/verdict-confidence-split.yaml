@@ -19,18 +19,22 @@ why: |
      but the single confidence scalar then conflates "unsure the code works"
      (false here) with "paperwork/trail missing" (true here).
 
-  Fix: report two axes instead of one scalar — (a) criteria_confidence: how sure
-  we are the code meets the spec; (b) completeness/verdict gating: whether the
-  required trail is present. And when the floor is indeterminate-dominated, defer
-  to the semantic confidence rather than min()-ing it away. This makes a
-  built-but-untrailed node read as ~0.95 criteria-confidence with a
-  needs-more-evidence verdict — honest, not 0.18.
+  Fix: report against the receipt contract instead of one blended scalar. The
+  criteria signal says how sure we are the code meets the spec; the completeness
+  signal says whether the required trail is present; the graph-readiness signal
+  says whether the human has enough evidence to advance graph truth. And when
+  the floor is indeterminate-dominated, defer to the semantic confidence rather
+  than min()-ing it away. This makes a built-but-untrailed node read as ~0.95
+  criteria-confidence with a needs-more-evidence verdict — honest, not 0.18.
 
-depends_on: []
+depends_on:
+  - verification-receipt-contract
 
 acceptance:
   - id: receipt-exposes-two-axes
-    criterion: VerdictReceipt in scripts/runtime/verification/schemas.py exposes a criteria_confidence field (confidence the code meets the criteria) distinct from a completeness/artifact-gate indicator, in addition to the existing overall confidence
+    criterion: VerdictReceipt in scripts/runtime/verification/schemas.py exposes criteria_confidence and completeness fields matching docs/verification-receipt-contract.md, in addition to the existing overall confidence
+  - id: receipt-contract-fields-populated
+    criterion: verifier output populates the contract's criteria judgment, execution-trail completeness, graph-advance readiness, and next-action fields without blending them into one score
   - id: blend-defers-to-semantic-when-floor-indeterminate
     criterion: _confidence_semantic_blend in scripts/runtime/verification/decision_engine.py no longer lets an indeterminate-dominated deterministic floor drag the score below the semantic confidence; when the floor is indeterminate it weights/defers to semantic instead of min()
   - id: artifact-gate-still-caps-verdict-only
@@ -44,6 +48,7 @@ acceptance:
 
 constraints:
   - only modify scripts/runtime/verification/decision_engine.py, scripts/runtime/verification/schemas.py, and scripts/runtime/verification/orchestrator.py
+  - follow docs/verification-receipt-contract.md; do not invent incompatible receipt field names in this node
   - DO NOT change the set of possible verdicts or the decision matrix rows — only the confidence computation and receipt shape
   - preserve backward compatibility — keep the existing overall confidence field populated
   - DO NOT weaken the artifact gate — it must still block PASS
