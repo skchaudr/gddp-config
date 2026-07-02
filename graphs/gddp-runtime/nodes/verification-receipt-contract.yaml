@@ -18,10 +18,12 @@ why: |
   questions: criteria satisfaction, execution-trail completeness, graph-advance
   readiness, and the next human/system action.
 
-  Runtime commit 7f803ce added partial receipt fields (`criteria_confidence`,
-  `completeness_status`), but there is still no contract doc or fixture set
-  defining how consumers should interpret them. This is now the next real
-  blocker before calibration changes should advance.
+  Runtime commits 7f803ce and 313925f added the terminal semantic path and the
+  first receipt compatibility fields (`confidence`, `criteria_confidence`,
+  `completeness_status`). The remaining contract gap is not another status flip:
+  it is proving, with docs, fixtures, and a real verifier receipt, that consumers
+  can read one receipt without guessing which signal means criteria judgment,
+  artifact completeness, graph readiness, or next action.
 
 depends_on:
   - return-router
@@ -29,27 +31,34 @@ depends_on:
   - semantic-validation-retry
 
 acceptance:
-  - id: contract-doc-exists
-    criterion: docs/verification-receipt-contract.md exists in gddp-runtime and defines the verifier receipt as a stable consumer-facing contract
-  - id: four-signals-separated
-    criterion: the contract defines separate fields or sections for criteria judgment, execution-trail completeness, graph-advance readiness, and next action; no single scalar is allowed to stand in for all four
+  - id: contract-doc-defines-current-shape
+    criterion: 'verification-engine-spec.md or docs/verification-receipt-contract.md in gddp-runtime defines the current VerdictReceipt fields: project_id, node_id, verdict, confidence, criteria_confidence, completeness_status, deterministic, semantic, decision_reasoning, required_next_action, and generated_at'
+  - id: confidence-alias-rule-explicit
+    criterion: the contract states that confidence is a legacy compatibility alias for criteria_confidence, that new consumers should read criteria_confidence, and that mismatched values are invalid
+  - id: completeness-status-enum-defined
+    criterion: the contract defines completeness_status values complete, partial, and not-run, including how semantic absence, empty judgments, and budget_exhausted map to those values
   - id: criteria-evidence-shape-defined
-    criterion: the contract specifies the per-criterion evidence shape, including criterion id, verdict, confidence, reasoning, and file/command evidence when available
+    criterion: the contract specifies the per-criterion semantic evidence shape, including criterion_id, judgment, confidence, reasoning, and evidence entries with file/command references when available
   - id: artifact-gate-shape-defined
-    criterion: the contract specifies how required artifacts are reported independently from criteria confidence, including present, missing, and not-required states
+    criterion: the contract specifies how deterministic.artifacts_present reports required artifacts independently from criteria_confidence, including present, missing, and not-required/no-entry cases
   - id: graph-truth-boundary-explicit
-    criterion: the contract states that runtime may emit an acceptance candidate or needs-review receipt but must not mutate gddp-config graph truth directly
-  - id: next-action-enum-defined
-    criterion: the contract defines the allowed next actions as accept, retry, block, defer, or dispatch-next, with one selected action per receipt
-  - id: fixture-receipts-included
-    criterion: at least two fixture receipt examples exist under tests/fixtures/verification_receipts/ showing semantic-pass-with-missing-artifacts and semantic-fail-with-complete-artifacts
+    criterion: the contract states that runtime may emit a receipt and required_next_action but must not mutate gddp-config graph truth directly
+  - id: next-action-vocabulary-defined
+    criterion: the contract maps required_next_action strings to the operator decisions accept, retry, block, defer, or dispatch-next without requiring readers to infer the action from verdict text alone
+  - id: fixture-receipts-cover-ambiguity
+    criterion: tests/fixtures/verification_receipts/ or equivalent committed test fixtures include semantic-pass-with-missing-artifacts and semantic-fail-with-complete-artifacts examples, and both validate as VerdictReceipt
+  - id: schema-tests-lock-contract
+    criterion: scripts/runtime/verification/test_schemas.py or equivalent tests prove legacy confidence-only payloads are accepted, confidence/criteria_confidence mismatches are rejected, and missing completeness_status is backfilled deterministically
+  - id: runtime-receipt-proves-node
+    criterion: this node is not complete until a runtime-generated verifier receipt for verification-receipt-contract is attached to the handoff or result artifacts and shows the contract fields populated without graph mutation
 
 constraints:
-  - documentation and fixtures only unless a tiny schema dataclass update is required to name the contract fields
-  - do not change verifier decision logic in this node; verdict-confidence-split owns calibration behavior
+  - documentation, fixtures, schema compatibility tests, and receipt-generation proof only; do not change confidence calibration in this node
+  - do not change verifier decision matrix behavior; verdict-confidence-split owns calibration behavior
   - do not add a visualization, dashboard, web UI, or graph rendering structure
   - preserve backward compatibility for existing receipt readers unless the contract doc explicitly names a migration path
   - keep graph truth human-owned; do not revive or replace graph_updater.py
+  - do not mark this node complete from code inspection alone; require a runtime verifier receipt generated in the completion round
 
 allowed_execution_modes:
   - human
