@@ -1,0 +1,356 @@
+schema_version: '1.0'
+schema_type: project_graph_bundle
+project_id: album-production
+project_name: Album Production
+description: End-to-end pipeline from songwriting through mastering, artwork, marketing, distribution, and release
+repo: sab-mini/album-production
+blueprint:
+  vision: Ship a cohesive album release where audio production, visual identity, and marketing launch in sync on release day
+  architecture_notes: 'Linear audio chain: songwriting → demo → arrangement → studio → mix → master.
+
+    Parallel tracks branch after demo (art) and after arrangement (marketing).
+
+    Distribution gates on mastered audio and final artwork; release gates on distribution plus live campaign assets.
+
+    Each phase produces reviewable artifacts on disk before the next phase starts.
+
+    '
+  major_capabilities:
+  - songwriting and demo capture
+  - arrangement and studio tracking
+  - mixing and mastering deliverables
+  - album art and marketing campaign
+  - distribution setup and public release
+graph_version: '1.0'
+created_at: 2026-06-29
+last_updated: '2026-06-29'
+nodes_dir: nodes/
+nodes:
+- schema_version: '1.0'
+  schema_type: node
+  node_id: songwriting
+  title: Complete album songwriting and lyric lock
+  type: capability
+  why: Demo recording cannot start until each track has a finalized chord structure, melody sketch, and lyric sheet approved for the album concept
+  depends_on: []
+  acceptance:
+  - id: track-list-locked
+    criterion: Album track list is documented with working titles, keys, and tempos for every planned song
+  - id: lyric-sheets-per-track
+    criterion: Each track has a lyric sheet file with final verses, chorus, and bridge text marked ready for demo
+  - id: chord-charts-present
+    criterion: Each track has a chord chart or lead sheet sufficient for a solo demo performance
+  - id: album-concept-note
+    criterion: A one-page album concept note defines sonic direction, narrative arc, and target song count
+  - id: songwriting-review-signoff
+    criterion: decision.md records human signoff that lyrics will not change during demo without reopening this node
+  constraints:
+  - no studio booking until songwriting node is complete
+  - lyric changes after demo require reopening songwriting, not patching downstream nodes silently
+  - keep all songwriting artifacts under project docs/songwriting/ in version control
+  allowed_execution_modes:
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  status: pending
+  priority: high
+  unlocks:
+  - demo-recording
+- schema_version: '1.0'
+  schema_type: node
+  node_id: demo-recording
+  title: Record reference demos for every album track
+  type: capability
+  why: Arrangement decisions need audible reference performances to evaluate structure, tempo feel, and vocal delivery before committing studio time
+  depends_on:
+  - songwriting
+  acceptance:
+  - id: demo-wav-per-track
+    criterion: Each locked track has a 24-bit WAV demo at project sample rate under audio/demos/<track-slug>.wav
+  - id: demo-matches-locked-tempo
+    criterion: Demo BPM matches the tempo documented in songwriting chord charts within ±2 BPM
+  - id: vocal-reference-takes
+    criterion: Lead vocal is present on every demo even if scratch quality, sufficient for arrangement critique
+  - id: demo-session-notes
+    criterion: result-summary.md lists gear, mic chain, and any structural deviations discovered during demo sessions
+  - id: demo-playback-review
+    criterion: decision.md confirms all demos were reviewed in full before marking complete
+  constraints:
+  - demos are reference only — do not master or release demo files publicly
+  - use consistent project sample rate across all demo WAV files
+  - do not begin arrangement until every track on the locked list has a demo
+  allowed_execution_modes:
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  status: pending
+  priority: high
+  unlocks:
+  - arrangement
+  - album-art-design
+- schema_version: '1.0'
+  schema_type: node
+  node_id: arrangement
+  title: Finalize arrangements and studio session plans
+  type: capability
+  why: Studio recording sessions need finalized instrument parts, section maps, and click-track tempos so tracking days stay on schedule
+  depends_on:
+  - demo-recording
+  acceptance:
+  - id: arrangement-charts-per-track
+    criterion: Each track has an arrangement chart documenting intro, verse, chorus, bridge, and outro instrument roles
+  - id: click-tracks-exported
+    criterion: Studio-ready click tracks or tempo maps are exported for every track under audio/clicks/
+  - id: session-plan-document
+    criterion: A studio session plan assigns tracks to recording days with musician roles and estimated hours per song
+  - id: arrangement-matches-demo-structure
+    criterion: Arrangement charts preserve song form from approved demos unless decision.md documents an intentional structural change
+  - id: scratch-vocal-retained
+    criterion: Scratch vocal reference from demo is archived for comparison against studio takes
+  constraints:
+  - no studio booking changes without updating the session plan artifact
+  - arrangement must not add new songs beyond the locked track list without reopening songwriting
+  - keep arrangement PDFs or charts in docs/arrangement/
+  allowed_execution_modes:
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  status: pending
+  priority: high
+  unlocks:
+  - studio-recording
+  - marketing-campaign
+- schema_version: '1.0'
+  schema_type: node
+  node_id: studio-recording
+  title: Track final studio performances for all album songs
+  type: capability
+  why: Mixing requires consolidated multitrack stems with final vocals and instruments captured at the agreed sample rate and gain staging
+  depends_on:
+  - arrangement
+  acceptance:
+  - id: multitrack-stems-per-song
+    criterion: Every album track has a labeled multitrack session folder with drums, bass, keys, guitars, and lead vocal stems
+  - id: consistent-sample-rate
+    criterion: All studio sessions were recorded at the same sample rate documented in the session plan
+  - id: no-clipping-stems
+    criterion: Peak levels on delivered stems stay below -1 dBFS with no clipped files in the final take folders
+  - id: session-logs-complete
+    criterion: result-summary.md records take numbers, punch-in notes, and any missing overdubs scheduled
+  - id: producer-signoff
+    criterion: decision.md confirms all planned instruments for each track were captured or explicitly deferred with a follow-up date
+  constraints:
+  - do not print mixes from studio sessions — mixing is a separate node
+  - keep raw studio files immutable; edits happen only in mix sessions
+  - archive session files to durable storage before marking complete
+  allowed_execution_modes:
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  status: pending
+  priority: high
+  unlocks:
+  - mixing
+- schema_version: '1.0'
+  schema_type: node
+  node_id: mixing
+  title: Mix all album tracks to approved reference balances
+  type: capability
+  why: Mastering needs stereo mixes with settled levels, panning, and effects decisions so loudness and tonal work happens on stable sources
+  depends_on:
+  - studio-recording
+  acceptance:
+  - id: stereo-mix-wav-per-track
+    criterion: Each track has a 24-bit stereo mix WAV at project sample rate under audio/mixes/<track-slug>.wav
+  - id: mix-version-labeled
+    criterion: Mix files include version suffix or session notes identifying the approved revision (e.g. mix-v3)
+  - id: vocal-intelligibility-check
+    criterion: Lead vocal sits clearly above instrumental bed on every mix per artist review notes in decision.md
+  - id: no-mastering-processing
+    criterion: Mix bus has no limiting, loudness maximizer, or mastering chain applied — mixes are pre-master headroom
+  - id: artist-mix-approval
+    criterion: decision.md records artist approval on every track mix before mastering begins
+  constraints:
+  - mix revisions stay in audio/mixes/ with version labels — do not overwrite prior mixes silently
+  - do not distribute mix WAVs publicly; only mastered files ship to distribution
+  - keep mix session files separate from mastering session files
+  allowed_execution_modes:
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  status: pending
+  priority: high
+  unlocks:
+  - mastering
+- schema_version: '1.0'
+  schema_type: node
+  node_id: mastering
+  title: Master album tracks to distribution-ready loudness and format
+  type: capability
+  why: Distribution platforms require mastered files meeting loudness, true-peak, and format specs before upload and metadata binding
+  depends_on:
+  - mixing
+  acceptance:
+  - id: mastered-wav-per-track
+    criterion: Each track has a 16-bit or 24-bit mastered WAV under audio/masters/<track-slug>.wav ready for aggregator upload
+  - id: integrated-loudness-target
+    criterion: Masters target integrated loudness between -14 and -10 LUFS per platform guidance documented in decision.md
+  - id: true-peak-limit
+    criterion: True peak on all masters stays at or below -1 dBTP
+  - id: album-sequence-ddp-or-reference
+    criterion: Album playback sequence document lists track order, ISRC placeholders, and crossfade notes if any
+  - id: mastering-qc-pass
+    criterion: decision.md records QC listen on studio monitors and earbuds with no clicks, pops, or uncaught mix regressions
+  constraints:
+  - do not remaster from demo or studio stems — only from approved stereo mixes
+  - keep mastering session separate from mix session archives
+  - no public release of unmastered mixes
+  allowed_execution_modes:
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  status: pending
+  priority: high
+  unlocks:
+  - distribution
+- schema_version: '1.0'
+  schema_type: node
+  node_id: album-art-design
+  title: Deliver final album artwork and packaging assets
+  type: capability
+  why: Distribution upload requires cover art at platform dimensions and marketing needs consistent visual identity derived from demo-era creative direction
+  depends_on:
+  - demo-recording
+  acceptance:
+  - id: cover-art-master-3000
+    criterion: Final cover art delivered at minimum 3000×3000 px RGB without embedded text smaller than platform readability guidelines
+  - id: alternate-aspect-exports
+    criterion: Exports include 1:1 streaming cover and 16:9 banner or social crop documented in assets/art/
+  - id: typography-source-files
+    criterion: Layered source file (PSD, AFFINITY, or Figma link) archived for future edit requests
+  - id: art-aligns-album-concept
+    criterion: decision.md ties visual mood to the album concept note from songwriting with artist approval
+  - id: parental-advisory-variant
+    criterion: If any track requires explicit label, a Parental Advisory variant cover is exported alongside the standard cover
+  constraints:
+  - artwork must not use unlicensed stock or uncleared photography
+  - do not upload draft art to distribution — only final approved exports
+  - keep work-in-progress art out of public repos if it contains unreleased titles
+  allowed_execution_modes:
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  status: pending
+  priority: medium
+  unlocks:
+  - distribution
+- schema_version: '1.0'
+  schema_type: node
+  node_id: marketing-campaign
+  title: Build pre-release marketing campaign and content calendar
+  type: capability
+  why: Album release day needs scheduled singles teasers, social copy, and press assets aligned with arrangement-final track order and positioning
+  depends_on:
+  - arrangement
+  acceptance:
+  - id: release-calendar-document
+    criterion: Marketing calendar lists pre-save date, single rollout dates, and album release date with platform targets
+  - id: social-copy-per-single
+    criterion: Draft social posts exist for at least two pre-release singles with hooks tied to arrangement-final track highlights
+  - id: press-kit-one-sheet
+    criterion: Press kit one-sheet includes artist bio, album summary, and contact email under docs/marketing/
+  - id: teaser-audio-clips
+    criterion: 15–30 second teaser clips are exported for approved singles without revealing unmastered full mixes
+  - id: campaign-budget-note
+    criterion: result-summary.md documents paid vs organic spend assumptions and any influencer outreach status
+  constraints:
+  - do not announce final release date publicly until distribution node confirms aggregator delivery window
+  - teaser clips must use approved demo or mix snippets only — no leaked masters before release
+  - keep unreleased lyrics out of public posts until songwriting signoff artifacts allow it
+  allowed_execution_modes:
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  status: pending
+  priority: medium
+  unlocks:
+  - album-release
+- schema_version: '1.0'
+  schema_type: node
+  node_id: distribution
+  title: Upload masters and metadata to distribution aggregator
+  type: capability
+  why: Album release cannot go live until mastered audio and cover art are ingested by the distributor with correct ISRC, UPC, and territory settings
+  depends_on:
+  - mastering
+  - album-art-design
+  acceptance:
+  - id: aggregator-upload-complete
+    criterion: All mastered tracks and cover art uploaded to chosen distributor with album-level metadata saved
+  - id: isrc-per-track
+    criterion: Each track has an assigned ISRC recorded in docs/distribution/isrc-registry.yaml
+  - id: upc-assigned
+    criterion: Album UPC or EAN is assigned and documented before release scheduling
+  - id: territories-and-date-set
+    criterion: Distribution dashboard shows release territories and earliest go-live date matching marketing calendar
+  - id: preview-qc-on-platform
+    criterion: decision.md confirms distributor preview playback passed on at least one mobile and one desktop client
+  constraints:
+  - do not set public release live until album-release node approves coordinated launch
+  - only use mastered files from mastering node — never upload mixes or demos
+  - keep distributor login credentials out of the graph repo
+  allowed_execution_modes:
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  status: pending
+  priority: high
+  unlocks:
+  - album-release
+- schema_version: '1.0'
+  schema_type: node
+  node_id: album-release
+  title: Execute coordinated album release day launch
+  type: capability
+  why: Public release requires distribution go-live plus marketing campaign activation on the same day so listeners find the album wherever teasers pointed them
+  depends_on:
+  - distribution
+  - marketing-campaign
+  acceptance:
+  - id: streaming-links-live
+    criterion: Album is playable on at least two target platforms (e.g. Spotify and Apple Music) with matching metadata and artwork
+  - id: marketing-posts-published
+    criterion: Release-day social posts from the campaign calendar are published with correct streaming links
+  - id: website-or-linktree-updated
+    criterion: Artist link page lists current album with UPC or album URL verified working
+  - id: release-day-metrics-baseline
+    criterion: result-summary.md captures Day-0 save count, presave conversion, or available analytics baseline
+  - id: post-release-retro-scheduled
+    criterion: decision.md schedules a one-week post-release review to evaluate campaign performance and playlist pitches
+  constraints:
+  - do not mark complete if distribution is live but marketing campaign was not activated — both dependencies must be satisfied
+  - keep emergency takedown contact for distributor documented in result-summary.md
+  - graph status complete does not imply endless marketing — only release day coordination
+  allowed_execution_modes:
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  status: pending
+  priority: critical
+  unlocks: []
+execution_policy:
+  default_executor: jules
+  max_concurrent_jobs: 1
+  require_human_review_before_overnight: true
+  artifact_gate_enforced: true
+node_files: 10

@@ -162,6 +162,17 @@ Extracts a graph skeleton from code, creates project nodes. Best for brownfield 
     --dry-run
 ```
 
+## export_graph_bundles.py — create shareable one-file graph exports
+
+Expands each project graph into one YAML file with the project metadata and all
+node documents inline. Useful when you want to share a whole graph without the
+directory of per-node files.
+
+```bash
+.venv/bin/python scripts/export_graph_bundles.py \
+    --output-dir graphify-out/shareable-graphs
+```
+
 ## llm_draft.py — LLM-assisted field drafting (stub)
 
 Drafts `why`, `acceptance`, `constraints` via LLM. Used by `node rapid --llm-draft`.

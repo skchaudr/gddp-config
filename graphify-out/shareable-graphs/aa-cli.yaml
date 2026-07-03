@@ -1,0 +1,457 @@
+schema_version: '1.0'
+schema_type: project_graph_bundle
+project_id: aa-cli
+project_name: AA CLI
+description: Zsh task compiler and dispatcher that turns prompts into validated packets, routes them to executor targets, and tracks runs in a TSV ledger
+repo: skchaudr/aa-cli
+blueprint:
+  vision: A terminal-first dispatch shell where one keystroke fires a validated packet to the right executor and every run leaves a ledger receipt
+  architecture_notes: 'Pure zsh CLI with lib/ modules sourced from bin/aa. Packets are JSON validated against schema/packet.schema.json.
+
+    targets.conf maps target names to sync/async commands; aa_fire_packet in lib/fire.zsh is the central router.
+
+    Async targets (codex, jules, pi) dispatch in background and reconcile later updates ledger state from exit_status or remote session status.
+
+    State lives under AA_DATA_HOME (packets) and AA_STATE_HOME (runs, ledger.tsv).
+
+    '
+  major_capabilities:
+  - shared path/init/validation helpers (common-core)
+  - target registry lookup from targets.conf (target-registry)
+  - TSV ledger append/update and stale detection (ledger-system)
+  - packet fire routing by target mode and async placeholders (dispatch-router)
+  - per-executor dispatch paths (grok, pi-cli, gemini, droid, codex, jules, pi-harness)
+  - async job reconciliation for codex/jules open rows (reconciliation)
+graph_version: '1.0'
+created_at: 2026-06-29
+last_updated: '2026-07-03'
+nodes_dir: nodes/
+nodes:
+- schema_version: '1.0'
+  schema_type: node
+  node_id: common-core
+  title: Implement shared aa path, init, and packet validation helpers
+  type: capability
+  why: Every aa module depends on consistent XDG paths, directory bootstrap, jq-backed packet validation, and small string/time utilities before targets, ledger, or fire can run
+  depends_on: []
+  acceptance:
+  - id: aa-root-and-state-paths
+    criterion: AA_ROOT, AA_DATA_HOME, AA_STATE_HOME, and AA_SCHEMA resolve to repo-local defaults with env override support in lib/fire.zsh
+  - id: aa-init-dirs-creates-state
+    criterion: aa_init_dirs creates packets and runs directories under AA_DATA_HOME and AA_STATE_HOME
+  - id: aa-validate-packet-schema
+    criterion: aa_validate_packet rejects missing packets and invalid JSON against schema/packet.schema.json via jq
+  - id: aa-require-jq-errors
+    criterion: aa_require_jq prints a clear error and returns non-zero when jq is not installed
+  - id: slug-and-iso-helpers
+    criterion: aa_slug, aa_now_iso, aa_now_id, and aa_title_from_prompt produce filesystem-safe slugs and UTC timestamps
+  constraints:
+  - implement helpers in lib/fire.zsh and lib/common.zsh only — do not add runtime dependencies beyond jq and zsh builtins
+  - keep AA_TARGETS_CONF default pointing at repo targets.conf
+  - do not source executor-specific modules from common-core
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: complete
+  priority: high
+  unlocks:
+  - target-registry
+  - ledger-system
+- schema_version: '1.0'
+  schema_type: node
+  node_id: target-registry
+  title: Implement targets.conf registry and aa_target_lookup
+  type: capability
+  why: aa_fire_packet must resolve a packet target and tier to a sync or async command before any executor dispatch branch can run
+  depends_on:
+  - common-core
+  acceptance:
+  - id: parse-four-column-rows
+    criterion: aa_target_parse_row parses name tier mode command rows from targets.conf
+  - id: legacy-three-column-default-tier
+    criterion: legacy three-column rows (target mode command) are treated as tier=default
+  - id: lookup-exact-tier
+    criterion: aa_target_lookup returns mode and command tab-separated for an exact name+tier match
+  - id: lookup-fallback-default-tier
+    criterion: aa_target_lookup falls back to tier=default when the requested tier is missing
+  - id: list-target-names
+    criterion: aa_target_names prints deduplicated target names from targets.conf ignoring comments and blank lines
+  - id: unknown-target-errors
+    criterion: aa_target_lookup errors with aa_die when the target name is not registered
+  constraints:
+  - keep targets.conf as the single source of truth for executor routing — no hardcoded target table in fire.zsh
+  - support both sync and async mode values only
+  - preserve existing target aliases (cdx and codex both map to __codex_async)
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: complete
+  priority: high
+  unlocks:
+  - dispatch-router
+- schema_version: '1.0'
+  schema_type: node
+  node_id: ledger-system
+  title: Implement TSV ledger append, update, and display
+  type: capability
+  why: Every fired packet must leave a durable ledger row so deck, reconcile, and the operator can see open, done, error, and stale runs
+  depends_on:
+  - common-core
+  acceptance:
+  - id: ledger-append-row
+    criterion: aa_ledger_append writes ISO timestamp, id, target, state, ref, and title as tab-separated fields to ledger.tsv
+  - id: ledger-update-or-append
+    criterion: aa_ledger_update_or_append updates an existing id row instead of duplicating on refire
+  - id: ledger-state-for-id
+    criterion: aa_ledger_state_for_id returns the current state for a packet id
+  - id: stale-detection
+    criterion: aa_is_stale marks open rows older than AA_STALE_HOURS as stale in glyph rendering
+  - id: ledger-print-formatted
+    criterion: aa_ledger_print renders a human-readable table with state glyphs when stdout is a TTY
+  constraints:
+  - ledger format stays TSV with six columns — do not migrate to JSON or SQLite
+  - update operations must be atomic via temp file + mv
+  - do not mutate packet JSON from ledger helpers
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: complete
+  priority: high
+  unlocks:
+  - dispatch-router
+  - reconciliation
+- schema_version: '1.0'
+  schema_type: node
+  node_id: dispatch-router
+  title: Implement aa_fire_packet routing and run directory setup
+  type: capability
+  why: Firing a packet requires validating input, composing the prompt, creating a run directory, looking up the target, and branching to the correct executor handler
+  depends_on:
+  - target-registry
+  - ledger-system
+  acceptance:
+  - id: validate-before-fire
+    criterion: aa_fire_packet calls aa_validate_packet and aborts before creating a run when the packet is invalid
+  - id: run-dir-artifacts
+    criterion: each fire copies packet.json, writes prompt.txt via aa_compose_prompt, and reserves output.log under AA_STATE_HOME/runs/<id>
+  - id: target-lookup-branch
+    criterion: aa_fire_packet calls aa_target_lookup with packet target and tier to obtain mode and command
+  - id: sync-inline-path
+    criterion: sync targets run the resolved command with prompt on stdin inside workdir and record done or error in the ledger
+  - id: async-placeholder-branch
+    criterion: async targets with __codex_async, __jules_async, or __pi_async delegate to dedicated dispatch handlers instead of eval-ing the placeholder literally
+  - id: receipt-and-toast
+    criterion: successful fires print a receipt line and write AA_STATE_HOME/.toast via aa_fire_toast
+  constraints:
+  - respect packet workdir — default to PWD when workdir is empty
+  - honor mutations flag when choosing codex sandbox mode
+  - skip clipboard re-copy when the wrapped command owns clipboard (aa_command_owns_clipboard)
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: complete
+  priority: high
+  unlocks:
+  - dispatch-grok
+  - dispatch-pi-cli
+  - dispatch-gemini
+  - dispatch-droid
+  - dispatch-codex
+  - dispatch-jules
+  - dispatch-pi-harness
+- schema_version: '1.0'
+  schema_type: node
+  node_id: dispatch-grok
+  title: Wire sync grok (grk) target dispatch
+  type: capability
+  why: Operators choose the grk target to run Grok inline; aa must route sync grk packets through the grk wrapper without breaking ledger receipts
+  depends_on:
+  - dispatch-router
+  acceptance:
+  - id: grk-default-tier
+    criterion: targets.conf registers grk default sync grk and aa_target_lookup resolves it
+  - id: grk-tier-variants
+    criterion: grk speed and frontier tiers resolve to distinct grk command variants including --model grok-frontier
+  - id: sync-fire-records-ledger
+    criterion: firing a grk sync packet records done or error in ledger.tsv with ref '-'
+  - id: prompt-on-stdin
+    criterion: composed prompt.txt is passed to grk on stdin inside packet workdir
+  - id: acceptance-test-covers-grk
+    criterion: tests/acceptance.zsh includes at least one grk or sync-target smoke path
+  constraints:
+  - grk remains a sync target — do not convert to async without a spec change
+  - do not bypass aa_command_owns_clipboard for grk wrapper commands
+  - keep tier keys limited to default, speed, frontier
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: complete
+  priority: medium
+  unlocks: []
+- schema_version: '1.0'
+  schema_type: node
+  node_id: dispatch-pi-cli
+  title: Wire sync pi-cli (pir) target dispatch
+  type: capability
+  why: The pir target is the inline Pi CLI path for fast local model runs and must behave like other sync executors in aa_fire_packet
+  depends_on:
+  - dispatch-router
+  acceptance:
+  - id: pir-default-tier
+    criterion: targets.conf registers pir default sync pir and aa_target_lookup resolves it
+  - id: pir-tier-variants
+    criterion: pir speed and frontier tiers map to pir --model glm-5 and pir --model claude-sonnet-4.6 respectively
+  - id: sync-fire-records-ledger
+    criterion: firing a pir packet writes done or error ledger state after inline command completion
+  - id: output-captured
+    criterion: pir stdout/stderr land in runs/<id>/output.log
+  - id: clipboard-ownership
+    criterion: pir wrapper commands are listed in aa_command_owns_clipboard so aa does not double-copy clipboard output
+  constraints:
+  - pir stays sync — background dispatch belongs to dispatch-pi-harness
+  - do not require pi-packet binary for pir sync fires
+  - preserve existing pir tier naming from targets.conf
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: complete
+  priority: medium
+  unlocks: []
+- schema_version: '1.0'
+  schema_type: node
+  node_id: dispatch-gemini
+  title: Wire sync gemini (agy) target dispatch
+  type: capability
+  why: Gemini runs through the agy wrapper as a sync target and must integrate with the shared fire path and ledger semantics
+  depends_on:
+  - dispatch-router
+  acceptance:
+  - id: gemini-target-registered
+    criterion: targets.conf lists gemini default sync agy
+  - id: sync-eval-in-workdir
+    criterion: aa_fire_packet evals agy with prompt on stdin inside packet workdir for gemini packets
+  - id: ledger-terminal-state
+    criterion: gemini sync completion sets ledger state to done on exit 0 and error otherwise
+  - id: run-artifacts-present
+    criterion: gemini fires leave packet.json, prompt.txt, and output.log in the run directory
+  - id: no-async-placeholder
+    criterion: gemini does not use __codex_async or other async placeholders
+  constraints:
+  - keep gemini as sync agy — no background pid tracking
+  - do not add gemini-specific ledger columns
+  - rely on existing aa_fire_packet sync branch only
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: complete
+  priority: medium
+  unlocks: []
+- schema_version: '1.0'
+  schema_type: node
+  node_id: dispatch-droid
+  title: Wire sync droid target dispatch
+  type: capability
+  why: Droid exec is a first-class sync executor in targets.conf and must fire through the standard inline command path
+  depends_on:
+  - dispatch-router
+  acceptance:
+  - id: droid-target-registered
+    criterion: targets.conf lists droid default sync droid exec
+  - id: sync-eval-command
+    criterion: aa_fire_packet runs droid exec with composed prompt on stdin inside workdir
+  - id: ledger-on-completion
+    criterion: droid fires update ledger.tsv to done or error when the inline process exits
+  - id: output-log-capture
+    criterion: droid stdout and stderr are captured in runs/<id>/output.log
+  - id: receipt-line-printed
+    criterion: successful droid fires print the standard receipt line with target and run name
+  constraints:
+  - droid remains sync — no pid file or reconcile hook
+  - do not fork a separate dispatch module outside lib/fire.zsh unless required for testing
+  - preserve droid exec command string exactly unless upstream CLI changes
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: complete
+  priority: medium
+  unlocks: []
+- schema_version: '1.0'
+  schema_type: node
+  node_id: dispatch-codex
+  title: Wire async codex (__codex_async) background dispatch
+  type: capability
+  why: Codex runs are long-lived and must fire in the background with a pid ref so reconciliation can later flip open rows to done or error
+  depends_on:
+  - dispatch-router
+  acceptance:
+  - id: cdx-async-placeholder
+    criterion: targets.conf maps cdx and codex tiers to async __codex_async
+  - id: codex-nohup-wrapper
+    criterion: aa_fire_packet launches codex exec via nohup wrapper, stores pid in runs/<id>/pid and exit_status file
+  - id: mutations-sandbox-flag
+    criterion: codex exec receives --sandbox workspace-write when mutations is true and read-only otherwise
+  - id: ledger-open-with-pid-ref
+    criterion: async codex fire appends ledger row with state open and ref equal to background pid
+  - id: receipt-shows-run-dir
+    criterion: codex async receipt prints target, title, and runs/<id> path without waiting for completion
+  constraints:
+  - use AA_CODEX_BIN override for codex binary path
+  - do not block aa_fire_packet on codex completion — reconciliation owns terminal state
+  - keep cdx and codex as aliases in targets.conf
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: complete
+  priority: high
+  unlocks:
+  - reconciliation
+- schema_version: '1.0'
+  schema_type: node
+  node_id: dispatch-jules
+  title: Wire async jules (__jules_async) remote session dispatch
+  type: capability
+  why: Jules remote sessions are async and need a session id ref in the ledger so reconcile can pull output when the session completes
+  depends_on:
+  - dispatch-router
+  acceptance:
+  - id: jules-async-placeholder
+    criterion: targets.conf maps jules default async __jules_async
+  - id: github-origin-required
+    criterion: jules dispatch derives OWNER/REPO from workdir git origin and errors when origin is missing
+  - id: jules-remote-new
+    criterion: aa_fire_packet runs jules remote new with composed prompt and captures dispatch.log
+  - id: session-id-extracted
+    criterion: numeric jules session id is parsed from dispatch.log and stored as ledger ref
+  - id: ledger-open-on-success
+    criterion: successful jules dispatch writes ledger state open with session id ref; failure writes error with ref '-'
+  constraints:
+  - use AA_JULES_BIN override for jules binary path
+  - require github.com origin URL parsing compatible with existing sed transform
+  - do not wait for jules completion in aa_fire_packet
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: complete
+  priority: high
+  unlocks:
+  - reconciliation
+- schema_version: '1.0'
+  schema_type: node
+  node_id: dispatch-pi-harness
+  title: Wire async pi-harness (__pi_async) background dispatch
+  type: capability
+  why: Pi harness runs via pi-packet are async and must record an artifact slug ref so reconcile and the operator can find the run output later
+  depends_on:
+  - dispatch-router
+  acceptance:
+  - id: pi-async-placeholder
+    criterion: targets.conf maps pi default async __pi_async
+  - id: pi-packet-binary-check
+    criterion: aa_fire_packet errors clearly when AA_PI_PACKET_BIN is missing or not executable
+  - id: inline-packet-yaml-built
+    criterion: when packet_slug is empty, aa_fire_packet writes runs/<id>/packet.yaml with slug aa-<id> and goal from prompt.txt
+  - id: referenced-packet-slug
+    criterion: when packet_slug is set, aa_fire_packet uses the referenced YAML from AA_PI_PACKETS without rebuilding goal text
+  - id: background-pi-packet-run
+    criterion: pi-packet run executes in background via nohup wrapper with pid and exit_status files
+  - id: pi-artifact-ref-recorded
+    criterion: runs/<id>/pi_artifact stores slug ref and ledger open row uses that ref
+  constraints:
+  - default pi-packet path is $HOME/.pi/harness/bin/pi-packet unless AA_PI_PACKET_BIN is set
+  - honor packet mutations field in generated inline packet YAML
+  - do not block on pi-packet completion in aa_fire_packet
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: complete
+  priority: high
+  unlocks:
+  - reconciliation
+- schema_version: '1.0'
+  schema_type: node
+  node_id: reconciliation
+  title: Implement aa_reconcile for async codex and jules ledger rows
+  type: capability
+  why: Async dispatches leave ledger rows in open state until reconcile inspects process exit or Jules session status and promotes rows to done or error
+  depends_on:
+  - ledger-system
+  - dispatch-codex
+  - dispatch-jules
+  - dispatch-pi-harness
+  acceptance:
+  - id: reconcile-codex-open-rows
+    criterion: aa_reconcile leaves codex rows open while pid is alive, sets done when exit_status is 0, and error otherwise
+  - id: reconcile-jules-session-status
+    criterion: aa_reconcile checks jules remote list for session ref and promotes Complete sessions to done after pulling output
+  - id: jules-pull-artifacts
+    criterion: completed jules reconcile writes output.log and diff.patch under runs/<id> and prints file count to stderr
+  - id: jules-failed-sessions
+    criterion: jules sessions marked Failed reconcile to ledger state error
+  - id: atomic-ledger-rewrite
+    criterion: aa_reconcile rewrites ledger.tsv atomically via temp file and mv without dropping non-open rows
+  - id: acceptance-test-async-path
+    criterion: tests/acceptance.zsh covers async codex reconcile promoting open to done
+  constraints:
+  - only mutate open rows for codex and jules targets — leave sync targets unchanged
+  - do not delete run directories during reconcile
+  - pi-harness reconciliation may remain future scope if not yet implemented in lib/reconcile.zsh
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: complete
+  priority: high
+  unlocks: []
+execution_policy:
+  default_executor: jules
+  max_concurrent_jobs: 1
+  require_human_review_before_overnight: false
+  artifact_gate_enforced: true
+node_files: 12
