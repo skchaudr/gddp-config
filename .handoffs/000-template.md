@@ -15,6 +15,8 @@ Branch:
 
 ### Scope touched (One file per line, +/- for only what was changed)
 
+### Constrained areas touched (none / list + justification)
+
 ### Current Git state (2-3 sentences max, anything more must be critically justifiable)
 
 ### Artifacts (Filepath - Description, 1 line max per artifact)
