@@ -6,7 +6,7 @@ writes a single expanded YAML file that is easier to share than a directory of
 per-node files.
 
 Output format:
-  graphify-out/shareable-graphs/<project-id>.yaml
+  exports/shareable-graphs/<project-id>.yaml
 
 The bundle is derived data only. It is not used by validation.
 """
@@ -93,8 +93,8 @@ def main() -> int:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("graphify-out/shareable-graphs"),
-        help="Directory to write bundles to (default: graphify-out/shareable-graphs/)",
+        default=Path("exports/shareable-graphs"),
+        help="Directory to write bundles to (default: exports/shareable-graphs/)",
     )
     parser.add_argument(
         "--project",

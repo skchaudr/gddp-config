@@ -170,7 +170,7 @@ directory of per-node files.
 
 ```bash
 .venv/bin/python scripts/export_graph_bundles.py \
-    --output-dir graphify-out/shareable-graphs
+    --output-dir exports/shareable-graphs
 ```
 
 ## llm_draft.py — LLM-assisted field drafting (stub)
