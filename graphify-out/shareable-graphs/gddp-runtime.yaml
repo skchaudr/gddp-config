@@ -1,0 +1,588 @@
+schema_version: '1.0'
+schema_type: project_graph_bundle
+project_id: gddp-runtime
+project_name: GDAD Runtime Engine
+description: The GDDP control plane that dispatches executors and turns their outputs into reviewable receipts while keeping graph truth human-owned
+repo: skchaudr/gddp-runtime
+blueprint:
+  vision: A self-operating control plane where the forward dispatch loop runs autonomously while the return path stays reviewable, never letting runtime mutate project truth
+  architecture_notes: 'gddp-runtime is the execution engine; graph truth lives in gddp-config and is human-owned.
+
+    The forward loop (read graph, dispatch executor) already works. The return path must remain
+
+    operationally useful without allowing runtime to write completion state into project.yaml.
+
+    Merged PRs and executor outputs become review receipts (SQLite results store), and matching
+
+    jobs move into awaiting_review. A decision loop reasons over events and a lightweight review
+
+    gate evaluates PRs before a node is accepted, but graph mutation stays a human decision.
+
+    '
+  major_capabilities:
+  - return router (merged PR creates a review receipt, no graph mutation)
+  - decision loop v0 spec (purpose, inputs, outputs, failure modes)
+  - decision loop v0 runtime (event-driven reasoning module)
+  - decision loop v0 review gate (lightweight PR eval before accepting a node)
+  - semantic harness — terminal verdict tool (structured, self-terminating output)
+  - semantic harness — validation-retry (self-correcting on invalid output)
+  - verifier receipt contract — separated criteria, artifact, graph-readiness, and next-action signals
+  - trustable calibration — split criteria-confidence from artifact/completeness gating
+  - ANE verifier-read evaluation — structural low-token reads for the semantic verifier (spike)
+graph_version: '1.0'
+created_at: 2026-03-12
+last_updated: 2026-07-03
+nodes_dir: nodes/
+nodes:
+- schema_version: '1.0'
+  schema_type: node
+  node_id: return-router
+  title: Implement return router — merged PR creates review receipt
+  type: capability
+  why: 'The forward loop already works: an event arrives, the graph is read,
+
+    an executor is dispatched. When a PR merges or an executor returns,
+
+    runtime must not mark graph truth complete. That would collapse
+
+    execution machinery into project truth ownership.
+
+
+    The return router exists to make the return path reviewable instead of
+
+    automatic. When a PR merges, runtime should parse the node/job metadata,
+
+    validate the linkage, write a structured result receipt to SQLite, and
+
+    move the matching job into review-needed state. A human then decides
+
+    whether the graph should change.
+
+    '
+  depends_on: []
+  acceptance:
+  - id: return-router-file-exists
+    criterion: return_router.py exists at scripts/runtime/return_router.py
+  - id: handle-merged-pr-validates
+    criterion: handle_merged_pr validates repo allowlist, parses node_id and job_id from PR body, validates them against the persisted job, writes a review receipt, and never mutates gddp-config
+  - id: parse-node-id-regex
+    criterion: 'parse_node_id extracts node id using regex matching "node: <id>" on its own line (case-insensitive, multiline)'
+  - id: parse-job-id-regex
+    criterion: 'parse_job_id extracts job id using regex matching "job: <id>" on its own line (case-insensitive, multiline)'
+  - id: validate-repo-allowlist
+    criterion: validate_repo rejects repos not in ALLOWED_REPOS module-level constant (initially skchaudr/vault-doctor)
+  - id: graph-updater-disabled
+    criterion: graph_updater.py is not an active runtime mechanism; if present, it is explicitly disabled
+  - id: results-store-exists
+    criterion: results_store.py exists at scripts/runtime/results_store.py
+  - id: write-result-inserts-row
+    criterion: write_result inserts or updates one row in the canonical results table using the existing result schema surface
+  - id: receipts-needs-review
+    criterion: merged PR receipts are recorded with status=needs_review
+  - id: jobs-moved-to-awaiting-review
+    criterion: matching jobs and queue records are moved to awaiting_review
+  - id: no-runtime-completion-write
+    criterion: no runtime path writes completion into project.yaml or implies automatic node advancement
+  - id: tests-cover-return-router
+    criterion: tests cover node_id parsed correctly, missing node tag returns rejected, missing job tag returns rejected, and valid merged PRs create review receipts instead of graph updates
+  constraints:
+  - DO NOT repair automatic return completion through the heartbeat runner
+  - DO NOT add new graph states
+  - DO NOT expand schema shape aggressively
+  - DO NOT implement auto-dispatch of next nodes from return handling
+  - DO NOT allow runtime to write completion state into gddp-config
+  - ALLOWED_REPOS must remain a module-level constant list, not hardcoded inside functions
+  - include the node and job metadata block in the PR description as required by the dispatch template
+  allowed_execution_modes:
+  - jules
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: complete
+  priority: high
+  unlocks:
+  - first-overnight-run
+- schema_version: '1.0'
+  schema_type: node
+  node_id: decision-loop-spec
+  title: Write decision loop v0 spec — purpose, inputs, outputs, decision loop, failure modes
+  type: capability
+  why: 'The GDAD system has a dispatch loop and a return loop, but no persistent
+
+    reasoning layer deciding what to do next. The decision loop fills this gap. Before
+
+    building it, the spec defines what it is, what it reads, what it decides,
+
+    what actions it can take, and how it fails safely. This spec is the contract
+
+    between the human and the system.
+
+    '
+  depends_on:
+  - return-router
+  acceptance:
+  - id: spec-file-exists
+    criterion: docs/decision-loop-spec.md exists in gddp-runtime
+  - id: spec-defines-required-sections
+    criterion: spec defines purpose, trigger model, context window, decision logic, 4 powers, output format, failure modes, human escalation rules, stale state handling, runtime architecture, and v0 scope limits
+  - id: four-powers-documented
+    criterion: '4 powers documented with inputs, actions, output JSON schema: dispatch_next, review_pr, accept_node, escalate'
+  - id: failure-mode-table-complete
+    criterion: failure mode table covers all error paths with explicit decision-loop behavior
+  constraints:
+  - spec must be a single markdown file in gddp-runtime/docs/
+  - spec must not prescribe implementation details — only contract and behavior
+  - v0 scope limits must be explicitly stated so Phase 2 cannot silently expand
+  allowed_execution_modes:
+  - human
+  required_artifacts:
+  - decision.md
+  status: complete
+  priority: medium
+  unlocks:
+  - decision-loop-runtime
+- schema_version: '1.0'
+  schema_type: node
+  node_id: decision-loop-runtime
+  title: Build decision loop v0 runtime — event-driven reasoning module in gddp-runtime
+  type: capability
+  why: 'The spec is written. Now build the thing. The decision loop is a Python module
+
+    inside gddp-runtime that wakes on webhook or cron trigger, reads graph +
+
+    SQLite + current event, makes one decision per cycle, acts, writes a result
+
+    row, and exits. This is the minimum viable brain: it replaces the human who
+
+    currently decides what to dispatch next.
+
+    '
+  depends_on:
+  - decision-loop-spec
+  acceptance:
+  - id: decision-loop-init-exists
+    criterion: scripts/runtime/decision_loop/__init__.py exists
+  - id: engine-file-exists
+    criterion: scripts/runtime/decision_loop/engine.py exists with handle_event(payload) and handle_cron() functions
+  - id: context-reader-exists
+    criterion: scripts/runtime/decision_loop/context_reader.py exists with read_context(event) that returns graph state, recent SQLite rows, and current event
+  - id: powers-init-exists
+    criterion: scripts/runtime/decision_loop/powers/__init__.py exists
+  - id: dispatch-next-exists
+    criterion: scripts/runtime/decision_loop/powers/dispatch_next.py exists — creates GitHub issue for Jules using dispatch template, writes job row to SQLite
+  - id: escalate-exists
+    criterion: scripts/runtime/decision_loop/powers/escalate.py exists — writes escalation result row, logs to stdout
+  - id: engine-follows-priority-order
+    criterion: 'engine.py decision logic follows priority order from spec: stale state cleanup → PR merged → dispatch next → stuck job → escalate'
+  - id: engine-no-duplicate-dispatch
+    criterion: engine.py never dispatches if a job is already in_progress for the same project
+  - id: actions-write-result-row
+    criterion: all actions write a result row to SQLite via results_store
+  - id: output-matches-spec-schema
+    criterion: output JSON format matches spec schema for each action
+  - id: stale-state-handler
+    criterion: stale state handler marks jobs and events older than 6 hours as expired on first run
+  - id: env-vars-configured
+    criterion: GITHUB_TOKEN, GDDP_RUNTIME_ROOT, and GDDP_CONFIG_PATH all read from environment; legacy OPCLAW_ROOT may remain as compatibility fallback
+  - id: at-least-3-passing-tests-engine
+    criterion: 'at least 3 tests: context_reader returns expected shape, dispatch blocked when job in_progress, escalate writes result row'
+  constraints:
+  - 'new files only: scripts/runtime/decision_loop/ tree'
+  - the ONLY existing file to modify is scripts/runtime/heartbeat/runner.py if needed to wire cron or webhook route to the decision loop
+  - DO NOT modify classifier.py, return_router.py, graph_updater.py, results_store.py, dispatcher.py, or any other existing file
+  - DO NOT implement review_pr or accept_node in this node — those are decision-loop-review-gate scope
+  - DO NOT implement Telegram, WhatsApp, or any notification channel
+  - DO NOT implement retries inside individual powers — retry logic is engine-level only (retry once on GitHub API failure, then escalate)
+  - DO NOT implement always-on polling loop — engine runs once per invocation and exits
+  - DO NOT commit __pycache__ or .pyc files
+  - dispatch_next must use the existing dispatch template format Jules expects — read from scripts/adapters/jules_action_adapter.py for format reference
+  - use only requests for HTTP calls (already a dependency) — no new packages
+  allowed_execution_modes:
+  - jules
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: pending
+  priority: high
+  unlocks:
+  - decision-loop-review-gate
+- schema_version: '1.0'
+  schema_type: node
+  node_id: decision-loop-review-gate
+  title: Build decision loop v0 review gate — lightweight PR eval before accepting node
+  type: capability
+  why: 'Without a review gate, the system blindly accepts any PR Jules merges.
+
+    The review gate adds the minimum viable quality check: did the PR touch
+
+    expected files, avoid forbidden paths, include the required metadata block,
+
+    and pass CI checks? If yes, the decision loop writes an acceptance candidate.
+
+    If no, it posts
+
+    a review comment with specific feedback and escalates. This closes the
+
+    quality loop without requiring a human to read every PR.
+
+    '
+  depends_on:
+  - decision-loop-runtime
+  acceptance:
+  - id: review-pr-exists
+    criterion: scripts/runtime/decision_loop/powers/review_pr.py exists with run(context, pr_payload) function
+  - id: accept-node-exists
+    criterion: scripts/runtime/decision_loop/powers/accept_node.py exists with run(context, node_id, pr_number) function
+  - id: review-pr-checks-listed
+    criterion: 'review_pr checks: expected files touched (keyword match against acceptance criteria), forbidden paths absent (keyword match against constraints), node metadata block present in PR body, CI checks passed (via GitHub Checks API)'
+  - id: review-pr-returns-verdict
+    criterion: review_pr returns verdict pass or fail with reason string
+  - id: accept-node-writes-candidate
+    criterion: accept_node writes a result row with status=acceptance_candidate and does not mutate gddp-config
+  - id: engine-wires-review-accept
+    criterion: engine.py updated to call review_pr when event is pull_request.closed merged=true, then accept_node if verdict is pass
+  - id: engine-handles-verdict-fail
+    criterion: on verdict fail, engine posts a GitHub PR review comment with the failure reason and writes result row with status=review_failed
+  - id: at-least-3-passing-tests-review
+    criterion: 'at least 3 tests: verdict pass when all checks met, verdict fail when forbidden file present, verdict fail when metadata block missing'
+  constraints:
+  - 'new files only: scripts/runtime/decision_loop/powers/review_pr.py and scripts/runtime/decision_loop/powers/accept_node.py'
+  - the ONLY existing file to modify is scripts/runtime/decision_loop/engine.py — wire in review_pr and accept_node to the decision loop
+  - DO NOT modify any file outside scripts/runtime/decision_loop/
+  - DO NOT implement ML-based code quality review — v0 checks are structural only (files, paths, metadata, CI status)
+  - DO NOT implement line-by-line diff analysis
+  - DO NOT commit __pycache__ or .pyc files
+  - CI check evaluation reads GitHub Checks API — if no checks exist, treat as pass (Jules runs no CI in v0)
+  - use only requests for HTTP calls
+  allowed_execution_modes:
+  - jules
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: pending
+  priority: high
+  unlocks: []
+- schema_version: '1.0'
+  schema_type: node
+  node_id: semantic-submit-verdict-tool
+  title: Make the semantic verdict a terminal tool call, not free-text JSON
+  type: capability
+  why: 'A practice run surfaced the core harness weakness: the semantic agent
+
+    investigates with tools, then is expected to STOP and emit a JSON object as
+
+    free text. That is where everything broke — deepseek-chat looped until the
+
+    turn budget was exhausted (never self-terminating), and model output arrived
+
+    wrapped in prose, markdown fences, and stray brace groups that the parser had
+
+    to reverse-engineer.
+
+
+    Making the terminal action an explicit `submit_verdict` tool fixes both by
+
+    construction: concluding becomes an obvious action a weak model can take (it
+
+    stops looping), and the verdict arrives as a validated tool-call payload
+
+    instead of parsed prose. This is the backbone pattern of every serious agent
+
+    harness (smolagents final-answer, pydantic-ai typed output).
+
+
+    Runtime commit 7f803ce shipped the terminal tool path, near-limit
+
+    finalization prompt, and legacy free-text fallback coverage. Provider-native
+
+    JSON input schemas remain a live-provider hardening risk, not the acceptance
+
+    boundary for this completed node.
+
+    '
+  depends_on: []
+  acceptance:
+  - id: submit-verdict-tool-declared
+    criterion: TOOL_SCHEMAS in scripts/runtime/verification/semantic/tools.py includes a submit_verdict terminal tool, and prompt.py instructs the model to call it with SemanticOutput fields (judgments[], overall_reasoning, risks, followup_candidates, budget_exhausted)
+  - id: loop-terminates-on-submit
+    criterion: the agent loop in scripts/runtime/verification/semantic/agent.py returns the SemanticOutput built from the submit_verdict tool call arguments and stops the loop when that tool is called
+  - id: forced-conclusion-on-low-budget
+    criterion: when the tool-call or token budget is nearly exhausted, the loop injects an instruction that the model must call submit_verdict now (no further investigation tools), guaranteeing termination with a structured result
+  - id: legacy-freetext-fallback-retained
+    criterion: if the model still ends its turn with free text instead of calling submit_verdict, the existing _parse_semantic_output path is used as a fallback so no regression
+  - id: at-least-3-passing-tests-terminal
+    criterion: 'at least 3 tests using a fake runner: submit_verdict tool call yields the expected SemanticOutput and ends the loop; forced-conclusion instruction is injected when budget is low; free-text fallback still parses'
+  constraints:
+  - only modify scripts/runtime/verification/semantic/tools.py, scripts/runtime/verification/semantic/prompt.py, and scripts/runtime/verification/semantic/agent.py
+  - DO NOT modify the SemanticOutput schema in this node (a sibling node owns calibration/schema changes)
+  - DO NOT remove the _parse_semantic_output fallback — keep it as a safety net
+  - keep the runner model-agnostic — no hardcoded provider or model id
+  - DO NOT commit __pycache__ or .pyc files
+  allowed_execution_modes:
+  - jules
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: complete
+  priority: high
+  unlocks:
+  - semantic-validation-retry
+- schema_version: '1.0'
+  schema_type: node
+  node_id: semantic-validation-retry
+  title: Re-prompt the model on invalid verdict output instead of failing the receipt
+  type: capability
+  why: 'Today when the model returned a verdict that did not match the SemanticOutput
+
+    schema, the pipeline gave up and wrote a needs-more-evidence receipt with zero
+
+    judgments — throwing away a run that had already spent tokens investigating the
+
+    repo. A trustworthy harness should do what pydantic-ai does: catch the
+
+    validation error and hand it back to the model ("your output failed validation
+
+    because X; return corrected JSON via submit_verdict"), giving it a bounded
+
+    number of retries before conceding.
+
+
+    This turns transient format drift (a dict where a string was expected, a missing
+
+    field) into a self-correcting step instead of a wasted run, which is essential
+
+    for using cheaper/weaker models reliably.
+
+
+    Runtime commit 7f803ce shipped bounded validation retry for both malformed
+
+    submit_verdict calls and terminal free-text fallback output.
+
+    '
+  depends_on:
+  - semantic-submit-verdict-tool
+  acceptance:
+  - id: retry-on-invalid-verdict
+    criterion: when a submit_verdict payload (or free-text fallback) fails SemanticOutput validation, the loop appends a corrective message containing the validation error and asks the model to resubmit, rather than immediately returning a parse-failure result
+  - id: bounded-retries
+    criterion: retries are bounded by a configurable max (default 2); after the limit the loop returns the graceful parse-failure SemanticOutput as it does today
+  - id: retry-budget-accounted
+    criterion: retry attempts are bounded by max_validation_retries and still execute inside the existing max_turns/token guardrails so a retry loop cannot run unbounded
+  - id: successful-retry-produces-judgments
+    criterion: a run where the first output is invalid and the second is valid returns the valid SemanticOutput with its judgments (verified with a fake runner)
+  - id: retry-tests-pass
+    criterion: semantic verifier tests cover invalid-then-valid submit_verdict retry, typed submit_verdict success, near-limit finalization, and free-text fallback parsing with a fake runner
+  constraints:
+  - only modify scripts/runtime/verification/semantic/agent.py
+  - DO NOT modify the SemanticOutput schema here (calibration node owns schema)
+  - retries must be bounded and budget-accounted — no unbounded loops
+  - keep model-agnostic; no provider-specific handling
+  - DO NOT commit __pycache__ or .pyc files
+  allowed_execution_modes:
+  - jules
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: complete
+  priority: high
+  unlocks:
+  - verification-receipt-contract
+- schema_version: '1.0'
+  schema_type: node
+  node_id: verification-receipt-contract
+  title: Define verifier receipt contract with separated judgment, trail, graph, and next-action signals
+  type: capability
+  why: 'The verifier is becoming useful enough that its receipt shape is now part of
+
+    the product contract, not an implementation detail. A live run proved the
+
+    danger of blended signals: criteria could pass semantically while required
+
+    artifacts were missing, and the receipt made that look like low confidence
+
+    instead of a strong code judgment gated by an incomplete trail.
+
+
+    This node locks the receipt contract before further hardening work piles more
+
+    behavior onto an ambiguous shape. A later visualization, review UI, or
+
+    operator brief should be able to consume one receipt and distinguish four
+
+    questions: criteria satisfaction, execution-trail completeness, graph-advance
+
+    readiness, and the next human/system action.
+
+
+    Runtime commits 7f803ce and 313925f added the terminal semantic path and the
+
+    first receipt compatibility fields (`confidence`, `criteria_confidence`,
+
+    `completeness_status`). The remaining contract gap is not another status flip:
+
+    it is proving, with docs, fixtures, and a real verifier receipt, that consumers
+
+    can read one receipt without guessing which signal means criteria judgment,
+
+    artifact completeness, graph readiness, or next action.
+
+    '
+  depends_on:
+  - return-router
+  - semantic-submit-verdict-tool
+  - semantic-validation-retry
+  acceptance:
+  - id: contract-doc-defines-current-shape
+    criterion: 'verification-engine-spec.md or docs/verification-receipt-contract.md in gddp-runtime defines the current VerdictReceipt fields: project_id, node_id, verdict, confidence, criteria_confidence, completeness_status, deterministic, semantic, decision_reasoning, required_next_action, and generated_at'
+  - id: confidence-alias-rule-explicit
+    criterion: the contract states that confidence is a legacy compatibility alias for criteria_confidence, that new consumers should read criteria_confidence, and that mismatched values are invalid
+  - id: completeness-status-enum-defined
+    criterion: the contract defines completeness_status values complete, partial, and not-run, including how semantic absence, empty judgments, and budget_exhausted map to those values
+  - id: criteria-evidence-shape-defined
+    criterion: the contract specifies the per-criterion semantic evidence shape, including criterion_id, judgment, confidence, reasoning, and evidence entries with file/command references when available
+  - id: artifact-gate-shape-defined
+    criterion: the contract specifies how deterministic.artifacts_present reports required artifacts independently from criteria_confidence, including present, missing, and not-required/no-entry cases
+  - id: graph-truth-boundary-explicit
+    criterion: the contract states that runtime may emit a receipt and required_next_action but must not mutate gddp-config graph truth directly
+  - id: next-action-vocabulary-defined
+    criterion: the contract maps required_next_action strings to the operator decisions accept, retry, block, defer, or dispatch-next without requiring readers to infer the action from verdict text alone
+  - id: fixture-receipts-cover-ambiguity
+    criterion: tests/fixtures/verification_receipts/ or equivalent committed test fixtures include semantic-pass-with-missing-artifacts and semantic-fail-with-complete-artifacts examples, and both validate as VerdictReceipt
+  - id: schema-tests-lock-contract
+    criterion: scripts/runtime/verification/test_schemas.py or equivalent tests prove legacy confidence-only payloads are accepted, confidence/criteria_confidence mismatches are rejected, and missing completeness_status is backfilled deterministically
+  - id: runtime-receipt-proves-node
+    criterion: this node is not complete until a runtime-generated verifier receipt for verification-receipt-contract is attached to the handoff or result artifacts and shows the contract fields populated without graph mutation
+  constraints:
+  - documentation, fixtures, schema compatibility tests, and receipt-generation proof only; do not change confidence calibration in this node
+  - do not change verifier decision matrix behavior; verdict-confidence-split owns calibration behavior
+  - do not add a visualization, dashboard, web UI, or graph rendering structure
+  - preserve backward compatibility for existing receipt readers unless the contract doc explicitly names a migration path
+  - keep graph truth human-owned; do not revive or replace graph_updater.py
+  - do not mark this node complete from code inspection alone; require a runtime verifier receipt generated in the completion round
+  allowed_execution_modes:
+  - human
+  - jules
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: complete
+  priority: critical
+  unlocks:
+  - verdict-confidence-split
+- schema_version: '1.0'
+  schema_type: node
+  node_id: verdict-confidence-split
+  title: Split verdict confidence into criteria-confidence and completeness so the score is trustable
+  type: capability
+  why: "A practice run exposed a calibration bug that directly undermines the goal of\ntrusting the loop at face value. A node whose code fully satisfied every\ncriterion (semantic judgments all pass at 0.9-0.99 with line-level evidence)\nreceived an overall confidence of 0.18. Two distortions caused this:\n\n1. The blend uses min(deterministic_floor, semantic). When the deterministic\n   floor is indeterminate-dominated — which is precisely WHY the semantic phase\n   was invoked — that low, admittedly-uncertain floor overrides the semantic\n   phase built to decide. The weakest signal wins, backwards.\n2. Missing execution artifacts correctly gate the VERDICT to needs-more-evidence,\n   but the single confidence scalar then conflates \"unsure the code works\"\n   (false here) with \"paperwork/trail missing\" (true here).\n\nFix: report against the receipt contract instead of one blended scalar. The\ncriteria signal says how sure we are the code meets the spec; the completeness\nsignal says\
+    \ whether the required trail is present; the graph-readiness signal\nsays whether the human has enough evidence to advance graph truth. And when\nthe floor is indeterminate-dominated, defer to the semantic confidence rather\nthan min()-ing it away. This makes a built-but-untrailed node read as ~0.95\ncriteria-confidence with a needs-more-evidence verdict — honest, not 0.18.\n\nRuntime commit 7f803ce added the field names, but it still populates\ncriteria_confidence as a compatibility alias of overall confidence and the\nsemantic blend still min()s against an indeterminate floor. This node remains\nblocked on the receipt contract, then owns the real calibration change.\n"
+  depends_on:
+  - verification-receipt-contract
+  acceptance:
+  - id: receipt-exposes-two-axes
+    criterion: VerdictReceipt in scripts/runtime/verification/schemas.py exposes criteria_confidence and completeness fields matching docs/verification-receipt-contract.md, in addition to the existing overall confidence
+  - id: receipt-contract-fields-populated
+    criterion: verifier output populates the contract's criteria judgment, execution-trail completeness, graph-advance readiness, and next-action fields without blending them into one score
+  - id: blend-defers-to-semantic-when-floor-indeterminate
+    criterion: _confidence_semantic_blend in scripts/runtime/verification/decision_engine.py no longer lets an indeterminate-dominated deterministic floor drag the score below the semantic confidence; when the floor is indeterminate it weights/defers to semantic instead of min()
+  - id: artifact-gate-still-caps-verdict-only
+    criterion: missing required artifacts still force verdict needs-more-evidence (matrix rows unchanged) but no longer collapse criteria_confidence for a semantically-passing node
+  - id: passing-node-reads-high-confidence
+    criterion: the vault-doctor scan-vault-core scenario (all semantic judgments pass, artifacts missing) yields criteria_confidence >= 0.85 with verdict needs-more-evidence
+  - id: orchestrator-populates-new-fields
+    criterion: scripts/runtime/verification/orchestrator.py populates the new receipt fields from the decision engine output
+  - id: at-least-3-passing-tests-calibration
+    criterion: 'at least 3 tests: semantic-pass + artifacts-missing gives high criteria_confidence and needs-more-evidence verdict; indeterminate floor does not lower a confident semantic result; a genuine semantic fail still yields low criteria_confidence'
+  constraints:
+  - only modify scripts/runtime/verification/decision_engine.py, scripts/runtime/verification/schemas.py, and scripts/runtime/verification/orchestrator.py
+  - follow docs/verification-receipt-contract.md; do not invent incompatible receipt field names in this node
+  - DO NOT change the set of possible verdicts or the decision matrix rows — only the confidence computation and receipt shape
+  - preserve backward compatibility — keep the existing overall confidence field populated
+  - DO NOT weaken the artifact gate — it must still block PASS
+  - DO NOT commit __pycache__ or .pyc files
+  allowed_execution_modes:
+  - jules
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: ready
+  priority: high
+  unlocks: []
+- schema_version: '1.0'
+  schema_type: node
+  node_id: ane-verifier-read-tool-eval
+  title: Evaluate ANE exec read/navigation chords as verifier read tooling
+  type: capability
+  why: 'The semantic verifier inspects code to judge whether a node''s acceptance
+
+    criteria are met, using blunt tools: read_file (dumps whole files) and
+
+    grep_code (regex). Those are token-heavy and imprecise — and they were exactly
+
+    the fiddly, expensive part of the first live verification run.
+
+
+    ANE (github.com/prettysmartdev/ane) advertises exec-mode read/navigation chords
+
+    — list symbols/functions in a file, yank a single function or class body —
+
+    backed by LSP/tree-sitter for Python/JS/Rust/Go. That maps cleanly onto
+
+    augmenting or replacing read_file/grep_code with structural, low-token reads.
+
+
+    This is the surface of ANE that is relevant NOW, because it serves the
+
+    verification harness we are actively hardening and needs no executor. It is a
+
+    bounded, abandonable evaluation: a no-go with clear reasoning fully satisfies
+
+    the node.
+
+
+    Explicitly NOT this node: using ANE to write edits, emit patches, or replace
+
+    implementer patch generation. That executor/editing surface needs a local edit
+
+    lane and is deferred to a later node.
+
+    '
+  depends_on: []
+  acceptance:
+  - id: ane-lists-symbols
+    criterion: decision.md shows ANE exec listing the relevant symbols/functions in a target source file (concrete command + output excerpt)
+  - id: ane-reads-single-body
+    criterion: decision.md shows ANE exec reading one function or class body without dumping the whole file (concrete command + output excerpt)
+  - id: toolbox-wrapper-callable
+    criterion: a small wrapper lets the semantic verifier toolbox (scripts/runtime/verification/semantic/tools.py) invoke ANE reads; decision.md documents the wrapper interface and shows it returning results
+  - id: comparison-on-real-cases
+    criterion: decision.md compares ANE reads vs read_file/grep_code on 2-3 existing verifier cases (e.g. vault-doctor nodes), reporting output size (token/byte) and usefulness for judging criteria
+  - id: go-no-go-recommendation
+    criterion: decision.md ends with an explicit go / no-go / defer recommendation on adopting ANE reads in the verifier toolbox, with reasoning grounded in the comparison
+  constraints:
+  - scope is verifier READ tooling only — do NOT use ANE to write edits or generate patches in this node
+  - do NOT make ANE a hard dependency of gddp-runtime; the wrapper must degrade gracefully (fall back to read_file/grep_code) if ANE is absent
+  - keep any proof/wrapper code minimal and clearly disposable if the outcome is no-go
+  - allowed_execution_modes is human because ANE exec must run locally to produce the comparison
+  - DO NOT commit build artifacts or vendored ANE binaries
+  allowed_execution_modes:
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  status: pending
+  priority: medium
+  unlocks: []
+execution_policy:
+  default_executor: jules
+  max_concurrent_jobs: 1
+  require_human_review_before_overnight: false
+  artifact_gate_enforced: true
+node_files: 9

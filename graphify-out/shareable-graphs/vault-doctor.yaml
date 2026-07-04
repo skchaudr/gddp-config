@@ -1,0 +1,391 @@
+schema_version: '1.0'
+schema_type: project_graph_bundle
+project_id: vault-doctor
+project_name: Vault Doctor
+description: Python CLI tool that scans, triages, and prescribes fixes for Obsidian vaults
+repo: skchaudr/vault-doctor
+blueprint:
+  vision: A terminal-first tool that gives Obsidian vaults a health check and lets users act on the results
+  architecture_notes: 'Pure Python CLI. Two core modules: doctor.py (analysis) and triage.py (interactive actions).
+
+    doctor.py is the foundation — all triage features depend on scan_vault() being implemented first.
+
+    Uses rich for terminal output, python-frontmatter for YAML parsing, pyyaml for config.
+
+    Mock vault in vault_doctor/mock_vault/ provides test fixtures.
+
+    '
+  major_capabilities:
+  - vault scanning (file metadata, structure)
+  - duplicate detection (MD5 hash)
+  - stale TODO identification (frontmatter date)
+  - performance check (plugin count, large files)
+  - interactive triage CLI (auto-move, reaper, dry-run)
+graph_version: '1.0'
+created_at: 2026-03-12
+last_updated: 2026-03-13
+nodes_dir: nodes/
+nodes:
+- schema_version: '1.0'
+  schema_type: node
+  node_id: scan-vault-core
+  title: Implement VaultDoctor scan_vault foundation
+  type: capability
+  why: 'All other vault-doctor features (duplicates, stale TODOs, performance check)
+
+    depend on a working scan_vault() that can walk a vault directory and return
+
+    structured file metadata. Nothing else can be built until this exists.
+
+    '
+  depends_on: []
+  acceptance:
+  - id: vaultdoctor-class-exists
+    criterion: VaultDoctor class exists in src/doctor.py
+  - id: scan-vault-walks-directory
+    criterion: scan_vault(vault_path) walks the directory tree and returns a list of file metadata dicts
+  - id: metadata-dict-minimum-keys
+    criterion: 'each metadata dict contains at minimum: path, size_bytes, extension, modified_at'
+  - id: scan-vault-ignores-obsidian
+    criterion: scan_vault correctly ignores .obsidian/ system files
+  - id: at-least-3-passing-tests
+    criterion: at least 3 passing tests in tests/test_doctor.py covering scan output structure
+  - id: tests-use-mock-vault-fixture
+    criterion: tests use the existing mock vault at vault_doctor/mock_vault/ as fixture
+  constraints:
+  - implement in src/doctor.py only — do not modify triage.py
+  - do not delete or modify the mock vault files Jules added in the previous PR
+  - use only libraries already in requirements.txt (python-frontmatter, rich, pyyaml)
+  - do not add new dependencies
+  - keep the implementation simple — this is a foundation, not a full feature
+  allowed_execution_modes:
+  - jules
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+  status: complete
+  priority: high
+  unlocks:
+  - find-duplicates
+  - find-stale-todos
+  - check-performance
+- schema_version: '1.0'
+  schema_type: node
+  node_id: find-duplicates
+  title: Implement duplicate file detection
+  type: capability
+  why: 'Duplicate files are one of the most common vault health problems — same content
+
+    saved multiple times under different names or in different folders. scan_vault()
+
+    already returns file metadata including size_bytes; the next step is adding MD5
+
+    hashing to detect content-identical files and surface them to the user.
+
+    '
+  depends_on:
+  - scan-vault-core
+  acceptance:
+  - id: find-duplicates-method-exists
+    criterion: VaultDoctor has a find_duplicates(vault_path) method in src/doctor.py
+  - id: find-duplicates-computes-md5
+    criterion: find_duplicates computes MD5 hash for each file returned by scan_vault()
+  - id: find-duplicates-returns-groups
+    criterion: find_duplicates returns a list of duplicate groups — each group is a list of file paths with identical content
+  - id: unique-files-excluded
+    criterion: files with unique content are not included in the output
+  - id: at-least-2-passing-tests-duplicates
+    criterion: at least 2 passing tests covering detection of duplicates and correct handling of no-duplicate case
+  - id: tests-use-mock-vault-fixture
+    criterion: tests use the existing mock vault fixture
+  constraints:
+  - implement in src/doctor.py only — do not modify triage.py
+  - use only hashlib (stdlib) for MD5 — no new dependencies
+  - call scan_vault() internally — do not re-walk the directory
+  - keep it simple — return path strings, not metadata dicts
+  allowed_execution_modes:
+  - jules
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+  status: complete
+  priority: high
+  unlocks:
+  - triage-cli-core
+- schema_version: '1.0'
+  schema_type: node
+  node_id: find-stale-todos
+  title: Implement stale TODO identification
+  type: capability
+  why: 'Obsidian users accumulate TODO items in note frontmatter that never get actioned.
+
+    A "stale" TODO is one in a file that hasn''t been modified in over 2 years.
+
+    scan_vault() already returns modified_at timestamps; the next step is parsing
+
+    frontmatter to find notes with TODO tags and flagging the ones that are stale.
+
+    '
+  depends_on:
+  - scan-vault-core
+  acceptance:
+  - id: find-stale-todos-method-exists
+    criterion: VaultDoctor has a find_stale_todos(vault_path, stale_days=730) method in src/doctor.py
+  - id: stale-todos-filters-md-files
+    criterion: find_stale_todos filters scan_vault() results to .md files only
+  - id: stale-todos-uses-frontmatter
+    criterion: find_stale_todos uses python-frontmatter to parse YAML frontmatter from each file
+  - id: stale-todo-definition
+    criterion: a file is considered a stale TODO if its frontmatter contains a "tags" field including "todo" (case-insensitive) AND modified_at is older than stale_days
+  - id: stale-todos-returns-paths
+    criterion: find_stale_todos returns a list of file path strings for stale TODO files
+  - id: at-least-2-passing-tests-stale
+    criterion: at least 2 passing tests — one with a stale TODO file, one with a recent file
+  - id: tests-use-mock-vault-fixture
+    criterion: tests use the existing mock vault fixture
+  constraints:
+  - implement in src/doctor.py only — do not modify triage.py
+  - use python-frontmatter (already in requirements.txt) for frontmatter parsing
+  - call scan_vault() internally — do not re-walk the directory
+  - stale_days must be configurable with a default of 730 (2 years)
+  - handle files with no frontmatter gracefully — do not raise exceptions
+  allowed_execution_modes:
+  - jules
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+  status: complete
+  priority: medium
+  unlocks:
+  - triage-cli-core
+- schema_version: '1.0'
+  schema_type: node
+  node_id: check-performance
+  title: Implement vault performance check
+  type: capability
+  why: 'Large vaults slow down Obsidian — too many plugins, oversized files, or
+
+    deeply nested folders all contribute. scan_vault() already returns size_bytes
+
+    per file; the next step is aggregating that data into a performance report:
+
+    plugin count from .obsidian/plugins/, files over a size threshold, and
+
+    total file count.
+
+    '
+  depends_on:
+  - scan-vault-core
+  acceptance:
+  - id: check-performance-method-exists
+    criterion: VaultDoctor has a check_performance(vault_path) method in src/doctor.py
+  - id: check-performance-returns-dict
+    criterion: 'check_performance returns a dict with at minimum these keys: total_files, large_files, plugin_count'
+  - id: large-files-size-threshold
+    criterion: large_files is a list of file path strings where size_bytes > 5MB (5_242_880 bytes)
+  - id: plugin-count-from-obsidian
+    criterion: plugin_count counts subdirectories inside .obsidian/plugins/ (0 if the folder does not exist)
+  - id: total-files-from-scan-vault
+    criterion: total_files is the count of all files returned by scan_vault()
+  - id: at-least-2-passing-tests-performance
+    criterion: at least 2 passing tests covering the returned dict structure and large file detection
+  - id: tests-use-mock-vault-fixture
+    criterion: tests use the existing mock vault fixture
+  constraints:
+  - implement in src/doctor.py ONLY — this is the one and only canonical file for VaultDoctor
+  - DO NOT touch vault_doctor/src/doctor.py — that path is not used and must not be modified
+  - DO NOT touch any file under vault_doctor/src/
+  - DO NOT commit __pycache__ directories or any .pyc files — these must be in .gitignore
+  - do not modify triage.py
+  - call scan_vault() internally — do not re-walk the directory
+  - plugin_count reads .obsidian/plugins/ directly using pathlib — do not rely on scan_vault for .obsidian contents
+  - use only stdlib — no new dependencies
+  allowed_execution_modes:
+  - jules
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+  status: complete
+  priority: medium
+  unlocks:
+  - triage-cli-core
+- schema_version: '1.0'
+  schema_type: node
+  node_id: obsidian-audit
+  title: Implement .obsidian folder audit and process detection
+  type: capability
+  why: 'The .obsidian folder contains the full configuration state of a vault —
+
+    which plugins are enabled, hotkeys, themes, and workspace layout. Auditing
+
+    it surfaces hidden performance and health problems that a file scan alone
+
+    can''t find. Process detection checks whether Obsidian is currently running
+
+    so the tool can warn before making changes to live vault config.
+
+    '
+  depends_on:
+  - scan-vault-core
+  acceptance:
+  - id: obsidian-audit-method-exists
+    criterion: VaultDoctor has an obsidian_audit(vault_path) method in src/doctor.py
+  - id: obsidian-audit-returns-dict
+    criterion: 'obsidian_audit returns a dict with at minimum: community_plugins, core_plugins, theme, hotkeys_customized, process_running'
+  - id: community-plugins-parsed
+    criterion: community_plugins is a list of enabled plugin IDs parsed from .obsidian/community-plugins.json (empty list if file absent)
+  - id: core-plugins-parsed
+    criterion: core_plugins is a list of enabled plugin IDs parsed from .obsidian/core-plugins.json (empty list if file absent)
+  - id: theme-from-appearance
+    criterion: theme is the active theme name parsed from .obsidian/appearance.json, or "default" if absent
+  - id: hotkeys-customized-bool
+    criterion: hotkeys_customized is a bool — True if .obsidian/hotkeys.json exists and is non-empty
+  - id: process-running-bool
+    criterion: process_running is a bool — True if an Obsidian process is detected on the system
+  - id: process-detection-method
+    criterion: process detection uses psutil or a subprocess ps check — no platform-specific assumptions
+  - id: at-least-3-passing-tests-audit
+    criterion: 'at least 3 passing tests covering: full audit dict structure, missing .obsidian files handled gracefully, process detection mocked'
+  - id: tests-use-mock-vault-fixture
+    criterion: tests use the existing mock vault fixture
+  constraints:
+  - implement in src/doctor.py ONLY — this is the one and only canonical file for VaultDoctor
+  - DO NOT touch vault_doctor/src/doctor.py — that path is not used and must not be modified
+  - DO NOT touch vault_doctor/src/triage.py or any file under vault_doctor/src/
+  - DO NOT commit __pycache__ directories or any .pyc files — these must be in .gitignore
+  - handle missing .obsidian subfiles gracefully — return empty/default values, never raise
+  - psutil is allowed as a new dependency — add it to requirements.txt
+  - do not scan inside plugin subdirectories — only read the top-level JSON config files
+  allowed_execution_modes:
+  - jules
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+  status: complete
+  priority: high
+  unlocks:
+  - triage-cli-core
+- schema_version: '1.0'
+  schema_type: node
+  node_id: performance-dashboard
+  title: Implement live performance dashboard
+  type: capability
+  why: 'Raw scan output is hard to act on. A live terminal dashboard using rich
+
+    gives users an at-a-glance view of vault health: file count, total size,
+
+    large files, plugin count, stale TODOs — all in one screen. "Live" means
+
+    it can refresh on demand, not that it continuously polls. This is the
+
+    primary output surface before the interactive triage CLI ships.
+
+    '
+  depends_on:
+  - scan-vault-core
+  - check-performance
+  acceptance:
+  - id: generate-dashboard-method-exists
+    criterion: VaultDoctor has a generate_dashboard(vault_path) method in src/doctor.py
+  - id: dashboard-prints-to-terminal
+    criterion: generate_dashboard prints a rich-formatted table or panel to the terminal
+  - id: dashboard-minimum-fields
+    criterion: 'dashboard shows at minimum: total files, total size (human readable), large file count, plugin count'
+  - id: dashboard-duplicates-optional
+    criterion: if find_duplicates is implemented, duplicate count is included; if absent, row is omitted gracefully
+  - id: dashboard-stale-todos-optional
+    criterion: if find_stale_todos is implemented, stale TODO count is included; if absent, row is omitted gracefully
+  - id: dashboard-cli-callable
+    criterion: dashboard is callable from the CLI via a --dashboard flag or dashboard subcommand
+  - id: at-least-2-passing-tests-dashboard
+    criterion: at least 2 passing tests verifying generate_dashboard runs without error given a valid vault path
+  - id: tests-use-mock-vault-fixture
+    criterion: tests use the existing mock vault fixture
+  constraints:
+  - implement generate_dashboard in src/doctor.py ONLY — this is the one and only canonical file for VaultDoctor
+  - DO NOT touch vault_doctor/src/doctor.py — that path is not used and must not be modified
+  - DO NOT touch any file under vault_doctor/src/
+  - DO NOT commit __pycache__ directories or any .pyc files — these must be in .gitignore
+  - CLI entry point may be wired in triage.py or a new cli.py at the repo root — not inside vault_doctor/
+  - use rich (already in requirements.txt) for all terminal output — no new display dependencies
+  - dashboard must not crash if optional features (find_duplicates, find_stale_todos) are not yet implemented
+  - do not implement auto-refresh/polling — static render on call is sufficient for this node
+  allowed_execution_modes:
+  - jules
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+  status: complete
+  priority: high
+  unlocks:
+  - triage-cli-core
+- schema_version: '1.0'
+  schema_type: node
+  node_id: triage-cli-core
+  title: Implement interactive triage CLI
+  type: capability
+  why: 'The analysis features (scan, duplicates, stale TODOs, performance, .obsidian audit)
+
+    are only useful if users can act on the results. triage-cli-core wires everything
+
+    into an interactive terminal session: show findings, let users choose actions
+
+    (delete duplicate, archive stale, open file), and confirm before any destructive operation.
+
+    This is the feature that makes vault-doctor a tool users actually run, not just a script.
+
+    '
+  depends_on:
+  - find-duplicates
+  - find-stale-todos
+  - check-performance
+  - obsidian-audit
+  - performance-dashboard
+  acceptance:
+  - id: cli-entry-point-exists
+    criterion: 'A CLI entry point exists (triage.py or cli.py) that can be run as: python3 -m vault_doctor or vault-doctor'
+  - id: no-args-shows-dashboard
+    criterion: Running with no args shows the dashboard and prompts for an action
+  - id: minimum-two-interactive-actions
+    criterion: 'At minimum two interactive actions are implemented: review duplicates, review stale TODOs'
+  - id: confirmation-before-operations
+    criterion: Each action shows findings and asks for confirmation before any file operation
+  - id: dry-run-flag-suppresses-writes
+    criterion: A --dry-run flag suppresses all file writes and prints what would have happened
+  - id: destructive-ops-behind-prompt
+    criterion: All destructive operations (delete, move, archive) are behind a confirmation prompt
+  - id: at-least-3-passing-tests-cli
+    criterion: 'At least 3 passing tests covering: CLI invocation, dry-run flag, confirmation prompt bypass via flag'
+  constraints:
+  - use rich and click (or argparse if click unavailable) for CLI structure
+  - never perform a destructive file operation without explicit user confirmation or --force flag
+  - --dry-run must be respected at every file operation site — not just at the top level
+  - do not implement undo/rollback in this node — that is a future node
+  allowed_execution_modes:
+  - jules
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+  status: complete
+  priority: high
+  unlocks: []
+execution_policy:
+  default_executor: jules
+  max_concurrent_jobs: 1
+  require_human_review_before_overnight: false
+  artifact_gate_enforced: true
+node_files: 7

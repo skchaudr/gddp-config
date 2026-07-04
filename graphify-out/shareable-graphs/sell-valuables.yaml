@@ -1,0 +1,375 @@
+schema_version: '1.0'
+schema_type: project_graph_bundle
+project_id: sell-valuables
+project_name: Sell Valuables Pipeline
+description: iMessage intake folders to listing markdown to Facebook Marketplace posting hooks
+repo: skchaudr/Automating-Selling-Random-Valuables
+blueprint:
+  vision: Turn Chris's junk-removal finds into local marketplace listings with minimal operator friction
+  architecture_notes: 'Intake is folder-based under incoming/<item-id>/ with description.txt, optional meta.yaml, and photos/.
+
+    Core is Python CLI scripts (sell-listing, sell-post-fb), not a monolithic app.
+
+    Facebook Marketplace has no public API; browser automation lives behind explicit hooks with dry_run before submit.
+
+    One item per folder; listing evidence is listing.md written beside intake files.
+
+    '
+  major_capabilities:
+  - intake folder convention and ItemIntake loader
+  - listing title/body/markdown generation
+  - sell-listing CLI
+  - Facebook post hook and Playwright session/form-fill path
+  - iMessage-to-folder operator workflow
+  - pytest coverage for intake and listing
+graph_version: '1.0'
+created_at: 2026-06-29
+last_updated: '2026-06-29'
+nodes_dir: nodes/
+nodes:
+- schema_version: '1.0'
+  schema_type: node
+  node_id: intake-folder-convention
+  title: Document and enforce incoming folder layout convention
+  type: capability
+  why: Every downstream loader and CLI assumes one item per incoming/<item-id>/ folder with description.txt and optional photos/ and meta.yaml
+  depends_on: []
+  acceptance:
+  - id: incoming-readme-documents-layout
+    criterion: incoming/README.md documents description.txt (required), photos/, meta.yaml (optional), and item-id slug format YYYY-MM-DD-short-slug
+  - id: example-folder-present
+    criterion: incoming/_example/ demonstrates the layout with description.txt, meta.yaml, and photos/.gitkeep
+  - id: meta-yaml-fields-documented
+    criterion: incoming/README.md documents price_hint, shipping, condition, and category_hint meta fields
+  - id: underscore-folders-ignored
+    criterion: CLIs skip directories whose names start with underscore when auto-selecting a single intake folder
+  - id: gitignore-incoming-artifacts
+    criterion: incoming/.gitignore excludes real item photos while keeping _example and README tracked
+  constraints:
+  - do not require a database or API for intake — filesystem folders are the source of truth
+  - item-id must stay lowercase kebab-case with date prefix
+  - do not store Facebook credentials inside intake folders
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: pending
+  priority: high
+  unlocks:
+  - intake-loader
+  - imessage-intake-path
+- schema_version: '1.0'
+  schema_type: node
+  node_id: intake-loader
+  title: Implement ItemIntake dataclass and load_item
+  type: capability
+  why: Listing generation and FB hooks need a single typed loader that reads description, photos, and meta from an intake folder
+  depends_on:
+  - intake-folder-convention
+  acceptance:
+  - id: item-intake-dataclass
+    criterion: ItemIntake frozen dataclass exposes item_id, root, description, photos tuple, and meta dict in src/sell_valuables/intake.py
+  - id: load-item-requires-description
+    criterion: load_item raises FileNotFoundError when description.txt is missing and ValueError when it is empty
+  - id: photos-filtered-by-extension
+    criterion: load_item collects sorted photos from photos/ accepting .jpg, .jpeg, .png, .heic, and .webp only
+  - id: meta-yaml-parsed
+    criterion: load_item parses optional meta.yaml into a dict mapping and rejects non-mapping YAML with ValueError
+  - id: resolve-incoming-root
+    criterion: resolve_incoming_root returns repo_root/incoming defaulting to package parents[2]
+  constraints:
+  - implement in src/sell_valuables/intake.py only for this node
+  - use pathlib and pyyaml already declared in pyproject.toml
+  - do not add network calls or Facebook logic to intake loader
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: pending
+  priority: high
+  unlocks:
+  - listing-text-builder
+  - test-suite
+- schema_version: '1.0'
+  schema_type: node
+  node_id: listing-text-builder
+  title: Implement build_title, build_body, and build_listing_markdown
+  type: capability
+  why: Operators need marketplace-ready title, body, and markdown derived from ItemIntake without hand-editing FB fields each time
+  depends_on:
+  - intake-loader
+  acceptance:
+  - id: build-title-first-line
+    criterion: build_title uses the first line of description trimmed to max_len default 80 with ellipsis when truncated
+  - id: build-body-condition-shipping
+    criterion: build_body appends Condition and pickup/shipping lines from meta.condition and meta.shipping when present
+  - id: build-body-photo-count
+    criterion: build_body includes a photo count line when item.photos is non-empty
+  - id: listing-markdown-structure
+    criterion: build_listing_markdown outputs title heading, price from meta.price_hint default TBD, FB create URL, and body text
+  - id: fb-create-url-constant
+    criterion: FB_MARKETPLACE_CREATE_URL constant points to facebook.com/marketplace/create/item
+  constraints:
+  - keep listing builders pure functions in src/sell_valuables/listing.py
+  - do not embed Playwright or browser code in listing.py
+  - price_hint stays a string hint — no payment processing
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: pending
+  priority: high
+  unlocks:
+  - listing-cli
+  - test-suite
+- schema_version: '1.0'
+  schema_type: node
+  node_id: listing-cli
+  title: Implement sell-listing CLI that writes listing.md
+  type: capability
+  why: Operators need a one-command path from an intake folder to an on-disk listing.md artifact before any Facebook step
+  depends_on:
+  - listing-text-builder
+  acceptance:
+  - id: console-script-entrypoint
+    criterion: pyproject.toml registers sell-listing entry point to sell_valuables.generate_listing:main
+  - id: generate-listing-writes-file
+    criterion: generate_listing loads the item and writes listing.md inside the item folder using build_listing_markdown
+  - id: item-id-argument
+    criterion: CLI accepts item_id folder name under incoming/ and errors when incoming/ is missing
+  - id: auto-single-candidate
+    criterion: when item_id is omitted CLI selects the sole non-underscore folder in incoming/ or errors if count is not exactly one
+  - id: incoming-override-flag
+    criterion: --incoming flag overrides default resolve_incoming_root path for fixtures and tests
+  constraints:
+  - CLI must exit non-zero on FileNotFoundError and ValueError from load_item
+  - print the output path on success to stdout
+  - do not open a browser from sell-listing
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: pending
+  priority: high
+  unlocks:
+  - fb-post-hook
+- schema_version: '1.0'
+  schema_type: node
+  node_id: fb-post-hook
+  title: Implement sell-post-fb CLI hook with listing generation and browser open
+  type: capability
+  why: After listing.md exists, the operator needs a single command that regenerates the listing and opens Facebook Marketplace or starts automation hooks
+  depends_on:
+  - listing-cli
+  acceptance:
+  - id: console-script-entrypoint
+    criterion: pyproject.toml registers sell-post-fb entry point to sell_valuables.post_to_fb:main
+  - id: generates-listing-first
+    criterion: sell-post-fb always calls generate_listing before any browser action and prints Wrote listing.md path
+  - id: open-flag-browser
+    criterion: --open opens FB_MARKETPLACE_CREATE_URL via webbrowser.open and on macOS reveals photos/ with open command
+  - id: playwright-flag-skeleton
+    criterion: --playwright invokes post_with_playwright with dry_run=True and prints result dict
+  - id: default-manual-instructions
+    criterion: when neither --open nor --playwright is passed CLI prints manual Marketplace URL and rerun hints
+  constraints:
+  - require explicit item_id argument — no auto-single-folder selection in sell-post-fb
+  - do not submit listings from the default CLI path
+  - keep post_to_fb.py separate from generate_listing.py concerns
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: pending
+  priority: high
+  unlocks:
+  - fb-playwright-session
+  - test-suite
+- schema_version: '1.0'
+  schema_type: node
+  node_id: fb-playwright-session
+  title: Implement Playwright session bootstrap with storage_state.json
+  type: capability
+  why: Facebook login cannot run headless on every post; persisted session state under .fb-session enables reuse across dry-run automation
+  depends_on:
+  - fb-post-hook
+  acceptance:
+  - id: optional-browser-extra
+    criterion: pyproject.toml browser optional extra installs playwright and documents pip install -e '.[browser]' requirement
+  - id: storage-state-path
+    criterion: post_with_playwright loads .fb-session/storage_state.json from repo root when the file exists
+  - id: playwright-import-error
+    criterion: missing playwright raises RuntimeError with install instructions instead of crashing import time
+  - id: chromium-launch
+    criterion: post_with_playwright launches chromium with headless flag support and opens FB_MARKETPLACE_CREATE_URL
+  - id: session-dir-created
+    criterion: automation creates .fb-session parent directory when missing to support future storage_state save
+  constraints:
+  - .fb-session/ must stay gitignored — never commit Facebook session cookies
+  - session bootstrap must work with dry_run=True without submitting
+  - do not hardcode operator credentials in source
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: pending
+  priority: medium
+  unlocks:
+  - fb-playwright-form-fill
+- schema_version: '1.0'
+  schema_type: node
+  node_id: fb-playwright-form-fill
+  title: Wire Playwright Marketplace create form fill from ItemIntake
+  type: capability
+  why: Manual copy-paste from listing.md is error-prone; automation should fill title, price, description, and photo inputs from intake data
+  depends_on:
+  - fb-playwright-session
+  acceptance:
+  - id: result-dict-fields
+    criterion: post_with_playwright returns dict with item_id, title, photo_count, dry_run, and submitted keys
+  - id: title-from-build-title
+    criterion: result title uses build_title(item) derived from loaded intake
+  - id: form-fill-selectors-scaffold
+    criterion: post_with_playwright contains commented selector scaffold for Title, Price, Description fields and photo file inputs
+  - id: photo-loop-scaffold
+    criterion: commented code iterates item.photos for set_input_files on file input
+  - id: dry-run-stops-before-submit
+    criterion: dry_run=True sets submitted False and note explains stopped before submit
+  constraints:
+  - keep selectors commented until validated by a manual recording session — do not guess live selectors in production path without review
+  - fill logic must use build_title and build_body from listing.py
+  - photo uploads must reference absolute paths from item.photos
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: pending
+  priority: medium
+  unlocks:
+  - fb-submit-gate
+- schema_version: '1.0'
+  schema_type: node
+  node_id: fb-submit-gate
+  title: Add explicit human-reviewed submit gate before Publish click
+  type: capability
+  why: Accidental live posts are costly; submit must stay behind dry_run default and a deliberate operator opt-in after form fill is verified
+  depends_on:
+  - fb-playwright-form-fill
+  acceptance:
+  - id: dry-run-default-true
+    criterion: post_with_playwright defaults dry_run=True and sell-post-fb --playwright always passes dry_run=True
+  - id: submit-not-implemented-guard
+    criterion: when dry_run=False code path returns note that submit is not implemented until selectors and review gate are wired
+  - id: publish-click-scaffold
+    criterion: commented page.get_by_role button Publish click exists as the final step after form fill
+  - id: submitted-flag-false-until-wired
+    criterion: result submitted stays False until explicit submit gate is implemented and tested
+  - id: human-review-required-policy
+    criterion: project execution_policy require_human_review_before_overnight remains true for this graph
+  constraints:
+  - never auto-submit in CI or overnight jobs without human review artifact
+  - require a merged decision.md approving selector map before enabling dry_run=False
+  - log enough context in result dict for operator to verify title and photo_count pre-submit
+  allowed_execution_modes:
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: pending
+  priority: high
+  unlocks: []
+- schema_version: '1.0'
+  schema_type: node
+  node_id: imessage-intake-path
+  title: Document iMessage and Shortcuts path into incoming folders
+  type: capability
+  why: Chris's photos and descriptions arrive via iMessage; operators need a documented v0 manual path and recommended Shortcuts automation into incoming/
+  depends_on:
+  - intake-folder-convention
+  acceptance:
+  - id: imessage-shortcuts-doc-exists
+    criterion: docs/imessage-shortcuts.md explains Apple does not expose iMessage to Python and documents manual folder workflow
+  - id: manual-steps-documented
+    criterion: docs/imessage-shortcuts.md lists create incoming/<item-id>/, save photos to photos/, paste description.txt, run sell-listing and sell-post-fb --open
+  - id: shortcuts-recommended-flow
+    criterion: docs/imessage-shortcuts.md describes Shortcuts steps for Share sheet images, slug generation, iCloud save path, and description append
+  - id: later-options-noted
+    criterion: docs/imessage-shortcuts.md mentions Twilio and BlueBubbles as heavier later options without implementing them
+  - id: incoming-readme-cross-link
+    criterion: incoming/README.md links to docs/imessage-shortcuts.md for the iMessage path
+  constraints:
+  - v0 is documentation and operator workflow only — no Messages.app automation in Python
+  - Shortcuts paths must target Automating-Selling-Random-Valuables/incoming/<slug>/ layout
+  - do not store Chris's PII in committed fixtures beyond sample-item test data
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  status: pending
+  priority: medium
+  unlocks: []
+- schema_version: '1.0'
+  schema_type: node
+  node_id: test-suite
+  title: Add pytest coverage for intake loader and listing builders
+  type: capability
+  why: Practice graph validation requires executable proof that load_item, build_title, and build_listing_markdown behave against a stable fixture
+  depends_on:
+  - intake-loader
+  - listing-text-builder
+  - fb-post-hook
+  acceptance:
+  - id: sample-item-fixture
+    criterion: tests/fixtures/sample-item/ contains description.txt and meta.yaml usable by load_item
+  - id: test-load-item-fixture
+    criterion: test_load_item_fixture asserts item_id, description content, and meta price_hint from fixture
+  - id: test-build-title-first-line
+    criterion: test_build_title_from_first_line asserts build_title matches first description line for fixture
+  - id: test-listing-markdown-content
+    criterion: test_listing_markdown_includes_price_and_fb_url asserts price line, FB URL, and pickup wording in markdown
+  - id: pytest-dev-extra
+    criterion: pyproject.toml dev optional extra includes pytest and README quick start documents pip install -e '.[dev]' && pytest
+  constraints:
+  - tests must not require Playwright or live Facebook access
+  - use tests/fixtures/sample-item only — do not depend on real incoming/ item folders
+  - keep testpaths limited to tests/ per pyproject.toml
+  allowed_execution_modes:
+  - jules
+  - human
+  required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  status: pending
+  priority: medium
+  unlocks: []
+execution_policy:
+  default_executor: jules
+  max_concurrent_jobs: 1
+  require_human_review_before_overnight: true
+  artifact_gate_enforced: true
+node_files: 10
