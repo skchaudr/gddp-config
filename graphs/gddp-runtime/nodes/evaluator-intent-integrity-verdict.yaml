@@ -1,0 +1,68 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: evaluator-intent-integrity-verdict
+title: Graduate the verdict contract from criteria satisfaction to intent preservation + graph integrity
+type: capability
+
+why: |
+  The v1 evaluator contract is criteria-shaped: per-criterion judged_pass/fail
+  + overall_reasoning. That is a semantic test runner. It can say "the code
+  meets each criterion" and still miss that the work damaged the project.
+
+  A node can satisfy its acceptance criteria and still be wrong because it may
+  solve the wrong layer, collapse a future abstraction, violate an upstream
+  design decision, duplicate responsibility owned by another node, change the
+  project's direction without authorization, make a local fix that creates
+  graph-level drift, or pass tests while weakening the project contract.
+
+  The v2 contract graduates the verdict from "did the implementation meet the
+  node criteria?" to "did the implementation preserve the node's intended role
+  inside the project graph?" The output gains intent_preserved,
+  graph_integrity_preserved, an explicit verdict enum
+  (pass | block | drift | insufficient | contradicted | unknown), and
+  required_human_review (the verifier acknowledging its own place in the
+  system). Criteria satisfaction stays as one input, not the whole verdict.
+
+  This is the coffin nail on "GDDP just checks tests." GDDP verification is
+  intent preservation under graph constraints.
+
+depends_on:
+  - pi-evaluator-guard
+  - verification-receipt-contract
+
+acceptance:
+  - id: verdict-schema-includes-intent-and-integrity
+    criterion: the evaluator's typed output schema (in scripts/runtime/verification/schemas.py or a new EvaluatorVerdict) includes verdict (pass|block|drift|insufficient|contradicted|unknown), intent_preserved (bool), graph_integrity_preserved (bool), required_human_review (bool), evidence (list), risks (list), and reasoning (str), in addition to the v1 per-criterion judgments
+  - id: decision-engine-consumes-new-fields
+    criterion: scripts/runtime/verification/decision_engine.py consumes intent_preserved and graph_integrity_preserved when present, and a drift/contradicted verdict routes to needs-human-review (not pass), preserving the human gate
+  - id: receipt-carries-intent-integrity
+    criterion: VerdictReceipt carries intent_preserved, graph_integrity_preserved, and the richer verdict enum, with backward compatibility for existing receipt readers
+  - id: submit-verdict-tool-upgraded
+    criterion: the pi submit_verdict extension and the OpenAICompatibleRunner path both accept and validate the upgraded payload; malformed output is rejected and re-prompted
+  - id: drift-detected-on-criteria-pass
+    criterion: at least one test fixture where criteria all pass but intent or graph integrity is violated yields a non-pass verdict (drift or contradicted) with required_human_review true
+  - id: suite-green
+    criterion: python3 -m pytest -q scripts/runtime/verification passes with no regressions
+
+constraints:
+  - do not remove v1 criteria satisfaction; it becomes one input to the v2 verdict, not the whole verdict
+  - do not let the evaluator flip node status; required_human_review must default true for any non-pass verdict
+  - preserve backward compatibility for existing receipt readers unless an explicit migration path is documented
+  - do not change the human-gated completion invariant; only the human moves a node to complete
+  - graph truth stays human-owned
+
+allowed_execution_modes:
+  - jules
+  - human
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+
+status: pending
+priority: high
+
+unlocks:
+  - evaluator-canonical-context

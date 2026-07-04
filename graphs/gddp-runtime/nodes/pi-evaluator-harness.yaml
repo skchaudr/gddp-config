@@ -1,0 +1,65 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: pi-evaluator-harness
+title: Drive the semantic evaluator through the pi coding agent for live visibility
+type: capability
+
+why: |
+  The hand-rolled SemanticAgent loop is correct but opaque: the operator only
+  sees a final receipt, never the investigator's text, thinking, or tool calls.
+  That opacity is the practical blocker to trusting the loop at face value and
+  to iterating on it.
+
+  Driving the evaluator through the pi coding agent (the same binary the
+  openClaw heartbeat runs on) gives live, streaming visibility into the
+  semantic investigation while preserving every GDDP contract: the typed
+  submit_verdict terminal tool, the 12-row decision_engine (the trust anchor),
+  the receipt, and the read-only-where-it-matters invariant. pi is agent-
+  agnostic and already backs a Microsoft/OpenAI-backed dispatch engine, so it
+  is not a throwaway choice.
+
+  This node lands the harness wiring. The enforcement layer (broad inputs,
+  enforced outputs) is a sibling node: pi-evaluator-guard. The intent/integrity
+  verdict contract upgrade is a downstream node: evaluator-intent-integrity-verdict.
+
+depends_on:
+  - semantic-submit-verdict-tool
+  - semantic-validation-retry
+  - verification-receipt-contract
+
+acceptance:
+  - id: pi-extension-registers-submit-verdict
+    criterion: scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts registers a typed submit_verdict terminal tool whose parameters mirror SemanticOutput and that writes the verdict JSON to $GDDP_VERDICT_OUT with terminate:true
+  - id: pi-runner-drives-pi
+    criterion: scripts/runtime/verification/semantic/pi_runner.py spawns pi in --print mode with the extension loaded, a pi-specific system prompt, and the target repo as cwd; it reads the verdict file and returns a SemanticOutput
+  - id: orchestrator-harness-hook
+    criterion: scripts/runtime/verification/orchestrator.py accepts an optional semantic_harness callable that, when set, replaces SemanticAgent.run(); the default path is unchanged (backward compatible)
+  - id: cli-harness-flag
+    criterion: scripts/runtime/verification/cli.py exposes --semantic-harness {auto,pi,runner} (auto resolves to runner so existing behavior is unchanged) plus --semantic-thinking and --semantic-pi-model
+  - id: live-run-produces-valid-receipt
+    criterion: a live --semantic-harness pi run against a vault-doctor node produces a VerdictReceipt with populated criteria_confidence, completeness_status, and semantic judgments; the decision_engine decides the verdict, not pi
+  - id: suite-green
+    criterion: python3 -m pytest -q scripts/runtime/verification passes with no regressions
+
+constraints:
+  - do not change the decision_engine matrix or the VerdictReceipt contract in this node
+  - do not remove the OpenAICompatibleRunner/AnthropicRunner path; pi is an option, not a replacement
+  - pi's edit/write/multi_edit/bash are excluded in this node (the sibling guard node later swaps exclusion for mechanistic enforcement)
+  - keep the harness model-agnostic across pi providers (deepseek/zai/gemini/openrouter)
+  - graph truth stays human-owned; this node produces evidence only
+
+allowed_execution_modes:
+  - jules
+  - human
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+
+status: ready
+priority: high
+
+unlocks:
+  - pi-evaluator-guard

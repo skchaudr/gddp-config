@@ -1,0 +1,62 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: evaluator-canonical-context
+title: Feed the evaluator canonical docs + DAG neighborhood instead of AGENTS.md
+type: capability
+
+why: |
+  AGENTS.md is executor-facing: it tells the worker how to behave in the repo.
+  The evaluator must not inherit the worker's framing. The evaluator needs the
+  project's source of truth, not the executor's operating instructions.
+
+  The evaluator's context must be the canonical narrative docs (README,
+  PROJECT-BRIEF, the foundational/first node) plus the DAG neighborhood of the
+  current node — every node the current node depends on and every node it
+  unlocks or relates to — plus the deterministic evidence. That is what lets
+  the evaluator judge intent preservation and graph integrity, not just local
+  criteria satisfaction: a node can pass its local tests and still damage the
+  project's shape, and the graph neighborhood is how that is caught.
+
+  This node builds the context assembly (input_builder / context_policy) and
+  the evaluator prompt that uses it. It depends on the v2 verdict contract
+  because richer context without a richer verdict still produces a criteria-
+  shaped answer.
+
+depends_on:
+  - evaluator-intent-integrity-verdict
+
+acceptance:
+  - id: context-builder-assembles-canonical-docs
+    criterion: a context builder assembles the project's README, PROJECT-BRIEF, and foundational/first node text as evaluator context, sourced from the gddp-config graph and the target repo
+  - id: context-builder-assembles-dag-neighborhood
+    criterion: the context builder assembles the current node's DAG neighborhood — depends_on nodes, unlocks nodes, and explicitly related nodes — as evaluator context
+  - id: evaluator-prompt-uses-canonical-context
+    criterion: the pi evaluator system prompt and user prompt carry the canonical-doc + DAG-neighborhood context, and explicitly do NOT carry the target repo's AGENTS.md
+  - id: evidence-can-cite-canonical-and-neighbors
+    criterion: the evaluator's evidence refs can point to canonical docs and neighbor node ids, not just file:line refs in the target repo
+  - id: live-run-uses-canonical-context
+    criterion: a live --semantic-harness pi run includes the canonical context in the prompt transcript (visible in the tool trace / receipt) and the verdict references it
+  - id: suite-green
+    criterion: python3 -m pytest -q scripts/runtime/verification passes with no regressions
+
+constraints:
+  - do not load the target repo's AGENTS.md into evaluator context; it is executor-facing
+  - keep context bounded; canonical docs + DAG neighborhood, not the whole graph
+  - do not let the evaluator mutate canonical docs or graph truth
+  - preserve the human-gated completion invariant
+  - graph truth stays human-owned
+
+allowed_execution_modes:
+  - jules
+  - human
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+
+status: pending
+priority: high
+
+unlocks: []

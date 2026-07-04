@@ -1,0 +1,64 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: pi-evaluator-guard
+title: Mechanistic enforcement layer for the evaluator — broad inputs, enforced outputs
+type: capability
+
+why: |
+  The evaluator must be boring: read canonical context, read node + graph
+  neighborhood, read deterministic evidence, emit a typed verdict, reject
+  malformed output, and never mutate project state. Crippling the input
+  allowlist is the wrong tool for that — it is a substitute for harness
+  enforcement and throws away legitimate investigative capability.
+
+  The right tool is a mechanistic guard at the pi tool_call hook: give pi broad
+  tool access (read, grep, find, ls, bash, even edit/write/multi_edit are
+  available to call), and hard-block anything that would violate the verifier
+  contract. edit/write/multi_edit are blocked (the evaluator is read-only).
+  Destructive bash, git mutation (commit/push/reset/...), network, and file
+  redirection are blocked. Every tool call and its result are logged to a trace
+  so the receipt's budget_trace is ground-truth evidence, not the model's claim.
+
+  This is the protected-paths.ts + permission-gate.ts + audit-log.ts patterns
+  from the pi docs, specialized for GDDP. The model is not asked to behave; the
+  harness refuses. This is the product boundary: broad inputs, enforced outputs.
+
+depends_on:
+  - pi-evaluator-harness
+
+acceptance:
+  - id: guard-extension-blocks-writes
+    criterion: scripts/runtime/verification/semantic/pi_harness/gddp_verifier_guard.ts registers a tool_call hook that hard-blocks edit, write, multi_edit, and any other write-capable tool, returning a block reason
+  - id: guard-blocks-dangerous-bash
+    criterion: the guard blocks bash commands matching destructive verbs (rm, rmdir, mv, cp-to-dest, mkdir, tee, chmod, chown), git mutation (commit, push, reset, checkout, switch, merge, rebase, clean, add, restore, stash, cherry-pick, revert), network (curl, wget, ssh, scp, pip, npm, etc.), and file redirection (> >> 2>)
+  - id: guard-logs-tool-trace
+    criterion: the guard logs every tool_call (blocked or allowed) and tool_execution_end to $GDDP_TOOL_TRACE JSONL, and the PiHarnessRunner folds that trace into SemanticOutput.budget_trace
+  - id: runner-drops-exclude-tools
+    criterion: scripts/runtime/verification/semantic/pi_runner.py loads both extensions with broad tool access (no --exclude-tools cripple) and sets GDDP_TOOL_TRACE
+  - id: block-proven-end-to-end
+    criterion: a forced write attempt through pi is hard-blocked (the target file is not created) and the trace records blocked:true with the reason; a live verification run still produces a correct receipt
+  - id: suite-green
+    criterion: python3 -m pytest -q scripts/runtime/verification passes with no regressions
+
+constraints:
+  - do not weaken the block patterns; the block list is the contract
+  - do not block read-only inspection (read, grep, find, ls, git diff/log/show/status/grep, read-only bash)
+  - keep submit_verdict working (it is a custom tool, not a built-in write tool)
+  - the guard must be best-effort on trace writes; never let tracing break the run
+  - graph truth stays human-owned; this node produces evidence only
+
+allowed_execution_modes:
+  - jules
+  - human
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+
+status: ready
+priority: high
+
+unlocks:
+  - evaluator-intent-integrity-verdict
