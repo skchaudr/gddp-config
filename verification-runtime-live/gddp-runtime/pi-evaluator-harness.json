@@ -1,0 +1,650 @@
+{
+  "project_id": "gddp-runtime",
+  "node_id": "pi-evaluator-harness",
+  "verdict": "needs-human-review",
+  "confidence": 0.4,
+  "criteria_confidence": 0.4,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "pi-extension-registers-submit-verdict",
+        "criterion": "scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts registers a typed submit_verdict terminal tool whose parameters mirror SemanticOutput and that writes the verdict JSON to $GDDP_VERDICT_OUT with terminate:true",
+        "status": "pass",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "gddp_verifier -> line 2: 'gddp_verifier'",
+          "submit_verdict -> line 2: 'submit_verdict'",
+          "SemanticOutput -> line 10: 'SemanticOutput'",
+          "JSON -> line 15: 'JSON'",
+          "GDDP_VERDICT_OUT -> line 12: 'GDDP_VERDICT_OUT'"
+        ],
+        "reasoning": "Scanned source files (scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts) for identifiers named in the criterion (pi_harness, gddp_verifier, submit_verdict, SemanticOutput, JSON, GDDP_VERDICT_OUT). Found.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "pi-runner-drives-pi",
+        "criterion": "scripts/runtime/verification/semantic/pi_runner.py spawns pi in --print mode with the extension loaded, a pi-specific system prompt, and the target repo as cwd; it reads the verdict file and returns a SemanticOutput",
+        "status": "pass",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "SemanticOutput -> line 19: 'SemanticOutput'"
+        ],
+        "reasoning": "Scanned source files (scripts/runtime/verification/semantic/pi_runner.py) for identifiers named in the criterion (pi_runner, pi-specific, SemanticOutput). Found.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "orchestrator-harness-hook",
+        "criterion": "scripts/runtime/verification/orchestrator.py accepts an optional semantic_harness callable that, when set, replaces SemanticAgent.run(); the default path is unchanged (backward compatible)",
+        "status": "pass",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "semantic_harness -> line 24: 'semantic_harness'",
+          "SemanticAgent -> line 9: 'SemanticAgent'"
+        ],
+        "reasoning": "Scanned source files (scripts/runtime/verification/orchestrator.py) for identifiers named in the criterion (semantic_harness, SemanticAgent). Found.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "cli-harness-flag",
+        "criterion": "scripts/runtime/verification/cli.py exposes --semantic-harness {auto,pi,runner} (auto resolves to runner so existing behavior is unchanged) plus --semantic-thinking and --semantic-pi-model",
+        "status": "pass",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "semantic\\-harness -> line 143: 'semantic-harness'",
+          "semantic\\-thinking -> line 154: 'semantic-thinking'",
+          "semantic\\-pi\\-model -> line 159: 'semantic-pi-model'"
+        ],
+        "reasoning": "Scanned source files (scripts/runtime/verification/cli.py) for identifiers named in the criterion (semantic-harness, semantic-thinking, semantic-pi-model). Found.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "live-run-produces-valid-receipt",
+        "criterion": "a live --semantic-harness pi run against a vault-doctor node produces a VerdictReceipt with populated criteria_confidence, completeness_status, and semantic judgments; the decision_engine decides the verdict, not pi",
+        "status": "pass",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "semantic\\-harness -> line 143: 'semantic-harness'",
+          "vault\\-doctor -> line 61: 'vault-doctor'",
+          "VerdictReceipt -> line 8: 'VerdictReceipt'",
+          "criteria_confidence -> line 296: 'criteria_confidence'",
+          "completeness_status -> line 297: 'completeness_status'",
+          "decision_engine -> line 7: 'decision_engine'"
+        ],
+        "reasoning": "Scanned source files (scripts/adapters/__init__.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_cli_adapter.py, scripts/adapters/test_jules_action_adapter.py...) for identifiers named in the criterion (semantic-harness, vault-doctor, VerdictReceipt, criteria_confidence, completeness_status, decision_engine). Found.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "suite-green",
+        "criterion": "python3 -m pytest -q scripts/runtime/verification passes with no regressions",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "do not change the decision_engine matrix or the VerdictReceipt contract in this node",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "do not remove the OpenAICompatibleRunner/AnthropicRunner path; pi is an option, not a replacement",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "pi's edit/write/multi_edit/bash are excluded in this node (the sibling guard node later swaps exclusion for mechanistic enforcement)",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "keep the harness model-agnostic across pi providers (deepseek/zai/gemini/openrouter)",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "graph truth stays human-owned; this node produces evidence only",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "decision.md": true,
+      "result-summary.md": true,
+      "patch.diff": true
+    },
+    "deps_status": {
+      "semantic-submit-verdict-tool": "complete",
+      "semantic-validation-retry": "complete",
+      "verification-receipt-contract": "complete"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": []
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "pi-extension-registers-submit-verdict",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts:30-43 (SubmitVerdictParams mirrors SemanticOutput)",
+          "scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts:49-52 (pi.registerTool with name 'submit_verdict')",
+          "scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts:60-62 (reads $GDDP_VERDICT_OUT from env)",
+          "scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts:77-81 (writeFileSync writes JSON verdict)",
+          "scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts:83-86 (returns with terminate: true)",
+          "scripts/runtime/verification/schemas.py:27-32 (SemanticOutput fields match TypeScript params)"
+        ],
+        "reasoning": "gddp_verifier.ts registers a typed submit_verdict terminal tool via pi.registerTool(). SubmitVerdictParams mirrors SemanticOutput fields (judgments, overall_reasoning, risks, followup_candidates, budget_exhausted, budget_trace). The execute() function reads $GDDP_VERDICT_OUT from process.env, validates args, writes the verdict JSON to that path, and returns with terminate: true. The JudgmentSchema matches CriterionJudgment exactly including the enum for judgment values. All requirements satisfied."
+      },
+      {
+        "criterion_id": "pi-runner-drives-pi",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "scripts/runtime/verification/semantic/pi_runner.py:36-37 (EXTENSION_PATH and GUARD_EXTENSION_PATH defined)",
+          "scripts/runtime/verification/semantic/pi_runner.py:53-79 (PI_SYSTEM_PROMPT with GDDP investigator role)",
+          "scripts/runtime/verification/semantic/pi_runner.py:99-117 (PiHarnessRunner.run() builds command, spawns subprocess, reads verdict)",
+          "scripts/runtime/verification/semantic/pi_runner.py:130-148 (_build_command uses --print --mode text, -e extension, --no-approve, --no-skills, etc.)",
+          "scripts/runtime/verification/semantic/pi_runner.py:102-109 (sets GDDP_VERDICT_OUT env var to temp file)",
+          "scripts/runtime/verification/semantic/pi_runner.py:115-117 (reads verdict file and calls SemanticOutput.model_validate)"
+        ],
+        "reasoning": "PiHarnessRunner.run() spawns pi with --print --mode text flags, loads the gddp_verifier.ts (and guard) extensions via -e, uses the pi-specific PI_SYSTEM_PROMPT, sets cwd=str(repo) on the subprocess, reads the verdict JSON from GDDP_VERDICT_OUT, validates it as SemanticOutput, and returns it. The build_prompt_messages() function from the shared prompt module is reused for consistency. All requirements satisfied."
+      },
+      {
+        "criterion_id": "orchestrator-harness-hook",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "scripts/runtime/verification/orchestrator.py:12 (SemanticHarness type alias = Callable[..., SemanticOutput])",
+          "scripts/runtime/verification/orchestrator.py:24 (semantic_harness: SemanticHarness | None = None parameter)",
+          "scripts/runtime/verification/orchestrator.py:37-40 (if semantic_harness is not None: semantic = semantic_harness(...))",
+          "scripts/runtime/verification/orchestrator.py:41-42 (else: SemanticAgent(runner=runner, ...).run(...) default path)",
+          "scripts/runtime/verification/semantic/pi_runner.py:268 (cli.py passes pi_runner.run as semantic_harness)"
+        ],
+        "reasoning": "The orchestrator.verify() function accepts an optional semantic_harness callable parameter typed as SemanticHarness (Callable[..., SemanticOutput]). When set, it replaces SemanticAgent.run() entirely. When None (the default), the original SemanticAgent path is used unchanged. The CLI already uses this hook by passing PiHarnessRunner.run when --semantic-harness pi is selected. The backward-compatible default path is preserved."
+      },
+      {
+        "criterion_id": "cli-harness-flag",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "scripts/runtime/verification/cli.py:98-106 (--semantic-harness {auto,pi,runner} argument parser)",
+          "scripts/runtime/verification/cli.py:107-114 (--semantic-thinking argument with default 'medium')",
+          "scripts/runtime/verification/cli.py:115-121 (--semantic-pi-model argument)",
+          "scripts/runtime/verification/cli.py:233-237 (_resolve_harness: auto returns 'runner')",
+          "scripts/runtime/verification/cli.py:242-254 (_pi_provider maps gddp provider names to pi provider names)"
+        ],
+        "reasoning": "cli.py exposes all three flags: --semantic-harness {auto,pi,runner}, --semantic-thinking (defaults to env GDDP_SEMANTIC_THINKING or 'medium'), and --semantic-pi-model (defaults to env GDDP_SEMANTIC_PI_MODEL or ''). The auto choice resolves to 'runner' via _resolve_harness(), keeping existing behavior unchanged when opt-in is not explicit."
+      },
+      {
+        "criterion_id": "live-run-produces-valid-receipt",
+        "judgment": "indeterminate",
+        "confidence": 0.6,
+        "evidence": [
+          "scripts/runtime/verification/cli.py:261-268 (builds PiHarnessRunner and passes pi_runner.run as semantic_harness)",
+          "scripts/runtime/verification/orchestrator.py:37-40 (semantic_harness is called when set)",
+          "scripts/runtime/verification/orchestrator.py:49-59 (VerdictReceipt built with criteria_confidence, completeness_status, semantic)",
+          "scripts/runtime/verification/schemas.py:32-51 (VerdictReceipt contract with all required fields)",
+          "scripts/runtime/verification/decision_engine.py:208-256 (12-row decide() matrix - the decision engine, not pi, decides verdict)"
+        ],
+        "reasoning": "The code paths are structurally correct: PiHarnessRunner.run() → orchestrator.verify() calls it as semantic_harness → decision_engine.decide() produces verdict. The VerdictReceipt includes criteria_confidence, completeness_status, and semantic judgments. The decision_engine.py (not pi) decides the final verdict via its 12-row matrix. However, this criterion requires a live, end-to-end runtime verification (actual pi binary with API keys against a vault-doctor node) which cannot be confirmed by static analysis alone. The code structure satisfies the design intent, but the live execution artifact is absent."
+      },
+      {
+        "criterion_id": "suite-green",
+        "judgment": "judged_pass",
+        "confidence": 1.0,
+        "evidence": [
+          "bash: '.venv/bin/python -m pytest -q scripts/runtime/verification/' returned '67 passed in 0.50s'"
+        ],
+        "reasoning": "All 67 tests pass with no failures when running pytest on the scripts/runtime/verification/ package. The suite is green."
+      }
+    ],
+    "overall_reasoning": "The pi-evaluator-harness node lands the pi coding agent as a live, streaming semantic verifier while preserving every GDDP contract. Five of six acceptance criteria are satisfied by the code:\n\n1. gddp_verifier.ts registers a fully typed submit_verdict terminal tool whose parameters mirror SemanticOutput exactly, writes to $GDDP_VERDICT_OUT, and terminates with terminate:true.\n2. pi_runner.py spawns pi with --print --mode text, loads the gddp_verifier extension, uses a pi-specific system prompt, runs in the target repo as cwd, reads the verdict file, and returns a validated SemanticOutput.\n3. orchestrator.py accepts an optional semantic_harness callable; when set, it replaces SemanticAgent.run(); when None, the default path is unchanged.\n4. cli.py exposes --semantic-harness {auto,pi,runner} (auto→runner), --semantic-thinking, and --semantic-pi-model.\n6. All 67 pytest tests pass with no regressions.\n\nCriterion 5 (live run) is indeterminate because it requires an actual pi binary execution with API keys against a vault-doctor node — a runtime/integration concern that cannot be verified statically. The code path is structurally correct (PiHarnessRunner → orchestrator → decision_engine), but no live run artifact exists.\n\nAll five constraints are respected. The decision_engine matrix (12 rows) and VerdictReceipt contract are unchanged. OpenAICompatibleRunner/AnthropicRunner paths remain intact in agent.py. The guard extension (gddp_verifier_guard.ts) blocks edit/write/multi_edit and dangerous bash at the tool_call hook. The harness is model-agnostic across providers (deepseek/zai/gemini/openrouter). Graph truth stays human-owned — the code only produces evidence.\n\nThe .gddp/ artifacts (decision.md, result-summary.md, patch.diff) are from a prior node (verification-receipt-contract), not from this node. Per instructions, this is a completeness concern, not a criteria concern.",
+    "risks": "The main risk is that criterion 5 (live-run-produces-valid-receipt) is untested at runtime. The pi binary and API keys are required for end-to-end verification. Additionally, there are no unit tests specifically for PiHarnessRunner or the CLI's --semantic-harness pi path; test coverage relies on the existing 67 tests passing. A change to pi's CLI interface or the extension API could break the harness silently.",
+    "followup_candidates": "1. Run a live --semantic-harness pi verification against a known node to validate criterion 5 end-to-end. 2. Add unit tests for PiHarnessRunner (mock pi binary, verify command-line construction, verdict file parsing, error handling). 3. Add CLI tests for --semantic-harness pi, --semantic-thinking, and --semantic-pi-model flags. 4. Proceed to pi-evaluator-guard node for the mechanistic enforcement layer. 5. Generate the required artifacts (decision.md, result-summary.md, patch.diff) for this node's completion.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-07-05T11:10:11.297Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_xZ0LyfV7Kq4fccqVk39Q6195",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:11.297Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_AuZwx1k8PKfLtBhhVwDl0651",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:11.298Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_IXSKwKrJ0Cow2dNYL3Xc9654",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:11.298Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_LQY4hZayU1ox1UUC1RQa9413",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:13.187Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_IYBDdJ8L72ogtQLdpMel0692",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:13.188Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_uSF0YAiv8UI3txX7rnmZ9909",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:15.870Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "find scripts/runtime/verification -name \"*.py\" -path \"*/test*\" -o -name \"test_*.py\" | sort"
+        },
+        {
+          "ts": "2026-07-05T11:10:15.871Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "find scripts/runtime/verification -name \"test_*.py\" -o -name \"*_test.py\" | sort"
+        },
+        {
+          "ts": "2026-07-05T11:10:15.893Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_SdkP822yuQUrGZRi1zeo3618",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:15.896Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_U4pqCFvOVw2F45JY3dCT5705",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:15.896Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ajE11nCuzX2GF7XgDdoI0483",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:18.084Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_iLxWojfcdrUY0McbwZWV1652",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:18.085Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_2T2xinHKQbO53e1zHNwx9720",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:20.663Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "grep -rn \"semantic_harness\" scripts/runtime/verification/ --include=\"*.py\""
+        },
+        {
+          "ts": "2026-07-05T11:10:20.663Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "grep -rn \"PiHarnessRunner\\|pi_runner\\|pi_harness\" scripts/runtime/verification/ --include=\"*.py\""
+        },
+        {
+          "ts": "2026-07-05T11:10:20.678Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_3dYVKhpITjEKFx1i8hjn9170",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:20.680Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_XHCN1KtAw27EMcl38WOi2446",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:23.091Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_f7Re0S3u8WHGVVHV7C7v1007",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:23.092Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_czSIsax5OlK12UmOknxJ9517",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:26.358Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "ls -la decision.md result-summary.md patch.diff 2>&1; echo \"---\"; ls -la scripts/runtime/verification/__init__.py scripts/runtime/verification/deterministic/__init__.py scripts/runtime/verification/semantic/__init__.py 2>&1"
+        },
+        {
+          "ts": "2026-07-05T11:10:26.358Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "cd /home/sab/gddp-runtime && python3 -m pytest -q scripts/runtime/verification/ 2>&1 | tail -30"
+        },
+        {
+          "ts": "2026-07-05T11:10:26.375Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Yx1j3EVEfOuA3oNsVfZU3684",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:26.428Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_H10MAT1hajuxrcuj8RNl3309",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:30.480Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "cd /home/sab/gddp-runtime && find . -name \"decision.md\" -o -name \"result-summary.md\" -o -name \"patch.diff\" 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-07-05T11:10:30.480Z",
+          "tool": "bash",
+          "blocked": true,
+          "reason": "command matched blocked pattern",
+          "command": "cd /home/sab/gddp-runtime && which pytest 2>/dev/null; pip list 2>/dev/null | grep -i pytest; python3 -m pip list 2>/dev/null | grep -i pytest; pip3 list 2>/dev/null | grep -i pytest",
+          "pattern": "\\b(?:curl|wget|ssh|scp|sftp|rsync|nc|netcat|telnet|ftp|pip|npm|pnpm|yarn|brew)\\b"
+        },
+        {
+          "ts": "2026-07-05T11:10:30.481Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_kQLRAl4ou4mZkr1TupgW4317",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-07-05T11:10:30.481Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "find /home/sab/gddp-runtime -name \".venv\" -o -name \"venv\" -o -name \"env\" -o -name \"poetry.lock\" -o -name \"pyproject.toml\" 2>/dev/null | head -10"
+        },
+        {
+          "ts": "2026-07-05T11:10:30.524Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_UShF3qiLAdQgg0olSJYr3644",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:30.533Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_gwNskTXIMA7Z9sIHIb067252",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:33.235Z",
+          "tool": "bash",
+          "blocked": true,
+          "reason": "command matched blocked pattern",
+          "command": "cd /home/sab/gddp-runtime && .venv/bin/pip list 2>/dev/null | grep -i pytest",
+          "pattern": "\\b(?:curl|wget|ssh|scp|sftp|rsync|nc|netcat|telnet|ftp|pip|npm|pnpm|yarn|brew)\\b"
+        },
+        {
+          "ts": "2026-07-05T11:10:33.236Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_CC6iRDfpjcS39FLTa0D69296",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-07-05T11:10:33.236Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "cd /home/sab/gddp-runtime && .venv/bin/python -m pytest -q scripts/runtime/verification/ 2>&1 | tail -40"
+        },
+        {
+          "ts": "2026-07-05T11:10:34.463Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_EMvcLcoXLfUWgRX2J0Q16947",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:37.808Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "cd /home/sab/gddp-runtime && cat .gddp/decision.md"
+        },
+        {
+          "ts": "2026-07-05T11:10:37.808Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "cd /home/sab/gddp-runtime && cat .gddp/result-summary.md"
+        },
+        {
+          "ts": "2026-07-05T11:10:37.808Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "cd /home/sab/gddp-runtime && cat .gddp/patch.diff"
+        },
+        {
+          "ts": "2026-07-05T11:10:37.825Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_nZTsuTuTxc607Z27ufq24362",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:37.826Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_zbImSs76qil2URiU4w1M8522",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:37.827Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_NBObg525RR46mKo0RTbd6108",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:56.808Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "find /home/sab/gddp-runtime -name \"*.py\" -path \"*/test*\" | xargs grep -l \"pi_runner\\|PiHarness\\|gddp_verifier\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-05T11:10:56.808Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "cd /home/sab/gddp-runtime && grep -rn \"semantic_harness\\|PiHarnessRunner\\|pi_harness\" scripts/runtime/verification/test_*.py --include=\"*.py\""
+        },
+        {
+          "ts": "2026-07-05T11:10:56.824Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Qb3qqGkrkUJlQDq259Qt1796",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-07-05T11:10:56.851Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_81hj7aQPWydFsC78a6MS5009",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:59.908Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "cd /home/sab/gddp-runtime && grep -n -A5 \"pi_runner\" scripts/runtime/verification/deterministic/test_deterministic.py"
+        },
+        {
+          "ts": "2026-07-05T11:10:59.909Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "cd /home/sab/gddp-runtime && grep -n \"semantic_harness\\|--semantic-harness\\|semantic-thinking\\|semantic-pi-model\" scripts/runtime/verification/test_cli.py"
+        },
+        {
+          "ts": "2026-07-05T11:10:59.921Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_kzHbq0IaeiiniK5FI0QV0300",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:10:59.924Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_9pynVe799xvQ1cEaGL4O7865",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-07-05T11:11:04.318Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "cd /home/sab/gddp-runtime && find . -path \"*/vault*doctor*\" -o -name \"*vault*doctor*\" 2>/dev/null | head -10"
+        },
+        {
+          "ts": "2026-07-05T11:11:04.318Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "cd /home/sab/gddp-runtime && find . -name \"*.yaml\" -o -name \"*.yml\" | xargs grep -l \"vault-doctor\\|vault_doctor\" 2>/dev/null | head -10"
+        },
+        {
+          "ts": "2026-07-05T11:11:04.363Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_bf64q6sYpW36RcmWixDy8816",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:11:04.365Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_68clk3oAwalBJIVZC4mi5991",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:11:07.303Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Z30kmnMnqbHCp4z22GCK7190",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:11:09.414Z",
+          "tool": "bash",
+          "blocked": false,
+          "command": "cd /home/sab/gddp-runtime && grep -n \"TOOL_SCHEMAS\\|submit_verdict\" scripts/runtime/verification/semantic/tools.py"
+        },
+        {
+          "ts": "2026-07-05T11:11:09.423Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_JPuhEBZHpmffwksaEP603668",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:11:12.243Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_GHBjDXYgtmwA0gw9a7T16559",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:11:14.570Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_YdOMrgr72yBR533WIezu2993",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-05T11:11:48.050Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_aZ641AG9h2EpoqEoEtWc9570",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    }
+  },
+  "decision_reasoning": "The pi-evaluator-harness node lands the pi coding agent as a live, streaming semantic verifier while preserving every GDDP contract. Five of six acceptance criteria are satisfied by the code:\n\n1. gddp_verifier.ts registers a fully typed submit_verdict terminal tool whose parameters mirror SemanticOutput exactly, writes to $GDDP_VERDICT_OUT, and terminates with terminate:true.\n2. pi_runner.py spawns pi with --print --mode text, loads the gddp_verifier extension, uses a pi-specific system prompt, runs in the target repo as cwd, reads the verdict file, and returns a validated SemanticOutput.\n3. orchestrator.py accepts an optional semantic_harness callable; when set, it replaces SemanticAgent.run(); when None, the default path is unchanged.\n4. cli.py exposes --semantic-harness {auto,pi,runner} (auto→runner), --semantic-thinking, and --semantic-pi-model.\n6. All 67 pytest tests pass with no regressions.\n\nCriterion 5 (live run) is indeterminate because it requires an actual pi binary execution with API keys against a vault-doctor node — a runtime/integration concern that cannot be verified statically. The code path is structurally correct (PiHarnessRunner → orchestrator → decision_engine), but no live run artifact exists.\n\nAll five constraints are respected. The decision_engine matrix (12 rows) and VerdictReceipt contract are unchanged. OpenAICompatibleRunner/AnthropicRunner paths remain intact in agent.py. The guard extension (gddp_verifier_guard.ts) blocks edit/write/multi_edit and dangerous bash at the tool_call hook. The harness is model-agnostic across providers (deepseek/zai/gemini/openrouter). Graph truth stays human-owned — the code only produces evidence.\n\nThe .gddp/ artifacts (decision.md, result-summary.md, patch.diff) are from a prior node (verification-receipt-contract), not from this node. Per instructions, this is a completeness concern, not a criteria concern.",
+  "required_next_action": "Human review required for unresolved semantic judgments.",
+  "generated_at": "2026-07-05T11:11:48.089086+00:00"
+}
