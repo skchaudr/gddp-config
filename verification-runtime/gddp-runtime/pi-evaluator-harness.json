@@ -1,0 +1,258 @@
+{
+  "project_id": "gddp-runtime",
+  "node_id": "pi-evaluator-harness",
+  "verdict": "needs-more-evidence",
+  "confidence": 0.17500000000000002,
+  "criteria_confidence": 0.17500000000000002,
+  "completeness_status": "partial",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "pi-extension-registers-submit-verdict",
+        "criterion": "scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts registers a typed submit_verdict terminal tool whose parameters mirror SemanticOutput and that writes the verdict JSON to $GDDP_VERDICT_OUT with terminate:true",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "path_mentioned_missing",
+        "evidence": [
+          "scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts absent"
+        ],
+        "reasoning": "The criterion names source path(s) that are not present in the checkout. The harness did not scan unrelated files as substitutes.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "pi-runner-drives-pi",
+        "criterion": "scripts/runtime/verification/semantic/pi_runner.py spawns pi in --print mode with the extension loaded, a pi-specific system prompt, and the target repo as cwd; it reads the verdict file and returns a SemanticOutput",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "path_mentioned_missing",
+        "evidence": [
+          "scripts/runtime/verification/semantic/pi_runner.py absent"
+        ],
+        "reasoning": "The criterion names source path(s) that are not present in the checkout. The harness did not scan unrelated files as substitutes.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "scripts/runtime/verification/semantic/pi_runner.py absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "orchestrator-harness-hook",
+        "criterion": "scripts/runtime/verification/orchestrator.py accepts an optional semantic_harness callable that, when set, replaces SemanticAgent.run(); the default path is unchanged (backward compatible)",
+        "status": "pass",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "SemanticAgent -> line 9: 'SemanticAgent'"
+        ],
+        "reasoning": "Scanned source files (scripts/runtime/verification/orchestrator.py) for identifiers named in the criterion (semantic_harness, SemanticAgent). Found.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "cli-harness-flag",
+        "criterion": "scripts/runtime/verification/cli.py exposes --semantic-harness {auto,pi,runner} (auto resolves to runner so existing behavior is unchanged) plus --semantic-thinking and --semantic-pi-model",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/runtime/verification/cli.py)"
+        ],
+        "reasoning": "Scanned source files (scripts/runtime/verification/cli.py) for identifiers named in the criterion (semantic-harness, semantic-thinking, semantic-pi-model). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "live-run-produces-valid-receipt",
+        "criterion": "a live --semantic-harness pi run against a vault-doctor node produces a VerdictReceipt with populated criteria_confidence, completeness_status, and semantic judgments; the decision_engine decides the verdict, not pi",
+        "status": "pass",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "vault\\-doctor -> line 61: 'vault-doctor'",
+          "VerdictReceipt -> line 8: 'VerdictReceipt'",
+          "criteria_confidence -> line 236: 'criteria_confidence'",
+          "completeness_status -> line 237: 'completeness_status'",
+          "decision_engine -> line 7: 'decision_engine'"
+        ],
+        "reasoning": "Scanned source files (scripts/adapters/__init__.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_cli_adapter.py, scripts/adapters/test_jules_action_adapter.py...) for identifiers named in the criterion (semantic-harness, vault-doctor, VerdictReceipt, criteria_confidence, completeness_status, decision_engine). Found.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "suite-green",
+        "criterion": "python3 -m pytest -q scripts/runtime/verification passes with no regressions",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "do not change the decision_engine matrix or the VerdictReceipt contract in this node",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "do not remove the OpenAICompatibleRunner/AnthropicRunner path; pi is an option, not a replacement",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "pi's edit/write/multi_edit/bash are excluded in this node (the sibling guard node later swaps exclusion for mechanistic enforcement)",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "keep the harness model-agnostic across pi providers (deepseek/zai/gemini/openrouter)",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "graph truth stays human-owned; this node produces evidence only",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "decision.md": true,
+      "result-summary.md": true,
+      "patch.diff": true
+    },
+    "deps_status": {
+      "semantic-submit-verdict-tool": "complete",
+      "semantic-validation-retry": "complete",
+      "verification-receipt-contract": "complete"
+    },
+    "criteria_mismatches": [
+      {
+        "criterion_id": "pi-extension-registers-submit-verdict",
+        "kind": "source_path",
+        "detail": "scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts absent"
+      },
+      {
+        "criterion_id": "pi-runner-drives-pi",
+        "kind": "source_path",
+        "detail": "scripts/runtime/verification/semantic/pi_runner.py absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "pi-extension-registers-submit-verdict",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "criterion_id": "pi-runner-drives-pi",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ]
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "pi-extension-registers-submit-verdict",
+        "judgment": "indeterminate",
+        "confidence": 0.2,
+        "evidence": [
+          "scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts absent"
+        ],
+        "reasoning": "Offline verifier CLI could not resolve this criterion semantically; a live semantic runner or human review is required."
+      },
+      {
+        "criterion_id": "pi-runner-drives-pi",
+        "judgment": "indeterminate",
+        "confidence": 0.2,
+        "evidence": [
+          "scripts/runtime/verification/semantic/pi_runner.py absent"
+        ],
+        "reasoning": "Offline verifier CLI could not resolve this criterion semantically; a live semantic runner or human review is required."
+      },
+      {
+        "criterion_id": "cli-harness-flag",
+        "judgment": "indeterminate",
+        "confidence": 0.2,
+        "evidence": [
+          "no hit in source scan (scripts/runtime/verification/cli.py)"
+        ],
+        "reasoning": "Offline verifier CLI could not resolve this criterion semantically; a live semantic runner or human review is required."
+      },
+      {
+        "criterion_id": "suite-green",
+        "judgment": "indeterminate",
+        "confidence": 0.1,
+        "evidence": [],
+        "reasoning": "Offline verifier CLI could not resolve this criterion semantically; a live semantic runner or human review is required."
+      }
+    ],
+    "overall_reasoning": "Offline verifier CLI finalized unresolved semantic criteria as indeterminate without network or graph mutation.",
+    "risks": "Semantic verification was not completed by a live model.",
+    "followup_candidates": null,
+    "budget_exhausted": true,
+    "budget_trace": {
+      "max_turns": 15,
+      "max_tool_calls": 40,
+      "max_tokens": 24000,
+      "max_tool_result_chars": 50000,
+      "initial_estimated_tokens": 5054,
+      "initial_remaining_tokens": 18946,
+      "initial_remaining_tool_calls": 40,
+      "events": [
+        {
+          "event": "model_response",
+          "turn": 0,
+          "estimated_tokens": 1,
+          "tool_calls": 1,
+          "finish_reason": "tool_use",
+          "remaining_tokens": 18945,
+          "remaining_tool_calls": 40
+        }
+      ],
+      "final_reason": "submit_verdict accepted",
+      "final_remaining_tokens": 18945,
+      "final_remaining_tool_calls": 40,
+      "message_count": 3
+    }
+  },
+  "decision_reasoning": "Offline verifier CLI finalized unresolved semantic criteria as indeterminate without network or graph mutation.",
+  "required_next_action": "Re-run semantic investigation with sufficient budget.",
+  "generated_at": "2026-07-05T06:03:07.458614+00:00"
+}

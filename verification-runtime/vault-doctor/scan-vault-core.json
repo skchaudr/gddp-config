@@ -1,0 +1,211 @@
+{
+  "project_id": "vault-doctor",
+  "node_id": "scan-vault-core",
+  "verdict": "needs-more-evidence",
+  "confidence": 0.2,
+  "criteria_confidence": 0.2,
+  "completeness_status": "partial",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "vaultdoctor-class-exists",
+        "criterion": "VaultDoctor class exists in src/doctor.py",
+        "status": "pass",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "VaultDoctor -> line 16: 'VaultDoctor'"
+        ],
+        "reasoning": "Scanned source files (src/doctor.py) for identifiers named in the criterion (VaultDoctor). Found.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "scan-vault-walks-directory",
+        "criterion": "scan_vault(vault_path) walks the directory tree and returns a list of file metadata dicts",
+        "status": "pass",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "scan_vault -> line 94: 'scan_vault'",
+          "vault_path -> line 21: 'vault_path'"
+        ],
+        "reasoning": "Scanned source files (src/__init__.py, src/doctor.py, src/normalize.py, src/triage.py...) for identifiers named in the criterion (scan_vault, vault_path). Found.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "metadata-dict-minimum-keys",
+        "criterion": "each metadata dict contains at minimum: path, size_bytes, extension, modified_at",
+        "status": "pass",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "size_bytes -> line 111: 'size_bytes'",
+          "modified_at -> line 113: 'modified_at'"
+        ],
+        "reasoning": "Scanned source files (src/__init__.py, src/doctor.py, src/normalize.py, src/triage.py...) for identifiers named in the criterion (size_bytes, modified_at). Found.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "scan-vault-ignores-obsidian",
+        "criterion": "scan_vault correctly ignores .obsidian/ system files",
+        "status": "pass",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "scan_vault -> line 94: 'scan_vault'"
+        ],
+        "reasoning": "Scanned source files (src/__init__.py, src/doctor.py, src/normalize.py, src/triage.py...) for identifiers named in the criterion (scan_vault). Found.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "at-least-3-passing-tests",
+        "criterion": "at least 3 passing tests in tests/test_doctor.py covering scan output structure",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (tests/test_doctor.py)"
+        ],
+        "reasoning": "Scanned source files (tests/test_doctor.py) for identifiers named in the criterion (test_doctor). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "tests-use-mock-vault-fixture",
+        "criterion": "tests use the existing mock vault at vault_doctor/mock_vault/ as fixture",
+        "status": "pass",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "vault_doctor -> line 14: 'vault_doctor'",
+          "mock_vault -> line 14: 'mock_vault'"
+        ],
+        "reasoning": "Scanned source files (src/__init__.py, src/doctor.py, src/normalize.py, src/triage.py...) for identifiers named in the criterion (vault_doctor, mock_vault). Found.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "implement in src/doctor.py only — do not modify triage.py",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "do not delete or modify the mock vault files Jules added in the previous PR",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "use only libraries already in requirements.txt (python-frontmatter, rich, pyyaml)",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "do not add new dependencies",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "keep the implementation simple — this is a foundation, not a full feature",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "decision.md": false,
+      "result-summary.md": false,
+      "patch.diff": false,
+      "graph-update.yaml": false
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": []
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "at-least-3-passing-tests",
+        "judgment": "indeterminate",
+        "confidence": 0.2,
+        "evidence": [
+          "no hit in source scan (tests/test_doctor.py)"
+        ],
+        "reasoning": "Offline verifier CLI could not resolve this criterion semantically; a live semantic runner or human review is required."
+      }
+    ],
+    "overall_reasoning": "Offline verifier CLI finalized unresolved semantic criteria as indeterminate without network or graph mutation.",
+    "risks": "Semantic verification was not completed by a live model.",
+    "followup_candidates": null,
+    "budget_exhausted": true,
+    "budget_trace": {
+      "max_turns": 15,
+      "max_tool_calls": 40,
+      "max_tokens": 24000,
+      "max_tool_result_chars": 50000,
+      "initial_estimated_tokens": 3252,
+      "initial_remaining_tokens": 20748,
+      "initial_remaining_tool_calls": 40,
+      "events": [
+        {
+          "event": "model_response",
+          "turn": 0,
+          "estimated_tokens": 1,
+          "tool_calls": 1,
+          "finish_reason": "tool_use",
+          "remaining_tokens": 20747,
+          "remaining_tool_calls": 40
+        }
+      ],
+      "final_reason": "submit_verdict accepted",
+      "final_remaining_tokens": 20747,
+      "final_remaining_tool_calls": 40,
+      "message_count": 3
+    }
+  },
+  "decision_reasoning": "Offline verifier CLI finalized unresolved semantic criteria as indeterminate without network or graph mutation.",
+  "required_next_action": "Re-run semantic investigation with sufficient budget.",
+  "generated_at": "2026-07-05T06:03:07.986122+00:00"
+}
