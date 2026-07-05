@@ -16,18 +16,18 @@ Changed surfaces:
 
 Evaluator runs:
 - `aa-cli/common-core`: runtime receipt `needs-more-evidence`; deterministic 5/5 criteria pass, 3/3 constraints clear, required artifacts missing (`decision.md`, `result-summary.md`, `patch.diff`).
-- `gddp-runtime/pi-evaluator-harness`: runtime receipt `needs-more-evidence`; deterministic 2/6 criteria pass, 5/5 constraints clear, artifacts present. Human questions: are `scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts` and `scripts/runtime/verification/semantic/pi_runner.py` stale paths or not landed?
+- `gddp-runtime/pi-evaluator-harness`: runtime receipt `needs-more-evidence`; deterministic 5/6 criteria pass, 5/5 constraints clear, artifacts present. The unresolved criterion is `suite-green`; the offline semantic runner leaves it indeterminate rather than claiming a live suite proof.
 - `vault-doctor/scan-vault-core`: runtime receipt `needs-more-evidence`; deterministic 5/6 criteria pass, 5/5 constraints clear, required artifacts missing (`decision.md`, `result-summary.md`, `patch.diff`, `graph-update.yaml`). The unresolved criterion is proving "at least 3 passing tests" from `tests/test_doctor.py`; the static fallback sees the file but does not execute that test contract.
 
 Harness fixes made:
 - Unregistered probes now scan explicit source paths first, then source/test layouts; they no longer assume every repo is zsh `lib/*.zsh`.
-- Criteria that name missing paths now produce `source_path` mismatches and human-review questions instead of passing from unrelated files.
+- Criteria that name missing paths now produce `source_path` mismatches and human-review questions instead of passing from unrelated files. After rebasing runtime, upstream had landed the referenced pi harness files, so the final `pi-evaluator-harness` receipt no longer carries those source-path questions.
 - Constraint scans now use probe/named files and only apply zsh forbidden patterns to `lib/*.zsh`, eliminating the false `lib/validate.zsh` violation for `aa-cli/common-core`.
 
 Validation:
 - `gddp-config`: `.venv/bin/python scripts/validate.py` -> 0 errors, 1 existing warning for `return-router` dangling unlock `first-overnight-run`.
 - `gddp-config`: `gddp.py verify node` rerun for all three target nodes.
-- `gddp-runtime`: `PYTHONPATH=/home/sab/gddp-runtime .venv/bin/python -m pytest -q scripts/runtime/verification` -> 66 passed.
+- `gddp-runtime`: `PYTHONPATH=/home/sab/gddp-runtime .venv/bin/python -m pytest -q scripts/runtime/verification` -> 67 passed.
 - `gddp-runtime`: runtime verifier CLI rerun in offline semantic mode for all three target nodes.
 
 Integrity notes:
