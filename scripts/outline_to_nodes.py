@@ -130,7 +130,7 @@ def make_node_dict(node: dict, deps_resolved: list[str]) -> dict:
         "type": "capability",
         "why": "REPLACE_ME",
         "depends_on": deps_resolved,
-        "acceptance": ["REPLACE_ME"],
+        "acceptance_criteria": ["REPLACE_ME"],
         "constraints": ["REPLACE_ME"],
         "allowed_execution_modes": ["jules"],
         "required_artifacts": list(DEFAULT_ARTIFACTS),
@@ -144,7 +144,7 @@ def render_node_yaml(node: dict) -> str:
     field_order = [
         "schema_version", "schema_type",
         "node_id", "title", "type", "why",
-        "depends_on", "acceptance", "constraints",
+        "depends_on", "acceptance_criteria", "constraints",
         "allowed_execution_modes", "required_artifacts",
         "status", "priority", "unlocks",
     ]

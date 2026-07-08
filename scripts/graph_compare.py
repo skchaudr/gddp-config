@@ -84,7 +84,7 @@ def analyze(project_dir: Path) -> dict:
             if u not in ids:
                 violations.append(f"{nid}: unlocks dangling target '{u}' (ok if a planned future node)")
 
-        for a in (n.get("acceptance") or []):
+        for a in (n.get("acceptance_criteria") or []):
             accept_total += 1
             aid = (a or {}).get("id")
             if not aid or not KEBAB.match(str(aid)):

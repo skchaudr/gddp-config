@@ -124,7 +124,7 @@ def make_node_dict(node_id: str, title: str, depends_on: list[str],
         "type": "capability",
         "why": "REPLACE_ME",
         "depends_on": depends_on,
-        "acceptance": normalize_acceptance_items(["REPLACE_ME"]),
+        "acceptance_criteria": normalize_acceptance_items(["REPLACE_ME"]),
         "constraints": ["REPLACE_ME"],
         "allowed_execution_modes": ["jules"],
         "required_artifacts": list(DEFAULT_ARTIFACTS),
@@ -138,7 +138,7 @@ def render_node_yaml(node: dict) -> str:
     field_order = [
         "schema_version", "schema_type",
         "node_id", "title", "type", "why",
-        "depends_on", "acceptance", "constraints",
+        "depends_on", "acceptance_criteria", "constraints",
         "allowed_execution_modes", "required_artifacts",
         "status", "priority", "unlocks",
     ]
@@ -291,7 +291,7 @@ def main(project: str, repo: str = "", project_name: str | None = None,
                     for k, v in drafted.items():
                         if v:
                             node[k] = v
-                    node["acceptance"] = normalize_acceptance_items(node.get("acceptance", []))
+                    node["acceptance_criteria"] = normalize_acceptance_items(node.get("acceptance_criteria", []))
                     console.print("  [green]draft applied[/green]")
             except Exception as e:
                 console.print(f"  [yellow]LLM draft failed: {e} — using placeholders[/yellow]")

@@ -60,7 +60,7 @@ nodes:
 
     '
   depends_on: []
-  acceptance:
+  acceptance_criteria:
   - id: return-router-file-exists
     criterion: return_router.py exists at scripts/runtime/return_router.py
   - id: handle-merged-pr-validates
@@ -121,7 +121,7 @@ nodes:
     '
   depends_on:
   - return-router
-  acceptance:
+  acceptance_criteria:
   - id: spec-file-exists
     criterion: docs/decision-loop-spec.md exists in gddp-runtime
   - id: spec-defines-required-sections
@@ -160,7 +160,7 @@ nodes:
     '
   depends_on:
   - decision-loop-spec
-  acceptance:
+  acceptance_criteria:
   - id: decision-loop-init-exists
     criterion: scripts/runtime/decision_loop/__init__.py exists
   - id: engine-file-exists
@@ -230,7 +230,7 @@ nodes:
     '
   depends_on:
   - decision-loop-runtime
-  acceptance:
+  acceptance_criteria:
   - id: review-pr-exists
     criterion: scripts/runtime/decision_loop/powers/review_pr.py exists with run(context, pr_payload) function
   - id: accept-node-exists
@@ -304,7 +304,7 @@ nodes:
 
     '
   depends_on: []
-  acceptance:
+  acceptance_criteria:
   - id: submit-verdict-tool-declared
     criterion: TOOL_SCHEMAS in scripts/runtime/verification/semantic/tools.py includes a submit_verdict terminal tool, and prompt.py instructs the model to call it with SemanticOutput fields (judgments[], overall_reasoning, risks, followup_candidates, budget_exhausted)
   - id: loop-terminates-on-submit
@@ -365,7 +365,7 @@ nodes:
     '
   depends_on:
   - semantic-submit-verdict-tool
-  acceptance:
+  acceptance_criteria:
   - id: retry-on-invalid-verdict
     criterion: when a submit_verdict payload (or free-text fallback) fails SemanticOutput validation, the loop appends a corrective message containing the validation error and asks the model to resubmit, rather than immediately returning a parse-failure result
   - id: bounded-retries
@@ -436,7 +436,7 @@ nodes:
   - return-router
   - semantic-submit-verdict-tool
   - semantic-validation-retry
-  acceptance:
+  acceptance_criteria:
   - id: contract-doc-defines-current-shape
     criterion: 'verification-engine-spec.md or docs/verification-receipt-contract.md in gddp-runtime defines the current VerdictReceipt fields: project_id, node_id, verdict, confidence, criteria_confidence, completeness_status, deterministic, semantic, decision_reasoning, required_next_action, and generated_at'
   - id: confidence-alias-rule-explicit
@@ -484,7 +484,7 @@ nodes:
     \ whether the required trail is present; the graph-readiness signal\nsays whether the human has enough evidence to advance graph truth. And when\nthe floor is indeterminate-dominated, defer to the semantic confidence rather\nthan min()-ing it away. This makes a built-but-untrailed node read as ~0.95\ncriteria-confidence with a needs-more-evidence verdict — honest, not 0.18.\n\nRuntime commit 7f803ce added the field names, but it still populates\ncriteria_confidence as a compatibility alias of overall confidence and the\nsemantic blend still min()s against an indeterminate floor. This node remains\nblocked on the receipt contract, then owns the real calibration change.\n"
   depends_on:
   - verification-receipt-contract
-  acceptance:
+  acceptance_criteria:
   - id: receipt-exposes-two-axes
     criterion: VerdictReceipt in scripts/runtime/verification/schemas.py exposes criteria_confidence and completeness fields matching docs/verification-receipt-contract.md, in addition to the existing overall confidence
   - id: receipt-contract-fields-populated
@@ -555,7 +555,7 @@ nodes:
 
     '
   depends_on: []
-  acceptance:
+  acceptance_criteria:
   - id: ane-lists-symbols
     criterion: decision.md shows ANE exec listing the relevant symbols/functions in a target source file (concrete command + output excerpt)
   - id: ane-reads-single-body

@@ -50,7 +50,7 @@ REQUIRED_FIELDS = {
     "type": str,
     "why": str,
     "depends_on": list,
-    "acceptance": list,
+    "acceptance_criteria": list,
     "constraints": list,
     "allowed_execution_modes": list,
     "required_artifacts": list,
@@ -116,7 +116,7 @@ def validate_node_yaml(doc: dict, source_label: str = "input") -> list[dict]:
                               "message": f"node_id {node_id!r} not kebab-case",
                               "source": source_label})
 
-    acceptance = doc.get("acceptance")
+    acceptance = doc.get("acceptance_criteria")
     if acceptance is not None:
         if not isinstance(acceptance, list):
             findings.append({"severity": "error", "rule": "acceptance_type",
@@ -207,7 +207,7 @@ def write_node_file(root: Path, project_id: str, doc: dict) -> Path:
     field_order = [
         "schema_version", "schema_type",
         "node_id", "title", "type", "why",
-        "depends_on", "acceptance", "constraints",
+        "depends_on", "acceptance_criteria", "constraints",
         "allowed_execution_modes", "required_artifacts",
         "status", "priority", "unlocks",
     ]

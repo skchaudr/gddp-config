@@ -1212,7 +1212,7 @@ def collect_constraint_files(node_yaml: dict, repo: Path) -> list[str]:
     """Files the constraints scope: explicit probe files + named source files."""
     files: set[str] = set()
     node_id = node_yaml.get("node_id", "")
-    for item in node_yaml.get("acceptance", []):
+    for item in node_yaml.get("acceptance_criteria", []):
         probe = _probe_for(node_id, item.get("id", ""))
         if probe:
             files.update(probe.get("files", []))
@@ -1270,7 +1270,7 @@ def verify(project_id: str, node_id: str, *,
 
     if repo is None:
         repo_name = project_yaml.get("repo", "?").split("/")[-1]
-        for item in node_yaml.get("acceptance", []):
+        for item in node_yaml.get("acceptance_criteria", []):
             criteria.append(CriterionCheck(
                 id=item.get("id", "?"), criterion=item.get("criterion", ""),
                 status="indeterminate", confidence=0.0,
@@ -1294,7 +1294,7 @@ def verify(project_id: str, node_id: str, *,
     files_inspected.add(f"<repo:{repo.name}>")
     commands.append(run_command(repo, ["test", "-f", "schema/packet.schema.json"]))
 
-    for item in node_yaml.get("acceptance", []):
+    for item in node_yaml.get("acceptance_criteria", []):
         cc = evaluate_criterion(item, repo, node_id)
         criteria.append(cc)
         probe = _probe_for(node_id, item.get("id", ""))

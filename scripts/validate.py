@@ -48,7 +48,7 @@ REQUIRED_FIELDS = {
     "type": str,
     "why": str,
     "depends_on": list,
-    "acceptance": list,
+    "acceptance_criteria": list,
     "constraints": list,
     "allowed_execution_modes": list,
     "required_artifacts": list,
@@ -132,7 +132,7 @@ def validate_node(path: Path, rel: str, doc: dict) -> list[Finding]:
                                      f"node_id {node_id!r} not kebab-case"))
 
     # Acceptance shape: list of {id: str, criterion: str}
-    acceptance = doc.get("acceptance")
+    acceptance = doc.get("acceptance_criteria")
     if acceptance is not None:
         if not isinstance(acceptance, list):
             findings.append(Finding(rel, 0, "error", "acceptance_type",

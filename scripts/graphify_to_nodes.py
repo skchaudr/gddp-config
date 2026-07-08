@@ -180,7 +180,7 @@ def make_node_dict(node_id: str, title: str,
         "type": "capability",
         "why": "REPLACE_ME",
         "depends_on": depends_on,
-        "acceptance": ["REPLACE_ME"],
+        "acceptance_criteria": ["REPLACE_ME"],
         "constraints": ["REPLACE_ME"],
         "allowed_execution_modes": ["jules"],
         "required_artifacts": ["decision.md", "result-summary.md", "graph-update.yaml"],
@@ -195,7 +195,7 @@ def render_node_yaml(node: dict) -> str:
     field_order = [
         "schema_version", "schema_type",
         "node_id", "title", "type", "why",
-        "depends_on", "acceptance", "constraints",
+        "depends_on", "acceptance_criteria", "constraints",
         "allowed_execution_modes", "required_artifacts",
         "status", "priority", "unlocks",
     ]

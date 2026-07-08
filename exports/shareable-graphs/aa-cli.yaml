@@ -34,7 +34,7 @@ nodes:
   type: capability
   why: Every aa module depends on consistent XDG paths, directory bootstrap, jq-backed packet validation, and small string/time utilities before targets, ledger, or fire can run
   depends_on: []
-  acceptance:
+  acceptance_criteria:
   - id: aa-root-and-state-paths
     criterion: AA_ROOT, AA_DATA_HOME, AA_STATE_HOME, and AA_SCHEMA resolve to repo-local defaults with env override support in lib/fire.zsh
   - id: aa-init-dirs-creates-state
@@ -69,7 +69,7 @@ nodes:
   why: aa_fire_packet must resolve a packet target and tier to a sync or async command before any executor dispatch branch can run
   depends_on:
   - common-core
-  acceptance:
+  acceptance_criteria:
   - id: parse-four-column-rows
     criterion: aa_target_parse_row parses name tier mode command rows from targets.conf
   - id: legacy-three-column-default-tier
@@ -105,7 +105,7 @@ nodes:
   why: Every fired packet must leave a durable ledger row so deck, reconcile, and the operator can see open, done, error, and stale runs
   depends_on:
   - common-core
-  acceptance:
+  acceptance_criteria:
   - id: ledger-append-row
     criterion: aa_ledger_append writes ISO timestamp, id, target, state, ref, and title as tab-separated fields to ledger.tsv
   - id: ledger-update-or-append
@@ -141,7 +141,7 @@ nodes:
   depends_on:
   - target-registry
   - ledger-system
-  acceptance:
+  acceptance_criteria:
   - id: validate-before-fire
     criterion: aa_fire_packet calls aa_validate_packet and aborts before creating a run when the packet is invalid
   - id: run-dir-artifacts
@@ -183,7 +183,7 @@ nodes:
   why: Operators choose the grk target to run Grok inline; aa must route sync grk packets through the grk wrapper without breaking ledger receipts
   depends_on:
   - dispatch-router
-  acceptance:
+  acceptance_criteria:
   - id: grk-default-tier
     criterion: targets.conf registers grk default sync grk and aa_target_lookup resolves it
   - id: grk-tier-variants
@@ -216,7 +216,7 @@ nodes:
   why: The pir target is the inline Pi CLI path for fast local model runs and must behave like other sync executors in aa_fire_packet
   depends_on:
   - dispatch-router
-  acceptance:
+  acceptance_criteria:
   - id: pir-default-tier
     criterion: targets.conf registers pir default sync pir and aa_target_lookup resolves it
   - id: pir-tier-variants
@@ -249,7 +249,7 @@ nodes:
   why: Gemini runs through the agy wrapper as a sync target and must integrate with the shared fire path and ledger semantics
   depends_on:
   - dispatch-router
-  acceptance:
+  acceptance_criteria:
   - id: gemini-target-registered
     criterion: targets.conf lists gemini default sync agy
   - id: sync-eval-in-workdir
@@ -282,7 +282,7 @@ nodes:
   why: Droid exec is a first-class sync executor in targets.conf and must fire through the standard inline command path
   depends_on:
   - dispatch-router
-  acceptance:
+  acceptance_criteria:
   - id: droid-target-registered
     criterion: targets.conf lists droid default sync droid exec
   - id: sync-eval-command
@@ -315,7 +315,7 @@ nodes:
   why: Codex runs are long-lived and must fire in the background with a pid ref so reconciliation can later flip open rows to done or error
   depends_on:
   - dispatch-router
-  acceptance:
+  acceptance_criteria:
   - id: cdx-async-placeholder
     criterion: targets.conf maps cdx and codex tiers to async __codex_async
   - id: codex-nohup-wrapper
@@ -349,7 +349,7 @@ nodes:
   why: Jules remote sessions are async and need a session id ref in the ledger so reconcile can pull output when the session completes
   depends_on:
   - dispatch-router
-  acceptance:
+  acceptance_criteria:
   - id: jules-async-placeholder
     criterion: targets.conf maps jules default async __jules_async
   - id: github-origin-required
@@ -383,7 +383,7 @@ nodes:
   why: Pi harness runs via pi-packet are async and must record an artifact slug ref so reconcile and the operator can find the run output later
   depends_on:
   - dispatch-router
-  acceptance:
+  acceptance_criteria:
   - id: pi-async-placeholder
     criterion: targets.conf maps pi default async __pi_async
   - id: pi-packet-binary-check
@@ -422,7 +422,7 @@ nodes:
   - dispatch-codex
   - dispatch-jules
   - dispatch-pi-harness
-  acceptance:
+  acceptance_criteria:
   - id: reconcile-codex-open-rows
     criterion: aa_reconcile leaves codex rows open while pid is alive, sets done when exit_status is 0, and error otherwise
   - id: reconcile-jules-session-status

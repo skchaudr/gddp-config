@@ -79,7 +79,7 @@ Keymap: number keys pick, `←`/`→` paginate, `m` manual, `s` skip, `q` quit,
 loudly but exits non-zero only if the new node or the `project.yaml` patch is
 the cause — pre-existing repo drift surfaces visibly but doesn't block.
 
-For the prose-heavy fields (`why`, `acceptance`, `constraints`), see
+For the prose-heavy fields (`why`, `acceptance_criteria`, `constraints`), see
 `templates/draft-node-prompt.md` — a saved prompt for drafting those fields
 with an LLM in the established voice.
 

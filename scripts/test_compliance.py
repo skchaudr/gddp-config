@@ -66,7 +66,7 @@ def make_placeholder_node(node_id: str) -> dict:
         "type": "capability",
         "why": "REPLACE_ME",
         "depends_on": [],
-        "acceptance": normalize_acceptance_items(["REPLACE_ME"]),
+        "acceptance_criteria": normalize_acceptance_items(["REPLACE_ME"]),
         "constraints": ["REPLACE_ME"],
         "allowed_execution_modes": ["jules"],
         "required_artifacts": ["decision.md", "result-summary.md"],
@@ -79,7 +79,7 @@ def make_placeholder_node(node_id: str) -> dict:
 def make_valid_node(node_id: str) -> dict:
     node = make_placeholder_node(node_id)
     node["why"] = "This capability must exist for testing purposes."
-    node["acceptance"] = normalize_acceptance_items(["The function returns a dict"])
+    node["acceptance_criteria"] = normalize_acceptance_items(["The function returns a dict"])
     node["constraints"] = ["use only stdlib"]
     return node
 
@@ -92,7 +92,7 @@ def test_refuses_empty_acceptance() -> None:
     """VAL-CLI-001: empty acceptance => no file written, error printed, returns False."""
     root = tmp_root()
     node = make_valid_node("empty-acc")
-    node["acceptance"] = []
+    node["acceptance_criteria"] = []
     KEYS.set(ch=["y"], line=[])
     with console.capture() as cap:
         result = batch_fill.review_and_write(node, root, PROJECT)
@@ -100,7 +100,7 @@ def test_refuses_empty_acceptance() -> None:
     assert result is False, "expected review_and_write to return False on empty acceptance"
     written = root / "graphs" / PROJECT / "nodes" / "empty-acc.yaml"
     assert not written.exists(), "node file must NOT be written when acceptance is empty"
-    assert "acceptance" in out.lower(), f"expected error message about acceptance, got: {out!r}"
+    assert "acceptance_criteria" in out.lower(), f"expected error message about acceptance, got: {out!r}"
 
 
 def test_prints_validation_findings() -> None:
@@ -122,9 +122,9 @@ def test_edit_handler_scopes_single_field() -> None:
     root = tmp_root()
     node = make_valid_node("edit-one")
     node["why"] = "original why"
-    node["acceptance"] = normalize_acceptance_items(["original acceptance criterion"])
+    node["acceptance_criteria"] = normalize_acceptance_items(["original acceptance criterion"])
     node["constraints"] = ["original constraint"]
-    orig_acceptance = [dict(x) for x in node["acceptance"]]
+    orig_acceptance = [dict(x) for x in node["acceptance_criteria"]]
 
     # 'e' -> edit "why"; manual multi-line entry "new why text" then blank;
     # then 'q' on the re-shown review to stop.
@@ -132,9 +132,9 @@ def test_edit_handler_scopes_single_field() -> None:
     batch_fill.review_and_write(node, root, PROJECT)
 
     assert node["why"] == "new why text", f"why should be updated, got {node['why']!r}"
-    assert node["acceptance"] == orig_acceptance, "acceptance must be preserved, not reset"
+    assert node["acceptance_criteria"] == orig_acceptance, "acceptance must be preserved, not reset"
     assert node["constraints"] == ["original constraint"], "constraints must be preserved, not reset"
-    assert "REPLACE_ME" not in str(node["acceptance"]), "acceptance must not be reset to REPLACE_ME"
+    assert "REPLACE_ME" not in str(node["acceptance_criteria"]), "acceptance must not be reset to REPLACE_ME"
     assert "REPLACE_ME" not in str(node["constraints"]), "constraints must not be reset to REPLACE_ME"
 
 
@@ -150,8 +150,8 @@ def test_filled_node_passes_validation() -> None:
     )
     filled = batch_fill.fill_node_fields(dict(node), root, PROJECT)
     assert filled["why"] == "Why this node exists"
-    assert filled["acceptance"] and isinstance(filled["acceptance"][0], dict)
-    assert "id" in filled["acceptance"][0] and "criterion" in filled["acceptance"][0]
+    assert filled["acceptance_criteria"] and isinstance(filled["acceptance_criteria"][0], dict)
+    assert "id" in filled["acceptance_criteria"][0] and "criterion" in filled["acceptance_criteria"][0]
     assert filled["constraints"] == ["use only stdlib"]
 
     KEYS.set(ch=["y"], line=[])

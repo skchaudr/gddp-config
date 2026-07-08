@@ -53,7 +53,7 @@ DEFAULT_ARTIFACTS = ["decision.md", "result-summary.md", "graph-update.yaml"]
 KEBAB_RE_PLACEHOLDER = "REPLACE_ME"
 PAGE_SIZE = 9
 
-PLACEHOLDER_FIELDS = {"why", "acceptance", "constraints"}
+PLACEHOLDER_FIELDS = {"why", "acceptance_criteria", "constraints"}
 
 
 def list_node_ids(root: Path, project_id: str) -> list[str]:
@@ -75,9 +75,9 @@ def gather_inspiration_bullets(root: Path, project_id: str) -> list[str]:
                 doc = yaml.safe_load(f) or {}
         except Exception:
             continue
-        for field in ("acceptance", "constraints"):
+        for field in ("acceptance_criteria", "constraints"):
             for item in doc.get(field) or []:
-                text = acceptance_text(item) if field == "acceptance" else item
+                text = acceptance_text(item) if field == "acceptance_criteria" else item
                 if isinstance(text, str) and "REPLACE_ME" not in text and text not in seen:
                     seen.add(text)
                     bullets.append(text)
@@ -92,7 +92,7 @@ def needs_batch(node: dict) -> bool:
         if isinstance(val, list):
             if acceptance_has_placeholder(val):
                 return True
-            if not val and field in ("acceptance", "constraints"):
+            if not val and field in ("acceptance_criteria", "constraints"):
                 return True
     return False
 
@@ -113,7 +113,7 @@ def show_node_card(node: dict, idx: int, total: int):
         elif isinstance(val, list):
             if acceptance_has_placeholder(val):
                 needs.append(f"{field}: has REPLACE_ME items")
-            elif not val and field in ("acceptance", "constraints"):
+            elif not val and field in ("acceptance_criteria", "constraints"):
                 needs.append(f"{field}: empty")
             else:
                 count = len(val)
@@ -202,12 +202,12 @@ def fill_node_fields(node: dict, root: Path, project: str) -> dict:
         if why:
             node["why"] = why
 
-    acceptance = node.get("acceptance", [])
+    acceptance = node.get("acceptance_criteria", [])
     has_placeholder = acceptance_has_placeholder(acceptance)
     if not acceptance or has_placeholder:
         result = edit_list_items("Acceptance (verifiable bullets)", [], suggestions)
         if result:
-            node["acceptance"] = normalize_acceptance_items(result)
+            node["acceptance_criteria"] = normalize_acceptance_items(result)
 
     constraints = node.get("constraints", [])
     has_placeholder = any(isinstance(x, str) and "REPLACE_ME" in x for x in constraints)
@@ -228,7 +228,7 @@ def review_and_write(node: dict, root: Path, project: str) -> bool:
     field_order = [
         "schema_version", "schema_type",
         "node_id", "title", "type", "why",
-        "depends_on", "acceptance", "constraints",
+        "depends_on", "acceptance_criteria", "constraints",
         "allowed_execution_modes", "required_artifacts",
         "status", "priority", "unlocks",
     ]
@@ -250,7 +250,7 @@ def review_and_write(node: dict, root: Path, project: str) -> bool:
         console.print("[dim]skipped[/dim]")
         return False
     if ch.lower() == "y":
-        if not node.get("acceptance"):
+        if not node.get("acceptance_criteria"):
             console.print("[red]at least one acceptance bullet required — refusing to write[/red]")
             return False
         nodes_dir = root / "graphs" / project / "nodes"
@@ -273,12 +273,12 @@ def review_and_write(node: dict, root: Path, project: str) -> bool:
             why = manual_text("Why (why this capability must exist)", multi_line=True)
             if why:
                 node["why"] = why
-        elif field_name == "acceptance":
+        elif field_name == "acceptance_criteria":
             suggestions = gather_inspiration_bullets(root, project)
-            node["acceptance"] = normalize_acceptance_items(["REPLACE_ME"])
+            node["acceptance_criteria"] = normalize_acceptance_items(["REPLACE_ME"])
             result = edit_list_items("Acceptance (verifiable bullets)", [], suggestions)
             if result:
-                node["acceptance"] = normalize_acceptance_items(result)
+                node["acceptance_criteria"] = normalize_acceptance_items(result)
         elif field_name == "constraints":
             suggestions = gather_inspiration_bullets(root, project)
             node["constraints"] = ["REPLACE_ME"]

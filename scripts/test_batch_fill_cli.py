@@ -46,8 +46,8 @@ def strip_ansi(text: str) -> str:
 
 
 def make_placeholder_yaml(node_id: str, *, empty_acceptance: bool) -> str:
-    acceptance = "acceptance: []" if empty_acceptance else (
-        "acceptance:\n  - id: replace-me\n    criterion: REPLACE_ME"
+    acceptance = "acceptance_criteria: []" if empty_acceptance else (
+        "acceptance_criteria:\n  - id: replace-me\n    criterion: REPLACE_ME"
     )
     return (
         'schema_version: "1.0"\n'
@@ -222,12 +222,12 @@ def test_refuses_empty_acceptance() -> None:
         # never called, so the file must remain the untouched placeholder.
         content = node_path.read_text()
         assert "REPLACE_ME" in content, (
-            f"placeholder was overwritten despite empty acceptance:\n{content}"
+            f"placeholder was overwritten despite empty acceptance_criteria:\n{content}"
         )
         assert "Why this node must exist." not in content, (
-            f"node was written with filled content despite empty acceptance:\n{content}"
+            f"node was written with filled content despite empty acceptance_criteria:\n{content}"
         )
-        assert "acceptance" in out.lower() and "refusing to write" in out.lower(), (
+        assert "acceptance_criteria" in out.lower() and "refusing to write" in out.lower(), (
             f"expected an acceptance-related refusal message:\n{out}"
         )
     finally:

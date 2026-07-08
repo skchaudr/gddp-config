@@ -34,7 +34,7 @@ nodes:
   type: capability
   why: Every downstream loader and CLI assumes one item per incoming/<item-id>/ folder with description.txt and optional photos/ and meta.yaml
   depends_on: []
-  acceptance:
+  acceptance_criteria:
   - id: incoming-readme-documents-layout
     criterion: incoming/README.md documents description.txt (required), photos/, meta.yaml (optional), and item-id slug format YYYY-MM-DD-short-slug
   - id: example-folder-present
@@ -69,7 +69,7 @@ nodes:
   why: Listing generation and FB hooks need a single typed loader that reads description, photos, and meta from an intake folder
   depends_on:
   - intake-folder-convention
-  acceptance:
+  acceptance_criteria:
   - id: item-intake-dataclass
     criterion: ItemIntake frozen dataclass exposes item_id, root, description, photos tuple, and meta dict in src/sell_valuables/intake.py
   - id: load-item-requires-description
@@ -104,7 +104,7 @@ nodes:
   why: Operators need marketplace-ready title, body, and markdown derived from ItemIntake without hand-editing FB fields each time
   depends_on:
   - intake-loader
-  acceptance:
+  acceptance_criteria:
   - id: build-title-first-line
     criterion: build_title uses the first line of description trimmed to max_len default 80 with ellipsis when truncated
   - id: build-body-condition-shipping
@@ -139,7 +139,7 @@ nodes:
   why: Operators need a one-command path from an intake folder to an on-disk listing.md artifact before any Facebook step
   depends_on:
   - listing-text-builder
-  acceptance:
+  acceptance_criteria:
   - id: console-script-entrypoint
     criterion: pyproject.toml registers sell-listing entry point to sell_valuables.generate_listing:main
   - id: generate-listing-writes-file
@@ -173,7 +173,7 @@ nodes:
   why: After listing.md exists, the operator needs a single command that regenerates the listing and opens Facebook Marketplace or starts automation hooks
   depends_on:
   - listing-cli
-  acceptance:
+  acceptance_criteria:
   - id: console-script-entrypoint
     criterion: pyproject.toml registers sell-post-fb entry point to sell_valuables.post_to_fb:main
   - id: generates-listing-first
@@ -208,7 +208,7 @@ nodes:
   why: Facebook login cannot run headless on every post; persisted session state under .fb-session enables reuse across dry-run automation
   depends_on:
   - fb-post-hook
-  acceptance:
+  acceptance_criteria:
   - id: optional-browser-extra
     criterion: pyproject.toml browser optional extra installs playwright and documents pip install -e '.[browser]' requirement
   - id: storage-state-path
@@ -242,7 +242,7 @@ nodes:
   why: Manual copy-paste from listing.md is error-prone; automation should fill title, price, description, and photo inputs from intake data
   depends_on:
   - fb-playwright-session
-  acceptance:
+  acceptance_criteria:
   - id: result-dict-fields
     criterion: post_with_playwright returns dict with item_id, title, photo_count, dry_run, and submitted keys
   - id: title-from-build-title
@@ -276,7 +276,7 @@ nodes:
   why: Accidental live posts are costly; submit must stay behind dry_run default and a deliberate operator opt-in after form fill is verified
   depends_on:
   - fb-playwright-form-fill
-  acceptance:
+  acceptance_criteria:
   - id: dry-run-default-true
     criterion: post_with_playwright defaults dry_run=True and sell-post-fb --playwright always passes dry_run=True
   - id: submit-not-implemented-guard
@@ -308,7 +308,7 @@ nodes:
   why: Chris's photos and descriptions arrive via iMessage; operators need a documented v0 manual path and recommended Shortcuts automation into incoming/
   depends_on:
   - intake-folder-convention
-  acceptance:
+  acceptance_criteria:
   - id: imessage-shortcuts-doc-exists
     criterion: docs/imessage-shortcuts.md explains Apple does not expose iMessage to Python and documents manual folder workflow
   - id: manual-steps-documented
@@ -342,7 +342,7 @@ nodes:
   - intake-loader
   - listing-text-builder
   - fb-post-hook
-  acceptance:
+  acceptance_criteria:
   - id: sample-item-fixture
     criterion: tests/fixtures/sample-item/ contains description.txt and meta.yaml usable by load_item
   - id: test-load-item-fixture

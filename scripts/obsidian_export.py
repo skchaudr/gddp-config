@@ -169,7 +169,7 @@ def render_node_note(
 
     depends = node.get("depends_on") or []
     unlocks = node.get("unlocks") or []
-    acceptance = node.get("acceptance") or []
+    acceptance = node.get("acceptance_criteria") or []
     constraints = node.get("constraints") or []
     modes = node.get("allowed_execution_modes") or []
     artifacts = node.get("required_artifacts") or []

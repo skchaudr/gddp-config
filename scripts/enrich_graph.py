@@ -57,7 +57,7 @@ NODE_ENRICH_FIELDS = {
 NODE_COUNT_FIELDS = {
     "depends_on": "depends_on_count",
     "unlocks": "unlocks_count",
-    "acceptance": "acceptance_count",
+    "acceptance_criteria": "acceptance_count",
     "constraints": "constraints_count",
     "required_artifacts": "required_artifacts_count",
 }

@@ -1,7 +1,7 @@
 # Draft-Node Prompt Template
 
 Use this prompt with Claude, Codex, or any capable LLM to draft the prose-heavy
-fields of a node (`why`, `acceptance`, `constraints`). Output is meant to be
+fields of a node (`why`, `acceptance_criteria`, `constraints`). Output is meant to be
 pasted into the corresponding slots during `scripts/new_node.py`'s `m` (manual)
 entry, or used to pre-fill a YAML spec file.
 
@@ -12,7 +12,7 @@ stare at a blank cursor.
 ## How to use
 
 1. Run `python3 scripts/new_node.py`. Pick project, node_id, title, type.
-2. When you reach `why`, `acceptance`, or `constraints`, pause the TUI.
+2. When you reach `why`, `acceptance_criteria`, or `constraints`, pause the TUI.
 3. Open Claude/Codex. Paste the **System prompt** below, then fill in the
    **Inputs** block with your one-line capability description.
 4. Copy the LLM's output back into the TUI slots.
@@ -25,12 +25,12 @@ stare at a blank cursor.
 ```
 You draft the prose fields of a GDDP node YAML file. The node schema lives in
 gddp-config/schemas/v1/node.yaml. Your job: produce three fields — why,
-acceptance, constraints — in the established voice of this repo.
+acceptance_criteria, constraints — in the established voice of this repo.
 
 Voice rules (non-negotiable):
 - why: one short paragraph (2-4 sentences). Explains the *capability gap* —
   what can't be done today, and why it matters. Never explains implementation.
-- acceptance: a list of 3-8 keyed objects. Each `criterion` must be mechanically
+- acceptance_criteria: a list of 3-8 keyed objects. Each `criterion` must be mechanically
   verifiable — a file existence check, a function signature, a test that
   passes, a behavior observable in output. Avoid vague verbs ("supports",
   "handles"); prefer concrete ones ("exists at <path>", "returns <shape>",
@@ -46,7 +46,7 @@ Output format — strict YAML only, no prose, no commentary:
 why: |
   <paragraph>
 
-acceptance:
+acceptance_criteria:
   - id: <stable-kebab-id>
     criterion: <bullet>
   - id: <stable-kebab-id>
@@ -63,7 +63,7 @@ why: |
   depend on a working scan_vault() that can walk a vault directory and return
   structured file metadata. Nothing else can be built until this exists.
 
-acceptance:
+acceptance_criteria:
   - id: vaultdoctor-class-exists
     criterion: VaultDoctor class exists in src/doctor.py
   - id: scan-vault-walks-directory
@@ -83,13 +83,13 @@ constraints:
 
 Reference example (pending infrastructure node, from
 graphs/gddp-runtime/nodes/decision-loop-runtime.yaml): read that file for the
-longer-form acceptance style when the node spans many files and tests.
+longer-form acceptance-criteria style when the node spans many files and tests.
 
 Do not invent file paths — if you don't know the exact path, use a placeholder
 like <TBD: path/to/file> and flag it. Do not include schema_version,
 schema_type, node_id, title, type, status, priority, depends_on, unlocks,
 allowed_execution_modes, or required_artifacts — those are filled by other
-means. Output only why, acceptance, constraints.
+means. Output only why, acceptance_criteria, constraints.
 ```
 
 ## Inputs (fill these in before sending)
@@ -108,5 +108,5 @@ Existing context (optional): <what's already built that this depends on>
   yourself before committing.
 - Replace `<TBD: ...>` placeholders with real paths.
 - Delete any bullet you don't actually need — LLMs over-generate.
-- The TUI's `acceptance` editor lets you enter criterion text; it writes keyed
+- The TUI's `acceptance_criteria` editor lets you enter criterion text; it writes keyed
   `{id, criterion}` objects. `constraints` remains plain text.

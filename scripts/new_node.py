@@ -86,9 +86,9 @@ def gather_inspiration_bullets(root: Path, project_id: str) -> list[str]:
                 doc = yaml.safe_load(f) or {}
         except Exception:
             continue
-        for field in ("acceptance", "constraints"):
+        for field in ("acceptance_criteria", "constraints"):
             for item in doc.get(field) or []:
-                text = acceptance_text(item) if field == "acceptance" else item
+                text = acceptance_text(item) if field == "acceptance_criteria" else item
                 if isinstance(text, str) and text not in seen:
                     seen.add(text)
                     bullets.append(text)
@@ -394,7 +394,7 @@ def gather_fields(root: Path) -> tuple[Optional[str], Optional[dict]]:
         "type": type_val or "capability",
         "why": why,
         "depends_on": depends or [],
-        "acceptance": normalize_acceptance_items(acceptance),
+        "acceptance_criteria": normalize_acceptance_items(acceptance),
         "constraints": constraints,
         "allowed_execution_modes": modes or ["jules"],
         "required_artifacts": artifacts or DEFAULT_ARTIFACTS,
@@ -409,7 +409,7 @@ def render_node_yaml(node: dict) -> str:
     field_order = [
         "schema_version", "schema_type",
         "node_id", "title", "type", "why",
-        "depends_on", "acceptance", "constraints",
+        "depends_on", "acceptance_criteria", "constraints",
         "allowed_execution_modes", "required_artifacts",
         "status", "priority", "unlocks",
     ]
@@ -486,14 +486,14 @@ def edit_one_field(node: dict, field: str, root: Path, project: str) -> None:
         v = pick_many(field, ALL_ARTIFACTS, current=node.get(field) or [])
         if v and v != "__quit__":
             node[field] = v
-    elif field in ("acceptance", "constraints"):
+    elif field in ("acceptance_criteria", "constraints"):
         suggestions = gather_inspiration_bullets(root, project)
         current = node.get(field) or []
-        if field == "acceptance":
+        if field == "acceptance_criteria":
             current = [text for text in (acceptance_text(item) for item in current) if text]
         v = edit_list_items(field, current, suggestions)
         if v and v != "__quit__":
-            node[field] = normalize_acceptance_items(v) if field == "acceptance" else v
+            node[field] = normalize_acceptance_items(v) if field == "acceptance_criteria" else v
     else:
         console.print(f"[yellow]no inline editor for {field}[/yellow]")
 
