@@ -1,0 +1,53 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: canary-retry-proof
+title: "Canary: echo utility with documentation requirement"
+type: capability
+
+why: |
+  Proof-of-concept node to exercise the retry loop. The implementation criterion
+  is designed so the executor will miss it on first attempt, producing a
+  fail-with-evidence verdict that triggers re-dispatch.
+
+  The goal and required_artifacts mention scripts/echo.py, decision.md,
+  result-summary.md, and patch.diff, but criterion 3 also requires
+  docs/echo-usage.md. Because that file is neither in the goal nor in
+  required_artifacts, the executor (Jules) will likely implement the echo
+  utility and produce the required artifacts without creating the docs file.
+  The evaluator's semantic lane should then judge criterion 3 as judged_fail
+  with evidence referencing "docs/echo-usage.md" (a file path), causing
+  has_criteria_evidence to return True and the retry loop to fire.
+
+depends_on: []
+
+goal: |
+  Implement a simple echo utility module at scripts/echo.py with a function
+  echo(msg) that returns the message string unchanged, and a function
+  echo_loud(msg) that returns the message uppercased with an exclamation mark
+  appended.
+
+acceptance_criteria:
+  - id: echo-function
+    criterion: scripts/echo.py defines a function echo(msg) that returns the message string unchanged
+  - id: echo-loud-function
+    criterion: scripts/echo.py defines a function echo_loud(msg) that returns the message uppercased with '!' appended
+  - id: docs-usage-file
+    criterion: The file docs/echo-usage.md exists in the repo root and documents both functions with at least one usage example each
+
+constraints:
+  - Only create or modify scripts/echo.py and docs/echo-usage.md
+  - Do not commit __pycache__ or .pyc files
+
+allowed_execution_modes:
+  - jules
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+
+status: ready
+priority: high
+
+unlocks: []
