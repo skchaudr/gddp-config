@@ -1,0 +1,50 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: job-state-consistency
+title: Make jobs.status and jobs.queue_state agree on every write path
+type: capability
+
+why: |
+  baseline.sh reported "running=2" when only one job was truly running: the
+  failed canary attempt job_20260711T16542651 sits at status=failed,
+  queue_state=running. At least one live write path updates status without
+  queue_state (decision_loop/engine.py expiry sets status='expired' only), and
+  the origin of the inconsistent row is undiagnosed. Every operator-facing
+  count reads one column or the other, so any divergence makes the dashboard
+  lie. Small surface, real correctness stakes.
+
+depends_on: []
+
+acceptance_criteria:
+  - id: root-cause-documented
+    criterion: decision.md names the write path (or manual action) that produced status=failed/queue_state=running for job_20260711T16542651, with evidence
+  - id: all-writers-set-both
+    criterion: every UPDATE to jobs.status in scripts/ also sets queue_state to the matching value (engine.py expiry included), or the redundancy is collapsed with a documented rationale
+  - id: consistency-check-exists
+    criterion: a check exists (test or baseline.sh probe) that fails when any jobs row has mismatched status/queue_state
+  - id: stale-row-reconciled
+    criterion: the existing inconsistent row is corrected via a documented, reversible step (SQL in decision.md), not silent mutation
+  - id: suite-green
+    criterion: .venv/bin/python -m pytest -q scripts passes with no regressions
+
+constraints:
+  - do not change receipt semantics or the human review gate
+  - schema changes to queue.db are out of scope; column semantics only
+  - graph truth stays human-owned; this node produces evidence only
+
+allowed_execution_modes:
+  - jules
+  - human
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: pending
+
+priority: medium
+
+unlocks: []

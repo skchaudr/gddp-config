@@ -1,0 +1,49 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: heartbeat-crash-recovery
+title: Prove heartbeat and intake survive crashes without losing or double-processing events
+type: capability
+
+why: |
+  The last unchecked box on docs/overnight-readiness.md: crash-recovery is
+  unproven. The code already claims the properties — stale 'claimed' events
+  become eligible again after 30 minutes (runner.py), launchd KeepAlive
+  restarts a dead intake, atomic claim prevents double-processing across
+  concurrent heartbeats — but no artifact demonstrates them. Overnight runs
+  become a no-brainer only when a killed process provably resumes cleanly.
+
+depends_on: []
+
+acceptance_criteria:
+  - id: stale-claim-recovery-tested
+    criterion: a test proves an event stuck in 'claimed' past the stale cutoff is re-claimed and processed by a later heartbeat run
+  - id: intake-restart-proven
+    criterion: evidence (script output or runbook transcript) shows intake killed mid-run is restarted by launchd and /health returns 200 without operator action
+  - id: no-double-processing
+    criterion: a test proves two concurrent heartbeat runs over the same received event produce exactly one job (atomic claim holds)
+  - id: crash-drill-runbook
+    criterion: decision.md documents the crash drill so it can be re-run before any overnight window
+  - id: suite-green
+    criterion: .venv/bin/python -m pytest -q scripts passes with no regressions
+
+constraints:
+  - drills run against a scratch database or clearly-marked synthetic events, never live queue rows
+  - do not weaken the 30-minute stale-claim cutoff or the atomic claim UPDATE
+  - launchd plists in deploy/mini-heartbeat are config-of-record; do not fork copies
+  - graph truth stays human-owned; this node produces evidence only
+
+allowed_execution_modes:
+  - jules
+  - human
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: pending
+priority: high
+
+unlocks: []
