@@ -38,7 +38,7 @@ except ImportError:
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from acceptance_items import normalize_acceptance_items
-from terminal import console, getch, getline
+from terminal import clear_lines, console, getch, getline
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -69,9 +69,13 @@ def list_existing_nodes(root: Path, project_id: str) -> list[str]:
 
 
 def pick_deps(existing: list[str], page_size: int = 9) -> list[str]:
-    """Number-key picker for dependencies. Returns selected node_ids."""
+    """Number-key picker for dependencies. Returns selected node_ids.
+
+    Redraws the menu in place on each keypress (no stacked duplicates).
+    """
     selected = []
     page = 0
+    drawn = 0
 
     if not existing:
         return selected
@@ -81,21 +85,36 @@ def pick_deps(existing: list[str], page_size: int = 9) -> list[str]:
         start = page * page_size
         visible = existing[start:start + page_size]
 
-        console.print(f"\n[bold cyan]Dependencies[/bold cyan]  (selected: {len(selected)})")
+        lines = [
+            f"[bold cyan]Dependencies[/bold cyan]  (selected: {len(selected)})",
+        ]
         if total_pages > 1:
-            console.print(f"[dim]page {page+1}/{total_pages}  ←/→ paginate[/dim]")
+            lines.append(f"[dim]page {page+1}/{total_pages}  ←/→ paginate[/dim]")
         for i, nid in enumerate(visible, 1):
             marker = "[green]✓[/green]" if nid in selected else " "
             title = kebab_to_title(nid)
-            console.print(f"  [bold]{i}[/bold] {marker} {nid:<35} {title}")
-        console.print("[dim]Enter done  q skip deps[/dim]")
+            lines.append(f"  [bold]{i}[/bold] {marker} {nid:<35} {title}")
+        lines.append("[dim]1-9 toggle · Enter done · q skip deps[/dim]")
+
+        clear_lines(drawn)
+        for line in lines:
+            console.print(line)
+        drawn = len(lines)
 
         ch = getch()
-        if ch == "\x03":
+        if ch == "\x03":  # Ctrl-C still exits, cleanly
+            clear_lines(drawn)
+            console.print("[dim]Aborted.[/dim]")
             sys.exit(0)
         if ch.lower() == "q":
+            clear_lines(drawn)
             return selected
         if ch in ("\r", "\n"):
+            clear_lines(drawn)
+            if selected:
+                console.print(f"  [dim]deps: {', '.join(selected)}[/dim]")
+            else:
+                console.print("  [dim]deps: (none)[/dim]")
             return selected
         if ch in ("RIGHT", "DOWN"):
             page = (page + 1) % total_pages
@@ -245,66 +264,88 @@ def main(project: str, repo: str = "", project_name: str | None = None,
         return 1
 
     console.print(Rule(f"[bold cyan]RAPID ADD — {project}[/bold cyan]"))
-    console.print("[dim]Type node name → Enter. Number keys = pick deps. Blank = done.[/dim]\n")
+    console.print(
+        "[dim]Type node name → Enter. Number keys = pick deps. "
+        "Blank or [bold]q[/bold]/[bold]quit[/bold]/[bold]done[/bold] = finish.[/dim]\n"
+    )
 
     added = []
     existing = list_existing_nodes(root, project)
+    EXIT_WORDS = {"q", "quit", "done", "exit"}
 
-    while True:
-        console.print(f"[bold cyan][{len(added)+1}][/bold cyan] Node name (blank to finish): ", end="")
-        name = getline("")
-
-        if not name.strip():
-            break
-
-        node_id = slugify(name)
-        if not node_id:
-            console.print(f"[yellow]  Can't slugify {name!r} to kebab-case. Try again.[/yellow]")
-            continue
-        if node_id in existing:
-            console.print(f"[yellow]  {node_id!r} already exists. Try again.[/yellow]")
-            continue
-
-        title = kebab_to_title(node_id)
-        console.print(f"  → [green]{node_id}[/green]  ({title})")
-
-        if existing:
-            deps = pick_deps(existing)
-        else:
-            deps = []
-
-        node = make_node_dict(node_id, title, deps)
-
-        if llm_draft:
+    try:
+        while True:
+            console.print(
+                f"[bold cyan][{len(added)+1}][/bold cyan] "
+                "Node name ([bold]q[/bold]/blank to finish): ",
+                end="",
+            )
             try:
-                llm = __import__("llm_draft")
-                console.print("  [dim]drafting with LLM...[/dim]")
-                drafted = llm.draft_fields(
-                    project_id=project,
-                    root=root,
-                    node_id=node_id,
-                    node_title=title,
-                    depends_on=deps,
-                    existing_nodes=existing,
+                name = getline("")
+            except KeyboardInterrupt:
+                console.print("\n[dim]Finished.[/dim]")
+                break
+
+            name = name.strip()
+            if not name or name.lower() in EXIT_WORDS:
+                break
+
+            node_id = slugify(name)
+            if not node_id:
+                console.print(f"[yellow]  Can't slugify {name!r} to kebab-case. Try again.[/yellow]")
+                continue
+            if node_id in existing:
+                console.print(f"[yellow]  {node_id!r} already exists. Try again.[/yellow]")
+                continue
+
+            title = kebab_to_title(node_id)
+            console.print(f"  → [green]{node_id}[/green]  ({title})")
+
+            if existing:
+                deps = pick_deps(existing)
+            else:
+                deps = []
+
+            node = make_node_dict(node_id, title, deps)
+
+            if llm_draft:
+                try:
+                    llm = __import__("llm_draft")
+                    console.print("  [dim]drafting with LLM...[/dim]")
+                    drafted = llm.draft_fields(
+                        project_id=project,
+                        root=root,
+                        node_id=node_id,
+                        node_title=title,
+                        depends_on=deps,
+                        existing_nodes=existing,
+                    )
+                    if drafted:
+                        for k, v in drafted.items():
+                            if v:
+                                node[k] = v
+                        node["acceptance_criteria"] = normalize_acceptance_items(
+                            node.get("acceptance_criteria", [])
+                        )
+                        console.print("  [green]draft applied[/green]")
+                except Exception as e:
+                    console.print(
+                        f"  [yellow]LLM draft failed: {e} — using placeholders[/yellow]"
+                    )
+
+            if not dry_run:
+                path = write_node(root, project, node)
+                patched = patch_project_yaml(root, project, node)
+                console.print(
+                    f"  [green]WROTE[/green] {path.relative_to(root)}"
+                    + (f"  [dim]project.yaml patched[/dim]" if patched else "")
                 )
-                if drafted:
-                    for k, v in drafted.items():
-                        if v:
-                            node[k] = v
-                    node["acceptance_criteria"] = normalize_acceptance_items(node.get("acceptance_criteria", []))
-                    console.print("  [green]draft applied[/green]")
-            except Exception as e:
-                console.print(f"  [yellow]LLM draft failed: {e} — using placeholders[/yellow]")
 
-        if not dry_run:
-            path = write_node(root, project, node)
-            patched = patch_project_yaml(root, project, node)
-            console.print(f"  [green]WROTE[/green] {path.relative_to(root)}" +
-                          (f"  [dim]project.yaml patched[/dim]" if patched else ""))
-
-        existing.append(node_id)
-        added.append(node_id)
-        console.print()
+            existing.append(node_id)
+            added.append(node_id)
+            console.print()
+    except KeyboardInterrupt:
+        console.print("\n[dim]Finished.[/dim]")
 
     if not added:
         console.print("[dim]No nodes added.[/dim]")
@@ -317,7 +358,10 @@ def main(project: str, repo: str = "", project_name: str | None = None,
     if llm_draft:
         console.print(f"Next: [bold]gddp node validate --project {project}[/bold]")
     else:
-        console.print(f"Next: [bold]gddp node batch --project {project}[/bold]  (fill why/acceptance/constraints)")
+        console.print(
+            f"Next: [bold]gddp node batch --project {project}[/bold]  "
+            "(fill why/acceptance/constraints)"
+        )
         console.print(f"      [bold]gddp node validate --project {project}[/bold]")
     return 0
 

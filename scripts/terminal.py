@@ -18,6 +18,17 @@ except ImportError:
 console = Console()
 
 
+def clear_lines(n: int) -> None:
+    """Move cursor up n lines and clear from there to end of screen.
+
+    Used to redraw menus in place instead of stacking duplicate frames.
+    """
+    if n <= 0:
+        return
+    sys.stdout.write(f"\033[{n}A\033[J")
+    sys.stdout.flush()
+
+
 def getch() -> str:
     """Read one keypress without Enter. Arrow keys decoded to UP/DOWN/LEFT/RIGHT.
 
