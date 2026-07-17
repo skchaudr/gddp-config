@@ -1,0 +1,62 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: prove-local-tool-routing-lane
+title: Prove a Needle or FunctionGemma lane for bounded tool routing
+type: capability
+why: >-
+  Cheap local inference is useful only when its task boundary, quality, resource
+  cost, and failure behavior are measured well enough to trust repeatedly.
+
+depends_on: []
+
+acceptance_criteria:
+  - id: shared-evaluation-contract
+    criterion: >-
+      A versioned evaluation contract defines the exact queries, tool schemas,
+      expected outputs, scoring method, hardware, and pinned model revisions used
+      for both Needle and FunctionGemma.
+  - id: comparable-baseline-receipt
+    criterion: >-
+      One repeatable run executes both models against the same corpus and records
+      tool-call validity, task correctness, latency, peak memory, failures, and raw
+      outputs in a durable receipt.
+  - id: routing-decision-recorded
+    criterion: >-
+      A decision record selects Needle, FunctionGemma, or an explicit task split,
+      names the rejected alternative for each task class, and cites the baseline
+      evidence rather than intuition.
+  - id: bounded-openclaw-invocation
+    criterion: >-
+      A documented command or adapter accepts one executor-neutral task envelope on
+      a designated OpenClaw worker and returns a structured result plus run id without
+      requiring an always-on model service.
+  - id: cold-start-and-recovery-proof
+    criterion: >-
+      A cold-start smoke test and one forced-failure test demonstrate deterministic
+      startup, timeout or error reporting, cleanup, and a successful subsequent run.
+  - id: compute-budget-enforced
+    criterion: >-
+      The run contract states memory, wall-time, and retry ceilings and verifies that
+      no model process or paid accelerator remains active after the job ends.
+
+constraints:
+  - do not fine-tune or launch a long training run before the shared baseline identifies a concrete failure class
+  - do not keep a model daemon or paid accelerator alive while idle
+  - keep model-specific flags behind the adapter so the task envelope remains executor neutral
+  - pin model weights, tokenizer, code revision, and hardware in every comparison receipt
+  - do not modify the upstream Needle repository merely to make the benchmark pass
+
+allowed_execution_modes:
+  - vm_worker
+  - human
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+  - graph-update.yaml
+
+status: ready
+priority: high
+unlocks: []

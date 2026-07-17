@@ -1,0 +1,43 @@
+schema_version: "1.0"
+schema_type: project_graph
+
+project_id: needle-gemma
+project_name: Needle and FunctionGemma Local Model Lane
+description: >-
+  Establish a small, cheap, repeatable local-model lane for bounded tool-routing
+  work, using evidence to choose Needle, FunctionGemma, or a deliberate split.
+repo: cactus-compute/needle
+
+blueprint:
+  vision: >-
+    Route well-bounded local work through the smallest model that proves it can
+    satisfy the contract reliably.
+  architecture_notes: >-
+    Start with an executor-neutral input/output contract and a fixed comparison
+    corpus. Run Needle and FunctionGemma under the same conditions on a designated
+    OpenClaw worker. Record correctness, latency, memory, and recovery evidence.
+    Keep the lane off when idle; training or fine-tuning begins only after the
+    baseline shows a specific gap worth paying to close.
+  major_capabilities:
+    - reproducible Needle and FunctionGemma baseline on one bounded tool-routing corpus
+    - evidence-backed model selection or explicit task routing split
+    - zero-idle-compute local invocation with durable run receipts
+
+graph_version: "1.0"
+created_at: 2026-07-17
+last_updated: 2026-07-17
+
+nodes_dir: nodes/
+
+nodes:
+  - id: prove-local-tool-routing-lane
+    title: Prove a Needle or FunctionGemma lane for bounded tool routing
+    status: ready
+    type: capability
+
+execution_policy:
+  default_executor: vm_worker
+  max_concurrent_jobs: 1
+  retry_budget: 2
+  require_human_review_before_overnight: true
+  artifact_gate_enforced: true
