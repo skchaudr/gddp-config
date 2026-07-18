@@ -1,0 +1,49 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: concurrent-node-flow
+title: "Prove independent execution and evaluation can move simultaneously without mixing state or evidence"
+type: capability
+
+why: |
+  Total project time is dominated by serialization if only one node can be
+  in flight at a time. Independent nodes and their evaluations must be
+  able to move at the same time without one node's success, failure,
+  correction, or pending review incorrectly pausing or altering another.
+  Concurrency is also how GDDP becomes economically viable for many small
+  nodes rather than a few large ones.
+
+depends_on:
+  - immediate-evaluator-round-trip
+  - direct-executor-round-trip
+
+acceptance_criteria:
+  - id: parallel-dispatch
+    criterion: I can dispatch at least two independent real nodes and see both being worked on at the same time
+  - id: parallel-evaluation
+    criterion: When independent nodes return work, their evaluators can run at the same time without mixing their evidence or results
+  - id: per-node-isolation
+    criterion: One node succeeding, failing, requiring correction, or awaiting acceptance does not incorrectly pause or alter another independent node
+  - id: acceptance-unblocks-downstream
+    criterion: After I accept a node, any newly unblocked node can begin moving while unrelated execution and evaluation work continues
+
+constraints:
+  - Respect declared capacity and isolation constraints from execution_policy.max_concurrent_jobs
+  - Preserve DAG structure; concurrent dispatch must not introduce cross-node evidence mixing
+  - Per-session failure isolation in the reconciler is required; one session's error must not abort another
+  - Do not retrofit queue or storage layers beyond what the neutral contract already specifies
+
+allowed_execution_modes:
+  - agent  
+  - human
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+
+status: pending
+priority: high
+
+unlocks:
+  - graph-frontier-operations

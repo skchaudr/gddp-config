@@ -1,0 +1,48 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: graph-frontier-operations
+title: "Show what is ready, what is already moving, and what human acceptance unlocks next"
+type: capability
+
+why: |
+  The useful operating view answers: how many nodes are ready, executing,
+  returned, awaiting correction, awaiting acceptance, and which acceptances
+  will unlock the next frontier. Without that view, the operator cannot
+  steer the loop and overnight runs cannot be supervised. This node makes
+  the frontier observable and keeps it honest: a node already moving is
+  not offered for duplicate dispatch, and acceptance actually updates
+  graph truth so the right downstream nodes become ready.
+
+depends_on:
+  - immediate-evaluator-round-trip
+  - concurrent-node-flow
+
+acceptance_criteria:
+  - id: ready-and-blocked-visibility
+    criterion: I can see which nodes are ready now and which incomplete dependencies prevent other nodes from becoming ready
+  - id: no-duplicate-dispatch
+    criterion: A node already executing, being evaluated, or awaiting review is not offered for duplicate dispatch
+  - id: downstream-impact-visible
+    criterion: I can see which downstream nodes would become ready if I accepted a node currently awaiting review
+  - id: acceptance-advances-frontier
+    criterion: When I accept a node, graph truth updates and the correct newly available nodes become ready
+
+constraints:
+  - Graph truth remains human-owned; this node only observes and reports, never mutates
+  - Frontier operations read the same executor-neutral contract used by the rest of the loop
+  - The operating view is a derived surface over jobs, queue records, and graph state, not a parallel state
+  - Do not introduce a UI in this node; JSON + log lines are sufficient
+
+allowed_execution_modes:
+  - any agent 
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+
+status: pending
+priority: high
+
+unlocks: []

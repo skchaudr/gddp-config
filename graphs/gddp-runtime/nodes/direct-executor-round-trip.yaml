@@ -1,0 +1,48 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: direct-executor-round-trip
+title: "Use a direct executor path to dispatch and recover one real node without the GitHub chain"
+type: capability
+
+why: |
+  The GitHub-mediated issue, Action, pull-request, and webhook pathway
+  creates a long and expensive node round trip regardless of which executor
+  is on the other end. A direct executor path lowers the cost and latency
+  of moving nodes through the operating loop and lets GDDP treat GitHub as
+  a durable artifact and review surface rather than the required command
+  bus. The path is executor-neutral; any direct-transport executor that
+  satisfies the neutral contract can run it.
+
+depends_on:
+  - neutral-executor-contract
+
+acceptance_criteria:
+  - id: dispatch-without-github-chain
+    criterion: I can dispatch one real ready node directly to an executor without creating a GitHub issue or relying on a GitHub-Action-mediated executor path
+  - id: durable-reviewable-evidence
+    criterion: The executor's returned work appears inside GDDP as durable, reviewable evidence without manual file transfer or database repair
+  - id: failed-attempt-visible-retryable
+    criterion: A failed or interrupted attempt remains visible and can be retried without losing the original attempt
+  - id: success-stops-at-evidence
+    criterion: A successful attempt stops at reviewable evidence and does not complete the node automatically
+
+constraints:
+  - Use the executor-neutral contract from neutral-executor-contract; do not bypass it
+  - Preserve any GitHub-mediated pathway as fallback, not as primary command bus
+  - Treat the direct executor as a replaceable transport; the node is about the round trip, not any specific agent
+  - Do not mark this node complete from a passing test alone; require a real dispatch + evidence receipt
+
+allowed_execution_modes:
+  - any agent
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+
+status: pending
+priority: critical
+
+unlocks:
+  - immediate-evaluator-round-trip

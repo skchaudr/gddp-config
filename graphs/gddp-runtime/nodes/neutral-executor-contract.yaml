@@ -1,0 +1,46 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: neutral-executor-contract
+title: "Define executor-neutral node packet, execution-attempt identity, and returned-result shape"
+type: capability
+
+why: |
+  GDDP must be able to send a node to any executor without changing the
+  node's meaning, identify each execution attempt independently of the
+  executor, and receive work back through one shared, understandable result
+  shape. Without a single executor-neutral contract, the runtime becomes
+  coupled to whichever executor was first wired in, and every new executor
+  is a rewrite rather than an adapter.
+
+depends_on: []
+
+acceptance_criteria:
+  - id: executor-neutral-packet
+    criterion: The same complete node packet can be given to any executor without changing the node's meaning
+  - id: execution-attempt-identity
+    criterion: GDDP can identify and track each execution attempt independently of the executor being used
+  - id: shared-result-shape
+    criterion: Every executor returns work through one shared, understandable result shape
+  - id: evidence-only-no-graph-mutation
+    criterion: Executor output remains evidence only and does not change graph truth automatically
+
+constraints:
+  - One executor-neutral packet and returned-result contract across all current and future executors
+  - Preserve any mediated pathway as inherited infrastructure rather than the required command bus
+  - Prefer a direct transport for the short node round trip
+  - Do not mark this node complete from executor success, passing tests, or an evaluator verdict
+
+allowed_execution_modes:
+  - any agent
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+
+status: ready
+priority: critical
+
+unlocks:
+  - direct-executor-round-trip

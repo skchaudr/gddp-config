@@ -1,0 +1,48 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: immediate-evaluator-round-trip
+title: "Turn returned evidence into separate criteria and intent/integrity judgments for human review"
+type: capability
+
+why: |
+  Executor completion only matters if it quickly becomes a meaningful human
+  review decision. When evaluation is manual, slow, or fused into a single
+  pass/fail signal, the round trip degrades into "wait for the operator to
+  notice." The evaluator must consume returned evidence automatically,
+  separate criteria judgment from intent/integrity judgment, and hand the
+  human enough information to accept, retry, block, or defer.
+
+depends_on:
+  - direct-executor-round-trip
+
+acceptance_criteria:
+  - id: automatic-evaluation-entry
+    criterion: Returned work enters evaluation without requiring me to manually move evidence or start the evaluation process
+  - id: per-criterion-judgment
+    criterion: I can see a clear judgment for each acceptance criterion and the evidence used for that judgment
+  - id: intent-integrity-judgment
+    criterion: I can separately see whether the implementation preserved project intent and integrity
+  - id: decision-shaped-no-decision
+    criterion: The completed evaluation gives me enough information to accept, retry, block, or defer the node, but cannot make that decision for me
+
+constraints:
+  - Criteria and intent/integrity verdicts remain independent evidence; neither rescues nor suppresses the other
+  - Evaluator remains read-only against graph truth and project canon
+  - Evaluator does not read AGENTS.md; canonical context is README, PROJECT-BRIEF, and the foundational node
+  - Required artifacts (decision.md, result-summary.md, patch.diff) are part of the evidence trail, not the verdict
+
+allowed_execution_modes:
+  - any agent 
+
+required_artifacts:
+  - decision.md
+  - result-summary.md
+  - patch.diff
+
+status: pending
+priority: critical
+
+unlocks:
+  - concurrent-node-flow
+  - graph-frontier-operations
