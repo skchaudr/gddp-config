@@ -6,6 +6,23 @@ Companion repo: `gddp-runtime` (the execution engine).
 
 Portfolio brief + system narrative: [`../gddp-runtime/PROJECT-BRIEF.md`](../gddp-runtime/PROJECT-BRIEF.md).
 
+## Graph truth and node revision
+
+- Every node is a human-owned proposal, not a commitment. Acceptance is not
+  assumed. Human review may accept, revise, split, supersede, rewire, defer, or
+  abandon a node.
+- Agents, executors, evaluators, tests, commits, and artifacts provide evidence
+  and recommendations. Only the human edits canonical node definitions,
+  dependencies, acceptance criteria, or status as graph truth.
+- When implementation evidence shows that revising, splitting, superseding, or
+  rewiring a node would preserve intent materially faster, safer, or more
+  cleanly, stop before further implementation and submit a graph-amendment
+  proposal. State why the current shape is costly, the alternative, the
+  time/risk and dependency/frontier effects, and what existing work remains
+  usable. Do not silently change the graph or assume the current node must land.
+- Independent ready paths may continue while the human reviews an amendment;
+  dependent work remains blocked by unchanged graph truth.
+
 ## Project snapshot
 
 - **Language:** YAML / Markdown (primary) + a small `scripts/` Python package (validator + TUI scaffold). No runtime code, no build step.
