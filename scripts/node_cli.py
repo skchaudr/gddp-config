@@ -653,17 +653,26 @@ def _findings_lines(receipt: dict | None, acceptance: dict) -> list[str]:
 
 
 def terminal_width(fallback: int = 80) -> int:
-    """Respect COLUMNS; else shutil.get_terminal_size."""
+    """Respect COLUMNS; else shutil.get_terminal_size.
+
+    COLUMNS=0 / empty / non-int is ignored (some shells export COLUMNS=0 when
+    not a TTY).
+    """
     env = os.environ.get("COLUMNS")
-    if env is not None:
+    if env is not None and str(env).strip():
         try:
-            return max(20, int(env))
+            n = int(env)
+            if n > 0:
+                return max(20, n)
         except ValueError:
             pass
     try:
-        return max(20, int(shutil.get_terminal_size(fallback=(fallback, 24)).columns))
+        n = int(shutil.get_terminal_size(fallback=(fallback, 24)).columns)
+        if n > 0:
+            return max(20, n)
     except OSError:
-        return fallback
+        pass
+    return fallback
 
 
 def _ellipsize(text: str, width: int) -> str:
@@ -740,7 +749,15 @@ def format_list_lines(
             if rest_bits:
                 cont = "  " + "  ".join(rest_bits)
                 lines.extend(_soft_wrap(cont, width, cont_indent="  "))
-        return lines
+        # Clamp non-id lines only (id lines must stay exact).
+        clamped: list[str] = []
+        id_set = {r[0] for r in rows}
+        for ln in lines:
+            if ln in id_set:
+                clamped.append(ln)
+            else:
+                clamped.append(ln if len(ln) <= width else ln[:width])
+        return clamped
 
     # Wide: table with fixed signal columns; TITLE fills remainder / ellipsized.
     id_w = max(len("ID"), max(len(r[0]) for r in rows))
@@ -750,7 +767,10 @@ def format_list_lines(
     t_w = max(len("TYPE"), max(len(r[4]) for r in rows))
     # separators = 2 spaces × 5 between six columns
     fixed = id_w + 2 + g_w + 2 + rt_w + 2 + v_w + 2 + t_w + 2
-    title_w = max(1, width - fixed)
+    if fixed >= width:
+        # Pathological narrow-"wide": fall back to compact layout.
+        return format_list_lines(rows, min(width, LIST_WIDE_MIN_COLUMNS - 1))
+    title_w = width - fixed
 
     header = (
         f"{'ID':<{id_w}}  {'GRAPH':<{g_w}}  {'RUNTIME':<{rt_w}}  "
