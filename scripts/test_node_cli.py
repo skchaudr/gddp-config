@@ -245,7 +245,8 @@ class ListFiltersTests(FixtureCase):
         return buf.getvalue()
 
     def test_id_first_columns_and_type_title(self):
-        out = self._list(project=PROJECT)
+        # Wide layout: single-line table with ID | GRAPH | RUNTIME | VERDICT | TYPE | TITLE
+        out = self._list(project=PROJECT, width=120)
         header_line = next(
             ln for ln in out.splitlines() if ln.startswith("ID")
         )
@@ -306,6 +307,105 @@ class ListFiltersTests(FixtureCase):
             )
         self.assertEqual(rc, 2)
         self.assertIn("Invalid --status", buf.getvalue())
+
+
+class ListResponsiveLayoutTests(ListFiltersTests):
+    """Stage-1 UX: COLUMNS-aware list; exact ID; width caps; signal separation."""
+
+    def _list_w(self, width: int, **kwargs) -> str:
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = node_cli.cmd_list(
+                root=self.root, db_path=self.db, width=width, **kwargs
+            )
+        self.assertEqual(rc, 0)
+        return buf.getvalue()
+
+    def test_columns_80_exact_id_line_and_max_width(self):
+        out = self._list_w(80, project=PROJECT)
+        lines = [ln for ln in out.splitlines() if ln.strip()]
+        # exact node id alone on its own line (copyable)
+        self.assertIn(NODE_A, lines)
+        id_line = next(ln for ln in lines if ln == NODE_A)
+        self.assertEqual(id_line, NODE_A)
+        # meta line carries distinct signals
+        meta = next(
+            ln for ln in lines
+            if "GRAPH" in ln and "RUNTIME" in ln and "VERDICT" in ln
+        )
+        self.assertIn("GRAPH pending", meta)
+        self.assertIn("RUNTIME running", meta)
+        self.assertIn("VERDICT fail", meta)
+        # no emitted content line exceeds width (project header "# pid" short)
+        for ln in out.splitlines():
+            self.assertLessEqual(len(ln), 80, msg=repr(ln))
+
+    def test_columns_120_table_id_first_title_truncatable(self):
+        long_title = "T" * 200
+        # stretch title on NODE_B via node yaml
+        npath = self.root / "graphs" / PROJECT / "nodes" / f"{NODE_B}.yaml"
+        text = npath.read_text(encoding="utf-8")
+        npath.write_text(
+            text.replace(f"title: Title for {NODE_B}", f"title: {long_title}"),
+            encoding="utf-8",
+        )
+        out = self._list_w(120, project=PROJECT, status="ready")
+        header = next(ln for ln in out.splitlines() if ln.startswith("ID"))
+        self.assertIn("GRAPH", header)
+        self.assertIn("VERDICT", header)
+        data = next(ln for ln in out.splitlines() if ln.startswith(NODE_B))
+        self.assertTrue(data.startswith(NODE_B))
+        self.assertLessEqual(len(data), 120)
+        # title ellipsized — full 200 T's must not appear
+        self.assertNotIn(long_title, data)
+        self.assertIn("…", data)
+
+    def test_format_list_lines_unit_narrow_vs_wide(self):
+        rows = [
+            (
+                "very-long-node-id-for-copy",
+                "ready",
+                "awaiting_review",
+                "pass",
+                "capability",
+                "A fairly long title that would smash columns on narrow terminals",
+            )
+        ]
+        narrow = node_cli.format_list_lines(rows, 80)
+        self.assertEqual(narrow[0], "very-long-node-id-for-copy")
+        self.assertTrue(any("GRAPH ready" in ln for ln in narrow))
+        self.assertTrue(any("VERDICT pass" in ln for ln in narrow))
+        self.assertTrue(any("RUNTIME awaiting_review" in ln for ln in narrow))
+        for ln in narrow:
+            self.assertLessEqual(len(ln), 80)
+
+        wide = node_cli.format_list_lines(rows, 120)
+        self.assertTrue(wide[0].startswith("ID"))
+        data = wide[1]
+        self.assertTrue(data.startswith("very-long-node-id-for-copy"))
+        self.assertIn("pass", data)
+        self.assertLessEqual(len(data), 120)
+
+    def test_columns_env_respected_by_terminal_width(self):
+        old = os.environ.get("COLUMNS")
+        try:
+            os.environ["COLUMNS"] = "80"
+            self.assertEqual(node_cli.terminal_width(), 80)
+            os.environ["COLUMNS"] = "120"
+            self.assertEqual(node_cli.terminal_width(), 120)
+        finally:
+            if old is None:
+                os.environ.pop("COLUMNS", None)
+            else:
+                os.environ["COLUMNS"] = old
+
+    def test_evaluator_distinction_narrow(self):
+        out = self._list_w(80, project=PROJECT)
+        # NODE_A fail vs NODE_B pass stay distinct from graph status
+        self.assertIn("VERDICT fail", out)
+        self.assertIn("VERDICT pass", out)
+        self.assertIn("GRAPH pending", out)
+        self.assertIn("GRAPH ready", out)
 
 
 class ShowTests(FixtureCase):

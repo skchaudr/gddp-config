@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import sqlite3
 import sys
 import tempfile
@@ -29,6 +30,9 @@ ROOT = SCRIPTS_DIR.parent
 GRAPH_STATUSES = ("pending", "ready", "complete", "deferred")
 ACTIVE_STATUSES = frozenset({"pending", "ready"})
 _NODE_STATUS_RE = re.compile(r"^(status:\s*)(\S+)\s*$", re.MULTILINE)
+
+# Narrow layout threshold for `node list` (binding Stage-1 UX fix).
+LIST_WIDE_MIN_COLUMNS = 120
 
 
 def config_root(root: Path | None = None) -> Path:
@@ -645,6 +649,128 @@ def _findings_lines(receipt: dict | None, acceptance: dict) -> list[str]:
     return lines
 
 
+# ── list formatting (width-aware) ───────────────────────────────────────────
+
+
+def terminal_width(fallback: int = 80) -> int:
+    """Respect COLUMNS; else shutil.get_terminal_size."""
+    env = os.environ.get("COLUMNS")
+    if env is not None:
+        try:
+            return max(20, int(env))
+        except ValueError:
+            pass
+    try:
+        return max(20, int(shutil.get_terminal_size(fallback=(fallback, 24)).columns))
+    except OSError:
+        return fallback
+
+
+def _ellipsize(text: str, width: int) -> str:
+    if width <= 0:
+        return ""
+    if len(text) <= width:
+        return text
+    if width == 1:
+        return "…"
+    return text[: width - 1] + "…"
+
+
+def _soft_wrap(text: str, width: int, *, cont_indent: str = "  ") -> list[str]:
+    """Wrap on spaces when possible; never emit a line longer than width.
+
+    First line uses text as-is (including any leading indent already in text).
+    Subsequent lines are prefixed with cont_indent.
+    """
+    if width < 1:
+        return []
+    if not text:
+        return [""]
+    if len(cont_indent) >= width:
+        cont_indent = ""
+    out: list[str] = []
+    rest = text
+    first = True
+    while rest:
+        budget = width if first else width - len(cont_indent)
+        if budget < 1:
+            budget = 1
+        if len(rest) <= budget:
+            out.append(rest if first else cont_indent + rest)
+            break
+        window = rest[:budget]
+        br = window.rfind(" ")
+        min_br = max(4, budget // 5)
+        if br >= min_br:
+            chunk = rest[:br].rstrip()
+            rest = rest[br:].lstrip()
+        else:
+            chunk = rest[:budget]
+            rest = rest[budget:]
+        out.append(chunk if first else cont_indent + chunk)
+        first = False
+    return [line if len(line) <= width else line[:width] for line in out]
+
+
+def format_list_lines(
+    rows: list[tuple[str, str, str, str, str, str]],
+    width: int,
+) -> list[str]:
+    """Render list rows for a terminal width.
+
+    rows: (node_id, graph, runtime, verdict, type, title)
+
+    <120: compact multi-line records — exact node_id alone on line 1;
+          line 2+ carry GRAPH/RUNTIME/VERDICT then TYPE/TITLE.
+    >=120: table-like scan; ID intact; TITLE is the only truncated field;
+           no emitted line exceeds width.
+    """
+    if not rows:
+        return []
+    width = max(20, int(width))
+
+    if width < LIST_WIDE_MIN_COLUMNS:
+        lines: list[str] = []
+        for nid, g, rt, v, ntype, title in rows:
+            # Line 1: exact full node_id — never truncated (IDs short by canon).
+            lines.append(nid)
+            meta = f"  GRAPH {g}  RUNTIME {rt}  VERDICT {v}"
+            lines.extend(_soft_wrap(meta, width, cont_indent="  "))
+            rest_bits = [b for b in (ntype, title) if b]
+            if rest_bits:
+                cont = "  " + "  ".join(rest_bits)
+                lines.extend(_soft_wrap(cont, width, cont_indent="  "))
+        return lines
+
+    # Wide: table with fixed signal columns; TITLE fills remainder / ellipsized.
+    id_w = max(len("ID"), max(len(r[0]) for r in rows))
+    g_w = max(len("GRAPH"), max(len(r[1]) for r in rows))
+    rt_w = max(len("RUNTIME"), max(len(r[2]) for r in rows))
+    v_w = max(len("VERDICT"), max(len(r[3]) for r in rows))
+    t_w = max(len("TYPE"), max(len(r[4]) for r in rows))
+    # separators = 2 spaces × 5 between six columns
+    fixed = id_w + 2 + g_w + 2 + rt_w + 2 + v_w + 2 + t_w + 2
+    title_w = max(1, width - fixed)
+
+    header = (
+        f"{'ID':<{id_w}}  {'GRAPH':<{g_w}}  {'RUNTIME':<{rt_w}}  "
+        f"{'VERDICT':<{v_w}}  {'TYPE':<{t_w}}  TITLE"
+    )
+    if len(header) > width:
+        header = header[:width]
+
+    out = [header]
+    for nid, g, rt, v, ntype, title in rows:
+        line = (
+            f"{nid:<{id_w}}  {g:<{g_w}}  {rt:<{rt_w}}  "
+            f"{v:<{v_w}}  {ntype:<{t_w}}  {_ellipsize(title, title_w)}"
+        )
+        if len(line) > width:
+            line = line[:width]
+        out.append(line)
+    return out
+
+
 # ── commands ───────────────────────────────────────────────────────────────
 
 
@@ -654,6 +780,7 @@ def cmd_list(
     active: bool = False,
     root: Path | None = None,
     db_path: Path | None = None,
+    width: int | None = None,
 ) -> int:
     root = config_root(root)
     if status is not None and status not in GRAPH_STATUSES:
@@ -709,25 +836,15 @@ def cmd_list(
         print("No nodes matched the given filters.")
         return 0
 
+    term_w = terminal_width() if width is None else max(20, int(width))
+
     for pid, rows in by_project:
         print(f"\n# {pid}")
         if not rows:
             print("  (no matching nodes)")
             continue
-        id_w = max(len("ID"), max(len(r[0]) for r in rows))
-        g_w = max(len("GRAPH"), max(len(r[1]) for r in rows))
-        rt_w = max(len("RUNTIME"), max(len(r[2]) for r in rows))
-        v_w = max(len("VERDICT"), max(len(r[3]) for r in rows))
-        t_w = max(len("TYPE"), max(len(r[4]) for r in rows))
-        print(
-            f"{'ID':<{id_w}}  {'GRAPH':<{g_w}}  {'RUNTIME':<{rt_w}}  "
-            f"{'VERDICT':<{v_w}}  {'TYPE':<{t_w}}  TITLE"
-        )
-        for nid, g, rt, v, ntype, title in rows:
-            print(
-                f"{nid:<{id_w}}  {g:<{g_w}}  {rt:<{rt_w}}  "
-                f"{v:<{v_w}}  {ntype:<{t_w}}  {title}"
-            )
+        for line in format_list_lines(rows, term_w):
+            print(line)
     return 0
 
 
