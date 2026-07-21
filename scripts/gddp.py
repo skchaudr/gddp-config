@@ -7,7 +7,9 @@ Subcommands:
     node batch        Walk through pending/REPLACE_ME nodes in a project
     node import       Import a node YAML from file or stdin (agent pipeline)
     node validate     Validate all nodes (or one project)
-    node list         List nodes in a project
+    node list         List nodes (optional --active / --status; runtime join)
+    node show         Inspect one node + optional evaluator evidence
+    node set-status   Change human-owned graph status (dual-write YAML)
     node status       Show status summary for all projects
 
     verify node       Run deterministic node evaluation; emit a receipt
@@ -22,6 +24,9 @@ Usage:
     python3 scripts/gddp.py node validate --project vault-doctor
     python3 scripts/gddp.py node import --file draft.yaml --project my-app
     python3 scripts/gddp.py node batch --project my-greenfield
+    python3 scripts/gddp.py node list --project gddp-runtime --active
+    python3 scripts/gddp.py node show --project gddp-runtime neutral-executor-contract
+    python3 scripts/gddp.py node set-status --project gddp-runtime neutral-executor-contract ready
     python3 scripts/gddp.py project new --from-outline outline.md --project-id my-app --repo org/repo
 """
 
@@ -114,7 +119,46 @@ def cmd_node_validate(args):
 
 
 def cmd_node_list(args):
-    list_nodes(args.project)
+    # Stage-1 operator list: ID-first, filters, optional runtime join.
+    # Falls back to legacy rich-ish listing only when no filters and no runtime
+    # join requested — actually always use node_ops for consistent columns.
+    node_ops = _import_module("node_ops")
+    raise SystemExit(
+        node_ops.cmd_list(
+            ROOT,
+            project_id=args.project,
+            status=args.status,
+            active=args.active,
+            runtime_root=args.runtime_root,
+        )
+    )
+
+
+def cmd_node_show(args):
+    node_ops = _import_module("node_ops")
+    raise SystemExit(
+        node_ops.cmd_show(
+            ROOT,
+            project_id=args.project,
+            node_id=args.node,
+            runtime_root=args.runtime_root,
+            trace=args.trace,
+        )
+    )
+
+
+def cmd_node_set_status(args):
+    node_ops = _import_module("node_ops")
+    raise SystemExit(
+        node_ops.cmd_set_status(
+            ROOT,
+            project_id=args.project,
+            node_id=args.node,
+            new_status=args.status,
+            yes=args.yes,
+            reason=args.reason,
+        )
+    )
 
 
 def cmd_node_status(args):
@@ -372,9 +416,60 @@ def main():
     node_val.add_argument("--root", type=Path, default=None)
     node_val.set_defaults(func=cmd_node_validate)
 
-    node_list = node_sub.add_parser("list", help="List nodes in a project")
+    node_list = node_sub.add_parser(
+        "list", help="List nodes (ID first; optional active/status filters + runtime join)"
+    )
     node_list.add_argument("--project", default=None, help="Project ID (omit for all)")
+    node_list.add_argument(
+        "--status",
+        default=None,
+        help="Filter by graph status (pending|ready|complete|deferred)",
+    )
+    node_list.add_argument(
+        "--active",
+        action="store_true",
+        help="Only in-play nodes (graph status pending or ready)",
+    )
+    node_list.add_argument(
+        "--runtime-root",
+        type=Path,
+        default=None,
+        help="gddp-runtime root for read-only evidence join "
+             "(default: $GDDP_RUNTIME_ROOT or sibling ../gddp-runtime)",
+    )
     node_list.set_defaults(func=cmd_node_list)
+
+    node_show = node_sub.add_parser(
+        "show", help="Inspect one node (graph + optional runtime/evaluator evidence)"
+    )
+    node_show.add_argument("--project", required=True, help="Project ID")
+    node_show.add_argument("node", help="Node ID (exact)")
+    node_show.add_argument(
+        "--trace",
+        action="store_true",
+        help="Include full evaluator acceptance_check history",
+    )
+    node_show.add_argument(
+        "--runtime-root",
+        type=Path,
+        default=None,
+        help="gddp-runtime root for read-only evidence join",
+    )
+    node_show.set_defaults(func=cmd_node_show)
+
+    node_set = node_sub.add_parser(
+        "set-status",
+        help="Change human-owned graph status (dual-write node yaml + project.yaml)",
+    )
+    node_set.add_argument("--project", required=True, help="Project ID")
+    node_set.add_argument("node", help="Node ID (exact)")
+    node_set.add_argument(
+        "status",
+        help="New graph status: pending | ready | complete | deferred",
+    )
+    node_set.add_argument("--yes", action="store_true", help="Skip confirmation prompt")
+    node_set.add_argument("--reason", default=None, help="Printed reason (not stored)")
+    node_set.set_defaults(func=cmd_node_set_status)
 
     node_status = node_sub.add_parser("status", help="Status summary for all projects")
     node_status.set_defaults(func=cmd_node_status)
