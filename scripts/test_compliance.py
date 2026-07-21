@@ -17,9 +17,11 @@ SCRIPTS_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPTS_DIR))
 
 import batch_fill
+import import_node
+import new_node
 from acceptance_items import normalize_acceptance_items
 from batch_fill import console
-from validate import run as validate_run
+from validate import run as validate_run, validate_node
 
 PROJECT = "testproj"
 
@@ -164,12 +166,44 @@ def test_filled_node_passes_validation() -> None:
     assert errors == [], f"filled node must pass validate.py with 0 errors, got: {errors}"
 
 
+def test_agent_is_canonical_executor_neutral_mode() -> None:
+    """Node tooling accepts `agent`, while rejecting prose-like `any agent`."""
+    node = make_valid_node("agent-mode")
+    node["allowed_execution_modes"] = ["agent"]
+
+    schema_findings = validate_node(
+        Path("agent-mode.yaml"), "graphs/testproj/nodes/agent-mode.yaml", node
+    )
+    import_findings = import_node.validate_node_yaml(node)
+
+    assert not [f for f in schema_findings if f.rule == "exec_mode_enum"]
+    assert not [f for f in import_findings if f["rule"] == "exec_mode_enum"]
+    assert "agent" in batch_fill.VALID_EXEC_MODES
+    assert "agent" in new_node.VALID_EXEC_MODES
+
+    node["allowed_execution_modes"] = ["any agent"]
+    assert any(
+        f.rule == "exec_mode_enum"
+        for f in validate_node(
+            Path("agent-mode.yaml"), "graphs/testproj/nodes/agent-mode.yaml", node
+        )
+    )
+    assert any(
+        f["rule"] == "exec_mode_enum"
+        for f in import_node.validate_node_yaml(node)
+    )
+
+
 def main() -> int:
     tests = [
         ("test_refuses_empty_acceptance", test_refuses_empty_acceptance),
         ("test_prints_validation_findings", test_prints_validation_findings),
         ("test_edit_handler_scopes_single_field", test_edit_handler_scopes_single_field),
         ("test_filled_node_passes_validation", test_filled_node_passes_validation),
+        (
+            "test_agent_is_canonical_executor_neutral_mode",
+            test_agent_is_canonical_executor_neutral_mode,
+        ),
     ]
     failed = 0
     for name, fn in tests:
