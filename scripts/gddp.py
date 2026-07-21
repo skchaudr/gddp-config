@@ -7,7 +7,9 @@ Subcommands:
     node batch        Walk through pending/REPLACE_ME nodes in a project
     node import       Import a node YAML from file or stdin (agent pipeline)
     node validate     Validate all nodes (or one project)
-    node list         List nodes in a project
+    node list         List nodes (ID | GRAPH | RUNTIME | VERDICT)
+    node show         Show one node + evaluator summary (read-only runtime)
+    node set-status   Set graph status on node YAML + project.yaml
     node status       Show status summary for all projects
 
     verify node       Run deterministic node evaluation; emit a receipt
@@ -22,6 +24,9 @@ Usage:
     python3 scripts/gddp.py node validate --project vault-doctor
     python3 scripts/gddp.py node import --file draft.yaml --project my-app
     python3 scripts/gddp.py node batch --project my-greenfield
+    python3 scripts/gddp.py node list --project gddp-runtime --active
+    python3 scripts/gddp.py node show --project gddp-runtime canary-retry-proof
+    python3 scripts/gddp.py node set-status --project gddp-runtime canary-retry-proof ready --yes
     python3 scripts/gddp.py project new --from-outline outline.md --project-id my-app --repo org/repo
 """
 
@@ -114,7 +119,32 @@ def cmd_node_validate(args):
 
 
 def cmd_node_list(args):
-    list_nodes(args.project)
+    node_cli = _import_module("node_cli")
+    sys.exit(node_cli.cmd_list(
+        project=getattr(args, "project", None),
+        status=getattr(args, "status", None),
+        active=bool(getattr(args, "active", False)),
+    ))
+
+
+def cmd_node_show(args):
+    node_cli = _import_module("node_cli")
+    sys.exit(node_cli.cmd_show(
+        project=args.project,
+        node_id=args.node_id,
+        trace=bool(getattr(args, "trace", False)),
+    ))
+
+
+def cmd_node_set_status(args):
+    node_cli = _import_module("node_cli")
+    sys.exit(node_cli.cmd_set_status(
+        project=args.project,
+        node_id=args.node_id,
+        status=args.status,
+        yes=bool(getattr(args, "yes", False)),
+        reason=getattr(args, "reason", None),
+    ))
 
 
 def cmd_node_status(args):
@@ -176,40 +206,6 @@ def cmd_project_new(args):
 
 def cmd_project_validate(args):
     validate_project(args.project)
-
-
-def list_nodes(project_id: str | None):
-    graphs = ROOT / "graphs"
-    if not graphs.exists():
-        print("No graphs/ directory found")
-        return
-
-    projects = sorted(
-        p.name for p in graphs.iterdir()
-        if p.is_dir() and p.name != "_template" and (p / "project.yaml").exists()
-    )
-    if project_id:
-        if project_id not in projects:
-            print(f"Project '{project_id}' not found. Available: {', '.join(projects)}")
-            return
-        projects = [project_id]
-
-    for pid in projects:
-        proj_yaml = graphs / pid / "project.yaml"
-        with open(proj_yaml) as f:
-            proj = yaml.safe_load(f) or {}
-        nodes = proj.get("nodes", [])
-        name = proj.get("project_name", pid)
-        print(f"\n[bold cyan]{pid}[/bold cyan] ({name}) — {len(nodes)} nodes")
-        if not nodes:
-            print("  (none)")
-            continue
-        for n in nodes:
-            nid = n.get("id", "?")
-            title = n.get("title", "")
-            status = n.get("status", "?")
-            ntype = n.get("type", "")
-            print(f"  [{status:<10}] {nid:<40} {ntype}  {title}")
 
 
 def show_status():
@@ -372,9 +368,37 @@ def main():
     node_val.add_argument("--root", type=Path, default=None)
     node_val.set_defaults(func=cmd_node_validate)
 
-    node_list = node_sub.add_parser("list", help="List nodes in a project")
+    node_list = node_sub.add_parser(
+        "list", help="List nodes (ID | GRAPH | RUNTIME | VERDICT)")
     node_list.add_argument("--project", default=None, help="Project ID (omit for all)")
+    node_list.add_argument("--status", default=None, help="Filter by graph status")
+    node_list.add_argument(
+        "--active", action="store_true",
+        help="Only graph status pending or ready",
+    )
     node_list.set_defaults(func=cmd_node_list)
+
+    node_show = node_sub.add_parser(
+        "show", help="Show one node + evaluator summary")
+    node_show.add_argument("--project", required=True, help="Project ID")
+    node_show.add_argument("node_id", help="Node ID")
+    node_show.add_argument(
+        "--trace", action="store_true",
+        help="Expand tool traces and result/job history",
+    )
+    node_show.set_defaults(func=cmd_node_show)
+
+    node_set = node_sub.add_parser(
+        "set-status",
+        help="Set graph status on node YAML + project.yaml (human-owned)",
+    )
+    node_set.add_argument("--project", required=True, help="Project ID")
+    node_set.add_argument("node_id", help="Node ID")
+    node_set.add_argument(
+        "status", help="Graph status: pending | ready | complete | deferred")
+    node_set.add_argument("--yes", action="store_true", help="Skip confirmation")
+    node_set.add_argument("--reason", default=None, help="Reason (printed only)")
+    node_set.set_defaults(func=cmd_node_set_status)
 
     node_status = node_sub.add_parser("status", help="Status summary for all projects")
     node_status.set_defaults(func=cmd_node_status)

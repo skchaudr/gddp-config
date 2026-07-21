@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Portable gddp launcher (source for later ~/bin install).
+# Resolves config root, prefers that checkout's venv Python, execs scripts/gddp.py.
+set -euo pipefail
+
+ROOT="${GDDP_CONFIG_PATH:-$HOME/repos/gddp-config}"
+if [[ -x "$ROOT/.venv/bin/python" ]]; then
+  PY="$ROOT/.venv/bin/python"
+else
+  PY="python3"
+fi
+exec "$PY" "$ROOT/scripts/gddp.py" "$@"

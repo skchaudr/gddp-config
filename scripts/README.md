@@ -20,6 +20,9 @@ Or use your system Python if it's not PEP-668-locked.
 .venv/bin/python scripts/gddp.py node import --file draft.yaml --project my-app
 .venv/bin/python scripts/gddp.py node validate
 .venv/bin/python scripts/gddp.py node status
+.venv/bin/python scripts/gddp.py node list --project gddp-runtime --active
+.venv/bin/python scripts/gddp.py node show --project gddp-runtime canary-retry-proof
+.venv/bin/python scripts/gddp.py node set-status --project gddp-runtime canary-retry-proof ready --yes
 .venv/bin/python scripts/gddp.py verify node --project aa-cli --node common-core
 .venv/bin/python scripts/gddp.py obsidian export --project aa-cli
 .venv/bin/python scripts/gddp.py project new --from-outline outline.md --project-id my-app --repo org/repo
@@ -34,8 +37,37 @@ Or use your system Python if it's not PEP-668-locked.
 | `node batch` | Walk through REPLACE_ME nodes | Edit acceptance/constraints/why |
 | `node import` | Import YAML from file or stdin | No TUI — JSON output, exit codes |
 | `node validate` | Validate all nodes against schema | No TUI |
-| `node list` | List nodes in a project | No TUI |
+| `node list` | List nodes: `ID \| GRAPH \| RUNTIME \| VERDICT` | No TUI |
+| `node show` | Node detail + evaluator summary (read-only runtime) | No TUI |
+| `node set-status` | Human graph-status change (node + project index) | Confirm unless `--yes` |
 | `node status` | Completion summary for all projects | No TUI |
+
+### Stage 1 operator commands
+
+Graph status, runtime queue state, and evaluator verdict stay **distinct**.
+
+```bash
+# Active = graph status pending or ready
+.venv/bin/python scripts/gddp.py node list --project gddp-runtime --active
+.venv/bin/python scripts/gddp.py node list --project gddp-runtime --status ready
+
+# Intent, criteria, deps, graph status + runtime/evaluator summary
+.venv/bin/python scripts/gddp.py node show --project gddp-runtime canary-retry-proof
+.venv/bin/python scripts/gddp.py node show --project gddp-runtime canary-retry-proof --trace
+
+# Dual-write graph status only (node YAML top-level + matching project.yaml entry)
+.venv/bin/python scripts/gddp.py node set-status --project gddp-runtime canary-retry-proof ready
+.venv/bin/python scripts/gddp.py node set-status --project gddp-runtime canary-retry-proof complete --yes --reason "accepted after review"
+```
+
+- Valid graph statuses: `pending` | `ready` | `complete` | `deferred`
+- `set-status` previews `old -> new` for both files, confirms unless `--yes`, no-ops without rewrite when already at target
+- Writes are surgical (status values only): staged per-file atomic replacements (`os.replace`) with rollback of both originals if either write or post-write validation fails (not a single joint atomic commit of both files)
+- Candidates are `yaml.safe_load`ed and id/status-checked **before** any disk write; baseline `validate.py` failures abort cleanly with no write
+- Runtime DB: `$GDDP_RUNTIME_ROOT` (default sibling `../gddp-runtime`) `db/queue.db` opened read-only (`mode=ro`); missing DB/receipts print `-` / `no evaluation evidence` and exit 0
+- Runtime job without evaluator acceptance/receipt/verdict still shows runtime state and prints `no evaluation evidence`
+- Receipt: latest `acceptance_check.receipt_path`, else `verification-runtime-live/<project>/<node>.json`
+- Implementation: thin `gddp.py` + `scripts/node_cli.py`; portable launcher: `bin/gddp` (`GDDP_CONFIG_PATH` or `$HOME/repos/gddp-config`)
 
 ### obsidian subcommand
 
