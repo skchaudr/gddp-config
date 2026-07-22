@@ -860,7 +860,10 @@ class LauncherTests(unittest.TestCase):
             timeout=30,
         )
         self.assertEqual(proc.returncode, 0, proc.stderr)
-        self.assertIn("graph node management", proc.stdout.lower() + proc.stderr.lower())
+        self.assertIn(
+            "graph truth and runtime evidence",
+            proc.stdout.lower() + proc.stderr.lower(),
+        )
 
 
 if __name__ == "__main__":

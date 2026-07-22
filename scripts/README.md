@@ -23,6 +23,10 @@ Or use your system Python if it's not PEP-668-locked.
 .venv/bin/python scripts/gddp.py node list --project gddp-runtime --active
 .venv/bin/python scripts/gddp.py node show --project gddp-runtime canary-retry-proof
 .venv/bin/python scripts/gddp.py node set-status --project gddp-runtime canary-retry-proof ready --yes
+.venv/bin/python scripts/gddp.py jobs list --state awaiting_review
+.venv/bin/python scripts/gddp.py jobs show <job-id> --full
+.venv/bin/python scripts/gddp.py jobs results --all
+.venv/bin/python scripts/gddp.py jobs set <job-id> awaiting_review --reason "returned for review"
 .venv/bin/python scripts/gddp.py verify node --project aa-cli --node common-core
 .venv/bin/python scripts/gddp.py obsidian export --project aa-cli
 .venv/bin/python scripts/gddp.py project new --from-outline outline.md --project-id my-app --repo org/repo
@@ -41,6 +45,25 @@ Or use your system Python if it's not PEP-668-locked.
 | `node show` | Node detail + evaluator summary (read-only runtime) | No TUI |
 | `node set-status` | Human graph-status change (node + project index) | Confirm unless `--yes` |
 | `node status` | Completion summary for all projects | No TUI |
+
+### jobs subcommands
+
+`gddp-config` owns the human-facing `gddp` command. The `jobs` group delegates
+to the sibling `gddp-runtime/scripts/node_status.py` CLI, so runtime queue state
+and evaluator evidence remain runtime-owned while graph truth remains config-owned.
+
+| Command | What |
+|---|---|
+| `jobs list [--state S]` | List runtime jobs and queue states |
+| `jobs show <job-or-node> [--full]` | Show one job, results, decisions, and evidence |
+| `jobs results [--all]` | Summarize evaluator output by project |
+| `jobs set <job-or-node> <state> --reason ...` | Change runtime queue state with confirmation and an audit row |
+
+Bare `gddp` opens the unified config-hosted menu in a terminal. Its jobs section
+opens runtime's existing interactive jobs menu. Redirected bare output prints a
+non-blocking command overview. Resolution uses `GDDP_RUNTIME_ROOT`, defaulting
+to the sibling `../gddp-runtime`; `GDDP_RUNTIME_PYTHON` can override the runtime
+interpreter.
 
 ### Stage 1 operator commands
 
