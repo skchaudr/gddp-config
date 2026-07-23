@@ -85,6 +85,24 @@ class RuntimeJobsForwardingTests(unittest.TestCase):
 
 
 class OverviewTests(unittest.TestCase):
+    def test_menu_choice_uses_one_keypress_without_enter(self):
+        terminal = SimpleNamespace(getch=lambda: "j")
+        actions = {
+            "n": ("nodes", ""),
+            "j": ("jobs", ""),
+        }
+        with patch.object(gddp, "_import_module", return_value=terminal):
+            self.assertEqual(gddp._menu_choice(actions, default="n"), "j")
+
+    def test_menu_choice_keeps_enter_as_the_default_shortcut(self):
+        terminal = SimpleNamespace(getch=lambda: "\r")
+        actions = {
+            "n": ("nodes", ""),
+            "j": ("jobs", ""),
+        }
+        with patch.object(gddp, "_import_module", return_value=terminal):
+            self.assertEqual(gddp._menu_choice(actions, default="n"), "n")
+
     def test_redirected_bare_command_uses_static_overview(self):
         fake_in = SimpleNamespace(isatty=lambda: False)
         fake_out = SimpleNamespace(isatty=lambda: False)

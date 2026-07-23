@@ -49,7 +49,6 @@ try:
     import yaml
     from rich import box
     from rich.console import Console
-    from rich.prompt import Prompt
     from rich.table import Table
     from rich.text import Text
 except ImportError:
@@ -65,6 +64,23 @@ console = Console(soft_wrap=True, highlight=False, width=_PIPE_WIDTH)
 def _import_module(name: str):
     sys.path.insert(0, str(SCRIPTS_DIR))
     return __import__(name)
+
+
+def _menu_choice(actions: dict[str, tuple[str, str]], default: str) -> str:
+    """Read one valid menu key immediately, without waiting for Enter."""
+    getch = _import_module("terminal").getch
+    while True:
+        console.print(Text("select", style="bold cyan"), end=" ")
+        choice = getch()
+        if choice == "\x03":
+            raise KeyboardInterrupt
+        if choice in {"\r", "\n"}:
+            choice = default
+        choice = choice.lower()
+        if choice in actions:
+            console.print(choice)
+            return choice
+        console.print(Text(f"{choice!r} is not an option", style="yellow"))
 
 
 def cmd_node_new(args):
@@ -267,7 +283,7 @@ def interactive_menu():
             menu.add_row(key, name, description)
         console.print(menu)
         try:
-            choice = Prompt.ask("select", choices=list(actions), default="n")
+            choice = _menu_choice(actions, default="n")
         except (EOFError, KeyboardInterrupt):
             console.print()
             break
