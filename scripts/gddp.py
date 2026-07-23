@@ -236,6 +236,15 @@ def _node_review_menu(project: str, node_id: str):
         )
 
 
+def _node_status_label(doc: dict, entry: dict | None) -> str:
+    """Show node/index disagreement instead of silently choosing one copy."""
+    node_status = str(doc.get("status") or "").strip()
+    index_status = str((entry or {}).get("status") or "").strip()
+    if node_status and index_status and node_status != index_status:
+        return f"DESYNC node={node_status} index={index_status}"
+    return node_status or index_status or "?"
+
+
 def interactive_nodes():
     """Project → node → review/update loop for canonical graph truth."""
     node_cli = _import_module("node_cli")
@@ -262,7 +271,7 @@ def interactive_nodes():
                 break
             node_items = []
             for node_id, doc, entry in nodes:
-                status = (entry or {}).get("status") or doc.get("status") or "?"
+                status = _node_status_label(doc, entry)
                 title = str(doc.get("title") or (entry or {}).get("title") or "")
                 node_items.append((node_id, f"{status} · {title}"))
 

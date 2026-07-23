@@ -148,6 +148,15 @@ class OverviewTests(unittest.TestCase):
         self.assertIn("next page", rendered)
         self.assertRegex(rendered, r"b\s+projects")
 
+    def test_node_status_label_exposes_node_index_desync(self):
+        self.assertEqual(
+            gddp._node_status_label(
+                {"status": "pending"},
+                {"status": "complete"},
+            ),
+            "DESYNC node=pending index=complete",
+        )
+
     def test_node_workflow_reviews_and_updates_entirely_in_menu(self):
         keys = iter(["1", "1", "u", "c", "y", "b", "b", "b"])
         terminal = SimpleNamespace(getch=lambda: next(keys))
