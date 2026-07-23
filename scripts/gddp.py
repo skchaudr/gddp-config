@@ -49,6 +49,7 @@ try:
     import yaml
     from rich import box
     from rich.console import Console
+    from rich.prompt import Prompt
     from rich.table import Table
     from rich.text import Text
 except ImportError:
@@ -59,6 +60,8 @@ SCRIPTS_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPTS_DIR.parent
 _PIPE_WIDTH = None if sys.stdout.isatty() else 120
 console = Console(soft_wrap=True, highlight=False, width=_PIPE_WIDTH)
+_MENU_BACK = object()
+_MENU_QUIT = object()
 
 
 def _import_module(name: str):
@@ -81,6 +84,196 @@ def _menu_choice(actions: dict[str, tuple[str, str]], default: str) -> str:
             console.print(choice)
             return choice
         console.print(Text(f"{choice!r} is not an option", style="yellow"))
+
+
+def _paged_menu(
+    heading: str,
+    items: list[tuple[str, str]],
+    *,
+    page_size: int = 9,
+):
+    """Choose any item with one key; page when there are more than nine."""
+    if not items:
+        console.print(Text("No items found.", style="yellow"))
+        return _MENU_BACK
+
+    page = 0
+    while True:
+        page_count = (len(items) + page_size - 1) // page_size
+        start = page * page_size
+        visible = items[start:start + page_size]
+        console.print(Text(heading, style="bold"))
+        menu = Table(box=None, padding=(0, 2, 0, 1), pad_edge=False, show_header=False)
+        menu.add_column(style="bold cyan", no_wrap=True)
+        menu.add_column(style="bold", no_wrap=True)
+        menu.add_column(style="dim")
+        actions: dict[str, tuple[str, str]] = {}
+        for offset, (value, description) in enumerate(visible, start=1):
+            key = str(offset)
+            actions[key] = (value, description)
+            menu.add_row(key, value, description)
+        if page > 0:
+            actions["p"] = ("previous", "")
+            menu.add_row("p", "previous", "")
+        if page + 1 < page_count:
+            actions["n"] = ("next", "")
+            menu.add_row("n", "next", "")
+        actions["b"] = ("back", "")
+        actions["q"] = ("quit", "")
+        menu.add_row("b", "back", "")
+        menu.add_row("q", "quit", "")
+        console.print(menu)
+
+        choice = _menu_choice(actions, default="1")
+        if choice == "p":
+            page -= 1
+        elif choice == "n":
+            page += 1
+        elif choice == "b":
+            return _MENU_BACK
+        elif choice == "q":
+            return _MENU_QUIT
+        else:
+            return visible[int(choice) - 1][0]
+
+
+def _confirm_status_change(project: str, node_id: str, status: str) -> int:
+    """Confirm with one key, collect a real reason, then dual-write + history."""
+    node_cli = _import_module("node_cli")
+    actions = {
+        "y": ("yes", f"set {node_id} to {status}"),
+        "n": ("no", "leave graph truth unchanged"),
+    }
+    console.print(
+        f"Set [bold]{project}/{node_id}[/bold] graph status to "
+        f"[bold cyan]{status}[/bold cyan]?"
+    )
+    choice = _menu_choice(actions, default="n")
+    if choice != "y":
+        console.print(Text("Unchanged.", style="dim"))
+        return 1
+    try:
+        reason = Prompt.ask(
+            Text("reason", style="cyan"),
+            default="",
+        ).strip()
+    except (EOFError, KeyboardInterrupt):
+        console.print()
+        console.print(Text("Unchanged — reason required.", style="dim"))
+        return 1
+    if not reason:
+        console.print(Text("Unchanged — reason required (status alone misleads agents).", style="yellow"))
+        return 1
+    return node_cli.cmd_set_status(
+        project=project,
+        node_id=node_id,
+        status=status,
+        yes=True,
+        reason=reason,
+    )
+
+
+def _node_review_menu(project: str, node_id: str):
+    """Review one node and optionally update its human-owned graph status."""
+    node_cli = _import_module("node_cli")
+    while True:
+        console.rule(f"{project} / {node_id}", style="dim")
+        node_cli.cmd_show(project=project, node_id=node_id, trace=False)
+        actions = {
+            "u": ("update", "change graph status"),
+            "t": ("trace", "show full evaluator and job trace"),
+            "b": ("back", "choose another node"),
+            "p": ("projects", "choose another project"),
+            "q": ("quit", ""),
+        }
+        menu = Table(box=None, padding=(0, 2, 0, 1), pad_edge=False, show_header=False)
+        menu.add_column(style="bold cyan", no_wrap=True)
+        menu.add_column(style="bold", no_wrap=True)
+        menu.add_column(style="dim")
+        for key, (name, description) in actions.items():
+            menu.add_row(key, name, description)
+        console.print(menu)
+        choice = _menu_choice(actions, default="u")
+        if choice == "q":
+            return _MENU_QUIT
+        if choice == "p":
+            return "projects"
+        if choice == "b":
+            return _MENU_BACK
+        if choice == "t":
+            console.rule("full trace", style="dim")
+            node_cli.cmd_show(project=project, node_id=node_id, trace=True)
+            continue
+
+        status_actions = {
+            "p": ("pending", ""),
+            "r": ("ready", ""),
+            "c": ("complete", ""),
+            "d": ("deferred", ""),
+            "b": ("back", ""),
+            "q": ("quit", ""),
+        }
+        status_menu = Table(
+            box=None, padding=(0, 2, 0, 1), pad_edge=False, show_header=False
+        )
+        status_menu.add_column(style="bold cyan", no_wrap=True)
+        status_menu.add_column(style="bold", no_wrap=True)
+        for key, (name, _) in status_actions.items():
+            status_menu.add_row(key, name)
+        console.print(Text("graph status", style="bold"))
+        console.print(status_menu)
+        status_choice = _menu_choice(status_actions, default="b")
+        if status_choice == "q":
+            return _MENU_QUIT
+        if status_choice == "b":
+            continue
+        _confirm_status_change(
+            project,
+            node_id,
+            status_actions[status_choice][0],
+        )
+
+
+def interactive_nodes():
+    """Project → node → review/update loop for canonical graph truth."""
+    node_cli = _import_module("node_cli")
+    while True:
+        projects = node_cli.list_project_ids(ROOT)
+        project_items = []
+        for project_id in projects:
+            try:
+                count = len(node_cli.iter_nodes(ROOT, project_id))
+                description = f"{count} node{'s' if count != 1 else ''}"
+            except Exception as exc:
+                description = f"unavailable: {exc}"
+            project_items.append((project_id, description))
+
+        project = _paged_menu("projects", project_items)
+        if project in {_MENU_BACK, _MENU_QUIT}:
+            return project
+
+        while True:
+            try:
+                nodes = node_cli.iter_nodes(ROOT, project)
+            except Exception as exc:
+                console.print(Text(f"Could not load {project}: {exc}", style="red"))
+                break
+            node_items = []
+            for node_id, doc, entry in nodes:
+                status = (entry or {}).get("status") or doc.get("status") or "?"
+                title = str(doc.get("title") or (entry or {}).get("title") or "")
+                node_items.append((node_id, f"{status} · {title}"))
+
+            node_id = _paged_menu(f"nodes · {project}", node_items)
+            if node_id is _MENU_QUIT:
+                return _MENU_QUIT
+            if node_id is _MENU_BACK:
+                break
+            outcome = _node_review_menu(project, node_id)
+            if outcome is _MENU_QUIT:
+                return _MENU_QUIT
+            if outcome == "projects":
+                break
 
 
 def cmd_node_new(args):
@@ -268,7 +461,7 @@ def interactive_menu():
     """Keep graph control in config while delegating the jobs section to runtime."""
     console.print(Text("gddp", style="bold").append("  ·  graph control plane", style="dim"))
     actions = {
-        "n": ("nodes", "list graph truth with runtime/evaluator evidence"),
+        "n": ("nodes", "review and update graph truth"),
         "j": ("jobs", "open runtime jobs, results, and queue controls"),
         "s": ("status", "summarize graph completion"),
         "v": ("validate", "validate graph definitions"),
@@ -292,7 +485,9 @@ def interactive_menu():
             break
         try:
             if choice == "n":
-                cmd_node_list(argparse.Namespace(project=None, status=None, active=False))
+                outcome = interactive_nodes()
+                if outcome is _MENU_QUIT:
+                    break
             elif choice == "j":
                 run_runtime_jobs([])
             elif choice == "s":
@@ -563,7 +758,11 @@ def main(argv=None):
     node_set.add_argument(
         "status", help="Graph status: pending | ready | complete | deferred")
     node_set.add_argument("--yes", action="store_true", help="Skip confirmation")
-    node_set.add_argument("--reason", default=None, help="Reason (printed only)")
+    node_set.add_argument(
+        "--reason",
+        required=True,
+        help="Why this status change — stored in runtime node_status_history/",
+    )
     node_set.set_defaults(func=cmd_node_set_status)
 
     node_status = node_sub.add_parser("status", help="Status summary for all projects")

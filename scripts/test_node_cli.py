@@ -245,13 +245,16 @@ class ListFiltersTests(FixtureCase):
         return buf.getvalue()
 
     def test_id_first_columns_and_type_title(self):
-        # Wide layout: single-line table with ID | GRAPH | RUNTIME | VERDICT | TYPE | TITLE
-        out = self._list(project=PROJECT, width=120)
+        # Wide layout: ID | GRAPH | RUNTIME | VERDICT | TYPE | REASON | TITLE
+        out = self._list(project=PROJECT, width=140)
         header_line = next(
             ln for ln in out.splitlines() if ln.startswith("ID")
         )
         cols = header_line.split()
-        self.assertEqual(cols[:6], ["ID", "GRAPH", "RUNTIME", "VERDICT", "TYPE", "TITLE"])
+        self.assertEqual(
+            cols[:7],
+            ["ID", "GRAPH", "RUNTIME", "VERDICT", "TYPE", "REASON", "TITLE"],
+        )
         data = next(ln for ln in out.splitlines() if ln.startswith(NODE_A))
         self.assertTrue(data.startswith(NODE_A))
         self.assertIn("capability", data)
@@ -369,6 +372,7 @@ class ListResponsiveLayoutTests(ListFiltersTests):
                 "pass",
                 "capability",
                 "A fairly long title that would smash columns on narrow terminals",
+                "quota; work fine — do not block unlocks",
             )
         ]
         narrow = node_cli.format_list_lines(rows, 80)
@@ -376,15 +380,18 @@ class ListResponsiveLayoutTests(ListFiltersTests):
         self.assertTrue(any("GRAPH ready" in ln for ln in narrow))
         self.assertTrue(any("VERDICT pass" in ln for ln in narrow))
         self.assertTrue(any("RUNTIME awaiting_review" in ln for ln in narrow))
+        self.assertTrue(any("REASON quota" in ln for ln in narrow))
         for ln in narrow:
             self.assertLessEqual(len(ln), 80)
 
-        wide = node_cli.format_list_lines(rows, 120)
+        wide = node_cli.format_list_lines(rows, 140)
         self.assertTrue(wide[0].startswith("ID"))
+        self.assertIn("REASON", wide[0])
         data = wide[1]
         self.assertTrue(data.startswith("very-long-node-id-for-copy"))
         self.assertIn("pass", data)
-        self.assertLessEqual(len(data), 120)
+        self.assertIn("quota", data)
+        self.assertLessEqual(len(data), 140)
 
     def test_columns_env_respected_by_terminal_width(self):
         old = os.environ.get("COLUMNS")
@@ -477,6 +484,10 @@ class ShowTests(FixtureCase):
         self.assertRegex(out, r"evaluator verdict:\s+-")
 
 
+_STATUS_REASON = "test: intentional graph status change"
+_HISTORY_SRC = SCRIPTS_DIR / "_test_support_node_status_history.py"
+
+
 class SetStatusTests(FixtureCase):
     def setUp(self):
         super().setUp()
@@ -484,6 +495,16 @@ class SetStatusTests(FixtureCase):
         self.ppath = self.root / "graphs" / PROJECT / "project.yaml"
         self.node_orig = self.npath.read_bytes()
         self.proj_orig = self.ppath.read_bytes()
+        self.rt = self.root / "fake-runtime"
+        scripts = self.rt / "scripts"
+        scripts.mkdir(parents=True)
+        if _HISTORY_SRC.is_file():
+            shutil.copy(_HISTORY_SRC, scripts / "node_status_history.py")
+        self._rt_patch = mock.patch.object(
+            node_cli, "runtime_root", return_value=self.rt
+        )
+        self._rt_patch.start()
+        self.addCleanup(self._rt_patch.stop)
 
     def test_dual_update_preserves_formatting(self):
         before_node = self.npath.read_text(encoding="utf-8")
@@ -495,6 +516,7 @@ class SetStatusTests(FixtureCase):
                 node_id=NODE_A,
                 status="ready",
                 yes=True,
+                reason=_STATUS_REASON,
                 root=self.root,
             )
         self.assertEqual(rc, 0, buf.getvalue())
@@ -511,6 +533,53 @@ class SetStatusTests(FixtureCase):
             ),
             after_proj,
         )
+        hist = (
+            self.rt / "node_status_history" / PROJECT / f"{NODE_A}.jsonl"
+        )
+        self.assertTrue(hist.is_file(), buf.getvalue())
+        self.assertIn(_STATUS_REASON, hist.read_text(encoding="utf-8"))
+
+    def test_reason_required(self):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = node_cli.cmd_set_status(
+                project=PROJECT,
+                node_id=NODE_A,
+                status="ready",
+                yes=True,
+                reason="",
+                root=self.root,
+            )
+        self.assertEqual(rc, 2)
+        self.assertIn("--reason is required", buf.getvalue())
+        self.assertEqual(self.npath.read_bytes(), self.node_orig)
+
+    def test_history_failure_rolls_back_graph(self):
+        hist_mod = node_cli._load_status_history_mod()
+        self.assertIsNotNone(hist_mod)
+        buf = io.StringIO()
+        with mock.patch.object(
+            hist_mod,
+            "append_status_change",
+            side_effect=OSError("disk full"),
+        ), redirect_stdout(buf):
+            # re-load would get fresh module — force cmd path to use patched mod
+            with mock.patch.object(
+                node_cli, "_load_status_history_mod", return_value=hist_mod
+            ):
+                rc = node_cli.cmd_set_status(
+                    project=PROJECT,
+                    node_id=NODE_A,
+                    status="ready",
+                    yes=True,
+                    reason=_STATUS_REASON,
+                    root=self.root,
+                )
+        self.assertEqual(rc, 1, buf.getvalue())
+        self.assertIn("history append failed", buf.getvalue())
+        self.assertIn("no files written", buf.getvalue())
+        self.assertEqual(self.npath.read_bytes(), self.node_orig)
+        self.assertEqual(self.ppath.read_bytes(), self.proj_orig)
 
     def test_noop_does_not_rewrite(self):
         content_n = self.npath.read_bytes()
@@ -524,6 +593,7 @@ class SetStatusTests(FixtureCase):
                 node_id=NODE_A,
                 status="pending",
                 yes=True,
+                reason=_STATUS_REASON,
                 root=self.root,
             )
         self.assertEqual(rc, 0)
@@ -542,6 +612,7 @@ class SetStatusTests(FixtureCase):
                     node_id=NODE_A,
                     status="ready",
                     yes=False,
+                    reason=_STATUS_REASON,
                     root=self.root,
                 )
         self.assertEqual(rc, 1)
@@ -562,6 +633,7 @@ class SetStatusTests(FixtureCase):
                     node_id=NODE_A,
                     status="ready",
                     yes=True,
+                    reason=_STATUS_REASON,
                     root=self.root,
                 )
         self.assertEqual(rc, 1)
@@ -577,6 +649,7 @@ class SetStatusTests(FixtureCase):
                 node_id=NODE_A,
                 status="running",
                 yes=True,
+                reason=_STATUS_REASON,
                 root=self.root,
             )
         self.assertEqual(rc, 2)
@@ -595,6 +668,7 @@ class SetStatusTests(FixtureCase):
                     node_id=NODE_A,
                     status="ready",
                     yes=True,
+                    reason=_STATUS_REASON,
                     root=self.root,
                 )
         self.assertEqual(rc, 1)
@@ -615,6 +689,7 @@ class SetStatusTests(FixtureCase):
                     node_id=NODE_A,
                     status="ready",
                     yes=True,
+                    reason=_STATUS_REASON,
                     root=self.root,
                 )
         self.assertEqual(rc, 1)

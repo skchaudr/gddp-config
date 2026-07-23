@@ -2,11 +2,13 @@
 """Stage 1 node CLI helpers: list, show, set-status.
 
 Graph status (YAML), runtime queue state, and evaluator verdict stay distinct.
-Runtime DB is read-only.
+Runtime DB is read-only. Human status *reasons* append to runtime
+node_status_history/ (not node YAML).
 """
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
 import re
@@ -46,6 +48,19 @@ def runtime_root() -> Path:
 
 def runtime_db_path() -> Path:
     return runtime_root() / "db" / "queue.db"
+
+
+def _load_status_history_mod():
+    """Load gddp-runtime scripts/node_status_history.py if present."""
+    path = runtime_root() / "scripts" / "node_status_history.py"
+    if not path.is_file():
+        return None
+    spec = importlib.util.spec_from_file_location("node_status_history", path)
+    if spec is None or spec.loader is None:
+        return None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def project_dir(root: Path, project_id: str) -> Path:
@@ -721,17 +736,38 @@ def _soft_wrap(text: str, width: int, *, cont_indent: str = "  ") -> list[str]:
     return [line if len(line) <= width else line[:width] for line in out]
 
 
+def _graph_status_reason(project_id: str, node_id: str, graph_status: str) -> str:
+    """Latest history reason matching current graph status, or '-' if none/unavailable."""
+    hist_mod = _load_status_history_mod()
+    if hist_mod is None:
+        return "-"
+    try:
+        last = hist_mod.latest_reason(
+            project_id,
+            node_id,
+            runtime_root=runtime_root(),
+            kind="graph",
+            matching_to_status=str(graph_status),
+        )
+    except ValueError:
+        return "!err"
+    if not last:
+        return "-"
+    reason = str(last.get("reason") or "").strip()
+    return reason if reason else "-"
+
+
 def format_list_lines(
-    rows: list[tuple[str, str, str, str, str, str]],
+    rows: list[tuple[str, str, str, str, str, str, str]],
     width: int,
 ) -> list[str]:
     """Render list rows for a terminal width.
 
-    rows: (node_id, graph, runtime, verdict, type, title)
+    rows: (node_id, graph, runtime, verdict, type, title, reason)
 
     <120: compact multi-line records — exact node_id alone on line 1;
-          line 2+ carry GRAPH/RUNTIME/VERDICT then TYPE/TITLE.
-    >=120: table-like scan; ID intact; TITLE is the only truncated field;
+          line 2+ carry GRAPH/RUNTIME/VERDICT, then REASON, then TYPE/TITLE.
+    >=120: table-like scan; ID intact; REASON + TITLE are truncated fields;
            no emitted line exceeds width.
     """
     if not rows:
@@ -740,11 +776,13 @@ def format_list_lines(
 
     if width < LIST_WIDE_MIN_COLUMNS:
         lines: list[str] = []
-        for nid, g, rt, v, ntype, title in rows:
+        for nid, g, rt, v, ntype, title, reason in rows:
             # Line 1: exact full node_id — never truncated (IDs short by canon).
             lines.append(nid)
             meta = f"  GRAPH {g}  RUNTIME {rt}  VERDICT {v}"
             lines.extend(_soft_wrap(meta, width, cont_indent="  "))
+            reason_line = f"  REASON {reason if reason else '-'}"
+            lines.extend(_soft_wrap(reason_line, width, cont_indent="  "))
             rest_bits = [b for b in (ntype, title) if b]
             if rest_bits:
                 cont = "  " + "  ".join(rest_bits)
@@ -759,31 +797,41 @@ def format_list_lines(
                 clamped.append(ln if len(ln) <= width else ln[:width])
         return clamped
 
-    # Wide: table with fixed signal columns; TITLE fills remainder / ellipsized.
+    # Wide: table with fixed signal columns; REASON and TITLE share remainder.
     id_w = max(len("ID"), max(len(r[0]) for r in rows))
     g_w = max(len("GRAPH"), max(len(r[1]) for r in rows))
     rt_w = max(len("RUNTIME"), max(len(r[2]) for r in rows))
     v_w = max(len("VERDICT"), max(len(r[3]) for r in rows))
     t_w = max(len("TYPE"), max(len(r[4]) for r in rows))
-    # separators = 2 spaces × 5 between six columns
+    # separators = 2 spaces × 6 between seven columns
     fixed = id_w + 2 + g_w + 2 + rt_w + 2 + v_w + 2 + t_w + 2
-    if fixed >= width:
+    if fixed + 12 >= width:
         # Pathological narrow-"wide": fall back to compact layout.
         return format_list_lines(rows, min(width, LIST_WIDE_MIN_COLUMNS - 1))
-    title_w = width - fixed
+    flex = width - fixed
+    # Prefer showing reason; give it ~40% of flex, rest to title (min 8 each).
+    reason_w = max(8, min(36, flex * 2 // 5))
+    title_w = max(8, flex - reason_w - 2)
+    # If still too tight, rebalance.
+    if reason_w + 2 + title_w > flex:
+        reason_w = max(8, flex // 2 - 1)
+        title_w = max(8, flex - reason_w - 2)
 
     header = (
         f"{'ID':<{id_w}}  {'GRAPH':<{g_w}}  {'RUNTIME':<{rt_w}}  "
-        f"{'VERDICT':<{v_w}}  {'TYPE':<{t_w}}  TITLE"
+        f"{'VERDICT':<{v_w}}  {'TYPE':<{t_w}}  "
+        f"{'REASON':<{reason_w}}  TITLE"
     )
     if len(header) > width:
         header = header[:width]
 
     out = [header]
-    for nid, g, rt, v, ntype, title in rows:
+    for nid, g, rt, v, ntype, title, reason in rows:
         line = (
             f"{nid:<{id_w}}  {g:<{g_w}}  {rt:<{rt_w}}  "
-            f"{v:<{v_w}}  {ntype:<{t_w}}  {_ellipsize(title, title_w)}"
+            f"{v:<{v_w}}  {ntype:<{t_w}}  "
+            f"{_ellipsize(reason or '-', reason_w):<{reason_w}}  "
+            f"{_ellipsize(title, title_w)}"
         )
         if len(line) > width:
             line = line[:width]
@@ -819,8 +867,8 @@ def cmd_list(
         print("No projects found")
         return 0
 
-    # per-project rows: (nid, graph, runtime, verdict, type, title)
-    by_project: list[tuple[str, list[tuple[str, str, str, str, str, str]]]] = []
+    # per-project rows: (nid, graph, runtime, verdict, type, title, reason)
+    by_project: list[tuple[str, list[tuple[str, str, str, str, str, str, str]]]] = []
     total = 0
     for pid in projects:
         try:
@@ -829,7 +877,7 @@ def cmd_list(
             print(f"# {pid}: {e}", file=sys.stderr)
             by_project.append((pid, []))
             continue
-        rows: list[tuple[str, str, str, str, str, str]] = []
+        rows: list[tuple[str, str, str, str, str, str, str]] = []
         for nid, doc, entry in nodes:
             # Preserve the original list command's project index as its graph-status
             # source; `node show` exposes any mismatch with the full node document.
@@ -841,6 +889,7 @@ def cmd_list(
             ev = fetch_runtime_evidence(root, pid, nid, db_path=db_path)
             ntype = str(doc.get("type") or (entry or {}).get("type") or "")
             title = str(doc.get("title") or (entry or {}).get("title") or "")
+            reason = _graph_status_reason(pid, nid, str(graph_status))
             rows.append((
                 nid,
                 str(graph_status),
@@ -848,6 +897,7 @@ def cmd_list(
                 ev.verdict if ev.verdict != "-" else "-",
                 ntype,
                 title,
+                reason,
             ))
         by_project.append((pid, rows))
         total += len(rows)
@@ -926,6 +976,50 @@ def cmd_show(
     else:
         print()
 
+    hist_mod = _load_status_history_mod()
+    if hist_mod is not None:
+        try:
+            last = hist_mod.latest_reason(
+                project,
+                node_id,
+                runtime_root=runtime_root(),
+                kind="graph",
+                matching_to_status=str(graph_status),
+            )
+            stale = None
+            if last is None:
+                # Any latest graph record that does not match current status.
+                any_last = hist_mod.latest_reason(
+                    project,
+                    node_id,
+                    runtime_root=runtime_root(),
+                    kind="graph",
+                )
+                if any_last is not None:
+                    stale = any_last
+            if last:
+                print(f"status reason:     {last.get('reason', '')}")
+                print(
+                    f"  (from {last.get('from_status', '?')} -> "
+                    f"{last.get('to_status', '?')} @ {last.get('ts', '?')})"
+                )
+            elif stale is not None:
+                print(
+                    "status reason:     (none matching current graph status "
+                    f"'{graph_status}')"
+                )
+                print(
+                    f"  WARNING: stale history ends at "
+                    f"{stale.get('from_status', '?')} -> "
+                    f"{stale.get('to_status', '?')}: {stale.get('reason', '')}"
+                )
+            else:
+                print("status reason:     (none recorded in node_status_history)")
+        except ValueError as e:
+            print(f"status reason:     ERROR reading history: {e}")
+    else:
+        print("status reason:     (runtime history module unavailable)")
+
     print("\nintent (why):")
     for line in str(doc.get("why") or "").rstrip().splitlines() or [""]:
         print(f"  {line}")
@@ -942,6 +1036,12 @@ def cmd_show(
         print(f"  {line}")
     print("constraints:")
     for line in _fmt_list(doc.get("constraints")):
+        print(f"  {line}")
+    print("required_artifacts:")
+    for line in _fmt_list(doc.get("required_artifacts")):
+        print(f"  {line}")
+    print("allowed_execution_modes:")
+    for line in _fmt_list(doc.get("allowed_execution_modes")):
         print(f"  {line}")
 
     ev = fetch_runtime_evidence(root, project, node_id, db_path=db_path)
@@ -1042,6 +1142,14 @@ def cmd_set_status(
         )
         return 2
 
+    reason_text = (reason or "").strip()
+    if not reason_text:
+        print(
+            "ERROR: --reason is required. Status without reason misleads agents "
+            "(e.g. deferred ≠ work was bad)."
+        )
+        return 2
+
     problems = verify_ids_before_write(root, project, node_id)
     if problems:
         for p in problems:
@@ -1079,8 +1187,7 @@ def cmd_set_status(
 
     print(f"node:    graphs/{project}/nodes/{node_id}.yaml  {old_node_status} -> {status}")
     print(f"project: graphs/{project}/project.yaml          {old_proj_status} -> {status}")
-    if reason:
-        print(f"reason:  {reason}")
+    print(f"reason:  {reason_text}")
 
     if old_node_status == status and old_proj_status == status:
         print("No-op: already at target status — files not rewritten.")
@@ -1101,6 +1208,17 @@ def cmd_set_status(
             print("Aborted.")
             return 1
 
+    # Reason ledger first, then graph. Never advance graph truth without a
+    # durable reason. Crash after history / before YAML leaves an orphan record
+    # that `node show` ignores unless to_status matches current graph status.
+    hist_mod = _load_status_history_mod()
+    if hist_mod is None:
+        print(
+            "ERROR: runtime node_status_history module missing under "
+            f"{runtime_root()} — no files written."
+        )
+        return 1
+
     try:
         baseline = baseline_error_keys(root, project)
     except Exception as e:
@@ -1109,14 +1227,36 @@ def cmd_set_status(
         return 1
 
     try:
+        hist_path = hist_mod.append_status_change(
+            project_id=project,
+            node_id=node_id,
+            from_status=old_node_status,
+            to_status=status,
+            reason=reason_text,
+            kind="graph",
+            source="gddp node set-status",
+            runtime_root=runtime_root(),
+        )
+    except Exception as e:
+        print(f"ERROR: history append failed ({e}) — no files written.")
+        return 1
+
+    try:
         _atomic_write(npath, new_node_text)
         _atomic_write(ppath, new_project_text)
     except Exception as e:
         try:
             _restore_pair(npath, ppath, node_bytes, project_bytes)
-            print(f"ERROR: write failed ({e}); rolled back both files.")
+            print(
+                f"ERROR: graph write failed ({e}); rolled back YAML. "
+                f"History entry left at {hist_path} (orphaned; show ignores "
+                "until to_status matches graph)."
+            )
         except Exception as e2:
-            print(f"ERROR: write failed ({e}); rollback also failed: {e2}")
+            print(
+                f"ERROR: graph write failed ({e}); rollback also failed: {e2}. "
+                f"History entry at {hist_path}."
+            )
         return 1
 
     post = validate_status_change_docs(root, project, node_id, status, baseline)
@@ -1126,12 +1266,18 @@ def cmd_set_status(
             print("ERROR: post-write validation failed; rolled back both files:")
             for p in post:
                 print(f"  - {p}")
+            print(
+                f"History entry left at {hist_path} (orphaned; show ignores "
+                "until to_status matches graph)."
+            )
         except Exception as e2:
             print("ERROR: post-write validation failed and rollback failed:")
             for p in post:
                 print(f"  - {p}")
             print(f"  rollback: {e2}")
+            print(f"  history: {hist_path}")
         return 1
 
     print(f"Done: {node_id} graph status -> {status}")
+    print(f"history: {hist_path}")
     return 0

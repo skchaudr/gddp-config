@@ -113,6 +113,82 @@ class OverviewTests(unittest.TestCase):
         self.assertEqual(rc, 0)
         overview.assert_called_once_with()
 
+    def test_paged_menu_selects_numbered_item_with_one_keypress(self):
+        terminal = SimpleNamespace(getch=lambda: "2")
+        with patch.object(gddp, "_import_module", return_value=terminal):
+            selected = gddp._paged_menu(
+                "projects",
+                [("first", "1 node"), ("second", "2 nodes")],
+            )
+        self.assertEqual(selected, "second")
+
+    def test_node_workflow_reviews_and_updates_entirely_in_menu(self):
+        keys = iter(["1", "1", "u", "c", "y", "b", "b", "b"])
+        terminal = SimpleNamespace(getch=lambda: next(keys))
+        node_cli = SimpleNamespace(
+            list_project_ids=lambda root: ["demo"],
+            iter_nodes=lambda root, project: [
+                (
+                    "alpha",
+                    {"title": "Alpha node", "status": "pending"},
+                    {"status": "pending"},
+                )
+            ],
+            cmd_show=lambda **kwargs: 0,
+            cmd_set_status=lambda **kwargs: 0,
+        )
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp.Prompt, "ask", return_value="accepted after review"), \
+                patch.object(node_cli, "cmd_show", wraps=node_cli.cmd_show) as show, \
+                patch.object(
+                    node_cli, "cmd_set_status", wraps=node_cli.cmd_set_status
+                ) as set_status:
+            outcome = gddp.interactive_nodes()
+
+        self.assertIs(outcome, gddp._MENU_BACK)
+        self.assertEqual(show.call_count, 2)
+        show.assert_called_with(project="demo", node_id="alpha", trace=False)
+        set_status.assert_called_once_with(
+            project="demo",
+            node_id="alpha",
+            status="complete",
+            yes=True,
+            reason="accepted after review",
+        )
+
+    def test_declined_status_change_never_calls_writer(self):
+        terminal = SimpleNamespace(getch=lambda: "n")
+        node_cli = SimpleNamespace(cmd_set_status=lambda **kwargs: 0)
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(node_cli, "cmd_set_status") as set_status:
+            rc = gddp._confirm_status_change("demo", "alpha", "ready")
+
+        self.assertEqual(rc, 1)
+        set_status.assert_not_called()
+
+    def test_empty_interactive_reason_never_calls_writer(self):
+        terminal = SimpleNamespace(getch=lambda: "y")
+        node_cli = SimpleNamespace(cmd_set_status=lambda **kwargs: 0)
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp.Prompt, "ask", return_value="  "), \
+                patch.object(node_cli, "cmd_set_status") as set_status:
+            rc = gddp._confirm_status_change("demo", "alpha", "deferred")
+
+        self.assertEqual(rc, 1)
+        set_status.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()

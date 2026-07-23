@@ -22,7 +22,7 @@ Or use your system Python if it's not PEP-668-locked.
 .venv/bin/python scripts/gddp.py node status
 .venv/bin/python scripts/gddp.py node list --project gddp-runtime --active
 .venv/bin/python scripts/gddp.py node show --project gddp-runtime canary-retry-proof
-.venv/bin/python scripts/gddp.py node set-status --project gddp-runtime canary-retry-proof ready --yes
+.venv/bin/python scripts/gddp.py node set-status --project gddp-runtime canary-retry-proof ready --yes --reason "ready for dispatch after review"
 .venv/bin/python scripts/gddp.py jobs list --state awaiting_review
 .venv/bin/python scripts/gddp.py jobs show <job-id> --full
 .venv/bin/python scripts/gddp.py jobs results --all
@@ -43,7 +43,7 @@ Or use your system Python if it's not PEP-668-locked.
 | `node validate` | Validate all nodes against schema | No TUI |
 | `node list` | List nodes: `ID \| GRAPH \| RUNTIME \| VERDICT` (width-aware) | No TUI |
 | `node show` | Node detail + evaluator summary (read-only runtime) | No TUI |
-| `node set-status` | Human graph-status change (node + project index) | Confirm unless `--yes` |
+| `node set-status` | Human graph-status change (node + project index); `--reason` required → runtime `node_status_history/` | Confirm unless `--yes` |
 | `node status` | Completion summary for all projects | No TUI |
 
 ### jobs subcommands
@@ -79,12 +79,12 @@ Graph status, runtime queue state, and evaluator verdict stay **distinct**.
 .venv/bin/python scripts/gddp.py node show --project gddp-runtime canary-retry-proof --trace
 
 # Dual-write graph status only (node YAML top-level + matching project.yaml entry)
-.venv/bin/python scripts/gddp.py node set-status --project gddp-runtime canary-retry-proof ready
+.venv/bin/python scripts/gddp.py node set-status --project gddp-runtime canary-retry-proof ready --reason "ready for dispatch"
 .venv/bin/python scripts/gddp.py node set-status --project gddp-runtime canary-retry-proof complete --yes --reason "accepted after review"
 ```
 
 - Valid graph statuses: `pending` | `ready` | `complete` | `deferred`
-- `set-status` previews `old -> new` for both files, confirms unless `--yes`, no-ops without rewrite when already at target
+- `set-status` requires `--reason` (stored under runtime `node_status_history/`, not node YAML), previews `old -> new` for both files, confirms unless `--yes`, no-ops without rewrite when already at target
 - `node list` uses terminal width (`COLUMNS` / `shutil.get_terminal_size`):
   - **&lt;120 cols:** each node is a compact multi-line record — exact `node_id` alone on line 1 (copyable, never truncated); line 2+ carries distinct `GRAPH` / `RUNTIME` / `VERDICT`, then TYPE/TITLE soft-wrapped to width
   - **≥120 cols:** table-like scan; exact ID intact; TITLE is the only truncated field; no emitted line exceeds detected width
