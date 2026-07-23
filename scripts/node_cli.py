@@ -2,11 +2,13 @@
 """Stage 1 node CLI helpers: list, show, set-status.
 
 Graph status (YAML), runtime queue state, and evaluator verdict stay distinct.
-Runtime DB is read-only.
+Runtime DB is read-only. Human status *reasons* append to runtime
+node_status_history/ (not node YAML).
 """
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
 import re
@@ -46,6 +48,19 @@ def runtime_root() -> Path:
 
 def runtime_db_path() -> Path:
     return runtime_root() / "db" / "queue.db"
+
+
+def _load_status_history_mod():
+    """Load gddp-runtime scripts/node_status_history.py if present."""
+    path = runtime_root() / "scripts" / "node_status_history.py"
+    if not path.is_file():
+        return None
+    spec = importlib.util.spec_from_file_location("node_status_history", path)
+    if spec is None or spec.loader is None:
+        return None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def project_dir(root: Path, project_id: str) -> Path:
@@ -926,6 +941,50 @@ def cmd_show(
     else:
         print()
 
+    hist_mod = _load_status_history_mod()
+    if hist_mod is not None:
+        try:
+            last = hist_mod.latest_reason(
+                project,
+                node_id,
+                runtime_root=runtime_root(),
+                kind="graph",
+                matching_to_status=str(graph_status),
+            )
+            stale = None
+            if last is None:
+                # Any latest graph record that does not match current status.
+                any_last = hist_mod.latest_reason(
+                    project,
+                    node_id,
+                    runtime_root=runtime_root(),
+                    kind="graph",
+                )
+                if any_last is not None:
+                    stale = any_last
+            if last:
+                print(f"status reason:     {last.get('reason', '')}")
+                print(
+                    f"  (from {last.get('from_status', '?')} -> "
+                    f"{last.get('to_status', '?')} @ {last.get('ts', '?')})"
+                )
+            elif stale is not None:
+                print(
+                    "status reason:     (none matching current graph status "
+                    f"'{graph_status}')"
+                )
+                print(
+                    f"  WARNING: stale history ends at "
+                    f"{stale.get('from_status', '?')} -> "
+                    f"{stale.get('to_status', '?')}: {stale.get('reason', '')}"
+                )
+            else:
+                print("status reason:     (none recorded in node_status_history)")
+        except ValueError as e:
+            print(f"status reason:     ERROR reading history: {e}")
+    else:
+        print("status reason:     (runtime history module unavailable)")
+
     print("\nintent (why):")
     for line in str(doc.get("why") or "").rstrip().splitlines() or [""]:
         print(f"  {line}")
@@ -942,6 +1001,12 @@ def cmd_show(
         print(f"  {line}")
     print("constraints:")
     for line in _fmt_list(doc.get("constraints")):
+        print(f"  {line}")
+    print("required_artifacts:")
+    for line in _fmt_list(doc.get("required_artifacts")):
+        print(f"  {line}")
+    print("allowed_execution_modes:")
+    for line in _fmt_list(doc.get("allowed_execution_modes")):
         print(f"  {line}")
 
     ev = fetch_runtime_evidence(root, project, node_id, db_path=db_path)
@@ -1042,6 +1107,14 @@ def cmd_set_status(
         )
         return 2
 
+    reason_text = (reason or "").strip()
+    if not reason_text:
+        print(
+            "ERROR: --reason is required. Status without reason misleads agents "
+            "(e.g. deferred ≠ work was bad)."
+        )
+        return 2
+
     problems = verify_ids_before_write(root, project, node_id)
     if problems:
         for p in problems:
@@ -1079,8 +1152,7 @@ def cmd_set_status(
 
     print(f"node:    graphs/{project}/nodes/{node_id}.yaml  {old_node_status} -> {status}")
     print(f"project: graphs/{project}/project.yaml          {old_proj_status} -> {status}")
-    if reason:
-        print(f"reason:  {reason}")
+    print(f"reason:  {reason_text}")
 
     if old_node_status == status and old_proj_status == status:
         print("No-op: already at target status — files not rewritten.")
@@ -1101,6 +1173,17 @@ def cmd_set_status(
             print("Aborted.")
             return 1
 
+    # Reason ledger first, then graph. Never advance graph truth without a
+    # durable reason. Crash after history / before YAML leaves an orphan record
+    # that `node show` ignores unless to_status matches current graph status.
+    hist_mod = _load_status_history_mod()
+    if hist_mod is None:
+        print(
+            "ERROR: runtime node_status_history module missing under "
+            f"{runtime_root()} — no files written."
+        )
+        return 1
+
     try:
         baseline = baseline_error_keys(root, project)
     except Exception as e:
@@ -1109,14 +1192,36 @@ def cmd_set_status(
         return 1
 
     try:
+        hist_path = hist_mod.append_status_change(
+            project_id=project,
+            node_id=node_id,
+            from_status=old_node_status,
+            to_status=status,
+            reason=reason_text,
+            kind="graph",
+            source="gddp node set-status",
+            runtime_root=runtime_root(),
+        )
+    except Exception as e:
+        print(f"ERROR: history append failed ({e}) — no files written.")
+        return 1
+
+    try:
         _atomic_write(npath, new_node_text)
         _atomic_write(ppath, new_project_text)
     except Exception as e:
         try:
             _restore_pair(npath, ppath, node_bytes, project_bytes)
-            print(f"ERROR: write failed ({e}); rolled back both files.")
+            print(
+                f"ERROR: graph write failed ({e}); rolled back YAML. "
+                f"History entry left at {hist_path} (orphaned; show ignores "
+                "until to_status matches graph)."
+            )
         except Exception as e2:
-            print(f"ERROR: write failed ({e}); rollback also failed: {e2}")
+            print(
+                f"ERROR: graph write failed ({e}); rollback also failed: {e2}. "
+                f"History entry at {hist_path}."
+            )
         return 1
 
     post = validate_status_change_docs(root, project, node_id, status, baseline)
@@ -1126,12 +1231,18 @@ def cmd_set_status(
             print("ERROR: post-write validation failed; rolled back both files:")
             for p in post:
                 print(f"  - {p}")
+            print(
+                f"History entry left at {hist_path} (orphaned; show ignores "
+                "until to_status matches graph)."
+            )
         except Exception as e2:
             print("ERROR: post-write validation failed and rollback failed:")
             for p in post:
                 print(f"  - {p}")
             print(f"  rollback: {e2}")
+            print(f"  history: {hist_path}")
         return 1
 
     print(f"Done: {node_id} graph status -> {status}")
+    print(f"history: {hist_path}")
     return 0
