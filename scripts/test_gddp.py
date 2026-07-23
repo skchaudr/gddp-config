@@ -7,9 +7,12 @@ import os
 import sys
 import tempfile
 import unittest
+from io import StringIO
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
+
+from rich.console import Console
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(SCRIPTS_DIR) not in sys.path:
@@ -121,6 +124,29 @@ class OverviewTests(unittest.TestCase):
                 [("first", "1 node"), ("second", "2 nodes")],
             )
         self.assertEqual(selected, "second")
+
+    def test_paged_menu_labels_pages_and_cycles_both_directions(self):
+        items = [(f"node-{i}", f"Node {i}") for i in range(1, 12)]
+        keys = iter(["p", "n", "n", "1"])
+        terminal = SimpleNamespace(getch=lambda: next(keys))
+        output = StringIO()
+        test_console = Console(file=output, width=120, color_system=None)
+
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "console", test_console):
+            selected = gddp._paged_menu(
+                "nodes · demo",
+                items,
+                back_label="projects",
+            )
+
+        self.assertEqual(selected, "node-10")
+        rendered = output.getvalue()
+        self.assertIn("nodes · demo · page 1 of 2", rendered)
+        self.assertIn("nodes · demo · page 2 of 2", rendered)
+        self.assertIn("previous page", rendered)
+        self.assertIn("next page", rendered)
+        self.assertRegex(rendered, r"b\s+projects")
 
     def test_node_workflow_reviews_and_updates_entirely_in_menu(self):
         keys = iter(["1", "1", "u", "c", "y", "b", "b", "b"])

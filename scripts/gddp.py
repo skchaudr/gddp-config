@@ -91,8 +91,9 @@ def _paged_menu(
     items: list[tuple[str, str]],
     *,
     page_size: int = 9,
+    back_label: str = "back",
 ):
-    """Choose any item with one key; page when there are more than nine."""
+    """Choose any item with one key; cycle between clearly labelled pages."""
     if not items:
         console.print(Text("No items found.", style="yellow"))
         return _MENU_BACK
@@ -102,7 +103,9 @@ def _paged_menu(
         page_count = (len(items) + page_size - 1) // page_size
         start = page * page_size
         visible = items[start:start + page_size]
-        console.print(Text(heading, style="bold"))
+        console.print(
+            Text(f"{heading} · page {page + 1} of {page_count}", style="bold")
+        )
         menu = Table(box=None, padding=(0, 2, 0, 1), pad_edge=False, show_header=False)
         menu.add_column(style="bold cyan", no_wrap=True)
         menu.add_column(style="bold", no_wrap=True)
@@ -112,23 +115,22 @@ def _paged_menu(
             key = str(offset)
             actions[key] = (value, description)
             menu.add_row(key, value, description)
-        if page > 0:
-            actions["p"] = ("previous", "")
-            menu.add_row("p", "previous", "")
-        if page + 1 < page_count:
-            actions["n"] = ("next", "")
-            menu.add_row("n", "next", "")
-        actions["b"] = ("back", "")
+        if page_count > 1:
+            actions["p"] = ("previous page", "")
+            actions["n"] = ("next page", "")
+            menu.add_row("p", "previous page", "")
+            menu.add_row("n", "next page", "")
+        actions["b"] = (back_label, "")
         actions["q"] = ("quit", "")
-        menu.add_row("b", "back", "")
+        menu.add_row("b", back_label, "")
         menu.add_row("q", "quit", "")
         console.print(menu)
 
         choice = _menu_choice(actions, default="1")
         if choice == "p":
-            page -= 1
+            page = (page - 1) % page_count
         elif choice == "n":
-            page += 1
+            page = (page + 1) % page_count
         elif choice == "b":
             return _MENU_BACK
         elif choice == "q":
@@ -248,7 +250,7 @@ def interactive_nodes():
                 description = f"unavailable: {exc}"
             project_items.append((project_id, description))
 
-        project = _paged_menu("projects", project_items)
+        project = _paged_menu("projects", project_items, back_label="main menu")
         if project in {_MENU_BACK, _MENU_QUIT}:
             return project
 
@@ -264,7 +266,11 @@ def interactive_nodes():
                 title = str(doc.get("title") or (entry or {}).get("title") or "")
                 node_items.append((node_id, f"{status} · {title}"))
 
-            node_id = _paged_menu(f"nodes · {project}", node_items)
+            node_id = _paged_menu(
+                f"nodes · {project}",
+                node_items,
+                back_label="projects",
+            )
             if node_id is _MENU_QUIT:
                 return _MENU_QUIT
             if node_id is _MENU_BACK:
