@@ -736,17 +736,38 @@ def _soft_wrap(text: str, width: int, *, cont_indent: str = "  ") -> list[str]:
     return [line if len(line) <= width else line[:width] for line in out]
 
 
+def _graph_status_reason(project_id: str, node_id: str, graph_status: str) -> str:
+    """Latest history reason matching current graph status, or '-' if none/unavailable."""
+    hist_mod = _load_status_history_mod()
+    if hist_mod is None:
+        return "-"
+    try:
+        last = hist_mod.latest_reason(
+            project_id,
+            node_id,
+            runtime_root=runtime_root(),
+            kind="graph",
+            matching_to_status=str(graph_status),
+        )
+    except ValueError:
+        return "!err"
+    if not last:
+        return "-"
+    reason = str(last.get("reason") or "").strip()
+    return reason if reason else "-"
+
+
 def format_list_lines(
-    rows: list[tuple[str, str, str, str, str, str]],
+    rows: list[tuple[str, str, str, str, str, str, str]],
     width: int,
 ) -> list[str]:
     """Render list rows for a terminal width.
 
-    rows: (node_id, graph, runtime, verdict, type, title)
+    rows: (node_id, graph, runtime, verdict, type, title, reason)
 
     <120: compact multi-line records — exact node_id alone on line 1;
-          line 2+ carry GRAPH/RUNTIME/VERDICT then TYPE/TITLE.
-    >=120: table-like scan; ID intact; TITLE is the only truncated field;
+          line 2+ carry GRAPH/RUNTIME/VERDICT, then REASON, then TYPE/TITLE.
+    >=120: table-like scan; ID intact; REASON + TITLE are truncated fields;
            no emitted line exceeds width.
     """
     if not rows:
@@ -755,11 +776,13 @@ def format_list_lines(
 
     if width < LIST_WIDE_MIN_COLUMNS:
         lines: list[str] = []
-        for nid, g, rt, v, ntype, title in rows:
+        for nid, g, rt, v, ntype, title, reason in rows:
             # Line 1: exact full node_id — never truncated (IDs short by canon).
             lines.append(nid)
             meta = f"  GRAPH {g}  RUNTIME {rt}  VERDICT {v}"
             lines.extend(_soft_wrap(meta, width, cont_indent="  "))
+            reason_line = f"  REASON {reason if reason else '-'}"
+            lines.extend(_soft_wrap(reason_line, width, cont_indent="  "))
             rest_bits = [b for b in (ntype, title) if b]
             if rest_bits:
                 cont = "  " + "  ".join(rest_bits)
@@ -774,31 +797,41 @@ def format_list_lines(
                 clamped.append(ln if len(ln) <= width else ln[:width])
         return clamped
 
-    # Wide: table with fixed signal columns; TITLE fills remainder / ellipsized.
+    # Wide: table with fixed signal columns; REASON and TITLE share remainder.
     id_w = max(len("ID"), max(len(r[0]) for r in rows))
     g_w = max(len("GRAPH"), max(len(r[1]) for r in rows))
     rt_w = max(len("RUNTIME"), max(len(r[2]) for r in rows))
     v_w = max(len("VERDICT"), max(len(r[3]) for r in rows))
     t_w = max(len("TYPE"), max(len(r[4]) for r in rows))
-    # separators = 2 spaces × 5 between six columns
+    # separators = 2 spaces × 6 between seven columns
     fixed = id_w + 2 + g_w + 2 + rt_w + 2 + v_w + 2 + t_w + 2
-    if fixed >= width:
+    if fixed + 12 >= width:
         # Pathological narrow-"wide": fall back to compact layout.
         return format_list_lines(rows, min(width, LIST_WIDE_MIN_COLUMNS - 1))
-    title_w = width - fixed
+    flex = width - fixed
+    # Prefer showing reason; give it ~40% of flex, rest to title (min 8 each).
+    reason_w = max(8, min(36, flex * 2 // 5))
+    title_w = max(8, flex - reason_w - 2)
+    # If still too tight, rebalance.
+    if reason_w + 2 + title_w > flex:
+        reason_w = max(8, flex // 2 - 1)
+        title_w = max(8, flex - reason_w - 2)
 
     header = (
         f"{'ID':<{id_w}}  {'GRAPH':<{g_w}}  {'RUNTIME':<{rt_w}}  "
-        f"{'VERDICT':<{v_w}}  {'TYPE':<{t_w}}  TITLE"
+        f"{'VERDICT':<{v_w}}  {'TYPE':<{t_w}}  "
+        f"{'REASON':<{reason_w}}  TITLE"
     )
     if len(header) > width:
         header = header[:width]
 
     out = [header]
-    for nid, g, rt, v, ntype, title in rows:
+    for nid, g, rt, v, ntype, title, reason in rows:
         line = (
             f"{nid:<{id_w}}  {g:<{g_w}}  {rt:<{rt_w}}  "
-            f"{v:<{v_w}}  {ntype:<{t_w}}  {_ellipsize(title, title_w)}"
+            f"{v:<{v_w}}  {ntype:<{t_w}}  "
+            f"{_ellipsize(reason or '-', reason_w):<{reason_w}}  "
+            f"{_ellipsize(title, title_w)}"
         )
         if len(line) > width:
             line = line[:width]
@@ -834,8 +867,8 @@ def cmd_list(
         print("No projects found")
         return 0
 
-    # per-project rows: (nid, graph, runtime, verdict, type, title)
-    by_project: list[tuple[str, list[tuple[str, str, str, str, str, str]]]] = []
+    # per-project rows: (nid, graph, runtime, verdict, type, title, reason)
+    by_project: list[tuple[str, list[tuple[str, str, str, str, str, str, str]]]] = []
     total = 0
     for pid in projects:
         try:
@@ -844,7 +877,7 @@ def cmd_list(
             print(f"# {pid}: {e}", file=sys.stderr)
             by_project.append((pid, []))
             continue
-        rows: list[tuple[str, str, str, str, str, str]] = []
+        rows: list[tuple[str, str, str, str, str, str, str]] = []
         for nid, doc, entry in nodes:
             # Preserve the original list command's project index as its graph-status
             # source; `node show` exposes any mismatch with the full node document.
@@ -856,6 +889,7 @@ def cmd_list(
             ev = fetch_runtime_evidence(root, pid, nid, db_path=db_path)
             ntype = str(doc.get("type") or (entry or {}).get("type") or "")
             title = str(doc.get("title") or (entry or {}).get("title") or "")
+            reason = _graph_status_reason(pid, nid, str(graph_status))
             rows.append((
                 nid,
                 str(graph_status),
@@ -863,6 +897,7 @@ def cmd_list(
                 ev.verdict if ev.verdict != "-" else "-",
                 ntype,
                 title,
+                reason,
             ))
         by_project.append((pid, rows))
         total += len(rows)

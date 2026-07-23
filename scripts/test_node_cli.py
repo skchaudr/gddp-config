@@ -245,13 +245,16 @@ class ListFiltersTests(FixtureCase):
         return buf.getvalue()
 
     def test_id_first_columns_and_type_title(self):
-        # Wide layout: single-line table with ID | GRAPH | RUNTIME | VERDICT | TYPE | TITLE
-        out = self._list(project=PROJECT, width=120)
+        # Wide layout: ID | GRAPH | RUNTIME | VERDICT | TYPE | REASON | TITLE
+        out = self._list(project=PROJECT, width=140)
         header_line = next(
             ln for ln in out.splitlines() if ln.startswith("ID")
         )
         cols = header_line.split()
-        self.assertEqual(cols[:6], ["ID", "GRAPH", "RUNTIME", "VERDICT", "TYPE", "TITLE"])
+        self.assertEqual(
+            cols[:7],
+            ["ID", "GRAPH", "RUNTIME", "VERDICT", "TYPE", "REASON", "TITLE"],
+        )
         data = next(ln for ln in out.splitlines() if ln.startswith(NODE_A))
         self.assertTrue(data.startswith(NODE_A))
         self.assertIn("capability", data)
@@ -369,6 +372,7 @@ class ListResponsiveLayoutTests(ListFiltersTests):
                 "pass",
                 "capability",
                 "A fairly long title that would smash columns on narrow terminals",
+                "quota; work fine — do not block unlocks",
             )
         ]
         narrow = node_cli.format_list_lines(rows, 80)
@@ -376,15 +380,18 @@ class ListResponsiveLayoutTests(ListFiltersTests):
         self.assertTrue(any("GRAPH ready" in ln for ln in narrow))
         self.assertTrue(any("VERDICT pass" in ln for ln in narrow))
         self.assertTrue(any("RUNTIME awaiting_review" in ln for ln in narrow))
+        self.assertTrue(any("REASON quota" in ln for ln in narrow))
         for ln in narrow:
             self.assertLessEqual(len(ln), 80)
 
-        wide = node_cli.format_list_lines(rows, 120)
+        wide = node_cli.format_list_lines(rows, 140)
         self.assertTrue(wide[0].startswith("ID"))
+        self.assertIn("REASON", wide[0])
         data = wide[1]
         self.assertTrue(data.startswith("very-long-node-id-for-copy"))
         self.assertIn("pass", data)
-        self.assertLessEqual(len(data), 120)
+        self.assertIn("quota", data)
+        self.assertLessEqual(len(data), 140)
 
     def test_columns_env_respected_by_terminal_width(self):
         old = os.environ.get("COLUMNS")
