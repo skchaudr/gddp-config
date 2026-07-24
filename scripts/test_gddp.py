@@ -148,6 +148,55 @@ class OverviewTests(unittest.TestCase):
         self.assertIn("next page", rendered)
         self.assertRegex(rendered, r"b\s+projects")
 
+    def test_paged_menu_redraws_each_page(self):
+        items = [(f"node-{i}", f"Node {i}") for i in range(1, 12)]
+        keys = iter(["n", "1"])
+        terminal = SimpleNamespace(getch=lambda: next(keys))
+
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "_clear_screen") as clear:
+            selected = gddp._paged_menu("nodes", items)
+
+        self.assertEqual(selected, "node-10")
+        self.assertEqual(clear.call_count, 2)
+
+    def test_interactive_jobs_starts_with_real_list_command(self):
+        terminal = SimpleNamespace(getch=lambda: "b")
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "run_runtime_jobs", return_value=0) as run, \
+                patch.object(gddp, "_clear_screen"):
+            outcome = gddp.interactive_jobs()
+
+        self.assertIs(outcome, gddp._MENU_BACK)
+        run.assert_called_once_with(["list"])
+
+    def test_interactive_jobs_can_filter_review_queue(self):
+        keys = iter(["a", "b"])
+        terminal = SimpleNamespace(getch=lambda: next(keys))
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "run_runtime_jobs", return_value=0) as run, \
+                patch.object(gddp, "_clear_screen"):
+            outcome = gddp.interactive_jobs()
+
+        self.assertIs(outcome, gddp._MENU_BACK)
+        self.assertEqual(
+            run.call_args_list,
+            [
+                unittest.mock.call(["list"]),
+                unittest.mock.call(["list", "--state", "awaiting_review"]),
+            ],
+        )
+
+    def test_main_menu_opens_jobs_submenu(self):
+        with patch.object(gddp, "_menu_choice", side_effect=["j", "q"]), \
+                patch.object(
+                    gddp, "interactive_jobs", return_value=gddp._MENU_BACK
+                ) as jobs, \
+                patch.object(gddp, "_clear_screen"):
+            gddp.interactive_menu()
+
+        jobs.assert_called_once_with()
+
     def test_node_status_label_exposes_node_index_desync(self):
         self.assertEqual(
             gddp._node_status_label(
@@ -158,7 +207,7 @@ class OverviewTests(unittest.TestCase):
         )
 
     def test_node_workflow_reviews_and_updates_entirely_in_menu(self):
-        keys = iter(["1", "1", "u", "c", "y", "b", "b", "b"])
+        keys = iter(["1", "1", "u", "c", "y", "x", "b", "b", "b"])
         terminal = SimpleNamespace(getch=lambda: next(keys))
         node_cli = SimpleNamespace(
             list_project_ids=lambda root: ["demo"],

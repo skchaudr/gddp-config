@@ -69,6 +69,20 @@ def _import_module(name: str):
     return __import__(name)
 
 
+def _clear_screen() -> None:
+    """Start each interactive view at the top of a clean terminal."""
+    if console.is_terminal:
+        console.clear()
+
+
+def _pause() -> None:
+    """Keep command output visible until the operator is ready to redraw."""
+    console.print(Text("press any key to continue", style="dim"))
+    choice = _import_module("terminal").getch()
+    if choice == "\x03":
+        raise KeyboardInterrupt
+
+
 def _menu_choice(actions: dict[str, tuple[str, str]], default: str) -> str:
     """Read one valid menu key immediately, without waiting for Enter."""
     getch = _import_module("terminal").getch
@@ -95,11 +109,14 @@ def _paged_menu(
 ):
     """Choose any item with one key; cycle between clearly labelled pages."""
     if not items:
+        _clear_screen()
         console.print(Text("No items found.", style="yellow"))
+        _pause()
         return _MENU_BACK
 
     page = 0
     while True:
+        _clear_screen()
         page_count = (len(items) + page_size - 1) // page_size
         start = page * page_size
         visible = items[start:start + page_size]
@@ -142,6 +159,8 @@ def _paged_menu(
 def _confirm_status_change(project: str, node_id: str, status: str) -> int:
     """Confirm with one key, collect a real reason, then dual-write + history."""
     node_cli = _import_module("node_cli")
+    _clear_screen()
+    console.rule(f"{project} / {node_id}", style="dim")
     actions = {
         "y": ("yes", f"set {node_id} to {status}"),
         "n": ("no", "leave graph truth unchanged"),
@@ -179,6 +198,7 @@ def _node_review_menu(project: str, node_id: str):
     """Review one node and optionally update its human-owned graph status."""
     node_cli = _import_module("node_cli")
     while True:
+        _clear_screen()
         console.rule(f"{project} / {node_id}", style="dim")
         node_cli.cmd_show(project=project, node_id=node_id, trace=False)
         actions = {
@@ -203,8 +223,10 @@ def _node_review_menu(project: str, node_id: str):
         if choice == "b":
             return _MENU_BACK
         if choice == "t":
+            _clear_screen()
             console.rule("full trace", style="dim")
             node_cli.cmd_show(project=project, node_id=node_id, trace=True)
+            _pause()
             continue
 
         status_actions = {
@@ -222,6 +244,8 @@ def _node_review_menu(project: str, node_id: str):
         status_menu.add_column(style="bold", no_wrap=True)
         for key, (name, _) in status_actions.items():
             status_menu.add_row(key, name)
+        _clear_screen()
+        console.rule(f"{project} / {node_id}", style="dim")
         console.print(Text("graph status", style="bold"))
         console.print(status_menu)
         status_choice = _menu_choice(status_actions, default="b")
@@ -234,6 +258,7 @@ def _node_review_menu(project: str, node_id: str):
             node_id,
             status_actions[status_choice][0],
         )
+        _pause()
 
 
 def _node_status_label(doc: dict, entry: dict | None) -> str:
@@ -431,6 +456,67 @@ def run_runtime_jobs(argv: list[str]) -> int:
     return subprocess.run(command, env=env, check=False).returncode
 
 
+def interactive_jobs():
+    """Browse runtime jobs without ever invoking its command-required CLI empty."""
+    state_filter: str | None = None
+    actions = {
+        "r": ("refresh", "show all runtime jobs"),
+        "a": ("awaiting review", "show the human review queue"),
+        "e": ("evaluations", "show evaluator result summary"),
+        "o": ("open", "show one job by job or node ID"),
+        "b": ("main menu", ""),
+        "q": ("quit", ""),
+    }
+    while True:
+        _clear_screen()
+        heading = "jobs" if state_filter is None else f"jobs · {state_filter}"
+        console.print(Text(heading, style="bold"))
+        argv = ["list"]
+        if state_filter:
+            argv.extend(["--state", state_filter])
+        run_runtime_jobs(argv)
+        console.print()
+
+        menu = Table(box=None, padding=(0, 2, 0, 1), pad_edge=False, show_header=False)
+        menu.add_column(style="bold cyan", no_wrap=True)
+        menu.add_column(style="bold", no_wrap=True)
+        menu.add_column(style="dim")
+        for key, (name, description) in actions.items():
+            menu.add_row(key, name, description)
+        console.print(menu)
+
+        choice = _menu_choice(actions, default="r")
+        if choice == "q":
+            return _MENU_QUIT
+        if choice == "b":
+            return _MENU_BACK
+        if choice == "r":
+            state_filter = None
+            continue
+        if choice == "a":
+            state_filter = "awaiting_review"
+            continue
+        if choice == "e":
+            _clear_screen()
+            console.print(Text("evaluator results", style="bold"))
+            run_runtime_jobs(["results"])
+            _pause()
+            continue
+
+        _clear_screen()
+        console.print(Text("open job", style="bold"))
+        try:
+            ref = Prompt.ask("job or node ID").strip()
+        except (EOFError, KeyboardInterrupt):
+            continue
+        if not ref:
+            continue
+        _clear_screen()
+        console.print(Text(f"job · {ref}", style="bold"))
+        run_runtime_jobs(["show", ref])
+        _pause()
+
+
 def cmd_jobs(args):
     argv = []
     command = getattr(args, "jobs_command", None)
@@ -474,15 +560,16 @@ def static_overview():
 
 def interactive_menu():
     """Keep graph control in config while delegating the jobs section to runtime."""
-    console.print(Text("gddp", style="bold").append("  ·  graph control plane", style="dim"))
     actions = {
         "n": ("nodes", "review and update graph truth"),
-        "j": ("jobs", "open runtime jobs, results, and queue controls"),
+        "j": ("jobs", "browse runtime jobs and evaluator results"),
         "s": ("status", "summarize graph completion"),
         "v": ("validate", "validate graph definitions"),
         "q": ("quit", ""),
     }
     while True:
+        _clear_screen()
+        console.print(Text("gddp", style="bold").append("  ·  graph control plane", style="dim"))
         menu = Table(box=None, padding=(0, 2, 0, 1), pad_edge=False, show_header=False)
         menu.add_column(style="bold cyan", no_wrap=True)
         menu.add_column(style="bold", no_wrap=True)
@@ -495,7 +582,6 @@ def interactive_menu():
         except (EOFError, KeyboardInterrupt):
             console.print()
             break
-        console.rule(style="dim")
         if choice == "q":
             break
         try:
@@ -504,10 +590,15 @@ def interactive_menu():
                 if outcome is _MENU_QUIT:
                     break
             elif choice == "j":
-                run_runtime_jobs([])
+                outcome = interactive_jobs()
+                if outcome is _MENU_QUIT:
+                    break
             elif choice == "s":
+                _clear_screen()
                 show_status()
+                _pause()
             elif choice == "v":
+                _clear_screen()
                 cmd_node_validate(argparse.Namespace(
                     root=None, project=None, json=False, quiet=False, strict=False
                 ))
@@ -515,7 +606,11 @@ def interactive_menu():
             # Existing command handlers use SystemExit; one menu action should
             # return to the control-plane menu instead of closing the CLI.
             pass
-        console.rule(style="dim")
+            if choice == "v":
+                _pause()
+        except KeyboardInterrupt:
+            continue
+    _clear_screen()
     console.print(Text("bye.", style="dim"))
 
 

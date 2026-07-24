@@ -59,9 +59,11 @@ and evaluator evidence remain runtime-owned while graph truth remains config-own
 | `jobs results [--all]` | Summarize evaluator output by project |
 | `jobs set <job-or-node> <state> --reason ...` | Change runtime queue state with confirmation and an audit row |
 
-Bare `gddp` opens the unified config-hosted menu in a terminal. Its jobs section
-opens runtime's existing interactive jobs menu. Redirected bare output prints a
-non-blocking command overview. Resolution uses `GDDP_RUNTIME_ROOT`, defaulting
+Bare `gddp` opens the unified config-hosted menu in a terminal. Each submenu
+clears and redraws as one screen. Its jobs section provides interactive runtime
+list/filter/results/detail views, delegating each real command to
+`node_status.py`. Redirected bare output prints a non-blocking command overview.
+Resolution uses `GDDP_RUNTIME_ROOT`, defaulting
 to the sibling `../gddp-runtime`; `GDDP_RUNTIME_PYTHON` can override the runtime
 interpreter.
 
