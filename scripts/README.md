@@ -22,6 +22,7 @@ Or use your system Python if it's not PEP-668-locked.
 .venv/bin/python scripts/gddp.py node status
 .venv/bin/python scripts/gddp.py node list --project gddp-runtime --active
 .venv/bin/python scripts/gddp.py node show --project gddp-runtime canary-retry-proof
+.venv/bin/python scripts/gddp.py node show --project gddp-runtime canary-retry-proof --view evaluation
 .venv/bin/python scripts/gddp.py node set-status --project gddp-runtime canary-retry-proof ready --yes --reason "ready for dispatch after review"
 .venv/bin/python scripts/gddp.py jobs list --state awaiting_review
 .venv/bin/python scripts/gddp.py jobs show <job-id> --full
@@ -86,6 +87,10 @@ Graph status, runtime queue state, and evaluator verdict stay **distinct**.
 ```
 
 - Valid graph statuses: `pending` | `ready` | `complete` | `deferred`
+- Interactive node review opens a concise status screen. `e` opens current-job evaluator evidence, `c` opens the delivery contract, and `t` opens job/result history.
+- `node show --view summary|evaluation|contract|all` exposes the same views non-interactively.
+- Current-job evaluator results and standalone/fallback receipts stay separate. A fallback receipt is labeled `NOT CURRENT JOB EVIDENCE` and never populates the current evaluator verdict.
+- Interactive completion and `node set-status ... complete` require current-job overall, criteria, and integrity verdicts to all be `pass`. Human override remains explicit through `--override-evidence-gate`.
 - `set-status` requires `--reason` (stored under runtime `node_status_history/`, not node YAML), previews `old -> new` for both files, confirms unless `--yes`, no-ops without rewrite when already at target
 - `node list` uses terminal width (`COLUMNS` / `shutil.get_terminal_size`):
   - **&lt;120 cols:** each node is a blank-line-separated multi-line record — exact `node_id` alone on line 1 (copyable, never truncated); line 2+ carries distinct `GRAPH` / `RUNTIME` / `VERDICT`, then TYPE/TITLE soft-wrapped to width
@@ -94,7 +99,7 @@ Graph status, runtime queue state, and evaluator verdict stay **distinct**.
 - Writes are surgical (status values only): staged per-file atomic replacements (`os.replace`) with rollback of both originals if either write or post-write validation fails (not a single joint atomic commit of both files)
 - Candidates are `yaml.safe_load`ed and id/status-checked **before** any disk write; baseline `validate.py` failures abort cleanly with no write
 - Runtime DB: `$GDDP_RUNTIME_ROOT` (default sibling `../gddp-runtime`) `db/queue.db` opened read-only (`mode=ro`); missing DB/receipts print `-` / `no evaluation evidence` and exit 0
-- Runtime job without evaluator acceptance/receipt/verdict still shows runtime state and prints `no evaluation evidence`
+- Runtime job without a result row shows `BLOCKED — DO NOT ACCEPT` and `MISSING — evaluator has not returned a result for the current job`
 - Receipt: latest `acceptance_check.receipt_path`, else `verification-runtime-live/<project>/<node>.json`
 - Implementation: thin `gddp.py` + `scripts/node_cli.py`; portable launcher: `bin/gddp` (`GDDP_CONFIG_PATH` or `$HOME/repos/gddp-config`)
 

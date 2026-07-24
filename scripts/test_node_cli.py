@@ -451,7 +451,7 @@ class ShowTests(FixtureCase):
         self.assertIn("DESYNC", out)
         self.assertIn("no evaluation evidence", out)
         self.assertRegex(out, r"graph status:\s+pending")
-        self.assertRegex(out, r"evaluator verdict:\s+-")
+        self.assertRegex(out, r"current evaluator verdict:\s+-")
 
     def test_missing_index_warning(self):
         ppath = self.root / "graphs" / PROJECT / "project.yaml"
@@ -496,7 +496,32 @@ class ShowTests(FixtureCase):
         out = buf.getvalue()
         self.assertIn("runtime state:     running", out)
         self.assertIn("no evaluation evidence", out)
-        self.assertRegex(out, r"evaluator verdict:\s+-")
+        self.assertRegex(out, r"current evaluator verdict:\s+-")
+
+    def test_summary_hides_contract_and_surfaces_evidence_gate(self):
+        db = make_db(
+            self.root / "rt" / "db" / "queue.db",
+            [{
+                "job_id": "job_only",
+                "node_id": NODE_A,
+                "queue_state": "failed",
+                "status": "failed",
+            }],
+        )
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = node_cli.cmd_show(
+                project=PROJECT,
+                node_id=NODE_A,
+                root=self.root,
+                db_path=db,
+                view="summary",
+            )
+        self.assertEqual(rc, 0)
+        out = buf.getvalue()
+        self.assertIn("BLOCKED — DO NOT ACCEPT", out)
+        self.assertNotIn("DELIVERY CONTRACT", out)
+        self.assertNotIn("acceptance_criteria:", out)
 
 
 _STATUS_REASON = "test: intentional graph status change"
@@ -739,6 +764,24 @@ class SetStatusTests(FixtureCase):
 
 
 class RuntimeEvidenceTests(FixtureCase):
+    def test_overall_pass_without_both_evaluator_lanes_stays_blocked(self):
+        evidence = node_cli.RuntimeEvidence(
+            job_id="job-1",
+            result_job_id="job-1",
+            verdict="pass",
+            acceptance_check={
+                "verdict": "pass",
+                "criteria_verdict": "pass",
+            },
+        )
+        self.assertEqual(
+            node_cli.completion_readiness(evidence),
+            (
+                False,
+                "current integrity evaluator verdict is missing, not pass",
+            ),
+        )
+
     def test_latest_result_and_receipt_path(self):
         receipt = {
             "project_id": PROJECT,
@@ -824,11 +867,25 @@ class RuntimeEvidenceTests(FixtureCase):
         self.assertEqual(rc, 0)
         out = buf.getvalue()
         self.assertIn("awaiting_review", out)
-        self.assertRegex(out, r"evaluator verdict:\s*pass")
-        self.assertIn("criteria:  verdict=pass", out)
+        self.assertRegex(out, r"current evaluator verdict:\s*pass")
+        self.assertIn("criteria verdict:    pass", out)
         self.assertIn("watch frontier", out)
         self.assertIn(str(rpath), out)
         self.assertIn("job_new", out)
+        evidence = node_cli.fetch_runtime_evidence(
+            self.root,
+            PROJECT,
+            NODE_A,
+            db_path=db,
+        )
+        self.assertEqual(
+            node_cli.completion_readiness(evidence),
+            (
+                True,
+                "current criteria and integrity evaluator verdicts are pass; "
+                "human acceptance is still required",
+            ),
+        )
 
     def test_receipt_fallback_live_path(self):
         live = self.root / "verification-runtime-live" / PROJECT / f"{NODE_A}.json"
@@ -853,8 +910,91 @@ class RuntimeEvidenceTests(FixtureCase):
         self.assertEqual(rc, 0)
         out = buf.getvalue()
         self.assertIn("needs-more-evidence", out)
-        self.assertIn("lane=completed", out)
+        self.assertIn("criteria=completed", out)
+        self.assertIn("OTHER RECEIPT — NOT CURRENT JOB EVIDENCE", out)
+        self.assertIn("BLOCKED — DO NOT ACCEPT", out)
         self.assertIn(str(live), out)
+
+    def test_standalone_receipt_never_becomes_current_job_verdict(self):
+        live = self.root / "verification-runtime-live" / PROJECT / f"{NODE_A}.json"
+        live.parent.mkdir(parents=True)
+        live.write_text(
+            json.dumps({
+                "verdict": "pass",
+                "criteria_confidence": 0.575,
+                "completeness_status": "not-run",
+                "semantic": None,
+                "generated_at": "2026-07-06T12:38:01Z",
+            }),
+            encoding="utf-8",
+        )
+        db = make_db(
+            self.root / "rt" / "db" / "queue.db",
+            [
+                {
+                    "job_id": "job_old_pass",
+                    "node_id": NODE_A,
+                    "queue_state": "awaiting_review",
+                    "status": "awaiting_review",
+                    "created_at": "2026-07-06T00:00:00Z",
+                    "acceptance_check": {"verdict": "pass"},
+                    "received_at": "2026-07-06T01:00:00Z",
+                },
+                {
+                    "job_id": "job_current_failed",
+                    "node_id": NODE_A,
+                    "queue_state": "failed",
+                    "status": "failed",
+                    "created_at": "2026-07-11T00:00:00Z",
+                },
+            ],
+        )
+
+        evidence = node_cli.fetch_runtime_evidence(
+            self.root,
+            PROJECT,
+            NODE_A,
+            db_path=db,
+        )
+        self.assertFalse(evidence.has_current_evaluation)
+        self.assertEqual(evidence.verdict, "-")
+        self.assertEqual(evidence.receipt_verdict, "pass")
+        self.assertEqual(evidence.receipt_source, "standalone_receipt")
+        self.assertEqual(
+            node_cli.completion_readiness(evidence),
+            (
+                False,
+                "no evaluator result exists for current job job_current_failed",
+            ),
+        )
+
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = node_cli.cmd_show(
+                project=PROJECT,
+                node_id=NODE_A,
+                root=self.root,
+                db_path=db,
+                view="evaluation",
+            )
+        self.assertEqual(rc, 0)
+        out = buf.getvalue()
+        self.assertIn("MISSING — evaluator has not returned", out)
+        self.assertIn("OTHER RECEIPT — NOT CURRENT JOB EVIDENCE", out)
+        self.assertIn("semantic evaluation: NOT RUN", out)
+        self.assertIn("verdict:             pass", out)
+        self.assertIn("HISTORICAL RUNTIME RESULTS: 1", out)
+
+        list_buf = io.StringIO()
+        with redirect_stdout(list_buf):
+            list_rc = node_cli.cmd_list(
+                project=PROJECT,
+                root=self.root,
+                db_path=db,
+                width=80,
+            )
+        self.assertEqual(list_rc, 0)
+        self.assertIn("VERDICT -", list_buf.getvalue())
 
     def test_malformed_evidence_is_normal(self):
         db_path = self.root / "rt" / "db" / "queue.db"
@@ -894,7 +1034,8 @@ class RuntimeEvidenceTests(FixtureCase):
                 project=PROJECT, node_id=NODE_A, root=self.root, db_path=db_path
             )
         self.assertEqual(rc2, 0)
-        self.assertIn("no evaluation evidence", buf2.getvalue())
+        self.assertIn("criteria verdict:    not recorded", buf2.getvalue())
+        self.assertIn("current evaluator verdict is missing", buf2.getvalue())
 
     def test_missing_db_exits_zero(self):
         missing = self.root / "nope" / "queue.db"

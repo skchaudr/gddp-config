@@ -428,23 +428,31 @@ class RuntimeEvidence:
     queue_state: str = "-"
     job_status: str = "-"
     job_id: str | None = None
+    job_created_at: str | None = None
     verdict: str = "-"
+    result_job_id: str | None = None
+    result_received_at: str | None = None
     acceptance_check: dict = field(default_factory=dict)
     receipt: dict | None = None
     receipt_path: str | None = None
+    receipt_source: str = "none"
+    receipt_verdict: str = "-"
     results_history: list[dict] = field(default_factory=list)
     jobs_history: list[dict] = field(default_factory=list)
 
     @property
     def has_evaluation(self) -> bool:
-        """Evaluator evidence only — independent of runtime job existence."""
-        if self.verdict and self.verdict != "-":
-            return True
-        if self.receipt:
-            return True
-        if self.acceptance_check:
-            return True
-        return False
+        """Any evaluator/receipt evidence, including explicitly stale evidence."""
+        return bool(
+            self.result_job_id
+            or self.acceptance_check
+            or self.receipt
+        )
+
+    @property
+    def has_current_evaluation(self) -> bool:
+        """A result row tied to the latest runtime job."""
+        return bool(self.job_id and self.result_job_id == self.job_id)
 
 
 def _connect_ro(db_path: Path) -> sqlite3.Connection | None:
@@ -489,18 +497,18 @@ def load_receipt_file(path: Path) -> dict | None:
 
 def resolve_receipt(
     root: Path, project_id: str, node_id: str, acceptance_check: dict
-) -> tuple[dict | None, str | None]:
+) -> tuple[dict | None, str | None, str]:
     rp = acceptance_check.get("receipt_path")
     if isinstance(rp, str) and rp.strip():
         p = Path(rp)
         receipt = load_receipt_file(p)
         if receipt is not None:
-            return receipt, str(p)
+            return receipt, str(p), "runtime_result"
     fallback = root / "verification-runtime-live" / project_id / f"{node_id}.json"
     receipt = load_receipt_file(fallback)
     if receipt is not None:
-        return receipt, str(fallback)
-    return None, None
+        return receipt, str(fallback), "standalone_receipt"
+    return None, None, "none"
 
 
 def fetch_runtime_evidence(
@@ -531,6 +539,7 @@ def fetch_runtime_evidence(
                     ev.queue_state = latest["queue_state"] or "-"
                     ev.job_status = latest["status"] or "-"
                     ev.job_id = latest["job_id"]
+                    ev.job_created_at = latest["created_at"]
                 if jobs and {"job_id", "acceptance_check"}.issubset(res_cols):
                     job_ids = [j["job_id"] for j in jobs]
                     ph = ",".join("?" * len(job_ids))
@@ -544,9 +553,19 @@ def fetch_runtime_evidence(
                         d = dict(r)
                         d["_acceptance"] = _parse_json_obj(d.get("acceptance_check"))
                         ev.results_history.append(d)
-                    if rows:
-                        acceptance = ev.results_history[0]["_acceptance"]
+                    current_result = next(
+                        (
+                            result
+                            for result in ev.results_history
+                            if result.get("job_id") == ev.job_id
+                        ),
+                        None,
+                    )
+                    if current_result is not None:
+                        acceptance = current_result["_acceptance"]
                         ev.acceptance_check = acceptance
+                        ev.result_job_id = current_result.get("job_id")
+                        ev.result_received_at = current_result.get("received_at")
                         v = acceptance.get("verdict")
                         if isinstance(v, str) and v:
                             ev.verdict = v
@@ -555,10 +574,16 @@ def fetch_runtime_evidence(
         finally:
             con.close()
 
-    receipt, receipt_path = resolve_receipt(root, project_id, node_id, acceptance)
+    receipt, receipt_path, receipt_source = resolve_receipt(
+        root, project_id, node_id, acceptance
+    )
     if receipt is not None:
         ev.receipt = receipt
-        if ev.verdict == "-":
+        ev.receipt_source = receipt_source
+        receipt_verdict = receipt.get("verdict")
+        if isinstance(receipt_verdict, str) and receipt_verdict:
+            ev.receipt_verdict = receipt_verdict
+        if ev.verdict == "-" and receipt_source == "runtime_result":
             v = receipt.get("verdict")
             if isinstance(v, str) and v:
                 ev.verdict = v
@@ -567,6 +592,61 @@ def fetch_runtime_evidence(
     elif isinstance(acceptance.get("receipt_path"), str):
         ev.receipt_path = acceptance["receipt_path"]
     return ev
+
+
+def completion_readiness(ev: RuntimeEvidence) -> tuple[bool, str]:
+    """Both current evaluator lanes must pass before interactive completion."""
+    if ev.job_id is None:
+        return False, "no runtime job exists for this node"
+    if not ev.has_current_evaluation:
+        return False, f"no evaluator result exists for current job {ev.job_id}"
+    if ev.verdict != "pass":
+        verdict = ev.verdict if ev.verdict != "-" else "missing"
+        return False, f"current evaluator verdict is {verdict}, not pass"
+    current_receipt = ev.receipt if ev.receipt_source == "runtime_result" else None
+    criteria_verdict = _pick(
+        ev.acceptance_check,
+        current_receipt,
+        "criteria_verdict",
+    )
+    if criteria_verdict != "pass":
+        return (
+            False,
+            "current criteria evaluator verdict is "
+            f"{criteria_verdict or 'missing'}, not pass",
+        )
+    integrity = (
+        _as_dict(ev.acceptance_check.get("integrity"))
+        or _as_dict((current_receipt or {}).get("integrity"))
+    )
+    integrity_verdict = integrity.get("verdict")
+    if integrity_verdict != "pass":
+        return (
+            False,
+            "current integrity evaluator verdict is "
+            f"{integrity_verdict or 'missing'}, not pass",
+        )
+    return (
+        True,
+        "current criteria and integrity evaluator verdicts are pass; "
+        "human acceptance is still required",
+    )
+
+
+def node_completion_readiness(
+    project_id: str,
+    node_id: str,
+    root: Path | None = None,
+    db_path: Path | None = None,
+) -> tuple[bool, str]:
+    return completion_readiness(
+        fetch_runtime_evidence(
+            config_root(root),
+            project_id,
+            node_id,
+            db_path=db_path,
+        )
+    )
 
 
 # ── evaluator field normalization ──────────────────────────────────────────
@@ -943,13 +1023,122 @@ def _section_heading(title: str, width: int | None = None) -> str:
     return "\n" + prefix + ("─" * max(0, line_width - len(prefix)))
 
 
+def _print_evaluation_payload(
+    acceptance: dict,
+    receipt: dict | None,
+    *,
+    verdict: str,
+) -> None:
+    lane, harness = _lane_fields(receipt, acceptance)
+    criteria_verdict = _pick(acceptance, receipt, "criteria_verdict")
+    criteria_confidence = _pick(acceptance, receipt, "criteria_confidence")
+    if criteria_confidence is None:
+        criteria_confidence = _pick(acceptance, receipt, "confidence")
+    completeness = _pick(acceptance, receipt, "completeness_status")
+    integrity = (
+        _as_dict(acceptance.get("integrity"))
+        or _as_dict((receipt or {}).get("integrity"))
+    )
+    semantic_value = (receipt or {}).get("semantic")
+    if isinstance(semantic_value, dict):
+        semantic_status = "ran"
+    elif receipt is not None and "semantic" in receipt:
+        semantic_status = "NOT RUN"
+    elif criteria_verdict or lane.get("criteria"):
+        semantic_status = "recorded status only"
+    else:
+        semantic_status = "not recorded"
+
+    print(f"  verdict:             {verdict}")
+    print(f"  criteria verdict:    {criteria_verdict or 'not recorded'}")
+    print(
+        "  criteria confidence: "
+        f"{criteria_confidence if criteria_confidence is not None else 'not recorded'}"
+    )
+    print(f"  completeness:        {completeness or 'not recorded'}")
+    print(f"  semantic evaluation: {semantic_status}")
+    print(
+        f"  integrity verdict:   {integrity.get('verdict') or 'not recorded'}"
+    )
+    print(
+        "  lanes:               "
+        f"criteria={lane.get('criteria') or 'not recorded'}  "
+        f"integrity={lane.get('integrity') or 'not recorded'}"
+    )
+    for side in ("criteria", "integrity"):
+        if harness.get(side):
+            print(f"  harness error ({side}): {harness[side]}")
+    print(f"  provenance:          {_provenance_line(receipt, acceptance) or 'not recorded'}")
+    print(f"  context coverage:    {_coverage_line(receipt, acceptance) or 'not recorded'}")
+    findings = _findings_lines(receipt, acceptance)
+    if findings:
+        print("  findings / graph observations:")
+        for finding in findings:
+            print(f"    - {finding}")
+    else:
+        print("  findings:            (none recorded)")
+
+
+def _print_evaluation(ev: RuntimeEvidence) -> None:
+    print("CURRENT RUNTIME JOB")
+    if ev.job_id:
+        print(f"  job_id:              {ev.job_id}")
+        print(f"  created:             {ev.job_created_at or 'not recorded'}")
+        print(f"  queue state:         {ev.queue_state}")
+        print(f"  job status:          {ev.job_status}")
+    else:
+        print("  (none)")
+
+    print("\nCURRENT EVALUATOR RESULT")
+    if ev.has_current_evaluation:
+        print(f"  source:              runtime result for {ev.result_job_id}")
+        print(f"  received:            {ev.result_received_at or 'not recorded'}")
+        _print_evaluation_payload(
+            ev.acceptance_check,
+            ev.receipt if ev.receipt_source == "runtime_result" else None,
+            verdict=ev.verdict,
+        )
+        if ev.receipt_source == "runtime_result":
+            print(f"  receipt path:        {ev.receipt_path or 'not recorded'}")
+    else:
+        print("  MISSING — evaluator has not returned a result for the current job.")
+        print("  This node is not ready for acceptance.")
+
+    if ev.receipt_source == "standalone_receipt" and ev.receipt is not None:
+        print("\nOTHER RECEIPT — NOT CURRENT JOB EVIDENCE")
+        print("  source:              standalone/fallback receipt")
+        print(
+            f"  generated:           "
+            f"{ev.receipt.get('generated_at') or 'not recorded'}"
+        )
+        _print_evaluation_payload(
+            {},
+            ev.receipt,
+            verdict=ev.receipt_verdict,
+        )
+        print(f"  receipt path:        {ev.receipt_path}")
+
+    historical_count = len(ev.results_history) - int(ev.has_current_evaluation)
+    if historical_count > 0:
+        print(
+            f"\nHISTORICAL RUNTIME RESULTS: {historical_count} "
+            "(not current-job evidence; open TRACE)"
+        )
+    if not ev.has_evaluation:
+        print("\nno evaluation evidence")
+
+
 def cmd_show(
     project: str,
     node_id: str,
     trace: bool = False,
+    view: str = "all",
     root: Path | None = None,
     db_path: Path | None = None,
 ) -> int:
+    if view not in {"all", "summary", "evaluation", "contract"}:
+        print(f"Invalid view '{view}'")
+        return 2
     root = config_root(root)
     try:
         proj = load_project_doc(root, project)
@@ -979,132 +1168,113 @@ def cmd_show(
     print(f"type:              {doc.get('type', '')}")
     print(f"priority:          {doc.get('priority', '')}")
 
-    print(_section_heading("Status"))
-    print(f"graph status:      {graph_status}", end="")
-    if entry is None:
-        print("  (missing from project.yaml index)")
-        print("WARNING: project.yaml has no nodes entry for this node_id")
-    elif index_status != graph_status:
-        print(f"  (index: {index_status})")
-        print("WARNING: DESYNC — node YAML status != project.yaml index status")
-    else:
-        print()
+    if view in {"all", "summary"}:
+        ready, gate_reason = completion_readiness(ev)
+        gate_label = (
+            "READY — REVIEW EVIDENCE; HUMAN DECIDES"
+            if ready
+            else "BLOCKED — DO NOT ACCEPT"
+        )
+        print(_section_heading("Status"))
+        print(f"human review gate: {gate_label}")
+        print(f"  {gate_reason}")
+        print(f"graph status:      {graph_status}", end="")
+        if entry is None:
+            print("  (missing from project.yaml index)")
+            print("WARNING: project.yaml has no nodes entry for this node_id")
+        elif index_status != graph_status:
+            print(f"  (index: {index_status})")
+            print("WARNING: DESYNC — node YAML status != project.yaml index status")
+        else:
+            print()
 
-    hist_mod = _load_status_history_mod()
-    if hist_mod is not None:
-        try:
-            last = hist_mod.latest_reason(
-                project,
-                node_id,
-                runtime_root=runtime_root(),
-                kind="graph",
-                matching_to_status=str(graph_status),
-            )
-            stale = None
-            if last is None:
-                # Any latest graph record that does not match current status.
-                any_last = hist_mod.latest_reason(
+        hist_mod = _load_status_history_mod()
+        if hist_mod is not None:
+            try:
+                last = hist_mod.latest_reason(
                     project,
                     node_id,
                     runtime_root=runtime_root(),
                     kind="graph",
+                    matching_to_status=str(graph_status),
                 )
-                if any_last is not None:
-                    stale = any_last
-            if last:
-                print(f"status reason:     {last.get('reason', '')}")
-                print(
-                    f"  (from {last.get('from_status', '?')} -> "
-                    f"{last.get('to_status', '?')} @ {last.get('ts', '?')})"
-                )
-            elif stale is not None:
-                print(
-                    "status reason:     (none matching current graph status "
-                    f"'{graph_status}')"
-                )
-                print(
-                    f"  WARNING: stale history ends at "
-                    f"{stale.get('from_status', '?')} -> "
-                    f"{stale.get('to_status', '?')}: {stale.get('reason', '')}"
-                )
-            else:
-                print("status reason:     (none recorded in node_status_history)")
-        except ValueError as e:
-            print(f"status reason:     ERROR reading history: {e}")
-    else:
-        print("status reason:     (runtime history module unavailable)")
-
-    runtime_extra = (
-        f"  (job status: {ev.job_status})"
-        if ev.job_status not in ("-", None)
-        else ""
-    )
-    print(f"runtime state:     {ev.queue_state}{runtime_extra}")
-    if ev.job_id:
-        print(f"runtime job_id:    {ev.job_id}")
-    print(f"evaluator verdict: {ev.verdict}")
-
-    print(_section_heading("Intent"))
-    for line in str(doc.get("why") or "").rstrip().splitlines() or [""]:
-        print(f"  {line}")
-
-    print(_section_heading("Graph"))
-    print("depends_on:")
-    for line in _fmt_list(doc.get("depends_on")):
-        print(f"  {line}")
-    print("unlocks:")
-    for line in _fmt_list(doc.get("unlocks")):
-        print(f"  {line}")
-
-    print(_section_heading("Delivery contract"))
-    print("acceptance_criteria:")
-    for line in _fmt_list(doc.get("acceptance_criteria")):
-        print(f"  {line}")
-    print("constraints:")
-    for line in _fmt_list(doc.get("constraints")):
-        print(f"  {line}")
-    print("required_artifacts:")
-    for line in _fmt_list(doc.get("required_artifacts")):
-        print(f"  {line}")
-    print("allowed_execution_modes:")
-    for line in _fmt_list(doc.get("allowed_execution_modes")):
-        print(f"  {line}")
-
-    print(_section_heading("Evaluation"))
-    if not ev.has_evaluation:
-        print("no evaluation evidence")
-    else:
-        acc = ev.acceptance_check
-        receipt = ev.receipt
-        lane, harness = _lane_fields(receipt, acc)
-        c_verdict = _pick(acc, receipt, "criteria_verdict")
-        c_conf = _pick(acc, receipt, "criteria_confidence")
-        if c_conf is None:
-            c_conf = _pick(acc, receipt, "confidence")
-        integ = _as_dict(acc.get("integrity")) or _as_dict((receipt or {}).get("integrity"))
-        print(
-            f"criteria:  verdict={c_verdict or '-'}  "
-            f"confidence={c_conf if c_conf is not None else '-'}  "
-            f"lane={lane.get('criteria') or '-'}"
-        )
-        print(
-            f"integrity: verdict={integ.get('verdict') or '-'}  "
-            f"confidence={integ.get('confidence') if integ.get('confidence') is not None else '-'}  "
-            f"lane={lane.get('integrity') or '-'}"
-        )
-        for side in ("criteria", "integrity"):
-            if harness.get(side):
-                print(f"harness error ({side}): {harness[side]}")
-        print(f"provenance: {_provenance_line(receipt, acc) or '-'}")
-        print(f"context coverage: {_coverage_line(receipt, acc) or '-'}")
-        findings = _findings_lines(receipt, acc)
-        if findings:
-            print("findings / graph observations:")
-            for fl in findings:
-                print(f"  - {fl}")
+                stale = None
+                if last is None:
+                    any_last = hist_mod.latest_reason(
+                        project,
+                        node_id,
+                        runtime_root=runtime_root(),
+                        kind="graph",
+                    )
+                    if any_last is not None:
+                        stale = any_last
+                if last:
+                    print(f"status reason:     {last.get('reason', '')}")
+                    print(
+                        f"  (from {last.get('from_status', '?')} -> "
+                        f"{last.get('to_status', '?')} @ {last.get('ts', '?')})"
+                    )
+                elif stale is not None:
+                    print(
+                        "status reason:     (none matching current graph status "
+                        f"'{graph_status}')"
+                    )
+                    print(
+                        f"  WARNING: stale history ends at "
+                        f"{stale.get('from_status', '?')} -> "
+                        f"{stale.get('to_status', '?')}: {stale.get('reason', '')}"
+                    )
+                else:
+                    print("status reason:     (none recorded in node_status_history)")
+            except ValueError as e:
+                print(f"status reason:     ERROR reading history: {e}")
         else:
-            print("findings / graph observations: (none)")
-        print(f"receipt path: {ev.receipt_path or '-'}")
+            print("status reason:     (runtime history module unavailable)")
+
+        runtime_extra = (
+            f"  (job status: {ev.job_status})"
+            if ev.job_status not in ("-", None)
+            else ""
+        )
+        print(f"runtime state:     {ev.queue_state}{runtime_extra}")
+        if ev.job_id:
+            print(f"runtime job_id:    {ev.job_id}")
+            print(f"runtime created:   {ev.job_created_at or 'not recorded'}")
+        print(f"current evaluator verdict: {ev.verdict}")
+
+    if view == "summary":
+        return 0
+
+    if view in {"all", "contract"}:
+        print(_section_heading("Intent"))
+        for line in str(doc.get("why") or "").rstrip().splitlines() or [""]:
+            print(f"  {line}")
+
+        print(_section_heading("Graph"))
+        print("depends_on:")
+        for line in _fmt_list(doc.get("depends_on")):
+            print(f"  {line}")
+        print("unlocks:")
+        for line in _fmt_list(doc.get("unlocks")):
+            print(f"  {line}")
+
+        print(_section_heading("Delivery contract"))
+        print("acceptance_criteria:")
+        for line in _fmt_list(doc.get("acceptance_criteria")):
+            print(f"  {line}")
+        print("constraints:")
+        for line in _fmt_list(doc.get("constraints")):
+            print(f"  {line}")
+        print("required_artifacts:")
+        for line in _fmt_list(doc.get("required_artifacts")):
+            print(f"  {line}")
+        print("allowed_execution_modes:")
+        for line in _fmt_list(doc.get("allowed_execution_modes")):
+            print(f"  {line}")
+
+    if view in {"all", "evaluation"} or trace:
+        print(_section_heading("Evaluation"))
+        _print_evaluation(ev)
 
     if trace:
         print(_section_heading("Trace"))

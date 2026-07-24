@@ -200,10 +200,17 @@ def _node_review_menu(project: str, node_id: str):
     while True:
         _clear_screen()
         console.rule(f"{project} / {node_id}", style="dim")
-        node_cli.cmd_show(project=project, node_id=node_id, trace=False)
+        node_cli.cmd_show(
+            project=project,
+            node_id=node_id,
+            trace=False,
+            view="summary",
+        )
         actions = {
+            "e": ("evaluation", "current-job evidence and any stale receipts"),
+            "c": ("contract", "intent, dependencies, and acceptance criteria"),
             "u": ("update", "change graph status"),
-            "t": ("trace", "show full evaluator and job trace"),
+            "t": ("trace", "full evaluator and job history"),
             "b": ("back", "choose another node"),
             "p": ("projects", "choose another project"),
             "q": ("quit", ""),
@@ -215,24 +222,48 @@ def _node_review_menu(project: str, node_id: str):
         for key, (name, description) in actions.items():
             menu.add_row(key, name, description)
         console.print(menu)
-        choice = _menu_choice(actions, default="u")
+        choice = _menu_choice(actions, default="e")
         if choice == "q":
             return _MENU_QUIT
         if choice == "p":
             return "projects"
         if choice == "b":
             return _MENU_BACK
+        if choice == "e":
+            _clear_screen()
+            node_cli.cmd_show(
+                project=project,
+                node_id=node_id,
+                trace=False,
+                view="evaluation",
+            )
+            _pause()
+            continue
+        if choice == "c":
+            _clear_screen()
+            node_cli.cmd_show(
+                project=project,
+                node_id=node_id,
+                trace=False,
+                view="contract",
+            )
+            _pause()
+            continue
         if choice == "t":
             _clear_screen()
-            console.rule("full trace", style="dim")
-            node_cli.cmd_show(project=project, node_id=node_id, trace=True)
+            node_cli.cmd_show(
+                project=project,
+                node_id=node_id,
+                trace=True,
+                view="evaluation",
+            )
             _pause()
             continue
 
         status_actions = {
             "p": ("pending", ""),
             "r": ("ready", ""),
-            "c": ("complete", ""),
+            "c": ("complete", "requires current passing evaluator result"),
             "d": ("deferred", ""),
             "b": ("back", ""),
             "q": ("quit", ""),
@@ -242,8 +273,9 @@ def _node_review_menu(project: str, node_id: str):
         )
         status_menu.add_column(style="bold cyan", no_wrap=True)
         status_menu.add_column(style="bold", no_wrap=True)
-        for key, (name, _) in status_actions.items():
-            status_menu.add_row(key, name)
+        status_menu.add_column(style="dim")
+        for key, (name, description) in status_actions.items():
+            status_menu.add_row(key, name, description)
         _clear_screen()
         console.rule(f"{project} / {node_id}", style="dim")
         console.print(Text("graph status", style="bold"))
@@ -253,10 +285,28 @@ def _node_review_menu(project: str, node_id: str):
             return _MENU_QUIT
         if status_choice == "b":
             continue
+        target_status = status_actions[status_choice][0]
+        if target_status == "complete":
+            ready, reason = node_cli.node_completion_readiness(project, node_id)
+            if not ready:
+                _clear_screen()
+                console.print(
+                    Text("COMPLETION BLOCKED — DO NOT ACCEPT", style="bold red")
+                )
+                console.print(reason)
+                console.print()
+                node_cli.cmd_show(
+                    project=project,
+                    node_id=node_id,
+                    trace=False,
+                    view="evaluation",
+                )
+                _pause()
+                continue
         _confirm_status_change(
             project,
             node_id,
-            status_actions[status_choice][0],
+            target_status,
         )
         _pause()
 
@@ -398,11 +448,28 @@ def cmd_node_show(args):
         project=args.project,
         node_id=args.node_id,
         trace=bool(getattr(args, "trace", False)),
+        view=getattr(args, "view", "all"),
     ))
 
 
 def cmd_node_set_status(args):
     node_cli = _import_module("node_cli")
+    if (
+        args.status == "complete"
+        and not bool(getattr(args, "override_evidence_gate", False))
+    ):
+        ready, reason = node_cli.node_completion_readiness(
+            args.project,
+            args.node_id,
+        )
+        if not ready:
+            print("COMPLETION BLOCKED — DO NOT ACCEPT")
+            print(reason)
+            print(
+                "A human may explicitly override with "
+                "--override-evidence-gate after reviewing why evidence is absent."
+            )
+            sys.exit(1)
     sys.exit(node_cli.cmd_set_status(
         project=args.project,
         node_id=args.node_id,
@@ -857,6 +924,12 @@ def main(argv=None):
         "--trace", action="store_true",
         help="Expand tool traces and result/job history",
     )
+    node_show.add_argument(
+        "--view",
+        choices=("all", "summary", "evaluation", "contract"),
+        default="all",
+        help="Limit output to one operator view",
+    )
     node_show.set_defaults(func=cmd_node_show)
 
     node_set = node_sub.add_parser(
@@ -868,6 +941,11 @@ def main(argv=None):
     node_set.add_argument(
         "status", help="Graph status: pending | ready | complete | deferred")
     node_set.add_argument("--yes", action="store_true", help="Skip confirmation")
+    node_set.add_argument(
+        "--override-evidence-gate",
+        action="store_true",
+        help="Human override: allow complete without current passing evaluator evidence",
+    )
     node_set.add_argument(
         "--reason",
         required=True,

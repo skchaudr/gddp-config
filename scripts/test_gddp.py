@@ -87,6 +87,60 @@ class RuntimeJobsForwardingTests(unittest.TestCase):
             self.assertEqual(gddp.run_runtime_jobs(["list"]), 2)
 
 
+class EvidenceGateTests(unittest.TestCase):
+    def test_complete_command_blocks_without_current_passing_evidence(self):
+        args = argparse.Namespace(
+            project="demo",
+            node_id="alpha",
+            status="complete",
+            yes=True,
+            reason="agent recommended acceptance",
+            override_evidence_gate=False,
+        )
+        node_cli = SimpleNamespace(
+            node_completion_readiness=lambda project, node_id: (
+                False,
+                "no evaluator result exists for current job job-1",
+            ),
+            cmd_set_status=lambda **kwargs: 0,
+        )
+
+        with patch.object(gddp, "_import_module", return_value=node_cli), \
+                patch.object(node_cli, "cmd_set_status") as set_status, \
+                self.assertRaises(SystemExit) as exit_context:
+            gddp.cmd_node_set_status(args)
+
+        self.assertEqual(exit_context.exception.code, 1)
+        set_status.assert_not_called()
+
+    def test_complete_command_allows_explicit_human_override(self):
+        args = argparse.Namespace(
+            project="demo",
+            node_id="alpha",
+            status="complete",
+            yes=True,
+            reason="human reviewed missing evidence",
+            override_evidence_gate=True,
+        )
+        node_cli = SimpleNamespace(cmd_set_status=lambda **kwargs: 0)
+
+        with patch.object(gddp, "_import_module", return_value=node_cli), \
+                patch.object(
+                    node_cli, "cmd_set_status", return_value=0
+                ) as set_status, \
+                self.assertRaises(SystemExit) as exit_context:
+            gddp.cmd_node_set_status(args)
+
+        self.assertEqual(exit_context.exception.code, 0)
+        set_status.assert_called_once_with(
+            project="demo",
+            node_id="alpha",
+            status="complete",
+            yes=True,
+            reason="human reviewed missing evidence",
+        )
+
+
 class OverviewTests(unittest.TestCase):
     def test_menu_choice_uses_one_keypress_without_enter(self):
         terminal = SimpleNamespace(getch=lambda: "j")
@@ -220,6 +274,10 @@ class OverviewTests(unittest.TestCase):
             ],
             cmd_show=lambda **kwargs: 0,
             cmd_set_status=lambda **kwargs: 0,
+            node_completion_readiness=lambda project, node_id: (
+                True,
+                "current evaluator verdict is pass",
+            ),
         )
 
         def import_module(name):
@@ -235,13 +293,48 @@ class OverviewTests(unittest.TestCase):
 
         self.assertIs(outcome, gddp._MENU_BACK)
         self.assertEqual(show.call_count, 2)
-        show.assert_called_with(project="demo", node_id="alpha", trace=False)
+        show.assert_called_with(
+            project="demo",
+            node_id="alpha",
+            trace=False,
+            view="summary",
+        )
         set_status.assert_called_once_with(
             project="demo",
             node_id="alpha",
             status="complete",
             yes=True,
             reason="accepted after review",
+        )
+
+    def test_node_workflow_blocks_complete_without_current_evaluation(self):
+        keys = iter(["u", "c", "x", "b"])
+        terminal = SimpleNamespace(getch=lambda: next(keys))
+        node_cli = SimpleNamespace(
+            cmd_show=lambda **kwargs: 0,
+            cmd_set_status=lambda **kwargs: 0,
+            node_completion_readiness=lambda project, node_id: (
+                False,
+                "no evaluator result exists for current job job-1",
+            ),
+        )
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(node_cli, "cmd_show", wraps=node_cli.cmd_show) as show, \
+                patch.object(node_cli, "cmd_set_status") as set_status:
+            outcome = gddp._node_review_menu("demo", "alpha")
+
+        self.assertIs(outcome, gddp._MENU_BACK)
+        set_status.assert_not_called()
+        self.assertTrue(
+            any(
+                call.kwargs.get("view") == "evaluation"
+                for call in show.call_args_list
+            )
         )
 
     def test_declined_status_change_never_calls_writer(self):
