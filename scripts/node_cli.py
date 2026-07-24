@@ -776,7 +776,9 @@ def format_list_lines(
 
     if width < LIST_WIDE_MIN_COLUMNS:
         lines: list[str] = []
-        for nid, g, rt, v, ntype, title, reason in rows:
+        for row_index, (nid, g, rt, v, ntype, title, reason) in enumerate(rows):
+            if row_index:
+                lines.append("")
             # Line 1: exact full node_id — never truncated (IDs short by canon).
             lines.append(nid)
             meta = f"  GRAPH {g}  RUNTIME {rt}  VERDICT {v}"
@@ -934,6 +936,13 @@ def _fmt_list(items: Any) -> list[str]:
     return out
 
 
+def _section_heading(title: str, width: int | None = None) -> str:
+    """Return one width-aware divider so dense node details stay scannable."""
+    line_width = terminal_width() if width is None else max(20, int(width))
+    prefix = f"{title.upper()} "
+    return "\n" + prefix + ("─" * max(0, line_width - len(prefix)))
+
+
 def cmd_show(
     project: str,
     node_id: str,
@@ -961,11 +970,16 @@ def cmd_show(
     entry = project_index_entry(proj, node_id)
     graph_status = doc.get("status", "?")
     index_status = entry.get("status") if entry else None
+    ev = fetch_runtime_evidence(root, project, node_id, db_path=db_path)
 
+    print(_section_heading("Overview").lstrip("\n"))
+    print(f"project:           {project}")
     print(f"node_id:           {doc.get('node_id', node_id)}")
     print(f"title:             {doc.get('title', '')}")
     print(f"type:              {doc.get('type', '')}")
     print(f"priority:          {doc.get('priority', '')}")
+
+    print(_section_heading("Status"))
     print(f"graph status:      {graph_status}", end="")
     if entry is None:
         print("  (missing from project.yaml index)")
@@ -1020,18 +1034,30 @@ def cmd_show(
     else:
         print("status reason:     (runtime history module unavailable)")
 
-    print("\nintent (why):")
+    runtime_extra = (
+        f"  (job status: {ev.job_status})"
+        if ev.job_status not in ("-", None)
+        else ""
+    )
+    print(f"runtime state:     {ev.queue_state}{runtime_extra}")
+    if ev.job_id:
+        print(f"runtime job_id:    {ev.job_id}")
+    print(f"evaluator verdict: {ev.verdict}")
+
+    print(_section_heading("Intent"))
     for line in str(doc.get("why") or "").rstrip().splitlines() or [""]:
         print(f"  {line}")
 
-    print("\ndepends_on:")
+    print(_section_heading("Graph"))
+    print("depends_on:")
     for line in _fmt_list(doc.get("depends_on")):
         print(f"  {line}")
     print("unlocks:")
     for line in _fmt_list(doc.get("unlocks")):
         print(f"  {line}")
 
-    print("\nacceptance_criteria:")
+    print(_section_heading("Delivery contract"))
+    print("acceptance_criteria:")
     for line in _fmt_list(doc.get("acceptance_criteria")):
         print(f"  {line}")
     print("constraints:")
@@ -1044,20 +1070,7 @@ def cmd_show(
     for line in _fmt_list(doc.get("allowed_execution_modes")):
         print(f"  {line}")
 
-    ev = fetch_runtime_evidence(root, project, node_id, db_path=db_path)
-    print("\n--- layers (distinct) ---")
-    print(f"graph status:      {graph_status}")
-    runtime_extra = (
-        f"  (job status: {ev.job_status})"
-        if ev.job_status not in ("-", None)
-        else ""
-    )
-    print(f"runtime state:     {ev.queue_state}{runtime_extra}")
-    if ev.job_id:
-        print(f"runtime job_id:    {ev.job_id}")
-    print(f"evaluator verdict: {ev.verdict}")
-
-    print("\n--- evaluator summary ---")
+    print(_section_heading("Evaluation"))
     if not ev.has_evaluation:
         print("no evaluation evidence")
     else:
@@ -1094,7 +1107,7 @@ def cmd_show(
         print(f"receipt path: {ev.receipt_path or '-'}")
 
     if trace:
-        print("\n--- trace ---")
+        print(_section_heading("Trace"))
         if ev.jobs_history:
             print("jobs (newest first):")
             for j in ev.jobs_history:

@@ -343,6 +343,11 @@ class ListResponsiveLayoutTests(ListFiltersTests):
         for ln in out.splitlines():
             self.assertLessEqual(len(ln), 80, msg=repr(ln))
 
+    def test_columns_80_separates_node_records(self):
+        out = self._list_w(80, project=PROJECT)
+        first_record_end = out.index(NODE_B)
+        self.assertIn("\n\n", out[:first_record_end])
+
     def test_columns_120_table_id_first_title_truncatable(self):
         long_title = "T" * 200
         # stretch title on NODE_B via node yaml
@@ -433,6 +438,16 @@ class ShowTests(FixtureCase):
             )
         self.assertEqual(rc, 0)
         out = buf.getvalue()
+        for heading in (
+            "OVERVIEW",
+            "STATUS",
+            "INTENT",
+            "GRAPH",
+            "DELIVERY CONTRACT",
+            "EVALUATION",
+        ):
+            self.assertRegex(out, rf"(?m)^{heading} ─")
+        self.assertEqual(out.count("graph status:"), 1)
         self.assertIn("DESYNC", out)
         self.assertIn("no evaluation evidence", out)
         self.assertRegex(out, r"graph status:\s+pending")

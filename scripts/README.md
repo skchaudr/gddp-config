@@ -86,8 +86,9 @@ Graph status, runtime queue state, and evaluator verdict stay **distinct**.
 - Valid graph statuses: `pending` | `ready` | `complete` | `deferred`
 - `set-status` requires `--reason` (stored under runtime `node_status_history/`, not node YAML), previews `old -> new` for both files, confirms unless `--yes`, no-ops without rewrite when already at target
 - `node list` uses terminal width (`COLUMNS` / `shutil.get_terminal_size`):
-  - **&lt;120 cols:** each node is a compact multi-line record — exact `node_id` alone on line 1 (copyable, never truncated); line 2+ carries distinct `GRAPH` / `RUNTIME` / `VERDICT`, then TYPE/TITLE soft-wrapped to width
+  - **&lt;120 cols:** each node is a blank-line-separated multi-line record — exact `node_id` alone on line 1 (copyable, never truncated); line 2+ carries distinct `GRAPH` / `RUNTIME` / `VERDICT`, then TYPE/TITLE soft-wrapped to width
   - **≥120 cols:** table-like scan; exact ID intact; TITLE is the only truncated field; no emitted line exceeds detected width
+- `node show` groups details under `OVERVIEW`, `STATUS`, `INTENT`, `GRAPH`, `DELIVERY CONTRACT`, `EVALUATION`, and optional `TRACE` dividers; graph status, runtime state, and evaluator verdict appear once in `STATUS`
 - Writes are surgical (status values only): staged per-file atomic replacements (`os.replace`) with rollback of both originals if either write or post-write validation fails (not a single joint atomic commit of both files)
 - Candidates are `yaml.safe_load`ed and id/status-checked **before** any disk write; baseline `validate.py` failures abort cleanly with no write
 - Runtime DB: `$GDDP_RUNTIME_ROOT` (default sibling `../gddp-runtime`) `db/queue.db` opened read-only (`mode=ro`); missing DB/receipts print `-` / `no evaluation evidence` and exit 0
