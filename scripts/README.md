@@ -23,7 +23,6 @@ Or use your system Python if it's not PEP-668-locked.
 .venv/bin/python scripts/gddp.py node list --project gddp-runtime --active
 .venv/bin/python scripts/gddp.py node show --project gddp-runtime canary-retry-proof
 .venv/bin/python scripts/gddp.py node show --project gddp-runtime canary-retry-proof --view evaluation
-.venv/bin/python scripts/gddp.py node set-status --project gddp-runtime canary-retry-proof ready --yes --reason "ready for dispatch after review"
 .venv/bin/python scripts/gddp.py jobs list --state awaiting_review
 .venv/bin/python scripts/gddp.py jobs show <job-id> --full
 .venv/bin/python scripts/gddp.py jobs results --all
@@ -44,13 +43,12 @@ Or use your system Python if it's not PEP-668-locked.
 | `node validate` | Validate all nodes against schema | No TUI |
 | `node list` | List nodes: `ID \| GRAPH \| RUNTIME \| VERDICT` (width-aware) | No TUI |
 | `node show` | Node detail + evaluator summary (read-only runtime) | No TUI |
-| `node set-status` | Human graph-status change (node + project index); `--reason` required → runtime `node_status_history/` | Confirm unless `--yes` |
 | `node status` | Completion summary for all projects | No TUI |
 
 ### jobs subcommands
 
 `gddp-config` owns the human-facing `gddp` command. The `jobs` group delegates
-to the sibling `gddp-runtime/scripts/node_status.py` CLI, so runtime queue state
+to the sibling `gddp-runtime/scripts/jobs_status.py` CLI, so runtime queue state
 and evaluator evidence remain runtime-owned while graph truth remains config-owned.
 
 | Command | What |
@@ -62,8 +60,8 @@ and evaluator evidence remain runtime-owned while graph truth remains config-own
 
 Bare `gddp` opens the unified config-hosted menu in a terminal. Each submenu
 clears and redraws as one screen. Its jobs section provides interactive runtime
-list/filter/results/detail views, delegating each real command to
-`node_status.py`. Redirected bare output prints a non-blocking command overview.
+list/filter/results/detail/update views, delegating job operations to
+`jobs_status.py`. Redirected bare output prints a non-blocking command overview.
 Resolution uses `GDDP_RUNTIME_ROOT`, defaulting
 to the sibling `../gddp-runtime`; `GDDP_RUNTIME_PYTHON` can override the runtime
 interpreter.
@@ -81,17 +79,15 @@ Graph status, runtime queue state, and evaluator verdict stay **distinct**.
 .venv/bin/python scripts/gddp.py node show --project gddp-runtime canary-retry-proof
 .venv/bin/python scripts/gddp.py node show --project gddp-runtime canary-retry-proof --trace
 
-# Dual-write graph status only (node YAML top-level + matching project.yaml entry)
-.venv/bin/python scripts/gddp.py node set-status --project gddp-runtime canary-retry-proof ready --reason "ready for dispatch"
-.venv/bin/python scripts/gddp.py node set-status --project gddp-runtime canary-retry-proof complete --yes --reason "accepted after review"
+# Graph status writes happen only through the interactive `gddp` Nodes menu.
 ```
 
 - Valid graph statuses: `pending` | `ready` | `complete` | `deferred`
 - Interactive node review opens a concise status screen. `e` opens current-job evaluator evidence, `c` opens the delivery contract, and `t` opens job/result history.
 - `node show --view summary|evaluation|contract|all` exposes the same views non-interactively.
 - Current-job evaluator results and standalone/fallback receipts stay separate. A fallback receipt is labeled `NOT CURRENT JOB EVIDENCE` and never populates the current evaluator verdict.
-- Interactive completion and `node set-status ... complete` require current-job overall, criteria, and integrity verdicts to all be `pass`. Human override remains explicit through `--override-evidence-gate`.
-- `set-status` requires `--reason` (stored under runtime `node_status_history/`, not node YAML), previews `old -> new` for both files, confirms unless `--yes`, no-ops without rewrite when already at target
+- Interactive completion requires current-job overall, criteria, and integrity verdicts to all be `pass`, unless the operator explicitly chooses the menu override after reviewing the missing evidence.
+- Interactive status updates require a reason (stored under runtime `node_status_history/`, not node YAML), preview `old -> new` for both files, and no-op without rewrite when already at target.
 - `node list` uses terminal width (`COLUMNS` / `shutil.get_terminal_size`):
   - **&lt;120 cols:** each node is a blank-line-separated multi-line record — exact `node_id` alone on line 1 (copyable, never truncated); line 2+ carries distinct `GRAPH` / `RUNTIME` / `VERDICT`, then TYPE/TITLE soft-wrapped to width
   - **≥120 cols:** table-like scan; exact ID intact; TITLE is the only truncated field; no emitted line exceeds detected width

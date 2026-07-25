@@ -22,6 +22,11 @@ Portfolio brief + system narrative: [`../gddp-runtime/PROJECT-BRIEF.md`](../gddp
   usable. Do not silently change the graph or assume the current node must land.
 - Independent ready paths may continue while the human reviews an amendment;
   dependent work remains blocked by unchanged graph truth.
+- Non-interactive node-status commands are read-only. Graph/node status changes
+  happen only through the interactive `gddp` Nodes menu.
+- Runtime job state is separate from graph truth. `gddp jobs
+  list/show/results/set` routes through `gddp-runtime/scripts/jobs_status.py`;
+  job writes must never change node YAML or project graph status.
 
 ## Project snapshot
 

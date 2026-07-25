@@ -1328,7 +1328,7 @@ def cmd_set_status(
     reason_text = (reason or "").strip()
     if not reason_text:
         print(
-            "ERROR: --reason is required. Status without reason misleads agents "
+            "ERROR: a reason is required. Status without reason misleads agents "
             "(e.g. deferred ≠ work was bad)."
         )
         return 2
@@ -1417,7 +1417,7 @@ def cmd_set_status(
             to_status=status,
             reason=reason_text,
             kind="graph",
-            source="gddp node set-status",
+            source="gddp operator menu",
             runtime_root=runtime_root(),
         )
     except Exception as e:

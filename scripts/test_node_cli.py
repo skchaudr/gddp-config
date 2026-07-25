@@ -591,7 +591,7 @@ class SetStatusTests(FixtureCase):
                 root=self.root,
             )
         self.assertEqual(rc, 2)
-        self.assertIn("--reason is required", buf.getvalue())
+        self.assertIn("a reason is required", buf.getvalue())
         self.assertEqual(self.npath.read_bytes(), self.node_orig)
 
     def test_history_failure_rolls_back_graph(self):

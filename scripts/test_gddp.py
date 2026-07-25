@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import argparse
 import os
 import sys
 import tempfile
@@ -27,7 +26,7 @@ class RuntimeJobsForwardingTests(unittest.TestCase):
         self.runtime_root = Path(self.tempdir.name) / "gddp-runtime"
         scripts = self.runtime_root / "scripts"
         scripts.mkdir(parents=True)
-        (scripts / "node_status.py").write_text("print('fake runtime')\n")
+        (scripts / "jobs_status.py").write_text("print('fake runtime')\n")
 
     def tearDown(self):
         self.tempdir.cleanup()
@@ -44,7 +43,7 @@ class RuntimeJobsForwardingTests(unittest.TestCase):
         command = run.call_args.args[0]
         self.assertEqual(command, [
             sys.executable,
-            str(self.runtime_root.resolve() / "scripts" / "node_status.py"),
+            str(self.runtime_root.resolve() / "scripts" / "jobs_status.py"),
             "list",
             "--state",
             "ready",
@@ -56,7 +55,7 @@ class RuntimeJobsForwardingTests(unittest.TestCase):
         self.assertFalse(run.call_args.kwargs["check"])
 
     def test_jobs_set_preserves_reason_as_one_argument(self):
-        args = argparse.Namespace(
+        args = unittest.mock.Mock(
             jobs_command="set",
             ref="job-1",
             state="awaiting_review",
@@ -81,64 +80,37 @@ class RuntimeJobsForwardingTests(unittest.TestCase):
         self.assertEqual(rc, 0)
         run.assert_called_once_with(["show", "node-1", "--full"])
 
+    def test_jobs_set_remains_a_shell_subcommand(self):
+        with patch.object(gddp, "run_runtime_jobs", return_value=0) as run:
+            rc = gddp.main([
+                "jobs",
+                "set",
+                "job-1",
+                "failed",
+                "--reason",
+                "executor failed",
+                "--yes",
+            ])
+        self.assertEqual(rc, 0)
+        run.assert_called_once_with([
+            "set",
+            "job-1",
+            "failed",
+            "--reason",
+            "executor failed",
+            "--yes",
+        ])
+
+    def test_node_set_status_is_not_a_shell_subcommand(self):
+        with patch.object(gddp.sys, "stderr", StringIO()), \
+                self.assertRaises(SystemExit) as exit_context:
+            gddp.main(["node", "set-status", "node-1", "complete"])
+        self.assertEqual(exit_context.exception.code, 2)
+
     def test_missing_runtime_reports_configuration_error(self):
         missing = Path(self.tempdir.name) / "missing"
         with patch.dict(os.environ, {"GDDP_RUNTIME_ROOT": str(missing)}, clear=False):
             self.assertEqual(gddp.run_runtime_jobs(["list"]), 2)
-
-
-class EvidenceGateTests(unittest.TestCase):
-    def test_complete_command_blocks_without_current_passing_evidence(self):
-        args = argparse.Namespace(
-            project="demo",
-            node_id="alpha",
-            status="complete",
-            yes=True,
-            reason="agent recommended acceptance",
-            override_evidence_gate=False,
-        )
-        node_cli = SimpleNamespace(
-            node_completion_readiness=lambda project, node_id: (
-                False,
-                "no evaluator result exists for current job job-1",
-            ),
-            cmd_set_status=lambda **kwargs: 0,
-        )
-
-        with patch.object(gddp, "_import_module", return_value=node_cli), \
-                patch.object(node_cli, "cmd_set_status") as set_status, \
-                self.assertRaises(SystemExit) as exit_context:
-            gddp.cmd_node_set_status(args)
-
-        self.assertEqual(exit_context.exception.code, 1)
-        set_status.assert_not_called()
-
-    def test_complete_command_allows_explicit_human_override(self):
-        args = argparse.Namespace(
-            project="demo",
-            node_id="alpha",
-            status="complete",
-            yes=True,
-            reason="human reviewed missing evidence",
-            override_evidence_gate=True,
-        )
-        node_cli = SimpleNamespace(cmd_set_status=lambda **kwargs: 0)
-
-        with patch.object(gddp, "_import_module", return_value=node_cli), \
-                patch.object(
-                    node_cli, "cmd_set_status", return_value=0
-                ) as set_status, \
-                self.assertRaises(SystemExit) as exit_context:
-            gddp.cmd_node_set_status(args)
-
-        self.assertEqual(exit_context.exception.code, 0)
-        set_status.assert_called_once_with(
-            project="demo",
-            node_id="alpha",
-            status="complete",
-            yes=True,
-            reason="human reviewed missing evidence",
-        )
 
 
 class OverviewTests(unittest.TestCase):
@@ -241,6 +213,39 @@ class OverviewTests(unittest.TestCase):
             ],
         )
 
+    def test_job_workflow_updates_only_through_menu(self):
+        keys = iter(["u", "1", "y", "x", "b"])
+        terminal = SimpleNamespace(getch=lambda: next(keys))
+        operator = SimpleNamespace(
+            QUEUE_STATES=("ready",),
+            apply_state_change=unittest.mock.Mock(return_value=0),
+        )
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "run_runtime_jobs", return_value=0) as run, \
+                patch.object(gddp, "load_runtime_jobs_module", return_value=operator), \
+                patch.object(
+                    gddp.Prompt,
+                    "ask",
+                    side_effect=["job-1", "operator reviewed recovery"],
+                ), \
+                patch.object(gddp, "_clear_screen"):
+            outcome = gddp.interactive_jobs()
+
+        self.assertIs(outcome, gddp._MENU_BACK)
+        self.assertEqual(
+            run.call_args_list,
+            [
+                unittest.mock.call(["list"]),
+                unittest.mock.call(["show", "job-1"]),
+                unittest.mock.call(["list"]),
+            ],
+        )
+        operator.apply_state_change.assert_called_once_with(
+            ref="job-1",
+            state="ready",
+            reason="operator reviewed recovery",
+        )
+
     def test_main_menu_opens_jobs_submenu(self):
         with patch.object(gddp, "_menu_choice", side_effect=["j", "q"]), \
                 patch.object(
@@ -308,7 +313,7 @@ class OverviewTests(unittest.TestCase):
         )
 
     def test_node_workflow_blocks_complete_without_current_evaluation(self):
-        keys = iter(["u", "c", "x", "b"])
+        keys = iter(["u", "c", "b", "b"])
         terminal = SimpleNamespace(getch=lambda: next(keys))
         node_cli = SimpleNamespace(
             cmd_show=lambda **kwargs: 0,
@@ -335,6 +340,40 @@ class OverviewTests(unittest.TestCase):
                 call.kwargs.get("view") == "evaluation"
                 for call in show.call_args_list
             )
+        )
+
+    def test_node_workflow_allows_explicit_menu_override(self):
+        keys = iter(["u", "c", "o", "y", "x", "b"])
+        terminal = SimpleNamespace(getch=lambda: next(keys))
+        node_cli = SimpleNamespace(
+            cmd_show=lambda **kwargs: 0,
+            cmd_set_status=lambda **kwargs: 0,
+            node_completion_readiness=lambda project, node_id: (
+                False,
+                "no evaluator result exists for current job job-1",
+            ),
+        )
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(
+                    gddp.Prompt,
+                    "ask",
+                    return_value="operator reviewed missing evidence",
+                ), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(node_cli, "cmd_set_status") as set_status:
+            outcome = gddp._node_review_menu("demo", "alpha")
+
+        self.assertIs(outcome, gddp._MENU_BACK)
+        set_status.assert_called_once_with(
+            project="demo",
+            node_id="alpha",
+            status="complete",
+            yes=True,
+            reason="operator reviewed missing evidence",
         )
 
     def test_declined_status_change_never_calls_writer(self):

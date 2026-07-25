@@ -9,13 +9,12 @@ Subcommands:
     node validate     Validate all nodes (or one project)
     node list         List nodes (ID | GRAPH | RUNTIME | VERDICT)
     node show         Show one node + evaluator summary (read-only runtime)
-    node set-status   Set graph status on node YAML + project.yaml
     node status       Show status summary for all projects
 
     jobs list         List runtime jobs and queue states
     jobs show         Show one runtime job and its evidence
     jobs results      Summarize evaluator output
-    jobs set          Change runtime queue state with an audit reason
+    jobs set          Change runtime job state with an audit reason
 
     verify node       Run deterministic node evaluation; emit a receipt
 
@@ -31,7 +30,6 @@ Usage:
     python3 scripts/gddp.py node batch --project my-greenfield
     python3 scripts/gddp.py node list --project gddp-runtime --active
     python3 scripts/gddp.py node show --project gddp-runtime canary-retry-proof
-    python3 scripts/gddp.py node set-status --project gddp-runtime canary-retry-proof ready --yes
     python3 scripts/gddp.py jobs list --state awaiting_review
     python3 scripts/gddp.py jobs show <job-id> --full
     python3 scripts/gddp.py project new --from-outline outline.md --project-id my-app --repo org/repo
@@ -40,6 +38,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import os
 import subprocess
 import sys
@@ -62,6 +61,7 @@ _PIPE_WIDTH = None if sys.stdout.isatty() else 120
 console = Console(soft_wrap=True, highlight=False, width=_PIPE_WIDTH)
 _MENU_BACK = object()
 _MENU_QUIT = object()
+_RUNTIME_JOB_COMMANDS = frozenset({"list", "show", "results", "set"})
 
 
 def _import_module(name: str):
@@ -301,8 +301,31 @@ def _node_review_menu(project: str, node_id: str):
                     trace=False,
                     view="evaluation",
                 )
-                _pause()
-                continue
+                override_actions = {
+                    "o": (
+                        "override",
+                        "continue after personally reviewing missing evidence",
+                    ),
+                    "b": ("back", "leave graph truth unchanged"),
+                    "q": ("quit", ""),
+                }
+                override_menu = Table(
+                    box=None,
+                    padding=(0, 2, 0, 1),
+                    pad_edge=False,
+                    show_header=False,
+                )
+                override_menu.add_column(style="bold cyan", no_wrap=True)
+                override_menu.add_column(style="bold", no_wrap=True)
+                override_menu.add_column(style="dim")
+                for key, (name, description) in override_actions.items():
+                    override_menu.add_row(key, name, description)
+                console.print(override_menu)
+                override_choice = _menu_choice(override_actions, default="b")
+                if override_choice == "q":
+                    return _MENU_QUIT
+                if override_choice == "b":
+                    continue
         _confirm_status_change(
             project,
             node_id,
@@ -452,33 +475,6 @@ def cmd_node_show(args):
     ))
 
 
-def cmd_node_set_status(args):
-    node_cli = _import_module("node_cli")
-    if (
-        args.status == "complete"
-        and not bool(getattr(args, "override_evidence_gate", False))
-    ):
-        ready, reason = node_cli.node_completion_readiness(
-            args.project,
-            args.node_id,
-        )
-        if not ready:
-            print("COMPLETION BLOCKED — DO NOT ACCEPT")
-            print(reason)
-            print(
-                "A human may explicitly override with "
-                "--override-evidence-gate after reviewing why evidence is absent."
-            )
-            sys.exit(1)
-    sys.exit(node_cli.cmd_set_status(
-        project=args.project,
-        node_id=args.node_id,
-        status=args.status,
-        yes=bool(getattr(args, "yes", False)),
-        reason=getattr(args, "reason", None),
-    ))
-
-
 def cmd_node_status(args):
     show_status()
 
@@ -488,7 +484,7 @@ def resolve_runtime_root() -> Path:
     configured = os.environ.get("GDDP_RUNTIME_ROOT")
     runtime_root = Path(configured).expanduser() if configured else ROOT.parent / "gddp-runtime"
     runtime_root = runtime_root.resolve()
-    if not (runtime_root / "scripts" / "node_status.py").is_file():
+    if not (runtime_root / "scripts" / "jobs_status.py").is_file():
         raise RuntimeError(
             f"gddp-runtime not found at {runtime_root}; set GDDP_RUNTIME_ROOT"
         )
@@ -507,7 +503,13 @@ def runtime_python(runtime_root: Path) -> str:
 
 
 def run_runtime_jobs(argv: list[str]) -> int:
-    """Delegate one jobs invocation through runtime's supported CLI boundary."""
+    """Delegate one jobs invocation through runtime's job-only CLI boundary."""
+    if not argv or argv[0] not in _RUNTIME_JOB_COMMANDS:
+        print(
+            "ERROR: unsupported runtime jobs command.",
+            file=sys.stderr,
+        )
+        return 2
     try:
         runtime_root = resolve_runtime_root()
     except RuntimeError as exc:
@@ -515,7 +517,7 @@ def run_runtime_jobs(argv: list[str]) -> int:
         return 2
     command = [
         runtime_python(runtime_root),
-        str(runtime_root / "scripts" / "node_status.py"),
+        str(runtime_root / "scripts" / "jobs_status.py"),
         *argv,
     ]
     env = os.environ.copy()
@@ -523,14 +525,59 @@ def run_runtime_jobs(argv: list[str]) -> int:
     return subprocess.run(command, env=env, check=False).returncode
 
 
+def load_runtime_jobs_module():
+    """Load the job-only runtime backend used by the interactive menu."""
+    runtime_root = resolve_runtime_root()
+    path = runtime_root / "scripts" / "jobs_status.py"
+    if not path.is_file():
+        raise RuntimeError(f"runtime jobs backend not found at {path}")
+    spec = importlib.util.spec_from_file_location("gddp_runtime_jobs_status", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"could not load runtime jobs backend from {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _confirm_job_state_change(ref: str, state: str) -> int:
+    """Collect explicit menu confirmation and a durable reason, then write."""
+    actions = {
+        "y": ("yes", f"set {ref} to {state}"),
+        "n": ("no", "leave runtime job state unchanged"),
+    }
+    console.print(
+        f"Set [bold]{ref}[/bold] runtime job state to "
+        f"[bold cyan]{state}[/bold cyan]?"
+    )
+    if _menu_choice(actions, default="n") != "y":
+        console.print(Text("Unchanged.", style="dim"))
+        return 1
+    try:
+        reason = Prompt.ask(Text("reason", style="cyan"), default="").strip()
+    except (EOFError, KeyboardInterrupt):
+        console.print()
+        console.print(Text("Unchanged — reason required.", style="dim"))
+        return 1
+    if not reason:
+        console.print(Text("Unchanged — reason required.", style="yellow"))
+        return 1
+    try:
+        jobs_status = load_runtime_jobs_module()
+        return jobs_status.apply_state_change(ref=ref, state=state, reason=reason)
+    except (RuntimeError, ValueError) as exc:
+        console.print(Text(f"ERROR: {exc}", style="red"))
+        return 1
+
+
 def interactive_jobs():
-    """Browse runtime jobs without ever invoking its command-required CLI empty."""
+    """Review and update runtime jobs inside the human-operated menu."""
     state_filter: str | None = None
     actions = {
         "r": ("refresh", "show all runtime jobs"),
         "a": ("awaiting review", "show the human review queue"),
         "e": ("evaluations", "show evaluator result summary"),
         "o": ("open", "show one job by job or node ID"),
+        "u": ("update", "change one runtime job state"),
         "b": ("main menu", ""),
         "q": ("quit", ""),
     }
@@ -571,7 +618,7 @@ def interactive_jobs():
             continue
 
         _clear_screen()
-        console.print(Text("open job", style="bold"))
+        console.print(Text("open job" if choice == "o" else "update job", style="bold"))
         try:
             ref = Prompt.ask("job or node ID").strip()
         except (EOFError, KeyboardInterrupt):
@@ -581,6 +628,25 @@ def interactive_jobs():
         _clear_screen()
         console.print(Text(f"job · {ref}", style="bold"))
         run_runtime_jobs(["show", ref])
+        if choice == "o":
+            _pause()
+            continue
+
+        try:
+            jobs_status = load_runtime_jobs_module()
+            states = [(state, "") for state in jobs_status.QUEUE_STATES]
+        except RuntimeError as exc:
+            console.print(Text(f"ERROR: {exc}", style="red"))
+            _pause()
+            continue
+        state = _paged_menu("job state", states, back_label="jobs")
+        if state is _MENU_QUIT:
+            return _MENU_QUIT
+        if state is _MENU_BACK:
+            continue
+        _clear_screen()
+        console.rule(f"job · {ref}", style="dim")
+        _confirm_job_state_change(ref, state)
         _pause()
 
 
@@ -629,7 +695,7 @@ def interactive_menu():
     """Keep graph control in config while delegating the jobs section to runtime."""
     actions = {
         "n": ("nodes", "review and update graph truth"),
-        "j": ("jobs", "browse runtime jobs and evaluator results"),
+        "j": ("jobs", "review and update runtime jobs"),
         "s": ("status", "summarize graph completion"),
         "v": ("validate", "validate graph definitions"),
         "q": ("quit", ""),
@@ -932,27 +998,6 @@ def main(argv=None):
     )
     node_show.set_defaults(func=cmd_node_show)
 
-    node_set = node_sub.add_parser(
-        "set-status",
-        help="Set graph status on node YAML + project.yaml (human-owned)",
-    )
-    node_set.add_argument("--project", required=True, help="Project ID")
-    node_set.add_argument("node_id", help="Node ID")
-    node_set.add_argument(
-        "status", help="Graph status: pending | ready | complete | deferred")
-    node_set.add_argument("--yes", action="store_true", help="Skip confirmation")
-    node_set.add_argument(
-        "--override-evidence-gate",
-        action="store_true",
-        help="Human override: allow complete without current passing evaluator evidence",
-    )
-    node_set.add_argument(
-        "--reason",
-        required=True,
-        help="Why this status change — stored in runtime node_status_history/",
-    )
-    node_set.set_defaults(func=cmd_node_set_status)
-
     node_status = node_sub.add_parser("status", help="Status summary for all projects")
     node_status.set_defaults(func=cmd_node_status)
 
@@ -973,11 +1018,15 @@ def main(argv=None):
     jobs_results.add_argument("--all", action="store_true", help="List every result row")
     jobs_results.set_defaults(func=cmd_jobs)
 
-    jobs_set = jobs_sub.add_parser("set", help="Change runtime queue state")
+    jobs_set = jobs_sub.add_parser("set", help="Change runtime job state")
     jobs_set.add_argument("ref", help="Job ID or uniquely matching node ID")
-    jobs_set.add_argument("state", help="New runtime queue state")
-    jobs_set.add_argument("--reason", required=True, help="Why; stored in the runtime audit row")
-    jobs_set.add_argument("--yes", action="store_true", help="Skip runtime confirmation")
+    jobs_set.add_argument("state", help="New runtime job state")
+    jobs_set.add_argument(
+        "--reason",
+        required=True,
+        help="Why; stored in the runtime audit row",
+    )
+    jobs_set.add_argument("--yes", action="store_true", help="Skip confirmation")
     jobs_set.set_defaults(func=cmd_jobs)
 
     verify_p = sub.add_parser("verify", help="Node evaluation harness")
