@@ -194,6 +194,29 @@ def test_agent_is_canonical_executor_neutral_mode() -> None:
     )
 
 
+def test_runtime_executor_modes_are_accepted() -> None:
+    for mode in ("jules_api", "jules_cli", "local_subprocess"):
+        node = make_valid_node(f"{mode.replace('_', '-')}-mode")
+        node["allowed_execution_modes"] = [mode]
+
+        assert not [
+            finding
+            for finding in validate_node(
+                Path(f"{mode}.yaml"),
+                f"graphs/testproj/nodes/{mode}.yaml",
+                node,
+            )
+            if finding.rule == "exec_mode_enum"
+        ]
+        assert not [
+            finding
+            for finding in import_node.validate_node_yaml(node)
+            if finding["rule"] == "exec_mode_enum"
+        ]
+        assert mode in batch_fill.VALID_EXEC_MODES
+        assert mode in new_node.VALID_EXEC_MODES
+
+
 def main() -> int:
     tests = [
         ("test_refuses_empty_acceptance", test_refuses_empty_acceptance),
@@ -203,6 +226,10 @@ def main() -> int:
         (
             "test_agent_is_canonical_executor_neutral_mode",
             test_agent_is_canonical_executor_neutral_mode,
+        ),
+        (
+            "test_runtime_executor_modes_are_accepted",
+            test_runtime_executor_modes_are_accepted,
         ),
     ]
     failed = 0

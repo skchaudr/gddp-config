@@ -45,7 +45,17 @@ ROOT = SCRIPTS_DIR.parent
 VALID_TYPES = ["capability", "milestone", "constraint"]
 VALID_STATUSES = ["pending", "ready", "complete", "deferred"]
 VALID_PRIORITIES = ["low", "medium", "high", "critical"]
-VALID_EXEC_MODES = ["agent", "jules", "vertex", "pi_worker", "vm_worker", "human"]
+VALID_EXEC_MODES = [
+    "agent",
+    "jules",
+    "jules_api",
+    "jules_cli",
+    "local_subprocess",
+    "vertex",
+    "pi_worker",
+    "vm_worker",
+    "human",
+]
 ALL_ARTIFACTS = ["decision.md", "result-summary.md", "patch.diff",
                   "graph-update.yaml", "merged_pr"]
 DEFAULT_ARTIFACTS = ["decision.md", "result-summary.md", "graph-update.yaml"]
