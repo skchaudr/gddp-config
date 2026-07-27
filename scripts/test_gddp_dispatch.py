@@ -51,7 +51,8 @@ CREATE TABLE jobs (
     node_id TEXT,
     project_id TEXT,
     status TEXT,
-    queue_state TEXT
+    queue_state TEXT,
+    created_at TEXT
 );
 """
 
@@ -202,14 +203,51 @@ def test_confirm_inserts_frontier(con, config_root, monkeypatch):
     assert {r["status"] for r in rows} == {"received"}
 
 
-def test_open_job_warning_is_advisory(con, config_root, monkeypatch):
+def test_in_flight_node_refused_zero_events(con, config_root, monkeypatch):
     con.execute(
-        "INSERT INTO jobs VALUES (?, ?, ?, ?, ?)",
-        ("job_1", "alpha", "proj-a", "awaiting_review", "awaiting_review"),
+        "INSERT INTO jobs VALUES (?, ?, ?, ?, ?, '2026-07-26T10:00')",
+        ("job_1", "alpha", "proj-a", "running", "running"),
     )
     monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
     rc = gddp._dispatch_flow(con, config_root, "alpha", None)
-    assert rc == 0  # warning shown, dispatch still operator-confirmed
+    assert rc == 2
+    assert con.execute("SELECT COUNT(*) c FROM events").fetchone()["c"] == 0
+
+
+def test_graph_dispatch_excludes_in_flight_inserts_rest(con, config_root, monkeypatch):
+    con.execute(
+        "INSERT INTO jobs VALUES (?, ?, ?, ?, ?, '2026-07-26T10:00')",
+        ("job_1", "alpha", "proj-a", "awaiting_review", "awaiting_review"),
+    )
+    monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
+    rc = gddp._dispatch_flow(con, config_root, "proj-a", None)
+    assert rc == 0
+    urls = [r["url"] for r in con.execute("SELECT url FROM events").fetchall()]
+    assert len(urls) == 2
+    assert all("node: alpha" not in u for u in urls)
+
+
+def test_all_in_flight_refuses_whole_dispatch(con, config_root, monkeypatch):
+    for index, node in enumerate(("alpha", "beta", "shared")):
+        con.execute(
+            "INSERT INTO jobs VALUES (?, ?, ?, ?, ?, ?)",
+            (f"job_{index}", node, "proj-a", "running", "running",
+             f"2026-07-26T10:0{index}"),
+        )
+    monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
+    rc = gddp._dispatch_flow(con, config_root, "proj-a", None)
+    assert rc == 2
+    assert con.execute("SELECT COUNT(*) c FROM events").fetchone()["c"] == 0
+
+
+def test_failed_latest_job_stays_dispatchable(con, config_root, monkeypatch):
+    con.execute(
+        "INSERT INTO jobs VALUES (?, ?, ?, ?, ?, '2026-07-26T10:00')",
+        ("job_1", "alpha", "proj-a", "failed", "failed"),
+    )
+    monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
+    rc = gddp._dispatch_flow(con, config_root, "alpha", None)
+    assert rc == 0
     assert con.execute("SELECT COUNT(*) c FROM events").fetchone()["c"] == 1
 
 
@@ -220,6 +258,7 @@ def test_main_positional_routes_to_dispatch(config_root, tmp_path, monkeypatch):
     db.parent.mkdir()
     c = sqlite3.connect(db)
     c.execute(_EVENTS_SCHEMA)
+    c.execute(_JOBS_SCHEMA)
     c.commit()
     c.close()
     monkeypatch.setattr(gddp, "ROOT", config_root)

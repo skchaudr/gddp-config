@@ -1,8 +1,10 @@
 """test_frontier.py — Derived operating frontier (read-only view).
 
-Covers the four graph-frontier-operations criteria: ready + exact blocking
-dependencies, no duplicate dispatch offers, downstream impact of acceptance,
-and recomputation after a human acceptance. Deferred deps count as satisfied.
+Regression coverage for the graph-frontier-operations criteria: ready + exact
+blocking deps, no duplicate dispatch offers, downstream impact of acceptance,
+recompute after acceptance with retained review evidence, drift demotion of
+ready-but-dep-blocked nodes, explicit runtime-unavailable state, and honest
+verdict/outcome labeling.
 """
 
 import json
@@ -35,6 +37,14 @@ def _write_node(nodes_dir: Path, node_id: str, status: str, deps=(), modes=()):
     )
 
 
+def _set_status(config_root: Path, nodes_dir: Path, node_id: str, old: str, new: str, deps=(), modes=()):
+    """Mimic the real acceptance path: YAML + project summary flip; jobs stay."""
+    _write_node(nodes_dir, node_id, new, deps=deps, modes=modes)
+    proj = config_root / "graphs" / "g" / "project.yaml"
+    proj.write_text(proj.read_text().replace(
+        f"id: {node_id}\n    status: {old}", f"id: {node_id}\n    status: {new}"))
+
+
 @pytest.fixture
 def config_root(tmp_path):
     root = tmp_path / "config"
@@ -45,6 +55,7 @@ def config_root(tmp_path):
         "child": "pending",
         "grandchild": "pending",
         "blocked": "pending",
+        "guard": "ready",
     })
     _write_node(nodes, "base", "complete", modes=["local_subprocess"])
     _write_node(nodes, "retired", "deferred")
@@ -52,6 +63,7 @@ def config_root(tmp_path):
     _write_node(nodes, "child", "pending", deps=["base", "retired"])
     _write_node(nodes, "grandchild", "pending", deps=["work"])
     _write_node(nodes, "blocked", "pending", deps=["base", "ghost", "work"])
+    _write_node(nodes, "guard", "ready", deps=["work"], modes=["jules"])
     return root
 
 
@@ -69,7 +81,7 @@ def con():
     )
     c.execute(
         "CREATE TABLE results (result_id TEXT, job_id TEXT, outcome TEXT, "
-        "received_at TEXT)"
+        "acceptance_check TEXT, received_at TEXT)"
     )
     return c
 
@@ -85,101 +97,132 @@ def _graph(config_root):
     return frontier.load_graph(config_root, "g")
 
 
+def _derive(config_root, con):
+    return frontier.derive(_graph(config_root), frontier.load_runtime(con, "g"))
+
+
 # --- ready + blocked visibility -------------------------------------------- #
 
 def test_ready_and_blocked_with_exact_deps(config_root, con):
-    derived = frontier.derive(_graph(config_root), frontier.load_runtime(con, "g"))
-    assert derived["ready"] == [("work", "jules_api", [])]
-    blocked = dict(derived["blocked"])
-    assert blocked["blocked"] == [("ghost", "missing"), ("work", "ready")]
-    assert blocked["child"] == []  # complete + deferred deps are satisfied
-    assert blocked["grandchild"] == [("work", "ready")]
+    derived = _derive(config_root, con)
+    assert derived["ready"] == [("work", "jules_api")]
+    blocked = {n: (s, u) for n, s, u in derived["blocked"]}
+    assert blocked["blocked"] == ("pending", [("ghost", "missing"), ("work", "ready")])
+    assert blocked["child"] == ("pending", [])  # complete + deferred satisfied
+    assert blocked["grandchild"] == ("pending", [("work", "ready")])
 
 
-def test_ready_node_with_incomplete_dep_is_annotated(config_root, con):
-    nodes_dir = config_root / "graphs" / "g" / "nodes"
-    _write_node(nodes_dir, "child", "ready", deps=["work"])
-    proj = config_root / "graphs" / "g" / "project.yaml"
-    proj.write_text(proj.read_text().replace("id: child\n    status: pending",
-                                             "id: child\n    status: ready"))
-    derived = frontier.derive(_graph(config_root), frontier.load_runtime(con, "g"))
-    ready = {n: u for n, _, u in derived["ready"]}
-    assert ready["child"] == ["work"]
+def test_ready_dep_blocked_is_drift_never_dispatchable(config_root, con):
+    # guard is graph-ready but depends on work (not complete): the harness→guard case.
+    derived = _derive(config_root, con)
+    assert [n for n, _ in derived["ready"]] == ["work"]
+    blocked = {n: (s, u) for n, s, u in derived["blocked"]}
+    assert blocked["guard"] == ("ready", [("work", "ready")])
     text = frontier.render_text("g", derived)
-    assert "child  (dep not complete: work)" in text
-
-
-def test_render_marks_deps_satisfied_but_pending(config_root, con):
-    text = frontier.render_text("g", frontier.derive(
-        _graph(config_root), frontier.load_runtime(con, "g")))
-    assert "child  ← deps satisfied; graph status still pending" in text
+    assert "guard  ← work [ready]  (graph status ready — dependency drift)" in text
+    ready_section = text.split("ready now (dispatchable):")[1].split("in flight")[0]
+    assert "guard" not in ready_section
 
 
 # --- no duplicate dispatch -------------------------------------------------- #
 
-def test_in_flight_phases_exclude_from_ready(config_root, con):
+def test_in_flight_phases_and_result_labels(config_root, con):
     _job(con, "j1", "work", "running")
+    con.execute("INSERT INTO executor_sessions VALUES ('s1', 'j1', 'collected', '2026-07-26T10:05')")
+    _job(con, "j2", "child", "awaiting_review", ts="2026-07-26T11:00")
     con.execute(
-        "INSERT INTO executor_sessions VALUES ('s1', 'j1', 'collected', '2026-07-26T10:05')"
+        "INSERT INTO results VALUES ('r1', 'j2', 'ok', ?, '2026-07-26T11:09')",
+        (json.dumps({"verdict": "pass"}),),
     )
-    _job(con, "j2", "base", "awaiting_review", ts="2026-07-26T11:00")
-    con.execute(
-        "INSERT INTO results VALUES ('r1', 'j2', 'pass', '2026-07-26T11:09')"
-    )
-    derived = frontier.derive(_graph(config_root), frontier.load_runtime(con, "g"))
-    assert derived["ready"] == []  # work is moving → not offered again
+    _job(con, "j3", "grandchild", "awaiting_review", ts="2026-07-26T11:30")
+    con.execute("INSERT INTO results VALUES ('r2', 'j3', 'success', NULL, '2026-07-26T11:40')")
+    derived = _derive(config_root, con)
+    assert derived["ready"] == []  # everything moving → nothing offered twice
     phases = {n: m["phase"] for n, m in derived["in_flight"]}
-    assert phases == {"work": "evaluating", "base": "awaiting review"}
-    verdicts = {n: m["verdict"] for n, m in derived["in_flight"]}
-    assert verdicts["base"] == "pass"
+    assert phases == {
+        "work": "evaluating",
+        "child": "awaiting review",
+        "grandchild": "awaiting review",
+    }
+    results = {n: m["result"] for n, m in derived["in_flight"]}
+    assert results["child"] == ("verdict", "pass")       # canonical verdict read
+    assert results["grandchild"] == ("outcome", "success")  # raw outcome labeled
 
 
 def test_failed_latest_job_shows_awaiting_correction(config_root, con):
     _job(con, "j1", "work", "failed")
-    derived = frontier.derive(_graph(config_root), frontier.load_runtime(con, "g"))
+    derived = _derive(config_root, con)
     assert derived["ready"] == []
-    assert derived["in_flight"] == [
-        ("work", {"phase": "failed — awaiting correction", "job_id": "j1", "verdict": None})
-    ]
+    assert derived["in_flight"][0][1]["phase"] == "failed — awaiting correction"
 
 
 def test_superseded_old_job_does_not_haunt(config_root, con):
     _job(con, "j_old", "work", "failed", ts="2026-07-26T08:00")
     _job(con, "j_new", "work", "awaiting_review", ts="2026-07-26T09:00")
-    derived = frontier.derive(_graph(config_root), frontier.load_runtime(con, "g"))
+    derived = _derive(config_root, con)
     assert [n for n, _ in derived["in_flight"]] == ["work"]
     assert derived["in_flight"][0][1]["phase"] == "awaiting review"
 
 
+def test_dispatch_blockers_semantics(config_root, con):
+    _job(con, "j1", "work", "running")
+    _job(con, "j2", "child", "awaiting_review", ts="2026-07-26T10:00")
+    _job(con, "j3", "grandchild", "failed", ts="2026-07-26T10:00")
+    _job(con, "j4", "guard", "failed", ts="2026-07-26T10:00")
+    assert frontier.dispatch_blockers(con, "g") == {"work", "child"}
+
+
 # --- downstream impact ------------------------------------------------------- #
 
-def test_unlocks_only_when_other_deps_satisfied(config_root, con):
+def test_unlocks_cover_pending_and_ready_dep_blocked(config_root, con):
     _job(con, "j1", "work", "awaiting_review")
-    derived = frontier.derive(_graph(config_root), frontier.load_runtime(con, "g"))
-    assert derived["unlocks"] == [("work", ["grandchild"])]
-    # "blocked" also depends on ghost → must NOT appear as an unlock
-    assert "blocked" not in [d for _, ds in derived["unlocks"] for d in ds]
+    derived = _derive(config_root, con)
+    # guard (ready but dep-blocked on work) and grandchild (pending) unlock;
+    # child is not downstream of work; "blocked" never unlocks (ghost stays).
+    assert derived["unlocks"] == [("work", ["grandchild", "guard"])]
 
 
 # --- acceptance advances the frontier ---------------------------------------- #
 
-def test_recompute_after_acceptance(config_root, con):
+def test_recompute_after_acceptance_with_retained_review_evidence(config_root, con):
     _job(con, "j1", "work", "awaiting_review")
-    before = frontier.derive(_graph(config_root), frontier.load_runtime(con, "g"))
-    assert [n for n, _ in before["ready"]] == []
+    before = _derive(config_root, con)
+    assert [n for n, _ in before["in_flight"]] == ["work"]
+    assert before["unlocks"]
 
-    # Human accepts: job leaves the active set, graph truth flips to complete.
-    con.execute("DELETE FROM jobs WHERE job_id = 'j1'")
+    # Real acceptance path (cmd_set_status): graph flips; the job row STAYS.
     nodes_dir = config_root / "graphs" / "g" / "nodes"
-    _write_node(nodes_dir, "work", "complete", modes=["jules_api"])
-    proj = config_root / "graphs" / "g" / "project.yaml"
-    proj.write_text(proj.read_text().replace("id: work\n    status: ready",
-                                             "id: work\n    status: complete"))
+    _set_status(config_root, nodes_dir, "work", "ready", "complete", modes=["jules_api"])
 
-    after = frontier.derive(_graph(config_root), frontier.load_runtime(con, "g"))
-    assert after["in_flight"] == []
-    assert after["unlocks"] == []
-    blocked = dict(after["blocked"])
-    assert blocked["grandchild"] == []  # now derivable; awaits human ready toggle
+    after = _derive(config_root, con)
+    assert after["in_flight"] == []  # retained evidence is not motion
+    assert after["unlocks"] == []    # already accepted → nothing left to unlock
+    blocked = {n: (s, u) for n, s, u in after["blocked"]}
+    assert blocked["grandchild"] == ("pending", [])
+    assert ("guard", "jules") in after["ready"]  # dep-blocked drift graduated
     text = frontier.render_text("g", after)
     assert "grandchild  ← deps satisfied; graph status still pending" in text
+
+
+# --- runtime availability ---------------------------------------------------- #
+
+def test_connect_readonly_unavailable_and_enforced_ro(tmp_path):
+    with pytest.raises(frontier.FrontierUnavailable, match="not found"):
+        frontier.connect_readonly(tmp_path / "missing.db")
+    db = tmp_path / "queue.db"
+    c = sqlite3.connect(db)
+    c.execute("CREATE TABLE jobs (job_id TEXT)")
+    c.commit()
+    c.close()
+    con = frontier.connect_readonly(db)
+    with pytest.raises(sqlite3.OperationalError):
+        con.execute("CREATE TABLE nope (x TEXT)")  # read-only is enforced
+    con.close()
+
+
+def test_render_marks_runtime_unavailable_explicitly(config_root, con):
+    derived = frontier.derive(_graph(config_root), {})
+    text = frontier.render_text("g", derived, runtime_note="database is locked")
+    assert "runtime: UNAVAILABLE — database is locked" in text
+    assert "in flight (not offered for dispatch):\n  (unknown — runtime unavailable)" in text
+    assert "unlocks on acceptance:\n  (unknown — runtime unavailable)" in text

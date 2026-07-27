@@ -184,22 +184,6 @@ def build_dispatch_plan(config_root, target, executor, project_hint=None):
     }
 
 
-def _open_job_warnings(con, project_id: str) -> dict:
-    """Open (ready/running/awaiting_review) job counts per node; advisory only."""
-    try:
-        rows = con.execute(
-            "SELECT node_id, COUNT(*) c FROM jobs "
-            "WHERE project_id = ? "
-            "AND (status IN ('ready','running','awaiting_review') "
-            "OR queue_state IN ('ready','running','awaiting_review')) "
-            "GROUP BY node_id",
-            (project_id,),
-        ).fetchall()
-    except sqlite3.OperationalError:
-        return {}
-    return {r["node_id"]: r["c"] for r in rows}
-
-
 def insert_dispatch_events(con, project_id, repo, items, *, executor_explicit, actor=None):
     """Insert one schema-valid intake event per node; the heartbeat pipeline
     claims, classifies (via the node: tag in url), scopes, reserves, and
@@ -254,27 +238,44 @@ def _connect_events_db(db_path: Path):
 
 
 def _dispatch_flow(con, config_root, target, executor, project_hint=None) -> int:
-    """Shared shell/menu path: validate, preview once, confirm once, insert."""
+    """Shared shell/menu path: validate, exclude in-flight nodes, preview once,
+    confirm once, insert. A node executing, being evaluated, or awaiting
+    review is never offered for duplicate dispatch."""
     try:
         plan = build_dispatch_plan(config_root, target, executor, project_hint)
     except DispatchError as exc:
         console.print(f"[bold red]ERROR:[/] {exc}")
         return 2
-    warnings = _open_job_warnings(con, plan["project_id"])
+    frontier = _import_module("frontier")
+    try:
+        blockers = frontier.dispatch_blockers(con, plan["project_id"])
+    except sqlite3.Error as exc:
+        console.print(
+            f"[bold red]ERROR:[/] runtime state unreadable ({exc}); "
+            "refusing to dispatch without duplicate-checking"
+        )
+        return 2
+    movable = [i for i in plan["items"] if i["node_id"] not in blockers]
+    excluded = [i for i in plan["items"] if i["node_id"] in blockers]
+    if not movable:
+        console.print(
+            "[bold red]ERROR:[/] every requested node is already executing, "
+            "being evaluated, or awaiting review — nothing offered for "
+            "duplicate dispatch"
+        )
+        return 2
     table = Table(title=f"dispatch preview — {plan['project_id']}")
     table.add_column("node", style="bold")
     table.add_column("executor")
-    table.add_column("warning", style="yellow")
-    for item in plan["items"]:
-        count = warnings.get(item["node_id"])
-        table.add_row(
-            item["node_id"], item["executor"],
-            f"{count} open job(s)" if count else "",
-        )
+    table.add_column("dispatch?", style="yellow")
+    for item in movable:
+        table.add_row(item["node_id"], item["executor"], "yes")
+    for item in excluded:
+        table.add_row(item["node_id"], item["executor"], "no — in flight")
     console.print(table)
     try:
         answer = Prompt.ask(
-            f"Dispatch {len(plan['items'])} event(s) through the heartbeat pipeline? [y/N]",
+            f"Dispatch {len(movable)} event(s) through the heartbeat pipeline? [y/N]",
             default="n",
         )
     except (EOFError, KeyboardInterrupt):
@@ -287,7 +288,7 @@ def _dispatch_flow(con, config_root, target, executor, project_hint=None) -> int
         con,
         plan["project_id"],
         plan["repo"],
-        plan["items"],
+        movable,
         executor_explicit=plan["executor_explicit"],
     )
     for event_id in event_ids:
@@ -331,13 +332,23 @@ def interactive_frontier():
         return
     try:
         con = frontier.connect_readonly(resolve_runtime_root() / "db" / "queue.db")
-    except Exception:
+        note = None
+    except frontier.FrontierUnavailable as exc:
         con = None
+        note = str(exc)
     try:
         for pid in selected:
             graph = frontier.load_graph(ROOT, pid)
-            runtime = frontier.load_runtime(con, pid) if con is not None else {}
-            console.print(frontier.render_text(pid, frontier.derive(graph, runtime)))
+            runtime = {}
+            pid_note = note
+            if con is not None:
+                try:
+                    runtime = frontier.load_runtime(con, pid)
+                except sqlite3.Error as exc:
+                    pid_note = str(exc)
+            console.print(frontier.render_text(
+                pid, frontier.derive(graph, runtime), runtime_note=pid_note
+            ))
             console.print()
     finally:
         if con is not None:
