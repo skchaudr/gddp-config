@@ -25,7 +25,7 @@ Graph and runtime state surfaces were read only. The implementation adds no sche
 
 ### Current Git state (2-3 sentences max, anything more must be critically justifiable)
 
-Branch `main` contains eight local, unpushed frontier commits: `d25a539`, `ad5e399`, `31da1b7`, `458d9d1`, `9a437f4`, `c89a1fb`, `ebb5ac8`, and `6224454`. The complete config suite is green at 117 tests; this handoff and overlay form one additional local docs/review checkpoint and remain unpushed.
+Immediately before authorized landing, branch `main` contains eight local frontier commits (`d25a539` through `6224454`) plus `bd707d5`, the docs/review checkpoint; this correction is the final local checkpoint before push. The complete config suite is green at 117 tests, and landing these checkpoints is authorized.
 
 ### Artifacts (Filepath - Description, 1 line max per artifact)
 
@@ -37,6 +37,6 @@ Branch `main` contains eight local, unpushed frontier commits: `d25a539`, `ad5e3
 
 ### Resume point (2-3 sentences max, anything more must be critically justifiable)
 
-Implementation and review are complete. Exact resume point: Sab human review/acceptance only; no agent may infer acceptance, mutate graph status, or push these local commits before that decision.
+Implementation and review are complete, and this checkpoint is authorized to push. After sync, only Sab may accept or revise the node or mutate graph status.
 
 ------------------------------------------------ Agent Section END
