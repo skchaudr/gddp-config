@@ -317,6 +317,33 @@ def cmd_dispatch(argv, *, config_root=None, db_path=None) -> int:
         con.close()
 
 
+def interactive_frontier():
+    """Derived frontier view; recomputes from live graph + runtime on open."""
+    frontier = _import_module("frontier")
+    projects = frontier.project_ids(ROOT)
+    if not projects:
+        console.print("no graphs found")
+        return
+    project = Prompt.ask("graph (blank = all)", default="")
+    selected = [project] if project.strip() else projects
+    if project.strip() and project not in projects:
+        console.print(f"[bold red]ERROR:[/] no graph named '{project}'")
+        return
+    try:
+        con = frontier.connect_readonly(resolve_runtime_root() / "db" / "queue.db")
+    except Exception:
+        con = None
+    try:
+        for pid in selected:
+            graph = frontier.load_graph(ROOT, pid)
+            runtime = frontier.load_runtime(con, pid) if con is not None else {}
+            console.print(frontier.render_text(pid, frontier.derive(graph, runtime)))
+            console.print()
+    finally:
+        if con is not None:
+            con.close()
+
+
 def interactive_dispatch():
     """Menu path: pick a graph, see the ready frontier, dispatch explicitly."""
     projects = _graph_projects(ROOT)
@@ -987,6 +1014,7 @@ def interactive_menu():
         "n": ("nodes", "review and update graph truth"),
         "j": ("jobs", "review and update runtime jobs"),
         "d": ("dispatch", "dispatch ready nodes through the event pipeline"),
+        "f": ("frontier", "derived operating frontier (read-only)"),
         "s": ("status", "summarize graph completion"),
         "v": ("validate", "validate graph definitions"),
         "q": ("quit", ""),
@@ -1020,6 +1048,10 @@ def interactive_menu():
             elif choice == "d":
                 _clear_screen()
                 interactive_dispatch()
+                _pause()
+            elif choice == "f":
+                _clear_screen()
+                interactive_frontier()
                 _pause()
             elif choice == "s":
                 _clear_screen()
