@@ -285,6 +285,49 @@ def test_graph_dispatch_excludes_dep_blocked_inserts_rest(con, config_root, monk
     assert all("node: depkid" not in u for u in urls)
 
 
+def test_interactive_frontier_prints_literal_bracket_evidence(monkeypatch):
+    calls = []
+
+    class Unavailable(Exception):
+        pass
+
+    class FakeFrontier:
+        FrontierUnavailable = Unavailable
+
+        @staticmethod
+        def project_ids(root):
+            return ["proj-a"]
+
+        @staticmethod
+        def connect_readonly(path):
+            raise Unavailable("db unavailable")
+
+        @staticmethod
+        def load_graph(root, project_id):
+            return {}
+
+        @staticmethod
+        def derive(graph, runtime):
+            return {}
+
+        @staticmethod
+        def render_text(project_id, derived, runtime_note=None):
+            return "blocked-node  ← dependency [pending]"
+
+    class FakeConsole:
+        @staticmethod
+        def print(*args, **kwargs):
+            calls.append((args, kwargs))
+
+    monkeypatch.setattr(gddp, "_import_module", lambda name: FakeFrontier)
+    monkeypatch.setattr(gddp, "console", FakeConsole())
+    monkeypatch.setattr(gddp.Prompt, "ask", lambda *args, **kwargs: "proj-a")
+
+    gddp.interactive_frontier()
+
+    assert calls[0] == (("blocked-node  ← dependency [pending]",), {"markup": False})
+
+
 def test_status_authority_refusals(config_root):
     # Node YAML ready but summary pending → drift refusal, not dispatch.
     _write_node(

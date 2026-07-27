@@ -407,7 +407,7 @@ def interactive_frontier():
                     pid_note = str(exc)
             console.print(frontier.render_text(
                 pid, frontier.derive(graph, runtime), runtime_note=pid_note
-            ))
+            ), markup=False)
             console.print()
     finally:
         if con is not None:
