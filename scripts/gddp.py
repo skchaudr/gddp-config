@@ -16,6 +16,9 @@ Subcommands:
     jobs results      Summarize evaluator output
     jobs set          Change runtime job state with an audit reason
 
+    <graph> [executor]  Dispatch the graph's ready frontier (positional, no verb)
+    <node> [executor]   Dispatch one ready node; executor defaults to node routing
+
     verify node       Run deterministic node evaluation; emit a receipt
 
     obsidian export   Export one graph to ~/Obsidian/gdd-<project>/
@@ -31,6 +34,8 @@ Usage:
     python3 scripts/gddp.py node list --project gddp-runtime --active
     python3 scripts/gddp.py node show --project gddp-runtime canary-retry-proof
     python3 scripts/gddp.py jobs list --state awaiting_review
+    python3 scripts/gddp.py gddp-runtime
+    python3 scripts/gddp.py verdict-confidence-split local_subprocess
     python3 scripts/gddp.py jobs show <job-id> --full
     python3 scripts/gddp.py project new --from-outline outline.md --project-id my-app --repo org/repo
 """
@@ -39,9 +44,13 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import json
 import os
+import secrets
+import sqlite3
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 try:
@@ -62,6 +71,287 @@ console = Console(soft_wrap=True, highlight=False, width=_PIPE_WIDTH)
 _MENU_BACK = object()
 _MENU_QUIT = object()
 _RUNTIME_JOB_COMMANDS = frozenset({"list", "show", "results", "set"})
+_CLI_COMMANDS = frozenset({"node", "jobs", "verify", "obsidian", "project"})
+
+
+# --------------------------------------------------------------------------- #
+# Positional dispatch: gddp <graph|node> [executor]
+# --------------------------------------------------------------------------- #
+
+class DispatchError(Exception):
+    """Operator-facing dispatch validation failure."""
+
+
+def _graph_projects(config_root: Path) -> list[str]:
+    graphs = Path(config_root) / "graphs"
+    if not graphs.is_dir():
+        return []
+    return sorted(
+        d.name for d in graphs.iterdir()
+        if d.is_dir() and (d / "project.yaml").is_file()
+    )
+
+
+def _ready_graph_nodes(config_root: Path, project_id: str) -> list[dict]:
+    nodes_dir = Path(config_root) / "graphs" / project_id / "nodes"
+    ready = []
+    for path in sorted(nodes_dir.glob("*.yaml")):
+        data = yaml.safe_load(path.read_text()) or {}
+        if data.get("status") != "ready":
+            continue
+        ready.append({
+            "node_id": data.get("node_id") or path.stem,
+            "modes": list(data.get("allowed_execution_modes") or []),
+        })
+    return ready
+
+
+def _configured_executor(project_doc: dict, modes: list[str]) -> str:
+    if modes:
+        return modes[0]
+    policy = project_doc.get("execution_policy") or {}
+    return policy.get("default_executor") or "jules"
+
+
+def build_dispatch_plan(config_root, target, executor, project_hint=None):
+    """Resolve target graph-first, validate everything, return a plan dict.
+
+    No guessing: unknown targets, ambiguous nodes, non-ready nodes, and
+    executors outside a node's allowed_execution_modes are all hard errors.
+    project_hint (menu path) qualifies a node lookup to one graph.
+    """
+    config_root = Path(config_root)
+    projects = _graph_projects(config_root)
+    if target in projects and project_hint is None:
+        project_id = target
+        nodes = _ready_graph_nodes(config_root, project_id)
+        if not nodes:
+            raise DispatchError(f"graph '{target}' has no ready nodes")
+        if executor:
+            conflicts = [n["node_id"] for n in nodes if executor not in n["modes"]]
+            if conflicts:
+                raise DispatchError(
+                    f"executor '{executor}' not allowed on: {', '.join(conflicts)}"
+                )
+    else:
+        if project_hint is not None:
+            matches = [project_hint] if (
+                config_root / "graphs" / project_hint / "nodes" / f"{target}.yaml"
+            ).is_file() else []
+        else:
+            matches = [
+                p for p in projects
+                if (config_root / "graphs" / p / "nodes" / f"{target}.yaml").is_file()
+            ]
+        if not matches:
+            raise DispatchError(
+                f"no graph or node named '{target}' "
+                f"(graphs: {', '.join(projects) or 'none'})"
+            )
+        if len(matches) > 1:
+            raise DispatchError(
+                f"node '{target}' exists in multiple graphs: {', '.join(matches)}; "
+                "dispatch is exact — qualify from the interactive menu"
+            )
+        project_id = matches[0]
+        data = yaml.safe_load(
+            (config_root / "graphs" / project_id / "nodes" / f"{target}.yaml").read_text()
+        ) or {}
+        status = data.get("status")
+        if status != "ready":
+            raise DispatchError(f"node '{target}' is '{status}', not ready")
+        modes = list(data.get("allowed_execution_modes") or [])
+        if executor and executor not in modes:
+            raise DispatchError(
+                f"executor '{executor}' not in {target}.allowed_execution_modes: "
+                f"{modes or []}"
+            )
+        nodes = [{"node_id": target, "modes": modes}]
+
+    project_doc = _import_module("node_cli").load_project_doc(config_root, project_id)
+    items = [
+        {
+            "node_id": n["node_id"],
+            "executor": executor or _configured_executor(project_doc, n["modes"]),
+        }
+        for n in nodes
+    ]
+    return {
+        "project_id": project_id,
+        "repo": project_doc.get("repo") or "",
+        "items": items,
+        "executor_explicit": bool(executor),
+    }
+
+
+def _open_job_warnings(con, project_id: str) -> dict:
+    """Open (ready/running/awaiting_review) job counts per node; advisory only."""
+    try:
+        rows = con.execute(
+            "SELECT node_id, COUNT(*) c FROM jobs "
+            "WHERE project_id = ? "
+            "AND (status IN ('ready','running','awaiting_review') "
+            "OR queue_state IN ('ready','running','awaiting_review')) "
+            "GROUP BY node_id",
+            (project_id,),
+        ).fetchall()
+    except sqlite3.OperationalError:
+        return {}
+    return {r["node_id"]: r["c"] for r in rows}
+
+
+def insert_dispatch_events(con, project_id, repo, items, *, executor_explicit, actor=None):
+    """Insert one schema-valid intake event per node; the heartbeat pipeline
+    claims, classifies (via the node: tag in url), scopes, reserves, and
+    dispatches. routing.selected_executor is set only when the operator named
+    an executor; otherwise the node's configured routing applies."""
+    now = datetime.now(timezone.utc)
+    event_ids = []
+    for item in items:
+        event_id = (
+            f"evt_dispatch_{now.strftime('%Y%m%dT%H%M%S')}_"
+            f"{item['node_id']}_{secrets.token_hex(3)}"
+        )
+        routing = (
+            json.dumps({"selected_executor": item["executor"]})
+            if executor_explicit
+            else None
+        )
+        con.execute(
+            "INSERT INTO events (event_id, schema_version, received_at, source, "
+            "event_type, actor, url, project_id, project_node_candidates, "
+            "scope_status, priority, risk_level, routing, status, repo) "
+            "VALUES (?, '1.0', ?, 'manual_inject', 'issue.opened', ?, ?, ?, ?, "
+            "'pending', 'pending', 'pending', ?, 'received', ?)",
+            (
+                event_id,
+                now.isoformat(),
+                actor or os.environ.get("USER") or "operator",
+                f"manual-dispatch://node: {item['node_id']}",
+                project_id,
+                json.dumps([item["node_id"]]),
+                routing,
+                repo,
+            ),
+        )
+        event_ids.append(event_id)
+    con.commit()
+    return event_ids
+
+
+def _connect_events_db(db_path: Path):
+    if not db_path.is_file():
+        raise DispatchError(f"runtime DB not initialized at {db_path}")
+    con = sqlite3.connect(db_path)
+    con.row_factory = sqlite3.Row
+    con.execute("PRAGMA busy_timeout=5000")
+    try:
+        con.execute("SELECT 1 FROM events LIMIT 1")
+    except sqlite3.OperationalError as exc:
+        con.close()
+        raise DispatchError(f"runtime DB missing events table: {exc}") from exc
+    return con
+
+
+def _dispatch_flow(con, config_root, target, executor, project_hint=None) -> int:
+    """Shared shell/menu path: validate, preview once, confirm once, insert."""
+    try:
+        plan = build_dispatch_plan(config_root, target, executor, project_hint)
+    except DispatchError as exc:
+        console.print(f"[bold red]ERROR:[/] {exc}")
+        return 2
+    warnings = _open_job_warnings(con, plan["project_id"])
+    table = Table(title=f"dispatch preview — {plan['project_id']}")
+    table.add_column("node", style="bold")
+    table.add_column("executor")
+    table.add_column("warning", style="yellow")
+    for item in plan["items"]:
+        count = warnings.get(item["node_id"])
+        table.add_row(
+            item["node_id"], item["executor"],
+            f"{count} open job(s)" if count else "",
+        )
+    console.print(table)
+    try:
+        answer = Prompt.ask(
+            f"Dispatch {len(plan['items'])} event(s) through the heartbeat pipeline? [y/N]",
+            default="n",
+        )
+    except (EOFError, KeyboardInterrupt):
+        console.print("\naborted; no events inserted")
+        return 1
+    if answer.strip().lower() not in {"y", "yes"}:
+        console.print("aborted; no events inserted")
+        return 1
+    event_ids = insert_dispatch_events(
+        con,
+        plan["project_id"],
+        plan["repo"],
+        plan["items"],
+        executor_explicit=plan["executor_explicit"],
+    )
+    for event_id in event_ids:
+        console.print(f"  event [cyan]{event_id}[/] → received")
+    console.print("next heartbeat tick claims, scopes, reserves, and dispatches.")
+    return 0
+
+
+def cmd_dispatch(argv, *, config_root=None, db_path=None) -> int:
+    """Positional dispatch: gddp <graph|node> [executor]. No verbs, no flags."""
+    if len(argv) not in (1, 2):
+        console.print("[bold red]usage:[/] gddp <graph|node> [executor]")
+        return 2
+    target = argv[0]
+    executor = argv[1] if len(argv) == 2 else None
+    config_root = Path(config_root) if config_root else ROOT
+    try:
+        con = _connect_events_db(
+            Path(db_path) if db_path else resolve_runtime_root() / "db" / "queue.db"
+        )
+    except DispatchError as exc:
+        console.print(f"[bold red]ERROR:[/] {exc}")
+        return 2
+    try:
+        return _dispatch_flow(con, config_root, target, executor)
+    finally:
+        con.close()
+
+
+def interactive_dispatch():
+    """Menu path: pick a graph, see the ready frontier, dispatch explicitly."""
+    projects = _graph_projects(ROOT)
+    if not projects:
+        console.print("no graphs found")
+        return
+    console.print("graphs: " + ", ".join(projects))
+    project = Prompt.ask("graph")
+    if project not in projects:
+        console.print(f"[bold red]ERROR:[/] no graph named '{project}'")
+        return
+    ready = _ready_graph_nodes(ROOT, project)
+    if not ready:
+        console.print(f"graph '{project}' has no ready nodes")
+        return
+    project_doc = _import_module("node_cli").load_project_doc(ROOT, project)
+    table = Table(title=f"ready frontier — {project}")
+    table.add_column("node", style="bold")
+    table.add_column("configured executor")
+    for n in ready:
+        table.add_row(n["node_id"], _configured_executor(project_doc, n["modes"]))
+    console.print(table)
+    node = Prompt.ask("node id (blank = entire ready frontier)", default="")
+    executor = Prompt.ask("executor (blank = configured routing)", default="")
+    target = node.strip() or project
+    try:
+        con = _connect_events_db(resolve_runtime_root() / "db" / "queue.db")
+    except DispatchError as exc:
+        console.print(f"[bold red]ERROR:[/] {exc}")
+        return
+    try:
+        _dispatch_flow(con, ROOT, target, executor.strip() or None,
+                       project_hint=project)
+    finally:
+        con.close()
 
 
 def _import_module(name: str):
@@ -696,6 +986,7 @@ def interactive_menu():
     actions = {
         "n": ("nodes", "review and update graph truth"),
         "j": ("jobs", "review and update runtime jobs"),
+        "d": ("dispatch", "dispatch ready nodes through the event pipeline"),
         "s": ("status", "summarize graph completion"),
         "v": ("validate", "validate graph definitions"),
         "q": ("quit", ""),
@@ -726,6 +1017,10 @@ def interactive_menu():
                 outcome = interactive_jobs()
                 if outcome is _MENU_QUIT:
                     break
+            elif choice == "d":
+                _clear_screen()
+                interactive_dispatch()
+                _pause()
             elif choice == "s":
                 _clear_screen()
                 show_status()
@@ -930,6 +1225,11 @@ def validate_project(project_id: str | None):
 
 
 def main(argv=None):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    # Positional dispatch: gddp <graph|node> [executor]. Anything that is not
+    # a known subcommand is an exact graph or node target — no verbs, no flags.
+    if argv and argv[0] not in _CLI_COMMANDS and not argv[0].startswith("-"):
+        return cmd_dispatch(argv)
     parser = argparse.ArgumentParser(
         description="gddp — graph truth and runtime evidence CLI",
         formatter_class=argparse.RawDescriptionHelpFormatter,
