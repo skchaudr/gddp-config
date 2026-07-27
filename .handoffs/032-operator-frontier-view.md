@@ -1,0 +1,42 @@
+# 032 — Operator frontier view approved; awaiting human acceptance
+
+------------------------------------------------ Agent Section START
+
+Date: 2026-07-27
+Worktree: /Users/sab-mini/repos/gddp-config
+Branch: main
+
+## Empirical Reality (2-3 sentences max, anything more must be critically justifiable)
+
+The menu-only `gddp` frontier now derives dispatchable, blocked, active, correction, drift, and acceptance-unlock views from both graph status surfaces plus read-only runtime state, using the same dependency and duplicate-motion gates as dispatch. Real interactive TTY smoke reached `gddp` → `f` and rendered the live frontier; it exposed Rich bracket consumption, fixed by `6224454` with literal `[pending]`, `[deferred]`, and executor evidence preserved. No graph/node status mutation, live dispatch, runtime DB write, or manual DB mutation occurred.
+
+### Scope touched (One file per line, +/- for only what was changed)
+
+- `scripts/frontier.py` (+ read-only derived frontier and shared safety rules)
+- `scripts/gddp.py` (+ menu entry, frontier rendering, dispatch truth alignment)
+- `scripts/test_frontier.py` (+ focused frontier truthfulness regressions)
+- `scripts/test_gddp_dispatch.py` (+ dispatch/refusal and literal-markup regressions)
+- `.ua/diff-overlay.json` (+ origin/main diff overlay; canonical known graph nodes only)
+- `.handoffs/032-operator-frontier-view.md` (+ approved-session handoff)
+
+### Constrained areas touched (none / list + justification)
+
+Graph and runtime state surfaces were read only. The implementation adds no schema, service, API, dashboard, graph status transition, job-state mutation, or dispatch side effect.
+
+### Current Git state (2-3 sentences max, anything more must be critically justifiable)
+
+Branch `main` contains eight local, unpushed frontier commits: `d25a539`, `ad5e399`, `31da1b7`, `458d9d1`, `9a437f4`, `c89a1fb`, `ebb5ac8`, and `6224454`. The complete config suite is green at 117 tests; this handoff and overlay form one additional local docs/review checkpoint and remain unpushed.
+
+### Artifacts (Filepath - Description, 1 line max per artifact)
+
+- `scripts/test_frontier.py` — Direct coverage for readiness, dependency truth, active motion, drift, runtime unavailability, and unlocks.
+- `scripts/test_gddp_dispatch.py` — Direct coverage for zero-event refusals and literal Rich-bracket preservation.
+- `.ua/diff-overlay.json` — `origin/main` changed/one-hop affected nodes from stale canonical `.ua/knowledge-graph.json`; only known graph node IDs appear.
+- Interactive TTY proof — `gddp` → `f` rendered the live frontier; final bracket-label behavior is fixed and regression-locked.
+- Zero-event refusal proof — `gddp pi-evaluator-guard </dev/null` refused `dep-blocked: pi-evaluator-harness [ready]` with rc=2 and emitted zero events.
+
+### Resume point (2-3 sentences max, anything more must be critically justifiable)
+
+Implementation and review are complete. Exact resume point: Sab human review/acceptance only; no agent may infer acceptance, mutate graph status, or push these local commits before that decision.
+
+------------------------------------------------ Agent Section END
