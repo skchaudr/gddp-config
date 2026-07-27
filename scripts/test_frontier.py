@@ -108,7 +108,9 @@ def test_ready_and_blocked_with_exact_deps(config_root, con):
     assert derived["ready"] == [("work", "jules_api")]
     blocked = {n: (s, u) for n, s, u in derived["blocked"]}
     assert blocked["blocked"] == ("pending", [("ghost", "missing"), ("work", "ready")])
-    assert blocked["child"] == ("pending", [])  # complete + deferred satisfied
+    # Deferred satisfies nothing downstream: retired settles itself, but child
+    # stays explicitly blocked until a human completes or rewires the dep.
+    assert blocked["child"] == ("pending", [("retired", "deferred")])
     assert blocked["grandchild"] == ("pending", [("work", "ready")])
 
 
