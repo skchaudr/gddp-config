@@ -112,6 +112,16 @@ def test_ready_and_blocked_with_exact_deps(config_root, con):
     assert blocked["grandchild"] == ("pending", [("work", "ready")])
 
 
+def test_deferred_dependency_remains_explicitly_blocking(config_root, con):
+    # retired is deferred: settled as a node, but satisfies nothing downstream.
+    derived = _derive(config_root, con)
+    blocked = {n: (s, u) for n, s, u in derived["blocked"]}
+    assert blocked["child"] == ("pending", [("retired", "deferred")])
+    text = frontier.render_text("g", derived)
+    assert "child  ← retired [deferred]" in text
+    assert "retired" not in [n for n, _ in derived["in_flight"]]
+
+
 def test_ready_dep_blocked_is_drift_never_dispatchable(config_root, con):
     # guard is graph-ready but depends on work (not complete): the harness→guard case.
     derived = _derive(config_root, con)

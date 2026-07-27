@@ -25,7 +25,14 @@ from pathlib import Path
 import yaml
 
 ACTIVE_JOB_STATES = frozenset({"ready", "running", "awaiting_review", "dispatching"})
-SATISFIED_DEP_STATUSES = frozenset({"complete", "deferred"})
+# Terminal graph statuses: suppress the NODE ITSELF (motion/unlocks) — a
+# deferred node is settled human business, never again in motion.
+TERMINAL_NODE_STATUSES = frozenset({"complete", "deferred"})
+# Dependency satisfaction: exactly "complete". Live truth —
+# scope_checker.py rejects any dep whose status != complete, and
+# dispatch_next.py eligibility requires deps in complete_ids. A deferred
+# dependency still blocks; only the node it belongs to is settled.
+SATISFIED_DEP_STATUSES = frozenset({"complete"})
 
 _SESSION_PHASES = {
     "dispatched": "dispatching",
@@ -213,7 +220,7 @@ def derive(graph: dict, runtime: dict) -> dict:
     ready, in_flight, correction, blocked, drift = [], [], [], [], []
     for node_id, info in sorted(graph.items()):
         motion = runtime.get(node_id)
-        if info["status"] in SATISFIED_DEP_STATUSES:
+        if info["status"] in TERMINAL_NODE_STATUSES:
             if motion is not None and motion["phase"] not in {
                 "awaiting review",
                 "failed — awaiting correction",
@@ -236,7 +243,7 @@ def derive(graph: dict, runtime: dict) -> dict:
     for node_id, motion in sorted(runtime.items()):
         if motion["phase"] != "awaiting review":
             continue
-        if (graph.get(node_id) or {}).get("status") in SATISFIED_DEP_STATUSES:
+        if (graph.get(node_id) or {}).get("status") in TERMINAL_NODE_STATUSES:
             continue  # already accepted; retained evidence is not an unlock
         downstream = []
         for cand, info in sorted(graph.items()):
