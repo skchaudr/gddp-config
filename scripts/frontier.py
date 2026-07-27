@@ -152,15 +152,19 @@ def load_runtime(con, project_id: str) -> dict:
 
 
 def dispatch_blockers(con, project_id: str) -> set[str]:
-    """Nodes that must not be offered for dispatch: latest job is executing,
-    being evaluated, or awaiting review. A failed latest job (awaiting
-    correction) is NOT a blocker — redispatch after correction is the
-    operator's recovery path."""
-    return {
-        node_id
-        for node_id, job in _latest_job_per_node(con, project_id).items()
-        if (job["status"] or job["queue_state"]) in ACTIVE_JOB_STATES
-    }
+    """Nodes that must not be offered for dispatch: ANY job (not just the
+    latest) still executing, being evaluated, or awaiting review, in either
+    state column — status=failed/queue_state=running drift still blocks.
+    Failed-and-settled jobs are NOT blockers: redispatch after correction is
+    the operator's recovery path."""
+    states = sorted(ACTIVE_JOB_STATES)
+    rows = con.execute(
+        f"SELECT DISTINCT node_id FROM jobs WHERE project_id = ? "
+        f"AND (status IN ({','.join('?' * len(states))}) "
+        f"OR queue_state IN ({','.join('?' * len(states))}))",
+        (project_id, *states, *states),
+    ).fetchall()
+    return {row["node_id"] for row in rows}
 
 
 def _unsatisfied_deps(graph: dict, info: dict) -> list:
@@ -174,15 +178,34 @@ def _unsatisfied_deps(graph: dict, info: dict) -> list:
     ]
 
 
+def unsatisfied_deps(graph: dict, node_id: str) -> list:
+    """Public dependency-readiness check for one node (dispatch gating)."""
+    info = graph.get(node_id)
+    if info is None:
+        return []
+    return _unsatisfied_deps(graph, info)
+
+
 def derive(graph: dict, runtime: dict) -> dict:
-    """Split the graph into ready / in-flight / blocked / unlocks."""
-    ready, in_flight, blocked = [], [], []
+    """Split the graph into ready / in-flight / correction / blocked / unlocks
+    / drift. Failed-latest is correction (may be redispatched), never
+    'not offered'; complete/deferred suppresses retained review evidence but
+    never hides genuinely active motion — that is runtime/graph drift."""
+    ready, in_flight, correction, blocked, drift = [], [], [], [], []
     for node_id, info in sorted(graph.items()):
-        if info["status"] in SATISFIED_DEP_STATUSES:
-            continue  # accepted/deferred: evidence retained, no longer motion
         motion = runtime.get(node_id)
+        if info["status"] in SATISFIED_DEP_STATUSES:
+            if motion is not None and motion["phase"] not in {
+                "awaiting review",
+                "failed — awaiting correction",
+            }:
+                drift.append((node_id, info["status"], motion["phase"]))
+            continue  # accepted/deferred: evidence retained, no longer motion
         if motion is not None:
-            in_flight.append((node_id, motion))
+            if motion["phase"] == "failed — awaiting correction":
+                correction.append((node_id, motion))
+            else:
+                in_flight.append((node_id, motion))
             continue
         unsatisfied = _unsatisfied_deps(graph, info)
         if info["status"] == "ready" and not unsatisfied:
@@ -214,8 +237,10 @@ def derive(graph: dict, runtime: dict) -> dict:
     return {
         "ready": ready,
         "in_flight": in_flight,
+        "correction": correction,
         "blocked": blocked,
         "unlocks": unlocks,
+        "drift": drift,
     }
 
 
@@ -226,6 +251,7 @@ def render_text(project_id: str, derived: dict, runtime_note: str | None = None)
     lines.append(
         f"  {len(derived['ready'])} ready · "
         f"{len(derived['in_flight'])} in flight · "
+        f"{len(derived['correction'])} awaiting correction · "
         f"{len(derived['blocked'])} blocked · "
         f"{len(derived['unlocks'])} acceptance unlocks"
     )
@@ -249,6 +275,18 @@ def render_text(project_id: str, derived: dict, runtime_note: str | None = None)
     else:
         lines.append("  (none)")
 
+    lines.append("\nawaiting correction (may be redispatched):")
+    if runtime_note:
+        lines.append("  (unknown — runtime unavailable)")
+    elif derived["correction"]:
+        for node_id, motion in derived["correction"]:
+            result = ""
+            if motion["result"]:
+                result = f"  {motion['result'][0]}: {motion['result'][1]}"
+            lines.append(f"  {node_id}  — {motion['phase']}{result}")
+    else:
+        lines.append("  (none)")
+
     lines.append("\nblocked (incomplete dependencies):")
     if derived["blocked"]:
         for node_id, status, unsatisfied in derived["blocked"]:
@@ -258,6 +296,13 @@ def render_text(project_id: str, derived: dict, runtime_note: str | None = None)
                 lines.append(f"  {node_id}  ← {detail}{drift}")
             else:
                 lines.append(f"  {node_id}  ← deps satisfied; graph status still pending")
+    else:
+        lines.append("  (none)")
+
+    lines.append("\nruntime/graph drift:")
+    if derived["drift"]:
+        for node_id, status, phase in derived["drift"]:
+            lines.append(f"  {node_id}  — graph {status} but runtime {phase}")
     else:
         lines.append("  (none)")
 

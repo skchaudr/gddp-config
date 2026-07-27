@@ -57,13 +57,15 @@ CREATE TABLE jobs (
 """
 
 
-def _write_node(nodes_dir: Path, node_id: str, status: str, modes: list[str]):
+def _write_node(nodes_dir: Path, node_id: str, status: str, modes: list[str], deps: list[str] | None = None):
+    deps_yaml = "depends_on: []\n" if not deps else "depends_on:\n" + "".join(f"  - {d}\n" for d in deps)
     (nodes_dir / f"{node_id}.yaml").write_text(
         f"schema_version: '1.0'\n"
         f"schema_type: node\n"
         f"node_id: {node_id}\n"
         f"title: t\n"
         f"status: {status}\n"
+        f"{deps_yaml}"
         f"allowed_execution_modes: {json.dumps(modes)}\n"
     )
 
@@ -238,6 +240,31 @@ def test_all_in_flight_refuses_whole_dispatch(con, config_root, monkeypatch):
     rc = gddp._dispatch_flow(con, config_root, "proj-a", None)
     assert rc == 2
     assert con.execute("SELECT COUNT(*) c FROM events").fetchone()["c"] == 0
+
+
+def test_dep_blocked_exact_node_refused_zero_events(con, config_root, monkeypatch):
+    # guard depends on work (ready, not complete) — the harness→guard case.
+    _write_node(
+        config_root / "graphs" / "proj-a" / "nodes",
+        "depkid", "ready", ["local_subprocess"], deps=["alpha"],
+    )
+    monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
+    rc = gddp._dispatch_flow(con, config_root, "depkid", None)
+    assert rc == 2
+    assert con.execute("SELECT COUNT(*) c FROM events").fetchone()["c"] == 0
+
+
+def test_graph_dispatch_excludes_dep_blocked_inserts_rest(con, config_root, monkeypatch):
+    _write_node(
+        config_root / "graphs" / "proj-a" / "nodes",
+        "depkid", "ready", ["local_subprocess"], deps=["alpha"],
+    )
+    monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
+    rc = gddp._dispatch_flow(con, config_root, "proj-a", None)
+    assert rc == 0
+    urls = [r["url"] for r in con.execute("SELECT url FROM events").fetchall()]
+    assert len(urls) == 3
+    assert all("node: depkid" not in u for u in urls)
 
 
 def test_failed_latest_job_stays_dispatchable(con, config_root, monkeypatch):

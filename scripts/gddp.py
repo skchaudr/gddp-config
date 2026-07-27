@@ -255,14 +255,25 @@ def _dispatch_flow(con, config_root, target, executor, project_hint=None) -> int
             "refusing to dispatch without duplicate-checking"
         )
         return 2
-    movable = [i for i in plan["items"] if i["node_id"] not in blockers]
-    excluded = [i for i in plan["items"] if i["node_id"] in blockers]
+    graph = frontier.load_graph(config_root, plan["project_id"])
+    movable, excluded = [], []
+    for item in plan["items"]:
+        if item["node_id"] in blockers:
+            excluded.append((item, "no — in flight"))
+            continue
+        deps = frontier.unsatisfied_deps(graph, item["node_id"])
+        if deps:
+            detail = ", ".join(f"{d} [{s}]" for d, s in deps)
+            excluded.append((item, f"no — dep-blocked: {detail}"))
+            continue
+        movable.append(item)
     if not movable:
         console.print(
-            "[bold red]ERROR:[/] every requested node is already executing, "
-            "being evaluated, or awaiting review — nothing offered for "
-            "duplicate dispatch"
+            "[bold red]ERROR:[/] nothing dispatchable: every requested node is "
+            "in flight or dependency-blocked —"
         )
+        for item, reason in excluded:
+            console.print(f"  {item['node_id']}: {reason}", markup=False)
         return 2
     table = Table(title=f"dispatch preview — {plan['project_id']}")
     table.add_column("node", style="bold")
@@ -270,8 +281,8 @@ def _dispatch_flow(con, config_root, target, executor, project_hint=None) -> int
     table.add_column("dispatch?", style="yellow")
     for item in movable:
         table.add_row(item["node_id"], item["executor"], "yes")
-    for item in excluded:
-        table.add_row(item["node_id"], item["executor"], "no — in flight")
+    for item, reason in excluded:
+        table.add_row(item["node_id"], item["executor"], Text(reason))
     console.print(table)
     try:
         answer = Prompt.ask(

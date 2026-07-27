@@ -149,11 +149,17 @@ def test_in_flight_phases_and_result_labels(config_root, con):
     assert results["grandchild"] == ("outcome", "success")  # raw outcome labeled
 
 
-def test_failed_latest_job_shows_awaiting_correction(config_root, con):
+def test_failed_latest_job_is_correction_not_in_flight(config_root, con):
     _job(con, "j1", "work", "failed")
     derived = _derive(config_root, con)
     assert derived["ready"] == []
-    assert derived["in_flight"][0][1]["phase"] == "failed — awaiting correction"
+    assert derived["in_flight"] == []  # failed is not 'not offered'
+    assert derived["correction"][0][0] == "work"
+    assert derived["correction"][0][1]["phase"] == "failed — awaiting correction"
+    text = frontier.render_text("g", derived)
+    assert "awaiting correction (may be redispatched):" in text
+    in_flight_section = text.split("in flight (not offered for dispatch):")[1].split("awaiting correction")[0]
+    assert "work" not in in_flight_section
 
 
 def test_superseded_old_job_does_not_haunt(config_root, con):
@@ -170,6 +176,34 @@ def test_dispatch_blockers_semantics(config_root, con):
     _job(con, "j3", "grandchild", "failed", ts="2026-07-26T10:00")
     _job(con, "j4", "guard", "failed", ts="2026-07-26T10:00")
     assert frontier.dispatch_blockers(con, "g") == {"work", "child"}
+
+
+def test_dispatch_blockers_catch_older_active_and_drift(config_root, con):
+    # Older job still active beneath an inactive latest job.
+    _job(con, "j_old", "work", "running", ts="2026-07-26T08:00")
+    _job(con, "j_new", "work", "failed", ts="2026-07-26T09:00")
+    # status=failed / queue_state=running drift row.
+    con.execute(
+        "INSERT INTO jobs VALUES ('j_drift', 'child', 'g', 'failed', 'running', '2026-07-26T10:00')"
+    )
+    assert frontier.dispatch_blockers(con, "g") == {"work", "child"}
+
+
+def test_complete_node_with_active_session_is_drift_not_hidden(config_root, con):
+    _job(con, "j1", "base", "running")  # base is complete in graph
+    con.execute("INSERT INTO executor_sessions VALUES ('s1', 'j1', 'running', '2026-07-26T10:05')")
+    derived = _derive(config_root, con)
+    assert derived["in_flight"] == []  # not ordinary motion…
+    assert derived["drift"] == [("base", "complete", "executing")]  # …it is drift
+    text = frontier.render_text("g", derived)
+    assert "base  — graph complete but runtime executing" in text
+
+
+def test_complete_node_with_retained_review_evidence_is_not_drift(config_root, con):
+    _job(con, "j1", "base", "awaiting_review")
+    derived = _derive(config_root, con)
+    assert derived["drift"] == []
+    assert derived["in_flight"] == []
 
 
 # --- downstream impact ------------------------------------------------------- #
@@ -225,4 +259,5 @@ def test_render_marks_runtime_unavailable_explicitly(config_root, con):
     text = frontier.render_text("g", derived, runtime_note="database is locked")
     assert "runtime: UNAVAILABLE — database is locked" in text
     assert "in flight (not offered for dispatch):\n  (unknown — runtime unavailable)" in text
+    assert "awaiting correction (may be redispatched):\n  (unknown — runtime unavailable)" in text
     assert "unlocks on acceptance:\n  (unknown — runtime unavailable)" in text
