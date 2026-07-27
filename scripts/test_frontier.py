@@ -162,6 +162,28 @@ def test_failed_latest_job_is_correction_not_in_flight(config_root, con):
     assert "work" not in in_flight_section
 
 
+def test_view_older_active_job_wins_over_newer_failed(config_root, con):
+    _job(con, "j_old", "work", "running", ts="2026-07-26T08:00")
+    _job(con, "j_new", "work", "failed", ts="2026-07-26T09:00")
+    derived = _derive(config_root, con)
+    assert derived["correction"] == []  # active truth wins; not 'may be redispatched'
+    assert derived["in_flight"][0][0] == "work"
+    assert derived["in_flight"][0][1]["phase"] == "queued"  # running, no session row
+
+
+def test_view_failed_running_drift_is_active_and_marked(config_root, con):
+    con.execute(
+        "INSERT INTO jobs VALUES ('j_d', 'child', 'g', 'failed', 'running', '2026-07-26T10:00')"
+    )
+    derived = _derive(config_root, con)
+    assert derived["correction"] == []
+    motion = dict(derived["in_flight"])["child"]
+    assert motion["phase"] == "queued"
+    assert motion["disagreement"] == "failed/running"
+    text = frontier.render_text("g", derived)
+    assert "child  — queued (status/queue: failed/running)" in text
+
+
 def test_superseded_old_job_does_not_haunt(config_root, con):
     _job(con, "j_old", "work", "failed", ts="2026-07-26T08:00")
     _job(con, "j_new", "work", "awaiting_review", ts="2026-07-26T09:00")

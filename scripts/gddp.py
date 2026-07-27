@@ -113,6 +113,34 @@ def _configured_executor(project_doc: dict, modes: list[str]) -> str:
     return policy.get("default_executor") or "jules"
 
 
+def _node_status_pairs(config_root: Path, project_id: str) -> dict:
+    """node_id -> {summary, yaml, modes} across both graph status surfaces.
+
+    project.yaml summaries are the readiness authority (the same contract
+    GraphReader reads); node YAMLs carry modes. A summary/YAML disagreement
+    is graph drift and must refuse, never silently pick one.
+    """
+    project_doc = _import_module("node_cli").load_project_doc(config_root, project_id)
+    summary = {
+        n.get("id"): n.get("status")
+        for n in project_doc.get("nodes", [])
+        if n.get("id")
+    }
+    out = {}
+    nodes_dir = Path(config_root) / "graphs" / project_id / "nodes"
+    for path in sorted(nodes_dir.glob("*.yaml")):
+        data = yaml.safe_load(path.read_text()) or {}
+        nid = data.get("node_id") or path.stem
+        out[nid] = {
+            "summary": summary.get(nid),
+            "yaml": data.get("status"),
+            "modes": list(data.get("allowed_execution_modes") or []),
+        }
+    for nid in summary:
+        out.setdefault(nid, {"summary": summary[nid], "yaml": None, "modes": []})
+    return out
+
+
 def build_dispatch_plan(config_root, target, executor, project_hint=None):
     """Resolve target graph-first, validate everything, return a plan dict.
 
@@ -124,7 +152,20 @@ def build_dispatch_plan(config_root, target, executor, project_hint=None):
     projects = _graph_projects(config_root)
     if target in projects and project_hint is None:
         project_id = target
-        nodes = _ready_graph_nodes(config_root, project_id)
+        nodes = []
+        drift = []
+        for nid, pair in sorted(_node_status_pairs(config_root, project_id).items()):
+            if pair["summary"] != "ready" or pair["yaml"] is None:
+                continue  # summary is the readiness authority; missing YAML skipped
+            if pair["yaml"] != "ready":
+                drift.append(f"{nid} (summary ready / yaml {pair['yaml']})")
+                continue
+            nodes.append({"node_id": nid, "modes": pair["modes"]})
+        if drift:
+            raise DispatchError(
+                "graph drift — project.yaml summary and node YAML disagree: "
+                + ", ".join(drift)
+            )
         if not nodes:
             raise DispatchError(f"graph '{target}' has no ready nodes")
         if executor:
@@ -154,13 +195,20 @@ def build_dispatch_plan(config_root, target, executor, project_hint=None):
                 "dispatch is exact — qualify from the interactive menu"
             )
         project_id = matches[0]
-        data = yaml.safe_load(
-            (config_root / "graphs" / project_id / "nodes" / f"{target}.yaml").read_text()
-        ) or {}
-        status = data.get("status")
-        if status != "ready":
-            raise DispatchError(f"node '{target}' is '{status}', not ready")
-        modes = list(data.get("allowed_execution_modes") or [])
+        pair = _node_status_pairs(config_root, project_id).get(
+            target, {"summary": None, "yaml": None, "modes": []}
+        )
+        if pair["summary"] != pair["yaml"]:
+            raise DispatchError(
+                f"graph drift for '{target}': project.yaml summary is "
+                f"'{pair['summary']}', node YAML is '{pair['yaml']}' — "
+                "reconcile before dispatch"
+            )
+        if pair["summary"] != "ready":
+            raise DispatchError(
+                f"node '{target}' is '{pair['summary']}', not ready"
+            )
+        modes = pair["modes"]
         if executor and executor not in modes:
             raise DispatchError(
                 f"executor '{executor}' not in {target}.allowed_execution_modes: "

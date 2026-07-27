@@ -88,18 +88,6 @@ def load_graph(config_root: Path, project_id: str) -> dict:
     return nodes
 
 
-def _latest_job_per_node(con, project_id: str):
-    rows = con.execute(
-        "SELECT job_id, node_id, status, queue_state, created_at "
-        "FROM jobs WHERE project_id = ? ORDER BY created_at DESC",
-        (project_id,),
-    ).fetchall()
-    latest = {}
-    for row in rows:  # DESC → first row per node is its latest job
-        latest.setdefault(row["node_id"], row)
-    return latest
-
-
 def _latest_session_state(con, job_id: str):
     row = con.execute(
         "SELECT state FROM executor_sessions WHERE job_id = ? "
@@ -129,24 +117,55 @@ def _latest_result_label(con, job_id: str):
 
 
 def load_runtime(con, project_id: str) -> dict:
-    """node_id -> {phase, job_id, result} for nodes whose latest job is open."""
+    """node_id -> {phase, job_id, result, disagreement} for nodes with motion.
+
+    Motion selection mirrors the dispatch safety rule: ANY job active in
+    either state column takes precedence (most recent active job wins); only
+    when nothing is active does the latest settled job's failure render as
+    awaiting correction. status/queue_state disagreement is surfaced, never
+    coalesced away.
+    """
+    rows = con.execute(
+        "SELECT job_id, node_id, status, queue_state, created_at "
+        "FROM jobs WHERE project_id = ? ORDER BY created_at DESC",
+        (project_id,),
+    ).fetchall()
+    by_node: dict[str, list] = {}
+    for row in rows:  # DESC → per-node lists stay newest-first
+        by_node.setdefault(row["node_id"], []).append(row)
     active = {}
-    for node_id, job in _latest_job_per_node(con, project_id).items():
-        state = job["status"] or job["queue_state"]
+    for node_id, jobs in by_node.items():
+        current = next(
+            (
+                job for job in jobs
+                if job["status"] in ACTIVE_JOB_STATES
+                or job["queue_state"] in ACTIVE_JOB_STATES
+            ),
+            None,
+        )
+        if current is None:
+            latest = jobs[0]
+            if "failed" in {latest["status"], latest["queue_state"]}:
+                active[node_id] = {
+                    "phase": "failed — awaiting correction",
+                    "job_id": latest["job_id"],
+                    "result": _latest_result_label(con, latest["job_id"]),
+                    "disagreement": None,
+                }
+            continue
+        status, queue = current["status"], current["queue_state"]
+        state = status if status in ACTIVE_JOB_STATES else queue
         if state == "awaiting_review":
             phase = "awaiting review"
-        elif state == "failed":
-            phase = "failed — awaiting correction"
-        elif state in ACTIVE_JOB_STATES:
-            phase = _SESSION_PHASES.get(
-                _latest_session_state(con, job["job_id"]), "queued"
-            )
         else:
-            continue
+            phase = _SESSION_PHASES.get(
+                _latest_session_state(con, current["job_id"]), "queued"
+            )
         active[node_id] = {
             "phase": phase,
-            "job_id": job["job_id"],
-            "result": _latest_result_label(con, job["job_id"]),
+            "job_id": current["job_id"],
+            "result": _latest_result_label(con, current["job_id"]),
+            "disagreement": (f"{status}/{queue}" if status != queue else None),
         }
     return active
 
@@ -271,7 +290,11 @@ def render_text(project_id: str, derived: dict, runtime_note: str | None = None)
             result = ""
             if motion["result"]:
                 result = f"  {motion['result'][0]}: {motion['result'][1]}"
-            lines.append(f"  {node_id}  — {motion['phase']}{result}")
+            drift = (
+                f" (status/queue: {motion['disagreement']})"
+                if motion.get("disagreement") else ""
+            )
+            lines.append(f"  {node_id}  — {motion['phase']}{drift}{result}")
     else:
         lines.append("  (none)")
 

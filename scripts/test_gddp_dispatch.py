@@ -70,16 +70,26 @@ def _write_node(nodes_dir: Path, node_id: str, status: str, modes: list[str], de
     )
 
 
+def _write_project_yaml(root: Path, project: str, repo: str, statuses: dict):
+    summary = "\n".join(f"  - id: {n}\n    status: {s}" for n, s in statuses.items())
+    (root / "graphs" / project / "project.yaml").write_text(
+        f"project_id: {project}\nrepo: {repo}\n"
+        "execution_policy:\n  default_executor: jules_api\n"
+        f"nodes:\n{summary}\n"
+    )
+
+
 @pytest.fixture
 def config_root(tmp_path):
     root = tmp_path / "config"
-    for project, repo in (("proj-a", "org/a"), ("proj-b", "org/b")):
-        nodes = root / "graphs" / project / "nodes"
-        nodes.mkdir(parents=True)
-        (root / "graphs" / project / "project.yaml").write_text(
-            f"project_id: {project}\nrepo: {repo}\n"
-            "execution_policy:\n  default_executor: jules_api\n"
-        )
+    for project in ("proj-a", "proj-b"):
+        (root / "graphs" / project / "nodes").mkdir(parents=True)
+    _write_project_yaml(root, "proj-a", "org/a", {
+        "alpha": "ready", "beta": "ready", "gamma": "pending", "shared": "ready",
+    })
+    _write_project_yaml(root, "proj-b", "org/b", {
+        "shared": "ready", "proj-a": "ready",
+    })
     a = root / "graphs" / "proj-a" / "nodes"
     _write_node(a, "alpha", "ready", ["local_subprocess"])
     _write_node(a, "beta", "ready", ["jules_api", "local_subprocess"])
@@ -248,6 +258,10 @@ def test_dep_blocked_exact_node_refused_zero_events(con, config_root, monkeypatc
         config_root / "graphs" / "proj-a" / "nodes",
         "depkid", "ready", ["local_subprocess"], deps=["alpha"],
     )
+    _write_project_yaml(config_root, "proj-a", "org/a", {
+        "alpha": "ready", "beta": "ready", "gamma": "pending",
+        "shared": "ready", "depkid": "ready",
+    })
     monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
     rc = gddp._dispatch_flow(con, config_root, "depkid", None)
     assert rc == 2
@@ -259,12 +273,43 @@ def test_graph_dispatch_excludes_dep_blocked_inserts_rest(con, config_root, monk
         config_root / "graphs" / "proj-a" / "nodes",
         "depkid", "ready", ["local_subprocess"], deps=["alpha"],
     )
+    _write_project_yaml(config_root, "proj-a", "org/a", {
+        "alpha": "ready", "beta": "ready", "gamma": "pending",
+        "shared": "ready", "depkid": "ready",
+    })
     monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
     rc = gddp._dispatch_flow(con, config_root, "proj-a", None)
     assert rc == 0
     urls = [r["url"] for r in con.execute("SELECT url FROM events").fetchall()]
     assert len(urls) == 3
     assert all("node: depkid" not in u for u in urls)
+
+
+def test_status_authority_refusals(config_root):
+    # Node YAML ready but summary pending → drift refusal, not dispatch.
+    _write_node(
+        config_root / "graphs" / "proj-a" / "nodes",
+        "sneak", "ready", ["local_subprocess"],
+    )
+    _write_project_yaml(config_root, "proj-a", "org/a", {
+        "alpha": "ready", "beta": "ready", "gamma": "pending",
+        "shared": "ready", "sneak": "pending",
+    })
+    with pytest.raises(gddp.DispatchError, match="graph drift"):
+        gddp.build_dispatch_plan(config_root, "sneak", None)
+    # Summary ready but YAML pending → drift refusal (also poisons graph dispatch).
+    _write_node(
+        config_root / "graphs" / "proj-a" / "nodes",
+        "sneak", "pending", ["local_subprocess"],
+    )
+    _write_project_yaml(config_root, "proj-a", "org/a", {
+        "alpha": "ready", "beta": "ready", "gamma": "pending",
+        "shared": "ready", "sneak": "ready",
+    })
+    with pytest.raises(gddp.DispatchError, match="graph drift"):
+        gddp.build_dispatch_plan(config_root, "sneak", None)
+    with pytest.raises(gddp.DispatchError, match="graph drift"):
+        gddp.build_dispatch_plan(config_root, "proj-a", None)
 
 
 def test_failed_latest_job_stays_dispatchable(con, config_root, monkeypatch):
