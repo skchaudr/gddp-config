@@ -24,7 +24,9 @@ from pathlib import Path
 
 import yaml
 
-ACTIVE_JOB_STATES = frozenset({"ready", "running", "awaiting_review", "dispatching"})
+ACTIVE_JOB_STATES = frozenset({
+    "ready", "running", "awaiting_result", "awaiting_review", "dispatching",
+})
 # Terminal graph statuses: suppress the NODE ITSELF (motion/unlocks) — a
 # deferred node is settled human business, never again in motion.
 TERMINAL_NODE_STATUSES = frozenset({"complete", "deferred"})
@@ -72,13 +74,19 @@ def project_ids(config_root: Path) -> list[str]:
 
 
 def load_graph(config_root: Path, project_id: str) -> dict:
-    """node_id -> {status, depends_on, executor} for one graph."""
+    """Preserve project-summary and node-YAML status for one graph."""
     config_root = Path(config_root)
     project_doc = yaml.safe_load(
         (config_root / "graphs" / project_id / "project.yaml").read_text()
     ) or {}
     nodes = {
-        n["id"]: {"status": n.get("status"), "depends_on": [], "executor": None}
+        n["id"]: {
+            "status": n.get("status"),
+            "summary_status": n.get("status"),
+            "yaml_status": None,
+            "depends_on": [],
+            "executor": None,
+        }
         for n in project_doc.get("nodes", [])
         if n.get("id")
     }
@@ -86,13 +94,34 @@ def load_graph(config_root: Path, project_id: str) -> dict:
     for path in sorted(nodes_dir.glob("*.yaml")):
         data = yaml.safe_load(path.read_text()) or {}
         node_id = data.get("node_id") or path.stem
-        entry = nodes.setdefault(node_id, {"status": None, "depends_on": [], "executor": None})
-        if entry["status"] is None:
-            entry["status"] = data.get("status")
+        entry = nodes.setdefault(node_id, {
+            "status": data.get("status"),
+            "summary_status": None,
+            "yaml_status": None,
+            "depends_on": [],
+            "executor": None,
+        })
+        yaml_status = data.get("status")
+        entry["yaml_status"] = yaml_status
         entry["depends_on"] = list(data.get("depends_on") or [])
         modes = data.get("allowed_execution_modes") or []
         entry["executor"] = modes[0] if modes else None
     return nodes
+
+
+def _status_drift_detail(info: dict) -> str | None:
+    summary, node_yaml = info.get("summary_status"), info.get("yaml_status")
+    if summary is None:
+        return f"status drift: summary missing / yaml {node_yaml or 'missing'}"
+    if node_yaml is None:
+        return f"status drift: summary {summary} / yaml missing"
+    if summary != node_yaml:
+        return f"status drift: summary {summary} / yaml {node_yaml}"
+    return None
+
+
+def _status_surfaces_agree(info: dict) -> bool:
+    return _status_drift_detail(info) is None
 
 
 def _latest_session_state(con, job_id: str):
@@ -164,6 +193,8 @@ def load_runtime(con, project_id: str) -> dict:
         state = status if status in ACTIVE_JOB_STATES else queue
         if state == "awaiting_review":
             phase = "awaiting review"
+        elif state == "awaiting_result":
+            phase = "awaiting result"
         else:
             phase = _SESSION_PHASES.get(
                 _latest_session_state(con, current["job_id"]), "queued"
@@ -220,12 +251,15 @@ def derive(graph: dict, runtime: dict) -> dict:
     ready, in_flight, correction, blocked, drift = [], [], [], [], []
     for node_id, info in sorted(graph.items()):
         motion = runtime.get(node_id)
+        status_drift = _status_drift_detail(info)
+        if status_drift:
+            drift.append((node_id, status_drift))
         if info["status"] in TERMINAL_NODE_STATUSES:
             if motion is not None and motion["phase"] not in {
                 "awaiting review",
                 "failed — awaiting correction",
             }:
-                drift.append((node_id, info["status"], motion["phase"]))
+                drift.append((node_id, f"graph {info['status']} but runtime {motion['phase']}"))
             continue  # accepted/deferred: evidence retained, no longer motion
         if motion is not None:
             if motion["phase"] == "failed — awaiting correction":
@@ -234,6 +268,8 @@ def derive(graph: dict, runtime: dict) -> dict:
                 in_flight.append((node_id, motion))
             continue
         unsatisfied = _unsatisfied_deps(graph, info)
+        if status_drift:
+            continue  # both status surfaces must exist and agree
         if info["status"] == "ready" and not unsatisfied:
             ready.append((node_id, info["executor"]))
         elif info["status"] in {"ready", "pending"}:
@@ -243,10 +279,15 @@ def derive(graph: dict, runtime: dict) -> dict:
     for node_id, motion in sorted(runtime.items()):
         if motion["phase"] != "awaiting review":
             continue
-        if (graph.get(node_id) or {}).get("status") in TERMINAL_NODE_STATUSES:
+        source = graph.get(node_id) or {}
+        if not _status_surfaces_agree(source):
+            continue
+        if source.get("status") in TERMINAL_NODE_STATUSES:
             continue  # already accepted; retained evidence is not an unlock
         downstream = []
         for cand, info in sorted(graph.items()):
+            if not _status_surfaces_agree(info):
+                continue
             if info["status"] not in {"pending", "ready"} or cand in runtime:
                 continue
             if node_id not in info["depends_on"]:
@@ -274,16 +315,23 @@ def render_text(project_id: str, derived: dict, runtime_note: str | None = None)
     lines = [f"frontier: {project_id}"]
     if runtime_note:
         lines.append(f"  runtime: UNAVAILABLE — {runtime_note}")
-    lines.append(
-        f"  {len(derived['ready'])} ready · "
-        f"{len(derived['in_flight'])} in flight · "
-        f"{len(derived['correction'])} awaiting correction · "
-        f"{len(derived['blocked'])} blocked · "
-        f"{len(derived['unlocks'])} acceptance unlocks"
-    )
+        lines.append(
+            f"  ready unknown · in flight unknown · awaiting correction unknown · "
+            f"{len(derived['blocked'])} blocked · unlocks unknown"
+        )
+    else:
+        lines.append(
+            f"  {len(derived['ready'])} ready · "
+            f"{len(derived['in_flight'])} in flight · "
+            f"{len(derived['correction'])} awaiting correction · "
+            f"{len(derived['blocked'])} blocked · "
+            f"{len(derived['unlocks'])} acceptance unlocks"
+        )
 
     lines.append("\nready now (dispatchable):")
-    if derived["ready"]:
+    if runtime_note:
+        lines.append("  (unknown — runtime unavailable)")
+    elif derived["ready"]:
         for node_id, executor in derived["ready"]:
             lines.append(f"  {node_id}" + (f"  [{executor}]" if executor else ""))
     else:
@@ -331,8 +379,8 @@ def render_text(project_id: str, derived: dict, runtime_note: str | None = None)
 
     lines.append("\nruntime/graph drift:")
     if derived["drift"]:
-        for node_id, status, phase in derived["drift"]:
-            lines.append(f"  {node_id}  — graph {status} but runtime {phase}")
+        for node_id, detail in derived["drift"]:
+            lines.append(f"  {node_id}  — {detail}")
     else:
         lines.append("  (none)")
 

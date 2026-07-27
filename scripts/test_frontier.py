@@ -161,6 +161,16 @@ def test_in_flight_phases_and_result_labels(config_root, con):
     assert results["grandchild"] == ("outcome", "success")  # raw outcome labeled
 
 
+def test_awaiting_result_is_active_and_never_offered(config_root, con):
+    _job(con, "j_wait", "work", "awaiting_result")
+    runtime = frontier.load_runtime(con, "g")
+    assert runtime["work"]["phase"] == "awaiting result"
+    assert frontier.dispatch_blockers(con, "g") == {"work"}
+    derived = frontier.derive(_graph(config_root), runtime)
+    assert "work" not in [node_id for node_id, _ in derived["ready"]]
+    assert dict(derived["in_flight"])["work"]["phase"] == "awaiting result"
+
+
 def test_failed_latest_job_is_correction_not_in_flight(config_root, con):
     _job(con, "j1", "work", "failed")
     derived = _derive(config_root, con)
@@ -228,7 +238,7 @@ def test_complete_node_with_active_session_is_drift_not_hidden(config_root, con)
     con.execute("INSERT INTO executor_sessions VALUES ('s1', 'j1', 'running', '2026-07-26T10:05')")
     derived = _derive(config_root, con)
     assert derived["in_flight"] == []  # not ordinary motion…
-    assert derived["drift"] == [("base", "complete", "executing")]  # …it is drift
+    assert derived["drift"] == [("base", "graph complete but runtime executing")]
     text = frontier.render_text("g", derived)
     assert "base  — graph complete but runtime executing" in text
 
@@ -286,6 +296,71 @@ def test_connect_readonly_unavailable_and_enforced_ro(tmp_path):
     with pytest.raises(sqlite3.OperationalError):
         con.execute("CREATE TABLE nope (x TEXT)")  # read-only is enforced
     con.close()
+
+
+def test_status_disagreement_demoted_from_ready_to_drift(config_root, con):
+    # Summary says ready, node YAML says pending — dispatch refuses this;
+    # the view must agree instead of offering it under 'ready now'.
+    nodes_dir = config_root / "graphs" / "g" / "nodes"
+    _write_node(nodes_dir, "work", "pending", modes=["jules_api"])
+    derived = _derive(config_root, con)
+    assert derived["ready"] == []
+    assert ("work", "status drift: summary ready / yaml pending") in derived["drift"]
+    text = frontier.render_text("g", derived)
+    assert "work  — status drift: summary ready / yaml pending" in text
+    ready_section = text.split("ready now (dispatchable):")[1].split("in flight")[0]
+    assert "work" not in ready_section
+
+
+def test_yaml_only_ready_is_drift_not_ready_or_unlockable(config_root, con):
+    nodes_dir = config_root / "graphs" / "g" / "nodes"
+    _write_node(nodes_dir, "yaml-only", "ready", deps=["work"], modes=["jules_api"])
+    derived = _derive(config_root, con)
+    assert "yaml-only" not in [node_id for node_id, _ in derived["ready"]]
+    assert (
+        "yaml-only", "status drift: summary missing / yaml ready"
+    ) in derived["drift"]
+
+    _job(con, "j_work", "work", "awaiting_review")
+    derived = _derive(config_root, con)
+    unlocked = [node_id for _, downstream in derived["unlocks"] for node_id in downstream]
+    assert "yaml-only" not in unlocked
+
+
+def test_summary_only_ready_is_drift_not_ready_or_an_unlock(config_root, con):
+    project = config_root / "graphs" / "g" / "project.yaml"
+    project.write_text(
+        project.read_text()
+        + "  - id: summary-only\n    status: ready\n"
+        + "  - id: after-summary\n    status: pending\n"
+    )
+    nodes_dir = config_root / "graphs" / "g" / "nodes"
+    _write_node(nodes_dir, "after-summary", "pending", deps=["summary-only"])
+
+    derived = _derive(config_root, con)
+    assert "summary-only" not in [node_id for node_id, _ in derived["ready"]]
+    assert (
+        "summary-only", "status drift: summary ready / yaml missing"
+    ) in derived["drift"]
+
+    _job(con, "j_summary", "summary-only", "awaiting_review")
+    derived = _derive(config_root, con)
+    assert "summary-only" not in [node_id for node_id, _ in derived["unlocks"]]
+
+
+def test_runtime_unavailable_hides_all_motion_sections(config_root, con):
+    derived = _derive(config_root, con)  # would be ready/unlocks if trusted
+    text = frontier.render_text("g", derived, runtime_note="db gone")
+    assert "ready unknown · in flight unknown" in text
+    ready_section = text.split("ready now (dispatchable):")[1].split("in flight")[0]
+    assert ready_section.strip() == "(unknown — runtime unavailable)"
+    for section in (
+        "in flight (not offered for dispatch):",
+        "awaiting correction (may be redispatched):",
+        "unlocks on acceptance:",
+    ):
+        body = text.split(section)[1].split("\n\n")[0]
+        assert "unknown — runtime unavailable" in body
 
 
 def test_render_marks_runtime_unavailable_explicitly(config_root, con):
