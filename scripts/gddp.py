@@ -471,13 +471,25 @@ def _pause() -> None:
 
 
 def _menu_choice(actions: dict[str, tuple[str, str]], default: str) -> str:
-    """Read one valid menu key immediately, without waiting for Enter."""
+    """Read one valid menu key immediately, without waiting for Enter.
+
+    Escape follows the menu hierarchy: it selects ``b`` when a back action is
+    present, the default action for confirmation-style menus, and ``q`` at the
+    top-level menu. Ctrl-C remains the unambiguous whole-TUI quit key.
+    """
     getch = _import_module("terminal").getch
     while True:
         console.print(Text("select", style="bold cyan"), end=" ")
         choice = getch()
         if choice == "\x03":
             raise KeyboardInterrupt
+        if choice == "\x1b":
+            if "b" in actions:
+                choice = "b"
+            elif "q" in actions:
+                choice = "q"
+            else:
+                choice = default
         if choice in {"\r", "\n"}:
             choice = default
         choice = choice.lower()
@@ -522,8 +534,14 @@ def _paged_menu(
         if page_count > 1:
             actions["p"] = ("previous page", "")
             actions["n"] = ("next page", "")
+            actions["left"] = ("previous page", "")
+            actions["up"] = ("previous page", "")
+            actions["right"] = ("next page", "")
+            actions["down"] = ("next page", "")
             menu.add_row("p", "previous page", "")
             menu.add_row("n", "next page", "")
+            menu.add_row("←/↑", "previous page", "")
+            menu.add_row("→/↓", "next page", "")
         actions["b"] = (back_label, "")
         actions["q"] = ("quit", "")
         menu.add_row("b", back_label, "")
@@ -531,9 +549,9 @@ def _paged_menu(
         console.print(menu)
 
         choice = _menu_choice(actions, default="1")
-        if choice == "p":
+        if choice in {"p", "left", "up"}:
             page = (page - 1) % page_count
-        elif choice == "n":
+        elif choice in {"n", "right", "down"}:
             page = (page + 1) % page_count
         elif choice == "b":
             return _MENU_BACK
@@ -565,7 +583,7 @@ def _confirm_status_change(project: str, node_id: str, status: str) -> int:
             Text("reason", style="cyan"),
             default="",
         ).strip()
-    except (EOFError, KeyboardInterrupt):
+    except EOFError:
         console.print()
         console.print(Text("Unchanged — reason required.", style="dim"))
         return 1
@@ -941,7 +959,7 @@ def _confirm_job_state_change(ref: str, state: str) -> int:
         return 1
     try:
         reason = Prompt.ask(Text("reason", style="cyan"), default="").strip()
-    except (EOFError, KeyboardInterrupt):
+    except EOFError:
         console.print()
         console.print(Text("Unchanged — reason required.", style="dim"))
         return 1
@@ -1008,7 +1026,7 @@ def interactive_jobs():
         console.print(Text("open job" if choice == "o" else "update job", style="bold"))
         try:
             ref = Prompt.ask("job or node ID").strip()
-        except (EOFError, KeyboardInterrupt):
+        except EOFError:
             continue
         if not ref:
             continue
@@ -1139,7 +1157,7 @@ def interactive_menu():
             if choice == "v":
                 _pause()
         except KeyboardInterrupt:
-            continue
+            break
     _clear_screen()
     console.print(Text("bye.", style="dim"))
 

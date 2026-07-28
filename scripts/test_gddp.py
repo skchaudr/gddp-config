@@ -132,6 +132,22 @@ class OverviewTests(unittest.TestCase):
         with patch.object(gddp, "_import_module", return_value=terminal):
             self.assertEqual(gddp._menu_choice(actions, default="n"), "n")
 
+    def test_menu_choice_maps_escape_to_back(self):
+        terminal = SimpleNamespace(getch=lambda: "\x1b")
+        actions = {
+            "b": ("back", ""),
+            "q": ("quit", ""),
+        }
+        with patch.object(gddp, "_import_module", return_value=terminal):
+            self.assertEqual(gddp._menu_choice(actions, default="b"), "b")
+
+    def test_menu_choice_keeps_ctrl_c_as_quit_signal(self):
+        terminal = SimpleNamespace(getch=lambda: "\x03")
+        actions = {"b": ("back", ""), "q": ("quit", "")}
+        with patch.object(gddp, "_import_module", return_value=terminal):
+            with self.assertRaises(KeyboardInterrupt):
+                gddp._menu_choice(actions, default="b")
+
     def test_redirected_bare_command_uses_static_overview(self):
         fake_in = SimpleNamespace(isatty=lambda: False)
         fake_out = SimpleNamespace(isatty=lambda: False)
@@ -185,6 +201,15 @@ class OverviewTests(unittest.TestCase):
 
         self.assertEqual(selected, "node-10")
         self.assertEqual(clear.call_count, 2)
+
+    def test_paged_menu_accepts_arrow_keys_for_page_navigation(self):
+        items = [(f"node-{i}", f"Node {i}") for i in range(1, 12)]
+        keys = iter(["RIGHT", "LEFT", "RIGHT", "1"])
+        terminal = SimpleNamespace(getch=lambda: next(keys))
+        with patch.object(gddp, "_import_module", return_value=terminal):
+            selected = gddp._paged_menu("nodes", items)
+
+        self.assertEqual(selected, "node-10")
 
     def test_interactive_jobs_starts_with_real_list_command(self):
         terminal = SimpleNamespace(getch=lambda: "b")
@@ -255,6 +280,11 @@ class OverviewTests(unittest.TestCase):
             gddp.interactive_menu()
 
         jobs.assert_called_once_with()
+
+    def test_main_menu_exits_on_ctrl_c(self):
+        with patch.object(gddp, "_menu_choice", side_effect=KeyboardInterrupt), \
+                patch.object(gddp, "_clear_screen"):
+            gddp.interactive_menu()
 
     def test_node_status_label_exposes_node_index_desync(self):
         self.assertEqual(
