@@ -1,0 +1,42 @@
+schema_version: '1.0'
+schema_type: project_graph
+project_id: sab-orchestrate
+project_name: Sab Orchestrate
+description: A training ground for reliable, understandable, repeatable agent workflows
+  that can serve as bounded executors for GDDP nodes
+repo: skchaudr/sab-orchestrate
+blueprint:
+  vision: Script predictable workflows around observable Pi workers while keeping
+    judgment bounded and human review explicit
+  architecture_notes: 'A small Python runner composes one or more pi-call subprocesses
+    into visible stages.
+
+    GDDP owns node selection, packets, evaluation, and review; sab-orchestrate owns
+
+    executor-stage models, concurrency, timeouts, transcripts, and output locations.
+
+    One GDDP node receives one independently observable Pi fleet. pi-boss remains
+    an
+
+    optional capability inside a worker rather than the outer workflow engine.
+
+    '
+  major_capabilities:
+  - bounded pi-call worker
+  - scripted implement-review-repair chain
+  - concurrent per-node Pi fleets
+  - durable transcripts and returned artifacts
+graph_version: '1.0'
+created_at: '2026-07-28'
+last_updated: '2026-07-28'
+nodes_dir: nodes/
+nodes:
+- id: scripted-pi-fleet-canary
+  title: Prove one GDDP node can produce reviewable work through a scripted Pi fleet
+  status: ready
+  type: capability
+execution_policy:
+  default_executor: local_subprocess
+  max_concurrent_jobs: 2
+  require_human_review_before_overnight: true
+  artifact_gate_enforced: true

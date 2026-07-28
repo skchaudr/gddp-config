@@ -1,0 +1,65 @@
+schema_version: '1.0'
+schema_type: node
+node_id: scripted-pi-fleet-canary
+title: Prove one GDDP node can produce reviewable work through a scripted Pi fleet
+type: capability
+why: 'GDDP becomes usable when a human can select a real node, hand its bounded
+
+  packet to a predictable executor workflow, and receive implementation,
+
+  independent review, conditional repair, and evaluator evidence without
+
+  manually coordinating agents. sab-orchestrate already demonstrates one Pi
+
+  subprocess and concurrent subprocesses separately. This canary combines
+
+  those primitives into the smallest real one-node, one-fleet round trip and
+
+  returns enough evidence for Sab to decide whether the structure is worth
+
+  extending to multiple ready nodes and heterogeneous tasks.
+
+  '
+depends_on: []
+acceptance_criteria:
+- id: one-node-one-fleet
+  criterion: One real GDDP NodePacket for sab-orchestrate is executed by one scripted
+    fleet containing distinct bounded implementation and independent-review Pi processes,
+    with repair invoked only from explicit review findings
+- id: script-controls-workflow
+  criterion: A small Python runner, without a workflow DSL, explicitly controls stage
+    order, models, concurrency, timeouts, session/transcript paths, and output locations
+- id: observable-stage-evidence
+  criterion: Each top-level Pi process has a durable session or transcript plus stdout,
+    stderr, exit state, model, timing, and stage output recorded in one fleet-run
+    manifest
+- id: gddp-round-trip
+  criterion: The attempt returns its required artifacts and final commit or patch
+    through GDDP, receives the immediate evaluator receipt, and stops awaiting Sab's
+    review without mutating graph status
+- id: useful-human-decision
+  criterion: From the fleet manifest, review findings, final result, and evaluator
+    receipt, Sab can decide whether to retain, revise, or abandon the scripted-fleet
+    pattern without replaying the run
+constraints:
+- Use the NodePacket and returned-result contracts already owned by GDDP; do not add
+  a parallel job or graph state model
+- Use ordinary Python subprocess orchestration combining the Lesson 05 and Lesson
+  06 primitives; do not introduce a workflow DSL, daemon, dashboard, or service
+- Keep the canary to one sab-orchestrate node and one local Pi fleet; multi-node,
+  remote-host, and overnight behavior are follow-up work
+- A Pi worker may opt into pi-boss only when its bounded stage genuinely benefits
+  from dynamic subagents; pi-boss is not the outer scheduler
+- The runner may write only inside the isolated attempt worktree and declared artifact/session
+  directories
+- Executor success and evaluator verdict are evidence only; only Sab may accept, revise,
+  retry, split, rewire, defer, or abandon the node
+allowed_execution_modes:
+- agent
+required_artifacts:
+- decision.md
+- result-summary.md
+- patch.diff
+status: ready
+priority: critical
+unlocks: []
