@@ -92,20 +92,6 @@ def _graph_projects(config_root: Path) -> list[str]:
     )
 
 
-def _ready_graph_nodes(config_root: Path, project_id: str) -> list[dict]:
-    nodes_dir = Path(config_root) / "graphs" / project_id / "nodes"
-    ready = []
-    for path in sorted(nodes_dir.glob("*.yaml")):
-        data = yaml.safe_load(path.read_text()) or {}
-        if data.get("status") != "ready":
-            continue
-        ready.append({
-            "node_id": data.get("node_id") or path.stem,
-            "modes": list(data.get("allowed_execution_modes") or []),
-        })
-    return ready
-
-
 def _configured_executor(project_doc: dict, modes: list[str]) -> str:
     if modes:
         return modes[0]
@@ -146,11 +132,13 @@ def build_dispatch_plan(config_root, target, executor, project_hint=None):
 
     No guessing: unknown targets, ambiguous nodes, non-ready nodes, and
     executors outside a node's allowed_execution_modes are all hard errors.
-    project_hint (menu path) qualifies a node lookup to one graph.
+    project_hint (menu path) qualifies a node lookup to one graph. When the
+    target is that same graph ID, the hint came from the graph-wide menu path
+    and the target must remain a graph frontier, not be reinterpreted as a node.
     """
     config_root = Path(config_root)
     projects = _graph_projects(config_root)
-    if target in projects and project_hint is None:
+    if target in projects and project_hint in (None, target):
         project_id = target
         nodes = []
         drift = []
@@ -285,6 +273,36 @@ def _connect_events_db(db_path: Path):
     return con
 
 
+def _classify_dispatch_items(con, config_root, plan):
+    """Return the plan's genuinely dispatchable and blocked items.
+
+    This is the single truth path for both the interactive frontier display and
+    the final dispatch gate: graph-ready status alone is never presented as
+    dispatchable when dependencies or live runtime motion still block a node.
+    """
+    frontier = _import_module("frontier")
+    try:
+        blockers = frontier.dispatch_blockers(con, plan["project_id"])
+    except sqlite3.Error as exc:
+        raise DispatchError(
+            f"runtime state unreadable ({exc}); "
+            "refusing to dispatch without duplicate-checking"
+        ) from exc
+    graph = frontier.load_graph(config_root, plan["project_id"])
+    movable, excluded = [], []
+    for item in plan["items"]:
+        if item["node_id"] in blockers:
+            excluded.append((item, "no — in flight"))
+            continue
+        deps = frontier.unsatisfied_deps(graph, item["node_id"])
+        if deps:
+            detail = ", ".join(f"{dep} [{status}]" for dep, status in deps)
+            excluded.append((item, f"no — dep-blocked: {detail}"))
+            continue
+        movable.append(item)
+    return movable, excluded
+
+
 def _dispatch_flow(con, config_root, target, executor, project_hint=None) -> int:
     """Shared shell/menu path: validate, exclude in-flight nodes, preview once,
     confirm once, insert. A node executing, being evaluated, or awaiting
@@ -294,27 +312,11 @@ def _dispatch_flow(con, config_root, target, executor, project_hint=None) -> int
     except DispatchError as exc:
         console.print(f"[bold red]ERROR:[/] {exc}")
         return 2
-    frontier = _import_module("frontier")
     try:
-        blockers = frontier.dispatch_blockers(con, plan["project_id"])
-    except sqlite3.Error as exc:
-        console.print(
-            f"[bold red]ERROR:[/] runtime state unreadable ({exc}); "
-            "refusing to dispatch without duplicate-checking"
-        )
+        movable, excluded = _classify_dispatch_items(con, config_root, plan)
+    except DispatchError as exc:
+        console.print(f"[bold red]ERROR:[/] {exc}")
         return 2
-    graph = frontier.load_graph(config_root, plan["project_id"])
-    movable, excluded = [], []
-    for item in plan["items"]:
-        if item["node_id"] in blockers:
-            excluded.append((item, "no — in flight"))
-            continue
-        deps = frontier.unsatisfied_deps(graph, item["node_id"])
-        if deps:
-            detail = ", ".join(f"{d} [{s}]" for d, s in deps)
-            excluded.append((item, f"no — dep-blocked: {detail}"))
-            continue
-        movable.append(item)
     if not movable:
         console.print(
             "[bold red]ERROR:[/] nothing dispatchable: every requested node is "
@@ -415,40 +417,89 @@ def interactive_frontier():
 
 
 def interactive_dispatch():
-    """Menu path: pick a graph, see the ready frontier, dispatch explicitly."""
+    """Pick a graph and a genuinely dispatchable target with one-key menus."""
     projects = _graph_projects(ROOT)
     if not projects:
         console.print("no graphs found")
         return
-    console.print("graphs: " + ", ".join(projects))
-    project = Prompt.ask("graph")
-    if project not in projects:
-        console.print(f"[bold red]ERROR:[/] no graph named '{project}'")
-        return
-    ready = _ready_graph_nodes(ROOT, project)
-    if not ready:
-        console.print(f"graph '{project}' has no ready nodes")
-        return
-    project_doc = _import_module("node_cli").load_project_doc(ROOT, project)
-    table = Table(title=f"ready frontier — {project}")
-    table.add_column("node", style="bold")
-    table.add_column("configured executor")
-    for n in ready:
-        table.add_row(n["node_id"], _configured_executor(project_doc, n["modes"]))
-    console.print(table)
-    node = Prompt.ask("node id (blank = entire ready frontier)", default="")
-    executor = Prompt.ask("executor (blank = configured routing)", default="")
-    target = node.strip() or project
-    try:
-        con = _connect_events_db(resolve_runtime_root() / "db" / "queue.db")
-    except DispatchError as exc:
-        console.print(f"[bold red]ERROR:[/] {exc}")
-        return
-    try:
-        _dispatch_flow(con, ROOT, target, executor.strip() or None,
-                       project_hint=project)
-    finally:
-        con.close()
+    project_items = [(project_id, "") for project_id in projects]
+    while True:
+        project = _paged_menu(
+            "dispatch · graphs",
+            project_items,
+            back_label="main menu",
+        )
+        if project is _MENU_QUIT:
+            return _MENU_QUIT
+        if project is _MENU_BACK:
+            return _MENU_BACK
+        try:
+            con = _connect_events_db(resolve_runtime_root() / "db" / "queue.db")
+        except DispatchError as exc:
+            console.print(f"[bold red]ERROR:[/] {exc}")
+            return
+        try:
+            try:
+                plan = build_dispatch_plan(
+                    ROOT, project, None, project_hint=project
+                )
+                movable, excluded = _classify_dispatch_items(con, ROOT, plan)
+            except DispatchError as exc:
+                console.print(f"[bold red]ERROR:[/] {exc}")
+                return
+
+            _clear_screen()
+            table = Table(title=f"dispatchability — {project}")
+            table.add_column("node", style="bold")
+            table.add_column("executor")
+            table.add_column("state")
+            for item in movable:
+                table.add_row(item["node_id"], item["executor"], "ready now")
+            for item, reason in excluded:
+                table.add_row(item["node_id"], item["executor"], Text(reason))
+            console.print(table)
+            if not movable:
+                console.print(
+                    Text("No nodes are dispatchable now.", style="yellow")
+                )
+                return
+
+            target_items = [
+                (
+                    project,
+                    f"entire dispatchable frontier · {len(movable)} node"
+                    f"{'s' if len(movable) != 1 else ''}",
+                ),
+                *[
+                    (
+                        item["node_id"],
+                        f"{item['executor']} · ready now",
+                    )
+                    for item in movable
+                ],
+            ]
+            target = _paged_menu(
+                f"dispatch · {project}",
+                target_items,
+                back_label="graphs",
+            )
+            if target is _MENU_QUIT:
+                return _MENU_QUIT
+            if target is _MENU_BACK:
+                continue
+            executor = Prompt.ask(
+                "executor override (blank = configured routing)", default=""
+            )
+            _dispatch_flow(
+                con,
+                ROOT,
+                target,
+                executor.strip() or None,
+                project_hint=project,
+            )
+            return
+        finally:
+            con.close()
 
 
 def _import_module(name: str):
@@ -1135,7 +1186,11 @@ def interactive_menu():
                     break
             elif choice == "d":
                 _clear_screen()
-                interactive_dispatch()
+                outcome = interactive_dispatch()
+                if outcome is _MENU_QUIT:
+                    break
+                if outcome is _MENU_BACK:
+                    continue
                 _pause()
             elif choice == "f":
                 _clear_screen()

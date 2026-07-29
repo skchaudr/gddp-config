@@ -67,6 +67,11 @@ to the sibling `../gddp-runtime`; `GDDP_RUNTIME_PYTHON` can override the runtime
 interpreter. In menus, `Escape` backs up one level, `←`/`↑` and `→`/`↓`
 paginate, `q` quits, and `Ctrl-C` quits the entire TUI.
 
+The dispatch menu uses paged one-key pickers for graphs and targets. Its
+`ready now` list is the actual dispatchable frontier after dependency and live
+runtime blockers are applied; blocked nodes remain visible with their reason
+but are not offered as dispatch targets.
+
 ### Stage 1 operator commands
 
 Graph status, runtime queue state, and evaluator verdict stay **distinct**.
