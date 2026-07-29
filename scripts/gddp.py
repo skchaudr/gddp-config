@@ -72,6 +72,9 @@ _MENU_BACK = object()
 _MENU_QUIT = object()
 _RUNTIME_JOB_COMMANDS = frozenset({"list", "show", "results", "set"})
 _CLI_COMMANDS = frozenset({"node", "jobs", "verify", "obsidian", "project"})
+_CONCRETE_AGENT_EXECUTORS = frozenset(
+    {"jules", "jules_api", "jules_cli", "local_subprocess"}
+)
 
 
 # --------------------------------------------------------------------------- #
@@ -106,11 +109,25 @@ def _ready_graph_nodes(config_root: Path, project_id: str) -> list[dict]:
     return ready
 
 
+def _executor_allowed(executor: str, modes: list[str]) -> bool:
+    """Treat `agent` as executor-neutral, never as a runnable adapter name."""
+    return executor in modes or (
+        "agent" in modes and executor in _CONCRETE_AGENT_EXECUTORS
+    )
+
+
 def _configured_executor(project_doc: dict, modes: list[str]) -> str:
-    if modes:
-        return modes[0]
     policy = project_doc.get("execution_policy") or {}
-    return policy.get("default_executor") or "jules"
+    default = policy.get("default_executor") or "jules"
+    if not modes or _executor_allowed(default, modes):
+        return default
+    concrete_modes = [mode for mode in modes if mode != "agent"]
+    if concrete_modes:
+        return concrete_modes[0]
+    raise DispatchError(
+        "executor-neutral mode 'agent' requires a concrete "
+        "execution_policy.default_executor"
+    )
 
 
 def _node_status_pairs(config_root: Path, project_id: str) -> dict:
@@ -169,7 +186,11 @@ def build_dispatch_plan(config_root, target, executor, project_hint=None):
         if not nodes:
             raise DispatchError(f"graph '{target}' has no ready nodes")
         if executor:
-            conflicts = [n["node_id"] for n in nodes if executor not in n["modes"]]
+            conflicts = [
+                n["node_id"]
+                for n in nodes
+                if not _executor_allowed(executor, n["modes"])
+            ]
             if conflicts:
                 raise DispatchError(
                     f"executor '{executor}' not allowed on: {', '.join(conflicts)}"
@@ -209,7 +230,7 @@ def build_dispatch_plan(config_root, target, executor, project_hint=None):
                 f"node '{target}' is '{pair['summary']}', not ready"
             )
         modes = pair["modes"]
-        if executor and executor not in modes:
+        if executor and not _executor_allowed(executor, modes):
             raise DispatchError(
                 f"executor '{executor}' not in {target}.allowed_execution_modes: "
                 f"{modes or []}"

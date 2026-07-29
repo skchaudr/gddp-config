@@ -136,6 +136,46 @@ def test_graph_named_executor_conflict_refuses(config_root):
         gddp.build_dispatch_plan(config_root, "proj-a", "jules_api")
 
 
+def test_executor_neutral_agent_uses_concrete_project_default(config_root):
+    nodes_dir = config_root / "graphs" / "proj-a" / "nodes"
+    _write_node(nodes_dir, "neutral", "ready", ["agent"])
+    project_path = config_root / "graphs" / "proj-a" / "project.yaml"
+    project_text = project_path.read_text()
+    project_path.write_text(
+        project_text.replace(
+            "nodes:\n",
+            "nodes:\n  - id: neutral\n    status: ready\n",
+            1,
+        )
+    )
+
+    plan = gddp.build_dispatch_plan(config_root, "neutral", None)
+
+    assert plan["items"] == [{"node_id": "neutral", "executor": "jules_api"}]
+
+
+def test_executor_neutral_agent_accepts_named_concrete_executor(config_root):
+    nodes_dir = config_root / "graphs" / "proj-a" / "nodes"
+    _write_node(nodes_dir, "neutral", "ready", ["agent"])
+    project_path = config_root / "graphs" / "proj-a" / "project.yaml"
+    project_text = project_path.read_text()
+    project_path.write_text(
+        project_text.replace(
+            "nodes:\n",
+            "nodes:\n  - id: neutral\n    status: ready\n",
+            1,
+        )
+    )
+
+    plan = gddp.build_dispatch_plan(
+        config_root, "neutral", "local_subprocess"
+    )
+
+    assert plan["items"] == [
+        {"node_id": "neutral", "executor": "local_subprocess"}
+    ]
+
+
 def test_graph_wins_over_same_named_node(config_root):
     plan = gddp.build_dispatch_plan(config_root, "proj-a", None)
     assert plan["project_id"] == "proj-a"
@@ -224,6 +264,25 @@ def test_in_flight_node_refused_zero_events(con, config_root, monkeypatch):
     rc = gddp._dispatch_flow(con, config_root, "alpha", None)
     assert rc == 2
     assert con.execute("SELECT COUNT(*) c FROM events").fetchone()["c"] == 0
+
+
+def test_failed_job_does_not_block_fresh_audited_dispatch(
+    con, config_root, monkeypatch
+):
+    con.execute(
+        "INSERT INTO jobs VALUES (?, ?, ?, ?, ?, '2026-07-26T10:00')",
+        ("job_failed", "alpha", "proj-a", "failed", "failed"),
+    )
+    monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
+
+    rc = gddp._dispatch_flow(
+        con, config_root, "alpha", "local_subprocess"
+    )
+
+    assert rc == 0
+    row = con.execute("SELECT * FROM events").fetchone()
+    assert row["status"] == "received"
+    assert json.loads(row["project_node_candidates"]) == ["alpha"]
 
 
 def test_graph_dispatch_excludes_in_flight_inserts_rest(con, config_root, monkeypatch):
