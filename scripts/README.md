@@ -64,7 +64,13 @@ list/filter/results/detail/update views, delegating job operations to
 `jobs_status.py`. Redirected bare output prints a non-blocking command overview.
 Resolution uses `GDDP_RUNTIME_ROOT`, defaulting
 to the sibling `../gddp-runtime`; `GDDP_RUNTIME_PYTHON` can override the runtime
-interpreter.
+interpreter. In menus, `Escape` backs up one level, `←`/`↑` and `→`/`↓`
+paginate, `q` quits, and `Ctrl-C` quits the entire TUI.
+
+The dispatch menu uses paged one-key pickers for graphs and targets. Its
+`ready now` list is the actual dispatchable frontier after dependency and live
+runtime blockers are applied; blocked nodes remain visible with their reason
+but are not offered as dispatch targets.
 
 ### Stage 1 operator commands
 

@@ -125,6 +125,17 @@ def test_graph_frontier_uses_configured_routing(config_root):
     }
 
 
+def test_graph_frontier_survives_matching_project_hint(config_root):
+    """The interactive blank-node path supplies project_hint=project."""
+    plan = gddp.build_dispatch_plan(
+        config_root, "proj-a", None, project_hint="proj-a"
+    )
+    assert plan["project_id"] == "proj-a"
+    assert {item["node_id"] for item in plan["items"]} == {
+        "alpha", "beta", "shared"
+    }
+
+
 def test_graph_named_executor_applies_to_all(config_root):
     plan = gddp.build_dispatch_plan(config_root, "proj-a", "local_subprocess")
     assert plan["executor_explicit"] is True
@@ -342,6 +353,55 @@ def test_graph_dispatch_excludes_dep_blocked_inserts_rest(con, config_root, monk
     urls = [r["url"] for r in con.execute("SELECT url FROM events").fetchall()]
     assert len(urls) == 3
     assert all("node: depkid" not in u for u in urls)
+
+
+def test_interactive_dispatch_uses_pickers_and_only_offers_true_frontier(
+    con, config_root, monkeypatch
+):
+    _write_node(
+        config_root / "graphs" / "proj-a" / "nodes",
+        "depkid", "ready", ["local_subprocess"], deps=["alpha"],
+    )
+    _write_project_yaml(config_root, "proj-a", "org/a", {
+        "alpha": "ready", "beta": "ready", "gamma": "pending",
+        "shared": "ready", "depkid": "ready",
+    })
+    con.execute(
+        "INSERT INTO jobs VALUES (?, ?, ?, ?, ?, '2026-07-26T10:00')",
+        ("job_1", "alpha", "proj-a", "running", "running"),
+    )
+    menus = []
+
+    def choose(heading, items, **kwargs):
+        menus.append((heading, list(items), kwargs))
+        return "proj-a"
+
+    dispatched = []
+    monkeypatch.setattr(gddp, "ROOT", config_root)
+    monkeypatch.setattr(gddp, "_paged_menu", choose)
+    monkeypatch.setattr(gddp, "_connect_events_db", lambda path: con)
+    monkeypatch.setattr(gddp, "resolve_runtime_root", lambda: config_root)
+    monkeypatch.setattr(gddp, "_clear_screen", lambda: None)
+    monkeypatch.setattr(gddp.Prompt, "ask", lambda *args, **kwargs: "")
+    monkeypatch.setattr(
+        gddp,
+        "_dispatch_flow",
+        lambda *args, **kwargs: dispatched.append((args, kwargs)) or 1,
+    )
+
+    gddp.interactive_dispatch()
+
+    assert menus[0][0] == "dispatch · graphs"
+    assert menus[0][2]["back_label"] == "main menu"
+    assert menus[1][0] == "dispatch · proj-a"
+    assert menus[1][2]["back_label"] == "graphs"
+    offered = dict(menus[1][1])
+    assert offered == {
+        "proj-a": "entire dispatchable frontier · 2 nodes",
+        "beta": "jules_api · ready now",
+        "shared": "local_subprocess · ready now",
+    }
+    assert dispatched
 
 
 def test_interactive_frontier_prints_literal_bracket_evidence(monkeypatch):

@@ -6,6 +6,7 @@ getline, and a shared Console.
 """
 
 import sys
+import select
 import tty
 import termios
 
@@ -16,6 +17,24 @@ except ImportError:
     sys.exit(1)
 
 console = Console()
+
+
+def _decode_escape_sequence(first: str, read_available) -> str:
+    """Decode an arrow escape sequence while preserving a bare Escape key."""
+    if first != "\x1b":
+        return first
+    second = read_available()
+    if second != "[":
+        return "\x1b"
+    final = read_available()
+    return {
+        "A": "UP",
+        "B": "DOWN",
+        "C": "RIGHT",
+        "D": "LEFT",
+        "H": "HOME",
+        "F": "END",
+    }.get(final, "\x1b")
 
 
 def clear_lines(n: int) -> None:
@@ -56,17 +75,11 @@ def getch() -> str:
         tty.setcbreak(fd)
         ch = stream.read(1)
         if ch == "\x1b":
-            seq = ch + stream.read(1)
-            if seq[1] == "[":
-                seq += stream.read(1)
-                return {
-                    "A": "UP",
-                    "B": "DOWN",
-                    "C": "RIGHT",
-                    "D": "LEFT",
-                    "H": "HOME",
-                    "F": "END",
-                }.get(seq[2], ch)
+            def read_available() -> str | None:
+                readable, _, _ = select.select([fd], [], [], 0.03)
+                return stream.read(1) if readable else None
+
+            return _decode_escape_sequence(ch, read_available)
     finally:
         try:
             termios.tcsetattr(fd, termios.TCSAFLUSH, old)
