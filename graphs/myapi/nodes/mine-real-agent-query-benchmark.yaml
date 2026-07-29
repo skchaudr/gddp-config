@@ -1,0 +1,46 @@
+schema_version: '1.0'
+schema_type: node
+node_id: mine-real-agent-query-benchmark
+title: Mine the real agent query benchmark from Mini and Air Pi/Codex sessions
+type: capability
+why: 'The question bank that drives baseline capture and retrieval evaluation
+  must be the questions agents have actually demonstrated they need — mined
+  from real Pi and Codex sessions, not synthesized. Mini extraction is already
+  complete (243 unique questions with provenance); Air holds the larger stores
+  (320 Pi, 554 Codex sessions) and remains unscanned. This node finishes the
+  mining, deduplicates, categorizes, and publishes the versioned benchmark.
+  '
+depends_on: []
+acceptance_criteria:
+- id: mini-air-coverage
+  criterion: Both session stores are scanned — Mini (183 Pi, 93 Codex sessions)
+    and Air (320 Pi, 554 Codex sessions) — with per-store extraction counts
+- id: deduplicated-categorized
+  criterion: Questions are normalized, deduplicated across hosts, and categorized
+    (knowledge questions, graphify invocations, graphify meta-queries) with counts
+    per category and per source store
+- id: provenance-preserved
+  criterion: Every question retains full provenance — source host, session store,
+    session file path, timestamp, and line or message reference
+- id: question-bank-produced
+  criterion: A versioned question bank artifact exists in a form directly consumable
+    by capture-live-vertex-baseline and prove-myapi-context-retrieval
+- id: no-synthesis
+  criterion: Every bank entry is an actual agent-attempted question from a session
+    record; no synthesized or doc-derived questions are included
+constraints:
+- Read-only extraction; never modify original session files
+- The query benchmark is Pi/Codex-derived by design; this restriction applies to
+  the benchmark only, not to corpus sources
+- Raw private transcript text stays outside tracked files; the repo receives only
+  the extraction tooling, manifests, and aggregate receipts
+- The completed Mini extraction (243 questions) is input to be extended, not
+  discarded or redone
+allowed_execution_modes:
+- agent
+required_artifacts:
+- question-bank-manifest.json
+- benchmark-receipt.md
+status: ready
+priority: high
+unlocks: []

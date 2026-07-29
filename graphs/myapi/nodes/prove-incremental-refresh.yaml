@@ -1,0 +1,40 @@
+schema_version: '1.0'
+schema_type: node
+node_id: prove-incremental-refresh
+title: Prove corpus updates incrementally without full rebuild or duplication
+type: capability
+why: 'A live corpus is only useful if it stays current without expensive
+  full rebuilds. This node demonstrates that new notes, sessions, and GitHub
+  activity flow through the registry, candidate, and promotion pipeline
+  incrementally — no reprocessing of unchanged sources and no duplicate
+  entries. Proof scope is corpus update only; refreshed-retrieval proof is
+  out of scope and belongs to prove-myapi-context-retrieval.
+  '
+depends_on:
+- assemble-current-personal-corpus
+acceptance_criteria:
+- id: new-sources-ingested
+  criterion: A new Obsidian note, a new agent session, and new GitHub activity
+    each appear in the source registry after a targeted refresh
+- id: no-full-rebuild
+  criterion: The refresh completes without reprocessing unchanged sources,
+    confirmed by an incremental receipt showing only changed items processed
+- id: no-duplication
+  criterion: Previously registered items are not duplicated, verified by
+    native ID and content hash dedup receipts before and after refresh
+- id: promotion-still-works
+  criterion: Eligible new candidates flow through the promotion path and
+    appear in the active corpus
+constraints:
+- Corpus-update proof only — refreshed-retrieval proof is out of scope
+- Refresh must not disturb the frozen Vertex baseline or benchmark-search
+- The refresh mechanism must work within the 15-30 day active window and
+  durable promotion model established by assemble-current-personal-corpus
+allowed_execution_modes:
+- agent
+required_artifacts:
+- refresh-receipt.md
+- result-summary.md
+status: pending
+priority: medium
+unlocks: []

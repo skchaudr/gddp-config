@@ -1,0 +1,65 @@
+schema_version: '1.0'
+schema_type: node
+node_id: assemble-current-personal-corpus
+title: Assemble the versioned active handoff corpus from all current sources
+type: capability
+why: 'This is the completion and redirection of V1, not a rewrite. Corpus v1
+  materialized 2,951 raw documents and created a gravity problem. The active
+  corpus instead registers all sources cheaply, generates candidates (events,
+  decisions, handoffs, anchors) without moving raw material, and promotes only
+  items that meet admission requirements into a bounded, versioned active
+  corpus. One registry, one candidate store, one active corpus; Corpus v1 stays
+  a fourth cold store. The output is an actual versioned corpus, not a plan.
+  '
+depends_on: []
+acceptance_criteria:
+- id: source-registry-built
+  criterion: One source registry covers Obsidian notes, Pi/Codex/Claude/Grok/Cline/Factory/Hermes/Zed-ACP
+    sessions, GitHub issues/PRs/reviews/discussions, repo briefs/decisions/docs/handoffs, Needle
+    curated datasets, Vertex/Khoj manifests, and Corpus v1 as cold material, each with logical
+    source ID, machine, family, path or URL, native ID where available, content hash,
+    created/updated/observed timestamps, project hint, and parser status
+- id: mini-air-deduplicated
+  criterion: Mini and Air copies of the same source are deduplicated by native ID
+    and content hash, with a dedup receipt
+- id: candidates-generated-by-shape
+  criterion: Each source shape receives its proper treatment — quality Obsidian anchors/briefs/decisions
+    enter as candidate documents directly, GitHub records become bounded project events with
+    linked evidence, agent sessions produce candidate events/decisions/failures/commands/handoffs
+    rather than one document per session, Corpus v1 is referenced not recopied, and Needle
+    datasets contribute already-extracted evidence
+- id: promotion-path-complete
+  criterion: Only the eight admitted types enter the active corpus (current-state brief, event
+    trace, decision, project handoff, person-context anchor, operational runbook, durable
+    reference, verified source note), and every promoted item carries all admission fields —
+    what is true, why it matters, project/person association, evidence pointers, event/validity
+    time, observation and last-verification time, freshness tier, supersession links, confidence
+    or unresolved status, and sanitization result
+- id: three-layers-separate
+  criterion: Source registry, candidate store, and active corpus are physically separate layers;
+    Corpus v1 remains a fourth cold historical store unmerged into active retrieval; private
+    corpus content stays outside tracked files
+- id: versioned-corpus-produced
+  criterion: A versioned active corpus artifact exists with a build manifest recording source
+    counts, candidate counts, promotion counts, and temporal window
+constraints:
+- Reuse existing machinery — source_manifest.py, normalization_schema.py, Obsidian/Claude
+  adapters, Needle Pi/Codex parsers, normalize_corpus.py scanning, build_vault_v1.py provenance
+  and safe-write guards, owner-queue checks, ContextPacket/ContextBrief; add only missing
+  readers (current Codex rollout JSONL, Pi session JSONL, GitHub records)
+- One source registry, one active-corpus builder — not separate pipelines per source
+- Never modify original sessions, vault notes, or GitHub records; raw material remains where
+  it lives
+- Dynamic sources default to a recent active window (roughly 15-30 days) plus explicitly
+  promoted durable material; if the active corpus approaches thousands of materialized
+  documents, stop unless A/B evidence proves the size improves fresh answers
+- The Mini Pi/Codex session extraction already completed feeds this node directly
+allowed_execution_modes:
+- agent
+required_artifacts:
+- corpus-build-manifest.json
+- promotion-receipt.md
+- result-summary.md
+status: ready
+priority: critical
+unlocks: []

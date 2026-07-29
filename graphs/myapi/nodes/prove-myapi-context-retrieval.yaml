@@ -1,0 +1,47 @@
+schema_version: '1.0'
+schema_type: node
+node_id: prove-myapi-context-retrieval
+title: Prove active corpus retrieval against the frozen Vertex baseline
+type: capability
+why: 'No new database is justified until it demonstrably outperforms the existing
+  engine on the same questions. This node runs the mined benchmark against
+  three configurations — frozen Vertex baseline, active MyAPI corpus, and
+  active corpus with Corpus v1 cold fallback — and scores each across
+  correctness, freshness, citations, and usefulness. Only after the active
+  corpus proves value should it be indexed into a separate Vertex datastore;
+  benchmark-search is never overwritten.
+  '
+depends_on:
+- capture-live-vertex-baseline
+- assemble-current-personal-corpus
+- mine-real-agent-query-benchmark
+acceptance_criteria:
+- id: three-way-eval-run
+  criterion: The same question bank is run against all three retrieval
+    configurations — frozen Vertex baseline, active MyAPI corpus, and active
+    corpus plus Corpus v1 cold fallback
+- id: evaluation-dimensions-scored
+  criterion: Every answer is scored on factual correctness, current-state
+    correctness, temporal correctness, citation quality, stale-claim rate,
+    raw-conversation dominance, next-action support, and budget adherence
+- id: comparison-receipt
+  criterion: A durable comparison receipt shows per-question scores and
+    aggregate verdict for active corpus versus frozen baseline
+- id: value-proven-or-falsified
+  criterion: An explicit verdict states whether the active corpus beats the
+    baseline, with supporting evidence either way
+constraints:
+- Point the existing MyAPI retrieval pipeline at the active corpus; do not
+  invent another database first
+- Never overwrite benchmark-search; index into a separate Vertex datastore
+  only after proof
+- Private content and raw query results stay outside tracked files; the repo
+  receives only evaluation receipts and aggregate manifests
+allowed_execution_modes:
+- agent
+required_artifacts:
+- comparison-receipt.md
+- eval-results.json
+status: pending
+priority: high
+unlocks: []

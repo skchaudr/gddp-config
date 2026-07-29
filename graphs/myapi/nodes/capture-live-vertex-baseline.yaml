@@ -1,0 +1,48 @@
+schema_version: '1.0'
+schema_type: node
+node_id: capture-live-vertex-baseline
+title: Capture the live Vertex benchmark-search baseline before access disappears
+type: capability
+why: 'The benchmark-search Vertex engine is live and answering from Air over a
+
+  perishable 1,545-document database. Before any new corpus work is judged,
+
+  we must preserve exactly what the current engine can do: its answers,
+
+  citations, latency, and visible staleness. This frozen baseline is the
+
+  comparison target for every later retrieval proof. The node is the action;
+
+  the frozen baseline is the resulting artifact.
+
+  '
+depends_on: []
+acceptance_criteria:
+- id: three-query-sets-run
+  criterion: All three query sets are executed against the live benchmark-search
+    engine from Air — the existing 18-query MyAPI benchmark, the existing
+    golden-brief questions, and the curated questions mined from Pi/Codex sessions
+- id: baseline-recorded
+  criterion: Every result records the exact query, answer, citations, latency,
+    timestamp, engine identity, source freshness visible in the answer, and any
+    obvious stale or incorrect claims
+- id: engine-unmutated
+  criterion: The benchmark-search engine, its datastore, and its configuration are
+    byte-identical before and after the capture; access is read-only
+- id: baseline-durable
+  criterion: The frozen baseline is stored durably outside the perishable engine
+    with a manifest recording query count, capture window, and storage location
+constraints:
+- Run from Air, where the live engine and valid Vertex credentials are
+- Do not alter, reindex, or tune the benchmark-search engine in any way
+- Private query results stay outside tracked source files; the repo receives only
+  manifests and aggregate receipts
+- Do not begin corpus ingestion or retrieval changes under this node
+allowed_execution_modes:
+- agent
+required_artifacts:
+- baseline-manifest.json
+- baseline-receipt.md
+status: ready
+priority: critical
+unlocks: []

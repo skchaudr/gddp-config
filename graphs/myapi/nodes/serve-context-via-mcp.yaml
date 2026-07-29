@@ -1,0 +1,38 @@
+schema_version: '1.0'
+schema_type: node
+node_id: serve-context-via-mcp
+title: Serve proven context through get_project_context and get_person_context
+type: capability
+why: 'MCP is the integration layer. After retrieval is proven, the active
+  corpus is exposed through exactly two tools returning the existing
+  ContextBrief envelope. No large tool roster, workflow engine, or mandatory
+  graph traversal — just the proven path wired in.
+  '
+depends_on:
+- prove-myapi-context-retrieval
+acceptance_criteria:
+- id: two-tools-implemented
+  criterion: Exactly get_project_context and get_person_context are exposed
+    through MCP
+- id: contextbrief-envelope
+  criterion: Both tools return the full ContextBrief envelope — short answer,
+    relevant current state, decisions and events, next useful action, evidence
+    paths, freshness, unresolved risks, and budget metadata
+- id: serves-proven-path
+  criterion: MCP serves the retrieval path proven in prove-myapi-context-retrieval
+- id: end-to-end-tested
+  criterion: Both tools are tested with sample project and person queries,
+    producing valid ContextBrief responses
+constraints:
+- No large tool roster, new workflow engine, or mandatory graph traversal
+- Tool names are fixed: get_project_context and get_person_context
+- Both tools return the existing ContextBrief contract; do not invent a new
+  response schema
+allowed_execution_modes:
+- agent
+required_artifacts:
+- mcp-test-receipt.md
+- result-summary.md
+status: pending
+priority: high
+unlocks: []
