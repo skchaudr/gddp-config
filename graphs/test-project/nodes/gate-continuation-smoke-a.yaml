@@ -1,0 +1,33 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: gate-continuation-smoke-a
+title: Produce the first gate marker
+type: capability
+
+why: Prove that a passing evaluator result opens the next node without
+  changing graph truth.
+
+depends_on: []
+
+acceptance_criteria:
+  - id: marker-a-exact
+    criterion: gate-smoke/a.txt exists and contains exactly "A passed\n"
+  - id: change-is-bounded
+    criterion: The attempt changes only gate-smoke/a.txt
+
+constraints:
+  - Do not modify graph configuration or runtime databases
+  - Create only gate-smoke/a.txt
+
+allowed_execution_modes:
+  - local_subprocess
+
+required_artifacts:
+  - gate-smoke/a.txt
+
+status: ready
+priority: high
+
+unlocks:
+  - gate-continuation-smoke-b

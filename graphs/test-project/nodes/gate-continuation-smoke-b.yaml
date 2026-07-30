@@ -1,0 +1,37 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: gate-continuation-smoke-b
+title: Consume the first result and produce the second marker
+type: capability
+
+why: Prove that GDDP dispatches downstream work building on the passing
+  predecessor's result commit.
+
+depends_on:
+  - gate-continuation-smoke-a
+
+acceptance_criteria:
+  - id: marker-a-inherited
+    criterion: gate-smoke/a.txt exists unchanged and contains exactly "A
+      passed\n"
+  - id: marker-b-exact
+    criterion: gate-smoke/b.txt exists and contains exactly "B passed\n"
+  - id: change-is-bounded
+    criterion: This attempt adds only gate-smoke/b.txt
+
+constraints:
+  - Preserve gate-smoke/a.txt unchanged
+  - Do not modify graph configuration or runtime databases
+  - Add only gate-smoke/b.txt
+
+allowed_execution_modes:
+  - local_subprocess
+
+required_artifacts:
+  - gate-smoke/b.txt
+
+status: pending
+priority: high
+
+unlocks: []
