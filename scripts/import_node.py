@@ -38,7 +38,7 @@ except ImportError:
 ROOT = Path(__file__).resolve().parent.parent
 
 VALID_TYPES = {"capability", "milestone", "constraint"}
-VALID_STATUSES = {"pending", "ready", "complete", "deferred"}
+VALID_STATUSES = {"pending", "ready", "provisional", "complete", "deferred"}
 VALID_PRIORITIES = {"low", "medium", "high", "critical"}
 VALID_EXEC_MODES = {
     "agent",

@@ -30,11 +30,12 @@ ACTIVE_JOB_STATES = frozenset({
 # Terminal graph statuses: suppress the NODE ITSELF (motion/unlocks) — a
 # deferred node is settled human business, never again in motion.
 TERMINAL_NODE_STATUSES = frozenset({"complete", "deferred"})
-# Dependency satisfaction: exactly "complete". Live truth —
-# scope_checker.py rejects any dep whose status != complete, and
-# dispatch_next.py eligibility requires deps in complete_ids. A deferred
-# dependency still blocks; only the node it belongs to is settled.
-SATISFIED_DEP_STATUSES = frozenset({"complete"})
+# Dependency satisfaction: "complete" (human-accepted graph truth) or
+# "provisional" (evaluator-passed, awaiting operator review). Provisional
+# flow, docs/GDDP-rebuild.md: a rejected provisional returns to ready and
+# re-blocks its dependents here automatically. A deferred dependency still
+# blocks; only the node it belongs to is settled.
+SATISFIED_DEP_STATUSES = frozenset({"complete", "provisional"})
 
 _SESSION_PHASES = {
     "dispatched": "dispatching",

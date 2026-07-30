@@ -29,7 +29,7 @@ except ImportError:
 SCRIPTS_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPTS_DIR.parent
 
-GRAPH_STATUSES = ("pending", "ready", "complete", "deferred")
+GRAPH_STATUSES = ("pending", "ready", "provisional", "complete", "deferred")
 ACTIVE_STATUSES = frozenset({"pending", "ready"})
 _NODE_STATUS_RE = re.compile(r"^(status:\s*)(\S+)\s*$", re.MULTILINE)
 
