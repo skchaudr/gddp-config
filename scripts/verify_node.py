@@ -1144,7 +1144,7 @@ def decide_verdict(criteria: list[CriterionCheck],
                    required_artifacts: list[str]) -> tuple[str, float, str]:
     """Compute verdict, confidence, and required_next_action."""
     incomplete = [d for d, s in deps.items()
-                  if s not in ("complete", "unknown")]
+                  if s not in ("complete", "provisional", "unknown")]
     if incomplete:
         return ("blocked", 0.9,
                 f"Dependencies not complete: {', '.join(incomplete)}. "

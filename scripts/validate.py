@@ -36,7 +36,7 @@ except ImportError:
 # ── Schema constants (mirror schemas/v1/node.yaml) ─────────────────────────
 
 VALID_TYPES = {"capability", "milestone", "constraint"}
-VALID_STATUSES = {"pending", "ready", "complete", "deferred"}
+VALID_STATUSES = {"pending", "ready", "provisional", "complete", "deferred"}
 VALID_PRIORITIES = {"low", "medium", "high", "critical"}
 VALID_EXEC_MODES = {
     "agent",
@@ -51,6 +51,14 @@ VALID_EXEC_MODES = {
 }
 KNOWN_ARTIFACTS = {"decision.md", "result-summary.md", "patch.diff",
                     "graph-update.yaml", "merged_pr"}
+
+
+def _is_artifact_shaped(value: str) -> bool:
+    """required_artifacts entries are literal repo paths in the runtime
+    (check_artifacts tests file existence). Accept path-shaped values — a
+    slash or a file extension — as known; warn only on bare unknown
+    type-names."""
+    return "/" in value or "." in value
 
 REQUIRED_FIELDS = {
     "node_id": str,
@@ -125,7 +133,9 @@ def validate_node(path: Path, rel: str, doc: dict) -> list[Finding]:
     # artifacts — warn on unknown (forward-compat for future artifact types)
     artifacts = doc.get("required_artifacts") or []
     if isinstance(artifacts, list):
-        unknown = [a for a in artifacts if isinstance(a, str) and a not in KNOWN_ARTIFACTS]
+        unknown = [a for a in artifacts
+                   if isinstance(a, str) and a not in KNOWN_ARTIFACTS
+                   and not _is_artifact_shaped(a)]
         if unknown:
             findings.append(Finding(rel, 0, "warning", "unknown_artifact",
                                      f"not in known set: {unknown}"))
