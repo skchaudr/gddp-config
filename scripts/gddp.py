@@ -1246,13 +1246,63 @@ def cmd_overview(_args):
 
 
 def cmd_verify_node(args):
-    verify_node = _import_module("verify_node")
-    argv = ["node", "--project", args.project, "--node", args.node]
+    """Delegate node verification to the runtime evaluator — the single judge.
+
+    Default runs the deterministic lane (offline, fast — the verb's original
+    contract). --live runs the full two-lane evaluation (deterministic +
+    semantic + integrity), the same judge the pipeline uses.
+    """
+    try:
+        runtime_root = resolve_runtime_root()
+    except RuntimeError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        sys.exit(2)
+    node_yaml = ROOT / "graphs" / args.project / "nodes" / f"{args.node}.yaml"
+    project_yaml = ROOT / "graphs" / args.project / "project.yaml"
+    for path, label in ((node_yaml, "node yaml"), (project_yaml, "project yaml")):
+        if not path.is_file():
+            print(f"ERROR: {label} not found at {path}", file=sys.stderr)
+            sys.exit(2)
+
+    with open(project_yaml) as f:
+        proj = yaml.safe_load(f) or {}
+    repo_name = str(proj.get("repo", "")).split("/")[-1]
+    repo = None
+    candidates = []
     if args.repo_path:
-        argv += ["--repo-path", args.repo_path]
-    if args.json:
-        argv += ["--json"]
-    sys.exit(verify_node.main(argv))
+        candidates.append(Path(args.repo_path).expanduser())
+    env_root = os.environ.get("GDDP_REPO_ROOT") or os.environ.get("GDDP_REPOS_ROOT")
+    if env_root and repo_name:
+        candidates.append(Path(env_root).expanduser() / repo_name)
+    if repo_name:
+        candidates.append(ROOT.parent / repo_name)
+    for c in candidates:
+        if c.is_dir():
+            repo = c
+            break
+    if repo is None:
+        print(f"ERROR: could not resolve repo checkout for '{proj.get('repo', '')}' "
+              "(pass --repo-path)", file=sys.stderr)
+        sys.exit(2)
+
+    receipt_dir = ROOT / "verification"
+    receipt_dir.mkdir(parents=True, exist_ok=True)
+    live = bool(getattr(args, "live", False))
+    cmd = [
+        runtime_python(runtime_root),
+        str(runtime_root / "scripts" / "runtime" / "verification" / "cli.py"),
+        "--node-yaml", str(node_yaml),
+        "--project-yaml", str(project_yaml),
+        "--repo", str(repo),
+        "--config-root", str(ROOT),
+        "--receipt-dir", str(receipt_dir),
+        "--semantic-mode", "live" if live else "offline",
+        "--integrity", "on" if live else "off",
+    ]
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(runtime_root)
+    env["GDDP_RUNTIME_ROOT"] = str(runtime_root)
+    sys.exit(subprocess.run(cmd, env=env, check=False).returncode)
 
 
 def cmd_obsidian_export(args):
@@ -1529,14 +1579,14 @@ def main(argv=None):
     verify_sub = verify_p.add_subparsers(dest="subcommand")
 
     verify_node = verify_sub.add_parser(
-        "node", help="Run deterministic node evaluation; emit a receipt")
+        "node", help="Run the runtime evaluator on a node; emit a receipt")
     verify_node.add_argument("--project", required=True, help="Project ID")
     verify_node.add_argument("--node", required=True, help="Node ID")
     verify_node.add_argument("--repo-path", default=None,
                              help="Path to the source repo checkout "
                                   "(overrides auto-resolve)")
-    verify_node.add_argument("--json", action="store_true",
-                             help="Print result.json to stdout")
+    verify_node.add_argument("--live", action="store_true",
+                             help="Full two-lane evaluation (deterministic + semantic + integrity); default is the fast deterministic lane")
     verify_node.set_defaults(func=cmd_verify_node)
 
     obs_p = sub.add_parser("obsidian", help="Obsidian vault export")
