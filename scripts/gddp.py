@@ -1288,6 +1288,7 @@ def cmd_verify_node(args):
     receipt_dir = ROOT / "verification"
     receipt_dir.mkdir(parents=True, exist_ok=True)
     live = bool(getattr(args, "live", False))
+    manual_job_id = "manual-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     cmd = [
         runtime_python(runtime_root),
         str(runtime_root / "scripts" / "runtime" / "verification" / "cli.py"),
@@ -1296,6 +1297,8 @@ def cmd_verify_node(args):
         "--repo", str(repo),
         "--config-root", str(ROOT),
         "--receipt-dir", str(receipt_dir),
+        "--job-id", manual_job_id,
+        "--attempt", "0",
         "--semantic-mode", "live" if live else "offline",
         "--integrity", "on" if live else "off",
     ]
