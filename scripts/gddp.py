@@ -73,7 +73,7 @@ console = Console(soft_wrap=True, highlight=False, width=_PIPE_WIDTH)
 _MENU_BACK = object()
 _MENU_QUIT = object()
 _RUNTIME_JOB_COMMANDS = frozenset({"list", "show", "results", "set"})
-_CLI_COMMANDS = frozenset({"node", "jobs", "verify", "obsidian", "project"})
+_CLI_COMMANDS = frozenset({"node", "jobs", "verify", "review", "obsidian", "project"})
 _CONCRETE_AGENT_EXECUTORS = frozenset(
     {"jules", "jules_api", "jules_cli", "local_subprocess"}
 )

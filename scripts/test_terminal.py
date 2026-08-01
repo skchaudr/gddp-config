@@ -41,8 +41,13 @@ class TerminalDecodeTests(unittest.TestCase):
         """A terminal multiplexer may split ESC [ C across several reads."""
         pid, fd = pty.fork()
         if pid == 0:
-            print("READY", flush=True)
-            print(f"KEY={terminal.getch()}", flush=True)
+            # pytest replaces sys.stdin with a non-tty capture object; getch
+            # needs a real tty. After pty.fork() fd 0 IS the slave, so point
+            # sys.stdin at it. Bypass sys.stdout for writes (pytest capture
+            # does not reach the pty master).
+            sys.stdin = open(0, encoding="utf-8", closefd=False)
+            os.write(1, b"READY\n")
+            os.write(1, f"KEY={terminal.getch()}\n".encode())
             os._exit(0)
 
         output = bytearray()

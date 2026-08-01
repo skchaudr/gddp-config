@@ -522,5 +522,22 @@ class ReviewSurfaceTests(unittest.TestCase):
             gddp._acceptance_merge_state(repo, "0" * 40), "unavailable")
 
 
+class ReviewRoutingTests(unittest.TestCase):
+    def test_review_routes_to_subcommand_not_positional_dispatch(self):
+        with patch.object(gddp, "cmd_review", return_value=0) as review, patch.object(
+            gddp, "cmd_dispatch"
+        ) as dispatch:
+            rc = gddp.main(["review", "--project", "p", "--node", "n"])
+        self.assertEqual(rc, 0)
+        review.assert_called_once()
+        dispatch.assert_not_called()
+
+    def test_cli_commands_cover_all_subcommands(self):
+        # _CLI_COMMANDS gates positional dispatch; a subcommand missing here is
+        # silently swallowed as a node id (shipped once with 'review').
+        for name in ("node", "jobs", "verify", "review", "obsidian", "project"):
+            self.assertIn(name, gddp._CLI_COMMANDS)
+
+
 if __name__ == "__main__":
     unittest.main()
