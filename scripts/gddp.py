@@ -671,6 +671,9 @@ def _confirm_status_change(project: str, node_id: str, status: str) -> int:
     if not reason:
         console.print(Text("Unchanged — reason required (status alone misleads agents).", style="yellow"))
         return 1
+    if status == "complete" and not _offer_acceptance_merge(project, node_id):
+        console.print(Text("Unchanged — result commit not merged.", style="dim"))
+        return 1
     return node_cli.cmd_set_status(
         project=project,
         node_id=node_id,
@@ -678,6 +681,187 @@ def _confirm_status_change(project: str, node_id: str, status: str) -> int:
         yes=True,
         reason=reason,
     )
+
+
+def _latest_receipt(project: str, node_id: str) -> dict | None:
+    """Newest receipt for the node (pipeline or manual), or None."""
+    rdir = ROOT / "verification" / project / node_id
+    if not rdir.is_dir():
+        return None
+    best: dict | None = None
+    for path in sorted(rdir.glob("*.json"), key=lambda p: p.stat().st_mtime):
+        try:
+            data = json.loads(path.read_text())
+        except (OSError, ValueError):
+            continue
+        if isinstance(data, dict):
+            data["_receipt_path"] = str(path)
+            best = data
+    return best
+
+
+def _resolve_project_repo(project: str, repo_path: str | None = None) -> Path | None:
+    """Same candidate chain as verify node: flag, env root, sibling checkout."""
+    import yaml
+
+    repo_name = ""
+    project_yaml = ROOT / "graphs" / project / "project.yaml"
+    if project_yaml.is_file():
+        with open(project_yaml) as f:
+            repo_name = str((yaml.safe_load(f) or {}).get("repo", "")).split("/")[-1]
+    candidates: list[Path] = []
+    if repo_path:
+        candidates.append(Path(repo_path).expanduser())
+    env_root = os.environ.get("GDDP_REPO_ROOT") or os.environ.get("GDDP_REPOS_ROOT")
+    if env_root and repo_name:
+        candidates.append(Path(env_root).expanduser() / repo_name)
+    if repo_name:
+        candidates.append(ROOT.parent / repo_name)
+    for candidate in candidates:
+        if (candidate / ".git").exists():
+            return candidate
+    return None
+
+
+def _default_branch(repo: Path) -> str:
+    proc = subprocess.run(
+        ["git", "-C", str(repo), "show-ref", "--verify", "refs/heads/main"],
+        capture_output=True, timeout=30, check=False,
+    )
+    if proc.returncode == 0:
+        return "main"
+    proc = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "--abbrev-ref", "HEAD"],
+        capture_output=True, text=True, timeout=30, check=False,
+    )
+    return proc.stdout.strip() or "HEAD"
+
+
+def _acceptance_merge_state(repo: Path, sha: str) -> str:
+    """merged | pending | unavailable — is the result commit in the mainline?"""
+    def git(*args: str) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            ["git", "-C", str(repo), *args],
+            capture_output=True, text=True, timeout=30, check=False,
+        )
+
+    if git("cat-file", "-e", f"{sha}^{{commit}}").returncode != 0:
+        return "unavailable"
+    if git("merge-base", "--is-ancestor", sha, _default_branch(repo)).returncode == 0:
+        return "merged"
+    return "pending"
+
+
+def _render_evaluation_and_diff(
+    project: str, node_id: str, repo_path: str | None = None, full: bool = False
+) -> None:
+    """Latest verdict + what the attempt actually changed + merge state."""
+    receipt = _latest_receipt(project, node_id)
+    if not receipt:
+        console.print(Text("no receipts under verification/ — nothing evaluated yet", style="dim"))
+        return
+    console.print(Text(f"latest receipt: {receipt['_receipt_path']}", style="dim"))
+    console.print(
+        f"verdict: [bold]{receipt.get('verdict')}[/bold]  "
+        f"criteria: {receipt.get('criteria_verdict')}  "
+        f"confidence: {receipt.get('confidence')}  "
+        f"generated: {receipt.get('generated_at')}"
+    )
+    subject_diff = (receipt.get("deterministic") or {}).get("subject_diff") or {}
+    if subject_diff.get("status") == "ok":
+        console.print(Text(
+            f"subject diff {subject_diff['base'][:8]}..{subject_diff['tip'][:8]} "
+            f"— {subject_diff.get('file_count')} file(s):",
+            style="bold",
+        ))
+        for entry in subject_diff.get("files", []):
+            console.print(f"  {entry['status']}  {entry['path']}")
+        if subject_diff.get("truncated"):
+            console.print("  … (truncated)")
+    tip = receipt.get("merge_commit_sha") or receipt.get("evaluated_commit_sha")
+    repo = _resolve_project_repo(project, repo_path)
+    if not tip or repo is None:
+        return
+    state = _acceptance_merge_state(repo, tip)
+    branch = _default_branch(repo)
+    style = {"merged": "green", "pending": "yellow", "unavailable": "dim"}[state]
+    console.print(Text(f"merge state: {state} ({repo.name} {branch})", style=style))
+    if state == "merged":
+        return
+    base = receipt.get("expected_base_commit_sha") or branch
+    diff_args = ["git", "-C", str(repo), "diff"]
+    if not full:
+        diff_args.append("--stat")
+    diff_args.append(f"{base}..{tip}")
+    proc = subprocess.run(diff_args, capture_output=True, text=True, timeout=60, check=False)
+    if proc.returncode == 0 and proc.stdout.strip():
+        print(proc.stdout.rstrip())
+    else:
+        console.print(Text(f"(diff unavailable: {proc.stderr.strip()[:200]})", style="dim"))
+
+
+def _offer_acceptance_merge(project: str, node_id: str) -> bool:
+    """Merge the accepted result commit into the project repo's mainline.
+
+    False when a pending result exists and the human declines or the merge
+    fails — graph truth must not outrun the arena. True when there is
+    nothing to merge (no receipt, no tip, already merged)."""
+    receipt = _latest_receipt(project, node_id) or {}
+    tip = receipt.get("merge_commit_sha") or receipt.get("evaluated_commit_sha")
+    repo = _resolve_project_repo(project)
+    if not tip or repo is None:
+        return True
+    state = _acceptance_merge_state(repo, tip)
+    if state == "merged":
+        return True
+    branch = _default_branch(repo)
+    if state == "unavailable":
+        console.print(Text(
+            f"result commit {tip[:12]} not present in {repo} — merge it manually",
+            style="yellow",
+        ))
+        return True
+    log = subprocess.run(
+        ["git", "-C", str(repo), "log", "--oneline", f"{branch}..{tip}"],
+        capture_output=True, text=True, timeout=30, check=False,
+    )
+    console.print(Text(
+        f"pending result — {tip[:12]} not yet in {repo.name} {branch}:", style="bold",
+    ))
+    print(log.stdout.strip() or "(no log output)")
+    actions = {
+        "y": ("merge", f"merge {tip[:12]} into {branch}"),
+        "n": ("no", "leave repo and graph unchanged"),
+    }
+    if _menu_choice(actions, default="n") != "y":
+        return False
+    proc = subprocess.run(
+        ["git", "-C", str(repo), "merge", "--ff-only", tip],
+        capture_output=True, text=True, timeout=60, check=False,
+    )
+    if proc.returncode != 0:
+        proc = subprocess.run(
+            ["git", "-C", str(repo), "merge", "--no-ff", tip,
+             "-m", f"accept({node_id}): human-approved result {tip[:12]}"],
+            capture_output=True, text=True, timeout=60, check=False,
+        )
+        if proc.returncode != 0:
+            console.print(Text(f"merge failed:\n{proc.stderr.strip()}", style="bold red"))
+            return False
+    head = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "--short", "HEAD"],
+        capture_output=True, text=True, timeout=30, check=False,
+    ).stdout.strip()
+    console.print(Text(f"merged — {repo.name} {branch} now at {head}", style="green"))
+    return True
+
+
+def cmd_review(args) -> int:
+    """Human-gate review surface: node summary, latest verdict, diff, merge state."""
+    node_cli = _import_module("node_cli")
+    node_cli.cmd_show(project=args.project, node_id=args.node, trace=False, view="summary")
+    _render_evaluation_and_diff(args.project, args.node, repo_path=args.repo_path, full=args.full)
+    return 0
 
 
 def _node_review_menu(project: str, node_id: str):
@@ -697,6 +881,7 @@ def _node_review_menu(project: str, node_id: str):
             "c": ("contract", "intent, dependencies, and acceptance criteria"),
             "u": ("update", "change graph status"),
             "t": ("trace", "full evaluator and job history"),
+            "d": ("diff", "what the attempt actually changed + merge state"),
             "b": ("back", "choose another node"),
             "p": ("projects", "choose another project"),
             "q": ("quit", ""),
@@ -743,6 +928,11 @@ def _node_review_menu(project: str, node_id: str):
                 trace=True,
                 view="evaluation",
             )
+            _pause()
+            continue
+        if choice == "d":
+            _clear_screen()
+            _render_evaluation_and_diff(project, node_id)
             _pause()
             continue
 
@@ -1626,6 +1816,18 @@ def main(argv=None):
                                   "subject-diff evidence (pipeline runs get this "
                                   "from the session row automatically)")
     verify_node.set_defaults(func=cmd_verify_node)
+
+    review_p = sub.add_parser(
+        "review",
+        help="Human-gate review surface: latest verdict, subject diff, merge state",
+    )
+    review_p.add_argument("--project", required=True, help="Project ID")
+    review_p.add_argument("--node", required=True, help="Node ID")
+    review_p.add_argument("--repo-path", default=None,
+                          help="Path to the source repo checkout (overrides auto-resolve)")
+    review_p.add_argument("--full", action="store_true",
+                          help="Full patch instead of --stat")
+    review_p.set_defaults(func=cmd_review)
 
     obs_p = sub.add_parser("obsidian", help="Obsidian vault export")
     obs_sub = obs_p.add_subparsers(dest="subcommand")

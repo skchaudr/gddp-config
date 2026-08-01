@@ -456,5 +456,71 @@ class OverviewTests(unittest.TestCase):
         set_status.assert_not_called()
 
 
+class ReviewSurfaceTests(unittest.TestCase):
+    def setUp(self):
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tempdir.cleanup)
+
+    def _write_receipt(self, node_dir: Path, name: str, **fields):
+        import json as _json
+
+        node_dir.mkdir(parents=True, exist_ok=True)
+        payload = {"verdict": "pass", "node_id": "n"}
+        payload.update(fields)
+        (node_dir / name).write_text(_json.dumps(payload))
+
+    def test_latest_receipt_picks_newest_and_skips_bad_json(self):
+        node_dir = Path(self.tempdir.name) / "verification" / "p" / "n"
+        self._write_receipt(node_dir, "a.json", verdict="fail")
+        self._write_receipt(node_dir, "b.json", verdict="pass")
+        (node_dir / "broken.json").write_text("{not json")
+        with patch.object(gddp, "ROOT", Path(self.tempdir.name)):
+            receipt = gddp._latest_receipt("p", "n")
+        self.assertIsNotNone(receipt)
+        self.assertEqual(receipt["verdict"], "pass")
+        self.assertTrue(receipt["_receipt_path"].endswith("broken.json") is False)
+
+    def test_latest_receipt_none_without_dir(self):
+        with patch.object(gddp, "ROOT", Path(self.tempdir.name)):
+            self.assertIsNone(gddp._latest_receipt("p", "n"))
+
+    def _git_repo(self):
+        import subprocess as sp
+        repo = Path(self.tempdir.name) / "repo"
+        repo.mkdir()
+        def git(*args):
+            proc = sp.run(["git", "-C", str(repo), *args],
+                          capture_output=True, text=True, check=False)
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            return proc.stdout.strip()
+        sp.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+        git("config", "user.email", "t@t")
+        git("config", "user.name", "t")
+        (repo / "f.txt").write_text("one\n")
+        git("add", "-A")
+        git("commit", "-qm", "base")
+        base = git("rev-parse", "HEAD")
+        (repo / "f.txt").write_text("two\n")
+        git("add", "-A")
+        git("commit", "-qm", "result")
+        tip = git("rev-parse", "HEAD")
+        git("reset", "-q", "--hard", base)
+        return repo, base, tip
+
+    def test_merge_state_pending_then_merged(self):
+        import subprocess as sp
+        repo, base, tip = self._git_repo()
+        self.assertEqual(gddp._acceptance_merge_state(repo, tip), "pending")
+        proc = sp.run(["git", "-C", str(repo), "merge", "--ff-only", tip],
+                      capture_output=True, text=True, check=False)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(gddp._acceptance_merge_state(repo, tip), "merged")
+
+    def test_merge_state_unavailable_for_unknown_sha(self):
+        repo, _, _ = self._git_repo()
+        self.assertEqual(
+            gddp._acceptance_merge_state(repo, "0" * 40), "unavailable")
+
+
 if __name__ == "__main__":
     unittest.main()
