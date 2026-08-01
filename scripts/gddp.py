@@ -1299,6 +1299,7 @@ def cmd_verify_node(args):
         "--receipt-dir", str(receipt_dir),
         "--job-id", manual_job_id,
         "--attempt", "0",
+        *(["--base", args.base] if getattr(args, "base", None) else []),
         "--semantic-mode", "live" if live else "offline",
         "--integrity", "on" if live else "off",
     ]
@@ -1590,6 +1591,10 @@ def main(argv=None):
                                   "(overrides auto-resolve)")
     verify_node.add_argument("--live", action="store_true",
                              help="Full two-lane evaluation (deterministic + semantic + integrity); default is the fast deterministic lane")
+    verify_node.add_argument("--base", default=None,
+                             help="Base commit the subject was built on; enables "
+                                  "subject-diff evidence (pipeline runs get this "
+                                  "from the session row automatically)")
     verify_node.set_defaults(func=cmd_verify_node)
 
     obs_p = sub.add_parser("obsidian", help="Obsidian vault export")
