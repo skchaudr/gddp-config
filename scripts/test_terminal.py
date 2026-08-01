@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import os
+import pty
+import select
 import sys
+import time
 import unittest
 from pathlib import Path
 
@@ -32,3 +36,43 @@ class TerminalDecodeTests(unittest.TestCase):
             terminal._decode_escape_sequence("\x1b", lambda: next(values)),
             "\x1b",
         )
+
+    def test_getch_decodes_arrow_split_across_pty_reads(self):
+        """A terminal multiplexer may split ESC [ C across several reads."""
+        pid, fd = pty.fork()
+        if pid == 0:
+            print("READY", flush=True)
+            print(f"KEY={terminal.getch()}", flush=True)
+            os._exit(0)
+
+        output = bytearray()
+        try:
+            deadline = time.monotonic() + 2
+            while b"READY" not in output and time.monotonic() < deadline:
+                readable, _, _ = select.select([fd], [], [], 0.1)
+                if readable:
+                    output.extend(os.read(fd, 4096))
+
+            self.assertIn(b"READY", output)
+            os.write(fd, b"\x1b")
+            time.sleep(0.08)
+            os.write(fd, b"[C")
+
+            deadline = time.monotonic() + 2
+            while b"KEY=" not in output and time.monotonic() < deadline:
+                readable, _, _ = select.select([fd], [], [], 0.1)
+                if readable:
+                    try:
+                        output.extend(os.read(fd, 4096))
+                    except OSError:
+                        break
+            self.assertIn(b"KEY=RIGHT", output)
+        finally:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+            try:
+                os.waitpid(pid, 0)
+            except ChildProcessError:
+                pass

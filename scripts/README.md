@@ -16,6 +16,7 @@ Or use your system Python if it's not PEP-668-locked.
 ## gddp.py — unified CLI
 
 ```bash
+.venv/bin/python scripts/gddp.py node browse --project gddp-runtime
 .venv/bin/python scripts/gddp.py node rapid --project my-app --repo org/repo
 .venv/bin/python scripts/gddp.py node import --file draft.yaml --project my-app
 .venv/bin/python scripts/gddp.py node validate
@@ -36,6 +37,7 @@ Or use your system Python if it's not PEP-668-locked.
 
 | Command | What | Keystrokes |
 |---|---|---|
+| `node browse [--project X]` | Interactive node review/status menu; project flag skips the project picker | Arrows, Enter, number keys |
 | `node rapid` | Minimal-keystroke adder | Type name, Enter, number keys for deps |
 | `node new` | Full TUI scaffold (field-by-field editor) | Number keys, m/s/q/Enter |
 | `node batch` | Walk through REPLACE_ME nodes | Edit acceptance/constraints/why |
@@ -64,8 +66,9 @@ list/filter/results/detail/update views, delegating job operations to
 `jobs_status.py`. Redirected bare output prints a non-blocking command overview.
 Resolution uses `GDDP_RUNTIME_ROOT`, defaulting
 to the sibling `../gddp-runtime`; `GDDP_RUNTIME_PYTHON` can override the runtime
-interpreter. In menus, `Escape` backs up one level, `←`/`↑` and `→`/`↓`
-paginate, `q` quits, and `Ctrl-C` quits the entire TUI.
+interpreter. In menus, `↑`/`↓` move the highlighted item, Enter opens it,
+`←`/`→` and `p`/`n` paginate, Escape backs up one level, `q` quits, and `Ctrl-C`
+quits the entire TUI. Number keys remain a direct fallback.
 
 The dispatch menu uses paged one-key pickers for graphs and targets. Its
 `ready now` list is the actual dispatchable frontier after dependency and live

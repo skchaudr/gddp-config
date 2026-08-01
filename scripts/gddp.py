@@ -2,6 +2,7 @@
 """gddp — unified CLI for graph truth and runtime evidence.
 
 Subcommands:
+    node browse       Open the node review TUI, optionally at one project
     node new          Interactive TUI node scaffold (full field editor)
     node rapid        Minimal-keystroke rapid node adder
     node batch        Walk through pending/REPLACE_ME nodes in a project
@@ -27,6 +28,7 @@ Subcommands:
     project validate  Validate project.yaml structure
 
 Usage:
+    python3 scripts/gddp.py node browse --project gddp-runtime
     python3 scripts/gddp.py node rapid --project my-app --repo org/repo
     python3 scripts/gddp.py node validate --project vault-doctor
     python3 scripts/gddp.py node import --file draft.yaml --project my-app
@@ -578,7 +580,7 @@ def _paged_menu(
     page_size: int = 9,
     back_label: str = "back",
 ):
-    """Choose any item with one key; cycle between clearly labelled pages."""
+    """Choose by cursor, Enter, or number; page with Left/Right or p/n."""
     if not items:
         _clear_screen()
         console.print(Text("No items found.", style="yellow"))
@@ -586,11 +588,13 @@ def _paged_menu(
         return _MENU_BACK
 
     page = 0
+    cursor = 0
     while True:
         _clear_screen()
         page_count = (len(items) + page_size - 1) // page_size
         start = page * page_size
         visible = items[start:start + page_size]
+        cursor = min(cursor, len(visible) - 1)
         console.print(
             Text(f"{heading} · page {page + 1} of {page_count}", style="bold")
         )
@@ -602,28 +606,33 @@ def _paged_menu(
         for offset, (value, description) in enumerate(visible, start=1):
             key = str(offset)
             actions[key] = (value, description)
-            menu.add_row(key, value, description)
+            marker = "›" if offset - 1 == cursor else " "
+            menu.add_row(f"{marker} {key}", value, description)
+        actions["up"] = ("move selection up", "")
+        actions["down"] = ("move selection down", "")
+        menu.add_row("↑/↓", "move selection", "")
+        menu.add_row("enter", "open selected", "")
         if page_count > 1:
             actions["p"] = ("previous page", "")
             actions["n"] = ("next page", "")
             actions["left"] = ("previous page", "")
-            actions["up"] = ("previous page", "")
             actions["right"] = ("next page", "")
-            actions["down"] = ("next page", "")
-            menu.add_row("p", "previous page", "")
-            menu.add_row("n", "next page", "")
-            menu.add_row("←/↑", "previous page", "")
-            menu.add_row("→/↓", "next page", "")
+            menu.add_row("←/p", "previous page", "")
+            menu.add_row("→/n", "next page", "")
         actions["b"] = (back_label, "")
         actions["q"] = ("quit", "")
         menu.add_row("b", back_label, "")
         menu.add_row("q", "quit", "")
         console.print(menu)
 
-        choice = _menu_choice(actions, default="1")
-        if choice in {"p", "left", "up"}:
+        choice = _menu_choice(actions, default=str(cursor + 1))
+        if choice == "up":
+            cursor = (cursor - 1) % len(visible)
+        elif choice == "down":
+            cursor = (cursor + 1) % len(visible)
+        elif choice in {"p", "left"}:
             page = (page - 1) % page_count
-        elif choice in {"n", "right", "down"}:
+        elif choice in {"n", "right"}:
             page = (page + 1) % page_count
         elif choice == "b":
             return _MENU_BACK
@@ -820,29 +829,34 @@ def _node_status_label(doc: dict, entry: dict | None) -> str:
     return node_status or index_status or "?"
 
 
-def interactive_nodes():
+def interactive_nodes(project: str | None = None):
     """Project → node → review/update loop for canonical graph truth."""
     node_cli = _import_module("node_cli")
+    fixed_project = project is not None
     while True:
-        projects = node_cli.list_project_ids(ROOT)
-        project_items = []
-        for project_id in projects:
-            try:
-                count = len(node_cli.iter_nodes(ROOT, project_id))
-                description = f"{count} node{'s' if count != 1 else ''}"
-            except Exception as exc:
-                description = f"unavailable: {exc}"
-            project_items.append((project_id, description))
+        if not fixed_project:
+            projects = node_cli.list_project_ids(ROOT)
+            project_items = []
+            for project_id in projects:
+                try:
+                    count = len(node_cli.iter_nodes(ROOT, project_id))
+                    description = f"{count} node{'s' if count != 1 else ''}"
+                except Exception as exc:
+                    description = f"unavailable: {exc}"
+                project_items.append((project_id, description))
 
-        project = _paged_menu("projects", project_items, back_label="main menu")
-        if project in {_MENU_BACK, _MENU_QUIT}:
-            return project
+            project = _paged_menu("projects", project_items, back_label="main menu")
+            if project in {_MENU_BACK, _MENU_QUIT}:
+                return project
 
         while True:
             try:
                 nodes = node_cli.iter_nodes(ROOT, project)
             except Exception as exc:
                 console.print(Text(f"Could not load {project}: {exc}", style="red"))
+                if fixed_project:
+                    _pause()
+                    return _MENU_BACK
                 break
             node_items = []
             for node_id, doc, entry in nodes:
@@ -858,12 +872,22 @@ def interactive_nodes():
             if node_id is _MENU_QUIT:
                 return _MENU_QUIT
             if node_id is _MENU_BACK:
+                if fixed_project:
+                    return _MENU_BACK
                 break
             outcome = _node_review_menu(project, node_id)
             if outcome is _MENU_QUIT:
                 return _MENU_QUIT
             if outcome == "projects":
+                if fixed_project:
+                    return _MENU_BACK
                 break
+
+
+def cmd_node_browse(args):
+    """Open the interactive node browser, optionally skipping project choice."""
+    interactive_nodes(args.project)
+    return 0
 
 
 def cmd_node_new(args):
@@ -1489,6 +1513,12 @@ def main(argv=None):
 
     node_p = sub.add_parser("node", help="Node operations")
     node_sub = node_p.add_subparsers(dest="subcommand")
+
+    node_browse = node_sub.add_parser(
+        "browse", help="Interactive node review and graph-status menu")
+    node_browse.add_argument(
+        "--project", default=None, help="Open this project directly")
+    node_browse.set_defaults(func=cmd_node_browse)
 
     node_new = node_sub.add_parser("new", help="Interactive TUI node scaffold (full editor)")
     node_new.set_defaults(func=cmd_node_new)

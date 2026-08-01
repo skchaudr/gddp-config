@@ -114,6 +114,17 @@ class RuntimeJobsForwardingTests(unittest.TestCase):
 
 
 class OverviewTests(unittest.TestCase):
+    def test_node_browse_can_open_one_project_directly(self):
+        with patch.object(
+            gddp, "interactive_nodes", return_value=gddp._MENU_BACK
+        ) as browse:
+            rc = gddp.main([
+                "node", "browse", "--project", "gddp-runtime",
+            ])
+
+        self.assertEqual(rc, 0)
+        browse.assert_called_once_with("gddp-runtime")
+
     def test_menu_choice_uses_one_keypress_without_enter(self):
         terminal = SimpleNamespace(getch=lambda: "j")
         actions = {
@@ -202,7 +213,7 @@ class OverviewTests(unittest.TestCase):
         self.assertEqual(selected, "node-10")
         self.assertEqual(clear.call_count, 2)
 
-    def test_paged_menu_accepts_arrow_keys_for_page_navigation(self):
+    def test_paged_menu_left_right_change_pages(self):
         items = [(f"node-{i}", f"Node {i}") for i in range(1, 12)]
         keys = iter(["RIGHT", "LEFT", "RIGHT", "1"])
         terminal = SimpleNamespace(getch=lambda: next(keys))
@@ -210,6 +221,15 @@ class OverviewTests(unittest.TestCase):
             selected = gddp._paged_menu("nodes", items)
 
         self.assertEqual(selected, "node-10")
+
+    def test_paged_menu_up_down_moves_highlighted_item(self):
+        items = [(f"node-{i}", f"Node {i}") for i in range(1, 4)]
+        keys = iter(["DOWN", "DOWN", "UP", "\r"])
+        terminal = SimpleNamespace(getch=lambda: next(keys))
+        with patch.object(gddp, "_import_module", return_value=terminal):
+            selected = gddp._paged_menu("nodes", items)
+
+        self.assertEqual(selected, "node-2")
 
     def test_interactive_jobs_starts_with_real_list_command(self):
         terminal = SimpleNamespace(getch=lambda: "b")
