@@ -5,10 +5,11 @@ the vault normalization TUI. No class hierarchy, no framework. Just getch,
 getline, and a shared Console.
 """
 
-import sys
+import os
 import select
-import tty
+import sys
 import termios
+import tty
 
 try:
     from rich.console import Console
@@ -18,13 +19,17 @@ except ImportError:
 
 console = Console()
 
+# Arrow bytes can be split by terminal multiplexers. Keep bare Escape responsive
+# while allowing a realistic gap between bytes in the same control sequence.
+ESCAPE_SEQUENCE_TIMEOUT_SECONDS = 0.15
+
 
 def _decode_escape_sequence(first: str, read_available) -> str:
     """Decode an arrow escape sequence while preserving a bare Escape key."""
     if first != "\x1b":
         return first
     second = read_available()
-    if second != "[":
+    if second not in {"[", "O"}:
         return "\x1b"
     final = read_available()
     return {
@@ -73,16 +78,21 @@ def getch() -> str:
     old = termios.tcgetattr(fd)
     try:
         tty.setcbreak(fd)
-        ch = stream.read(1)
+        ch = os.read(fd, 1).decode("utf-8", errors="replace")
         if ch == "\x1b":
             def read_available() -> str | None:
-                readable, _, _ = select.select([fd], [], [], 0.03)
-                return stream.read(1) if readable else None
+                readable, _, _ = select.select(
+                    [fd], [], [], ESCAPE_SEQUENCE_TIMEOUT_SECONDS
+                )
+                if not readable:
+                    return None
+                return os.read(fd, 1).decode("utf-8", errors="replace")
 
             return _decode_escape_sequence(ch, read_available)
     finally:
         try:
-            termios.tcsetattr(fd, termios.TCSAFLUSH, old)
+            # TCSAFLUSH drops queued keystrokes, including an arrow sequence tail.
+            termios.tcsetattr(fd, termios.TCSADRAIN, old)
         except termios.error:
             pass
         if tty_in is not None:
