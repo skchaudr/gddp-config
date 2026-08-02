@@ -169,8 +169,11 @@ class OverviewTests(unittest.TestCase):
         self.assertEqual(rc, 0)
         overview.assert_called_once_with()
 
+    def _paged_terminal(self, getch):
+        return SimpleNamespace(getch=getch, clear_lines=lambda n: None)
+
     def test_paged_menu_selects_numbered_item_with_one_keypress(self):
-        terminal = SimpleNamespace(getch=lambda: "2")
+        terminal = self._paged_terminal(lambda: "2")
         with patch.object(gddp, "_import_module", return_value=terminal):
             selected = gddp._paged_menu(
                 "projects",
@@ -181,7 +184,7 @@ class OverviewTests(unittest.TestCase):
     def test_paged_menu_labels_pages_and_cycles_both_directions(self):
         items = [(f"node-{i}", f"Node {i}") for i in range(1, 12)]
         keys = iter(["p", "n", "n", "1"])
-        terminal = SimpleNamespace(getch=lambda: next(keys))
+        terminal = self._paged_terminal(lambda: next(keys))
         output = StringIO()
         test_console = Console(file=output, width=120, color_system=None)
 
@@ -201,22 +204,28 @@ class OverviewTests(unittest.TestCase):
         self.assertIn("next page", rendered)
         self.assertRegex(rendered, r"b\s+projects")
 
-    def test_paged_menu_redraws_each_page(self):
+    def test_paged_menu_full_clear_only_on_first_paint(self):
+        """Arrow/page moves redraw in place — no full clear per keypress."""
         items = [(f"node-{i}", f"Node {i}") for i in range(1, 12)]
-        keys = iter(["n", "1"])
-        terminal = SimpleNamespace(getch=lambda: next(keys))
+        keys = iter(["n", "DOWN", "\r"])
+        clear_lines_calls = []
+        terminal = SimpleNamespace(
+            getch=lambda: next(keys),
+            clear_lines=lambda n: clear_lines_calls.append(n),
+        )
 
         with patch.object(gddp, "_import_module", return_value=terminal), \
                 patch.object(gddp, "_clear_screen") as clear:
             selected = gddp._paged_menu("nodes", items)
 
-        self.assertEqual(selected, "node-10")
-        self.assertEqual(clear.call_count, 2)
+        self.assertEqual(selected, "node-11")
+        self.assertEqual(clear.call_count, 1)
+        self.assertEqual(len(clear_lines_calls), 2)
 
     def test_paged_menu_left_right_change_pages(self):
         items = [(f"node-{i}", f"Node {i}") for i in range(1, 12)]
         keys = iter(["RIGHT", "LEFT", "RIGHT", "1"])
-        terminal = SimpleNamespace(getch=lambda: next(keys))
+        terminal = self._paged_terminal(lambda: next(keys))
         with patch.object(gddp, "_import_module", return_value=terminal):
             selected = gddp._paged_menu("nodes", items)
 
@@ -225,7 +234,7 @@ class OverviewTests(unittest.TestCase):
     def test_paged_menu_up_down_moves_highlighted_item(self):
         items = [(f"node-{i}", f"Node {i}") for i in range(1, 4)]
         keys = iter(["DOWN", "DOWN", "UP", "\r"])
-        terminal = SimpleNamespace(getch=lambda: next(keys))
+        terminal = self._paged_terminal(lambda: next(keys))
         with patch.object(gddp, "_import_module", return_value=terminal):
             selected = gddp._paged_menu("nodes", items)
 
@@ -260,7 +269,10 @@ class OverviewTests(unittest.TestCase):
 
     def test_job_workflow_updates_only_through_menu(self):
         keys = iter(["u", "1", "y", "x", "b"])
-        terminal = SimpleNamespace(getch=lambda: next(keys))
+        terminal = SimpleNamespace(
+            getch=lambda: next(keys),
+            clear_lines=lambda n: None,
+        )
         operator = SimpleNamespace(
             QUEUE_STATES=("ready",),
             apply_state_change=unittest.mock.Mock(return_value=0),
@@ -317,7 +329,10 @@ class OverviewTests(unittest.TestCase):
 
     def test_node_workflow_reviews_and_updates_entirely_in_menu(self):
         keys = iter(["1", "1", "u", "c", "y", "x", "b", "b", "b"])
-        terminal = SimpleNamespace(getch=lambda: next(keys))
+        terminal = SimpleNamespace(
+            getch=lambda: next(keys),
+            clear_lines=lambda n: None,
+        )
         node_cli = SimpleNamespace(
             list_project_ids=lambda root: ["demo"],
             iter_nodes=lambda root, project: [
@@ -331,7 +346,7 @@ class OverviewTests(unittest.TestCase):
             cmd_set_status=lambda **kwargs: 0,
             node_completion_readiness=lambda project, node_id: (
                 True,
-                "current evaluator verdict is pass",
+                "evaluator passed (criteria + integrity) — your acceptance sets graph status",
             ),
         )
 
@@ -367,7 +382,13 @@ class OverviewTests(unittest.TestCase):
         test_console = Console(file=output, force_terminal=False, width=80)
         keys = iter(["e", "u", "b", "b"])
         terminal = SimpleNamespace(getch=lambda: next(keys))
-        node_cli = SimpleNamespace(cmd_show=lambda **kwargs: 0)
+        node_cli = SimpleNamespace(
+            cmd_show=lambda **kwargs: 0,
+            node_completion_readiness=lambda project, node_id: (
+                True,
+                "evaluator passed (criteria + integrity) — your acceptance sets graph status",
+            ),
+        )
 
         def import_module(name):
             return terminal if name == "terminal" else node_cli
@@ -379,6 +400,7 @@ class OverviewTests(unittest.TestCase):
 
         self.assertIs(outcome, gddp._MENU_BACK)
         self.assertRegex(output.getvalue(), r"(?m)^graph status$")
+        self.assertIn("evaluator passed", output.getvalue())
 
     def test_node_workflow_blocks_complete_without_current_evaluation(self):
         keys = iter(["u", "c", "b", "b"])
@@ -388,7 +410,7 @@ class OverviewTests(unittest.TestCase):
             cmd_set_status=lambda **kwargs: 0,
             node_completion_readiness=lambda project, node_id: (
                 False,
-                "no evaluator result exists for current job job-1",
+                "no evaluator result yet for job job-1",
             ),
         )
 
@@ -418,7 +440,7 @@ class OverviewTests(unittest.TestCase):
             cmd_set_status=lambda **kwargs: 0,
             node_completion_readiness=lambda project, node_id: (
                 False,
-                "no evaluator result exists for current job job-1",
+                "no evaluator result yet for job job-1",
             ),
         )
 

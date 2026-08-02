@@ -536,6 +536,19 @@ def _clear_screen() -> None:
         console.clear()
 
 
+def _graph_status_style(status: str) -> str:
+    """Bright styles for graph status so list rows aren't all equal weight."""
+    key = status.split()[0].lower() if status else ""
+    return {
+        "complete": "bold green",
+        "ready": "bold cyan",
+        "provisional": "bold yellow",
+        "pending": "yellow",
+        "deferred": "magenta",
+        "desync": "bold red",
+    }.get(key, "bold white")
+
+
 def _pause(message: str = "press any key to continue") -> str:
     """Keep command output visible until the operator is ready to redraw."""
     console.print(Text(message, style="dim"))
@@ -556,7 +569,12 @@ def _print_action_menu(actions: dict[str, tuple[str, str]]) -> None:
     console.print(menu)
 
 
-def _menu_choice(actions: dict[str, tuple[str, str]], default: str) -> str:
+def _menu_choice(
+    actions: dict[str, tuple[str, str]],
+    default: str,
+    *,
+    echo: bool = True,
+) -> str:
     """Read one valid menu key immediately, without waiting for Enter.
 
     Escape follows the menu hierarchy: it selects ``b`` when a back action is
@@ -580,78 +598,151 @@ def _menu_choice(actions: dict[str, tuple[str, str]], default: str) -> str:
             choice = default
         choice = choice.lower()
         if choice in actions:
-            console.print(choice)
+            if echo:
+                console.print(choice)
+            else:
+                console.print()
             return choice
         console.print(Text(f"{choice!r} is not an option", style="yellow"))
 
 
+def _format_list_description(description: str | Text, room: int) -> Text:
+    """One-line description: color status · title; truncate to keep redraw stable."""
+    if isinstance(description, Text):
+        plain = description.plain
+        if len(plain) > room:
+            plain = plain[: max(1, room - 1)] + "…"
+            if " · " in plain:
+                status, rest = plain.split(" · ", 1)
+                out = Text()
+                out.append(status, style=_graph_status_style(status))
+                out.append(f" · {rest}")
+                return out
+            return Text(plain)
+        return description.copy()
+
+    plain = str(description)
+    if len(plain) > room:
+        plain = plain[: max(1, room - 1)] + "…"
+    if " · " in plain:
+        status, rest = plain.split(" · ", 1)
+        out = Text()
+        out.append(status, style=_graph_status_style(status))
+        out.append(f" · {rest}")
+        return out
+    return Text(plain)
+
+
 def _paged_menu(
     heading: str,
-    items: list[tuple[str, str]],
+    items: list[tuple[str, str | Text]],
     *,
     page_size: int = 9,
     back_label: str = "back",
 ):
-    """Choose by cursor, Enter, or number; page with Left/Right or p/n."""
+    """Choose by cursor, Enter, or number; page with Left/Right or p/n.
+
+    Static list content is redrawn in place (clear-to-end), not via a full
+    terminal clear on every arrow key — that flicker was pure noise.
+    """
     if not items:
         _clear_screen()
         console.print(Text("No items found.", style="yellow"))
         _pause()
         return _MENU_BACK
 
+    terminal = _import_module("terminal")
+    getch = terminal.getch
+    clear_lines = terminal.clear_lines
     page = 0
     cursor = 0
+    drawn = 0
+    first_paint = True
+
     while True:
-        _clear_screen()
         page_count = (len(items) + page_size - 1) // page_size
+        page = page % page_count
         start = page * page_size
         visible = items[start:start + page_size]
         cursor = min(cursor, len(visible) - 1)
-        console.print(
-            Text(f"{heading} · page {page + 1} of {page_count}", style="bold")
-        )
-        menu = Table(box=None, padding=(0, 2, 0, 1), pad_edge=False, show_header=False)
-        menu.add_column(style="bold cyan", no_wrap=True)
-        menu.add_column(style="bold", no_wrap=True)
-        menu.add_column(style="dim")
-        actions: dict[str, tuple[str, str]] = {}
-        for offset, (value, description) in enumerate(visible, start=1):
-            key = str(offset)
-            actions[key] = (value, description)
-            marker = "›" if offset - 1 == cursor else " "
-            menu.add_row(f"{marker} {key}", value, description)
-        actions["up"] = ("move selection up", "")
-        actions["down"] = ("move selection down", "")
-        menu.add_row("↑/↓", "move selection", "")
-        menu.add_row("enter", "open selected", "")
-        if page_count > 1:
-            actions["p"] = ("previous page", "")
-            actions["n"] = ("next page", "")
-            actions["left"] = ("previous page", "")
-            actions["right"] = ("next page", "")
-            menu.add_row("←/p", "previous page", "")
-            menu.add_row("→/n", "next page", "")
-        actions["b"] = (back_label, "")
-        actions["q"] = ("quit", "")
-        menu.add_row("b", back_label, "")
-        menu.add_row("q", "quit", "")
-        console.print(menu)
 
-        choice = _menu_choice(actions, default=str(cursor + 1))
-        if choice == "up":
-            cursor = (cursor - 1) % len(visible)
-        elif choice == "down":
-            cursor = (cursor + 1) % len(visible)
-        elif choice in {"p", "left"}:
-            page = (page - 1) % page_count
-        elif choice in {"n", "right"}:
-            page = (page + 1) % page_count
-        elif choice == "b":
-            return _MENU_BACK
-        elif choice == "q":
-            return _MENU_QUIT
+        # One logical line per row so clear_lines stays accurate; truncate.
+        width = console.width or 80
+        lines: list[Text] = [
+            Text(f"{heading} · page {page + 1} of {page_count}", style="bold")
+        ]
+        for offset, (value, description) in enumerate(visible, start=1):
+            marker = "›" if offset - 1 == cursor else " "
+            row = Text()
+            row.append(f"{marker} {offset}", style="bold cyan")
+            row.append(f"  {value}", style="bold")
+            used = 4 + len(str(offset)) + 2 + len(value) + 2
+            room = max(12, width - used)
+            row.append("  ")
+            row.append_text(_format_list_description(description, room))
+            lines.append(row)
+
+        help_rows = [
+            ("↑/↓", "move selection"),
+            ("enter", "open selected"),
+        ]
+        if page_count > 1:
+            help_rows.extend([
+                ("←/p", "previous page"),
+                ("→/n", "next page"),
+            ])
+        help_rows.extend([
+            ("b", back_label),
+            ("q", "quit"),
+        ])
+        for key, label in help_rows:
+            h = Text()
+            h.append(f"{key:<8}", style="bold cyan")
+            h.append(label, style="dim")
+            lines.append(h)
+
+        if first_paint:
+            _clear_screen()
+            first_paint = False
         else:
-            return visible[int(choice) - 1][0]
+            clear_lines(drawn)
+
+        for line in lines:
+            console.print(line)
+        drawn = len(lines)
+
+        # Read keys here so navigation does not echo "up"/"down" or full-clear.
+        while True:
+            choice = getch()
+            if choice == "\x03":
+                raise KeyboardInterrupt
+            if choice == "\x1b":
+                choice = "b"
+            if choice in {"\r", "\n"}:
+                return visible[cursor][0]
+            if choice == "UP":
+                cursor = (cursor - 1) % len(visible)
+                break
+            if choice == "DOWN":
+                cursor = (cursor + 1) % len(visible)
+                break
+            if choice in {"LEFT", "p", "P"} and page_count > 1:
+                page = (page - 1) % page_count
+                cursor = 0
+                break
+            if choice in {"RIGHT", "n", "N"} and page_count > 1:
+                page = (page + 1) % page_count
+                cursor = 0
+                break
+            if choice in {"b", "B"}:
+                return _MENU_BACK
+            if choice in {"q", "Q"}:
+                return _MENU_QUIT
+            if choice.isdigit() and choice != "0":
+                idx = int(choice) - 1
+                if 0 <= idx < len(visible):
+                    return visible[idx][0]
+            # invalid key: stay put, no redraw needed
 
 
 def _confirm_status_change(project: str, node_id: str, status: str) -> int:
@@ -681,7 +772,7 @@ def _confirm_status_change(project: str, node_id: str, status: str) -> int:
         console.print(Text("Unchanged — reason required.", style="dim"))
         return 1
     if not reason:
-        console.print(Text("Unchanged — reason required (status alone misleads agents).", style="yellow"))
+        console.print(Text("Unchanged — need a short reason for the history trail.", style="yellow"))
         return 1
     if status == "complete" and not _offer_acceptance_merge(project, node_id):
         console.print(Text("Unchanged — result commit not merged.", style="dim"))
@@ -948,10 +1039,16 @@ def _node_review_menu(project: str, node_id: str):
             if _pause("u update · any other key returns to the node") != "u":
                 continue
 
+        ready, gate_reason = node_cli.node_completion_readiness(project, node_id)
+        complete_hint = (
+            "evaluator passed — your call"
+            if ready
+            else gate_reason
+        )
         status_actions = {
             "p": ("pending", ""),
             "r": ("ready", ""),
-            "c": ("complete", "requires current passing evaluator result"),
+            "c": ("complete", complete_hint),
             "d": ("deferred", ""),
             "b": ("back", ""),
             "q": ("quit", ""),
@@ -961,9 +1058,18 @@ def _node_review_menu(project: str, node_id: str):
         )
         status_menu.add_column(style="bold cyan", no_wrap=True)
         status_menu.add_column(style="bold", no_wrap=True)
-        status_menu.add_column(style="dim")
+        status_menu.add_column()  # hints carry meaning — don't dim them away
         for key, (name, description) in status_actions.items():
-            status_menu.add_row(key, name, description)
+            if key == "c" and ready:
+                status_menu.add_row(
+                    key, name, Text(description, style="bold green")
+                )
+            elif key == "c":
+                status_menu.add_row(
+                    key, name, Text(description, style="yellow")
+                )
+            else:
+                status_menu.add_row(key, name, Text(description, style="dim"))
         _clear_screen()
         console.rule(f"{project} / {node_id}", style="dim")
         console.print(Text("graph status", style="bold"))
@@ -975,13 +1081,12 @@ def _node_review_menu(project: str, node_id: str):
             continue
         target_status = status_actions[status_choice][0]
         if target_status == "complete":
-            ready, reason = node_cli.node_completion_readiness(project, node_id)
             if not ready:
                 _clear_screen()
                 console.print(
-                    Text("COMPLETION BLOCKED — DO NOT ACCEPT", style="bold red")
+                    Text("Not ready to mark complete yet", style="bold yellow")
                 )
-                console.print(reason)
+                console.print(gate_reason)
                 console.print()
                 node_cli.cmd_show(
                     project=project,
@@ -992,9 +1097,9 @@ def _node_review_menu(project: str, node_id: str):
                 override_actions = {
                     "o": (
                         "override",
-                        "continue after personally reviewing missing evidence",
+                        "accept anyway after you've checked the gaps",
                     ),
-                    "b": ("back", "leave graph truth unchanged"),
+                    "b": ("back", "leave graph status unchanged"),
                     "q": ("quit", ""),
                 }
                 override_menu = Table(
@@ -1064,7 +1169,11 @@ def interactive_nodes(project: str | None = None):
             for node_id, doc, entry in nodes:
                 status = _node_status_label(doc, entry)
                 title = str(doc.get("title") or (entry or {}).get("title") or "")
-                node_items.append((node_id, f"{status} · {title}"))
+                desc = Text()
+                desc.append(status, style=_graph_status_style(status))
+                if title:
+                    desc.append(f" · {title}")
+                node_items.append((node_id, desc))
 
             node_id = _paged_menu(
                 f"nodes · {project}",

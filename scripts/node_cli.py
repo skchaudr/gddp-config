@@ -597,12 +597,12 @@ def fetch_runtime_evidence(
 def completion_readiness(ev: RuntimeEvidence) -> tuple[bool, str]:
     """Both current evaluator lanes must pass before interactive completion."""
     if ev.job_id is None:
-        return False, "no runtime job exists for this node"
+        return False, "no runtime job yet for this node"
     if not ev.has_current_evaluation:
-        return False, f"no evaluator result exists for current job {ev.job_id}"
+        return False, f"no evaluator result yet for job {ev.job_id}"
     if ev.verdict != "pass":
         verdict = ev.verdict if ev.verdict != "-" else "missing"
-        return False, f"current evaluator verdict is {verdict}, not pass"
+        return False, f"evaluator verdict is {verdict} (need pass)"
     current_receipt = ev.receipt if ev.receipt_source == "runtime_result" else None
     criteria_verdict = _pick(
         ev.acceptance_check,
@@ -612,8 +612,7 @@ def completion_readiness(ev: RuntimeEvidence) -> tuple[bool, str]:
     if criteria_verdict != "pass":
         return (
             False,
-            "current criteria evaluator verdict is "
-            f"{criteria_verdict or 'missing'}, not pass",
+            f"criteria verdict is {criteria_verdict or 'missing'} (need pass)",
         )
     integrity = (
         _as_dict(ev.acceptance_check.get("integrity"))
@@ -623,13 +622,11 @@ def completion_readiness(ev: RuntimeEvidence) -> tuple[bool, str]:
     if integrity_verdict != "pass":
         return (
             False,
-            "current integrity evaluator verdict is "
-            f"{integrity_verdict or 'missing'}, not pass",
+            f"integrity verdict is {integrity_verdict or 'missing'} (need pass)",
         )
     return (
         True,
-        "current criteria and integrity evaluator verdicts are pass; "
-        "human acceptance is still required",
+        "evaluator passed (criteria + integrity) — your acceptance sets graph status",
     )
 
 
@@ -1159,6 +1156,35 @@ def _print_evaluation(ev: RuntimeEvidence) -> None:
         print("  (none)")
 
 
+def _status_ansi(kind: str) -> str:
+    """ANSI emphasis for the few fields operators actually scan first."""
+    if not sys.stdout.isatty():
+        return ""
+    styles = {
+        "pass": "\033[1;32m",       # bold green
+        "fail": "\033[1;31m",       # bold red
+        "wait": "\033[1;33m",       # bold yellow
+        "warn": "\033[1;33m",
+        "complete": "\033[1;32m",
+        "ready": "\033[1;36m",      # bold cyan
+        "provisional": "\033[1;33m",
+        "pending": "\033[33m",
+        "deferred": "\033[35m",
+        "awaiting_review": "\033[1;36m",
+        "running": "\033[1;36m",
+        "failed": "\033[1;31m",
+    }
+    return styles.get(kind.lower(), "\033[1m")
+
+
+def _print_status_line(label: str, value: str, style_key: str = "") -> None:
+    """Print a key status field; color the value when stdout is a TTY."""
+    pad = f"{label + ':':<18} "
+    color = _status_ansi(style_key) if style_key else ""
+    reset = "\033[0m" if color else ""
+    print(f"{pad}{color}{value}{reset}")
+
+
 def _print_overview(project: str, node_id: str, doc: dict) -> None:
     """Print machine-reference fields without competing with evaluator judgment."""
     print(_section_heading("Overview").lstrip("\n"))
@@ -1208,22 +1234,25 @@ def cmd_show(
     if view in {"all", "summary"}:
         ready, gate_reason = completion_readiness(ev)
         gate_label = (
-            "READY — REVIEW EVIDENCE; HUMAN DECIDES"
+            "evaluator passed — ready for your review"
             if ready
-            else "BLOCKED — DO NOT ACCEPT"
+            else "not ready for acceptance yet"
         )
         print(_section_heading("Status"))
-        print(f"human review gate: {gate_label}")
+        _print_status_line("review", gate_label, "pass" if ready else "wait")
         print(f"  {gate_reason}")
-        print(f"graph status:      {graph_status}", end="")
         if entry is None:
-            print("  (missing from project.yaml index)")
-            print("WARNING: project.yaml has no nodes entry for this node_id")
+            _print_status_line("graph status", f"{graph_status}  (missing from project.yaml index)", "warn")
+            print("  note: project.yaml has no nodes entry for this node_id")
         elif index_status != graph_status:
-            print(f"  (index: {index_status})")
-            print("WARNING: DESYNC — node YAML status != project.yaml index status")
+            _print_status_line(
+                "graph status",
+                f"{graph_status}  (index: {index_status})",
+                "warn",
+            )
+            print("  note: DESYNC — node YAML status != project.yaml index status")
         else:
-            print()
+            _print_status_line("graph status", str(graph_status), str(graph_status))
 
         hist_mod = _load_status_history_mod()
         if hist_mod is not None:
@@ -1257,7 +1286,7 @@ def cmd_show(
                         f"'{graph_status}')"
                     )
                     print(
-                        f"  WARNING: stale history ends at "
+                        f"  note: stale history ends at "
                         f"{stale.get('from_status', '?')} -> "
                         f"{stale.get('to_status', '?')}: {stale.get('reason', '')}"
                     )
@@ -1273,11 +1302,19 @@ def cmd_show(
             if ev.job_status not in ("-", None)
             else ""
         )
-        print(f"runtime state:     {ev.queue_state}{runtime_extra}")
+        _print_status_line(
+            "runtime state",
+            f"{ev.queue_state}{runtime_extra}",
+            str(ev.queue_state or ""),
+        )
         if ev.job_id:
             print(f"runtime job_id:    {ev.job_id}")
             print(f"runtime created:   {ev.job_created_at or 'not recorded'}")
-        print(f"current evaluator verdict: {ev.verdict}")
+        _print_status_line(
+            "evaluator verdict",
+            str(ev.verdict),
+            str(ev.verdict or ""),
+        )
 
     if view == "summary":
         return 0

@@ -451,7 +451,7 @@ class ShowTests(FixtureCase):
         self.assertIn("DESYNC", out)
         self.assertIn("no evaluation evidence", out)
         self.assertRegex(out, r"graph status:\s+pending")
-        self.assertRegex(out, r"current evaluator verdict:\s+-")
+        self.assertRegex(out, r"evaluator verdict:\s+-")
 
     def test_missing_index_warning(self):
         ppath = self.root / "graphs" / PROJECT / "project.yaml"
@@ -471,7 +471,7 @@ class ShowTests(FixtureCase):
                 project=PROJECT, node_id=NODE_A, root=self.root, db_path=db
             )
         self.assertEqual(rc, 0)
-        self.assertIn("WARNING: project.yaml has no nodes entry", buf.getvalue())
+        self.assertIn("project.yaml has no nodes entry", buf.getvalue())
 
     def test_runtime_without_evaluator(self):
         db = make_db(
@@ -496,7 +496,7 @@ class ShowTests(FixtureCase):
         out = buf.getvalue()
         self.assertIn("runtime state:     running", out)
         self.assertIn("no evaluation evidence", out)
-        self.assertRegex(out, r"current evaluator verdict:\s+-")
+        self.assertRegex(out, r"evaluator verdict:\s+-")
 
     def test_summary_hides_contract_and_surfaces_evidence_gate(self):
         db = make_db(
@@ -519,7 +519,7 @@ class ShowTests(FixtureCase):
             )
         self.assertEqual(rc, 0)
         out = buf.getvalue()
-        self.assertIn("BLOCKED — DO NOT ACCEPT", out)
+        self.assertIn("not ready for acceptance yet", out)
         self.assertNotIn("DELIVERY CONTRACT", out)
         self.assertNotIn("acceptance_criteria:", out)
 
@@ -778,7 +778,7 @@ class RuntimeEvidenceTests(FixtureCase):
             node_cli.completion_readiness(evidence),
             (
                 False,
-                "current integrity evaluator verdict is missing, not pass",
+                "integrity verdict is missing (need pass)",
             ),
         )
 
@@ -867,7 +867,7 @@ class RuntimeEvidenceTests(FixtureCase):
         self.assertEqual(rc, 0)
         out = buf.getvalue()
         self.assertIn("awaiting_review", out)
-        self.assertRegex(out, r"current evaluator verdict:\s*pass")
+        self.assertRegex(out, r"evaluator verdict:\s*pass")
         self.assertIn("criteria verdict:    pass", out)
         self.assertIn("watch frontier", out)
         self.assertIn(str(rpath), out)
@@ -882,8 +882,7 @@ class RuntimeEvidenceTests(FixtureCase):
             node_cli.completion_readiness(evidence),
             (
                 True,
-                "current criteria and integrity evaluator verdicts are pass; "
-                "human acceptance is still required",
+                "evaluator passed (criteria + integrity) — your acceptance sets graph status",
             ),
         )
 
@@ -912,7 +911,7 @@ class RuntimeEvidenceTests(FixtureCase):
         self.assertIn("needs-more-evidence", out)
         self.assertIn("criteria=completed", out)
         self.assertIn("OTHER RECEIPT — NOT CURRENT JOB EVIDENCE", out)
-        self.assertIn("BLOCKED — DO NOT ACCEPT", out)
+        self.assertIn("not ready for acceptance yet", out)
         self.assertIn(str(live), out)
 
     def test_standalone_receipt_never_becomes_current_job_verdict(self):
@@ -968,7 +967,7 @@ class RuntimeEvidenceTests(FixtureCase):
             node_cli.completion_readiness(evidence),
             (
                 False,
-                "no evaluator result exists for current job job_current_failed",
+                "no evaluator result yet for job job_current_failed",
             ),
         )
 
@@ -1045,7 +1044,7 @@ class RuntimeEvidenceTests(FixtureCase):
             )
         self.assertEqual(rc2, 0)
         self.assertIn("criteria verdict:    not recorded", buf2.getvalue())
-        self.assertIn("current evaluator verdict is missing", buf2.getvalue())
+        self.assertIn("evaluator verdict is missing", buf2.getvalue())
 
     def test_missing_db_exits_zero(self):
         missing = self.root / "nope" / "queue.db"

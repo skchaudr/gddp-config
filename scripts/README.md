@@ -104,7 +104,7 @@ Graph status, runtime queue state, and evaluator verdict stay **distinct**.
 - Writes are surgical (status values only): staged per-file atomic replacements (`os.replace`) with rollback of both originals if either write or post-write validation fails (not a single joint atomic commit of both files)
 - Candidates are `yaml.safe_load`ed and id/status-checked **before** any disk write; baseline `validate.py` failures abort cleanly with no write
 - Runtime DB: `$GDDP_RUNTIME_ROOT` (default sibling `../gddp-runtime`) `db/queue.db` opened read-only (`mode=ro`); missing DB/receipts print `-` / `no evaluation evidence` and exit 0
-- Runtime job without a result row shows `BLOCKED — DO NOT ACCEPT` and `MISSING — evaluator has not returned a result for the current job`
+- Runtime job without a result row shows `not ready for acceptance yet` and `MISSING — evaluator has not returned a result for the current job`
 - Receipt: latest `acceptance_check.receipt_path`, else `verification-runtime-live/<project>/<node>.json`
 - Implementation: thin `gddp.py` + `scripts/node_cli.py`; portable launcher: `bin/gddp` (`GDDP_CONFIG_PATH` or `$HOME/repos/gddp-config`)
 
