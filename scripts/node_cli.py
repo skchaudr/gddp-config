@@ -741,20 +741,142 @@ def _findings_lines(receipt: dict | None, acceptance: dict) -> list[str]:
     return lines
 
 
-def _evaluator_reasoning(receipt: dict | None, acceptance: dict) -> str | None:
-    """Prefer the overall intent/integrity explanation the evaluator authored."""
+def _evaluator_reasoning_parts(
+    receipt: dict | None, acceptance: dict
+) -> tuple[str | None, str | None]:
+    """Return (primary why, optional integrity/detail notes).
+
+    Primary prefers decision_reasoning (summary). Detail is integrity or
+    semantic reasoning when it adds different text.
+    """
+    decision = None
+    for blob in (acceptance, receipt or {}):
+        if isinstance(blob, dict) and blob.get("decision_reasoning"):
+            decision = str(blob["decision_reasoning"]).strip()
+            break
     acceptance_integrity = _as_dict(acceptance.get("integrity"))
     receipt_integrity = _as_dict((receipt or {}).get("integrity"))
-    reasoning = acceptance_integrity.get("reasoning") or receipt_integrity.get("reasoning")
-    if reasoning:
-        return str(reasoning)
+    integrity = (
+        acceptance_integrity.get("reasoning") or receipt_integrity.get("reasoning")
+    )
+    integrity_s = str(integrity).strip() if integrity else None
     acceptance_semantic = _as_dict(acceptance.get("semantic"))
     receipt_semantic = _as_dict((receipt or {}).get("semantic"))
-    semantic_reasoning = (
+    semantic = (
         acceptance_semantic.get("overall_reasoning")
         or receipt_semantic.get("overall_reasoning")
     )
-    return str(semantic_reasoning) if semantic_reasoning else None
+    semantic_s = str(semantic).strip() if semantic else None
+
+    detail = integrity_s or semantic_s
+    if decision:
+        if detail and detail != decision:
+            return decision, detail
+        return decision, None
+    return detail, None
+
+
+def _evaluator_reasoning(receipt: dict | None, acceptance: dict) -> str | None:
+    """Single-string why (tests / callers that only need one block)."""
+    primary, detail = _evaluator_reasoning_parts(receipt, acceptance)
+    if primary and detail:
+        return f"{primary}\n\n{detail}"
+    return primary or detail
+
+
+# Numbered list markers: "1." "2)" "(3)" at line starts or mid-prose breaks.
+_NUM_MARKER_SPLIT = re.compile(
+    r"(?=(?:^|(?<=\s))(?:\(\d{1,2}\)|\d{1,2}[.)])\s+\S)"
+)
+_NUM_MARKER_LINE = re.compile(
+    r"^(\s*)(\(\d{1,2}\)|\d{1,2}[.)])(\s+)(.*)$"
+)
+
+
+def _ansi(code: str, text: str) -> str:
+    """Wrap text in ANSI when stdout is a TTY; plain otherwise."""
+    if not text or not sys.stdout.isatty():
+        return text
+    return f"\033[{code}m{text}\033[0m"
+
+
+def _structure_numbered_prose(text: str) -> list[str]:
+    """Break prose so each 1. / 1) / (1) item is its own line; keep blanks."""
+    lines: list[str] = []
+    for raw in str(text).splitlines() or [""]:
+        if not raw.strip():
+            lines.append("")
+            continue
+        # If the line already starts with a marker, keep as-is (maybe more inline).
+        chunks = _NUM_MARKER_SPLIT.split(raw)
+        pieces = [c for c in chunks if c != ""]
+        if len(pieces) <= 1:
+            lines.append(raw.rstrip())
+            continue
+        for i, piece in enumerate(pieces):
+            piece = piece.strip()
+            if not piece:
+                continue
+            # First chunk may be lead-in prose before "1."
+            if i == 0 and not _NUM_MARKER_LINE.match(piece):
+                lines.append(piece)
+                lines.append("")
+            else:
+                # Normalize leading space so markers align
+                m = _NUM_MARKER_LINE.match(piece)
+                if m:
+                    lines.append(f"{m.group(2)}{m.group(3)}{m.group(4).rstrip()}")
+                else:
+                    lines.append(piece)
+                # blank between numbered items for scanability
+                if i < len(pieces) - 1:
+                    lines.append("")
+    # collapse triple blanks
+    out: list[str] = []
+    for line in lines:
+        if line == "" and out and out[-1] == "":
+            continue
+        out.append(line)
+    return out
+
+
+def _format_prose_line(line: str) -> str:
+    """Bold numbered markers (1. 2) (3)) on a structured line when TTY."""
+    m = _NUM_MARKER_LINE.match(line)
+    if not m:
+        return line
+    indent, marker, space, rest = m.groups()
+    return f"{indent}{_ansi('1;36', marker)}{space}{rest}"
+
+
+def _print_prose_block(label: str, text: str, *, indent: str = "    ") -> None:
+    """Print a labeled prose block: structured, wrapped, numbered items emphasized."""
+    print(f"  {_ansi('1', label)}")
+    width = max(40, terminal_width() - len(indent))
+    structured = _structure_numbered_prose(text)
+    if not structured:
+        print(f"{indent}(empty)")
+        return
+    for line in structured:
+        if not line.strip():
+            print()
+            continue
+        formatted = _format_prose_line(line)
+        # wrap plain length; ANSI only at marker start so wrap on plain text is fine
+        plain = _NUM_MARKER_LINE.sub(
+            lambda m: f"{m.group(1)}{m.group(2)}{m.group(3)}{m.group(4)}",
+            line,
+        )
+        if len(plain) <= width:
+            print(f"{indent}{formatted}")
+            continue
+        # First wrap on plain, re-apply marker bold on first segment only
+        wrapped = _soft_wrap(plain, width, cont_indent="")
+        for i, seg in enumerate(wrapped):
+            if i == 0:
+                print(f"{indent}{_format_prose_line(seg)}")
+            else:
+                print(f"{indent}  {seg}")
 
 
 # ── list formatting (width-aware) ───────────────────────────────────────────
@@ -1062,29 +1184,59 @@ def _print_evaluation_payload(
     else:
         semantic_status = "not recorded"
 
-    print(f"  verdict:             {verdict}")
-    reasoning = _evaluator_reasoning(receipt, acceptance)
-    if reasoning:
-        print("  why:")
-        for line in reasoning.splitlines():
-            print(f"    {line}")
+    v_style = {
+        "pass": "pass",
+        "fail": "fail",
+        "needs-more-evidence": "wait",
+    }.get(str(verdict).lower(), "")
+    print(f"  {_ansi('1', 'verdict:')}            ", end="")
+    if v_style:
+        color = _status_ansi(v_style)
+        reset = "\033[0m" if color else ""
+        print(f"{color}{verdict}{reset}")
     else:
-        print("  why:                 (not recorded)")
-    next_action = _pick(acceptance, receipt, "required_next_action")
-    if next_action:
-        print(
-            f"  next action:         {next_action} "
-            "(evaluator recommendation, not a decision)"
-        )
-    findings = _findings_lines(receipt, acceptance)
-    if findings:
-        print("  findings / graph observations:")
-        for finding in findings:
-            print(f"    - {finding}")
-    else:
-        print("  findings:            (none recorded)")
+        print(verdict)
 
-    print("  evaluator details:")
+    primary_why, detail_why = _evaluator_reasoning_parts(receipt, acceptance)
+    print()
+    if primary_why:
+        _print_prose_block("why", primary_why)
+        if detail_why:
+            print()
+            _print_prose_block("integrity notes", detail_why)
+    else:
+        print(f"  {_ansi('1', 'why:')}                (not recorded)")
+
+    next_action = _pick(acceptance, receipt, "required_next_action")
+    print()
+    if next_action:
+        print(f"  {_ansi('1', 'next action:')}")
+        body = f"{next_action}  (evaluator recommendation, not a decision)"
+        for i, wline in enumerate(
+            _soft_wrap(body, max(40, terminal_width() - 4), cont_indent="")
+        ):
+            print(f"    {wline}" if i == 0 else f"      {wline}")
+    else:
+        print(f"  {_ansi('1', 'next action:')}        (none recorded)")
+
+    findings = _findings_lines(receipt, acceptance)
+    print()
+    if findings:
+        print(f"  {_ansi('1', 'findings / graph observations:')}")
+        for finding in findings:
+            for i, wline in enumerate(
+                _soft_wrap(
+                    f"• {finding}",
+                    max(40, terminal_width() - 4),
+                    cont_indent="",
+                )
+            ):
+                print(f"    {wline}" if i == 0 else f"      {wline}")
+    else:
+        print(f"  {_ansi('1', 'findings:')}           (none recorded)")
+
+    print()
+    print(f"  {_ansi('1', 'evaluator details')}")
     print(f"  criteria verdict:    {criteria_verdict or 'not recorded'}")
     print(
         "  criteria confidence: "

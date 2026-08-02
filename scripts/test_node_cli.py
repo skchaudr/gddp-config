@@ -985,7 +985,7 @@ class RuntimeEvidenceTests(FixtureCase):
         self.assertIn("MISSING — evaluator has not returned", out)
         self.assertIn("OTHER RECEIPT — NOT CURRENT JOB EVIDENCE", out)
         self.assertIn("semantic evaluation: NOT RUN", out)
-        self.assertIn("verdict:             pass", out)
+        self.assertRegex(out, r"verdict:\s+pass")
         self.assertIn("The evaluator found intent and integrity preserved.", out)
         self.assertIn("HISTORICAL RUNTIME RESULTS: 1", out)
         self.assertLess(
@@ -1053,6 +1053,28 @@ class RuntimeEvidenceTests(FixtureCase):
             rc = node_cli.cmd_list(project=PROJECT, root=self.root, db_path=missing)
         self.assertEqual(rc, 0)
         self.assertIn("-", buf.getvalue())
+
+
+class ProseFormatTests(unittest.TestCase):
+    def test_structure_splits_inline_numbered_markers(self):
+        lines = node_cli._structure_numbered_prose(
+            "Lead. 1. First item. 2) Second item. (3) Third item."
+        )
+        joined = "\n".join(lines)
+        self.assertIn("1. First item.", joined)
+        self.assertIn("2) Second item.", joined)
+        self.assertIn("(3) Third item.", joined)
+        # markers land on their own lines (not one blob)
+        self.assertTrue(any(l.startswith("1.") for l in lines))
+        self.assertTrue(any(l.startswith("2)") for l in lines))
+        self.assertTrue(any(l.startswith("(3)") for l in lines))
+
+    def test_format_prose_line_preserves_plain_text_off_tty(self):
+        # stdout is not a TTY under unittest capture
+        self.assertEqual(
+            node_cli._format_prose_line("1. Alpha"),
+            "1. Alpha",
+        )
 
 
 class NormalizeShapeTests(unittest.TestCase):
