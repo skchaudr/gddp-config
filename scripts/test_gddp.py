@@ -327,6 +327,25 @@ class OverviewTests(unittest.TestCase):
             "DESYNC node=pending index=complete",
         )
 
+    def test_node_menu_phase_distinguishes_review_from_ready(self):
+        self.assertEqual(
+            gddp._node_menu_phase("ready", "awaiting_review", "awaiting_review"),
+            "awaiting review",
+        )
+        self.assertEqual(gddp._node_menu_phase("ready", "-", "-"), "ready")
+        self.assertEqual(
+            gddp._node_menu_phase("ready", "running", "running"),
+            "running",
+        )
+        self.assertEqual(
+            gddp._node_menu_phase("complete", "awaiting_review", "awaiting_review"),
+            "complete",
+        )
+        self.assertNotEqual(
+            gddp._graph_status_style("ready"),
+            gddp._graph_status_style("awaiting review"),
+        )
+
     def test_node_workflow_reviews_and_updates_entirely_in_menu(self):
         keys = iter(["1", "1", "u", "c", "y", "x", "b", "b", "b"])
         terminal = SimpleNamespace(
@@ -344,6 +363,9 @@ class OverviewTests(unittest.TestCase):
             ],
             cmd_show=lambda **kwargs: 0,
             cmd_set_status=lambda **kwargs: 0,
+            fetch_runtime_evidence=lambda *a, **k: SimpleNamespace(
+                queue_state="-", job_status="-"
+            ),
             node_completion_readiness=lambda project, node_id: (
                 True,
                 "evaluator passed (criteria + integrity) — your acceptance sets graph status",

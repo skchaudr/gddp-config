@@ -537,16 +537,62 @@ def _clear_screen() -> None:
 
 
 def _graph_status_style(status: str) -> str:
-    """Bright styles for graph status so list rows aren't all equal weight."""
-    key = status.split()[0].lower() if status else ""
+    """Bright styles so list rows are scannable — review ≠ ready."""
+    plain = (status or "").strip().lower().replace("_", " ")
+    if plain.startswith("desync"):
+        return "bold red"
+    if plain == "awaiting review":
+        return "bold yellow"
+    if plain == "awaiting result":
+        return "bold cyan"
+    key = plain.split()[0] if plain else ""
     return {
         "complete": "bold green",
         "ready": "bold cyan",
+        "queued": "bold blue",
         "provisional": "bold yellow",
         "pending": "yellow",
         "deferred": "magenta",
+        "running": "bold magenta",
+        "failed": "bold red",
         "desync": "bold red",
+        "cancelled": "dim",
+        "blocked": "yellow",
+        "intake": "dim",
+        "classified": "dim",
     }.get(key, "bold white")
+
+
+def _node_menu_phase(
+    graph_status: str,
+    queue_state: str = "-",
+    job_status: str = "-",
+) -> str:
+    """Picker label: waiting-for-review wins over bare graph ready.
+
+    Graph complete/deferred stays graph truth. Active runtime phases
+    (awaiting review, running, …) override a still-open graph status so the
+    operator can tell human-review work from dispatchable ready.
+    """
+    graph = (graph_status or "").strip()
+    if graph.upper().startswith("DESYNC"):
+        return graph
+    g = graph.lower()
+    if g in {"complete", "deferred"}:
+        return g
+    runtime = queue_state if queue_state not in (None, "", "-") else job_status
+    runtime = str(runtime or "-").strip().lower()
+    if runtime == "awaiting_review":
+        return "awaiting review"
+    if runtime == "awaiting_result":
+        return "awaiting result"
+    if runtime == "running":
+        return "running"
+    if runtime == "ready":
+        return "queued"
+    if runtime == "failed":
+        return "failed"
+    return graph or "?"
 
 
 def _pause(message: str = "press any key to continue") -> str:
@@ -1197,10 +1243,19 @@ def interactive_nodes(project: str | None = None):
                 break
             node_items = []
             for node_id, doc, entry in nodes:
-                status = _node_status_label(doc, entry)
+                graph_status = _node_status_label(doc, entry)
+                queue_state = "-"
+                job_status = "-"
+                try:
+                    ev = node_cli.fetch_runtime_evidence(ROOT, project, node_id)
+                    queue_state = getattr(ev, "queue_state", "-") or "-"
+                    job_status = getattr(ev, "job_status", "-") or "-"
+                except Exception:
+                    pass
+                phase = _node_menu_phase(graph_status, queue_state, job_status)
                 title = str(doc.get("title") or (entry or {}).get("title") or "")
                 desc = Text()
-                desc.append(status, style=_graph_status_style(status))
+                desc.append(phase, style=_graph_status_style(phase))
                 if title:
                     desc.append(f" · {title}")
                 node_items.append((node_id, desc))
@@ -1477,7 +1532,10 @@ def interactive_jobs():
 
         try:
             jobs_status = load_runtime_jobs_module()
-            states = [(state, "") for state in jobs_status.QUEUE_STATES]
+            states = []
+            for state in jobs_status.QUEUE_STATES:
+                label = Text(state.replace("_", " "), style=_graph_status_style(state))
+                states.append((state, label))
         except RuntimeError as exc:
             console.print(Text(f"ERROR: {exc}", style="red"))
             _pause()

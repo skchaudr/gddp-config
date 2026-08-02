@@ -1312,21 +1312,24 @@ def _status_ansi(kind: str) -> str:
     """ANSI emphasis for the few fields operators actually scan first."""
     if not sys.stdout.isatty():
         return ""
+    key = kind.lower().replace(" ", "_")
     styles = {
         "pass": "\033[1;32m",       # bold green
         "fail": "\033[1;31m",       # bold red
         "wait": "\033[1;33m",       # bold yellow
         "warn": "\033[1;33m",
         "complete": "\033[1;32m",
-        "ready": "\033[1;36m",      # bold cyan
+        "ready": "\033[1;36m",      # bold cyan — dispatchable
         "provisional": "\033[1;33m",
         "pending": "\033[33m",
         "deferred": "\033[35m",
-        "awaiting_review": "\033[1;36m",
-        "running": "\033[1;36m",
+        "awaiting_review": "\033[1;33m",  # bold yellow — needs human
+        "awaiting_result": "\033[1;36m",
+        "running": "\033[1;35m",    # bold magenta
         "failed": "\033[1;31m",
+        "queued": "\033[1;34m",
     }
-    return styles.get(kind.lower(), "\033[1m")
+    return styles.get(key, "\033[1m")
 
 
 def _print_status_line(label: str, value: str, style_key: str = "") -> None:
