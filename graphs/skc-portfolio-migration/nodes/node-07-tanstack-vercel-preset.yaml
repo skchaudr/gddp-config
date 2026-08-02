@@ -1,0 +1,32 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: node-07-tanstack-vercel-preset
+title: Configure TanStack Start Nitro build preset for Vercel
+type: capability
+
+why: Ensure skc-new (TanStack Start + Nitro) builds cleanly with the Vercel deployment preset so Vercel can deploy it automatically.
+
+depends_on: []
+
+acceptance_criteria:
+  - id: vercel-preset-configured
+    criterion: Nitro / Vite config includes Vercel build output target or vercel.json configuration
+  - id: build-script-ready
+    criterion: package.json scripts contain working build command for Vercel deployment
+
+constraints:
+  - Maintain compatibility with Lovable sync (@lovable.dev/vite-tanstack-config)
+  - Do not break local vite dev server
+
+allowed_execution_modes:
+  - local_subprocess
+
+required_artifacts:
+  - vercel.json
+
+status: ready
+priority: high
+
+unlocks:
+  - node-09-build-lint-pass

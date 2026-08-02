@@ -1,0 +1,34 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: node-01-asset-sync
+title: Sync diagrams and static images from old portfolio
+type: capability
+
+why: Ensure new portfolio skc-new has all technical SVG diagrams (GDDP dispatch flow, Pi Agent guardrail engine) and assets from saboorkc.dev.
+
+depends_on: []
+
+acceptance_criteria:
+  - id: diagrams-copied
+    criterion: public/images/gddp-dispatch-flow.svg and public/images/pi-agent-guardrail-engine.svg exist in skc-new repo
+  - id: asset-dir-clean
+    criterion: Assets are placed under public/images/ with proper SVG structure
+
+constraints:
+  - Do not edit files outside skc-new repository
+  - Copy SVG diagrams verbatim from /Users/sab-mini/repos/saboorkc.dev/public/images/
+
+allowed_execution_modes:
+  - local_subprocess
+
+required_artifacts:
+  - public/images/gddp-dispatch-flow.svg
+  - public/images/pi-agent-guardrail-engine.svg
+
+status: provisional
+priority: high
+
+unlocks:
+  - node-03-project-mdx-gddp
+  - node-05-project-mdx-pi-agent
