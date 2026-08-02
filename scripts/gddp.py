@@ -775,7 +775,13 @@ def _confirm_status_change(project: str, node_id: str, status: str) -> int:
         console.print(Text("Unchanged — need a short reason for the history trail.", style="yellow"))
         return 1
     if status == "complete" and not _offer_acceptance_merge(project, node_id):
-        console.print(Text("Unchanged — result commit not merged.", style="dim"))
+        console.print(
+            Text(
+                "Status not updated — result commit still off mainline "
+                "(merge it, or choose skip on the merge prompt).",
+                style="bold yellow",
+            )
+        )
         return 1
     return node_cli.cmd_set_status(
         project=project,
@@ -906,9 +912,11 @@ def _render_evaluation_and_diff(
 def _offer_acceptance_merge(project: str, node_id: str) -> bool:
     """Merge the accepted result commit into the project repo's mainline.
 
-    False when a pending result exists and the human declines or the merge
-    fails — graph truth must not outrun the arena. True when there is
-    nothing to merge (no receipt, no tip, already merged)."""
+    False only when the human aborts (``n``) or git merge fails.
+    True when already merged, nothing to merge, unavailable tip (manual
+    later), or the human explicitly skips the merge and still wants graph
+    status advanced.
+    """
     receipt = _latest_receipt(project, node_id) or {}
     tip = receipt.get("merge_commit_sha") or receipt.get("evaluated_commit_sha")
     repo = _resolve_project_repo(project)
@@ -920,7 +928,8 @@ def _offer_acceptance_merge(project: str, node_id: str) -> bool:
     branch = _default_branch(repo)
     if state == "unavailable":
         console.print(Text(
-            f"result commit {tip[:12]} not present in {repo} — merge it manually",
+            f"result commit {tip[:12]} not in {repo} — "
+            "graph can still complete; merge the attempt branch yourself later",
             style="yellow",
         ))
         return True
@@ -928,16 +937,33 @@ def _offer_acceptance_merge(project: str, node_id: str) -> bool:
         ["git", "-C", str(repo), "log", "--oneline", f"{branch}..{tip}"],
         capture_output=True, text=True, timeout=30, check=False,
     )
+    console.print()
     console.print(Text(
-        f"pending result — {tip[:12]} not yet in {repo.name} {branch}:", style="bold",
+        f"Result commit not on {repo.name} {branch} yet — "
+        f"{tip[:12]} still on the attempt branch:",
+        style="bold yellow",
     ))
     print(log.stdout.strip() or "(no log output)")
+    console.print(
+        Text("This is the last step before graph status updates.", style="dim")
+    )
     actions = {
-        "y": ("merge", f"merge {tip[:12]} into {branch}"),
-        "n": ("no", "leave repo and graph unchanged"),
+        "y": ("merge", f"ff/merge {tip[:12]} into {branch}, then set complete"),
+        "s": ("skip merge", "set graph complete anyway (repo left as-is)"),
+        "n": ("abort", "leave repo and graph unchanged"),
     }
-    if _menu_choice(actions, default="n") != "y":
+    _print_action_menu(actions)
+    # No silent Enter-to-abort: after typing a reason, Enter is muscle memory.
+    choice = _menu_choice(actions, default="y")
+    if choice == "n":
+        console.print(Text("Aborted — graph status not changed.", style="yellow"))
         return False
+    if choice == "s":
+        console.print(Text(
+            f"Skipping merge — {tip[:12]} stays off {branch}; graph will still update.",
+            style="yellow",
+        ))
+        return True
     proc = subprocess.run(
         ["git", "-C", str(repo), "merge", "--ff-only", tip],
         capture_output=True, text=True, timeout=60, check=False,
@@ -950,6 +976,10 @@ def _offer_acceptance_merge(project: str, node_id: str) -> bool:
         )
         if proc.returncode != 0:
             console.print(Text(f"merge failed:\n{proc.stderr.strip()}", style="bold red"))
+            console.print(Text(
+                "Graph status not updated. Fix the repo, then retry complete.",
+                style="yellow",
+            ))
             return False
     head = subprocess.run(
         ["git", "-C", str(repo), "rev-parse", "--short", "HEAD"],

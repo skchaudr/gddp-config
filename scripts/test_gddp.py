@@ -480,6 +480,50 @@ class OverviewTests(unittest.TestCase):
         self.assertEqual(rc, 1)
         set_status.assert_not_called()
 
+    def test_complete_abort_on_pending_merge_skips_writer(self):
+        """After reason, declining the merge prompt must not write graph status."""
+        terminal = SimpleNamespace(getch=lambda: "y")  # confirm set complete
+        node_cli = SimpleNamespace(cmd_set_status=lambda **kwargs: 0)
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp.Prompt, "ask", return_value="looks good"), \
+                patch.object(gddp, "_offer_acceptance_merge", return_value=False), \
+                patch.object(node_cli, "cmd_set_status") as set_status:
+            rc = gddp._confirm_status_change("demo", "alpha", "complete")
+
+        self.assertEqual(rc, 1)
+        set_status.assert_not_called()
+
+    def test_acceptance_merge_skip_allows_complete(self):
+        terminal = SimpleNamespace(getch=lambda: "s")
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(
+                    gddp,
+                    "_latest_receipt",
+                    return_value={
+                        "merge_commit_sha": "abc123def456",
+                        "evaluated_commit_sha": "abc123def456",
+                    },
+                ), \
+                patch.object(
+                    gddp, "_resolve_project_repo", return_value=Path("/tmp/repo")
+                ), \
+                patch.object(gddp, "_acceptance_merge_state", return_value="pending"), \
+                patch.object(gddp, "_default_branch", return_value="main"), \
+                patch.object(
+                    gddp.subprocess,
+                    "run",
+                    return_value=SimpleNamespace(
+                        returncode=0, stdout="abc123d tip\n", stderr=""
+                    ),
+                ):
+            self.assertTrue(
+                gddp._offer_acceptance_merge("demo", "alpha")
+            )
+
     def test_status_confirmation_shows_yes_no_before_reading_key(self):
         output = StringIO()
         test_console = Console(file=output, force_terminal=False, width=80)
