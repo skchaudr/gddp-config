@@ -92,7 +92,7 @@ Graph status, runtime queue state, and evaluator verdict stay **distinct**.
 ```
 
 - Valid graph statuses: `pending` | `ready` | `complete` | `deferred`
-- Interactive node review opens a concise status screen. `e` opens current-job evaluator evidence, `c` opens the delivery contract, and `t` opens job/result history.
+- Interactive node review opens a concise status screen. `e` opens current-job evaluator evidence, `c` opens the delivery contract, and `t` opens job/result history. From any detail view, `u` goes directly to status selection; confirmation visibly shows `y`/`n` before accepting input.
 - `node show --view summary|evaluation|contract|all` exposes the same views non-interactively.
 - Current-job evaluator results and standalone/fallback receipts stay separate. A fallback receipt is labeled `NOT CURRENT JOB EVIDENCE` and never populates the current evaluator verdict.
 - Interactive completion requires current-job overall, criteria, and integrity verdicts to all be `pass`, unless the operator explicitly chooses the menu override after reviewing the missing evidence.

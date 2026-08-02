@@ -536,12 +536,24 @@ def _clear_screen() -> None:
         console.clear()
 
 
-def _pause() -> None:
+def _pause(message: str = "press any key to continue") -> str:
     """Keep command output visible until the operator is ready to redraw."""
-    console.print(Text("press any key to continue", style="dim"))
+    console.print(Text(message, style="dim"))
     choice = _import_module("terminal").getch()
     if choice == "\x03":
         raise KeyboardInterrupt
+    return choice.lower()
+
+
+def _print_action_menu(actions: dict[str, tuple[str, str]]) -> None:
+    """Show every accepted key before a single-key prompt reads input."""
+    menu = Table(box=None, padding=(0, 2, 0, 1), pad_edge=False, show_header=False)
+    menu.add_column(style="bold cyan", no_wrap=True)
+    menu.add_column(style="bold", no_wrap=True)
+    menu.add_column(style="dim")
+    for key, (name, description) in actions.items():
+        menu.add_row(key, name, description)
+    console.print(menu)
 
 
 def _menu_choice(actions: dict[str, tuple[str, str]], default: str) -> str:
@@ -655,6 +667,7 @@ def _confirm_status_change(project: str, node_id: str, status: str) -> int:
         f"Set [bold]{project}/{node_id}[/bold] graph status to "
         f"[bold cyan]{status}[/bold cyan]?"
     )
+    _print_action_menu(actions)
     choice = _menu_choice(actions, default="n")
     if choice != "y":
         console.print(Text("Unchanged.", style="dim"))
@@ -662,7 +675,6 @@ def _confirm_status_change(project: str, node_id: str, status: str) -> int:
     try:
         reason = Prompt.ask(
             Text("reason", style="cyan"),
-            default="",
         ).strip()
     except EOFError:
         console.print()
@@ -908,8 +920,8 @@ def _node_review_menu(project: str, node_id: str):
                 trace=False,
                 view="evaluation",
             )
-            _pause()
-            continue
+            if _pause("u update · any other key returns to the node") != "u":
+                continue
         if choice == "c":
             _clear_screen()
             node_cli.cmd_show(
@@ -918,8 +930,8 @@ def _node_review_menu(project: str, node_id: str):
                 trace=False,
                 view="contract",
             )
-            _pause()
-            continue
+            if _pause("u update · any other key returns to the node") != "u":
+                continue
         if choice == "t":
             _clear_screen()
             node_cli.cmd_show(
@@ -928,13 +940,13 @@ def _node_review_menu(project: str, node_id: str):
                 trace=True,
                 view="evaluation",
             )
-            _pause()
-            continue
+            if _pause("u update · any other key returns to the node") != "u":
+                continue
         if choice == "d":
             _clear_screen()
             _render_evaluation_and_diff(project, node_id)
-            _pause()
-            continue
+            if _pause("u update · any other key returns to the node") != "u":
+                continue
 
         status_actions = {
             "p": ("pending", ""),
@@ -1240,11 +1252,12 @@ def _confirm_job_state_change(ref: str, state: str) -> int:
         f"Set [bold]{ref}[/bold] runtime job state to "
         f"[bold cyan]{state}[/bold cyan]?"
     )
+    _print_action_menu(actions)
     if _menu_choice(actions, default="n") != "y":
         console.print(Text("Unchanged.", style="dim"))
         return 1
     try:
-        reason = Prompt.ask(Text("reason", style="cyan"), default="").strip()
+        reason = Prompt.ask(Text("reason", style="cyan")).strip()
     except EOFError:
         console.print()
         console.print(Text("Unchanged — reason required.", style="dim"))

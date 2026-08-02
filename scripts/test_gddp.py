@@ -362,6 +362,24 @@ class OverviewTests(unittest.TestCase):
             reason="accepted after review",
         )
 
+    def test_update_key_after_evaluation_opens_status_menu(self):
+        output = StringIO()
+        test_console = Console(file=output, force_terminal=False, width=80)
+        keys = iter(["e", "u", "b", "b"])
+        terminal = SimpleNamespace(getch=lambda: next(keys))
+        node_cli = SimpleNamespace(cmd_show=lambda **kwargs: 0)
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "console", test_console), \
+                patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp, "_clear_screen"):
+            outcome = gddp._node_review_menu("demo", "alpha")
+
+        self.assertIs(outcome, gddp._MENU_BACK)
+        self.assertRegex(output.getvalue(), r"(?m)^graph status$")
+
     def test_node_workflow_blocks_complete_without_current_evaluation(self):
         keys = iter(["u", "c", "b", "b"])
         terminal = SimpleNamespace(getch=lambda: next(keys))
@@ -439,6 +457,28 @@ class OverviewTests(unittest.TestCase):
 
         self.assertEqual(rc, 1)
         set_status.assert_not_called()
+
+    def test_status_confirmation_shows_yes_no_before_reading_key(self):
+        output = StringIO()
+        test_console = Console(file=output, force_terminal=False, width=80)
+        terminal = SimpleNamespace(getch=lambda: "n")
+        node_cli = SimpleNamespace(cmd_set_status=lambda **kwargs: 0)
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "console", test_console), \
+                patch.object(gddp, "_import_module", side_effect=import_module):
+            rc = gddp._confirm_status_change("demo", "alpha", "ready")
+
+        rendered = output.getvalue()
+        self.assertEqual(rc, 1)
+        self.assertRegex(rendered, r"(?m)^y\s+yes\s+set alpha to ready\s*$")
+        self.assertRegex(
+            rendered,
+            r"(?m)^n\s+no\s+leave graph truth unchanged\s*$",
+        )
+        self.assertLess(rendered.index("yes"), rendered.index("select"))
 
     def test_empty_interactive_reason_never_calls_writer(self):
         terminal = SimpleNamespace(getch=lambda: "y")
