@@ -924,6 +924,10 @@ class RuntimeEvidenceTests(FixtureCase):
                 "criteria_confidence": 0.575,
                 "completeness_status": "not-run",
                 "semantic": None,
+                "integrity": {
+                    "verdict": "pass",
+                    "reasoning": "The evaluator found intent and integrity preserved.",
+                },
                 "generated_at": "2026-07-06T12:38:01Z",
             }),
             encoding="utf-8",
@@ -983,7 +987,13 @@ class RuntimeEvidenceTests(FixtureCase):
         self.assertIn("OTHER RECEIPT — NOT CURRENT JOB EVIDENCE", out)
         self.assertIn("semantic evaluation: NOT RUN", out)
         self.assertIn("verdict:             pass", out)
+        self.assertIn("The evaluator found intent and integrity preserved.", out)
         self.assertIn("HISTORICAL RUNTIME RESULTS: 1", out)
+        self.assertLess(
+            out.index("CURRENT EVALUATOR RESULT"),
+            out.index("CURRENT RUNTIME JOB"),
+        )
+        self.assertLess(out.index("CURRENT RUNTIME JOB"), out.index("OVERVIEW"))
 
         list_buf = io.StringIO()
         with redirect_stdout(list_buf):

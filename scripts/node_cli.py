@@ -744,6 +744,22 @@ def _findings_lines(receipt: dict | None, acceptance: dict) -> list[str]:
     return lines
 
 
+def _evaluator_reasoning(receipt: dict | None, acceptance: dict) -> str | None:
+    """Prefer the overall intent/integrity explanation the evaluator authored."""
+    acceptance_integrity = _as_dict(acceptance.get("integrity"))
+    receipt_integrity = _as_dict((receipt or {}).get("integrity"))
+    reasoning = acceptance_integrity.get("reasoning") or receipt_integrity.get("reasoning")
+    if reasoning:
+        return str(reasoning)
+    acceptance_semantic = _as_dict(acceptance.get("semantic"))
+    receipt_semantic = _as_dict((receipt or {}).get("semantic"))
+    semantic_reasoning = (
+        acceptance_semantic.get("overall_reasoning")
+        or receipt_semantic.get("overall_reasoning")
+    )
+    return str(semantic_reasoning) if semantic_reasoning else None
+
+
 # ── list formatting (width-aware) ───────────────────────────────────────────
 
 
@@ -1050,6 +1066,28 @@ def _print_evaluation_payload(
         semantic_status = "not recorded"
 
     print(f"  verdict:             {verdict}")
+    reasoning = _evaluator_reasoning(receipt, acceptance)
+    if reasoning:
+        print("  why:")
+        for line in reasoning.splitlines():
+            print(f"    {line}")
+    else:
+        print("  why:                 (not recorded)")
+    next_action = _pick(acceptance, receipt, "required_next_action")
+    if next_action:
+        print(
+            f"  next action:         {next_action} "
+            "(evaluator recommendation, not a decision)"
+        )
+    findings = _findings_lines(receipt, acceptance)
+    if findings:
+        print("  findings / graph observations:")
+        for finding in findings:
+            print(f"    - {finding}")
+    else:
+        print("  findings:            (none recorded)")
+
+    print("  evaluator details:")
     print(f"  criteria verdict:    {criteria_verdict or 'not recorded'}")
     print(
         "  criteria confidence: "
@@ -1070,34 +1108,18 @@ def _print_evaluation_payload(
             print(f"  harness error ({side}): {harness[side]}")
     print(f"  provenance:          {_provenance_line(receipt, acceptance) or 'not recorded'}")
     print(f"  context coverage:    {_coverage_line(receipt, acceptance) or 'not recorded'}")
-    findings = _findings_lines(receipt, acceptance)
-    if findings:
-        print("  findings / graph observations:")
-        for finding in findings:
-            print(f"    - {finding}")
-    else:
-        print("  findings:            (none recorded)")
 
 
 def _print_evaluation(ev: RuntimeEvidence) -> None:
-    print("CURRENT RUNTIME JOB")
-    if ev.job_id:
-        print(f"  job_id:              {ev.job_id}")
-        print(f"  created:             {ev.job_created_at or 'not recorded'}")
-        print(f"  queue state:         {ev.queue_state}")
-        print(f"  job status:          {ev.job_status}")
-    else:
-        print("  (none)")
-
-    print("\nCURRENT EVALUATOR RESULT")
+    print("CURRENT EVALUATOR RESULT")
     if ev.has_current_evaluation:
-        print(f"  source:              runtime result for {ev.result_job_id}")
-        print(f"  received:            {ev.result_received_at or 'not recorded'}")
         _print_evaluation_payload(
             ev.acceptance_check,
             ev.receipt if ev.receipt_source == "runtime_result" else None,
             verdict=ev.verdict,
         )
+        print(f"  source:              runtime result for {ev.result_job_id}")
+        print(f"  received:            {ev.result_received_at or 'not recorded'}")
         if ev.receipt_source == "runtime_result":
             print(f"  receipt path:        {ev.receipt_path or 'not recorded'}")
     else:
@@ -1126,6 +1148,25 @@ def _print_evaluation(ev: RuntimeEvidence) -> None:
         )
     if not ev.has_evaluation:
         print("\nno evaluation evidence")
+
+    print("\nCURRENT RUNTIME JOB")
+    if ev.job_id:
+        print(f"  job_id:              {ev.job_id}")
+        print(f"  created:             {ev.job_created_at or 'not recorded'}")
+        print(f"  queue state:         {ev.queue_state}")
+        print(f"  job status:          {ev.job_status}")
+    else:
+        print("  (none)")
+
+
+def _print_overview(project: str, node_id: str, doc: dict) -> None:
+    """Print machine-reference fields without competing with evaluator judgment."""
+    print(_section_heading("Overview").lstrip("\n"))
+    print(f"project:           {project}")
+    print(f"node_id:           {doc.get('node_id', node_id)}")
+    print(f"title:             {doc.get('title', '')}")
+    print(f"type:              {doc.get('type', '')}")
+    print(f"priority:          {doc.get('priority', '')}")
 
 
 def cmd_show(
@@ -1161,12 +1202,8 @@ def cmd_show(
     index_status = entry.get("status") if entry else None
     ev = fetch_runtime_evidence(root, project, node_id, db_path=db_path)
 
-    print(_section_heading("Overview").lstrip("\n"))
-    print(f"project:           {project}")
-    print(f"node_id:           {doc.get('node_id', node_id)}")
-    print(f"title:             {doc.get('title', '')}")
-    print(f"type:              {doc.get('type', '')}")
-    print(f"priority:          {doc.get('priority', '')}")
+    if view != "evaluation":
+        _print_overview(project, node_id, doc)
 
     if view in {"all", "summary"}:
         ready, gate_reason = completion_readiness(ev)
@@ -1275,6 +1312,9 @@ def cmd_show(
     if view in {"all", "evaluation"} or trace:
         print(_section_heading("Evaluation"))
         _print_evaluation(ev)
+
+    if view == "evaluation":
+        _print_overview(project, node_id, doc)
 
     if trace:
         print(_section_heading("Trace"))

@@ -1781,7 +1781,9 @@ def main(argv=None):
 
     jobs_show = jobs_sub.add_parser("show", help="Show one job by job ID or node ID")
     jobs_show.add_argument("ref", help="Job ID or uniquely matching node ID")
-    jobs_show.add_argument("--full", action="store_true", help="Include full integrity reasoning")
+    jobs_show.add_argument(
+        "--full", action="store_true", help="Include criterion-level reasoning"
+    )
     jobs_show.set_defaults(func=cmd_jobs)
 
     jobs_results = jobs_sub.add_parser("results", help="Summarize evaluator output")
