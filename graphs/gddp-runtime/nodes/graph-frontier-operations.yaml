@@ -14,6 +14,15 @@ why: |
   not offered for duplicate dispatch, and acceptance actually updates
   graph truth so the right downstream nodes become ready.
 
+  Draft revision 2026-08-02 (Sab): frontier ADVANCEMENT is no longer this
+  node's scope — it shipped as loop machinery (runtime frontier.py +
+  provisional_gate.py). A passing evaluator verdict marks the node
+  provisional; satisfied dependencies transition pending nodes to ready
+  and inject their dispatch events automatically for projects opted into
+  execution_policy.frontier_auto_advance. What remains here is the
+  observability surface: the derived view that keeps the operator able to
+  supervise unattended runs.
+
 depends_on:
   - immediate-evaluator-round-trip
   - concurrent-node-flow
@@ -27,10 +36,12 @@ acceptance_criteria:
     criterion: I can see which downstream nodes would become ready if I accepted a node currently awaiting review
   - id: acceptance-advances-frontier
     criterion: When I accept a node, graph truth updates and the correct newly available nodes become ready
+  - id: frontier-view-reflects-machinery
+    criterion: The view reflects the live frontier machinery (provisional marks, auto-advanced ready nodes, frontier_auto dispatch events) rather than a parallel accounting
 
 constraints:
-  - Graph truth remains human-owned; this node only observes and reports, never mutates
-  - Frontier operations read the same executor-neutral contract used by the rest of the loop
+  - Graph truth remains human-owned: only the operator moves a node to complete; provisional and ready are system-written scheduler markers, never terminal truth
+  - Frontier advancement and dispatch-event synthesis live in the runtime loop (frontier.py, provisional_gate.py), not in this node; this node observes and reports the derived frontier view
   - The operating view is a derived surface over jobs, queue records, and graph state, not a parallel state
   - Do not introduce a UI in this node; JSON + log lines are sufficient
 
