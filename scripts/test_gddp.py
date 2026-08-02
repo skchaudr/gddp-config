@@ -346,6 +346,78 @@ class OverviewTests(unittest.TestCase):
             gddp._graph_status_style("awaiting review"),
         )
 
+    def test_interactive_status_all_and_one(self):
+        keys = iter(["a", "x", "o", "1", "x", "b"])
+        terminal = SimpleNamespace(
+            getch=lambda: next(keys),
+            clear_lines=lambda n: None,
+        )
+        node_cli = SimpleNamespace(
+            iter_nodes=lambda root, project: [
+                (
+                    "alpha",
+                    {"title": "Alpha", "status": "ready"},
+                    {"status": "ready"},
+                )
+            ],
+            fetch_runtime_evidence=lambda *a, **k: SimpleNamespace(
+                queue_state="awaiting_review", job_status="awaiting_review"
+            ),
+        )
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(
+                    gddp, "_list_status_projects", return_value=["demo"]
+                ), \
+                patch.object(
+                    gddp,
+                    "_load_project_doc",
+                    return_value={
+                        "nodes": [{"id": "alpha", "status": "ready"}],
+                    },
+                ), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp.console, "print") as printed:
+            outcome = gddp.interactive_status()
+
+        self.assertIs(outcome, gddp._MENU_BACK)
+        rendered = " ".join(
+            str(getattr(c.args[0], "plain", c.args[0]))
+            for c in printed.call_args_list
+            if c.args
+        )
+        self.assertIn("status · all projects", rendered)
+        self.assertIn("awaiting review", rendered)
+
+    def test_show_status_all_uses_rich_counts(self):
+        with patch.object(
+            gddp, "_list_status_projects", return_value=["demo"]
+        ), patch.object(
+            gddp,
+            "_load_project_doc",
+            return_value={"nodes": [
+                {"id": "a", "status": "complete"},
+                {"id": "b", "status": "ready"},
+            ]},
+        ), patch.object(gddp.console, "print") as printed:
+            gddp.show_status()
+        texts = [
+            c.args[0]
+            for c in printed.call_args_list
+            if c.args and hasattr(c.args[0], "plain")
+        ]
+        joined = " ".join(t.plain for t in texts)
+        self.assertIn("demo", joined)
+        self.assertIn("complete=1", joined)
+        self.assertIn("ready=1", joined)
+        # colored spans present for status tokens
+        styles = {span.style for t in texts for span in t.spans}
+        self.assertTrue(any(s and "green" in str(s) for s in styles))
+        self.assertTrue(any(s and "cyan" in str(s) for s in styles))
+
     def test_node_workflow_reviews_and_updates_entirely_in_menu(self):
         keys = iter(["1", "1", "u", "c", "y", "x", "b", "b", "b"])
         terminal = SimpleNamespace(

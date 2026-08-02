@@ -402,18 +402,48 @@ def cmd_dispatch(argv, *, config_root=None, db_path=None) -> int:
         con.close()
 
 
-def interactive_frontier():
-    """Derived frontier view; recomputes from live graph + runtime on open."""
+def _print_frontier_text(text: str) -> None:
+    """Color frontier section heads and phase tokens for scannable output."""
+    section_styles = {
+        "ready now (dispatchable):": "bold cyan",
+        "in flight (not offered for dispatch):": "bold magenta",
+        "awaiting correction (may be redispatched):": "bold yellow",
+        "blocked (incomplete dependencies):": "yellow",
+        "runtime/graph drift:": "bold red",
+        "unlocks on acceptance:": "bold green",
+    }
+    for raw in text.splitlines():
+        line = raw.rstrip()
+        if not line:
+            console.print()
+            continue
+        if line.startswith("frontier:"):
+            t = Text()
+            t.append("frontier: ", style="bold")
+            t.append(line[len("frontier:"):].strip(), style="bold cyan")
+            console.print(t)
+            continue
+        if line.strip() in section_styles:
+            console.print(Text(line, style=section_styles[line.strip()]))
+            continue
+        if " — " in line:
+            left, right = line.split(" — ", 1)
+            t = Text(left + " — ")
+            phase = right.split("  ", 1)[0]
+            rest = right[len(phase):]
+            t.append(phase, style=_graph_status_style(phase))
+            if rest:
+                t.append(rest, style="dim")
+            console.print(t)
+            continue
+        if line.strip() == "(none)":
+            console.print(Text(line, style="dim"))
+            continue
+        console.print(line)
+
+
+def _show_frontier(selected: list[str]) -> None:
     frontier = _import_module("frontier")
-    projects = frontier.project_ids(ROOT)
-    if not projects:
-        console.print("no graphs found")
-        return
-    project = Prompt.ask("graph (blank = all)", default="")
-    selected = [project] if project.strip() else projects
-    if project.strip() and project not in projects:
-        console.print(f"[bold red]ERROR:[/] no graph named '{project}'")
-        return
     try:
         con = frontier.connect_readonly(resolve_runtime_root() / "db" / "queue.db")
         note = None
@@ -430,13 +460,56 @@ def interactive_frontier():
                     runtime = frontier.load_runtime(con, pid)
                 except sqlite3.Error as exc:
                     pid_note = str(exc)
-            console.print(frontier.render_text(
-                pid, frontier.derive(graph, runtime), runtime_note=pid_note
-            ), markup=False)
+            _print_frontier_text(
+                frontier.render_text(
+                    pid, frontier.derive(graph, runtime), runtime_note=pid_note
+                )
+            )
             console.print()
     finally:
         if con is not None:
             con.close()
+
+
+def interactive_frontier():
+    """Derived frontier view; recomputes from live graph + runtime on open."""
+    frontier = _import_module("frontier")
+    projects = frontier.project_ids(ROOT)
+    if not projects:
+        console.print(Text("no graphs found", style="yellow"))
+        return _MENU_BACK
+    actions = {
+        "a": ("all", "frontier for every project"),
+        "o": ("one", "pick one project"),
+        "b": ("main menu", ""),
+        "q": ("quit", ""),
+    }
+    while True:
+        _clear_screen()
+        console.print(Text("frontier", style="bold"))
+        _print_action_menu(actions)
+        choice = _menu_choice(actions, default="a")
+        if choice == "q":
+            return _MENU_QUIT
+        if choice == "b":
+            return _MENU_BACK
+        if choice == "a":
+            _clear_screen()
+            _show_frontier(projects)
+            _pause()
+            continue
+        project = _paged_menu(
+            "frontier · graphs",
+            [(pid, "") for pid in projects],
+            back_label="frontier",
+        )
+        if project is _MENU_QUIT:
+            return _MENU_QUIT
+        if project is _MENU_BACK:
+            continue
+        _clear_screen()
+        _show_frontier([project])
+        _pause()
 
 
 def interactive_dispatch():
@@ -477,9 +550,17 @@ def interactive_dispatch():
             table.add_column("executor")
             table.add_column("state")
             for item in movable:
-                table.add_row(item["node_id"], item["executor"], "ready now")
+                table.add_row(
+                    item["node_id"],
+                    item["executor"],
+                    Text("ready now", style="bold cyan"),
+                )
             for item, reason in excluded:
-                table.add_row(item["node_id"], item["executor"], Text(reason))
+                table.add_row(
+                    item["node_id"],
+                    item["executor"],
+                    Text(str(reason), style="yellow"),
+                )
             console.print(table)
             if not movable:
                 console.print(
@@ -490,13 +571,19 @@ def interactive_dispatch():
             target_items = [
                 (
                     project,
-                    f"entire dispatchable frontier · {len(movable)} node"
-                    f"{'s' if len(movable) != 1 else ''}",
+                    Text(
+                        f"entire dispatchable frontier · {len(movable)} node"
+                        f"{'s' if len(movable) != 1 else ''}",
+                        style="bold cyan",
+                    ),
                 ),
                 *[
                     (
                         item["node_id"],
-                        f"{item['executor']} · ready now",
+                        Text(
+                            f"{item['executor']} · ready now",
+                            style="bold cyan",
+                        ),
                     )
                     for item in movable
                 ],
@@ -1373,7 +1460,7 @@ def cmd_node_show(args):
 
 
 def cmd_node_status(args):
-    show_status()
+    show_status(getattr(args, "project", None))
 
 
 def resolve_runtime_root() -> Path:
@@ -1638,18 +1725,17 @@ def interactive_menu():
                     continue
                 _pause()
             elif choice == "f":
-                _clear_screen()
-                interactive_frontier()
-                _pause()
+                outcome = interactive_frontier()
+                if outcome is _MENU_QUIT:
+                    break
             elif choice == "s":
-                _clear_screen()
-                show_status()
-                _pause()
+                outcome = interactive_status()
+                if outcome is _MENU_QUIT:
+                    break
             elif choice == "v":
-                _clear_screen()
-                cmd_node_validate(argparse.Namespace(
-                    root=None, project=None, json=False, quiet=False, strict=False
-                ))
+                outcome = interactive_validate()
+                if outcome is _MENU_QUIT:
+                    break
         except SystemExit:
             # Existing command handlers use SystemExit; one menu action should
             # return to the control-plane menu instead of closing the CLI.
@@ -1780,62 +1866,233 @@ def cmd_project_validate(args):
     validate_project(args.project)
 
 
-def show_status():
+def _list_status_projects() -> list[str]:
     graphs = ROOT / "graphs"
     if not graphs.exists():
-        print("No graphs/ directory found")
-        return
-
-    projects = sorted(
+        return []
+    return sorted(
         p.name for p in graphs.iterdir()
         if p.is_dir() and p.name != "_template" and (p / "project.yaml").exists()
     )
 
+
+def _load_project_doc(project_id: str) -> dict:
+    with open(ROOT / "graphs" / project_id / "project.yaml") as f:
+        return yaml.safe_load(f) or {}
+
+
+def _graph_status_counts(nodes: list) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for n in nodes:
+        if not isinstance(n, dict):
+            continue
+        s = str(n.get("status") or "unknown")
+        counts[s] = counts.get(s, 0) + 1
+    return counts
+
+
+def _pct_style(pct: int) -> str:
+    if pct >= 100:
+        return "bold green"
+    if pct > 0:
+        return "bold yellow"
+    return "dim"
+
+
+def _status_counts_text(counts: dict[str, int]) -> Text:
+    out = Text()
+    for i, (status, count) in enumerate(sorted(counts.items())):
+        if i:
+            out.append(", ", style="dim")
+        out.append(status, style=_graph_status_style(status))
+        out.append(f"={count}")
+    return out
+
+
+def _print_status_project_row(project_id: str, nodes: list, *, indent: str = "") -> tuple[int, int]:
+    """Print one project summary line. Returns (complete, total)."""
+    counts = _graph_status_counts(nodes)
+    total = sum(counts.values())
+    complete = counts.get("complete", 0)
+    pct = int(complete / total * 100) if total else 0
+    row = Text(indent)
+    row.append(f"{project_id:<25}", style="bold")
+    row.append(f" {total:>3} nodes  ", style="dim")
+    row.append(f"{pct:>3}% done", style=_pct_style(pct))
+    row.append("  (", style="dim")
+    row.append_text(_status_counts_text(counts))
+    row.append(")", style="dim")
+    console.print(row)
+    return complete, total
+
+
+def show_status(project_id: str | None = None) -> None:
+    """Rich graph completion summary — all projects or one project with nodes."""
+    projects = _list_status_projects()
+    if not projects:
+        console.print(Text("No graphs/ directory found", style="yellow"))
+        return
+    if project_id:
+        if project_id not in projects:
+            console.print(Text(f"Project '{project_id}' not found", style="red"))
+            return
+        _render_project_status_detail(project_id)
+        return
+
+    console.print(Text("status · all projects", style="bold"))
     total_complete = 0
-    total_pending = 0
-    total_other = 0
-
+    grand = 0
     for pid in projects:
-        proj_yaml = graphs / pid / "project.yaml"
-        with open(proj_yaml) as f:
-            proj = yaml.safe_load(f) or {}
-        nodes = proj.get("nodes", [])
-        counts = {}
-        for n in nodes:
-            s = n.get("status", "unknown")
-            counts[s] = counts.get(s, 0) + 1
-            if s == "complete":
-                total_complete += 1
-            elif s == "pending":
-                total_pending += 1
-            else:
-                total_other += 1
-
-        name = proj.get("project_name", pid)
-        parts = [f"{s}={c}" for s, c in sorted(counts.items())]
-        total = len(nodes)
-        complete_count = counts.get("complete", 0)
-        pct = int(complete_count / total * 100) if total else 0
-        print(f"{pid:<25} {total:>3} nodes  {pct:>3}% done  ({', '.join(parts)})")
-
-    grand = total_complete + total_pending + total_other
+        proj = _load_project_doc(pid)
+        complete, total = _print_status_project_row(pid, proj.get("nodes") or [])
+        total_complete += complete
+        grand += total
     gpct = int(total_complete / grand * 100) if grand else 0
-    print(f"\n{'TOTAL':<25} {grand:>3} nodes  {gpct:>3}% done")
+    footer = Text()
+    footer.append(f"{'TOTAL':<25}", style="bold")
+    footer.append(f" {grand:>3} nodes  ", style="dim")
+    footer.append(f"{gpct:>3}% done", style=_pct_style(gpct))
+    console.print()
+    console.print(footer)
+
+
+def _render_project_status_detail(project_id: str) -> None:
+    """One project: colored counts + each node with runtime phase."""
+    node_cli = _import_module("node_cli")
+    proj = _load_project_doc(project_id)
+    nodes_index = proj.get("nodes") or []
+    console.print(Text(f"status · {project_id}", style="bold"))
+    _print_status_project_row(project_id, nodes_index)
+    console.print()
+
+    try:
+        node_rows = node_cli.iter_nodes(ROOT, project_id)
+    except Exception as exc:
+        console.print(Text(f"Could not load nodes: {exc}", style="red"))
+        return
+    if not node_rows:
+        console.print(Text("(no nodes)", style="dim"))
+        return
+
+    phase_counts: dict[str, int] = {}
+    for node_id, doc, entry in node_rows:
+        graph_status = _node_status_label(doc, entry)
+        queue_state = "-"
+        job_status = "-"
+        try:
+            ev = node_cli.fetch_runtime_evidence(ROOT, project_id, node_id)
+            queue_state = getattr(ev, "queue_state", "-") or "-"
+            job_status = getattr(ev, "job_status", "-") or "-"
+        except Exception:
+            pass
+        phase = _node_menu_phase(graph_status, queue_state, job_status)
+        phase_counts[phase] = phase_counts.get(phase, 0) + 1
+        title = str(doc.get("title") or (entry or {}).get("title") or "")
+        line = Text()
+        line.append(f"  {node_id:<36}", style="bold")
+        line.append(phase, style=_graph_status_style(phase))
+        if title:
+            line.append(f"  {title}", style="dim")
+        console.print(line)
+
+    console.print()
+    scan = Text("  operator scan  ")
+    scan.append_text(_status_counts_text(phase_counts))
+    console.print(scan)
+
+
+def interactive_status():
+    """Status menu: all projects summary or one project with node phases."""
+    actions = {
+        "a": ("all", "every project completion summary"),
+        "o": ("one", "pick one project — counts + node phases"),
+        "b": ("main menu", ""),
+        "q": ("quit", ""),
+    }
+    while True:
+        _clear_screen()
+        console.print(Text("status", style="bold"))
+        _print_action_menu(actions)
+        choice = _menu_choice(actions, default="a")
+        if choice == "q":
+            return _MENU_QUIT
+        if choice == "b":
+            return _MENU_BACK
+        if choice == "a":
+            _clear_screen()
+            show_status()
+            _pause()
+            continue
+        projects = _list_status_projects()
+        if not projects:
+            console.print(Text("No graphs found", style="yellow"))
+            _pause()
+            continue
+        project = _paged_menu(
+            "status · projects",
+            [(pid, "") for pid in projects],
+            back_label="status",
+        )
+        if project is _MENU_QUIT:
+            return _MENU_QUIT
+        if project is _MENU_BACK:
+            continue
+        _clear_screen()
+        show_status(project)
+        _pause()
+
+
+def interactive_validate():
+    """Validate menu: all graphs or one project."""
+    actions = {
+        "a": ("all", "validate every project"),
+        "o": ("one", "pick one project"),
+        "b": ("main menu", ""),
+        "q": ("quit", ""),
+    }
+    while True:
+        _clear_screen()
+        console.print(Text("validate", style="bold"))
+        _print_action_menu(actions)
+        choice = _menu_choice(actions, default="a")
+        if choice == "q":
+            return _MENU_QUIT
+        if choice == "b":
+            return _MENU_BACK
+        if choice == "a":
+            _clear_screen()
+            validate_project(None)
+            _pause()
+            continue
+        projects = _list_status_projects()
+        if not projects:
+            console.print(Text("No graphs found", style="yellow"))
+            _pause()
+            continue
+        project = _paged_menu(
+            "validate · projects",
+            [(pid, "") for pid in projects],
+            back_label="validate",
+        )
+        if project is _MENU_QUIT:
+            return _MENU_QUIT
+        if project is _MENU_BACK:
+            continue
+        _clear_screen()
+        validate_project(project)
+        _pause()
 
 
 def validate_project(project_id: str | None):
     graphs = ROOT / "graphs"
     if not graphs.exists():
-        print("No graphs/ directory found")
+        console.print(Text("No graphs/ directory found", style="yellow"))
         return
 
-    projects = sorted(
-        p.name for p in graphs.iterdir()
-        if p.is_dir() and p.name != "_template" and (p / "project.yaml").exists()
-    )
+    projects = _list_status_projects()
     if project_id:
         if project_id not in projects:
-            print(f"Project '{project_id}' not found")
+            console.print(Text(f"Project '{project_id}' not found", style="red"))
             return
         projects = [project_id]
 
@@ -1887,14 +2144,20 @@ def validate_project(project_id: str | None):
                     pid_errors.append(f"nodes/{nid}.yaml exists but not listed in project.yaml")
 
         if pid_errors:
-            print(f"[red]{pid}[/red]")
+            console.print(Text(pid, style="bold red"))
             for e in pid_errors:
-                print(f"  ERROR: {e}")
+                console.print(Text(f"  ERROR: {e}", style="red"))
             errors += len(pid_errors)
         else:
-            print(f"[green]{pid}[/green] OK")
+            line = Text()
+            line.append(pid, style="bold green")
+            line.append(" OK", style="green")
+            console.print(line)
 
-    print(f"\n{errors} error(s) across {len(projects)} project(s)")
+    summary = Text()
+    summary.append(f"\n{errors} error(s)", style="bold red" if errors else "bold green")
+    summary.append(f" across {len(projects)} project(s)", style="dim")
+    console.print(summary)
     return 1 if errors else 0
 
 
@@ -1978,7 +2241,12 @@ def main(argv=None):
     )
     node_show.set_defaults(func=cmd_node_show)
 
-    node_status = node_sub.add_parser("status", help="Status summary for all projects")
+    node_status = node_sub.add_parser(
+        "status", help="Status summary (all projects, or one with --project)"
+    )
+    node_status.add_argument(
+        "--project", default=None, help="One project — counts + node phases"
+    )
     node_status.set_defaults(func=cmd_node_status)
 
     jobs_p = sub.add_parser("jobs", help="Runtime jobs and evaluator evidence")
