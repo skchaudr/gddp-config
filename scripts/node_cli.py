@@ -1388,13 +1388,32 @@ def cmd_show(
 
     if view in {"all", "summary"}:
         ready, gate_reason = completion_readiness(ev)
-        gate_label = (
-            "evaluator passed — ready for your review"
-            if ready
-            else "not ready for acceptance yet"
-        )
+        # Gate copy should match graph truth, not only evaluator readiness.
+        if str(graph_status) == "complete":
+            if ready:
+                gate_label = "evaluator passed — graph already complete"
+                gate_reason = (
+                    "graph status is complete; evaluator still shows pass "
+                    "(criteria + integrity)"
+                )
+                gate_style = "complete"
+            else:
+                gate_label = "graph already complete"
+                gate_reason = (
+                    f"graph status is complete; current evaluator state: {gate_reason}"
+                )
+                gate_style = "complete"
+        elif str(graph_status) == "deferred":
+            gate_label = "deferred — not in active acceptance path"
+            gate_style = "deferred"
+        elif ready:
+            gate_label = "evaluator passed — ready for your review"
+            gate_style = "pass"
+        else:
+            gate_label = "not ready for acceptance yet"
+            gate_style = "wait"
         print(_section_heading("Status"))
-        _print_status_line("review", gate_label, "pass" if ready else "wait")
+        _print_status_line("review", gate_label, gate_style)
         print(f"  {gate_reason}")
         if entry is None:
             _print_status_line("graph status", f"{graph_status}  (missing from project.yaml index)", "warn")
@@ -1462,6 +1481,14 @@ def cmd_show(
             f"{ev.queue_state}{runtime_extra}",
             str(ev.queue_state or ""),
         )
+        if (
+            str(graph_status) == "complete"
+            and str(ev.queue_state or "") == "awaiting_review"
+        ):
+            print(
+                "  note: graph is complete but the runtime job is still "
+                "awaiting_review — settle it under jobs if you want the queue clean"
+            )
         if ev.job_id:
             print(f"runtime job_id:    {ev.job_id}")
             print(f"runtime created:   {ev.job_created_at or 'not recorded'}")
