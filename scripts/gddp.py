@@ -916,13 +916,124 @@ def _confirm_status_change(project: str, node_id: str, status: str) -> int:
             )
         )
         return 1
-    return node_cli.cmd_set_status(
+    rc = node_cli.cmd_set_status(
         project=project,
         node_id=node_id,
         status=status,
         yes=True,
         reason=reason,
     )
+    if rc == 0:
+        _offer_publish_graph_status(project, node_id, status, reason)
+    return rc
+
+
+def _config_git(*args: str, timeout: int = 60) -> subprocess.CompletedProcess:
+    """Run git in the gddp-config checkout (graph truth lives here)."""
+    return subprocess.run(
+        ["git", "-C", str(ROOT), *args],
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+        check=False,
+    )
+
+
+def _graph_status_relpaths(project: str, node_id: str) -> list[str]:
+    """Paths dual-written by set-status, relative to config ROOT."""
+    return [
+        f"graphs/{project}/nodes/{node_id}.yaml",
+        f"graphs/{project}/project.yaml",
+    ]
+
+
+def _dirty_graph_status_paths(project: str, node_id: str) -> list[str]:
+    """Which dual-write paths currently differ from HEAD."""
+    rels = _graph_status_relpaths(project, node_id)
+    proc = _config_git("status", "--porcelain", "--", *rels)
+    if proc.returncode != 0:
+        return []
+    dirty: list[str] = []
+    for line in proc.stdout.splitlines():
+        # porcelain: XY PATH or XY ORIG -> PATH
+        path = line[3:].strip()
+        if " -> " in path:
+            path = path.split(" -> ", 1)[1]
+        if path in rels:
+            dirty.append(path)
+    return dirty
+
+
+def _offer_publish_graph_status(
+    project: str, node_id: str, status: str, reason: str
+) -> None:
+    """After graph YAML is written: commit/push it, or leave dirty on purpose.
+
+    Status writes without a publish step is what leaves gddp-config full of
+    modified node files. This is the real confirmation — not another scold.
+    """
+    dirty = _dirty_graph_status_paths(project, node_id)
+    if not dirty:
+        return
+
+    console.print()
+    console.print(Text("Graph YAML written — still only local until published:", style="bold"))
+    for path in dirty:
+        console.print(f"  {path}")
+    diff = _config_git("diff", "--stat", "--", *dirty)
+    if diff.stdout.strip():
+        console.print(Text(diff.stdout.rstrip(), style="dim"))
+
+    actions = {
+        "p": ("commit + push", "add these files, commit, push to origin"),
+        "c": ("commit only", "add + commit; you push later"),
+        "s": ("skip", "leave the working tree dirty"),
+    }
+    _print_action_menu(actions)
+    choice = _menu_choice(actions, default="p")
+    if choice == "s":
+        console.print(Text(
+            "Left dirty — remember to commit graphs/ when you're ready.",
+            style="yellow",
+        ))
+        return
+
+    add = _config_git("add", "--", *dirty)
+    if add.returncode != 0:
+        console.print(Text(
+            f"git add failed:\n{(add.stderr or add.stdout).strip()}",
+            style="bold red",
+        ))
+        return
+
+    msg = (
+        f"graph({project}): {node_id} → {status}\n\n"
+        f"{reason.strip()}\n"
+    )
+    commit = _config_git("commit", "-m", msg)
+    if commit.returncode != 0:
+        console.print(Text(
+            f"git commit failed:\n{(commit.stderr or commit.stdout).strip()}",
+            style="bold red",
+        ))
+        return
+    sha = _config_git("rev-parse", "--short", "HEAD").stdout.strip()
+    console.print(Text(f"committed {sha} — {', '.join(dirty)}", style="green"))
+
+    if choice != "p":
+        console.print(Text("Not pushed (commit only).", style="dim"))
+        return
+
+    push = _config_git("push", timeout=120)
+    if push.returncode != 0:
+        console.print(Text(
+            f"git push failed:\n{(push.stderr or push.stdout).strip()}",
+            style="bold red",
+        ))
+        console.print(Text("Commit is local; push when the remote is ready.", style="yellow"))
+        return
+    branch = _config_git("branch", "--show-current").stdout.strip() or "HEAD"
+    console.print(Text(f"pushed {sha} → origin/{branch}", style="bold green"))
 
 
 def _latest_receipt(project: str, node_id: str) -> dict | None:

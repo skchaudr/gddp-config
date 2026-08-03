@@ -618,6 +618,83 @@ class OverviewTests(unittest.TestCase):
                 gddp._offer_acceptance_merge("demo", "alpha")
             )
 
+    def test_successful_status_change_offers_publish(self):
+        terminal = SimpleNamespace(getch=lambda: "y")
+        node_cli = SimpleNamespace(cmd_set_status=lambda **kwargs: 0)
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp.Prompt, "ask", return_value="ship it"), \
+                patch.object(
+                    gddp, "_offer_publish_graph_status"
+                ) as publish, \
+                patch.object(node_cli, "cmd_set_status", return_value=0) as set_status:
+            rc = gddp._confirm_status_change("demo", "alpha", "ready")
+
+        self.assertEqual(rc, 0)
+        set_status.assert_called_once()
+        publish.assert_called_once_with("demo", "alpha", "ready", "ship it")
+
+    def test_publish_commit_push_stages_only_graph_paths(self):
+        calls: list[tuple] = []
+
+        def fake_git(*args, timeout=60):
+            calls.append(args)
+            if args[:2] == ("status", "--porcelain"):
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout=(
+                        " M graphs/demo/nodes/alpha.yaml\n"
+                        " M graphs/demo/project.yaml\n"
+                    ),
+                    stderr="",
+                )
+            if args[0] == "diff":
+                return SimpleNamespace(returncode=0, stdout=" 2 files changed\n", stderr="")
+            if args[0] == "rev-parse":
+                return SimpleNamespace(returncode=0, stdout="abc1234\n", stderr="")
+            if args[0] == "branch":
+                return SimpleNamespace(returncode=0, stdout="main\n", stderr="")
+            return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+        terminal = SimpleNamespace(getch=lambda: "p")
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "_config_git", side_effect=fake_git):
+            gddp._offer_publish_graph_status(
+                "demo", "alpha", "complete", "looks good"
+            )
+
+        self.assertIn(
+            ("add", "--", "graphs/demo/nodes/alpha.yaml", "graphs/demo/project.yaml"),
+            calls,
+        )
+        commit_calls = [c for c in calls if c and c[0] == "commit"]
+        self.assertEqual(len(commit_calls), 1)
+        self.assertIn("graph(demo): alpha → complete", commit_calls[0][2])
+        self.assertIn(("push",), calls)
+
+    def test_publish_skip_does_not_git_write(self):
+        calls: list[tuple] = []
+
+        def fake_git(*args, timeout=60):
+            calls.append(args)
+            if args[:2] == ("status", "--porcelain"):
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout=" M graphs/demo/nodes/alpha.yaml\n",
+                    stderr="",
+                )
+            return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+        terminal = SimpleNamespace(getch=lambda: "s")
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "_config_git", side_effect=fake_git):
+            gddp._offer_publish_graph_status("demo", "alpha", "ready", "x")
+
+        self.assertFalse(any(c and c[0] in {"add", "commit", "push"} for c in calls))
+
     def test_status_confirmation_shows_yes_no_before_reading_key(self):
         output = StringIO()
         test_console = Console(file=output, force_terminal=False, width=80)

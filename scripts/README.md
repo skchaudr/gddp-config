@@ -97,6 +97,7 @@ Graph status, runtime queue state, and evaluator verdict stay **distinct**.
 - Current-job evaluator results and standalone/fallback receipts stay separate. A fallback receipt is labeled `NOT CURRENT JOB EVIDENCE` and never populates the current evaluator verdict.
 - Interactive completion requires current-job overall, criteria, and integrity verdicts to all be `pass`, unless the operator explicitly chooses the menu override after reviewing the missing evidence.
 - Interactive status updates require a reason (stored under runtime `node_status_history/`, not node YAML), preview `old -> new` for both files, and no-op without rewrite when already at target.
+- After a successful status write, the menu offers **publish**: `p` commit+push the dual-written graph paths only, `c` commit only, or `s` leave dirty. Default is `p`.
 - `node list` uses terminal width (`COLUMNS` / `shutil.get_terminal_size`):
   - **&lt;120 cols:** each node is a blank-line-separated multi-line record — exact `node_id` alone on line 1 (copyable, never truncated); line 2+ carries distinct `GRAPH` / `RUNTIME` / `VERDICT`, then TYPE/TITLE soft-wrapped to width
   - **≥120 cols:** table-like scan; exact ID intact; TITLE is the only truncated field; no emitted line exceeds detected width
