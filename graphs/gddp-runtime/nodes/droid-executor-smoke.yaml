@@ -1,0 +1,44 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: droid-executor-smoke
+title: "Smoke: prove the droid executor transport end-to-end"
+type: capability
+
+why: |
+  First live node driven through the droid executor (Factory droid exec,
+  registered 2026-08-03). Proves the executor-neutral contract carries a
+  second local transport unchanged: packet -> worktree -> commit-ref
+  handoff -> evaluation. The artifact is real documentation, so the smoke
+  leaves something useful behind.
+
+depends_on: []
+
+goal: |
+  Create docs/executors/droid.md documenting the droid executor transport:
+  how a node opts in (allowed_execution_modes: [droid]), that the packet and
+  commit-ref handoff contract is identical to local_subprocess, and that the
+  model/autonomy live in host config (GDDP_DROID_SUBPROCESS_ARGV), not code.
+
+acceptance_criteria:
+  - id: doc-exists
+    criterion: The file docs/executors/droid.md exists in the repo root
+  - id: doc-covers-opt-in
+    criterion: docs/executors/droid.md explains that a node selects droid via allowed_execution_modes: [droid]
+  - id: doc-covers-config
+    criterion: docs/executors/droid.md states that model and autonomy are host config via GDDP_DROID_SUBPROCESS_ARGV
+
+constraints:
+  - Only create docs/executors/droid.md
+  - Do not modify graph truth, runtime databases, or any existing file
+
+allowed_execution_modes:
+  - droid
+
+required_artifacts:
+  - docs/executors/droid.md
+
+status: ready
+priority: high
+
+unlocks: []
