@@ -1,0 +1,36 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: node-05-tty-validation-probe
+title: Drive a real PTY validation of the VM gddp deployment
+type: capability
+
+why: Prove droid can drive real terminal sessions and capture transcript evidence, not just code-level checks. The PTY session doubles as an end-to-end smoke of the VM's gddp deployment through an actual terminal.
+
+depends_on:
+  - node-04-subagents-chains-audit
+
+acceptance_criteria:
+  - id: transcript-exists
+    criterion: reports/05-tty/transcript.txt exists and is non-empty, captured from a real PTY session (script(1), tmux capture-pane, or equivalent)
+  - id: smoke-markers-present
+    criterion: transcript contains the output of a gddp deployment smoke check run inside the PTY (gddp status, deploy/mini-heartbeat/bin/smoke.sh, or equivalent) showing the command and its output
+  - id: summary-exists
+    criterion: reports/05-tty/summary.md exists and states what was run, the exit status observed, and any anomalies seen in the terminal output
+
+constraints:
+  - Read-only commands inside the PTY: status/smoke/inspection only; no dispatch, no mutation, no graph writes
+  - The PTY session must be bounded (explicit timeout or scripted exit); no interactive sessions left running
+
+allowed_execution_modes:
+  - droid
+
+required_artifacts:
+  - reports/05-tty/transcript.txt
+  - reports/05-tty/summary.md
+
+status: pending
+priority: medium
+
+unlocks:
+  - node-06-separation-proposal

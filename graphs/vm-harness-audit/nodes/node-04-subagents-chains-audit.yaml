@@ -1,0 +1,38 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: node-04-subagents-chains-audit
+title: Audit subagents and chains against the tiering doctrine
+type: capability
+
+why: Subagent and chain routing needs to match the operator's tiering doctrine before real workloads flow through it. This node audits the current setup against that doctrine and proposes the corrected chain set.
+
+depends_on:
+  - node-03-extensions-audit
+
+acceptance_criteria:
+  - id: report-exists
+    criterion: reports/04-subagents-chains.md exists and is non-empty
+  - id: surface-inventoried
+    criterion: report inventories chain definitions (~/.pi/agent/chains/) and subagent configurations present on the VM, with the models each chain step pins
+  - id: doctrine-evaluation
+    criterion: report evaluates each chain/subagent against the tiering doctrine (see constraints) and records conform/violate per entry with a one-line reason
+  - id: corrected-set-proposed
+    criterion: report proposes a corrected chain set implementing the doctrine, naming concrete models per tier already available in the operator's environment
+
+constraints:
+  - Read-only: inspect and report only; do not modify chain or subagent configs
+  - Tiering doctrine to evaluate against: (a) large tasks route to a long-context-window orchestrator; (b) read-only runs use cheaper or faster models; (c) implementation tasks with a well-specified packet route to a mid-level executor; implementation tasks that are larger or under-specified route to an advanced executor; (d) the same tiering applies one notch down for smaller tasks (mid-sized context orchestrator, and so on)
+  - Prefer models with long context windows for orchestrator roles
+
+allowed_execution_modes:
+  - droid
+
+required_artifacts:
+  - reports/04-subagents-chains.md
+
+status: pending
+priority: medium
+
+unlocks:
+  - node-05-tty-validation-probe

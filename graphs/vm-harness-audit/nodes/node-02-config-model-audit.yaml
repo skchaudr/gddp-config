@@ -1,0 +1,37 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: node-02-config-model-audit
+title: Audit env and custom model wiring for droid executor
+type: capability
+
+why: The canary depends on the VM's custom model path (droid via local proxy) being pinned and reachable. This node verifies the exact env and argv the heartbeat will use before heavier audit work runs.
+
+depends_on:
+  - node-01-entrypoints-audit
+
+acceptance_criteria:
+  - id: report-exists
+    criterion: reports/02-config-models.md exists and is non-empty
+  - id: env-documented
+    criterion: report documents GDDP_* environment wiring (gddp.env or equivalent), including GDDP_DROID_SUBPROCESS_ARGV if set
+  - id: model-path-documented
+    criterion: report documents the droid custom model configuration and the proxy endpoint (host:port) it targets
+  - id: proxy-reachable
+    criterion: report records a bounded reachability probe of the proxy endpoint (e.g. curl with explicit timeout) and its result
+
+constraints:
+  - Read-only: do not modify env files, droid config, or proxy config
+  - Probes must use explicit timeouts of 10 seconds or less; no full model generations
+
+allowed_execution_modes:
+  - droid
+
+required_artifacts:
+  - reports/02-config-models.md
+
+status: pending
+priority: high
+
+unlocks:
+  - node-03-extensions-audit

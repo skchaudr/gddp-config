@@ -1,0 +1,36 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: node-01-entrypoints-audit
+title: Audit VM launcher entrypoints and deployment checkouts
+type: capability
+
+why: Certify the VM as a gddp/droid production host by baselining its launcher surface and deployment checkouts. This is the first droid-executed node in the loop; its report anchors all later audit nodes.
+
+depends_on: []
+
+acceptance_criteria:
+  - id: report-exists
+    criterion: reports/01-entrypoints.md exists and is non-empty
+  - id: launchers-documented
+    criterion: report documents pi-lite, pi-full, and pi-studio launchers with their resolved binary/symlink paths (or records each as absent)
+  - id: droid-documented
+    criterion: report documents the droid binary path and version output
+  - id: checkouts-documented
+    criterion: report documents gddp-runtime and gddp-config checkout paths with their current HEAD commit hashes
+
+constraints:
+  - Read-only: inspect and report only; do not modify any file outside reports/
+  - Commit all work to this repository (skchaudr/pi-harness-audit) on branch main
+
+allowed_execution_modes:
+  - droid
+
+required_artifacts:
+  - reports/01-entrypoints.md
+
+status: ready
+priority: high
+
+unlocks:
+  - node-02-config-model-audit
