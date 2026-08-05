@@ -170,7 +170,7 @@ def validate_node_yaml(doc: dict, source_label: str = "input") -> list[dict]:
                 for idx, item in non_str:
                     if isinstance(item, dict) and len(item) == 1:
                         recovered = next(iter(item.keys())) + ": " + next(iter(item.values()))
-                        findings.append({"severity": "warning", "rule": "implicit_mapping_in_list",
+                        findings.append({"severity": "error", "rule": "implicit_mapping_in_list",
                                           "message": f"{fname}[{idx}] parsed as dict — quote: {recovered[:80]}",
                                           "source": source_label})
                     else:

@@ -191,7 +191,7 @@ def validate_node(path: Path, rel: str, doc: dict) -> list[Finding]:
                 for idx, item in non_str:
                     if isinstance(item, dict) and len(item) == 1:
                         recovered = next(iter(item.keys())) + ": " + next(iter(item.values()))
-                        findings.append(Finding(rel, 0, "warning",
+                        findings.append(Finding(rel, 0, "error",
                                                  "implicit_mapping_in_list",
                                                  f"{fname}[{idx}] parsed as dict (unquoted colon) — "
                                                  f"quote the string: {recovered[:80]}"))
