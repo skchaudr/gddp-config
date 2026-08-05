@@ -2,11 +2,11 @@ schema_version: '1.0'
 schema_type: project_graph
 project_id: vm-harness-audit
 project_name: VM Harness Audit (Droid Executor Canary)
-description: Six-node linear audit of the VM's pi harness + gddp + droid deployment, executed by the droid executor end-to-end through the GDDP loop. Doubles as the droid executor canary and as certification of the VM as an overnight-run host.
+description: Five-node linear audit of the VM's pi harness + gddp + droid deployment, executed by the droid executor end-to-end through the GDDP loop. Doubles as the droid executor canary and as certification of the VM as an overnight-run host.
 repo: skchaudr/pi-harness-audit
 blueprint:
-  vision: Provide a capability, performance, and human usability audit for the Pi agent harness. Historically, this project served the dual purpose of being a learning and familiarization project with agentic harnesses. and the opportunity to build up a custom agentic harness. As time went on, these two purposes often conflicted, and so now the purpose is to isolate and focus on creating the a highly capable, performant, and multi-purpose interactive and non-interactive agent. This audit also serves the role of proving Factory's droid as an executor through the full GDDP loop (dispatch, collect, evaluate, provisional, human accept) on read-only, binary-checkable audit work, and certify the VM deployment as a production host. Node 6 synthesizes findings into the spec for the follow-up execution graph (pi harness separation).
-  architecture_notes: Linear 6-node chain, one droid attempt per node, human-gated acceptance between nodes. All work is read-only against the VM environment; every node commits one bounded report to skchaudr/pi-harness-audit. Acceptance criteria are binary (file exists, non-empty, required sections present).
+  vision: Provide a capability, performance, and human usability audit for the Pi agent harness. Historically, this project served the dual purpose of being a learning and familiarization project with agentic harnesses. and the opportunity to build up a custom agentic harness. As time went on, these two purposes often conflicted, and so now the purpose is to isolate and focus on creating the a highly capable, performant, and multi-purpose interactive and non-interactive agent. This audit also serves the role of proving Factory's droid as an executor through the full GDDP loop (dispatch, collect, evaluate, provisional, human accept) on read-only, binary-checkable audit work, and certify the VM deployment as a production host. Node 5 synthesizes findings into the spec for the follow-up execution graph (pi harness separation).
+  architecture_notes: Linear 5-node chain, one droid attempt per node, human-gated acceptance between nodes. All work is read-only against the VM environment; every node commits one bounded report to skchaudr/pi-harness-audit. Acceptance criteria are binary (file exists, non-empty, required sections present).
   major_capabilities:
   - VM launcher and deployment inventory
   - Custom model wiring verification (droid via proxy)
@@ -19,26 +19,22 @@ last_updated: 2026-08-04
 nodes_dir: nodes/
 nodes:
   - id: node-01-entrypoints-audit
-    title: Audit VM launcher entrypoints and deployment checkouts
+    title: Audit VM launcher entrypoints, deployment checkouts, and executor model wiring
     status: ready
     type: capability
-  - id: node-02-config-model-audit
-    title: Audit env and custom model wiring for droid executor
-    status: pending
-    type: capability
-  - id: node-03-extensions-audit
+  - id: node-02-extensions-audit
     title: Audit pi extension surface on the VM
     status: pending
     type: capability
-  - id: node-04-subagents-chains-audit
+  - id: node-03-subagents-chains-audit
     title: Audit subagents and chains against the tiering doctrine
     status: pending
     type: capability
-  - id: node-05-tty-validation-probe
+  - id: node-04-tty-validation-probe
     title: Drive a real PTY validation of the VM gddp deployment
     status: pending
     type: capability
-  - id: node-06-separation-proposal
+  - id: node-05-separation-proposal
     title: Synthesize findings into the pi-harness separation spec
     status: pending
     type: milestone

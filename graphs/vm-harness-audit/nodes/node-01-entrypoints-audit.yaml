@@ -2,10 +2,10 @@ schema_version: "1.0"
 schema_type: node
 
 node_id: node-01-entrypoints-audit
-title: Audit VM launcher entrypoints and deployment checkouts
+title: Audit VM launcher entrypoints, deployment checkouts, and executor model wiring
 type: capability
 
-why: Certify the VM as a gddp/droid production host by baselining its launcher surface and deployment checkouts. This is the first droid-executed node in the loop; its report anchors all later audit nodes.
+why: Certify the VM as a gddp/droid production host by baselining its launcher surface, deployment checkouts, and the exact env + model path the heartbeat uses. This is the first droid-executed node in the loop; its report anchors all later audit nodes and records the executor wiring the execution graph will inherit.
 
 depends_on: []
 
@@ -18,9 +18,16 @@ acceptance_criteria:
     criterion: report documents the droid binary path and version output
   - id: checkouts-documented
     criterion: report documents gddp-runtime and gddp-config checkout paths with their current HEAD commit hashes
+  - id: env-documented
+    criterion: report documents GDDP_* environment wiring (gddp.env or equivalent), including GDDP_DROID_SUBPROCESS_ARGV if set
+  - id: model-path-documented
+    criterion: report documents the droid custom model configuration and the proxy endpoint (host:port) it targets
+  - id: proxy-reachable
+    criterion: report records a bounded reachability probe of the proxy endpoint (e.g. curl with explicit timeout) and its result
 
 constraints:
   - Read-only: inspect and report only; do not modify any file outside reports/
+  - Probes must use explicit timeouts of 10 seconds or less; no full model generations
   - Commit all work to this repository (skchaudr/pi-harness-audit) on branch main
 
 allowed_execution_modes:
@@ -33,4 +40,4 @@ status: ready
 priority: high
 
 unlocks:
-  - node-02-config-model-audit
+  - node-02-extensions-audit
