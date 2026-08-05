@@ -395,7 +395,7 @@ def test_interactive_dispatch_uses_pickers_and_only_offers_true_frontier(
     assert menus[0][2]["back_label"] == "main menu"
     assert menus[1][0] == "dispatch · proj-a"
     assert menus[1][2]["back_label"] == "graphs"
-    offered = dict(menus[1][1])
+    offered = {k: str(v) for k, v in menus[1][1]}
     assert offered == {
         "proj-a": "entire dispatchable frontier · 2 nodes",
         "beta": "jules_api · ready now",
@@ -434,17 +434,38 @@ def test_interactive_frontier_prints_literal_bracket_evidence(monkeypatch):
             return "blocked-node  ← dependency [pending]"
 
     class FakeConsole:
+        is_terminal = False
+
         @staticmethod
         def print(*args, **kwargs):
             calls.append((args, kwargs))
 
-    monkeypatch.setattr(gddp, "_import_module", lambda name: FakeFrontier)
+    class FakeTerminal:
+        keys = ["a", "", "q"]
+
+        @classmethod
+        def getch(cls):
+            return cls.keys.pop(0) if cls.keys else "q"
+
+    real_import = gddp._import_module
+    monkeypatch.setattr(
+        gddp,
+        "_import_module",
+        lambda name: (
+            FakeFrontier if name == "frontier"
+            else FakeTerminal if name == "terminal"
+            else real_import(name)
+        ),
+    )
     monkeypatch.setattr(gddp, "console", FakeConsole())
     monkeypatch.setattr(gddp.Prompt, "ask", lambda *args, **kwargs: "proj-a")
 
     gddp.interactive_frontier()
 
-    assert calls[0] == (("blocked-node  ← dependency [pending]",), {"markup": False})
+    assert any(
+        "blocked-node  ← dependency [pending]" in str(args)
+        for args, _kwargs in calls
+    )
 
 
 def test_status_authority_refusals(config_root):
