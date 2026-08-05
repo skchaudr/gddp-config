@@ -37,7 +37,7 @@ Or use your system Python if it's not PEP-668-locked.
 
 | Command | What | Keystrokes |
 |---|---|---|
-| `node browse [--project X]` | Interactive node review/status menu; project flag skips the project picker | Arrows, Enter, number keys |
+| `node browse [--project X]` | Interactive node review/status menu; project flag skips the project picker | List: ↑/↓, Enter, numbers, ←/→ page. Node view: ←/→ prev/next node; ↑/↓ action cursor, Enter open |
 | `node rapid` | Minimal-keystroke adder | Type name, Enter, number keys for deps |
 | `node new` | Full TUI scaffold (field-by-field editor) | Number keys, m/s/q/Enter |
 | `node batch` | Walk through REPLACE_ME nodes | Edit acceptance/constraints/why |
@@ -68,7 +68,10 @@ Resolution uses `GDDP_RUNTIME_ROOT`, defaulting
 to the sibling `../gddp-runtime`; `GDDP_RUNTIME_PYTHON` can override the runtime
 interpreter. In menus, `↑`/`↓` move the highlighted item, Enter opens it,
 `←`/`→` and `p`/`n` paginate, Escape backs up one level, `q` quits, and `Ctrl-C`
-quits the entire TUI. Number keys remain a direct fallback.
+quits the entire TUI. Number keys remain a direct fallback. On a node review
+screen, `←`/`→` jump to the previous/next node (wraps at ends); `↑`/`↓` move
+the action cursor and Enter opens the highlighted action (letter keys still
+jump directly).
 
 The dispatch menu uses paged one-key pickers for graphs and targets. Its
 `ready now` list is the actual dispatchable frontier after dependency and live

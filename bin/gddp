@@ -1,12 +1,56 @@
 #!/usr/bin/env bash
-# Portable gddp launcher (source for later ~/bin install).
-# Resolves config root, prefers that checkout's venv Python, execs scripts/gddp.py.
+# Portable gddp launcher.
+# Order: GDDP_CONFIG_PATH → this script's repo root (symlink-safe) → known layouts.
 set -euo pipefail
 
-ROOT="${GDDP_CONFIG_PATH:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+_resolve_self_root() {
+  local source dir
+  source="${BASH_SOURCE[0]}"
+  # Follow symlinks so ~/bin/gddp → .../gddp-config/bin/gddp still works.
+  while [[ -L "$source" ]]; do
+    dir="$(cd -P "$(dirname "$source")" && pwd)"
+    source="$(readlink "$source")"
+    [[ "$source" != /* ]] && source="$dir/$source"
+  done
+  dir="$(cd -P "$(dirname "$source")/.." && pwd)"
+  if [[ -f "$dir/scripts/gddp.py" ]]; then
+    printf '%s\n' "$dir"
+    return 0
+  fi
+  return 1
+}
+
+_resolve_root() {
+  if [[ -n "${GDDP_CONFIG_PATH:-}" && -f "${GDDP_CONFIG_PATH}/scripts/gddp.py" ]]; then
+    printf '%s\n' "$GDDP_CONFIG_PATH"
+    return 0
+  fi
+  if _resolve_self_root; then
+    return 0
+  fi
+  local candidate
+  for candidate in \
+    "$HOME/gddp-config" \
+    "$HOME/repos/gddp-config" \
+    "/Users/sab-mini/repos/gddp-config"; do
+    if [[ -f "$candidate/scripts/gddp.py" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+if ! ROOT="$(_resolve_root)"; then
+  echo "gddp: could not find gddp-config checkout." >&2
+  echo "  Set GDDP_CONFIG_PATH, or install this script from a gddp-config clone." >&2
+  exit 1
+fi
+
 if [[ -x "$ROOT/.venv/bin/python" ]]; then
   PY="$ROOT/.venv/bin/python"
 else
   PY="python3"
 fi
+
 exec "$PY" "$ROOT/scripts/gddp.py" "$@"

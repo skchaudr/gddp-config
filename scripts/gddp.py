@@ -691,6 +691,22 @@ def _pause(message: str = "press any key to continue") -> str:
     return choice.lower()
 
 
+# Named keys from terminal.getch — keep display short and match actions exactly.
+_NAMED_KEY_LABELS = {
+    "LEFT": "←",
+    "RIGHT": "→",
+    "UP": "↑",
+    "DOWN": "↓",
+    "HOME": "Home",
+    "END": "End",
+}
+
+
+def _key_label(key: str) -> str:
+    """Human-facing key glyph for menus and echoed choices."""
+    return _NAMED_KEY_LABELS.get(key, key)
+
+
 def _print_action_menu(actions: dict[str, tuple[str, str]]) -> None:
     """Show every accepted key before a single-key prompt reads input."""
     menu = Table(box=None, padding=(0, 2, 0, 1), pad_edge=False, show_header=False)
@@ -698,7 +714,7 @@ def _print_action_menu(actions: dict[str, tuple[str, str]]) -> None:
     menu.add_column(style="bold", no_wrap=True)
     menu.add_column(style="dim")
     for key, (name, description) in actions.items():
-        menu.add_row(key, name, description)
+        menu.add_row(_key_label(key), name, description)
     console.print(menu)
 
 
@@ -713,6 +729,10 @@ def _menu_choice(
     Escape follows the menu hierarchy: it selects ``b`` when a back action is
     present, the default action for confirmation-style menus, and ``q`` at the
     top-level menu. Ctrl-C remains the unambiguous whole-TUI quit key.
+
+    Multi-character tokens from ``getch`` (``LEFT``, ``RIGHT``, …) match
+    actions exactly when registered; otherwise they are ignored so menus that
+    don't use arrows stay quiet under accidental keypresses.
     """
     getch = _import_module("terminal").getch
     while True:
@@ -729,6 +749,16 @@ def _menu_choice(
                 choice = default
         if choice in {"\r", "\n"}:
             choice = default
+        # Named keys (arrows, etc.): exact match only; don't lower-case them.
+        if len(choice) > 1:
+            if choice in actions:
+                if echo:
+                    console.print(_key_label(choice))
+                else:
+                    console.print()
+                return choice
+            console.print()
+            continue
         choice = choice.lower()
         if choice in actions:
             if echo:
@@ -1241,36 +1271,140 @@ def cmd_review(args) -> int:
     return 0
 
 
-def _node_review_menu(project: str, node_id: str):
-    """Review one node and optionally update its human-owned graph status."""
+def _node_review_pick_action(
+    *,
+    has_siblings: bool,
+    default_key: str = "e",
+) -> str:
+    """Pick a node-review action with split arrow roles.
+
+    ↑/↓ move the action cursor (Enter activates). ←/→ mean previous/next
+    sibling when the project has more than one node. Letter keys still work
+    as direct shortcuts. Escape maps to back.
+    """
+    terminal = _import_module("terminal")
+    getch = terminal.getch
+    clear_lines = getattr(terminal, "clear_lines", lambda _n: None)
+
+    # Cursor targets only — horizontal sibling nav is separate chrome.
+    selectables: list[tuple[str, str, str]] = [
+        ("e", "evaluation", "current-job evidence and any stale receipts"),
+        ("c", "contract", "intent, dependencies, and acceptance criteria"),
+        ("u", "update", "change graph status"),
+        ("t", "trace", "full evaluator and job history"),
+        ("d", "diff", "what the attempt actually changed + merge state"),
+        ("b", "back", "choose another node"),
+        ("p", "projects", "choose another project"),
+        ("q", "quit", ""),
+    ]
+    by_key = {key: i for i, (key, _, _) in enumerate(selectables)}
+    cursor = by_key.get(default_key, 0)
+    drawn = 0
+    first_paint = True
+
+    while True:
+        lines: list[Text] = []
+        if has_siblings:
+            for key, name, description in (
+                ("LEFT", "prev", "previous node"),
+                ("RIGHT", "next", "next node"),
+            ):
+                row = Text()
+                row.append(f"  {_key_label(key):<8}", style="bold cyan")
+                row.append(f"{name:<12}", style="bold")
+                row.append(description, style="dim")
+                lines.append(row)
+        for offset, (key, name, description) in enumerate(selectables):
+            marker = "›" if offset == cursor else " "
+            row = Text()
+            row.append(f"{marker} {key:<6}", style="bold cyan")
+            row.append(f"{name:<12}", style="bold")
+            row.append(description, style="dim")
+            lines.append(row)
+        help_bits = ["↑/↓ move", "enter open"]
+        if has_siblings:
+            help_bits.insert(0, "←/→ node")
+        help_bits.extend(["letters jump", "esc back"])
+        help_line = Text("  " + " · ".join(help_bits), style="dim")
+        lines.append(help_line)
+
+        if first_paint:
+            first_paint = False
+        else:
+            clear_lines(drawn)
+        for line in lines:
+            console.print(line)
+        drawn = len(lines)
+
+        choice = getch()
+        if choice == "\x03":
+            raise KeyboardInterrupt
+        if choice == "\x1b":
+            return "b"
+        if choice in {"\r", "\n"}:
+            return selectables[cursor][0]
+        if choice == "UP":
+            cursor = (cursor - 1) % len(selectables)
+            continue
+        if choice == "DOWN":
+            cursor = (cursor + 1) % len(selectables)
+            continue
+        if choice == "LEFT" and has_siblings:
+            return "LEFT"
+        if choice == "RIGHT" and has_siblings:
+            return "RIGHT"
+        # Ignore vertical/horizontal arrows that don't apply (no scolding).
+        if choice in {"LEFT", "RIGHT", "UP", "DOWN", "HOME", "END"}:
+            continue
+        if len(choice) == 1:
+            key = choice.lower()
+            if key in by_key:
+                return key
+            console.print(Text(f"{key!r} is not an option", style="yellow"))
+            drawn += 1
+            continue
+        # Unknown multi-char: ignore.
+        continue
+
+
+def _node_review_menu(
+    project: str,
+    node_id: str,
+    node_ids: list[str] | None = None,
+):
+    """Review one node and optionally update its human-owned graph status.
+
+    When ``node_ids`` is the project's ordered list:
+      ←/→  previous / next sibling node
+      ↑/↓  move action cursor; Enter opens the highlighted action
+    Letter keys remain direct shortcuts.
+    """
     node_cli = _import_module("node_cli")
+    siblings = list(node_ids) if node_ids else []
+    if node_id not in siblings:
+        siblings = [node_id, *[s for s in siblings if s != node_id]]
+
     while True:
         _clear_screen()
-        console.rule(f"{project} / {node_id}", style="dim")
+        position = ""
+        if len(siblings) > 1:
+            position = f" · {siblings.index(node_id) + 1}/{len(siblings)}"
+        console.rule(f"{project} / {node_id}{position}", style="dim")
         node_cli.cmd_show(
             project=project,
             node_id=node_id,
             trace=False,
             view="summary",
         )
-        actions = {
-            "e": ("evaluation", "current-job evidence and any stale receipts"),
-            "c": ("contract", "intent, dependencies, and acceptance criteria"),
-            "u": ("update", "change graph status"),
-            "t": ("trace", "full evaluator and job history"),
-            "d": ("diff", "what the attempt actually changed + merge state"),
-            "b": ("back", "choose another node"),
-            "p": ("projects", "choose another project"),
-            "q": ("quit", ""),
-        }
-        menu = Table(box=None, padding=(0, 2, 0, 1), pad_edge=False, show_header=False)
-        menu.add_column(style="bold cyan", no_wrap=True)
-        menu.add_column(style="bold", no_wrap=True)
-        menu.add_column(style="dim")
-        for key, (name, description) in actions.items():
-            menu.add_row(key, name, description)
-        console.print(menu)
-        choice = _menu_choice(actions, default="e")
+        choice = _node_review_pick_action(has_siblings=len(siblings) > 1)
+        if choice == "LEFT":
+            idx = siblings.index(node_id)
+            node_id = siblings[(idx - 1) % len(siblings)]
+            continue
+        if choice == "RIGHT":
+            idx = siblings.index(node_id)
+            node_id = siblings[(idx + 1) % len(siblings)]
+            continue
         if choice == "q":
             return _MENU_QUIT
         if choice == "p":
@@ -1469,7 +1603,8 @@ def interactive_nodes(project: str | None = None):
                 if fixed_project:
                     return _MENU_BACK
                 break
-            outcome = _node_review_menu(project, node_id)
+            ordered_ids = [nid for nid, _ in node_items]
+            outcome = _node_review_menu(project, node_id, node_ids=ordered_ids)
             if outcome is _MENU_QUIT:
                 return _MENU_QUIT
             if outcome == "projects":

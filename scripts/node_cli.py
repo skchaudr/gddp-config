@@ -1184,18 +1184,7 @@ def _print_evaluation_payload(
     else:
         semantic_status = "not recorded"
 
-    v_style = {
-        "pass": "pass",
-        "fail": "fail",
-        "needs-more-evidence": "wait",
-    }.get(str(verdict).lower(), "")
-    print(f"  {_ansi('1', 'verdict:')}            ", end="")
-    if v_style:
-        color = _status_ansi(v_style)
-        reset = "\033[0m" if color else ""
-        print(f"{color}{verdict}{reset}")
-    else:
-        print(verdict)
+    print(f"  {_ansi('1', 'verdict:')}            {_paint(str(verdict))}")
 
     primary_why, detail_why = _evaluator_reasoning_parts(receipt, acceptance)
     print()
@@ -1215,7 +1204,9 @@ def _print_evaluation_payload(
         for i, wline in enumerate(
             _soft_wrap(body, max(40, terminal_width() - 4), cont_indent="")
         ):
-            print(f"    {wline}" if i == 0 else f"      {wline}")
+            # Mild cyan so action stands out from plain findings prose.
+            painted = _paint(wline, "ready") if i == 0 else wline
+            print(f"    {painted}" if i == 0 else f"      {wline}")
     else:
         print(f"  {_ansi('1', 'next action:')}        (none recorded)")
 
@@ -1235,32 +1226,39 @@ def _print_evaluation_payload(
     else:
         print(f"  {_ansi('1', 'findings:')}           (none recorded)")
 
+    integrity_verdict = integrity.get("verdict") or "not recorded"
+    criteria_label = criteria_verdict or "not recorded"
+    completeness_label = completeness or "not recorded"
+    lane_criteria = lane.get("criteria") or "not recorded"
+    lane_integrity = lane.get("integrity") or "not recorded"
+
     print()
     print(f"  {_ansi('1', 'evaluator details')}")
-    print(f"  criteria verdict:    {criteria_verdict or 'not recorded'}")
+    print(f"  criteria verdict:    {_paint(str(criteria_label))}")
     print(
         "  criteria confidence: "
         f"{criteria_confidence if criteria_confidence is not None else 'not recorded'}"
     )
-    print(f"  completeness:        {completeness or 'not recorded'}")
-    print(f"  semantic evaluation: {semantic_status}")
-    print(
-        f"  integrity verdict:   {integrity.get('verdict') or 'not recorded'}"
-    )
+    print(f"  completeness:        {_paint(str(completeness_label))}")
+    print(f"  semantic evaluation: {_paint(semantic_status)}")
+    print(f"  integrity verdict:   {_paint(str(integrity_verdict))}")
     print(
         "  lanes:               "
-        f"criteria={lane.get('criteria') or 'not recorded'}  "
-        f"integrity={lane.get('integrity') or 'not recorded'}"
+        f"criteria={_paint(str(lane_criteria))}  "
+        f"integrity={_paint(str(lane_integrity))}"
     )
     for side in ("criteria", "integrity"):
         if harness.get(side):
-            print(f"  harness error ({side}): {harness[side]}")
+            print(
+                f"  harness error ({side}): "
+                f"{_paint(str(harness[side]), 'fail')}"
+            )
     print(f"  provenance:          {_provenance_line(receipt, acceptance) or 'not recorded'}")
     print(f"  context coverage:    {_coverage_line(receipt, acceptance) or 'not recorded'}")
 
 
 def _print_evaluation(ev: RuntimeEvidence) -> None:
-    print("CURRENT EVALUATOR RESULT")
+    print(_ansi("1;36", "CURRENT EVALUATOR RESULT"))
     if ev.has_current_evaluation:
         _print_evaluation_payload(
             ev.acceptance_check,
@@ -1308,11 +1306,48 @@ def _print_evaluation(ev: RuntimeEvidence) -> None:
         print("  (none)")
 
 
+def _verdict_style_key(value: str | None) -> str:
+    """Map evaluator/lane/status tokens onto ``_status_ansi`` style keys."""
+    if value is None:
+        return ""
+    raw = str(value).strip()
+    if not raw or raw in {"-", "not recorded", "none"}:
+        return ""
+    key = raw.lower().replace(" ", "_")
+    aliases = {
+        "pass": "pass",
+        "passed": "pass",
+        "fail": "fail",
+        "failed": "fail",
+        "needs-more-evidence": "wait",
+        "needs_more_evidence": "wait",
+        "unknown": "warn",
+        "missing": "warn",
+        "error": "fail",
+        "not_run": "warn",
+        "not-run": "warn",
+        "ran": "complete",
+        "recorded_status_only": "wait",
+        "complete": "complete",
+        "ready": "ready",
+        "provisional": "provisional",
+        "pending": "pending",
+        "deferred": "deferred",
+        "awaiting_review": "awaiting_review",
+        "awaiting_result": "awaiting_result",
+        "running": "running",
+        "queued": "queued",
+    }
+    return aliases.get(key, "")
+
+
 def _status_ansi(kind: str) -> str:
     """ANSI emphasis for the few fields operators actually scan first."""
     if not sys.stdout.isatty():
         return ""
     key = kind.lower().replace(" ", "_")
+    # Normalize verdict tokens (e.g. needs-more-evidence) before lookup.
+    key = _verdict_style_key(key) or key
     styles = {
         "pass": "\033[1;32m",       # bold green
         "fail": "\033[1;31m",       # bold red
@@ -1332,12 +1367,25 @@ def _status_ansi(kind: str) -> str:
     return styles.get(key, "\033[1m")
 
 
+def _paint(value: str, style_key: str = "") -> str:
+    """Color a value for TTY output; return plain text when redirected."""
+    if value is None:
+        return ""
+    text = str(value)
+    if not text:
+        return text
+    key = style_key or _verdict_style_key(text)
+    color = _status_ansi(key) if key else ""
+    if not color:
+        return text
+    return f"{color}{text}\033[0m"
+
+
 def _print_status_line(label: str, value: str, style_key: str = "") -> None:
     """Print a key status field; color the value when stdout is a TTY."""
     pad = f"{label + ':':<18} "
-    color = _status_ansi(style_key) if style_key else ""
-    reset = "\033[0m" if color else ""
-    print(f"{pad}{color}{value}{reset}")
+    key = style_key or _verdict_style_key(value)
+    print(f"{pad}{_paint(value, key)}")
 
 
 def _print_overview(project: str, node_id: str, doc: dict) -> None:

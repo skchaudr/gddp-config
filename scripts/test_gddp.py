@@ -159,6 +159,23 @@ class OverviewTests(unittest.TestCase):
             with self.assertRaises(KeyboardInterrupt):
                 gddp._menu_choice(actions, default="b")
 
+    def test_menu_choice_accepts_named_arrow_keys(self):
+        terminal = SimpleNamespace(getch=lambda: "RIGHT")
+        actions = {
+            "LEFT": ("prev", ""),
+            "RIGHT": ("next", ""),
+            "b": ("back", ""),
+        }
+        with patch.object(gddp, "_import_module", return_value=terminal):
+            self.assertEqual(gddp._menu_choice(actions, default="b"), "RIGHT")
+
+    def test_menu_choice_ignores_unregistered_arrow_keys(self):
+        keys = iter(["LEFT", "b"])
+        terminal = SimpleNamespace(getch=lambda: next(keys))
+        actions = {"b": ("back", ""), "q": ("quit", "")}
+        with patch.object(gddp, "_import_module", return_value=terminal):
+            self.assertEqual(gddp._menu_choice(actions, default="b"), "b")
+
     def test_redirected_bare_command_uses_static_overview(self):
         fake_in = SimpleNamespace(isatty=lambda: False)
         fake_out = SimpleNamespace(isatty=lambda: False)
@@ -495,6 +512,134 @@ class OverviewTests(unittest.TestCase):
         self.assertIs(outcome, gddp._MENU_BACK)
         self.assertRegex(output.getvalue(), r"(?m)^graph status$")
         self.assertIn("evaluator passed", output.getvalue())
+
+    def test_node_review_left_right_move_to_sibling_nodes(self):
+        """←/→ on the node view jumps prev/next without returning to the list."""
+        output = StringIO()
+        test_console = Console(file=output, force_terminal=False, width=80)
+        keys = iter(["RIGHT", "LEFT", "b"])
+        terminal = SimpleNamespace(
+            getch=lambda: next(keys),
+            clear_lines=lambda n: None,
+        )
+        shown: list[str] = []
+
+        def cmd_show(**kwargs):
+            if kwargs.get("view") == "summary":
+                shown.append(kwargs["node_id"])
+            return 0
+
+        node_cli = SimpleNamespace(
+            cmd_show=cmd_show,
+            node_completion_readiness=lambda project, node_id: (False, "n/a"),
+        )
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "console", test_console), \
+                patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp, "_clear_screen"):
+            outcome = gddp._node_review_menu(
+                "demo",
+                "alpha",
+                node_ids=["alpha", "beta", "gamma"],
+            )
+
+        self.assertIs(outcome, gddp._MENU_BACK)
+        # start alpha → RIGHT beta → LEFT alpha → b
+        self.assertEqual(shown, ["alpha", "beta", "alpha"])
+        self.assertIn("1/3", output.getvalue())
+        self.assertIn("prev", output.getvalue())
+        self.assertIn("next", output.getvalue())
+        self.assertIn("↑/↓ move", output.getvalue())
+
+    def test_node_review_up_down_enter_opens_contract(self):
+        """↑/↓ walk the action menu; Enter opens the highlighted action."""
+        views: list[tuple[str, str]] = []
+        # default cursor is evaluation (e); one DOWN → contract; Enter; pause; back
+        keys = iter(["DOWN", "\r", "x", "b"])
+        terminal = SimpleNamespace(
+            getch=lambda: next(keys),
+            clear_lines=lambda n: None,
+        )
+
+        def cmd_show(**kwargs):
+            views.append((kwargs.get("node_id", ""), kwargs.get("view", "")))
+            return 0
+
+        node_cli = SimpleNamespace(
+            cmd_show=cmd_show,
+            node_completion_readiness=lambda project, node_id: (False, "n/a"),
+        )
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp, "_clear_screen"):
+            outcome = gddp._node_review_menu(
+                "demo",
+                "alpha",
+                node_ids=["alpha"],
+            )
+
+        self.assertIs(outcome, gddp._MENU_BACK)
+        self.assertIn(("alpha", "summary"), views)
+        self.assertIn(("alpha", "contract"), views)
+
+    def test_node_review_up_from_top_wraps_to_quit_then_enter(self):
+        """↑ from the default evaluation row wraps to quit."""
+        keys = iter(["UP", "\r"])
+        terminal = SimpleNamespace(
+            getch=lambda: next(keys),
+            clear_lines=lambda n: None,
+        )
+        node_cli = SimpleNamespace(
+            cmd_show=lambda **kwargs: 0,
+            node_completion_readiness=lambda project, node_id: (False, "n/a"),
+        )
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp, "_clear_screen"):
+            outcome = gddp._node_review_menu("demo", "alpha", node_ids=["alpha"])
+
+        self.assertIs(outcome, gddp._MENU_QUIT)
+
+    def test_node_review_arrows_wrap_at_list_ends(self):
+        keys = iter(["LEFT", "b"])
+        terminal = SimpleNamespace(
+            getch=lambda: next(keys),
+            clear_lines=lambda n: None,
+        )
+        shown: list[str] = []
+
+        def cmd_show(**kwargs):
+            if kwargs.get("view") == "summary":
+                shown.append(kwargs["node_id"])
+            return 0
+
+        node_cli = SimpleNamespace(
+            cmd_show=cmd_show,
+            node_completion_readiness=lambda project, node_id: (False, "n/a"),
+        )
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp, "_clear_screen"):
+            outcome = gddp._node_review_menu(
+                "demo",
+                "alpha",
+                node_ids=["alpha", "beta", "gamma"],
+            )
+
+        self.assertIs(outcome, gddp._MENU_BACK)
+        self.assertEqual(shown, ["alpha", "gamma"])
 
     def test_node_workflow_blocks_complete_without_current_evaluation(self):
         keys = iter(["u", "c", "b", "b"])
