@@ -40,6 +40,7 @@ VALID_STATUSES = {"pending", "ready", "provisional", "complete", "deferred"}
 VALID_PRIORITIES = {"low", "medium", "high", "critical"}
 VALID_EXEC_MODES = {
     "agent",
+    "droid",
     "jules",
     "jules_api",
     "jules_cli",

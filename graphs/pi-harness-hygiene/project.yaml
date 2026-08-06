@@ -1,0 +1,35 @@
+schema_version: '1.0'
+schema_type: project_graph
+project_id: pi-harness-hygiene
+project_name: Pi Harness Hygiene (sab-mini)
+description: Two concurrent, disjoint corrective nodes on the sab-mini pi home (the Pi-Coding-Agent repo-as-checkout at ~/.pi), executed by droid through the GDDP loop. First mutation graph; the audit graphs stay behind us — this is real work through the daily-driver machinery, then a full pause for assessment.
+repo: /Users/sab-mini/.pi
+blueprint:
+  vision: Prove the GDDP loop as a daily driver on real, bounded improvement work against the primary host's pi harness. Two nodes with disjoint file scopes dispatch concurrently (the first honest concurrency exercise), land on result refs, and pause for human review before any sync decision.
+  architecture_notes: Both nodes depend on nothing and run concurrently. node-01 owns agent/extensions/ hygiene (archive three entrypoint-less dirs); node-02 owns agent/chains/ model-pin correctness against enabledModels. Disjoint subtrees of one repo, so concurrent worktrees cannot conflict. Mutation is recoverable — the repo is git, and node-01 archives rather than deletes.
+  major_capabilities:
+  - Extension auto-load hygiene (remove noise without losing history)
+  - Chain model-pin correctness against the live enabledModels set
+  - Concurrent non-overlapping dispatch through one repo
+graph_version: '1.0'
+created_at: 2026-08-05
+last_updated: 2026-08-05
+nodes_dir: nodes/
+nodes:
+  - id: node-01-extension-noise-cleanup
+    title: Archive entrypoint-less extension dirs out of auto-load
+    status: ready
+    type: task
+  - id: node-02-chain-pin-repair
+    title: Repair chain model pins that reference unavailable models
+    status: ready
+    type: task
+execution_policy:
+  default_executor: droid
+  max_concurrent_jobs: 2
+  frontier_auto_advance: true
+  retry_budget: 3
+  require_human_review_before_overnight: false
+  artifact_gate_enforced: true
+  allowed_repos:
+    - /Users/sab-mini/.pi

@@ -1,0 +1,39 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: node-02-chain-pin-repair
+title: Repair chain model pins that reference unavailable models
+type: capability
+
+why: "Several agent/chains/*.chain.json files pin model ids that are not present in settings.json enabledModels (candidates from a 2026-08-05 spot check — openai-codex/gpt-5.6-terra in pre-run-gate, grok-cli/grok-composer-2.5-fast and grok-cli/grok-4.5 in build-audit and trio-implement — verify, do not trust that list). A chain pinning an unavailable model fails at dispatch or silently falls back. Repair every dead pin to the closest doctrine-equivalent model that IS in enabledModels, changing nothing else."
+
+depends_on: []
+
+acceptance_criteria:
+  - id: pins-resolved
+    criterion: every model id pinned anywhere in agent/chains/*.chain.json is present in settings.json enabledModels; report includes the verification method and its output
+  - id: json-valid
+    criterion: all agent/chains/*.chain.json files parse as valid JSON after edits
+  - id: semantics-preserved
+    criterion: no chain step, agent, or structure was added, removed, or reordered — only model id values changed; the diff confirms this
+  - id: changes-documented
+    criterion: reports/node-02-chain-pin-repair.md lists every changed pin as before -> after with a one-line rationale (or records that no changes were needed and why the candidates were false)
+  - id: report-exists
+    criterion: reports/node-02-chain-pin-repair.md exists and is non-empty
+
+constraints:
+  - Only modify model id values inside agent/chains/*.chain.json
+  - Do not edit settings.json, agent/agents/, or any other file
+  - Replacement models must come from settings.json enabledModels exactly as spelled there
+  - Commit all work on this node's result ref per the executor contract
+
+allowed_execution_modes:
+  - droid
+
+required_artifacts:
+  - reports/node-02-chain-pin-repair.md
+
+status: ready
+priority: high
+
+unlocks: []

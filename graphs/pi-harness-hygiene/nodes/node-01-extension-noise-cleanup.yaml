@@ -1,0 +1,39 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: node-01-extension-noise-cleanup
+title: Archive entrypoint-less extension dirs out of auto-load
+type: capability
+
+why: The agent/extensions/ auto-load surface carries three directories that resolve no loadable entrypoint (herdr/, subagent/, pi-tool-display/ — identified in the 2026-08-05 extension audit on the VM and confirmed present in this repo). They are noise in every loader scan and every audit. Archive them inside the repo (agent/archive/) so auto-load skips them while history and content stay recoverable. Do not touch anything else in the tree.
+
+depends_on: []
+
+acceptance_criteria:
+  - id: dirs-moved
+    criterion: herdr, subagent, and pi-tool-display directories no longer exist directly under agent/extensions/
+  - id: archive-exists
+    criterion: all three directories exist with their contents intact under agent/archive/extensions/
+  - id: local-file-preserved
+    criterion: agent/extensions/herdr-agent-state.ts (a real local file, not a symlink) is still present and unmodified
+  - id: pi-loads
+    criterion: report includes the output of `pi list` (or `pi --version`) run after the move, exiting 0
+  - id: report-exists
+    criterion: reports/node-01-extension-cleanup.md exists, listing what moved where and the verification output
+
+constraints:
+  - Only move agent/extensions/herdr, agent/extensions/subagent, and agent/extensions/pi-tool-display to agent/archive/extensions/ (create the archive dir as needed)
+  - Do not modify, rename, or delete any other file or directory
+  - Do not edit settings.json or any npm/package configuration
+  - Commit all work on this node's result ref per the executor contract
+
+allowed_execution_modes:
+  - droid
+
+required_artifacts:
+  - reports/node-01-extension-cleanup.md
+
+status: ready
+priority: high
+
+unlocks: []
