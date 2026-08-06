@@ -1,0 +1,44 @@
+schema_version: '1.0'
+schema_type: project_graph
+project_id: pi-hub-projection
+project_name: Pi Hub Projection (Observability Graft)
+description: "Graft the disler/sssf SQLite observability schema + visualizer onto the existing pi harness on sab-mini. pi-observe normalization projects into a WAL SQLite ledger; a 127.0.0.1-bound cursor API serves it; a forked visualizer renders it; GDDP receipts and MyAPI ADW results land in the same envelope/gate tables. One isolated droid mission. Upstream is reference-only, pinned at de313748 — nothing from it is installed or executed."
+repo: /Users/sab-mini/.pi
+blueprint:
+  vision: "The harness already has pi-observe normalization (sessions, subagents, tools, artifacts, instances) and a Rust terminal view. This graph adds the durable queryable projection and a browser surface, transplanted from upstream's proven shape, without replacing anything that works. Target per the operator note: job ID, phase, cost/status, logs, and pass/fail receipt path, visible in one place."
+  architecture_notes: "Diamond, not a chain. node-01 builds the projection core; node-02 (API) and node-04 (receipts ingestion) run concurrently on top of it; node-03 (visualizer fork) follows node-02. Upstream repo exists ONLY as a read reference at ~/repos/_reference/sssf pinned to de31374882e7a4e3e5b7bb9bd09e69dc2f779356 — the safety audit forbids running its installer or its runtime. pi-hub-rs stays the terminal/operator view; nothing in this graph touches it."
+  major_capabilities:
+  - Transactional SQLite/WAL projection of pi-observe surfaces with stable IDs and transition events
+  - Cursor-polling localhost API with proven secret redaction
+  - Browser dashboard forked from upstream visualizer, bound to localhost
+  - GDDP receipts + MyAPI ADW results in shared envelope/gate tables
+graph_version: '1.0'
+created_at: 2026-08-06
+last_updated: 2026-08-06
+nodes_dir: nodes/
+nodes:
+  - id: node-01-sqlite-projection
+    title: Build the pi-observe to SQLite/WAL projection core
+    status: ready
+    type: capability
+  - id: node-02-localhost-api
+    title: Serve the projection over a localhost-only cursor API
+    status: ready
+    type: capability
+  - id: node-03-visualizer-fork
+    title: Fork the upstream visualizer as pi-hub-web against the new schema
+    status: ready
+    type: capability
+  - id: node-04-receipts-ingestion
+    title: Project GDDP receipts and MyAPI ADW results into envelope/gate tables
+    status: ready
+    type: capability
+execution_policy:
+  default_executor: droid
+  max_concurrent_jobs: 2
+  frontier_auto_advance: true
+  retry_budget: 3
+  require_human_review_before_overnight: false
+  artifact_gate_enforced: true
+  allowed_repos:
+    - /Users/sab-mini/.pi

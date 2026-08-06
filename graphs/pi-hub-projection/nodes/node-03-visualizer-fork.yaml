@@ -1,0 +1,41 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: node-03-visualizer-fork
+title: Fork the upstream visualizer as pi-hub-web against the new schema
+type: capability
+
+why: "The upstream visualizer (~/repos/_reference/sssf, pinned de313748, apps/visualizer) already renders sessions, events, envelopes, and gates — the exact nouns our projection now serves. Fork it to harness/apps/pi-hub-web and adapt its data layer from upstream's SQLite schema to node-02's cursor API (or directly to pi-hub.db read-only if simpler — decide and record why). The MIT license permits this with the copyright/license notice retained; include it."
+
+depends_on:
+  - node-02-localhost-api
+
+acceptance_criteria:
+  - id: app-exists
+    criterion: harness/apps/pi-hub-web exists with the upstream visualizer forked and its LICENSE notice retained in the directory
+  - id: localhost-bound
+    criterion: any server component binds 127.0.0.1 explicitly (fix the upstream omission); report shows the bind configuration and evidence
+  - id: renders-our-data
+    criterion: the app serves at least sessions and transitions from our projection; report includes the queries/endpoints adapted and a rendered-output description or captured artifact
+  - id: no-placeholder-tests
+    criterion: any test/lint/build commands carried over from upstream that are placeholder echoes are either replaced with real commands or removed; report lists what was found and done
+  - id: report-exists
+    criterion: reports/pi-hub-projection/node-03-visualizer-fork.md exists with fork provenance (upstream SHA), adaptation notes, and run instructions
+
+constraints:
+  - Create and modify files only under harness/apps/pi-hub-web/ and reports/pi-hub-projection/
+  - The upstream repo at ~/repos/_reference/sssf is read-only reference; never execute its installer or scripts
+  - Do not modify pi-hub-rs or any existing harness component
+  - Never run git add -A; stage only files this node created or changed
+  - Commit all work on this node's result ref per the executor contract
+
+allowed_execution_modes:
+  - droid
+
+required_artifacts:
+  - reports/pi-hub-projection/node-03-visualizer-fork.md
+
+status: ready
+priority: high
+
+unlocks: []

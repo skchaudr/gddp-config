@@ -1,0 +1,41 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: node-04-receipts-ingestion
+title: Project GDDP receipts and MyAPI ADW results into envelope/gate tables
+type: capability
+
+why: "The operator's target is one surface showing job ID, phase, cost/status, logs, and pass/fail receipt path. GDDP evaluation receipts live under ~/repos/gddp-config/verification/ and results in gddp-runtime's queue.db; MyAPI ADW results exist on disk. This node extends the node-01 projection with envelope and gate_results tables and ingests both receipt sources into them, so node-03's visualizer renders verdicts alongside sessions."
+
+depends_on:
+  - node-01-sqlite-projection
+
+acceptance_criteria:
+  - id: tables-exist
+    criterion: pi-hub.db gains envelopes and gate_results tables (names may adapt to node-01's schema; the report maps them to upstream's concepts)
+  - id: gddp-receipts-ingested
+    criterion: at least the receipts currently under ~/repos/gddp-config/verification/ are projected; report shows counts per project
+  - id: receipt-path-preserved
+    criterion: every gate_results row carries the source receipt file path (the pass/fail receipt path from the operator note)
+  - id: incremental
+    criterion: re-running ingestion adds only new receipts; report shows rerun evidence
+  - id: report-exists
+    criterion: reports/pi-hub-projection/node-04-receipts-ingestion.md exists with source inventory (what was found, what was skipped and why) and count evidence
+
+constraints:
+  - Create and modify files only under agent/observability/ and reports/pi-hub-projection/
+  - Read receipt sources in place; never write into ~/repos/gddp-config, ~/repos/gddp-runtime, or MyAPI directories
+  - python3 stdlib only; extend node-01's projection rather than building a parallel pipeline
+  - Never run git add -A; stage only files this node created or changed
+  - Commit all work on this node's result ref per the executor contract
+
+allowed_execution_modes:
+  - droid
+
+required_artifacts:
+  - reports/pi-hub-projection/node-04-receipts-ingestion.md
+
+status: ready
+priority: high
+
+unlocks: []

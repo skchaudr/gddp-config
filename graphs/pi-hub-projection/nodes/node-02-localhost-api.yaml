@@ -1,0 +1,44 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: node-02-localhost-api
+title: Serve the projection over a localhost-only cursor API
+type: capability
+
+why: "node-03 and any future surface read through one API, not raw SQLite. This node serves pi-hub.db over HTTP with cursor polling (clients resume from a monotonic cursor, never offset pages). Hard requirement from the upstream safety audit: bind 127.0.0.1 only — upstream's Bun server omits hostname and defaults to 0.0.0.0, which would expose prompts, envelopes, and gates to the LAN. Our API must prove its bind."
+
+depends_on:
+  - node-01-sqlite-projection
+
+acceptance_criteria:
+  - id: api-exists
+    criterion: agent/observability/api.py exists, python3 stdlib only, serves pi-hub.db over HTTP
+  - id: localhost-bound
+    criterion: the server binds exactly 127.0.0.1; report includes evidence (listener inspection output) and a failed external-interface connection attempt
+  - id: cursor-polling
+    criterion: at least the sessions, events, and transition endpoints support cursor resume; report shows a two-request sequence where the second request returns only rows newer than the cursor
+  - id: read-only
+    criterion: the API opens the db read-only and exposes no mutation endpoints
+  - id: redaction
+    criterion: responses pass through the secret-redaction pattern used by the existing ledger sink; report shows a redacted fixture secret in output
+  - id: report-exists
+    criterion: reports/pi-hub-projection/node-02-localhost-api.md exists with endpoint list, cursor semantics, and the bind/cursor/redaction evidence
+
+constraints:
+  - Create and modify files only under agent/observability/ and reports/pi-hub-projection/
+  - python3 stdlib only (http.server or socketserver + sqlite3); no new dependencies
+  - Default port must be documented and overridable by env var; pick an uncommon default and record it
+  - Never run git add -A; stage only files this node created or changed
+  - Commit all work on this node's result ref per the executor contract
+
+allowed_execution_modes:
+  - droid
+
+required_artifacts:
+  - reports/pi-hub-projection/node-02-localhost-api.md
+
+status: ready
+priority: high
+
+unlocks:
+  - node-03-visualizer-fork

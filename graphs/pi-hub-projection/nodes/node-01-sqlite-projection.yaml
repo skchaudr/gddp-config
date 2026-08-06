@@ -1,0 +1,44 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: node-01-sqlite-projection
+title: Build the pi-observe to SQLite/WAL projection core
+type: capability
+
+why: "Every observability surface this graph adds reads from one durable projection. pi-observe already normalizes sessions, subagents, tools, artifacts, and instances to jsonl; this node projects them transactionally into ~/.pi/agent/observability/pi-hub.db (WAL mode) with stable IDs, upserts for current state, and an appended transition event whenever status, tool, acceptance, or ownership changes. Reference shape: ~/repos/_reference/sssf (read-only, pinned de313748) — adapt its schema ideas, do not copy its runtime."
+
+depends_on: []
+
+acceptance_criteria:
+  - id: projection-script-exists
+    criterion: agent/observability/project.py exists and runs with python3 stdlib only
+  - id: db-created
+    criterion: running the projection creates agent/observability/pi-hub.db with WAL journal mode
+  - id: counts-match
+    criterion: report shows projected row counts reconciled against the live jsonl sources (sessions, subagents, tools) at run time
+  - id: idempotent
+    criterion: a second consecutive run inserts zero new current-state rows (transition events excepted only when something actually changed); report shows the rerun evidence
+  - id: transitions-recorded
+    criterion: a state transition table exists and the report shows one real transition row captured across two runs with a mutated fixture or live delta
+  - id: report-exists
+    criterion: reports/pi-hub-projection/node-01-sqlite-projection.md exists with schema DDL, design decisions, and the count/idempotency evidence
+
+constraints:
+  - Create and modify files only under agent/observability/ and reports/pi-hub-projection/
+  - python3 stdlib only (sqlite3, json, pathlib); no new dependencies, no pip installs
+  - The upstream repo at ~/repos/_reference/sssf is read-only reference; never execute its installer or scripts
+  - Never run git add -A; stage only files this node created or changed
+  - Commit all work on this node's result ref per the executor contract
+
+allowed_execution_modes:
+  - droid
+
+required_artifacts:
+  - reports/pi-hub-projection/node-01-sqlite-projection.md
+
+status: ready
+priority: high
+
+unlocks:
+  - node-02-localhost-api
+  - node-04-receipts-ingestion
