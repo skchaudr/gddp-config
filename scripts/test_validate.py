@@ -77,3 +77,30 @@ class TestImplicitMappingPromotion:
         hits = [f for f in findings if f.rule == "acceptance_criterion_type"]
         assert len(hits) == 1
         assert hits[0].severity == "error"
+
+
+def test_ready_with_unsatisfied_deps_is_error():
+    """Authoring a dependent as 'ready' strands it (advance_frontier only
+    transitions pending nodes; a settled project reads dormant), so the
+    validator must refuse ready-with-unsatisfied-deps (2026-08-06 stall)."""
+    from validate import cross_node_findings
+    docs = {
+        "a": {"node_id": "a", "status": "ready", "depends_on": [], "unlocks": ["b"]},
+        "b": {"node_id": "b", "status": "ready", "depends_on": ["a"], "unlocks": []},
+    }
+    findings = cross_node_findings("proj", docs)
+    assert ("error", "ready_with_unsatisfied_deps") in [
+        (f.severity, f.rule) for f in findings
+    ]
+
+
+def test_ready_with_satisfied_deps_passes():
+    from validate import cross_node_findings
+    docs = {
+        "a": {"node_id": "a", "status": "provisional", "depends_on": [], "unlocks": ["b"]},
+        "b": {"node_id": "b", "status": "ready", "depends_on": ["a"], "unlocks": []},
+    }
+    findings = cross_node_findings("proj", docs)
+    assert ("error", "ready_with_unsatisfied_deps") not in [
+        (f.severity, f.rule) for f in findings
+    ]
