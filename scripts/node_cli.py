@@ -50,6 +50,38 @@ def runtime_db_path() -> Path:
     return runtime_root() / "db" / "queue.db"
 
 
+def _resolve_repo_for_project(root: Path, project_id: str) -> Path | None:
+    """Resolve the local checkout path for a project's repo, for gate operations."""
+    import yaml as _yaml
+    ppath = root / "graphs" / project_id / "project.yaml"
+    if not ppath.exists():
+        return None
+    try:
+        proj = _yaml.safe_load(ppath.read_text()) or {}
+    except Exception:
+        return None
+    repo = proj.get("repo")
+    if not repo:
+        return None
+    # Absolute path (our convention for non-GitHub repos like ~/.pi)
+    from pathlib import Path as _P
+    candidate = _P(str(repo)).expanduser()
+    if candidate.is_absolute() and candidate.is_dir():
+        return candidate
+    # GitHub slug: resolve via GDDP_REPOS_ROOT or sibling checkout
+    basename = str(repo).rstrip("/").split("/")[-1]
+    for env_name in ("GDDP_REPO_ROOT", "GDDP_REPOS_ROOT"):
+        env_root = os.environ.get(env_name)
+        if env_root:
+            c = _P(env_root).expanduser() / basename
+            if c.is_dir():
+                return c
+    sibling = root.parent / basename
+    if sibling.is_dir():
+        return sibling
+    return None
+
+
 def _load_status_history_mod():
     """Load gddp-runtime scripts/node_status_history.py if present."""
     path = runtime_root() / "scripts" / "node_status_history.py"
@@ -1767,6 +1799,28 @@ def cmd_set_status(
             print(f"  rollback: {e2}")
             print(f"  history: {hist_path}")
         return 1
+
+    # Gate-token revocation: when a human moves a node AWAY from provisional
+    # to a non-acceptance status (reject -> ready/pending, or defer), the
+    # gate token must be removed so mission-mode dependents re-block. A move
+    # to `complete` leaves the token (acceptance is the end state). Non-fatal.
+    if old_node_status == "provisional" and status not in ("complete", "provisional"):
+        try:
+            rt = runtime_root()
+            gates_spec = importlib.util.spec_from_file_location(
+                "gates", rt / "scripts" / "runtime" / "gates.py"
+            )
+            if gates_spec and gates_spec.loader:
+                gates_mod = importlib.util.module_from_spec(gates_spec)
+                gates_spec.loader.exec_module(gates_mod)
+                # Resolve the repo checkout to find .gddp/gates/
+                repo = _resolve_repo_for_project(root, project)
+                if repo is not None:
+                    revoked = gates_mod.revoke_gate(str(repo), node_id)
+                    if revoked:
+                        print(f"  → gate revoked: {node_id} token removed (dependents re-block)")
+        except Exception as gate_exc:
+            print(f"  → gate revoke WARNING (non-fatal): {gate_exc}")
 
     print(f"Done: {node_id} graph status -> {status}")
     print(f"history: {hist_path}")
