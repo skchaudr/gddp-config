@@ -1,0 +1,37 @@
+schema_version: "1.0"
+schema_type: node
+node_id: verify-state-model
+title: What are the official verify states, and who sets them?
+type: capability
+why: |
+  The destination requires tasks to be officially marked verified, visually
+  and schema-wise. The state language — which marks exist, and whether man or
+  machine sets each — is the load-bearing decision of this map. Settled
+  during charting on 2026-08-06.
+depends_on: []
+acceptance_criteria:
+  - id: decision-recorded
+    criterion: resolution field names the chosen option and its rationale
+  - id: map-updated
+    criterion: dependent nodes are wired and MAP.md is current
+constraints:
+  - Decision only — no implementation in this node
+allowed_execution_modes:
+  - human
+required_artifacts: []
+status: ready
+priority: high
+unlocks:
+  - verify-evidence-surface
+  - past-tasks-reflection
+resolution: |
+  2026-08-06 (charting, Sab): Four marks. White ✓ — machine-set on clean
+  return: "something returned, task is over" (deterministic, binary). Green ✓
+  — agent-set: "agent thinks it's good" (verify commands pass, or the
+  verifier agent's verdict) = verified-via-completion. Red ✓ — agent
+  disagrees with the work, with a stated reason that is viewable. Green ✓✓ —
+  human-only: "human has reviewed it and accepts it" =
+  verified-via-actual-review. Only the human produces ✓✓. The schema field is
+  `verified: completion|review` replacing `validated: bool`; machine-run
+  verify commands become evidence, never state. The model mirrors GDDP's own
+  loop: evidence returned → evaluator pass → human acceptance.

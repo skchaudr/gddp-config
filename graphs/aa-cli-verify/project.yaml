@@ -1,0 +1,85 @@
+schema_version: '1.0'
+schema_type: project_graph
+project_id: aa-cli-verify
+project_name: AA CLI — Verify Pathway
+description: >-
+  Chart the open decisions on aa-cli's verify pathway — the product's
+  load-bearing core — from a deck-dispatched packet (or an ad-hoc
+  user-supplied subject) to a task officially marked verified, visually and
+  schema-wise, reflected in the deck and past tasks.
+repo: skchaudr/aa-cli
+blueprint:
+  vision: >-
+    The way to "verified" is fully charted: every open decision on the verify
+    pathway resolved, so this graph can graduate into a dispatchable execution
+    DAG. Verify runs from a deck-dispatched packet (or an ad-hoc user-supplied
+    subject via generic verify) through evidence capture to a human-flipped
+    verified mark (✓✓) reflected in the deck and past tasks.
+  architecture_notes: >-
+    Settled during charting (2026-08-06): verify is a 3-option menu (one-shot
+    agent verify/recon/audit with template + optional skill + optional custom
+    instructions; nvim/fzf; git panel). State language: white ✓
+    machine-returned, green ✓ agent-good, red ✓ agent-disagrees with viewable
+    reason, ✓✓ human-accepts-only. The verified mark is `verified:
+    completion|review` on the JSON packet (run-level); deck and past tasks
+    derive. zsh backend, Rust frontend. Async pull/apply is a precondition;
+    verify judges the workdir as it stands, target-agnostic.
+  major_capabilities: []
+graph_version: '1.0'
+created_at: '2026-08-06'
+last_updated: '2026-08-06'
+nodes_dir: nodes/
+nodes:
+  - id: verify-menu-mechanics
+    title: What is the verify pathway's mechanics?
+    status: ready
+    type: capability
+  - id: verify-state-model
+    title: What are the official verify states, and who sets them?
+    status: ready
+    type: capability
+  - id: verify-architecture-split
+    title: Where does verify live architecturally?
+    status: ready
+    type: capability
+  - id: async-verify-composition
+    title: How does verify compose with async targets?
+    status: ready
+    type: capability
+  - id: verified-state-location
+    title: Where does the verified mark live schema-wise?
+    status: ready
+    type: capability
+  - id: verify-menu-subtree
+    title: What is the verify menu's exact sub-option tree, and where does it live?
+    status: pending
+    type: capability
+  - id: verifier-agent-contract
+    title: What does the one-shot verifier agent return, and how is it dispatched?
+    status: pending
+    type: capability
+  - id: verify-evidence-surface
+    title: What does the human see at the review moment, and how does the accept flow work?
+    status: pending
+    type: capability
+  - id: past-tasks-reflection
+    title: How do the four verify states render and filter in the deck and past tasks?
+    status: pending
+    type: capability
+  - id: generic-verify-entry
+    title: How does the user enter generic verify mode without a packet?
+    status: pending
+    type: capability
+  - id: validated-blast-radius
+    title: What is the blast radius of the validated-to-verified state-model migration?
+    status: ready
+    type: capability
+execution_policy:
+  default_executor: human
+  max_concurrent_jobs: 1
+  frontier_auto_advance: false
+  retry_budget: 1
+  require_human_review_before_overnight: true
+  artifact_gate_enforced: false
+  allowed_repos:
+    - skchaudr/aa-cli

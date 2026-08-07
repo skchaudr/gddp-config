@@ -1,0 +1,29 @@
+schema_version: "1.0"
+schema_type: node
+node_id: validated-blast-radius
+title: What is the blast radius of the validated-to-verified state-model migration?
+type: capability
+why: |
+  The future execution graph needs every read/write site of `validated`,
+  `done`, and the glyph logic across zsh, Rust, and the packet schema
+  inventoried before the state-model migration (see "What are the official
+  verify states, and who sets them?") can be sliced into build nodes.
+depends_on: []
+acceptance_criteria:
+  - id: report-exists
+    criterion: research/validated-blast-radius.md exists in this graph directory and is non-empty
+  - id: sites-enumerated
+    criterion: report lists every read/write site of validated, done, and validated-glyph logic across lib/, hub-rs/src/, and schema/ with file and line references
+  - id: migration-notes
+    criterion: "report notes rename-vs-coexistence considerations for replacing validated: bool with verified: completion|review"
+constraints:
+  - Read-only inventory against ~/repos/aa-cli — report only, no code changes
+  - Commit the report inside this graph directory
+allowed_execution_modes:
+  - agent
+required_artifacts:
+  - research/validated-blast-radius.md
+status: ready
+priority: high
+unlocks: []
+resolution: ""

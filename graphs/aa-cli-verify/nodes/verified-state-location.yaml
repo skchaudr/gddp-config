@@ -1,0 +1,32 @@
+schema_version: "1.0"
+schema_type: node
+node_id: verified-state-location
+title: Where does the verified mark live schema-wise?
+type: capability
+why: |
+  The destination demands a schema-wise official mark; whether it lives on
+  the JSON packet, the deck card frontmatter, or both determines the drift
+  surface. Settled during charting on 2026-08-06.
+depends_on: []
+acceptance_criteria:
+  - id: decision-recorded
+    criterion: resolution field names the chosen option and its rationale
+  - id: map-updated
+    criterion: dependent nodes are wired and MAP.md is current
+constraints:
+  - Decision only — no implementation in this node
+allowed_execution_modes:
+  - human
+required_artifacts: []
+status: ready
+priority: high
+unlocks:
+  - past-tasks-reflection
+resolution: |
+  2026-08-06 (charting, Sab): Packet/run-level state; the deck derives.
+  `verified: completion|review` replaces `validated: bool` on the JSON
+  packet; deck and past-tasks views derive glyphs from the latest run's
+  packet. Rationale: evergreen cards re-fire, so a verified mark belongs to a
+  RUN, not the card — frontmatter on the card would show a card as verified
+  forever, and a synced copy would reproduce the documented
+  packet-vs-frontmatter drift problem (docs/CONFUSIONS.md).
