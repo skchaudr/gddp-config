@@ -50,8 +50,26 @@ def runtime_db_path() -> Path:
     return runtime_root() / "db" / "queue.db"
 
 
+def _is_checkout(candidate: Path) -> bool:
+    """True when the path holds a git checkout (.git dir or worktree file).
+
+    Mirrors the runtime's repo_resolver._is_checkout so both code paths
+    resolve identically — a decoy directory without .git never wins.
+    """
+    try:
+        return candidate.is_dir() and (candidate / ".git").exists()
+    except OSError:
+        return False
+
+
 def _resolve_repo_for_project(root: Path, project_id: str) -> Path | None:
-    """Resolve the local checkout path for a project's repo, for gate operations."""
+    """Resolve the local checkout path for a project's repo, for gate operations.
+
+    Uses the same .git-entry rule as the runtime resolver
+    (repo_resolver.py:_is_checkout) so revocation targets the same directory
+    the writer used — a decoy directory under GDDP_REPO_ROOT cannot intercept
+    a revocation while leaving the real token live.
+    """
     import yaml as _yaml
     ppath = root / "graphs" / project_id / "project.yaml"
     if not ppath.exists():
@@ -66,7 +84,7 @@ def _resolve_repo_for_project(root: Path, project_id: str) -> Path | None:
     # Absolute path (our convention for non-GitHub repos like ~/.pi)
     from pathlib import Path as _P
     candidate = _P(str(repo)).expanduser()
-    if candidate.is_absolute() and candidate.is_dir():
+    if candidate.is_absolute() and _is_checkout(candidate):
         return candidate
     # GitHub slug: resolve via GDDP_REPOS_ROOT or sibling checkout
     basename = str(repo).rstrip("/").split("/")[-1]
@@ -74,10 +92,10 @@ def _resolve_repo_for_project(root: Path, project_id: str) -> Path | None:
         env_root = os.environ.get(env_name)
         if env_root:
             c = _P(env_root).expanduser() / basename
-            if c.is_dir():
+            if _is_checkout(c):
                 return c
     sibling = root.parent / basename
-    if sibling.is_dir():
+    if _is_checkout(sibling):
         return sibling
     return None
 

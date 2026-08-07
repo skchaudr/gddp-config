@@ -7,6 +7,7 @@ Run:
 
 from __future__ import annotations
 
+import importlib.util
 import io
 import json
 import os
@@ -1130,3 +1131,126 @@ class LauncherTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestResolveRepoRequiresGit(unittest.TestCase):
+    """Revocation path must use the same .git-entry rule as the runtime resolver.
+
+    A decoy directory without .git must never win — otherwise revocation
+    targets the wrong directory while the real token stays live.
+    """
+
+    def test_decoy_directory_without_git_is_rejected(self):
+        """_resolve_repo_for_project returns None for a dir without .git."""
+        import tempfile
+        from pathlib import Path
+        from node_cli import _resolve_repo_for_project
+
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            config = tmp / "config"
+            proj = config / "graphs" / "decoy-proj"
+            proj.mkdir(parents=True)
+            # Project declares a basename repo
+            (proj / "project.yaml").write_text(
+                "project_id: decoy-proj\nrepo: owner/decoy-repo\nnodes: []\n"
+            )
+            # Decoy dir under config parent (no .git)
+            decoy = config.parent / "decoy-repo"
+            decoy.mkdir()
+            # Real checkout under config parent (has .git)
+            real = config.parent / "decoy-repo-real"
+            real.mkdir()
+            (real / ".git").mkdir()
+            # Since basename is decoy-repo, the decoy matches by name but
+            # lacks .git, so it must be rejected
+            resolved = _resolve_repo_for_project(config, "decoy-proj")
+            self.assertIsNone(resolved)
+
+    def test_real_checkout_with_git_is_accepted(self):
+        """_resolve_repo_for_project accepts a dir with .git."""
+        import tempfile
+        from pathlib import Path
+        from node_cli import _resolve_repo_for_project
+
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            config = tmp / "config"
+            proj = config / "graphs" / "real-proj"
+            proj.mkdir(parents=True)
+            (proj / "project.yaml").write_text(
+                "project_id: real-proj\nrepo: owner/real-checkout\nnodes: []\n"
+            )
+            checkout = config.parent / "real-checkout"
+            checkout.mkdir()
+            (checkout / ".git").mkdir()
+            resolved = _resolve_repo_for_project(config, "real-proj")
+            self.assertIsNotNone(resolved)
+            self.assertEqual(resolved.name, "real-checkout")
+
+    def test_absolute_path_without_git_is_rejected(self):
+        """An absolute repo path without .git must not resolve."""
+        import tempfile
+        from pathlib import Path
+        from node_cli import _resolve_repo_for_project
+
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            config = tmp / "config"
+            proj = config / "graphs" / "abs-proj"
+            proj.mkdir(parents=True)
+            target = tmp / "not-a-checkout"
+            target.mkdir()
+            (proj / "project.yaml").write_text(
+                f"project_id: abs-proj\nrepo: {target}\nnodes: []\n"
+            )
+            resolved = _resolve_repo_for_project(config, "abs-proj")
+            self.assertIsNone(resolved)
+
+
+class GateRevocationIntegrationTests(FixtureCase):
+    """cmd_set_status must revoke the token in the same checkout the writer uses."""
+
+    def test_rejecting_provisional_node_revokes_real_gate(self):
+        npath = self.root / "graphs" / PROJECT / "nodes" / f"{NODE_A}.yaml"
+        ppath = self.root / "graphs" / PROJECT / "project.yaml"
+        checkout = self.root / "checkout"
+        checkout.mkdir()
+        (checkout / ".git").mkdir()
+
+        # Point graph repo at the real checkout and make alpha provisional.
+        ppath.write_text(
+            ppath.read_text().replace("repo: org/demo", f"repo: {checkout}")
+            .replace("status: pending", "status: provisional", 1)
+        )
+        npath.write_text(npath.read_text().replace("status: pending", "status: provisional", 1))
+
+        # Supply the runtime gates module exactly as cmd_set_status loads it.
+        fake_runtime = self.root / "fake-runtime"
+        gates_dest = fake_runtime / "scripts" / "runtime" / "gates.py"
+        gates_dest.parent.mkdir(parents=True)
+        gates_source = REPO_ROOT.parent / "gddp-runtime" / "scripts" / "runtime" / "gates.py"
+        shutil.copy(gates_source, gates_dest)
+        shutil.copy(_HISTORY_SRC, fake_runtime / "scripts" / "node_status_history.py")
+        with mock.patch.object(node_cli, "runtime_root", return_value=fake_runtime):
+            spec = importlib.util.spec_from_file_location("test_gates", gates_dest)
+            gates = importlib.util.module_from_spec(spec)
+            assert spec and spec.loader
+            spec.loader.exec_module(gates)
+            gates.write_gate(str(checkout), NODE_A)
+            self.assertTrue(gates.gate_satisfied(str(checkout), [NODE_A]))
+
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = node_cli.cmd_set_status(
+                    project=PROJECT,
+                    node_id=NODE_A,
+                    status="ready",
+                    yes=True,
+                    reason=_STATUS_REASON,
+                    root=self.root,
+                )
+
+        self.assertEqual(rc, 0, buf.getvalue())
+        self.assertFalse(gates.gate_satisfied(str(checkout), [NODE_A]))
+        self.assertIn("gate revoked", buf.getvalue())
