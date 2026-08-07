@@ -26,4 +26,14 @@ required_artifacts:
 status: ready
 priority: high
 unlocks: []
-resolution: ""
+resolution: |
+  2026-08-06 (research agent): ~86 code/test sites across 14 files (zsh:
+  validate/ledger/deck/reconcile/generate; Rust: models/packets/app/main/
+  keymap/dashboard plus render tests; packet schema; acceptance tests) and
+  ~38 doc/gddp references. Riskiest: the Rust Packet.validated bool→verified
+  type change cascading ~20 call sites, and the aa_deck_glyph /
+  aa_dep_is_terminal derivation reads that drive every list view and
+  dependency unblock. Recommendation: coexistence migration in 6 steps
+  (dual-accept schema → atomic Rust type change → zsh dual-read → new-write
+  paths → glyph set → one-time migrate command + harden). Evidence:
+  research/validated-blast-radius.md
