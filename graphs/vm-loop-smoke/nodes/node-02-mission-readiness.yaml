@@ -1,0 +1,37 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-02-mission-readiness
+title: Assess VM host readiness for droid missions and persistent pi executors
+type: capability
+why: After the heartbeat inventory, assess whether this host is ready to run droid
+  missions and persistent pi executors — versions, docker, resources, auth, shutdown
+  timers.
+depends_on:
+- node-01-heartbeat-status
+acceptance_criteria:
+- id: report-exists
+  criterion: reports/vm-loop-smoke/02-mission-readiness.md exists and is non-empty
+- id: droid-version
+  criterion: report records droid --version output
+- id: docker-status
+  criterion: report records docker --version and daemon active/inactive
+- id: resources
+  criterion: report records free -h and df -h for the root filesystem
+- id: auth-matrix
+  criterion: 'report tests model auth: xai/grok-4.5 works; notes deepseek/zai/openai-codex
+    currently broken if so'
+- id: timers-disabled
+  criterion: report confirms auto-shutdown timers are disabled (systemctl list-timers
+    / status)
+constraints:
+- Create only reports/vm-loop-smoke/02-mission-readiness.md
+- Read-only outside that report path
+- Run the checks yourself and quote real output
+- Commit all work on this node result ref per the executor contract
+allowed_execution_modes:
+- local_subprocess
+required_artifacts:
+- reports/vm-loop-smoke/02-mission-readiness.md
+status: pending
+priority: high
+unlocks: []

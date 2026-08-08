@@ -1,0 +1,32 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-01-heartbeat-status
+title: Document VM gddp heartbeat deployment status
+type: capability
+why: Prove the VM control plane is alive by capturing real heartbeat deployment evidence
+  into a durable report.
+depends_on: []
+acceptance_criteria:
+- id: report-exists
+  criterion: reports/vm-loop-smoke/01-heartbeat-status.md exists and is non-empty
+- id: units-documented
+  criterion: report quotes real output from systemctl --user status/list-timers for
+    gddp-heartbeat
+- id: log-lines
+  criterion: report includes recent gddp-heartbeat journal or log lines
+- id: queue-db
+  criterion: report documents that queue.db exists and lists its tables (sqlite3 .tables
+    or equivalent)
+constraints:
+- Create only reports/vm-loop-smoke/01-heartbeat-status.md
+- Read-only outside that report path
+- Run the inventory commands yourself and quote real output
+- Commit all work on this node result ref per the executor contract
+allowed_execution_modes:
+- local_subprocess
+required_artifacts:
+- reports/vm-loop-smoke/01-heartbeat-status.md
+status: ready
+priority: high
+unlocks:
+- node-02-mission-readiness

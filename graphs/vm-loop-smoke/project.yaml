@@ -1,0 +1,38 @@
+schema_version: '1.0'
+schema_type: project_graph
+project_id: vm-loop-smoke
+project_name: VM Loop Smoke (all-Grok / pi one-shot)
+description: Small two-node all-Grok smoke graph on khoj-38 proving the GDDP heartbeat
+  loop with pi as local_subprocess executor (xai/grok-4.5). Binary criteria, real
+  host inventory.
+repo: skchaudr/gddp-runtime
+blueprint:
+  vision: Prove the VM control plane can claim, dispatch, execute via pi-one-shot,
+    and advance frontier on a cheap all-Grok path.
+  architecture_notes: Two-node chain. Node-01 inventory; node-02 mission-readiness
+    depends on 01. local_subprocess only. frontier_auto_advance true.
+  major_capabilities:
+  - Heartbeat deployment inventory
+  - Mission-host readiness checklist
+graph_version: '1.0'
+created_at: '2026-08-07'
+last_updated: '2026-08-08'
+nodes_dir: nodes/
+nodes:
+- id: node-01-heartbeat-status
+  title: Document VM gddp heartbeat deployment status
+  status: ready
+  type: capability
+- id: node-02-mission-readiness
+  title: Assess VM host readiness for droid missions and persistent pi executors
+  status: pending
+  type: capability
+execution_policy:
+  default_executor: local_subprocess
+  max_concurrent_jobs: 1
+  frontier_auto_advance: true
+  retry_budget: 3
+  require_human_review_before_overnight: false
+  artifact_gate_enforced: true
+  allowed_repos:
+  - skchaudr/gddp-runtime
