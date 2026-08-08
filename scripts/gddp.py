@@ -2329,6 +2329,23 @@ def interactive_validate():
         _pause()
 
 
+def _execution_policy_errors(project: dict) -> list[str]:
+    policy = project.get("execution_policy", {})
+    if not isinstance(policy, dict):
+        return ["execution_policy is not a mapping"]
+
+    errors = []
+    for field_name in ("mission_engagement_size", "mission_max_pairs"):
+        if field_name not in policy:
+            continue
+        value = policy[field_name]
+        if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+            errors.append(
+                f"execution_policy.{field_name} must be a positive integer"
+            )
+    return errors
+
+
 def validate_project(project_id: str | None):
     graphs = ROOT / "graphs"
     if not graphs.exists():
@@ -2358,6 +2375,7 @@ def validate_project(project_id: str | None):
             pid_errors.append(f"project_id '{proj.get('project_id')}' != directory '{pid}'")
         if not proj.get("repo"):
             pid_errors.append("missing repo")
+        pid_errors.extend(_execution_policy_errors(proj))
         nodes = proj.get("nodes")
         if not isinstance(nodes, list):
             pid_errors.append("nodes is not a list")

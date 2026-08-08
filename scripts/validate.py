@@ -41,6 +41,7 @@ VALID_PRIORITIES = {"low", "medium", "high", "critical"}
 VALID_EXEC_MODES = {
     "agent",
     "droid",
+    "factory_mission",
     "jules",
     "jules_api",
     "jules_cli",
