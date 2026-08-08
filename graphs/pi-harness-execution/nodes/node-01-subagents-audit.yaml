@@ -1,0 +1,31 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-01-subagents-audit
+title: Audit pi subagents for reliability and traceability
+type: capability
+why: 'Audit the subagent system (agent/npm/node_modules/pi-subagents, agent/agents,
+  agent/chains) for weaknesses, misconfiguration, and missing config, toward making
+  multi-agent orchestration a reliable daily tool. Seed findings already discovered
+  (verify, then go beyond): completion-guard false positives on remote work (fixed
+  via agent/patches), activity-watchdog false positives, turn-budget resume descriptor
+  bug, 20-turn scout default too tight, nested dispatch unavailable to children, per-dispatch
+  mission-registration noise in the TUI.'
+depends_on: []
+acceptance_criteria:
+- id: report-exists
+  criterion: reports/pi-harness-execution/subagents-audit.md exists and is non-empty
+- id: evidence-cited
+  criterion: every finding cites a file:line or command output from the live harness
+- id: proposals-ranked
+  criterion: report ends with proposals ranked by confidence and effort
+constraints:
+- 'Read-only: do not modify the harness; the only new file is the report under reports/pi-harness-execution/'
+- Verify every claim against the live checkout before writing it
+- Commit all work on this node's result ref per the executor contract
+allowed_execution_modes:
+- factory_mission
+required_artifacts:
+- reports/pi-harness-execution/subagents-audit.md
+status: ready
+priority: high
+unlocks: []

@@ -1,0 +1,30 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-06-extensions-execute
+title: Implement accepted extensions improvements
+type: capability
+why: 'Implement the high-confidence proposals from the paired audit report at reports/pi-harness-execution/extensions-audit.md.
+  Each change must trace to a specific proposal in that report. Bounded: skip anything
+  rated speculative.'
+depends_on:
+- node-05-extensions-audit
+acceptance_criteria:
+- id: changes-mapped
+  criterion: reports/pi-harness-execution/extensions-execute.md maps every change
+    to the audit proposal it implements
+- id: pi-loads
+  criterion: report includes output of pi --version (or equivalent load check) run
+    after the changes, exiting 0
+- id: report-exists
+  criterion: reports/pi-harness-execution/extensions-execute.md exists and is non-empty
+constraints:
+- Only implement proposals from the paired audit report; no unilateral improvements
+- Do not modify settings.json auth or credential content
+- Commit all work on this node's result ref per the executor contract
+allowed_execution_modes:
+- factory_mission
+required_artifacts:
+- reports/pi-harness-execution/extensions-execute.md
+status: pending
+priority: high
+unlocks: []
