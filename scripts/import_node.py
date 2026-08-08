@@ -44,6 +44,7 @@ VALID_EXEC_MODES = {
     "agent",
     "droid",
     "factory_mission",
+    "pi_rpc",
     "jules",
     "jules_api",
     "jules_cli",
