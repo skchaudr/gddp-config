@@ -21,6 +21,7 @@ Subcommands:
     <node> [executor]   Dispatch one ready node; executor defaults to node routing
 
     verify node       Run deterministic node evaluation; emit a receipt
+    receipt           Append a mission worker node receipt to GDDP_RECEIPTS_PATH
 
     obsidian export   Export one graph to ~/Obsidian/gdd-<project>/
 
@@ -73,7 +74,9 @@ console = Console(soft_wrap=True, highlight=False, width=_PIPE_WIDTH)
 _MENU_BACK = object()
 _MENU_QUIT = object()
 _RUNTIME_JOB_COMMANDS = frozenset({"list", "show", "results", "set"})
-_CLI_COMMANDS = frozenset({"node", "jobs", "verify", "review", "obsidian", "project"})
+_CLI_COMMANDS = frozenset(
+    {"node", "jobs", "verify", "review", "receipt", "obsidian", "project"}
+)
 _CONCRETE_AGENT_EXECUTORS = frozenset(
     {"jules", "jules_api", "jules_cli", "local_subprocess"}
 )
@@ -2001,6 +2004,32 @@ def cmd_overview(_args):
     return 0
 
 
+def cmd_receipt(args) -> int:
+    """Delegate mission worker receipt writes to runtime's receipt CLI."""
+    try:
+        runtime_root = resolve_runtime_root()
+    except RuntimeError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
+    script = runtime_root / "scripts" / "gddp_node_receipt.py"
+    if not script.is_file():
+        print(f"ERROR: receipt backend not found at {script}", file=sys.stderr)
+        return 2
+    command = [
+        runtime_python(runtime_root),
+        str(script),
+        "--node-id",
+        args.node_id,
+        "--base",
+        args.base,
+        "--result",
+        args.result,
+    ]
+    env = os.environ.copy()
+    env["GDDP_RUNTIME_ROOT"] = str(runtime_root)
+    return subprocess.run(command, env=env, check=False).returncode
+
+
 def cmd_verify_node(args):
     """Delegate node verification to the runtime evaluator — the single judge.
 
@@ -2524,6 +2553,15 @@ def main(argv=None):
     )
     jobs_set.add_argument("--yes", action="store_true", help="Skip confirmation")
     jobs_set.set_defaults(func=cmd_jobs)
+
+    receipt_p = sub.add_parser(
+        "receipt",
+        help="Append a mission worker node receipt (requires GDDP_RECEIPTS_PATH)",
+    )
+    receipt_p.add_argument("--node-id", required=True, help="Graph/feature node id")
+    receipt_p.add_argument("--base", required=True, help="Starting commit SHA")
+    receipt_p.add_argument("--result", required=True, help="Result commit SHA")
+    receipt_p.set_defaults(func=cmd_receipt)
 
     verify_p = sub.add_parser("verify", help="Node evaluation harness")
     verify_sub = verify_p.add_subparsers(dest="subcommand")
