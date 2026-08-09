@@ -2,6 +2,10 @@ acceptance_criteria:
 - criterion: reports/pi-harness-execution/subagents-execute.md maps every change to
     the audit proposal it implements
   id: changes-mapped
+- criterion: >-
+    report gives every acceptance-criteria item in the paired audit a disposition:
+    implemented, skipped as speculative, obsolete on current main, or blocked with evidence
+  id: audit-plan-disposition
 - criterion: report includes output of pi --version (or equivalent load check) run
     after the changes, exiting 0
   id: pi-loads
@@ -10,6 +14,9 @@ acceptance_criteria:
 allowed_execution_modes:
 - factory_mission
 constraints:
+- Before changing code, read reports/pi-harness-execution/subagents-audit.md; its findings and final acceptance-criteria section are the authoritative execution plan for this node
+- Abort and report before making changes if the paired audit report is absent from the execution base
+- Re-verify every selected proposal against current main after the codebase trim; record obsolete or blocked proposals instead of forcing stale changes
 - Only implement proposals from the paired audit report; no unilateral improvements
 - Do not modify settings.json auth or credential content
 - Commit all work on this node's result ref per the executor contract

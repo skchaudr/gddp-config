@@ -7,14 +7,15 @@ why: 'Two audit-proven gaps converge on one design: (1) agents deployed to a for
   repo lack identity, memory, rules, and skills context (instructions audit F-1/F-15:
   SOUL/USER/MEMORY not injected; subagents get systemPromptMode: replace with no inheritance),
   and (2) every-turn static injection accumulates into noise agents skim. The answer
-  is a hybrid auto-advisor with three modes. FORCING mode: blocks, interrupts, or
+  is a hybrid auto-advisor with three modes. The six first principles are in
+  reports/pi-harness-execution/session-addenda-2026-08-09.md on main. FORCING mode: blocks, interrupts, or
   injects on the tool-call path — it cannot fall behind, this is the auto-mode lane
   (pi-auto-mode package, archived not deleted, config at agent/auto-mode.json). STEERING
   mode: per-turn dynamic surfacing from the knowledge base — allow list, rule list,
   skill list, MEMORY.md pointers — via hooks and dynamic system prompts; this is the
   advisor lane, run by a cheap always-on model (DeepSeek class). DEFAULT mode: when
-  nothing surfaces, the agent gets the six field-technician first principles (session
-  addenda A on branch gddp/98c883d8b9144665b937446e918d695b). Coverage must include
+  nothing surfaces, the agent gets the six field-technician first principles from
+  that merged session-addenda report. Coverage must include
   subagents: every subagent is a resumable pi session and advisor-on-subagent machinery
   already exists (agent/extensions/advisor-mode.ts subagents config toggle and isAdvisorSubagentProcess).
   Building blocks verified on both hosts: advisor-mode.ts tracked and present, auto-mode.json
@@ -25,6 +26,9 @@ acceptance_criteria:
   criterion: reports/pi-harness-execution/hybrid-advisor-design.md exists and defines
     all three modes (forcing, steering, default), their triggers, and their knowledge
     sources
+- id: merged-input-used
+  criterion: the design doc cites reports/pi-harness-execution/session-addenda-2026-08-09.md
+    as an input and does not depend on an audit branch
 - id: feature-map
   criterion: the doc ends with a feature map splittable into implementation nodes,
     each feature sized at roughly one solid agent session
@@ -39,6 +43,7 @@ acceptance_criteria:
   criterion: the doc names the always-on model class for the steering lane and justifies
     the per-turn cost model with real pricing or measured token counts
 constraints:
+- Read reports/pi-harness-execution/session-addenda-2026-08-09.md before designing; abort and report if it is absent from the execution base
 - Read-only on the harness; the only new file is the design doc under reports/pi-harness-execution/
 - Verify every building-block claim against the live checkout before writing it
 - Design for subagent sessions as first-class, not as an afterthought
