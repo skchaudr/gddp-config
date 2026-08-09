@@ -1,18 +1,27 @@
 schema_version: '1.0'
 schema_type: node
 node_id: node-07-instructions-audit
-title: Audit agent instructions, memory, docs, hook steering
+title: Audit agent instructions, memory, docs, hook steering, and deployment context
 type: capability
 why: 'Audit agent/AGENTS.md, SOUL.md, USER.md, MEMORY.md, daily memory, skills, and
   hook/steering configuration: what exists, what is mis- or un-configured, what drifts.
   IMPORTANT: cite current external consensus/research on agent instructions and memory
-  management (fetch real sources; no vibe suggestions).'
+  management (fetch real sources; no vibe suggestions). CRITICAL: audit what context
+  is actually injected when Pi deploys to a project (like gddp-runtime) — what is
+  in the project context vs what is NOT (subagents-runbook.md, MEMORY.md, daily memory).
+  Check if model tier assignments, spawn vs subagent guidance, fleet discipline rules,
+  notification hygiene, and turn budget visibility are available to agents or if they
+  are tribal knowledge that agents miss.'
 depends_on: []
 acceptance_criteria:
 - id: report-exists
   criterion: reports/pi-harness-execution/instructions-audit.md exists and is non-empty
 - id: evidence-cited
   criterion: every finding cites a file:line or command output from the live harness
+- id: deployment-context-audited
+  criterion: report explicitly documents what context is injected when Pi deploys
+    to gddp-runtime, what is missing, and whether agents can succeed with only the
+    injected context
 - id: execute-node-generated
   criterion: schema-validated YAML for node-08-instructions-execute is written to
     reports/pi-harness-execution/instructions-execute.yaml
