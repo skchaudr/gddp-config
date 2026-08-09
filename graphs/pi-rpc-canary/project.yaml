@@ -1,0 +1,45 @@
+schema_version: '1.0'
+schema_type: project_graph
+project_id: pi-rpc-canary
+project_name: Pi-RPC Persistent Executor Canary (mac mini)
+description: Three-node canary proving the pi_rpc persistent executor path on the
+  mac mini. Real bounded fixes from the pi-harness-execution audits, one session per
+  node, receipts and evidence through the normal heartbeat loop.
+repo: /Users/sab-mini/.pi
+blueprint:
+  vision: Prove the pi_rpc adapter (persistent pi sessions via --mode rpc) executes
+    real nodes through the heartbeat with per-node evidence, before any engagement/persistent-across-nodes
+    work is built.
+  architecture_notes: Serial canary (max_concurrent_jobs 1). Two independent fix nodes,
+    one verification node depending on both. All work in isolated worktrees of the
+    Pi-Coding-Agent repo; results land on result refs for human review.
+  major_capabilities:
+  - pi_rpc dispatch through the heartbeat
+  - per-node evidence and receipts
+  - frontier auto-advance into the verification node
+graph_version: '1.0'
+created_at: '2026-08-09'
+last_updated: '2026-08-09'
+nodes_dir: nodes/
+nodes:
+- id: node-01-moshi-hooks-env-path
+  title: Make moshi-hook binary path configurable
+  status: ready
+  type: capability
+- id: node-02-guardrails-first-principles
+  title: Replace guardrails list with the six first principles
+  status: ready
+  type: capability
+- id: node-03-load-verification
+  title: Verify pi loads clean with both canary changes
+  status: pending
+  type: capability
+execution_policy:
+  default_executor: pi_rpc
+  max_concurrent_jobs: 1
+  frontier_auto_advance: true
+  retry_budget: 3
+  require_human_review_before_overnight: false
+  artifact_gate_enforced: true
+  allowed_repos:
+  - /Users/sab-mini/.pi

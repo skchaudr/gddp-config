@@ -1,0 +1,37 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-02-guardrails-first-principles
+title: Replace guardrails list with the six first principles
+type: capability
+why: 'agent/extensions/agent-guardrails.ts accumulates one rule per incident and is
+  becoming noise agents skim. Replace the GUARDRAILS list with the six field-technician
+  first principles agreed in the 2026-08-09 session (session addenda A, branch gddp/98c883d8b9144665b937446e918d695b):
+  (1) The live system is the only truth — no human, agent, or document owns it; measure
+  before claiming anything about it. (2) Measure twice, cut once. (3) Understand the
+  consequences — if irreversible, get operator approval; if reversible, know the price
+  of reversal before acting. (4) The operator''s intent is the spec — if you are authoring
+  the criteria, you have already lost the plot. (5) Leave the site cleaner than you
+  found it — committed, pushed, resumable by the next tech. (6) Know your instruments
+  — shell, git, logs, /proc; the machine in front of you beats any doc.'
+depends_on: []
+acceptance_criteria:
+- id: principles-verbatim
+  criterion: the GUARDRAILS list in agent-guardrails.ts contains exactly the six first
+    principles, verbatim as specified in the node why
+- id: audit-logic-preserved
+  criterion: the negative-claim audit (message_end hook) still functions — only the
+    list content changed
+- id: report-exists
+  criterion: reports/pi-rpc-canary/node-02.md exists and shows the before/after of
+    the GUARDRAILS list
+constraints:
+- Only the GUARDRAILS list content changes; the injection mechanism and the message_end
+  audit stay intact
+- Work only in the node worktree; commit on the node's result ref
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- reports/pi-rpc-canary/node-02.md
+status: ready
+priority: high
+unlocks: []

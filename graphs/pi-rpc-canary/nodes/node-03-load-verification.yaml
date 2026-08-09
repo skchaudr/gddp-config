@@ -1,0 +1,33 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-03-load-verification
+title: Verify pi loads clean with both canary changes
+type: capability
+why: 'After node-01 and node-02 land on their result refs, verify the harness still
+  loads: pi --version exits 0, the guardrails injection shows the six first principles
+  in the system prompt, and moshi-hooks loads without errors. This is the canary''s
+  integration check.'
+depends_on:
+- node-01-moshi-hooks-env-path
+- node-02-guardrails-first-principles
+acceptance_criteria:
+- id: pi-loads
+  criterion: report includes output of pi --version (or equivalent load check) exiting
+    0, run against a checkout containing both node results
+- id: guardrails-visible
+  criterion: report shows the injected system-prompt guardrails block containing the
+    six first principles
+- id: report-exists
+  criterion: reports/pi-rpc-canary/node-03.md exists and includes both command outputs
+constraints:
+- 'Read-only verification: no source changes; the only new file is the report'
+- If either parent result is missing or broken, stop and report rather than fixing
+  it yourself
+- Commit the report on the node's result ref
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- reports/pi-rpc-canary/node-03.md
+status: pending
+priority: high
+unlocks: []

@@ -1,0 +1,30 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-01-moshi-hooks-env-path
+title: Make moshi-hook binary path configurable
+type: capability
+why: agent/extensions/moshi-hooks.ts:8 hardcodes the helper binary at /opt/homebrew/bin/moshi-hook
+  (extensions audit F-6). Replace with process.env.MOSHI_HOOK_BIN with the current
+  path as the default fallback, so the extension is portable across hosts.
+depends_on: []
+acceptance_criteria:
+- id: change-present
+  criterion: moshi-hooks.ts reads the binary path from process.env.MOSHI_HOOK_BIN
+    with /opt/homebrew/bin/moshi-hook as the fallback default
+- id: file-parses
+  criterion: the modified extension file passes a syntax check (node --check or equivalent)
+    and the report includes the command output
+- id: report-exists
+  criterion: reports/pi-rpc-canary/node-01.md exists, cites the before/after of the
+    changed lines, and includes the syntax-check output
+constraints:
+- Change only the binary-path resolution; no other behavior changes
+- Work only in the node worktree; commit on the node's result ref
+- Verify the claim against the live file before editing
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- reports/pi-rpc-canary/node-01.md
+status: ready
+priority: high
+unlocks: []
