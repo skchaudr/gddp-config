@@ -1,0 +1,53 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-11-hybrid-advisor-spec
+title: 'Spec the hybrid auto-advisor: forcing, steering, and default modes'
+type: capability
+why: 'Two audit-proven gaps converge on one design: (1) agents deployed to a foreign
+  repo lack identity, memory, rules, and skills context (instructions audit F-1/F-15:
+  SOUL/USER/MEMORY not injected; subagents get systemPromptMode: replace with no inheritance),
+  and (2) every-turn static injection accumulates into noise agents skim. The answer
+  is a hybrid auto-advisor with three modes. FORCING mode: blocks, interrupts, or
+  injects on the tool-call path — it cannot fall behind, this is the auto-mode lane
+  (pi-auto-mode package, archived not deleted, config at agent/auto-mode.json). STEERING
+  mode: per-turn dynamic surfacing from the knowledge base — allow list, rule list,
+  skill list, MEMORY.md pointers — via hooks and dynamic system prompts; this is the
+  advisor lane, run by a cheap always-on model (DeepSeek class). DEFAULT mode: when
+  nothing surfaces, the agent gets the six field-technician first principles (session
+  addenda A on branch gddp/98c883d8b9144665b937446e918d695b). Coverage must include
+  subagents: every subagent is a resumable pi session and advisor-on-subagent machinery
+  already exists (agent/extensions/advisor-mode.ts subagents config toggle and isAdvisorSubagentProcess).
+  Building blocks verified on both hosts: advisor-mode.ts tracked and present, auto-mode.json
+  tracked, pi-auto-mode npm package installed per-host (agent/npm is gitignored).'
+depends_on: []
+acceptance_criteria:
+- id: design-doc
+  criterion: reports/pi-harness-execution/hybrid-advisor-design.md exists and defines
+    all three modes (forcing, steering, default), their triggers, and their knowledge
+    sources
+- id: feature-map
+  criterion: the doc ends with a feature map splittable into implementation nodes,
+    each feature sized at roughly one solid agent session
+- id: building-blocks-verified
+  criterion: every building-block claim cites file:line evidence from the live checkout
+    (advisor-mode.ts subagent support, auto-mode.json rule structure, pi-auto-mode
+    package surface, agent-guardrails.ts injection point)
+- id: fallback-semantics
+  criterion: the doc specifies exactly what the agent receives on a turn where nothing
+    surfaces, with the six first principles verbatim
+- id: model-economics
+  criterion: the doc names the always-on model class for the steering lane and justifies
+    the per-turn cost model with real pricing or measured token counts
+constraints:
+- Read-only on the harness; the only new file is the design doc under reports/pi-harness-execution/
+- Verify every building-block claim against the live checkout before writing it
+- Design for subagent sessions as first-class, not as an afterthought
+- Commit all work on this node's result ref per the executor contract
+allowed_execution_modes:
+- factory_mission
+- pi_rpc
+required_artifacts:
+- reports/pi-harness-execution/hybrid-advisor-design.md
+status: ready
+priority: high
+unlocks: []
