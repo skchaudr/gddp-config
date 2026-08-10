@@ -8,8 +8,8 @@ Portfolio brief + system narrative: [`../gddp-runtime/PROJECT-BRIEF.md`](../gddp
 
 ## Graph truth and node revision
 
-- Every node is a human-owned proposal, not a commitment. Acceptance is not
-  assumed. Human review may accept, revise, split, supersede, rewire, defer, or
+- Every node is a human-owned proposal and statement of intent, not a commitment. 
+- Acceptance is not assumed. Human review may accept, revise, split, supersede, rewire, defer, or
   abandon a node.
 - Agents, executors, evaluators, tests, commits, and artifacts provide evidence
   and recommendations. Only the human edits canonical node definitions,
@@ -22,8 +22,15 @@ Portfolio brief + system narrative: [`../gddp-runtime/PROJECT-BRIEF.md`](../gddp
   usable. Do not silently change the graph or assume the current node must land.
 - Independent ready paths may continue while the human reviews an amendment;
   dependent work remains blocked by unchanged graph truth.
-- Non-interactive node-status commands are read-only. Graph/node status changes
-  happen only through the interactive `gddp` Nodes menu.
+- Non-interactive node-status commands are read-only. 
+- Graph/node status changes are designed for Sab to be done through a robust 
+quick press CLI tool known as `gddp`. It serves many purposes, but the interactive pathway 
+explicitly chose a non-agent-friendly interface that still remained low-friction to: 
+  - Update graph truth
+  - View upcoming and past nodes 
+  - View current and past jobs 
+  - View evaluator verdicts 
+  - Update graph truth and node status 
 - Runtime job state is separate from graph truth. `gddp jobs
   list/show/results/set` routes through `gddp-runtime/scripts/jobs_status.py`;
   job writes must never change node YAML or project graph status.
