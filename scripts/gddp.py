@@ -77,9 +77,7 @@ _RUNTIME_JOB_COMMANDS = frozenset({"list", "show", "results", "set"})
 _CLI_COMMANDS = frozenset(
     {"node", "jobs", "verify", "review", "receipt", "obsidian", "project"}
 )
-_CONCRETE_AGENT_EXECUTORS = frozenset(
-    {"jules", "jules_api", "jules_cli", "local_subprocess"}
-)
+_ABSTRACT_EXECUTION_MODES = frozenset({"agent", "human"})
 
 
 # --------------------------------------------------------------------------- #
@@ -102,8 +100,8 @@ def _graph_projects(config_root: Path) -> list[str]:
 
 def _executor_allowed(executor: str, modes: list[str]) -> bool:
     """Treat `agent` as executor-neutral, never as a runnable adapter name."""
-    return executor in modes or (
-        "agent" in modes and executor in _CONCRETE_AGENT_EXECUTORS
+    return executor not in _ABSTRACT_EXECUTION_MODES and (
+        executor in modes or "agent" in modes
     )
 
 
@@ -242,15 +240,14 @@ def build_dispatch_plan(config_root, target, executor, project_hint=None):
         "project_id": project_id,
         "repo": project_doc.get("repo") or "",
         "items": items,
-        "executor_explicit": bool(executor),
     }
 
 
-def insert_dispatch_events(con, project_id, repo, items, *, executor_explicit, actor=None):
+def insert_dispatch_events(con, project_id, repo, items, *, actor=None):
     """Insert one schema-valid intake event per node; the heartbeat pipeline
     claims, classifies (via the node: tag in url), scopes, reserves, and
-    dispatches. routing.selected_executor is set only when the operator named
-    an executor; otherwise the node's configured routing applies."""
+    dispatches. Each item already contains the concrete executor resolved by
+    the dispatch plan; persist it so runtime never re-plans operator intent."""
     now = datetime.now(timezone.utc)
     event_ids = []
     for item in items:
@@ -258,11 +255,7 @@ def insert_dispatch_events(con, project_id, repo, items, *, executor_explicit, a
             f"evt_dispatch_{now.strftime('%Y%m%dT%H%M%S')}_"
             f"{item['node_id']}_{secrets.token_hex(3)}"
         )
-        routing = (
-            json.dumps({"selected_executor": item["executor"]})
-            if executor_explicit
-            else None
-        )
+        routing = json.dumps({"selected_executor": item["executor"]})
         con.execute(
             "INSERT INTO events (event_id, schema_version, received_at, source, "
             "event_type, actor, url, project_id, project_node_candidates, "
@@ -376,7 +369,6 @@ def _dispatch_flow(con, config_root, target, executor, project_hint=None) -> int
         plan["project_id"],
         plan["repo"],
         movable,
-        executor_explicit=plan["executor_explicit"],
     )
     for event_id in event_ids:
         console.print(f"  event [cyan]{event_id}[/] → received")

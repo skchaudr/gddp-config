@@ -117,7 +117,6 @@ def test_graph_frontier_uses_configured_routing(config_root):
     plan = gddp.build_dispatch_plan(config_root, "proj-a", None)
     assert plan["project_id"] == "proj-a"
     assert plan["repo"] == "org/a"
-    assert plan["executor_explicit"] is False
     assert {i["node_id"]: i["executor"] for i in plan["items"]} == {
         "alpha": "local_subprocess",
         "beta": "jules_api",
@@ -138,7 +137,6 @@ def test_graph_frontier_survives_matching_project_hint(config_root):
 
 def test_graph_named_executor_applies_to_all(config_root):
     plan = gddp.build_dispatch_plan(config_root, "proj-a", "local_subprocess")
-    assert plan["executor_explicit"] is True
     assert {i["executor"] for i in plan["items"]} == {"local_subprocess"}
 
 
@@ -179,11 +177,11 @@ def test_executor_neutral_agent_accepts_named_concrete_executor(config_root):
     )
 
     plan = gddp.build_dispatch_plan(
-        config_root, "neutral", "local_subprocess"
+        config_root, "neutral", "droid"
     )
 
     assert plan["items"] == [
-        {"node_id": "neutral", "executor": "local_subprocess"}
+        {"node_id": "neutral", "executor": "droid"}
     ]
 
 
@@ -225,7 +223,7 @@ def test_unknown_target_and_not_ready_refuse(config_root):
 def test_insert_event_shape(con):
     items = [{"node_id": "alpha", "executor": "local_subprocess"}]
     ids = gddp.insert_dispatch_events(
-        con, "proj-a", "org/a", items, executor_explicit=True, actor="sab"
+        con, "proj-a", "org/a", items, actor="sab"
     )
     row = con.execute("SELECT * FROM events WHERE event_id = ?", ids).fetchone()
     assert row["status"] == "received"
@@ -239,13 +237,11 @@ def test_insert_event_shape(con):
     assert json.loads(row["routing"]) == {"selected_executor": "local_subprocess"}
 
 
-def test_insert_without_named_executor_leaves_routing_null(con):
+def test_insert_persists_executor_resolved_by_plan(con):
     items = [{"node_id": "beta", "executor": "jules_api"}]
-    ids = gddp.insert_dispatch_events(
-        con, "proj-a", "org/a", items, executor_explicit=False
-    )
+    ids = gddp.insert_dispatch_events(con, "proj-a", "org/a", items)
     row = con.execute("SELECT routing FROM events WHERE event_id = ?", ids).fetchone()
-    assert row["routing"] is None
+    assert json.loads(row["routing"]) == {"selected_executor": "jules_api"}
 
 
 # --- preview / confirm gate ------------------------------------------------- #
