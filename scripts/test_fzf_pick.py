@@ -83,27 +83,79 @@ class FzfPickTests(unittest.TestCase):
 
 
 class GddpPickListFallbackTests(unittest.TestCase):
-    def test_pick_list_falls_back_to_paged_when_fzf_unavailable(self):
+    def test_pick_list_defaults_to_paged_menu(self):
         import gddp
 
         items = [("p1", "one"), ("p2", "two")]
-        fake_fzf = SimpleNamespace(available=lambda: False, pick=lambda *a, **k: None)
-        with patch.object(gddp, "_import_module", side_effect=lambda name: fake_fzf if name == "fzf_pick" else __import__(name)), \
-             patch.object(gddp, "_paged_menu", return_value="p2") as paged:
-            result = gddp._pick_list("projects", items, multi=False)
+        with patch.object(gddp, "_paged_menu", return_value="p2") as paged:
+            result = gddp._pick_list(
+                "projects",
+                items,
+                multi=False,
+                preview_cmd="echo {1}",
+            )
         self.assertEqual(result, "p2")
         paged.assert_called_once()
+        kwargs = paged.call_args.kwargs
+        self.assertEqual(kwargs.get("fzf_preview_cmd"), "echo {1}")
+        self.assertFalse(kwargs.get("fzf_multi"))
 
-    def test_pick_list_uses_fzf_when_available(self):
+    def test_paged_menu_f_steps_into_fzf(self):
         import gddp
 
-        items = [("n1", "ready"), ("n2", "pending")]
-        fake_fzf = SimpleNamespace(
+        keys = iter(["f"])
+        terminal = SimpleNamespace(
+            getch=lambda: next(keys),
+            clear_lines=lambda n: None,
+        )
+        fzf = SimpleNamespace(
+            available=lambda: True,
+            pick=lambda *a, **k: ["chosen"],
+        )
+
+        def import_module(name):
+            if name == "terminal":
+                return terminal
+            if name == "fzf_pick":
+                return fzf
+            return __import__(name)
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp, "_clear_screen"):
+            result = gddp._paged_menu(
+                "projects",
+                [("a", "one"), ("chosen", "two")],
+                fzf_preview_cmd="echo {1}",
+            )
+        self.assertEqual(result, "chosen")
+
+    def test_paged_menu_m_returns_multi_selection(self):
+        import gddp
+
+        keys = iter(["m"])
+        terminal = SimpleNamespace(
+            getch=lambda: next(keys),
+            clear_lines=lambda n: None,
+        )
+        fzf = SimpleNamespace(
             available=lambda: True,
             pick=lambda *a, **k: ["n1", "n2"],
         )
-        with patch.object(gddp, "_import_module", return_value=fake_fzf):
-            result = gddp._pick_list("nodes", items, multi=True, preview_cmd="echo {1}")
+
+        def import_module(name):
+            if name == "terminal":
+                return terminal
+            if name == "fzf_pick":
+                return fzf
+            return __import__(name)
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp, "_clear_screen"):
+            result = gddp._paged_menu(
+                "nodes",
+                [("n1", "a"), ("n2", "b")],
+                fzf_multi=True,
+            )
         self.assertEqual(result, ["n1", "n2"])
 
     def test_preview_cmds_do_not_double_quote_fzf_placeholders(self):

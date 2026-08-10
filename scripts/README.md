@@ -37,7 +37,7 @@ Or use your system Python if it's not PEP-668-locked.
 
 | Command | What | Keystrokes |
 |---|---|---|
-| `node browse [--project X]` | Interactive node review/status menu; project flag skips the project picker | Lists prefer **fzf** (fuzzy + YAML preview; tab multi-select → batch status). Without fzf: ↑/↓, Enter, numbers, ←/→ page. Node view: ←/→ prev/next; ↑/↓ actions |
+| `node browse [--project X]` | Interactive node review/status menu; project flag skips the project picker | Default: rich ↑/↓ list. **`f`** / Ctrl-F → fzf filter+preview; **`m`** → multi batch status. Node view: ←/→ prev/next; ↑/↓ actions |
 | `node rapid` | Minimal-keystroke adder | Type name, Enter, number keys for deps |
 | `node new` | Full TUI scaffold (field-by-field editor) | Number keys, m/s/q/Enter |
 | `node batch` | Walk through REPLACE_ME nodes | Edit acceptance/constraints/why |
@@ -61,21 +61,16 @@ and evaluator evidence remain runtime-owned while graph truth remains config-own
 | `jobs set <job-or-node> <state> --reason ...` | Change runtime queue state with confirmation and an audit row |
 
 Bare `gddp` opens the unified config-hosted menu in a terminal. Each submenu
-clears and redraws as one screen. List picks (graphs, nodes, jobs, status,
-validate, frontier, dispatch) use **fzf** when installed (`brew install fzf`):
-fuzzy filter, right-pane preview (project/node YAML or `jobs show`), and tab
-multi-select for batch graph-status / job-state updates. Without fzf, menus fall
-back to the paged ↑/↓ picker (multi becomes one-by-one). Jobs section still
-delegates writes to `jobs_status.py`. Redirected bare output prints a
-non-blocking command overview.
-Resolution uses `GDDP_RUNTIME_ROOT`, defaulting
+clears and redraws as one screen. **Default list path is the rich paged menu**
+(colored status · title). With `fzf` installed, **`f`** (or Ctrl-F) steps into
+fuzzy filter + YAML/`jobs show` preview; on node/job update lists, **`m`** opens
+multi-select for batch status/state. fzf never replaces the default path.
+Jobs writes still go through `jobs_status.py`. Redirected bare output prints a
+non-blocking command overview. Resolution uses `GDDP_RUNTIME_ROOT`, defaulting
 to the sibling `../gddp-runtime`; `GDDP_RUNTIME_PYTHON` can override the runtime
-interpreter. In menus, `↑`/`↓` move the highlighted item, Enter opens it,
-`←`/`→` and `p`/`n` paginate, Escape backs up one level, `q` quits, and `Ctrl-C`
-quits the entire TUI. Number keys remain a direct fallback. On a node review
-screen, `←`/`→` jump to the previous/next node (wraps at ends); `↑`/`↓` move
-the action cursor and Enter opens the highlighted action (letter keys still
-jump directly).
+interpreter. Keys: `↑`/`↓` move, Enter opens, `←`/`→` page, Escape back, `q`
+quit, `Ctrl-C` quit TUI, numbers direct pick. Node review: `←`/`→` sibling;
+`↑`/`↓` action cursor.
 
 The dispatch menu uses paged one-key pickers for graphs and targets. Its
 `ready now` list is the actual dispatchable frontier after dependency and live

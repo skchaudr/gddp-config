@@ -741,6 +741,42 @@ def _job_preview_cmd() -> str:
         return f'echo "runtime unavailable: {exc}"'
 
 
+def _fzf_items(
+    items: list[tuple[str, str | Text]],
+) -> list[tuple[str, str]]:
+    """(value, plain label) for fzf — rich styles do not survive fzf."""
+    out: list[tuple[str, str]] = []
+    for value, description in items:
+        lab = _plain_desc(description).strip()
+        display = f"{value}  {lab}" if lab and lab != value else value
+        out.append((value, display))
+    return out
+
+
+def _run_fzf(
+    heading: str,
+    items: list[tuple[str, str | Text]],
+    *,
+    preview_cmd: str | None = None,
+    multi: bool = False,
+) -> list[str] | None:
+    """Step into fzf; return selected values or None (cancel / unavailable)."""
+    fzf = _import_module("fzf_pick")
+    if not fzf.available():
+        console.print(
+            Text("fzf not installed (brew install fzf)", style="yellow")
+        )
+        return None
+    header = "tab multi · enter · esc" if multi else "enter · esc"
+    return fzf.pick(
+        _fzf_items(items),
+        prompt=f"{heading}> ",
+        header=header,
+        preview_cmd=preview_cmd,
+        multi=multi,
+    )
+
+
 def _pick_list(
     heading: str,
     items: list[tuple[str, str | Text]],
@@ -750,69 +786,20 @@ def _pick_list(
     back_label: str = "back",
     fzf_header: str | None = None,
 ):
-    """Pick from a list via fzf when available; else ``_paged_menu``.
+    """Rich paged list by default. Optional fzf via ``f`` / ``m`` keys.
 
     multi=False → value | _MENU_BACK | _MENU_QUIT
-    multi=True  → list[str] | _MENU_BACK | _MENU_QUIT
+    multi=True  → value | list[str] | _MENU_BACK | _MENU_QUIT
+      (list only when the operator steps into multi fzf with ``m``)
     """
-    if not items:
-        _clear_screen()
-        console.print(Text("No items found.", style="yellow"))
-        _pause()
-        return _MENU_BACK
-
-    fzf = _import_module("fzf_pick")
-    fzf_items: list[tuple[str, str]] = []
-    for value, description in items:
-        lab = _plain_desc(description).strip()
-        display = f"{value}  {lab}" if lab and lab != value else value
-        fzf_items.append((value, display))
-
-    if fzf.available():
-        if fzf_header is None:
-            if multi:
-                fzf_header = (
-                    f"{heading}  ·  tab multi  ·  ctrl-a all  ·  enter accept  ·  esc back"
-                )
-            else:
-                fzf_header = f"{heading}  ·  enter open  ·  esc back"
-        selected = fzf.pick(
-            fzf_items,
-            prompt=f"{heading}> ",
-            header=fzf_header,
-            preview_cmd=preview_cmd,
-            multi=multi,
-        )
-        if not selected:
-            return _MENU_BACK
-        return selected if multi else selected[0]
-
-    if multi:
-        # Sequential paged picks until back (no fzf multi).
-        console.print(
-            Text(
-                "fzf not on PATH — multi-select falls back to one-by-one "
-                "(install: brew install fzf)",
-                style="yellow",
-            )
-        )
-        remaining = list(items)
-        chosen: list[str] = []
-        while remaining:
-            pick = _paged_menu(
-                f"{heading} · {len(chosen)} selected · pick next or back=done",
-                remaining,
-                back_label="done",
-            )
-            if pick is _MENU_QUIT:
-                return _MENU_QUIT
-            if pick is _MENU_BACK:
-                break
-            chosen.append(pick)
-            remaining = [(v, d) for v, d in remaining if v != pick]
-        return chosen if chosen else _MENU_BACK
-
-    return _paged_menu(heading, items, back_label=back_label)
+    del fzf_header  # callers used to pass verbose fzf chrome; paged owns help now
+    return _paged_menu(
+        heading,
+        items,
+        back_label=back_label,
+        fzf_preview_cmd=preview_cmd,
+        fzf_multi=multi,
+    )
 
 
 def _batch_node_status(project: str, node_ids: list[str]):
@@ -1117,11 +1104,17 @@ def _paged_menu(
     *,
     page_size: int = 9,
     back_label: str = "back",
+    fzf_preview_cmd: str | None = None,
+    fzf_multi: bool = False,
 ):
-    """Choose by cursor, Enter, or number; page with Left/Right or p/n.
+    """Rich cursor list: ↑/↓, Enter, numbers; ←/→ page.
+
+    Optional fzf step-in (does not replace this path):
+      ``f`` / Ctrl-F  — fuzzy filter + preview (single)
+      ``m``           — multi-select batch (when ``fzf_multi``)
 
     Static list content is redrawn in place (clear-to-end), not via a full
-    terminal clear on every arrow key — that flicker was pure noise.
+    terminal clear on every arrow key.
     """
     if not items:
         _clear_screen()
@@ -1132,6 +1125,10 @@ def _paged_menu(
     terminal = _import_module("terminal")
     getch = terminal.getch
     clear_lines = terminal.clear_lines
+    try:
+        fzf_ok = bool(_import_module("fzf_pick").available())
+    except Exception:
+        fzf_ok = False
     page = 0
     cursor = 0
     drawn = 0
@@ -1146,9 +1143,10 @@ def _paged_menu(
 
         # One logical line per row so clear_lines stays accurate; truncate.
         width = console.width or 80
-        lines: list[Text] = [
-            Text(f"{heading} · page {page + 1} of {page_count}", style="bold")
-        ]
+        title = Text(heading, style="bold")
+        if page_count > 1:
+            title.append(f"  ·  {page + 1}/{page_count}", style="dim")
+        lines: list[Text] = [title]
         for offset, (value, description) in enumerate(visible, start=1):
             marker = "›" if offset - 1 == cursor else " "
             row = Text()
@@ -1160,24 +1158,16 @@ def _paged_menu(
             row.append_text(_format_list_description(description, room))
             lines.append(row)
 
-        help_rows = [
-            ("↑/↓", "move selection"),
-            ("enter", "open selected"),
-        ]
+        # One help line — no stacked chrome.
+        help_bits = ["↑/↓", "enter", "1-9"]
         if page_count > 1:
-            help_rows.extend([
-                ("←/p", "previous page"),
-                ("→/n", "next page"),
-            ])
-        help_rows.extend([
-            ("b", back_label),
-            ("q", "quit"),
-        ])
-        for key, label in help_rows:
-            h = Text()
-            h.append(f"{key:<8}", style="bold cyan")
-            h.append(label, style="dim")
-            lines.append(h)
+            help_bits.append("←/→ page")
+        if fzf_ok:
+            help_bits.append("f filter")
+            if fzf_multi:
+                help_bits.append("m multi")
+        help_bits.extend([f"b {back_label}", "q quit"])
+        lines.append(Text("  " + " · ".join(help_bits), style="dim"))
 
         if first_paint:
             _clear_screen()
@@ -1212,6 +1202,36 @@ def _paged_menu(
                 page = (page + 1) % page_count
                 cursor = 0
                 break
+            # f / Ctrl-F — opt-in fzf (single). Cancel returns to this menu.
+            if choice in {"f", "F", "\x06"} and fzf_ok:
+                selected = _run_fzf(
+                    heading,
+                    items,
+                    preview_cmd=fzf_preview_cmd,
+                    multi=False,
+                )
+                if selected:
+                    return selected[0]
+                first_paint = True  # fzf wrecked the screen; full redraw
+                break
+            # m — opt-in multi fzf (batch). Only when caller enabled it.
+            if choice in {"m", "M"} and fzf_ok and fzf_multi:
+                selected = _run_fzf(
+                    heading,
+                    items,
+                    preview_cmd=fzf_preview_cmd,
+                    multi=True,
+                )
+                if selected:
+                    return selected if len(selected) > 1 else selected[0]
+                first_paint = True
+                break
+            if choice in {"f", "F", "\x06", "m", "M"} and not fzf_ok:
+                console.print(
+                    Text("  fzf not installed (brew install fzf)", style="yellow")
+                )
+                drawn += 1
+                continue
             if choice in {"b", "B"}:
                 return _MENU_BACK
             if choice in {"q", "Q"}:
@@ -1834,8 +1854,8 @@ def _node_status_label(doc: dict, entry: dict | None) -> str:
 def interactive_nodes(project: str | None = None):
     """Project → node → review/update loop for canonical graph truth.
 
-    Node list prefers fzf (preview + tab multi-select). One selection opens
-    review; two or more enter batch graph-status update.
+    Default path is the rich paged menu. ``f`` steps into fzf (filter/preview);
+    ``m`` multi-selects for batch graph-status when fzf is installed.
     """
     node_cli = _import_module("node_cli")
     fixed_project = project is not None
@@ -1894,10 +1914,6 @@ def interactive_nodes(project: str | None = None):
                 preview_cmd=_node_preview_cmd(project),
                 multi=True,
                 back_label="projects",
-                fzf_header=(
-                    f"{project}  ·  tab multi → batch status  ·  "
-                    "one + enter → review  ·  esc back"
-                ),
             )
             if picked is _MENU_QUIT:
                 return _MENU_QUIT
@@ -2108,16 +2124,16 @@ def _confirm_job_state_change(ref: str, state: str) -> int:
 def interactive_jobs():
     """Review and update runtime jobs inside the human-operated menu.
 
-    open/update use fzf (preview via jobs show). update supports multi-select
-    batch state changes; typing a job id remains available as fallback.
+    open/update use the rich paged list; ``f`` filters via fzf, ``m`` multi-
+    selects for batch queue-state changes. Empty queue falls back to typing an id.
     """
     state_filter: str | None = None
     actions = {
         "r": ("refresh", "show all runtime jobs"),
         "a": ("awaiting review", "show the human review queue"),
         "e": ("evaluations", "show evaluator result summary"),
-        "o": ("open", "fzf pick a job (preview) or type an id"),
-        "u": ("update", "fzf pick one/many jobs → set queue state"),
+        "o": ("open", "pick a job (f = filter)"),
+        "u": ("update", "set queue state (m = multi)"),
         "b": ("main menu", ""),
         "q": ("quit", ""),
     }
@@ -2164,7 +2180,6 @@ def interactive_jobs():
                     preview_cmd=_job_preview_cmd(),
                     multi=False,
                     back_label="jobs",
-                    fzf_header="jobs · enter open · esc back · type to fuzzy filter",
                 )
                 if ref is _MENU_QUIT:
                     return _MENU_QUIT
@@ -2183,7 +2198,7 @@ def interactive_jobs():
             _pause()
             continue
 
-        # update — multi fzf when jobs exist
+        # update — paged list; m steps into multi fzf when wanted
         if not job_items:
             console.print(Text("No jobs to update.", style="yellow"))
             _pause()
@@ -2194,9 +2209,6 @@ def interactive_jobs():
             preview_cmd=_job_preview_cmd(),
             multi=True,
             back_label="jobs",
-            fzf_header=(
-                "tab multi · enter set state  ·  one job = confirm path  ·  esc back"
-            ),
         )
         if selected is _MENU_QUIT:
             return _MENU_QUIT

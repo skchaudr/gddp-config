@@ -249,11 +249,10 @@ class OverviewTests(unittest.TestCase):
 
         self.assertEqual(selected, "node-10")
         rendered = output.getvalue()
-        self.assertIn("nodes · demo · page 1 of 2", rendered)
-        self.assertIn("nodes · demo · page 2 of 2", rendered)
-        self.assertIn("previous page", rendered)
-        self.assertIn("next page", rendered)
-        self.assertRegex(rendered, r"b\s+projects")
+        self.assertIn("nodes · demo  ·  1/2", rendered)
+        self.assertIn("nodes · demo  ·  2/2", rendered)
+        self.assertIn("←/→ page", rendered)
+        self.assertIn("b projects", rendered)
 
     def test_paged_menu_full_clear_only_on_first_paint(self):
         """Arrow/page moves redraw in place — no full clear per keypress."""
@@ -324,7 +323,7 @@ class OverviewTests(unittest.TestCase):
         )
 
     def test_job_workflow_updates_only_through_menu(self):
-        # u → pick job-1 (multi fallback ends when list empty) → state 1 → y → reason → b
+        # u → paged pick job-1 → state 1 → y → reason → b
         keys = iter(["u", "1", "1", "y", "x", "b"])
         terminal = SimpleNamespace(
             getch=lambda: next(keys),
@@ -501,7 +500,7 @@ class OverviewTests(unittest.TestCase):
         self.assertTrue(any(s and "cyan" in str(s) for s in styles))
 
     def test_node_workflow_reviews_and_updates_entirely_in_menu(self):
-        # multi node pick (no fzf): 1 selects sole node (list empties → open review)
+        # paged: project 1 → node 1 → update → complete → confirm → back out
         keys = iter(["1", "1", "u", "c", "y", "x", "b", "b", "b"])
         terminal = SimpleNamespace(
             getch=lambda: next(keys),
