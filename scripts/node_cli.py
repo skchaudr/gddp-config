@@ -1234,7 +1234,7 @@ def _print_evaluation_payload(
     else:
         semantic_status = "not recorded"
 
-    print(f"  {_ansi('1', 'verdict:')}            {_paint(str(verdict))}")
+    _print_field("verdict", str(verdict))
 
     primary_why, detail_why = _evaluator_reasoning_parts(receipt, acceptance)
     print()
@@ -1244,26 +1244,25 @@ def _print_evaluation_payload(
             print()
             _print_prose_block("integrity notes", detail_why)
     else:
-        print(f"  {_ansi('1', 'why:')}                (not recorded)")
+        print(f"  {_ansi('2', 'why:')}                (not recorded)")
 
     next_action = _pick(acceptance, receipt, "required_next_action")
     print()
     if next_action:
-        print(f"  {_ansi('1', 'next action:')}")
+        print(f"  {_ansi('2', 'next action:')}")
         body = f"{next_action}  (evaluator recommendation, not a decision)"
         for i, wline in enumerate(
             _soft_wrap(body, max(40, terminal_width() - 4), cont_indent="")
         ):
-            # Mild cyan so action stands out from plain findings prose.
-            painted = _paint(wline, "ready") if i == 0 else wline
-            print(f"    {painted}" if i == 0 else f"      {wline}")
+            # Prose stays plain — only short status tokens get color elsewhere.
+            print(f"    {wline}" if i == 0 else f"      {wline}")
     else:
-        print(f"  {_ansi('1', 'next action:')}        (none recorded)")
+        print(f"  {_ansi('2', 'next action:')}        (none recorded)")
 
     findings = _findings_lines(receipt, acceptance)
     print()
     if findings:
-        print(f"  {_ansi('1', 'findings / graph observations:')}")
+        print(f"  {_ansi('2', 'findings / graph observations:')}")
         for finding in findings:
             for i, wline in enumerate(
                 _soft_wrap(
@@ -1274,7 +1273,7 @@ def _print_evaluation_payload(
             ):
                 print(f"    {wline}" if i == 0 else f"      {wline}")
     else:
-        print(f"  {_ansi('1', 'findings:')}           (none recorded)")
+        print(f"  {_ansi('2', 'findings:')}           (none recorded)")
 
     integrity_verdict = integrity.get("verdict") or "not recorded"
     criteria_label = criteria_verdict or "not recorded"
@@ -1284,31 +1283,40 @@ def _print_evaluation_payload(
 
     print()
     print(f"  {_ansi('1', 'evaluator details')}")
-    print(f"  criteria verdict:    {_paint(str(criteria_label))}")
-    print(
-        "  criteria confidence: "
-        f"{criteria_confidence if criteria_confidence is not None else 'not recorded'}"
+    _print_field("criteria verdict", str(criteria_label), indent="  ")
+    conf = (
+        criteria_confidence
+        if criteria_confidence is not None
+        else "not recorded"
     )
-    print(f"  completeness:        {_paint(str(completeness_label))}")
-    print(f"  semantic evaluation: {_paint(semantic_status)}")
-    print(f"  integrity verdict:   {_paint(str(integrity_verdict))}")
+    _print_field("criteria confidence", str(conf), indent="  ")
+    _print_field("completeness", str(completeness_label), indent="  ")
+    _print_field("semantic evaluation", str(semantic_status), indent="  ")
+    _print_field("integrity verdict", str(integrity_verdict), indent="  ")
     print(
-        "  lanes:               "
+        f"  lanes:               "
         f"criteria={_paint(str(lane_criteria))}  "
         f"integrity={_paint(str(lane_integrity))}"
     )
     for side in ("criteria", "integrity"):
         if harness.get(side):
-            print(
-                f"  harness error ({side}): "
-                f"{_paint(str(harness[side]), 'fail')}"
-            )
-    print(f"  provenance:          {_provenance_line(receipt, acceptance) or 'not recorded'}")
-    print(f"  context coverage:    {_coverage_line(receipt, acceptance) or 'not recorded'}")
+            # Error *messages* are prose — label red, body plain.
+            print(f"  {_ansi('1;31', f'harness error ({side}):')}")
+            print(f"    {harness[side]}")
+    _print_field(
+        "provenance",
+        _provenance_line(receipt, acceptance) or "not recorded",
+        indent="  ",
+    )
+    _print_field(
+        "context coverage",
+        _coverage_line(receipt, acceptance) or "not recorded",
+        indent="  ",
+    )
 
 
 def _print_evaluation(ev: RuntimeEvidence) -> None:
-    print(_ansi("1;36", "CURRENT EVALUATOR RESULT"))
+    print(_ansi("1", "CURRENT EVALUATOR RESULT"))
     if ev.has_current_evaluation:
         _print_evaluation_payload(
             ev.acceptance_check,
@@ -1392,7 +1400,7 @@ def _verdict_style_key(value: str | None) -> str:
 
 
 def _status_ansi(kind: str) -> str:
-    """ANSI emphasis for the few fields operators actually scan first."""
+    """ANSI color for known status *tokens* only (never free prose)."""
     if not sys.stdout.isatty():
         return ""
     key = kind.lower().replace(" ", "_")
@@ -1414,38 +1422,85 @@ def _status_ansi(kind: str) -> str:
         "failed": "\033[1;31m",
         "queued": "\033[1;34m",
     }
-    return styles.get(key, "\033[1m")
+    return styles.get(key, "")
+
+
+def _is_status_token(text: str) -> bool:
+    """True only for short status/verdict chips — not sentences or YAML prose."""
+    t = str(text).strip()
+    if not t or len(t) > 40 or "\n" in t:
+        return False
+    if " — " in t or ": " in t or t.endswith("."):
+        return False
+    # allow "awaiting review" / "not recorded" / needs-more-evidence
+    if t.count(" ") > 2:
+        return False
+    return True
 
 
 def _paint(value: str, style_key: str = "") -> str:
-    """Color a value for TTY output; return plain text when redirected."""
+    """Color a short status token. Long / prose values stay plain (no green blobs)."""
     if value is None:
         return ""
     text = str(value)
     if not text:
         return text
+    if not _is_status_token(text):
+        return text
     key = style_key or _verdict_style_key(text)
-    color = _status_ansi(key) if key else ""
+    if not key:
+        return text
+    color = _status_ansi(key)
     if not color:
         return text
     return f"{color}{text}\033[0m"
 
 
-def _print_status_line(label: str, value: str, style_key: str = "") -> None:
-    """Print a key status field; color the value when stdout is a TTY."""
-    pad = f"{label + ':':<18} "
-    key = style_key or _verdict_style_key(value)
-    print(f"{pad}{_paint(value, key)}")
+def _print_field(
+    label: str,
+    value: str,
+    *,
+    style_key: str = "",
+    indent: str = "",
+) -> None:
+    """Dim label + value. Colors value only when it is a short status token."""
+    label_s = f"{label}:"
+    # Historical layout: labels pad to 18, then a space, then the value.
+    pad = f"{indent}{label_s:<18} "
+    if sys.stdout.isatty():
+        # Dim only the label text; keep spacing plain for alignment.
+        pad = f"{indent}{_ansi('2', f'{label_s:<18}')} "
+    key = style_key or _verdict_style_key(str(value))
+    print(f"{pad}{_paint(str(value), key)}")
+
+
+def _print_status_line(
+    label: str,
+    value: str,
+    style_key: str = "",
+    *,
+    note: str = "",
+) -> None:
+    """Status row: dim label, colored token, optional plain note (never painted)."""
+    label_s = f"{label}:"
+    pad = f"{label_s:<18} "
+    if sys.stdout.isatty():
+        pad = f"{_ansi('2', f'{label_s:<18}')} "
+    key = style_key or _verdict_style_key(str(value))
+    body = _paint(str(value), key)
+    if note:
+        body = f"{body}  {_ansi('2', note) if sys.stdout.isatty() else note}"
+    print(f"{pad}{body}")
 
 
 def _print_overview(project: str, node_id: str, doc: dict) -> None:
     """Print machine-reference fields without competing with evaluator judgment."""
     print(_section_heading("Overview").lstrip("\n"))
-    print(f"project:           {project}")
-    print(f"node_id:           {doc.get('node_id', node_id)}")
-    print(f"title:             {doc.get('title', '')}")
-    print(f"type:              {doc.get('type', '')}")
-    print(f"priority:          {doc.get('priority', '')}")
+    _print_field("project", project)
+    _print_field("node_id", str(doc.get("node_id", node_id)))
+    _print_field("title", str(doc.get("title", "")))
+    _print_field("type", str(doc.get("type", "")))
+    _print_field("priority", str(doc.get("priority", "")))
 
 
 def cmd_show(
@@ -1511,16 +1566,24 @@ def cmd_show(
             gate_label = "not ready for acceptance yet"
             gate_style = "wait"
         print(_section_heading("Status"))
-        _print_status_line("review", gate_label, gate_style)
-        print(f"  {gate_reason}")
+        # Short colored chip + plain prose (never paint the whole sentence).
+        _print_status_line("review", gate_style, gate_style, note=gate_label)
+        if gate_reason and gate_reason != gate_label:
+            print(f"  {_ansi('2', gate_reason) if sys.stdout.isatty() else gate_reason}")
         if entry is None:
-            _print_status_line("graph status", f"{graph_status}  (missing from project.yaml index)", "warn")
+            _print_status_line(
+                "graph status",
+                str(graph_status),
+                "warn",
+                note="(missing from project.yaml index)",
+            )
             print("  note: project.yaml has no nodes entry for this node_id")
         elif index_status != graph_status:
             _print_status_line(
                 "graph status",
-                f"{graph_status}  (index: {index_status})",
+                str(graph_status),
                 "warn",
+                note=f"(index: {index_status})",
             )
             print("  note: DESYNC — node YAML status != project.yaml index status")
         else:
@@ -1547,15 +1610,16 @@ def cmd_show(
                     if any_last is not None:
                         stale = any_last
                 if last:
-                    print(f"status reason:     {last.get('reason', '')}")
-                    print(
-                        f"  (from {last.get('from_status', '?')} -> "
+                    _print_field("status reason", str(last.get("reason", "")))
+                    meta = (
+                        f"(from {last.get('from_status', '?')} -> "
                         f"{last.get('to_status', '?')} @ {last.get('ts', '?')})"
                     )
+                    print(f"  {_ansi('2', meta) if sys.stdout.isatty() else meta}")
                 elif stale is not None:
-                    print(
-                        "status reason:     (none matching current graph status "
-                        f"'{graph_status}')"
+                    _print_field(
+                        "status reason",
+                        f"(none matching current graph status '{graph_status}')",
                     )
                     print(
                         f"  note: stale history ends at "
@@ -1563,21 +1627,28 @@ def cmd_show(
                         f"{stale.get('to_status', '?')}: {stale.get('reason', '')}"
                     )
                 else:
-                    print("status reason:     (none recorded in node_status_history)")
+                    _print_field(
+                        "status reason",
+                        "(none recorded in node_status_history)",
+                    )
             except ValueError as e:
-                print(f"status reason:     ERROR reading history: {e}")
+                _print_field("status reason", f"ERROR reading history: {e}")
         else:
-            print("status reason:     (runtime history module unavailable)")
+            _print_field(
+                "status reason",
+                "(runtime history module unavailable)",
+            )
 
-        runtime_extra = (
-            f"  (job status: {ev.job_status})"
+        job_note = (
+            f"(job status: {ev.job_status})"
             if ev.job_status not in ("-", None)
             else ""
         )
         _print_status_line(
             "runtime state",
-            f"{ev.queue_state}{runtime_extra}",
+            str(ev.queue_state or "-"),
             str(ev.queue_state or ""),
+            note=job_note,
         )
         if (
             str(graph_status) == "complete"
@@ -1588,8 +1659,11 @@ def cmd_show(
                 "awaiting_review — settle it under jobs if you want the queue clean"
             )
         if ev.job_id:
-            print(f"runtime job_id:    {ev.job_id}")
-            print(f"runtime created:   {ev.job_created_at or 'not recorded'}")
+            _print_field("runtime job_id", str(ev.job_id))
+            _print_field(
+                "runtime created",
+                str(ev.job_created_at or "not recorded"),
+            )
         _print_status_line(
             "evaluator verdict",
             str(ev.verdict),

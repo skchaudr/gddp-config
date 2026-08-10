@@ -869,7 +869,7 @@ class RuntimeEvidenceTests(FixtureCase):
         out = buf.getvalue()
         self.assertIn("awaiting_review", out)
         self.assertRegex(out, r"evaluator verdict:\s*pass")
-        self.assertIn("criteria verdict:    pass", out)
+        self.assertRegex(out, r"criteria verdict:\s+pass")
         self.assertIn("watch frontier", out)
         self.assertIn(str(rpath), out)
         self.assertIn("job_new", out)
@@ -1044,7 +1044,7 @@ class RuntimeEvidenceTests(FixtureCase):
                 project=PROJECT, node_id=NODE_A, root=self.root, db_path=db_path
             )
         self.assertEqual(rc2, 0)
-        self.assertIn("criteria verdict:    not recorded", buf2.getvalue())
+        self.assertRegex(buf2.getvalue(), r"criteria verdict:\s+not recorded")
         self.assertIn("evaluator verdict is missing", buf2.getvalue())
 
     def test_missing_db_exits_zero(self):
