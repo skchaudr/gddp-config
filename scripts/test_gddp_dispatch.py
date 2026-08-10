@@ -140,9 +140,13 @@ def test_graph_named_executor_applies_to_all(config_root):
     assert {i["executor"] for i in plan["items"]} == {"local_subprocess"}
 
 
-def test_graph_named_executor_conflict_refuses(config_root):
-    with pytest.raises(gddp.DispatchError, match="alpha"):
-        gddp.build_dispatch_plan(config_root, "proj-a", "jules_api")
+def test_graph_named_executor_conflict_excludes_only_conflicting_nodes(config_root):
+    plan = gddp.build_dispatch_plan(config_root, "proj-a", "jules_api")
+
+    assert plan["items"] == [{"node_id": "beta", "executor": "jules_api"}]
+    assert {item["node_id"] for item, _reason in plan["excluded"]} == {
+        "alpha", "shared",
+    }
 
 
 def test_executor_neutral_agent_uses_concrete_project_default(config_root):
@@ -476,7 +480,7 @@ def test_status_authority_refusals(config_root):
     })
     with pytest.raises(gddp.DispatchError, match="graph drift"):
         gddp.build_dispatch_plan(config_root, "sneak", None)
-    # Summary ready but YAML pending → drift refusal (also poisons graph dispatch).
+    # Summary ready but YAML pending refuses that node, not the whole graph.
     _write_node(
         config_root / "graphs" / "proj-a" / "nodes",
         "sneak", "pending", ["local_subprocess"],
@@ -487,8 +491,16 @@ def test_status_authority_refusals(config_root):
     })
     with pytest.raises(gddp.DispatchError, match="graph drift"):
         gddp.build_dispatch_plan(config_root, "sneak", None)
-    with pytest.raises(gddp.DispatchError, match="graph drift"):
-        gddp.build_dispatch_plan(config_root, "proj-a", None)
+    plan = gddp.build_dispatch_plan(config_root, "proj-a", None)
+    assert {item["node_id"] for item in plan["items"]} == {
+        "alpha", "beta", "shared",
+    }
+    assert plan["excluded"] == [
+        (
+            {"node_id": "sneak", "executor": "local_subprocess"},
+            "no — graph drift: summary ready / yaml pending",
+        )
+    ]
 
 
 def test_failed_latest_job_stays_dispatchable(con, config_root, monkeypatch):

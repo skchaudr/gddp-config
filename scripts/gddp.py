@@ -124,7 +124,7 @@ def _node_status_pairs(config_root: Path, project_id: str) -> dict:
 
     project.yaml summaries are the readiness authority (the same contract
     GraphReader reads); node YAMLs carry modes. A summary/YAML disagreement
-    is graph drift and must refuse, never silently pick one.
+    is graph drift and must be shown, never silently resolved.
     """
     project_doc = _import_module("node_cli").load_project_doc(config_root, project_id)
     summary = {
@@ -150,42 +150,42 @@ def _node_status_pairs(config_root: Path, project_id: str) -> dict:
 def build_dispatch_plan(config_root, target, executor, project_hint=None):
     """Resolve target graph-first, validate everything, return a plan dict.
 
-    No guessing: unknown targets, ambiguous nodes, non-ready nodes, and
-    executors outside a node's allowed_execution_modes are all hard errors.
+    Exact-node errors refuse that node. Graph dispatch excludes and explains
+    invalid members while preserving the valid frontier. Unknown or ambiguous
+    targets remain hard errors.
     project_hint (menu path) qualifies a node lookup to one graph. When the
     target is that same graph ID, the hint came from the graph-wide menu path
     and the target must remain a graph frontier, not be reinterpreted as a node.
     """
     config_root = Path(config_root)
     projects = _graph_projects(config_root)
+    plan_excluded = []
     if target in projects and project_hint in (None, target):
         project_id = target
         nodes = []
-        drift = []
-        for nid, pair in sorted(_node_status_pairs(config_root, project_id).items()):
-            if pair["summary"] != "ready" or pair["yaml"] is None:
-                continue  # summary is the readiness authority; missing YAML skipped
-            if pair["yaml"] != "ready":
-                drift.append(f"{nid} (summary ready / yaml {pair['yaml']})")
+        pairs = _node_status_pairs(config_root, project_id)
+        for nid, pair in sorted(pairs.items()):
+            if pair["summary"] != "ready":
                 continue
-            nodes.append({"node_id": nid, "modes": pair["modes"]})
-        if drift:
-            raise DispatchError(
-                "graph drift — project.yaml summary and node YAML disagree: "
-                + ", ".join(drift)
-            )
-        if not nodes:
-            raise DispatchError(f"graph '{target}' has no ready nodes")
-        if executor:
-            conflicts = [
-                n["node_id"]
-                for n in nodes
-                if not _executor_allowed(executor, n["modes"])
-            ]
-            if conflicts:
-                raise DispatchError(
-                    f"executor '{executor}' not allowed on: {', '.join(conflicts)}"
-                )
+            node = {"node_id": nid, "modes": pair["modes"]}
+            if pair["yaml"] is None:
+                plan_excluded.append((node, "no — graph drift: node YAML missing"))
+                continue
+            if pair["yaml"] != "ready":
+                plan_excluded.append((
+                    node,
+                    "no — graph drift: summary ready / yaml {}".format(pair["yaml"]),
+                ))
+                continue
+            if executor and not _executor_allowed(executor, pair["modes"]):
+                plan_excluded.append((
+                    node,
+                    "no — executor {!r} not allowed".format(executor),
+                ))
+                continue
+            nodes.append(node)
+        if not nodes and not plan_excluded:
+            raise DispatchError(f"graph {target!r} has no ready nodes")
     else:
         if project_hint is not None:
             matches = [project_hint] if (
@@ -229,17 +229,21 @@ def build_dispatch_plan(config_root, target, executor, project_hint=None):
         nodes = [{"node_id": target, "modes": modes}]
 
     project_doc = _import_module("node_cli").load_project_doc(config_root, project_id)
-    items = [
-        {
-            "node_id": n["node_id"],
-            "executor": executor or _configured_executor(project_doc, n["modes"]),
+
+    def resolve_item(node):
+        return {
+            "node_id": node["node_id"],
+            "executor": executor or _configured_executor(project_doc, node["modes"]),
         }
-        for n in nodes
-    ]
+
+    items = [resolve_item(node) for node in nodes]
     return {
         "project_id": project_id,
         "repo": project_doc.get("repo") or "",
         "items": items,
+        "excluded": [
+            (resolve_item(node), reason) for node, reason in plan_excluded
+        ],
     }
 
 
@@ -308,7 +312,7 @@ def _classify_dispatch_items(con, config_root, plan):
             "refusing to dispatch without duplicate-checking"
         ) from exc
     graph = frontier.load_graph(config_root, plan["project_id"])
-    movable, excluded = [], []
+    movable, excluded = [], list(plan.get("excluded", []))
     for item in plan["items"]:
         if item["node_id"] in blockers:
             excluded.append((item, "no — in flight"))
@@ -338,8 +342,7 @@ def _dispatch_flow(con, config_root, target, executor, project_hint=None) -> int
         return 2
     if not movable:
         console.print(
-            "[bold red]ERROR:[/] nothing dispatchable: every requested node is "
-            "in flight or dependency-blocked —"
+            "[bold red]ERROR:[/] nothing dispatchable; requested nodes were excluded:"
         )
         for item, reason in excluded:
             console.print(f"  {item['node_id']}: {reason}", markup=False)
