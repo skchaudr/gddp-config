@@ -125,8 +125,11 @@ class OverviewTests(unittest.TestCase):
         self.assertEqual(rc, 0)
         browse.assert_called_once_with("gddp-runtime")
 
+    def _menu_terminal(self, getch):
+        return SimpleNamespace(getch=getch, clear_lines=lambda n: None)
+
     def test_menu_choice_uses_one_keypress_without_enter(self):
-        terminal = SimpleNamespace(getch=lambda: "j")
+        terminal = self._menu_terminal(lambda: "j")
         actions = {
             "n": ("nodes", ""),
             "j": ("jobs", ""),
@@ -135,7 +138,7 @@ class OverviewTests(unittest.TestCase):
             self.assertEqual(gddp._menu_choice(actions, default="n"), "j")
 
     def test_menu_choice_keeps_enter_as_the_default_shortcut(self):
-        terminal = SimpleNamespace(getch=lambda: "\r")
+        terminal = self._menu_terminal(lambda: "\r")
         actions = {
             "n": ("nodes", ""),
             "j": ("jobs", ""),
@@ -144,7 +147,7 @@ class OverviewTests(unittest.TestCase):
             self.assertEqual(gddp._menu_choice(actions, default="n"), "n")
 
     def test_menu_choice_maps_escape_to_back(self):
-        terminal = SimpleNamespace(getch=lambda: "\x1b")
+        terminal = self._menu_terminal(lambda: "\x1b")
         actions = {
             "b": ("back", ""),
             "q": ("quit", ""),
@@ -153,14 +156,14 @@ class OverviewTests(unittest.TestCase):
             self.assertEqual(gddp._menu_choice(actions, default="b"), "b")
 
     def test_menu_choice_keeps_ctrl_c_as_quit_signal(self):
-        terminal = SimpleNamespace(getch=lambda: "\x03")
+        terminal = self._menu_terminal(lambda: "\x03")
         actions = {"b": ("back", ""), "q": ("quit", "")}
         with patch.object(gddp, "_import_module", return_value=terminal):
             with self.assertRaises(KeyboardInterrupt):
                 gddp._menu_choice(actions, default="b")
 
     def test_menu_choice_accepts_named_arrow_keys(self):
-        terminal = SimpleNamespace(getch=lambda: "RIGHT")
+        terminal = self._menu_terminal(lambda: "RIGHT")
         actions = {
             "LEFT": ("prev", ""),
             "RIGHT": ("next", ""),
@@ -169,12 +172,43 @@ class OverviewTests(unittest.TestCase):
         with patch.object(gddp, "_import_module", return_value=terminal):
             self.assertEqual(gddp._menu_choice(actions, default="b"), "RIGHT")
 
-    def test_menu_choice_ignores_unregistered_arrow_keys(self):
+    def test_menu_choice_ignores_unregistered_horizontal_arrows(self):
         keys = iter(["LEFT", "b"])
-        terminal = SimpleNamespace(getch=lambda: next(keys))
+        terminal = self._menu_terminal(lambda: next(keys))
         actions = {"b": ("back", ""), "q": ("quit", "")}
         with patch.object(gddp, "_import_module", return_value=terminal):
             self.assertEqual(gddp._menu_choice(actions, default="b"), "b")
+
+    def test_menu_choice_arrows_move_cursor_then_enter(self):
+        keys = iter(["DOWN", "\r"])
+        terminal = self._menu_terminal(lambda: next(keys))
+        actions = {
+            "n": ("nodes", ""),
+            "j": ("jobs", ""),
+            "q": ("quit", ""),
+        }
+        with patch.object(gddp, "_import_module", return_value=terminal):
+            self.assertEqual(gddp._menu_choice(actions, default="n"), "j")
+
+    def test_menu_choice_number_picks_by_position(self):
+        terminal = self._menu_terminal(lambda: "2")
+        actions = {
+            "n": ("nodes", ""),
+            "j": ("jobs", ""),
+            "q": ("quit", ""),
+        }
+        with patch.object(gddp, "_import_module", return_value=terminal):
+            self.assertEqual(gddp._menu_choice(actions, default="n"), "j")
+
+    def test_menu_choice_enter_uses_default_when_not_first(self):
+        """Confirm menus put the safe default mid-list; Enter lands there."""
+        terminal = self._menu_terminal(lambda: "\r")
+        actions = {
+            "y": ("yes", ""),
+            "n": ("no", ""),
+        }
+        with patch.object(gddp, "_import_module", return_value=terminal):
+            self.assertEqual(gddp._menu_choice(actions, default="n"), "n")
 
     def test_redirected_bare_command_uses_static_overview(self):
         fake_in = SimpleNamespace(isatty=lambda: False)
@@ -855,12 +889,14 @@ class OverviewTests(unittest.TestCase):
 
         rendered = output.getvalue()
         self.assertEqual(rc, 1)
-        self.assertRegex(rendered, r"(?m)^y\s+yes\s+set alpha to ready\s*$")
+        # Cursor starts on default ``n``; both options paint before any key.
+        self.assertRegex(rendered, r"(?m)^  y\s+yes\s+set alpha to ready\s*$")
         self.assertRegex(
             rendered,
-            r"(?m)^n\s+no\s+leave graph truth unchanged\s*$",
+            r"(?m)^› n\s+no\s+leave graph truth unchanged\s*$",
         )
-        self.assertLess(rendered.index("yes"), rendered.index("select"))
+        self.assertIn("↑/↓ move", rendered)
+        self.assertLess(rendered.index("yes"), rendered.index("Unchanged"))
 
     def test_empty_interactive_reason_never_calls_writer(self):
         terminal = SimpleNamespace(getch=lambda: "y")

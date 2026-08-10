@@ -490,7 +490,6 @@ def interactive_frontier():
     while True:
         _clear_screen()
         console.print(Text("frontier", style="bold"))
-        _print_action_menu(actions)
         choice = _menu_choice(actions, default="a")
         if choice == "q":
             return _MENU_QUIT
@@ -710,66 +709,112 @@ def _key_label(key: str) -> str:
     return _NAMED_KEY_LABELS.get(key, key)
 
 
-def _print_action_menu(actions: dict[str, tuple[str, str]]) -> None:
-    """Show every accepted key before a single-key prompt reads input."""
-    menu = Table(box=None, padding=(0, 2, 0, 1), pad_edge=False, show_header=False)
-    menu.add_column(style="bold cyan", no_wrap=True)
-    menu.add_column(style="bold", no_wrap=True)
-    menu.add_column(style="dim")
+def _print_action_menu(actions: dict[str, tuple[str, str | Text]]) -> None:
+    """Static action list (no cursor). Prefer ``_menu_choice`` for interactive pick."""
     for key, (name, description) in actions.items():
-        menu.add_row(_key_label(key), name, description)
-    console.print(menu)
+        row = Text()
+        row.append(f"  {_key_label(key):<6}", style="bold cyan")
+        row.append(f"{name:<16}", style="bold")
+        if isinstance(description, Text):
+            row.append_text(description)
+        elif description:
+            row.append(str(description), style="dim")
+        console.print(row)
 
 
 def _menu_choice(
-    actions: dict[str, tuple[str, str]],
+    actions: dict[str, tuple[str, str | Text]],
     default: str,
     *,
     echo: bool = True,
 ) -> str:
-    """Read one valid menu key immediately, without waiting for Enter.
+    """Cursor action menu: ↑/↓ + Enter, letter shortcuts, optional 1–9.
 
-    Escape follows the menu hierarchy: it selects ``b`` when a back action is
-    present, the default action for confirmation-style menus, and ``q`` at the
-    top-level menu. Ctrl-C remains the unambiguous whole-TUI quit key.
+    Cursor starts on ``default`` (top when default is the first item — main
+    menu). Letter keys still jump. Named action keys (``LEFT``/``RIGHT``) still
+    select when registered. Escape: ``b`` → ``q`` → default. Ctrl-C quits.
 
-    Multi-character tokens from ``getch`` (``LEFT``, ``RIGHT``, …) match
-    actions exactly when registered; otherwise they are ignored so menus that
-    don't use arrows stay quiet under accidental keypresses.
+    ``echo`` is accepted for call-site compatibility; the cursor UI paints the
+    selection in place, so nothing extra is printed on success.
     """
-    getch = _import_module("terminal").getch
+    del echo  # API compat; cursor paint replaces the old single-key echo.
+    terminal = _import_module("terminal")
+    getch = terminal.getch
+    clear_lines = getattr(terminal, "clear_lines", lambda _n: None)
+
+    selectables = [(key, name, desc) for key, (name, desc) in actions.items()]
+    if not selectables:
+        raise ValueError("menu has no actions")
+    by_key = {key: i for i, (key, _, _) in enumerate(selectables)}
+    cursor = by_key.get(default, 0)
+    drawn = 0
+    first_paint = True
+
     while True:
-        console.print(Text("select", style="bold cyan"), end=" ")
+        lines: list[Text] = []
+        for offset, (key, name, description) in enumerate(selectables):
+            marker = "›" if offset == cursor else " "
+            row = Text()
+            row.append(f"{marker} {_key_label(key):<6}", style="bold cyan")
+            row.append(f"{name:<16}", style="bold")
+            if isinstance(description, Text):
+                row.append_text(description)
+            elif description:
+                row.append(str(description), style="dim")
+            lines.append(row)
+        lines.append(
+            Text(
+                "  ↑/↓ move · enter open · letters jump · 1-9 pick · esc back",
+                style="dim",
+            )
+        )
+
+        if first_paint:
+            first_paint = False
+        else:
+            clear_lines(drawn)
+        for line in lines:
+            console.print(line)
+        drawn = len(lines)
+
         choice = getch()
         if choice == "\x03":
             raise KeyboardInterrupt
         if choice == "\x1b":
-            if "b" in actions:
-                choice = "b"
-            elif "q" in actions:
-                choice = "q"
-            else:
-                choice = default
+            if "b" in by_key:
+                return "b"
+            if "q" in by_key:
+                return "q"
+            return default
         if choice in {"\r", "\n"}:
-            choice = default
-        # Named keys (arrows, etc.): exact match only; don't lower-case them.
-        if len(choice) > 1:
-            if choice in actions:
-                if echo:
-                    console.print(_key_label(choice))
-                else:
-                    console.print()
-                return choice
-            console.print()
+            return selectables[cursor][0]
+        if choice == "UP":
+            cursor = (cursor - 1) % len(selectables)
             continue
-        choice = choice.lower()
-        if choice in actions:
-            if echo:
-                console.print(choice)
-            else:
-                console.print()
-            return choice
-        console.print(Text(f"{choice!r} is not an option", style="yellow"))
+        if choice == "DOWN":
+            cursor = (cursor + 1) % len(selectables)
+            continue
+        if choice == "HOME":
+            cursor = 0
+            continue
+        if choice == "END":
+            cursor = len(selectables) - 1
+            continue
+        # Registered named keys (e.g. LEFT/RIGHT sibling actions).
+        if len(choice) > 1:
+            if choice in by_key:
+                return choice
+            continue
+        if choice.isdigit() and choice != "0":
+            idx = int(choice) - 1
+            if 0 <= idx < len(selectables):
+                return selectables[idx][0]
+            continue
+        key = choice.lower()
+        if key in by_key:
+            return key
+        console.print(Text(f"{key!r} is not an option", style="yellow"))
+        drawn += 1
 
 
 def _format_list_description(description: str | Text, room: int) -> Text:
@@ -924,7 +969,6 @@ def _confirm_status_change(project: str, node_id: str, status: str) -> int:
         f"Set [bold]{project}/{node_id}[/bold] graph status to "
         f"[bold cyan]{status}[/bold cyan]?"
     )
-    _print_action_menu(actions)
     choice = _menu_choice(actions, default="n")
     if choice != "y":
         console.print(Text("Unchanged.", style="dim"))
@@ -1022,7 +1066,6 @@ def _offer_publish_graph_status(
         "c": ("commit only", "add + commit; you push later"),
         "s": ("skip", "leave the working tree dirty"),
     }
-    _print_action_menu(actions)
     choice = _menu_choice(actions, default="p")
     if choice == "s":
         console.print(Text(
@@ -1229,8 +1272,7 @@ def _offer_acceptance_merge(project: str, node_id: str) -> bool:
         "s": ("skip merge", "set graph complete anyway (repo left as-is)"),
         "n": ("abort", "leave repo and graph unchanged"),
     }
-    _print_action_menu(actions)
-    # No silent Enter-to-abort: after typing a reason, Enter is muscle memory.
+    # Cursor starts on default ``y``; letters still jump. No silent Enter-abort.
     choice = _menu_choice(actions, default="y")
     if choice == "n":
         console.print(Text("Aborted — graph status not changed.", style="yellow"))
@@ -1456,35 +1498,22 @@ def _node_review_menu(
             if ready
             else gate_reason
         )
-        status_actions = {
+        complete_desc: str | Text = (
+            Text(complete_hint, style="bold green")
+            if ready
+            else Text(complete_hint, style="yellow")
+        )
+        status_actions: dict[str, tuple[str, str | Text]] = {
             "p": ("pending", ""),
             "r": ("ready", ""),
-            "c": ("complete", complete_hint),
+            "c": ("complete", complete_desc),
             "d": ("deferred", ""),
             "b": ("back", ""),
             "q": ("quit", ""),
         }
-        status_menu = Table(
-            box=None, padding=(0, 2, 0, 1), pad_edge=False, show_header=False
-        )
-        status_menu.add_column(style="bold cyan", no_wrap=True)
-        status_menu.add_column(style="bold", no_wrap=True)
-        status_menu.add_column()  # hints carry meaning — don't dim them away
-        for key, (name, description) in status_actions.items():
-            if key == "c" and ready:
-                status_menu.add_row(
-                    key, name, Text(description, style="bold green")
-                )
-            elif key == "c":
-                status_menu.add_row(
-                    key, name, Text(description, style="yellow")
-                )
-            else:
-                status_menu.add_row(key, name, Text(description, style="dim"))
         _clear_screen()
         console.rule(f"{project} / {node_id}", style="dim")
         console.print(Text("graph status", style="bold"))
-        console.print(status_menu)
         status_choice = _menu_choice(status_actions, default="b")
         if status_choice == "q":
             return _MENU_QUIT
@@ -1513,18 +1542,6 @@ def _node_review_menu(
                     "b": ("back", "leave graph status unchanged"),
                     "q": ("quit", ""),
                 }
-                override_menu = Table(
-                    box=None,
-                    padding=(0, 2, 0, 1),
-                    pad_edge=False,
-                    show_header=False,
-                )
-                override_menu.add_column(style="bold cyan", no_wrap=True)
-                override_menu.add_column(style="bold", no_wrap=True)
-                override_menu.add_column(style="dim")
-                for key, (name, description) in override_actions.items():
-                    override_menu.add_row(key, name, description)
-                console.print(override_menu)
                 override_choice = _menu_choice(override_actions, default="b")
                 if override_choice == "q":
                     return _MENU_QUIT
@@ -1782,7 +1799,6 @@ def _confirm_job_state_change(ref: str, state: str) -> int:
         f"Set [bold]{ref}[/bold] runtime job state to "
         f"[bold cyan]{state}[/bold cyan]?"
     )
-    _print_action_menu(actions)
     if _menu_choice(actions, default="n") != "y":
         console.print(Text("Unchanged.", style="dim"))
         return 1
@@ -1825,14 +1841,6 @@ def interactive_jobs():
         run_runtime_jobs(argv)
         console.print()
 
-        menu = Table(box=None, padding=(0, 2, 0, 1), pad_edge=False, show_header=False)
-        menu.add_column(style="bold cyan", no_wrap=True)
-        menu.add_column(style="bold", no_wrap=True)
-        menu.add_column(style="dim")
-        for key, (name, description) in actions.items():
-            menu.add_row(key, name, description)
-        console.print(menu)
-
         choice = _menu_choice(actions, default="r")
         if choice == "q":
             return _MENU_QUIT
@@ -1854,7 +1862,7 @@ def interactive_jobs():
         _clear_screen()
         console.print(Text("open job" if choice == "o" else "update job", style="bold"))
         try:
-            ref = Prompt.ask("job or node ID").strip()
+            ref = Prompt.ask(Text("job or node ID", style="cyan")).strip()
         except EOFError:
             continue
         if not ref:
@@ -1942,13 +1950,6 @@ def interactive_menu():
     while True:
         _clear_screen()
         console.print(Text("gddp", style="bold").append("  ·  graph control plane", style="dim"))
-        menu = Table(box=None, padding=(0, 2, 0, 1), pad_edge=False, show_header=False)
-        menu.add_column(style="bold cyan", no_wrap=True)
-        menu.add_column(style="bold", no_wrap=True)
-        menu.add_column(style="dim")
-        for key, (name, description) in actions.items():
-            menu.add_row(key, name, description)
-        console.print(menu)
         try:
             choice = _menu_choice(actions, default="n")
         except (EOFError, KeyboardInterrupt):
@@ -2287,7 +2288,6 @@ def interactive_status():
     while True:
         _clear_screen()
         console.print(Text("status", style="bold"))
-        _print_action_menu(actions)
         choice = _menu_choice(actions, default="a")
         if choice == "q":
             return _MENU_QUIT
@@ -2328,7 +2328,6 @@ def interactive_validate():
     while True:
         _clear_screen()
         console.print(Text("validate", style="bold"))
-        _print_action_menu(actions)
         choice = _menu_choice(actions, default="a")
         if choice == "q":
             return _MENU_QUIT
