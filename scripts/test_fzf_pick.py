@@ -106,6 +106,29 @@ class GddpPickListFallbackTests(unittest.TestCase):
             result = gddp._pick_list("nodes", items, multi=True, preview_cmd="echo {1}")
         self.assertEqual(result, ["n1", "n2"])
 
+    def test_preview_cmds_do_not_double_quote_fzf_placeholders(self):
+        """Regression: quoted \"...{1}...\" becomes graphs/'id'/… and 404s."""
+        import gddp
+
+        project_cmd = gddp._project_preview_cmd()
+        node_cmd = gddp._node_preview_cmd("gddp-runtime")
+        job_cmd = gddp._job_preview_cmd()
+        # Bug form embeds fzf's shell quotes inside a double-quoted path.
+        self.assertNotIn(
+            f'"{gddp.ROOT}/graphs/{{1}}/project.yaml"',
+            project_cmd,
+        )
+        self.assertIn(f"{gddp.ROOT}/graphs/{{1}}/project.yaml", project_cmd)
+        self.assertNotIn(
+            f'"{gddp.ROOT}/graphs/gddp-runtime/nodes/{{1}}.yaml"',
+            node_cmd,
+        )
+        self.assertIn(
+            f"{gddp.ROOT}/graphs/gddp-runtime/nodes/{{1}}.yaml",
+            node_cmd,
+        )
+        self.assertIn("show {1}", job_cmd)
+
 
 if __name__ == "__main__":
     unittest.main()

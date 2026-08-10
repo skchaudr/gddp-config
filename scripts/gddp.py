@@ -703,29 +703,38 @@ def _plain_desc(description: str | Text) -> str:
 
 
 def _project_preview_cmd() -> str:
-    """fzf preview: head of project.yaml ({1} = project id)."""
+    """fzf preview: head of project.yaml ({1} = project id).
+
+    fzf shell-escapes placeholders (``{1}`` → ``'aa-cli'``). Never put
+    ``{1}`` *inside* double quotes or the quotes become path characters:
+    ``".../{1}/..."`` → ``".../'aa-cli'/..."`` → file not found.
+    """
+    # Adjacent quoting: /abs/graphs/'id'/project.yaml resolves correctly.
     return (
-        f'sed -n "1,80p" "{ROOT}/graphs/{{1}}/project.yaml" 2>/dev/null '
+        f'sed -n "1,80p" {ROOT}/graphs/{{1}}/project.yaml 2>/dev/null '
         f'|| echo "(no project.yaml)"'
     )
 
 
 def _node_preview_cmd(project: str) -> str:
-    """fzf preview: node YAML head ({1} = node id)."""
+    """fzf preview: node YAML head ({1} = node id). See ``_project_preview_cmd``."""
     return (
-        f'sed -n "1,120p" "{ROOT}/graphs/{project}/nodes/{{1}}.yaml" 2>/dev/null '
+        f'sed -n "1,120p" {ROOT}/graphs/{project}/nodes/{{1}}.yaml 2>/dev/null '
         f'|| echo "(no node file)"'
     )
 
 
 def _job_preview_cmd() -> str:
-    """fzf preview: runtime jobs show ({1} = job_id)."""
+    """fzf preview: runtime jobs show ({1} = job_id).
+
+    ``{1}`` is a bare argv token so fzf's own quoting is correct.
+    """
     try:
         runtime_root = resolve_runtime_root()
         py = runtime_python(runtime_root)
         script = runtime_root / "scripts" / "jobs_status.py"
         return (
-            f'GDDP_RUNTIME_ROOT="{runtime_root}" "{py}" "{script}" show {{1}} '
+            f'GDDP_RUNTIME_ROOT={runtime_root} {py} {script} show {{1}} '
             f'2>/dev/null | head -n 100 || echo "(job show failed)"'
         )
     except RuntimeError as exc:

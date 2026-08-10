@@ -7,8 +7,10 @@ Contract
 * **items** — ``(value, label)`` pairs. ``value`` is what callers get back;
   ``label`` is what the operator scans (may equal value).
 * **preview_cmd** — shell fragment for ``fzf --preview``. Field tokens:
-  ``{1}`` = value, ``{2}`` = label, ``{}`` = full line. Quote carefully;
-  values that need shell safety should stay path-safe (node/job ids).
+  ``{1}`` = value, ``{2}`` = label, ``{}`` = full line. fzf shell-escapes
+  each placeholder (e.g. ``{1}`` → ``'aa-cli'``). Do **not** wrap
+  ``{1}`` inside extra double quotes (that embeds literal quote chars
+  into the path and breaks previews).
 * **multi** — tab/shift-tab multi-select (``--multi``).
 * **return** — selected values (order preserved). ``None`` means cancel,
   empty list input, or fzf unavailable / non-zero exit.
