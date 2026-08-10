@@ -1900,7 +1900,7 @@ def cmd_set_status(
         try:
             rt = runtime_root()
             gates_spec = importlib.util.spec_from_file_location(
-                "gates", rt / "scripts" / "runtime" / "gates.py"
+                "gate_tokens", rt / "scripts" / "runtime" / "gate_tokens.py"
             )
             if gates_spec and gates_spec.loader:
                 gates_mod = importlib.util.module_from_spec(gates_spec)

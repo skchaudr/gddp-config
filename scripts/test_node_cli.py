@@ -1227,13 +1227,13 @@ class GateRevocationIntegrationTests(FixtureCase):
 
         # Supply the runtime gates module exactly as cmd_set_status loads it.
         fake_runtime = self.root / "fake-runtime"
-        gates_dest = fake_runtime / "scripts" / "runtime" / "gates.py"
+        gates_dest = fake_runtime / "scripts" / "runtime" / "gate_tokens.py"
         gates_dest.parent.mkdir(parents=True)
-        gates_source = REPO_ROOT.parent / "gddp-runtime" / "scripts" / "runtime" / "gates.py"
+        gates_source = REPO_ROOT.parent / "gddp-runtime" / "scripts" / "runtime" / "gate_tokens.py"
         shutil.copy(gates_source, gates_dest)
         shutil.copy(_HISTORY_SRC, fake_runtime / "scripts" / "node_status_history.py")
         with mock.patch.object(node_cli, "runtime_root", return_value=fake_runtime):
-            spec = importlib.util.spec_from_file_location("test_gates", gates_dest)
+            spec = importlib.util.spec_from_file_location("test_gate_tokens", gates_dest)
             gates = importlib.util.module_from_spec(spec)
             assert spec and spec.loader
             spec.loader.exec_module(gates)
