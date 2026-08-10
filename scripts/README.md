@@ -37,7 +37,7 @@ Or use your system Python if it's not PEP-668-locked.
 
 | Command | What | Keystrokes |
 |---|---|---|
-| `node browse [--project X]` | Interactive node review/status menu; project flag skips the project picker | List: ↑/↓, Enter, numbers, ←/→ page. Node view: ←/→ prev/next node; ↑/↓ action cursor, Enter open |
+| `node browse [--project X]` | Interactive node review/status menu; project flag skips the project picker | Lists prefer **fzf** (fuzzy + YAML preview; tab multi-select → batch status). Without fzf: ↑/↓, Enter, numbers, ←/→ page. Node view: ←/→ prev/next; ↑/↓ actions |
 | `node rapid` | Minimal-keystroke adder | Type name, Enter, number keys for deps |
 | `node new` | Full TUI scaffold (field-by-field editor) | Number keys, m/s/q/Enter |
 | `node batch` | Walk through REPLACE_ME nodes | Edit acceptance/constraints/why |
@@ -61,9 +61,13 @@ and evaluator evidence remain runtime-owned while graph truth remains config-own
 | `jobs set <job-or-node> <state> --reason ...` | Change runtime queue state with confirmation and an audit row |
 
 Bare `gddp` opens the unified config-hosted menu in a terminal. Each submenu
-clears and redraws as one screen. Its jobs section provides interactive runtime
-list/filter/results/detail/update views, delegating job operations to
-`jobs_status.py`. Redirected bare output prints a non-blocking command overview.
+clears and redraws as one screen. List picks (graphs, nodes, jobs, status,
+validate, frontier, dispatch) use **fzf** when installed (`brew install fzf`):
+fuzzy filter, right-pane preview (project/node YAML or `jobs show`), and tab
+multi-select for batch graph-status / job-state updates. Without fzf, menus fall
+back to the paged ↑/↓ picker (multi becomes one-by-one). Jobs section still
+delegates writes to `jobs_status.py`. Redirected bare output prints a
+non-blocking command overview.
 Resolution uses `GDDP_RUNTIME_ROOT`, defaulting
 to the sibling `../gddp-runtime`; `GDDP_RUNTIME_PYTHON` can override the runtime
 interpreter. In menus, `↑`/`↓` move the highlighted item, Enter opens it,

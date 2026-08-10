@@ -500,9 +500,10 @@ def interactive_frontier():
             _show_frontier(projects)
             _pause()
             continue
-        project = _paged_menu(
+        project = _pick_list(
             "frontier · graphs",
             [(pid, "") for pid in projects],
+            preview_cmd=_project_preview_cmd(),
             back_label="frontier",
         )
         if project is _MENU_QUIT:
@@ -522,9 +523,10 @@ def interactive_dispatch():
         return
     project_items = [(project_id, "") for project_id in projects]
     while True:
-        project = _paged_menu(
+        project = _pick_list(
             "dispatch · graphs",
             project_items,
+            preview_cmd=_project_preview_cmd(),
             back_label="main menu",
         )
         if project is _MENU_QUIT:
@@ -590,7 +592,7 @@ def interactive_dispatch():
                     for item in movable
                 ],
             ]
-            target = _paged_menu(
+            target = _pick_list(
                 f"dispatch · {project}",
                 target_items,
                 back_label="graphs",
@@ -691,6 +693,262 @@ def _pause(message: str = "press any key to continue") -> str:
     if choice == "\x03":
         raise KeyboardInterrupt
     return choice.lower()
+
+
+def _plain_desc(description: str | Text) -> str:
+    """Strip Rich markup for fzf labels."""
+    if isinstance(description, Text):
+        return description.plain
+    return str(description) if description is not None else ""
+
+
+def _project_preview_cmd() -> str:
+    """fzf preview: head of project.yaml ({1} = project id)."""
+    return (
+        f'sed -n "1,80p" "{ROOT}/graphs/{{1}}/project.yaml" 2>/dev/null '
+        f'|| echo "(no project.yaml)"'
+    )
+
+
+def _node_preview_cmd(project: str) -> str:
+    """fzf preview: node YAML head ({1} = node id)."""
+    return (
+        f'sed -n "1,120p" "{ROOT}/graphs/{project}/nodes/{{1}}.yaml" 2>/dev/null '
+        f'|| echo "(no node file)"'
+    )
+
+
+def _job_preview_cmd() -> str:
+    """fzf preview: runtime jobs show ({1} = job_id)."""
+    try:
+        runtime_root = resolve_runtime_root()
+        py = runtime_python(runtime_root)
+        script = runtime_root / "scripts" / "jobs_status.py"
+        return (
+            f'GDDP_RUNTIME_ROOT="{runtime_root}" "{py}" "{script}" show {{1}} '
+            f'2>/dev/null | head -n 100 || echo "(job show failed)"'
+        )
+    except RuntimeError as exc:
+        return f'echo "runtime unavailable: {exc}"'
+
+
+def _pick_list(
+    heading: str,
+    items: list[tuple[str, str | Text]],
+    *,
+    preview_cmd: str | None = None,
+    multi: bool = False,
+    back_label: str = "back",
+    fzf_header: str | None = None,
+):
+    """Pick from a list via fzf when available; else ``_paged_menu``.
+
+    multi=False → value | _MENU_BACK | _MENU_QUIT
+    multi=True  → list[str] | _MENU_BACK | _MENU_QUIT
+    """
+    if not items:
+        _clear_screen()
+        console.print(Text("No items found.", style="yellow"))
+        _pause()
+        return _MENU_BACK
+
+    fzf = _import_module("fzf_pick")
+    fzf_items: list[tuple[str, str]] = []
+    for value, description in items:
+        lab = _plain_desc(description).strip()
+        display = f"{value}  {lab}" if lab and lab != value else value
+        fzf_items.append((value, display))
+
+    if fzf.available():
+        if fzf_header is None:
+            if multi:
+                fzf_header = (
+                    f"{heading}  ·  tab multi  ·  ctrl-a all  ·  enter accept  ·  esc back"
+                )
+            else:
+                fzf_header = f"{heading}  ·  enter open  ·  esc back"
+        selected = fzf.pick(
+            fzf_items,
+            prompt=f"{heading}> ",
+            header=fzf_header,
+            preview_cmd=preview_cmd,
+            multi=multi,
+        )
+        if not selected:
+            return _MENU_BACK
+        return selected if multi else selected[0]
+
+    if multi:
+        # Sequential paged picks until back (no fzf multi).
+        console.print(
+            Text(
+                "fzf not on PATH — multi-select falls back to one-by-one "
+                "(install: brew install fzf)",
+                style="yellow",
+            )
+        )
+        remaining = list(items)
+        chosen: list[str] = []
+        while remaining:
+            pick = _paged_menu(
+                f"{heading} · {len(chosen)} selected · pick next or back=done",
+                remaining,
+                back_label="done",
+            )
+            if pick is _MENU_QUIT:
+                return _MENU_QUIT
+            if pick is _MENU_BACK:
+                break
+            chosen.append(pick)
+            remaining = [(v, d) for v, d in remaining if v != pick]
+        return chosen if chosen else _MENU_BACK
+
+    return _paged_menu(heading, items, back_label=back_label)
+
+
+def _batch_node_status(project: str, node_ids: list[str]):
+    """One target status + shared reason → dual-write each selected node."""
+    node_cli = _import_module("node_cli")
+    _clear_screen()
+    console.print(Text(f"batch status · {project}", style="bold"))
+    console.print(Text(f"{len(node_ids)} node(s):", style="dim"))
+    for nid in node_ids:
+        console.print(f"  {nid}")
+    console.print()
+
+    status_items = [(s, s) for s in node_cli.GRAPH_STATUSES]
+    status = _pick_list(
+        "target status",
+        status_items,
+        multi=False,
+        back_label="nodes",
+    )
+    if status in {_MENU_BACK, _MENU_QUIT}:
+        return status
+
+    try:
+        reason = Prompt.ask(Text("shared reason", style="cyan")).strip()
+    except EOFError:
+        console.print(Text("Unchanged — reason required.", style="dim"))
+        return _MENU_BACK
+    if not reason:
+        console.print(Text("Unchanged — need a short reason.", style="yellow"))
+        return _MENU_BACK
+
+    if status == "complete":
+        console.print(
+            Text(
+                "Note: batch complete skips per-node acceptance merge prompts. "
+                "Merge attempt branches yourself if needed.",
+                style="yellow",
+            )
+        )
+
+    actions = {
+        "y": ("yes", f"set {len(node_ids)} node(s) → {status}"),
+        "n": ("no", "leave graph truth unchanged"),
+    }
+    _print_action_menu(actions)
+    if _menu_choice(actions, default="n") != "y":
+        console.print(Text("Unchanged.", style="dim"))
+        return _MENU_BACK
+
+    ok = 0
+    failed = 0
+    for node_id in node_ids:
+        console.rule(f"{project} / {node_id}", style="dim")
+        rc = node_cli.cmd_set_status(
+            project=project,
+            node_id=node_id,
+            status=status,
+            yes=True,
+            reason=reason,
+        )
+        if rc == 0:
+            ok += 1
+        else:
+            failed += 1
+    console.print(
+        Text(f"batch done — ok={ok} failed={failed}", style="bold green" if failed == 0 else "bold yellow")
+    )
+    # Offer publish once if any dual-write left dirty graph paths.
+    dirty: list[str] = []
+    for node_id in node_ids:
+        dirty.extend(_dirty_graph_status_paths(project, node_id))
+    dirty = sorted(set(dirty))
+    if dirty and ok:
+        # Reuse single-node publish on the first id; paths cover the batch.
+        _offer_publish_graph_status(project, node_ids[0], status, reason)
+    _pause()
+    return _MENU_BACK
+
+
+def _runtime_job_items(state_filter: str | None = None) -> list[tuple[str, str]]:
+    """(job_id, scan label) from the runtime queue DB."""
+    jobs_status = load_runtime_jobs_module()
+    con = jobs_status.connect()
+    try:
+        q = (
+            "SELECT job_id, node_id, queue_state, created_at FROM jobs"
+        )
+        params: tuple = ()
+        if state_filter:
+            q += " WHERE queue_state = ?"
+            params = (state_filter,)
+        q += " ORDER BY created_at DESC"
+        rows = con.execute(q, params).fetchall()
+        items: list[tuple[str, str]] = []
+        for r in rows:
+            created = str(r["created_at"] or "")[:10]
+            state = str(r["queue_state"] or "?")
+            node = str(r["node_id"] or "")
+            items.append((str(r["job_id"]), f"{state}  {node}  {created}"))
+        return items
+    finally:
+        con.close()
+
+
+def _batch_job_state(job_ids: list[str], states: list[tuple[str, str | Text]]):
+    """Set the same queue state on multiple runtime jobs with one reason."""
+    _clear_screen()
+    console.print(Text(f"batch job update · {len(job_ids)} job(s)", style="bold"))
+    for jid in job_ids:
+        console.print(f"  {jid}")
+    state = _pick_list("job state", states, multi=False, back_label="jobs")
+    if state in {_MENU_BACK, _MENU_QUIT}:
+        return state
+    try:
+        reason = Prompt.ask(Text("shared reason", style="cyan")).strip()
+    except EOFError:
+        console.print(Text("Unchanged — reason required.", style="dim"))
+        return _MENU_BACK
+    if not reason:
+        console.print(Text("Unchanged — need a short reason.", style="yellow"))
+        return _MENU_BACK
+    actions = {
+        "y": ("yes", f"set {len(job_ids)} job(s) → {state}"),
+        "n": ("no", "leave runtime jobs unchanged"),
+    }
+    _print_action_menu(actions)
+    if _menu_choice(actions, default="n") != "y":
+        console.print(Text("Unchanged.", style="dim"))
+        return _MENU_BACK
+    ok = failed = 0
+    for jid in job_ids:
+        console.rule(jid, style="dim")
+        rc = run_runtime_jobs(["set", jid, state, "--reason", reason, "--yes"])
+        if rc == 0:
+            ok += 1
+        else:
+            failed += 1
+    console.print(
+        Text(
+            f"batch jobs done — ok={ok} failed={failed}",
+            style="bold green" if failed == 0 else "bold yellow",
+        )
+    )
+    _pause()
+    return _MENU_BACK
 
 
 # Named keys from terminal.getch — keep display short and match actions exactly.
@@ -1565,7 +1823,11 @@ def _node_status_label(doc: dict, entry: dict | None) -> str:
 
 
 def interactive_nodes(project: str | None = None):
-    """Project → node → review/update loop for canonical graph truth."""
+    """Project → node → review/update loop for canonical graph truth.
+
+    Node list prefers fzf (preview + tab multi-select). One selection opens
+    review; two or more enter batch graph-status update.
+    """
     node_cli = _import_module("node_cli")
     fixed_project = project is not None
     while True:
@@ -1580,7 +1842,12 @@ def interactive_nodes(project: str | None = None):
                     description = f"unavailable: {exc}"
                 project_items.append((project_id, description))
 
-            project = _paged_menu("projects", project_items, back_label="main menu")
+            project = _pick_list(
+                "projects",
+                project_items,
+                preview_cmd=_project_preview_cmd(),
+                back_label="main menu",
+            )
             if project in {_MENU_BACK, _MENU_QUIT}:
                 return project
 
@@ -1612,19 +1879,29 @@ def interactive_nodes(project: str | None = None):
                     desc.append(f" · {title}")
                 node_items.append((node_id, desc))
 
-            node_id = _paged_menu(
+            picked = _pick_list(
                 f"nodes · {project}",
                 node_items,
+                preview_cmd=_node_preview_cmd(project),
+                multi=True,
                 back_label="projects",
+                fzf_header=(
+                    f"{project}  ·  tab multi → batch status  ·  "
+                    "one + enter → review  ·  esc back"
+                ),
             )
-            if node_id is _MENU_QUIT:
+            if picked is _MENU_QUIT:
                 return _MENU_QUIT
-            if node_id is _MENU_BACK:
+            if picked is _MENU_BACK:
                 if fixed_project:
                     return _MENU_BACK
                 break
             ordered_ids = [nid for nid, _ in node_items]
-            outcome = _node_review_menu(project, node_id, node_ids=ordered_ids)
+            if isinstance(picked, list) and len(picked) > 1:
+                outcome = _batch_node_status(project, picked)
+            else:
+                node_id = picked[0] if isinstance(picked, list) else picked
+                outcome = _node_review_menu(project, node_id, node_ids=ordered_ids)
             if outcome is _MENU_QUIT:
                 return _MENU_QUIT
             if outcome == "projects":
@@ -1820,14 +2097,18 @@ def _confirm_job_state_change(ref: str, state: str) -> int:
 
 
 def interactive_jobs():
-    """Review and update runtime jobs inside the human-operated menu."""
+    """Review and update runtime jobs inside the human-operated menu.
+
+    open/update use fzf (preview via jobs show). update supports multi-select
+    batch state changes; typing a job id remains available as fallback.
+    """
     state_filter: str | None = None
     actions = {
         "r": ("refresh", "show all runtime jobs"),
         "a": ("awaiting review", "show the human review queue"),
         "e": ("evaluations", "show evaluator result summary"),
-        "o": ("open", "show one job by job or node ID"),
-        "u": ("update", "change one runtime job state"),
+        "o": ("open", "fzf pick a job (preview) or type an id"),
+        "u": ("update", "fzf pick one/many jobs → set queue state"),
         "b": ("main menu", ""),
         "q": ("quit", ""),
     }
@@ -1859,20 +2140,60 @@ def interactive_jobs():
             _pause()
             continue
 
-        _clear_screen()
-        console.print(Text("open job" if choice == "o" else "update job", style="bold"))
         try:
-            ref = Prompt.ask(Text("job or node ID", style="cyan")).strip()
-        except EOFError:
-            continue
-        if not ref:
-            continue
-        _clear_screen()
-        console.print(Text(f"job · {ref}", style="bold"))
-        run_runtime_jobs(["show", ref])
-        if choice == "o":
+            job_items = _runtime_job_items(state_filter)
+        except RuntimeError as exc:
+            console.print(Text(f"ERROR: {exc}", style="red"))
             _pause()
             continue
+
+        if choice == "o":
+            if job_items:
+                ref = _pick_list(
+                    "open job",
+                    job_items,
+                    preview_cmd=_job_preview_cmd(),
+                    multi=False,
+                    back_label="jobs",
+                    fzf_header="jobs · enter open · esc back · type to fuzzy filter",
+                )
+                if ref is _MENU_QUIT:
+                    return _MENU_QUIT
+                if ref is _MENU_BACK:
+                    continue
+            else:
+                try:
+                    ref = Prompt.ask(Text("job or node ID", style="cyan")).strip()
+                except EOFError:
+                    continue
+                if not ref:
+                    continue
+            _clear_screen()
+            console.print(Text(f"job · {ref}", style="bold"))
+            run_runtime_jobs(["show", ref])
+            _pause()
+            continue
+
+        # update — multi fzf when jobs exist
+        if not job_items:
+            console.print(Text("No jobs to update.", style="yellow"))
+            _pause()
+            continue
+        selected = _pick_list(
+            "update jobs",
+            job_items,
+            preview_cmd=_job_preview_cmd(),
+            multi=True,
+            back_label="jobs",
+            fzf_header=(
+                "tab multi · enter set state  ·  one job = confirm path  ·  esc back"
+            ),
+        )
+        if selected is _MENU_QUIT:
+            return _MENU_QUIT
+        if selected is _MENU_BACK:
+            continue
+        refs = selected if isinstance(selected, list) else [selected]
 
         try:
             jobs_status = load_runtime_jobs_module()
@@ -1884,7 +2205,18 @@ def interactive_jobs():
             console.print(Text(f"ERROR: {exc}", style="red"))
             _pause()
             continue
-        state = _paged_menu("job state", states, back_label="jobs")
+
+        if len(refs) > 1:
+            outcome = _batch_job_state(refs, states)
+            if outcome is _MENU_QUIT:
+                return _MENU_QUIT
+            continue
+
+        ref = refs[0]
+        _clear_screen()
+        console.print(Text(f"job · {ref}", style="bold"))
+        run_runtime_jobs(["show", ref])
+        state = _pick_list("job state", states, multi=False, back_label="jobs")
         if state is _MENU_QUIT:
             return _MENU_QUIT
         if state is _MENU_BACK:
@@ -2303,9 +2635,10 @@ def interactive_status():
             console.print(Text("No graphs found", style="yellow"))
             _pause()
             continue
-        project = _paged_menu(
+        project = _pick_list(
             "status · projects",
             [(pid, "") for pid in projects],
+            preview_cmd=_project_preview_cmd(),
             back_label="status",
         )
         if project is _MENU_QUIT:
@@ -2343,9 +2676,10 @@ def interactive_validate():
             console.print(Text("No graphs found", style="yellow"))
             _pause()
             continue
-        project = _paged_menu(
+        project = _pick_list(
             "validate · projects",
             [(pid, "") for pid in projects],
+            preview_cmd=_project_preview_cmd(),
             back_label="validate",
         )
         if project is _MENU_QUIT:
