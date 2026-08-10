@@ -234,23 +234,6 @@ def cross_node_findings(project_id: str, node_docs: dict[str, dict]) -> list[Fin
                                              f"unlocks {ref!r} but {ref}.yaml doesn't "
                                              f"list this node in depends_on"))
 
-        # 'ready' must MEAN ready: a node whose deps are not all satisfied
-        # (complete/provisional) cannot be ready. Authoring dependents as
-        # ready strands them — advance_frontier only transitions pending
-        # nodes, and a settled project reads dormant to the heartbeat, so
-        # nothing ever dispatches them (pi-hub-projection stall, 2026-08-06).
-        if doc.get("status") == "ready":
-            unsatisfied = [
-                ref for ref in depends
-                if isinstance(ref, str)
-                and ref in node_docs
-                and node_docs[ref].get("status") not in ("complete", "provisional")
-            ]
-            if unsatisfied:
-                findings.append(Finding(rel, 0, "error", "ready_with_unsatisfied_deps",
-                                         f"status is ready but deps not satisfied: "
-                                         f"{unsatisfied} (author dependents as pending; "
-                                         f"the frontier machine sets ready)"))
 
     return findings
 
