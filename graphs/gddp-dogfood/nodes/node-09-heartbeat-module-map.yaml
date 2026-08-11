@@ -1,0 +1,28 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-09-heartbeat-module-map
+title: Map the heartbeat modules
+type: capability
+why: The heartbeat is the loop; a one-line-per-module map keeps the operating surface
+  legible.
+depends_on: []
+acceptance_criteria:
+- id: report-exists
+  criterion: reports/gddp-dogfood/09-heartbeat-module-map.md exists and is non-empty
+- id: all-modules
+  criterion: every module under scripts/runtime/heartbeat/ is listed with a one-line
+    purpose
+- id: flow
+  criterion: 'report describes the tick flow: events -> dispatch -> reconcile -> evaluate'
+constraints:
+- Create only reports/gddp-dogfood/09-heartbeat-module-map.md
+- Read-only outside that report path
+- Run python3 -m pytest -q before finishing and quote its tail line in the report
+- Commit all work on this node result ref per the executor contract
+allowed_execution_modes:
+- local_subprocess
+required_artifacts:
+- reports/gddp-dogfood/09-heartbeat-module-map.md
+status: ready
+priority: medium
+unlocks: []
