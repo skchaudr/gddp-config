@@ -1,0 +1,32 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-12-test-topological-order
+title: Unit-test _topological_nodes ordering
+type: capability
+why: Pure-function unit coverage for _topological_nodes in scripts/adapters/mission_projection.py;
+  small, independent, mechanically verifiable.
+depends_on: []
+acceptance_criteria:
+- id: test-file-exists
+  criterion: scripts/adapters/test_topological_nodes.py exists (or scripts/runtime/heartbeat/test_topological_nodes.py
+    matching the target module location) and contains tests for _topological_nodes
+- id: behavior-covered
+  criterion: the tests assert that depends_on ordering is respected and independent
+    nodes keep a stable order
+- id: suite-green
+  criterion: 'python3 -m pytest -q passes with only the 3 known flask-import failures
+    (ModuleNotFoundError: flask); the new test file passes'
+constraints:
+- Create exactly one new test file for _topological_nodes in scripts/adapters/mission_projection.py
+  next to its module
+- Do not modify production code or other test files
+- Run python3 -m pytest -q before finishing and quote its tail line in the commit
+  or a short note
+- Commit all work on this node result ref per the executor contract
+allowed_execution_modes:
+- local_subprocess
+required_artifacts:
+- test_topological_nodes.py
+status: ready
+priority: medium
+unlocks: []
