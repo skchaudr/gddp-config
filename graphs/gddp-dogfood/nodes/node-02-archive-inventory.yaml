@@ -1,0 +1,28 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-02-archive-inventory
+title: Inventory the archived code surfaces
+type: capability
+why: Archived modules (push guard, jules adapter) exist for recoverability; a current
+  inventory keeps the archive reviewable without archaeology.
+depends_on: []
+acceptance_criteria:
+- id: report-exists
+  criterion: reports/gddp-dogfood/02-archive-inventory.md exists and is non-empty
+- id: both-dirs
+  criterion: report covers both scripts/_archive/ and deploy/_archive/
+- id: exact-paths
+  criterion: every archived entry is listed with its exact path and its current stated
+    purpose or evidence (README or header comment)
+constraints:
+- Create only reports/gddp-dogfood/02-archive-inventory.md
+- Read-only outside that report path
+- Run python3 -m pytest -q before finishing and quote its tail line in the report
+- Commit all work on this node result ref per the executor contract
+allowed_execution_modes:
+- local_subprocess
+required_artifacts:
+- reports/gddp-dogfood/02-archive-inventory.md
+status: provisional
+priority: high
+unlocks: []
