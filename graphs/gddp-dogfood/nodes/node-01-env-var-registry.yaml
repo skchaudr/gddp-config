@@ -1,0 +1,28 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-01-env-var-registry
+title: Build the GDDP_* environment-variable registry report
+type: capability
+why: The runtime reads many GDDP_* environment variables; there is no single inventory.
+  A registry makes configuration reviewable and is pure evidence-gathering.
+depends_on: []
+acceptance_criteria:
+- id: report-exists
+  criterion: reports/gddp-dogfood/01-env-var-registry.md exists and is non-empty
+- id: ten-rows
+  criterion: report table lists at least 10 distinct GDDP_* variables
+- id: cites
+  criterion: every table row cites the file and line where the variable is read
+constraints:
+- Create only reports/gddp-dogfood/01-env-var-registry.md
+- Read-only outside that report path
+- Run the grep/search commands yourself and quote real matches
+- Run python3 -m pytest -q before finishing and quote its tail line in the report
+- Commit all work on this node result ref per the executor contract
+allowed_execution_modes:
+- local_subprocess
+required_artifacts:
+- reports/gddp-dogfood/01-env-var-registry.md
+status: provisional
+priority: high
+unlocks: []

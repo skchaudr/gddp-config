@@ -1,0 +1,39 @@
+schema_version: '1.0'
+schema_type: project_graph
+project_id: gddp-dogfood
+project_name: GDDP Dogfood + Housekeeping
+description: 22-node dogfood + housekeeping run (handoff 092). Tranche 1 = 3 report-only
+  canaries proving executor->evaluator visibility on the post-demolition runtime.
+repo: skchaudr/gddp-runtime
+blueprint:
+  vision: Prove the one-shot pi executor + post-hoc evaluator loop end-to-end on dead-simple,
+    mechanically verifiable nodes before substantive graph work resumes.
+  architecture_notes: Tranche-gated. T1 report-only; edit shapes earned after evaluator
+    visibility. Executor local_subprocess (pi xai/grok-4.5 one-shot); post-hoc evaluator
+    with DeepSeek semantic lane.
+  major_capabilities:
+  - report-only canary nodes (T1/T2)
+  - tiny pure-function test nodes (T3)
+  - one-file docs/cleanup nodes (T4)
+graph_version: '1.0'
+created_at: '2026-08-11'
+last_updated: '2026-08-11'
+nodes_dir: nodes/
+nodes:
+- id: node-01-env-var-registry
+  title: Build the GDDP_* environment-variable registry report
+  status: provisional
+  type: capability
+- id: node-02-archive-inventory
+  title: Inventory the archived code surfaces
+  status: provisional
+  type: capability
+execution_policy:
+  default_executor: local_subprocess
+  frontier_auto_advance: true
+  retry_budget: 3
+  allowed_repos:
+  - skchaudr/gddp-runtime
+  max_concurrent_jobs: 1
+  require_human_review_before_overnight: false
+  artifact_gate_enforced: true

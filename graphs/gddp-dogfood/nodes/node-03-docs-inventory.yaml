@@ -1,0 +1,28 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-03-docs-inventory
+title: Inventory docs/ and flag references to removed machinery
+type: capability
+why: The demolition removed machinery that docs may still describe as live; an inventory
+  with a drift flag list keeps the doc surface honest.
+depends_on: []
+acceptance_criteria:
+- id: report-exists
+  criterion: reports/gddp-dogfood/03-docs-inventory.md exists and is non-empty
+- id: all-docs
+  criterion: every file under docs/ is listed with a one-line summary
+- id: drift-flags
+  criterion: report has a flag list of docs referencing mission_push_guard, verify_planned_feature_ids,
+    or _feature_drift_reason (the list may be empty, but it must be present)
+constraints:
+- Create only reports/gddp-dogfood/03-docs-inventory.md
+- Read-only outside that report path
+- Run python3 -m pytest -q before finishing and quote its tail line in the report
+- Commit all work on this node result ref per the executor contract
+allowed_execution_modes:
+- local_subprocess
+required_artifacts:
+- reports/gddp-dogfood/03-docs-inventory.md
+status: provisional
+priority: high
+unlocks: []
