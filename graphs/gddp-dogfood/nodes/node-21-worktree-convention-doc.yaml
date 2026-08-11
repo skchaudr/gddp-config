@@ -1,0 +1,30 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-21-worktree-convention-doc
+title: Document the worktree working convention
+type: capability
+why: One-file documentation/cleanup so the post-demolition runtime is legible to the
+  next session.
+depends_on: []
+acceptance_criteria:
+- id: artifact-exists
+  criterion: docs/worktree-convention.md exists and is non-empty
+- id: covers
+  criterion: the file covers the rule that stage work happens in git worktrees, never
+    the shared checkout, citing the .worktrees/ pattern and the parallel-session collision
+    lesson
+- id: suite-unchanged
+  criterion: python3 -m pytest -q shows no new failures beyond those already present
+    on this host before the node (flask-import and rig1 plist asserts); quote the
+    tail line in the commit message
+constraints:
+- Create or modify only docs/worktree-convention.md
+- Read-only outside that path
+- Commit all work on this node result ref per the executor contract
+allowed_execution_modes:
+- local_subprocess
+required_artifacts:
+- docs/worktree-convention.md
+status: ready
+priority: medium
+unlocks: []
