@@ -546,6 +546,48 @@ def test_eof_at_confirm_aborts_cleanly(con, config_root, monkeypatch):
     assert con.execute("SELECT COUNT(*) c FROM events").fetchone()["c"] == 0
 
 
+def test_yes_skips_confirm_and_inserts(con, config_root, monkeypatch):
+    def _should_not_prompt(*a, **k):
+        raise AssertionError("Prompt.ask must not run with yes=True")
+    monkeypatch.setattr(gddp.Prompt, "ask", _should_not_prompt)
+    rc = gddp._dispatch_flow(con, config_root, "alpha", None, yes=True)
+    assert rc == 0
+    assert con.execute("SELECT COUNT(*) c FROM events").fetchone()["c"] == 1
+
+
+def test_cmd_dispatch_yes_flag(config_root, tmp_path, monkeypatch):
+    db = tmp_path / "db" / "queue.db"
+    db.parent.mkdir()
+    c = sqlite3.connect(db)
+    c.execute(_EVENTS_SCHEMA)
+    c.execute(_JOBS_SCHEMA)
+    c.commit()
+    c.close()
+    monkeypatch.setattr(gddp, "ROOT", config_root)
+    monkeypatch.setattr(gddp, "resolve_runtime_root", lambda: tmp_path)
+
+    def _should_not_prompt(*a, **k):
+        raise AssertionError("Prompt.ask must not run with --yes")
+    monkeypatch.setattr(gddp.Prompt, "ask", _should_not_prompt)
+    rc = gddp.cmd_dispatch(
+        ["beta", "--yes"], config_root=config_root, db_path=db
+    )
+    assert rc == 0
+    check = sqlite3.connect(db)
+    check.row_factory = sqlite3.Row
+    rows = check.execute("SELECT * FROM events").fetchall()
+    assert len(rows) == 1
+    assert "node: beta" in rows[0]["url"]
+    check.close()
+
+
+def test_cmd_dispatch_unknown_flag_refuses(config_root, tmp_path):
+    rc = gddp.cmd_dispatch(
+        ["beta", "--force"], config_root=config_root, db_path=tmp_path / "missing.db"
+    )
+    assert rc == 2
+
+
 def test_main_known_commands_still_parse(monkeypatch):
     monkeypatch.setattr(
         gddp, "cmd_overview", lambda _args: 0

@@ -17,8 +17,8 @@ Subcommands:
     jobs results      Summarize evaluator output
     jobs set          Change runtime job state with an audit reason
 
-    <graph> [executor]  Dispatch the graph's ready frontier (positional, no verb)
-    <node> [executor]   Dispatch one ready node; executor defaults to node routing
+    <graph> [executor] [--yes]  Dispatch the graph's ready frontier (positional)
+    <node> [executor] [--yes]   Dispatch one ready node; --yes skips confirm
 
     verify node       Run deterministic node evaluation; emit a receipt
     receipt           Append a mission worker node receipt to GDDP_RECEIPTS_PATH
@@ -326,7 +326,8 @@ def _classify_dispatch_items(con, config_root, plan):
     return movable, excluded
 
 
-def _dispatch_flow(con, config_root, target, executor, project_hint=None) -> int:
+def _dispatch_flow(con, config_root, target, executor, project_hint=None,
+                   yes=False) -> int:
     """Shared shell/menu path: validate, exclude in-flight nodes, preview once,
     confirm once, insert. A node executing, being evaluated, or awaiting
     review is never offered for duplicate dispatch."""
@@ -356,17 +357,18 @@ def _dispatch_flow(con, config_root, target, executor, project_hint=None) -> int
     for item, reason in excluded:
         table.add_row(item["node_id"], item["executor"], Text(reason))
     console.print(table)
-    try:
-        answer = Prompt.ask(
-            f"Dispatch {len(movable)} event(s) through the heartbeat pipeline? [y/N]",
-            default="n",
-        )
-    except (EOFError, KeyboardInterrupt):
-        console.print("\naborted; no events inserted")
-        return 1
-    if answer.strip().lower() not in {"y", "yes"}:
-        console.print("aborted; no events inserted")
-        return 1
+    if not yes:
+        try:
+            answer = Prompt.ask(
+                f"Dispatch {len(movable)} event(s) through the heartbeat pipeline? [y/N]",
+                default="n",
+            )
+        except (EOFError, KeyboardInterrupt):
+            console.print("\naborted; no events inserted")
+            return 1
+        if answer.strip().lower() not in {"y", "yes"}:
+            console.print("aborted; no events inserted")
+            return 1
     event_ids = insert_dispatch_events(
         con,
         plan["project_id"],
@@ -380,12 +382,22 @@ def _dispatch_flow(con, config_root, target, executor, project_hint=None) -> int
 
 
 def cmd_dispatch(argv, *, config_root=None, db_path=None) -> int:
-    """Positional dispatch: gddp <graph|node> [executor]. No verbs, no flags."""
-    if len(argv) not in (1, 2):
-        console.print("[bold red]usage:[/] gddp <graph|node> [executor]")
+    """Positional dispatch: gddp <graph|node> [executor] [--yes]."""
+    yes = False
+    positional = []
+    for arg in argv:
+        if arg == "--yes":
+            yes = True
+            continue
+        if arg.startswith("-"):
+            console.print("[bold red]usage:[/] gddp <graph|node> [executor] [--yes]")
+            return 2
+        positional.append(arg)
+    if len(positional) not in (1, 2):
+        console.print("[bold red]usage:[/] gddp <graph|node> [executor] [--yes]")
         return 2
-    target = argv[0]
-    executor = argv[1] if len(argv) == 2 else None
+    target = positional[0]
+    executor = positional[1] if len(positional) == 2 else None
     config_root = Path(config_root) if config_root else ROOT
     try:
         con = _connect_events_db(
@@ -395,7 +407,7 @@ def cmd_dispatch(argv, *, config_root=None, db_path=None) -> int:
         console.print(f"[bold red]ERROR:[/] {exc}")
         return 2
     try:
-        return _dispatch_flow(con, config_root, target, executor)
+        return _dispatch_flow(con, config_root, target, executor, yes=yes)
     finally:
         con.close()
 
@@ -2788,8 +2800,8 @@ def validate_project(project_id: str | None):
 
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
-    # Positional dispatch: gddp <graph|node> [executor]. Anything that is not
-    # a known subcommand is an exact graph or node target — no verbs, no flags.
+    # Positional dispatch: gddp <graph|node> [executor] [--yes]. Anything that
+    # is not a known subcommand is an exact graph or node target.
     if argv and argv[0] not in _CLI_COMMANDS and not argv[0].startswith("-"):
         return cmd_dispatch(argv)
     parser = argparse.ArgumentParser(
