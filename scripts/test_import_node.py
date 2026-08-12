@@ -138,5 +138,29 @@ class UpdatePathTests(unittest.TestCase):
             self.assertEqual(len(index["nodes"]), 1)
 
 
+class ArtifactPathWarningTests(unittest.TestCase):
+    def test_bare_filename_warns(self):
+        findings = import_node.validate_node_yaml(
+            _valid_doc(required_artifacts=["test_manifest_name.py"])
+        )
+        hits = [f for f in findings if f["rule"] == "bare_artifact_path"]
+        self.assertEqual(len(hits), 1)
+        self.assertEqual(hits[0]["severity"], "warning")
+        self.assertIn("test_manifest_name.py", hits[0]["message"])
+        self.assertIn("repo root/.gddp/docs", hits[0]["message"])
+
+    def test_pathed_artifact_is_silent(self):
+        findings = import_node.validate_node_yaml(
+            _valid_doc(required_artifacts=["scripts/adapters/test_manifest_name.py"])
+        )
+        self.assertFalse([f for f in findings if f["rule"] == "bare_artifact_path"])
+
+    def test_merged_pr_token_is_silent(self):
+        findings = import_node.validate_node_yaml(
+            _valid_doc(required_artifacts=["merged_pr"])
+        )
+        self.assertFalse([f for f in findings if f["rule"] == "bare_artifact_path"])
+
+
 if __name__ == "__main__":
     raise SystemExit(unittest.main())

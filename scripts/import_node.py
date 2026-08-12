@@ -197,6 +197,22 @@ def validate_node_yaml(doc: dict, source_label: str = "input") -> list[dict]:
                                           "message": f"{fname}[{idx}] must be string, got {type(item).__name__}",
                                           "source": source_label})
 
+    artifacts = doc.get("required_artifacts")
+    if isinstance(artifacts, list):
+        for artifact in artifacts:
+            if not isinstance(artifact, str) or not artifact or artifact == "merged_pr":
+                continue
+            if Path(artifact).parent == Path("."):
+                findings.append({
+                    "severity": "warning",
+                    "rule": "bare_artifact_path",
+                    "message": (
+                        "artifact gates resolve against repo root/.gddp/docs; "
+                        f"bare filename {artifact} will not resolve at path {artifact}"
+                    ),
+                    "source": source_label,
+                })
+
     return findings
 
 
