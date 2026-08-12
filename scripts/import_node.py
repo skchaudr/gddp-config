@@ -10,6 +10,7 @@ Usage:
 
     --auto-approve   skip interactive review, just validate + write
     --dry-run        validate only, don't write
+    --update         replace an existing node; preserve its status
 
 Exit codes:
     0   node imported successfully
@@ -199,7 +200,10 @@ def validate_node_yaml(doc: dict, source_label: str = "input") -> list[dict]:
     return findings
 
 
-def check_conflicts(root: Path, project_id: str, node_id: str) -> list[dict]:
+def check_conflicts(root: Path, project_id: str, node_id: str,
+                    update: bool = False) -> list[dict]:
+    if update:
+        return []
     findings = []
     node_file = root / "graphs" / project_id / "nodes" / f"{node_id}.yaml"
     if node_file.exists():
@@ -217,6 +221,15 @@ def check_conflicts(root: Path, project_id: str, node_id: str) -> list[dict]:
                                   "source": "project.yaml"})
                 break
     return findings
+
+
+def existing_node_status(root: Path, project_id: str, node_id: str) -> str | None:
+    node_file = root / "graphs" / project_id / "nodes" / f"{node_id}.yaml"
+    if not node_file.exists():
+        return None
+    existing = yaml.safe_load(node_file.read_text(encoding="utf-8")) or {}
+    status = existing.get("status")
+    return status if isinstance(status, str) else None
 
 
 def check_deps_exist(root: Path, project_id: str, depends_on: list[str]) -> list[dict]:
@@ -250,7 +263,8 @@ def write_node_file(root: Path, project_id: str, doc: dict) -> Path:
     return path
 
 
-def patch_project_index(root: Path, project_id: str, doc: dict) -> bool:
+def patch_project_index(root: Path, project_id: str, doc: dict,
+                        update: bool = False) -> bool:
     project_yaml = root / "graphs" / project_id / "project.yaml"
     if not project_yaml.exists():
         return False
@@ -262,14 +276,19 @@ def patch_project_index(root: Path, project_id: str, doc: dict) -> bool:
     try:
         proj = yaml.safe_load(original) or {}
         nodes_list = proj.setdefault("nodes", [])
-        if any(n.get("id") == doc["node_id"] for n in nodes_list):
-            raise RuntimeError(f"node {doc['node_id']!r} already in index")
-        nodes_list.append({
+        entry = {
             "id": doc["node_id"],
             "title": doc["title"],
             "status": doc["status"],
             "type": doc["type"],
-        })
+        }
+        existing = next((n for n in nodes_list if n.get("id") == doc["node_id"]), None)
+        if existing is not None:
+            if not update:
+                raise RuntimeError(f"node {doc['node_id']!r} already in index")
+            existing.update(entry)
+        else:
+            nodes_list.append(entry)
         proj["last_updated"] = datetime.date.today().isoformat()
         project_yaml.write_text(
             yaml.dump(proj, default_flow_style=False, sort_keys=False, allow_unicode=True),
@@ -282,7 +301,8 @@ def patch_project_index(root: Path, project_id: str, doc: dict) -> bool:
 
 
 def import_node(doc: dict, project_id: str, root: Path,
-                auto_approve: bool = False, dry_run: bool = False) -> int:
+                auto_approve: bool = False, dry_run: bool = False,
+                update: bool = False) -> int:
     project_dir = root / "graphs" / project_id
     if not project_dir.exists() or not (project_dir / "project.yaml").exists():
         print(json.dumps({"error": f"project '{project_id}' not found"},
@@ -292,8 +312,15 @@ def import_node(doc: dict, project_id: str, root: Path,
     source_label = doc.get("node_id", "unknown")
     all_findings = []
 
+    if update:
+        preserved = existing_node_status(root, project_id, doc.get("node_id", ""))
+        if preserved is not None:
+            doc["status"] = preserved
+
     all_findings.extend(validate_node_yaml(doc, source_label))
-    all_findings.extend(check_conflicts(root, project_id, doc.get("node_id", "")))
+    all_findings.extend(check_conflicts(
+        root, project_id, doc.get("node_id", ""), update=update,
+    ))
 
     deps = doc.get("depends_on") or []
     all_findings.extend(check_deps_exist(root, project_id, deps))
@@ -322,8 +349,9 @@ def import_node(doc: dict, project_id: str, root: Path,
         return 0
 
     path = write_node_file(root, project_id, doc)
-    patched = patch_project_index(root, project_id, doc)
+    patched = patch_project_index(root, project_id, doc, update=update)
 
+    result["status"] = "updated" if update else "imported"
     result["file_written"] = str(path.relative_to(root))
     result["project_patched"] = patched
     print(json.dumps(result, indent=2))
@@ -331,7 +359,7 @@ def import_node(doc: dict, project_id: str, root: Path,
 
 
 def main(file_path=None, use_stdin=False, project=None,
-         auto_approve=False, dry_run=False, root=None) -> int:
+         auto_approve=False, dry_run=False, update=False, root=None) -> int:
     root = root or ROOT
 
     if use_stdin:
@@ -356,7 +384,7 @@ def main(file_path=None, use_stdin=False, project=None,
         print(json.dumps({"error": "YAML top-level must be a mapping"}, indent=2))
         return 1
 
-    return import_node(doc, project, root, auto_approve, dry_run)
+    return import_node(doc, project, root, auto_approve, dry_run, update)
 
 
 if __name__ == "__main__":
@@ -367,10 +395,14 @@ if __name__ == "__main__":
     p.add_argument("--project", required=True)
     p.add_argument("--auto-approve", action="store_true")
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--update", action="store_true",
+                    help="Replace an existing node; preserve its status")
+    args = p.parse_args()
     sys.exit(main(
-        file_path=p.parse_args().file,
-        use_stdin=p.parse_args().stdin,
-        project=p.parse_args().project,
-        auto_approve=p.parse_args().auto_approve,
-        dry_run=p.parse_args().dry_run,
+        file_path=args.file,
+        use_stdin=args.stdin,
+        project=args.project,
+        auto_approve=args.auto_approve,
+        dry_run=args.dry_run,
+        update=args.update,
     ))

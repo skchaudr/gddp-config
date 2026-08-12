@@ -1965,6 +1965,7 @@ def cmd_node_import(args):
         project=args.project,
         auto_approve=args.auto_approve,
         dry_run=args.dry_run,
+        update=args.update,
     ))
 
 
@@ -2829,6 +2830,10 @@ def main(argv=None):
     node_import.add_argument("--project", required=True, help="Project ID")
     node_import.add_argument("--auto-approve", action="store_true")
     node_import.add_argument("--dry-run", action="store_true")
+    node_import.add_argument(
+        "--update", action="store_true",
+        help="Replace an existing node; preserve its status",
+    )
     node_import.set_defaults(func=cmd_node_import)
 
     node_val = node_sub.add_parser("validate", help="Validate nodes")
