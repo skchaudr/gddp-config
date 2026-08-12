@@ -40,6 +40,7 @@ ROOT = Path(__file__).resolve().parent.parent
 VALID_TYPES = {"capability", "milestone", "constraint"}
 VALID_STATUSES = {"pending", "ready", "provisional", "complete", "deferred"}
 VALID_PRIORITIES = {"low", "medium", "high", "critical"}
+PRIORITY_ALIASES = {"normal": "medium"}
 VALID_EXEC_MODES = {
     "agent",
     "droid",
@@ -78,9 +79,19 @@ LIST_FIELDS = ("depends_on", "unlocks", "constraints",
 KEBAB_RE = __import__("re").compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
 
 
+def normalize_priority(doc: dict) -> None:
+    """Rewrite known priority aliases in place so import writes the canonical value."""
+    if not isinstance(doc, dict):
+        return
+    raw = doc.get("priority")
+    if isinstance(raw, str) and raw in PRIORITY_ALIASES:
+        doc["priority"] = PRIORITY_ALIASES[raw]
+
+
 def validate_node_yaml(doc: dict, source_label: str = "input") -> list[dict]:
     """Validate a parsed YAML dict against the node schema. Returns findings list."""
     findings = []
+    normalize_priority(doc)
 
     if doc.get("schema_version") != "1.0":
         findings.append({"severity": "error", "rule": "schema_version",
@@ -110,8 +121,12 @@ def validate_node_yaml(doc: dict, source_label: str = "input") -> list[dict]:
                           "message": f"status {doc['status']!r} not in {sorted(VALID_STATUSES)}",
                           "source": source_label})
     if isinstance(doc.get("priority"), str) and doc["priority"] not in VALID_PRIORITIES:
+        valid = ", ".join(sorted(VALID_PRIORITIES))
         findings.append({"severity": "error", "rule": "priority_enum",
-                          "message": f"priority {doc['priority']!r} not in {sorted(VALID_PRIORITIES)}",
+                          "message": (
+                              f"priority {doc['priority']!r} is invalid; "
+                              f"valid values: {valid} (alias: normal → medium)"
+                          ),
                           "source": source_label})
 
     modes = doc.get("allowed_execution_modes") or []
