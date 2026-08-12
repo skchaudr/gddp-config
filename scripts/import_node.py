@@ -7,10 +7,13 @@ writes it to the project's nodes/ directory, and patches project.yaml.
 Usage:
     python3 scripts/gddp.py node import --file draft.yaml --project my-app
     echo '<yaml>' | python3 scripts/gddp.py node import --stdin --project my-app
+    python3 scripts/gddp.py node import --file draft.yaml --project my-app --update
 
     --auto-approve   skip interactive review, just validate + write
     --dry-run        validate only, don't write
     --update         replace an existing node; preserve its status
+
+    priority: critical | high | medium | low  (alias: normal → medium)
 
 Exit codes:
     0   node imported successfully

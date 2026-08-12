@@ -33,6 +33,8 @@ Usage:
     python3 scripts/gddp.py node rapid --project my-app --repo org/repo
     python3 scripts/gddp.py node validate --project vault-doctor
     python3 scripts/gddp.py node import --file draft.yaml --project my-app
+    python3 scripts/gddp.py node import --file draft.yaml --project my-app --update
+    python3 scripts/gddp.py gddp-runtime local_subprocess --yes
     python3 scripts/gddp.py node batch --project my-greenfield
     python3 scripts/gddp.py node list --project gddp-runtime --active
     python3 scripts/gddp.py node show --project gddp-runtime canary-retry-proof

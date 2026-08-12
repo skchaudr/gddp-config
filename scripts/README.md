@@ -19,6 +19,8 @@ Or use your system Python if it's not PEP-668-locked.
 .venv/bin/python scripts/gddp.py node browse --project gddp-runtime
 .venv/bin/python scripts/gddp.py node rapid --project my-app --repo org/repo
 .venv/bin/python scripts/gddp.py node import --file draft.yaml --project my-app
+.venv/bin/python scripts/gddp.py node import --file draft.yaml --project my-app --update
+.venv/bin/python scripts/gddp.py gddp-runtime local_subprocess --yes
 .venv/bin/python scripts/gddp.py node validate
 .venv/bin/python scripts/gddp.py node status
 .venv/bin/python scripts/gddp.py node list --project gddp-runtime --active
@@ -41,7 +43,7 @@ Or use your system Python if it's not PEP-668-locked.
 | `node rapid` | Minimal-keystroke adder | Type name, Enter, number keys for deps |
 | `node new` | Full TUI scaffold (field-by-field editor) | Number keys, m/s/q/Enter |
 | `node batch` | Walk through REPLACE_ME nodes | Edit acceptance/constraints/why |
-| `node import` | Import YAML from file or stdin | No TUI — JSON output, exit codes |
+| `node import` | Import YAML from file or stdin; `--update` replaces an existing node | No TUI — JSON output, exit codes |
 | `node validate` | Validate all nodes against schema | No TUI |
 | `node list` | List nodes: `ID \| GRAPH \| RUNTIME \| VERDICT` (width-aware) | No TUI |
 | `node show` | Node detail + evaluator summary (read-only runtime) | No TUI |
@@ -75,7 +77,9 @@ quit, `Ctrl-C` quit TUI, numbers direct pick. Node review: `←`/`→` sibling;
 The dispatch menu uses paged one-key pickers for graphs and targets. Its
 `ready now` list is the actual dispatchable frontier after dependency and live
 runtime blockers are applied; blocked nodes remain visible with their reason
-but are not offered as dispatch targets.
+but are not offered as dispatch targets. Shell dispatch is positional:
+`gddp <graph|node> [executor] [--yes]`. `--yes` skips the `[y/N]` confirm
+(needed when stdin is not a TTY; default remains `n`).
 
 ### Stage 1 operator commands
 
@@ -178,7 +182,14 @@ For agent-assisted workflows. Accepts YAML, validates, writes, patches.
 .venv/bin/python scripts/gddp.py node import --file draft.yaml --project my-app
 echo '<yaml>' | .venv/bin/python scripts/gddp.py node import --stdin --project my-app
 .venv/bin/python scripts/gddp.py node import --file draft.yaml --project my-app --dry-run
+.venv/bin/python scripts/gddp.py node import --file draft.yaml --project my-app --update
 ```
+
+Priority enum: `critical` | `high` | `medium` | `low`. `normal` is accepted as
+an alias for `medium` and written as `medium`. `--update` replaces an existing
+node file and `project.yaml` index entry; the live `status` is preserved.
+Bare `required_artifacts` filenames warn because artifact gates resolve against
+repo root / `.gddp/` / `docs/` only.
 
 Returns JSON findings on stdout. Exit codes: 0=imported, 1=validation errors, 2=exists, 3=project not found.
 
