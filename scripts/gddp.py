@@ -346,6 +346,35 @@ def _classify_dispatch_items(con, config_root, plan):
     return movable, excluded
 
 
+def _confirm_dispatch(count: int) -> bool:
+    """Confirm insert. Enter / y = yes. n = abort. Never default to no.
+
+    TTY uses the same one-key menu as the rest of the control plane. Pipes
+    and tests fall back to a line prompt defaulting to y.
+    """
+    console.print(
+        Text(
+            f"Dispatch {count} event(s) through the heartbeat pipeline?",
+            style="bold",
+        )
+    )
+    try:
+        if sys.stdin.isatty() and sys.stdout.isatty():
+            actions = {
+                "y": ("yes", f"insert {count} event(s) — start heartbeat work"),
+                "n": ("no", "abort — insert nothing"),
+            }
+            return _menu_choice(actions, default="y") == "y"
+        answer = Prompt.ask(
+            f"Dispatch {count} event(s)? [Y/n]",
+            default="y",
+        )
+        return answer.strip().lower() in {"", "y", "yes"}
+    except (EOFError, KeyboardInterrupt):
+        console.print("\naborted; no events inserted")
+        return False
+
+
 def _dispatch_flow(con, config_root, target, executor, project_hint=None,
                    yes=False) -> int:
     """Shared shell/menu path: validate, exclude in-flight nodes, preview once,
@@ -378,15 +407,7 @@ def _dispatch_flow(con, config_root, target, executor, project_hint=None,
         table.add_row(item["node_id"], item["executor"], Text(reason))
     console.print(table)
     if not yes:
-        try:
-            answer = Prompt.ask(
-                f"Dispatch {len(movable)} event(s) through the heartbeat pipeline? [y/N]",
-                default="n",
-            )
-        except (EOFError, KeyboardInterrupt):
-            console.print("\naborted; no events inserted")
-            return 1
-        if answer.strip().lower() not in {"y", "yes"}:
+        if not _confirm_dispatch(len(movable)):
             console.print("aborted; no events inserted")
             return 1
     event_ids = insert_dispatch_events(
@@ -812,14 +833,14 @@ def _dispatch_for_project(project: str, *, back_label: str = "graphs"):
             return _MENU_QUIT
         if target is _MENU_BACK:
             return _MENU_BACK
-        executor = Prompt.ask(
-            "executor override (blank = configured routing)", default=""
-        )
+        # Executor already shown on each row; override is shell-only
+        # (`gddp <node> <executor>`). Empty Prompt.ask "():" was noise that
+        # trained people to hit Enter into the next default-no confirm.
         _dispatch_flow(
             con,
             ROOT,
             target,
-            executor.strip() or None,
+            None,
             project_hint=project,
         )
         _pause()

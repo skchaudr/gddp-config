@@ -251,14 +251,14 @@ def test_insert_persists_executor_resolved_by_plan(con):
 # --- preview / confirm gate ------------------------------------------------- #
 
 def test_abort_inserts_nothing(con, config_root, monkeypatch):
-    monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "n")
+    monkeypatch.setattr(gddp, "_confirm_dispatch", lambda count: False)
     rc = gddp._dispatch_flow(con, config_root, "proj-a", None)
     assert rc == 1
     assert con.execute("SELECT COUNT(*) c FROM events").fetchone()["c"] == 0
 
 
 def test_confirm_inserts_frontier(con, config_root, monkeypatch):
-    monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
+    monkeypatch.setattr(gddp, "_confirm_dispatch", lambda count: True)
     rc = gddp._dispatch_flow(con, config_root, "proj-a", None)
     assert rc == 0
     rows = con.execute("SELECT * FROM events ORDER BY event_id").fetchall()
@@ -271,7 +271,7 @@ def test_in_flight_node_refused_zero_events(con, config_root, monkeypatch):
         "INSERT INTO jobs VALUES (?, ?, ?, ?, ?, '2026-07-26T10:00')",
         ("job_1", "alpha", "proj-a", "running", "running"),
     )
-    monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
+    monkeypatch.setattr(gddp, "_confirm_dispatch", lambda count: True)
     rc = gddp._dispatch_flow(con, config_root, "alpha", None)
     assert rc == 2
     assert con.execute("SELECT COUNT(*) c FROM events").fetchone()["c"] == 0
@@ -284,7 +284,7 @@ def test_failed_job_does_not_block_fresh_audited_dispatch(
         "INSERT INTO jobs VALUES (?, ?, ?, ?, ?, '2026-07-26T10:00')",
         ("job_failed", "alpha", "proj-a", "failed", "failed"),
     )
-    monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
+    monkeypatch.setattr(gddp, "_confirm_dispatch", lambda count: True)
 
     rc = gddp._dispatch_flow(
         con, config_root, "alpha", "local_subprocess"
@@ -301,7 +301,7 @@ def test_graph_dispatch_excludes_in_flight_inserts_rest(con, config_root, monkey
         "INSERT INTO jobs VALUES (?, ?, ?, ?, ?, '2026-07-26T10:00')",
         ("job_1", "alpha", "proj-a", "awaiting_review", "awaiting_review"),
     )
-    monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
+    monkeypatch.setattr(gddp, "_confirm_dispatch", lambda count: True)
     rc = gddp._dispatch_flow(con, config_root, "proj-a", None)
     assert rc == 0
     urls = [r["url"] for r in con.execute("SELECT url FROM events").fetchall()]
@@ -316,7 +316,7 @@ def test_all_in_flight_refuses_whole_dispatch(con, config_root, monkeypatch):
             (f"job_{index}", node, "proj-a", "running", "running",
              f"2026-07-26T10:0{index}"),
         )
-    monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
+    monkeypatch.setattr(gddp, "_confirm_dispatch", lambda count: True)
     rc = gddp._dispatch_flow(con, config_root, "proj-a", None)
     assert rc == 2
     assert con.execute("SELECT COUNT(*) c FROM events").fetchone()["c"] == 0
@@ -332,7 +332,7 @@ def test_dep_blocked_exact_node_refused_zero_events(con, config_root, monkeypatc
         "alpha": "ready", "beta": "ready", "gamma": "pending",
         "shared": "ready", "depkid": "ready",
     })
-    monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
+    monkeypatch.setattr(gddp, "_confirm_dispatch", lambda count: True)
     rc = gddp._dispatch_flow(con, config_root, "depkid", None)
     assert rc == 2
     assert con.execute("SELECT COUNT(*) c FROM events").fetchone()["c"] == 0
@@ -347,7 +347,7 @@ def test_graph_dispatch_excludes_dep_blocked_inserts_rest(con, config_root, monk
         "alpha": "ready", "beta": "ready", "gamma": "pending",
         "shared": "ready", "depkid": "ready",
     })
-    monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
+    monkeypatch.setattr(gddp, "_confirm_dispatch", lambda count: True)
     rc = gddp._dispatch_flow(con, config_root, "proj-a", None)
     assert rc == 0
     urls = [r["url"] for r in con.execute("SELECT url FROM events").fetchall()]
@@ -374,34 +374,44 @@ def test_interactive_dispatch_uses_pickers_and_only_offers_true_frontier(
 
     def choose(heading, items, **kwargs):
         menus.append((heading, list(items), kwargs))
+        # Graph pick → project; target pick → entire frontier (project id)
         return "proj-a"
 
     dispatched = []
     monkeypatch.setattr(gddp, "ROOT", config_root)
-    monkeypatch.setattr(gddp, "_paged_menu", choose)
+    monkeypatch.setattr(gddp, "_pick_list", choose)
     monkeypatch.setattr(gddp, "_connect_events_db", lambda path: con)
     monkeypatch.setattr(gddp, "resolve_runtime_root", lambda: config_root)
     monkeypatch.setattr(gddp, "_clear_screen", lambda: None)
-    monkeypatch.setattr(gddp.Prompt, "ask", lambda *args, **kwargs: "")
+    monkeypatch.setattr(gddp, "_pause", lambda *a, **k: "")
+    monkeypatch.setattr(
+        gddp,
+        "partition_graphs_by_activity",
+        lambda *a, **k: ([("proj-a", __import__("datetime").datetime.now(
+            __import__("datetime").timezone.utc
+        ))], []),
+    )
     monkeypatch.setattr(
         gddp,
         "_dispatch_flow",
-        lambda *args, **kwargs: dispatched.append((args, kwargs)) or 1,
+        lambda *args, **kwargs: dispatched.append((args, kwargs)) or 0,
     )
 
     gddp.interactive_dispatch()
 
-    assert menus[0][0] == "dispatch · graphs"
-    assert menus[0][2]["back_label"] == "main menu"
-    assert menus[1][0] == "dispatch · proj-a"
-    assert menus[1][2]["back_label"] == "graphs"
-    offered = {k: str(v) for k, v in menus[1][1]}
+    headings = [m[0] for m in menus]
+    assert "dispatch · graphs" in headings
+    assert "dispatch · proj-a" in headings
+    target_menu = next(m for m in menus if m[0] == "dispatch · proj-a")
+    offered = {k: str(v) for k, v in target_menu[1]}
     assert offered == {
         "proj-a": "entire dispatchable frontier · 2 nodes",
         "beta": "jules_api · ready now",
         "shared": "local_subprocess · ready now",
     }
     assert dispatched
+    # Menu path no longer prompts for executor override
+    assert dispatched[0][0][3] is None
 
 
 def test_interactive_frontier_prints_literal_bracket_evidence(monkeypatch):
@@ -508,7 +518,7 @@ def test_failed_latest_job_stays_dispatchable(con, config_root, monkeypatch):
         "INSERT INTO jobs VALUES (?, ?, ?, ?, ?, '2026-07-26T10:00')",
         ("job_1", "alpha", "proj-a", "failed", "failed"),
     )
-    monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
+    monkeypatch.setattr(gddp, "_confirm_dispatch", lambda count: True)
     rc = gddp._dispatch_flow(con, config_root, "alpha", None)
     assert rc == 0
     assert con.execute("SELECT COUNT(*) c FROM events").fetchone()["c"] == 1
@@ -526,7 +536,7 @@ def test_main_positional_routes_to_dispatch(config_root, tmp_path, monkeypatch):
     c.close()
     monkeypatch.setattr(gddp, "ROOT", config_root)
     monkeypatch.setattr(gddp, "resolve_runtime_root", lambda: tmp_path)
-    monkeypatch.setattr(gddp.Prompt, "ask", lambda *a, **k: "y")
+    monkeypatch.setattr(gddp, "_confirm_dispatch", lambda count: True)
     rc = gddp.main(["beta"])
     assert rc == 0
     check = sqlite3.connect(db)
@@ -538,18 +548,25 @@ def test_main_positional_routes_to_dispatch(config_root, tmp_path, monkeypatch):
 
 
 def test_eof_at_confirm_aborts_cleanly(con, config_root, monkeypatch):
-    def _eof(*a, **k):
-        raise EOFError
-    monkeypatch.setattr(gddp.Prompt, "ask", _eof)
+    monkeypatch.setattr(gddp, "_confirm_dispatch", lambda count: False)
     rc = gddp._dispatch_flow(con, config_root, "proj-a", None)
     assert rc == 1
     assert con.execute("SELECT COUNT(*) c FROM events").fetchone()["c"] == 0
 
 
+def test_confirm_dispatch_eof_returns_false(monkeypatch):
+    def _eof(*a, **k):
+        raise EOFError
+    monkeypatch.setattr(gddp.sys.stdin, "isatty", lambda: False)
+    monkeypatch.setattr(gddp.sys.stdout, "isatty", lambda: False)
+    monkeypatch.setattr(gddp.Prompt, "ask", _eof)
+    assert gddp._confirm_dispatch(2) is False
+
+
 def test_yes_skips_confirm_and_inserts(con, config_root, monkeypatch):
-    def _should_not_prompt(*a, **k):
-        raise AssertionError("Prompt.ask must not run with yes=True")
-    monkeypatch.setattr(gddp.Prompt, "ask", _should_not_prompt)
+    def _should_not_confirm(count):
+        raise AssertionError("_confirm_dispatch must not run with yes=True")
+    monkeypatch.setattr(gddp, "_confirm_dispatch", _should_not_confirm)
     rc = gddp._dispatch_flow(con, config_root, "alpha", None, yes=True)
     assert rc == 0
     assert con.execute("SELECT COUNT(*) c FROM events").fetchone()["c"] == 1
@@ -566,9 +583,9 @@ def test_cmd_dispatch_yes_flag(config_root, tmp_path, monkeypatch):
     monkeypatch.setattr(gddp, "ROOT", config_root)
     monkeypatch.setattr(gddp, "resolve_runtime_root", lambda: tmp_path)
 
-    def _should_not_prompt(*a, **k):
-        raise AssertionError("Prompt.ask must not run with --yes")
-    monkeypatch.setattr(gddp.Prompt, "ask", _should_not_prompt)
+    def _should_not_confirm(count):
+        raise AssertionError("_confirm_dispatch must not run with --yes")
+    monkeypatch.setattr(gddp, "_confirm_dispatch", _should_not_confirm)
     rc = gddp.cmd_dispatch(
         ["beta", "--yes"], config_root=config_root, db_path=db
     )
