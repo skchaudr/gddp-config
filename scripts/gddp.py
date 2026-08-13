@@ -21,6 +21,7 @@ Subcommands:
     evaluations       List evaluator receipts (verdict + timing)
 
     watch [target]    Live running fleet (default); drill-in by node/job id
+    runs              fzf picker over attempts (agent-runs style; Enter → watch)
     steer <target>    Send an operator message into a running attempt's session
 
     <graph> [executor] [--yes]  Dispatch the graph's ready frontier (positional)
@@ -95,6 +96,7 @@ _CLI_COMMANDS = frozenset(
         "obsidian",
         "project",
         "watch",
+        "runs",
         "steer",
     }
 )
@@ -3345,8 +3347,22 @@ def cmd_watch(args) -> int:
 
 
 def interactive_watch(project: str | None = None) -> object:
-    """Menu entry: live running fleet (project-scoped when under a graph)."""
+    """Menu entry: fzf pick when available, else live fleet refresh."""
     _clear_screen()
+    fzf = _import_module("fzf_pick")
+    if fzf.available():
+        try:
+            cmd_runs(
+                argparse.Namespace(
+                    all=False,
+                    project=project,
+                    list=False,
+                    height="90%",
+                )
+            )
+        except KeyboardInterrupt:
+            pass
+        return _MENU_BACK
     console.print(Text("live", style="bold").append(
         f"  ·  {project}" if project else "  ·  running attempts",
         style="dim",
@@ -3365,6 +3381,173 @@ def interactive_watch(project: str | None = None) -> object:
     except KeyboardInterrupt:
         pass
     return _MENU_BACK
+
+
+def _runs_catalog_rows(
+    attempts: list[dict],
+    *,
+    now: float | None = None,
+) -> list[tuple[str, str, dict]]:
+    """(value=spool_dir, display_label, info) for fzf / --list."""
+    now = now if now is not None else time.time()
+    rows: list[tuple[str, str, dict]] = []
+    for info in attempts:
+        node = info.get("node_id") or info["name"][:40]
+        job = info.get("job_id") or "-"
+        state = info["state"]
+        age = _age(info["created"], now)
+        quiet = _age(info["last_write"], now)
+        shortstat, untracked = _diff_summary(info.get("worktree"))
+        diff = shortstat
+        if untracked:
+            diff = f"{diff}+{untracked}n"
+        # Fixed-ish columns for scanning (like agent-runs labels).
+        label = (
+            f"{state:<8}  {node:<36}  age {age:>6}  quiet {quiet:>5}  "
+            f"{diff:<18}  {job[-16:]}"
+        )
+        rows.append((str(info["dir"]), label, info))
+    return rows
+
+
+def _print_attempt_preview(attempt_dir: Path, *, event_count: int = 40) -> int:
+    """Render a compact card for fzf --preview (one attempt spool dir)."""
+    info = _attempt_info(attempt_dir)
+    if info is None:
+        print(f"(not an attempt dir: {attempt_dir})")
+        return 1
+    now = time.time()
+    print(f"state:  {info['state']}   age {_age(info['created'], now)}   quiet {_age(info['last_write'], now)}")
+    print(f"node:   {info.get('node_id') or '-'}")
+    print(f"job:    {info.get('job_id') or '-'}")
+    print(f"pid:    {info.get('pid') or '-'}")
+    print(f"tree:   {info.get('worktree') or '-'}")
+    print(f"spool:  {info['dir']}")
+    print(f"events: {info.get('events_path')}")
+    print()
+    print("-- recent events --")
+    briefs = _recent_events(info["dir"], count=event_count)
+    if briefs:
+        for line in briefs:
+            print(f"  {line}")
+    else:
+        print("  (none yet)")
+    return 0
+
+
+def _runs_preview_script() -> str:
+    """Shell preview for fzf: call back into this CLI (escaped path via {1})."""
+    # Prefer the same interpreter running this process.
+    py = sys.executable or "python3"
+    # Locate gddp.py next to this file.
+    gddp_py = str(Path(__file__).resolve())
+    # fzf shell-escapes {1}; do not wrap in extra quotes.
+    return f"{py} {gddp_py} runs --preview {{1}}"
+
+
+def cmd_runs(args) -> int:
+    """agent-runs-style fzf over executor attempts; Enter → live watch.
+
+    Shell aliases: ``gddp-runs``, espanso ``;gdr``. Default list is running
+    only (``--all`` for done/dead history).
+    """
+    # fzf --preview callback (must be first — no spool scan needed beyond dir).
+    preview_dir = getattr(args, "preview", None)
+    if preview_dir:
+        return _print_attempt_preview(Path(preview_dir))
+
+    runtime_root = resolve_runtime_root()
+    spool = _spool_root(runtime_root)
+    if not spool.is_dir():
+        print(f"no spool at {spool}; nothing has run yet", file=sys.stderr)
+        return 1
+
+    running_only = not bool(getattr(args, "all", False))
+    project = getattr(args, "project", None) or None
+    attempts = _filter_attempts(
+        _scan_attempts(spool),
+        running_only=running_only,
+        project=project,
+    )
+    rows = _runs_catalog_rows(attempts)
+    if getattr(args, "list", False):
+        if not rows:
+            print("no attempts")
+            return 0
+        for value, label, _info in rows:
+            print(f"{label}\t{value}")
+        return 0
+
+    if not rows:
+        scope = "running" if running_only else "all"
+        print(f"no {scope} attempts" + (f" for {project}" if project else ""))
+        print("  tip: gddp runs --all   ·   gddp watch --once")
+        return 0
+
+    fzf = _import_module("fzf_pick")
+    items = [(value, label) for value, label, _ in rows]
+    by_dir = {value: info for value, _label, info in rows}
+
+    if not fzf.available():
+        # Non-TTY / no fzf: print catalog + suggest watch.
+        print(f"gddp runs · {'running' if running_only else 'all'} ({len(rows)})")
+        for i, (_v, label, info) in enumerate(rows, 1):
+            print(f"  {i:>2}  {label}")
+        print()
+        print("  drill in: gddp watch <node-id|job-id>")
+        print("  install fzf for the picker (agent-runs style)")
+        return 0
+
+    height = str(getattr(args, "height", None) or "90%")
+    selected = fzf.pick(
+        items,
+        prompt="gddp-runs> ",
+        header=(
+            "Enter watch  ·  esc cancel  ·  "
+            f"{'running only' if running_only else 'all history'}"
+            + (f"  ·  project={project}" if project else "")
+        ),
+        preview_cmd=_runs_preview_script(),
+        preview_window="right:55%:wrap:border-left",
+        multi=False,
+        height=height,
+    )
+    if not selected:
+        return 0
+    attempt_dir = selected[0]
+    info = by_dir.get(attempt_dir)
+    if info is None:
+        print(f"unknown selection: {attempt_dir}", file=sys.stderr)
+        return 1
+
+    target = info.get("job_id") or info.get("node_id") or info["name"]
+    # Optional action via env or second mode later; default = live watch.
+    action = (getattr(args, "action", None) or "watch").strip().lower()
+    if action in {"events", "tail", "e"}:
+        events = info.get("events_path") or str(Path(attempt_dir) / "events.jsonl")
+        print(f"tail -F {events}")
+        try:
+            os.execvp("tail", ["tail", "-F", events])
+        except OSError as exc:
+            print(f"could not exec tail: {exc}", file=sys.stderr)
+            return 1
+    if action in {"show", "job", "j"}:
+        return run_runtime_jobs(["show", target])
+    if action in {"path", "print"}:
+        print(attempt_dir)
+        print(info.get("events_path") or "")
+        return 0
+
+    # Default: enter live single-target watch (same as agent-runs → open).
+    return cmd_watch(
+        argparse.Namespace(
+            target=target,
+            interval=float(getattr(args, "interval", 2.0) or 2.0),
+            once=bool(getattr(args, "once", False)),
+            all=True,  # single target: allow done attempts too
+            project=None,
+        )
+    )
 
 
 def cmd_steer(args) -> int:
@@ -3961,6 +4144,44 @@ def main(argv=None):
         "--project", default=None, help="limit fleet to one graph/project id"
     )
     watch_p.set_defaults(func=cmd_watch)
+
+    runs_p = sub.add_parser(
+        "runs",
+        help="fzf picker over attempts (agent-runs style); Enter → gddp watch",
+    )
+    runs_p.add_argument(
+        "--all",
+        action="store_true",
+        help="include done/dead history (default: running only)",
+    )
+    runs_p.add_argument(
+        "--project", default=None, help="limit to one graph/project id"
+    )
+    runs_p.add_argument(
+        "--list", action="store_true", help="print catalog (no fzf)"
+    )
+    runs_p.add_argument(
+        "--preview",
+        default=None,
+        metavar="DIR",
+        help=argparse.SUPPRESS,  # fzf --preview callback
+    )
+    runs_p.add_argument(
+        "--action",
+        default="watch",
+        choices=("watch", "events", "show", "path"),
+        help="after pick: watch (default), events (tail -F), show (jobs show), path",
+    )
+    runs_p.add_argument(
+        "--once", action="store_true", help="with action=watch: one frame then exit"
+    )
+    runs_p.add_argument(
+        "--interval", type=float, default=2.0, help="watch refresh seconds"
+    )
+    runs_p.add_argument(
+        "--height", default="90%", help="fzf height (default 90%%)"
+    )
+    runs_p.set_defaults(func=cmd_runs)
 
     steer_p = sub.add_parser(
         "steer", help="Send an operator message into a running attempt's session"

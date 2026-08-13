@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# gddp-runs — agent-runs-style fzf over GDDP executor attempts.
+#
+# Usage:
+#   gddp-runs                 # running only (default)
+#   gddp-runs --all           # include done/dead
+#   gddp-runs --project ID    # one graph
+#   gddp-runs --list          # catalog, no fzf
+#   gddp-runs --action events # after pick: tail -F events.jsonl
+#   gddp-runs --action show   # after pick: gddp jobs show
+#   gddp-runs --once          # watch one frame then exit
+#
+# Enter → gddp watch <job> (live). Esc cancels.
+# Same surface as: gddp runs …
+#
+# Espanso: ;gdr → gddp-runs   ·   ;gdw → gddp watch --once
+set -euo pipefail
+
+_resolve_self_root() {
+  local source dir
+  source="${BASH_SOURCE[0]}"
+  while [[ -L "$source" ]]; do
+    dir="$(cd -P "$(dirname "$source")" && pwd)"
+    source="$(readlink "$source")"
+    [[ "$source" != /* ]] && source="$dir/$source"
+  done
+  dir="$(cd -P "$(dirname "$source")/.." && pwd)"
+  if [[ -f "$dir/scripts/gddp.py" ]]; then
+    printf '%s\n' "$dir"
+    return 0
+  fi
+  return 1
+}
+
+if [[ -n "${GDDP_CONFIG_PATH:-}" && -f "${GDDP_CONFIG_PATH}/scripts/gddp.py" ]]; then
+  ROOT="$GDDP_CONFIG_PATH"
+elif ROOT="$(_resolve_self_root)"; then
+  :
+else
+  for candidate in "$HOME/repos/gddp-config" "$HOME/gddp-config"; do
+    if [[ -f "$candidate/scripts/gddp.py" ]]; then
+      ROOT="$candidate"
+      break
+    fi
+  done
+fi
+
+if [[ -z "${ROOT:-}" || ! -f "$ROOT/scripts/gddp.py" ]]; then
+  echo "gddp-runs: could not find gddp-config (set GDDP_CONFIG_PATH)" >&2
+  exit 1
+fi
+
+if [[ -x "$ROOT/bin/gddp" ]]; then
+  exec "$ROOT/bin/gddp" runs "$@"
+fi
+if [[ -x "$ROOT/.venv/bin/python" ]]; then
+  exec "$ROOT/.venv/bin/python" "$ROOT/scripts/gddp.py" runs "$@"
+fi
+exec python3 "$ROOT/scripts/gddp.py" runs "$@"

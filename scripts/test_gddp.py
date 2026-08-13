@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import os
 import sys
 import tempfile
@@ -493,6 +494,41 @@ class OverviewTests(unittest.TestCase):
         self.assertEqual([a["job_id"] for a in live], ["j1"])
         all_a = gddp._filter_attempts(attempts, running_only=False)
         self.assertEqual(len(all_a), 3)
+
+    def test_runs_list_uses_catalog(self):
+        with patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp")), \
+                patch.object(
+                    gddp,
+                    "_spool_root",
+                    return_value=Path("/tmp/spool"),
+                ), \
+                patch.object(Path, "is_dir", return_value=True), \
+                patch.object(
+                    gddp,
+                    "_scan_attempts",
+                    return_value=[{
+                        "dir": Path("/tmp/spool/a"),
+                        "name": "a",
+                        "job_id": "job-1",
+                        "node_id": "node-x",
+                        "project_id": "p",
+                        "state": "running",
+                        "worktree": None,
+                        "last_write": 100.0,
+                        "created": 90.0,
+                        "events_path": "/tmp/spool/a/events.jsonl",
+                        "pid": 1,
+                    }],
+                ), \
+                patch.object(gddp, "_diff_summary", return_value=("0f +0/-0", 0)), \
+                patch("sys.stdout", new_callable=StringIO) as out:
+            rc = gddp.cmd_runs(argparse.Namespace(
+                all=False, project=None, list=True, preview=None,
+                action="watch", once=False, interval=2.0, height="90%",
+            ))
+        self.assertEqual(rc, 0)
+        self.assertIn("node-x", out.getvalue())
+        self.assertIn("job-1", out.getvalue())
 
     def test_main_menu_exits_on_ctrl_c(self):
         with patch.object(gddp, "_menu_choice", side_effect=KeyboardInterrupt), \
