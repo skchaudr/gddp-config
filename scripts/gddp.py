@@ -745,6 +745,7 @@ def _dispatch_for_project(project: str, *, back_label: str = "graphs"):
         con = _connect_events_db(resolve_runtime_root() / "db" / "queue.db")
     except DispatchError as exc:
         console.print(f"[bold red]ERROR:[/] {exc}")
+        _pause()
         return _MENU_BACK
     try:
         try:
@@ -754,6 +755,7 @@ def _dispatch_for_project(project: str, *, back_label: str = "graphs"):
             movable, excluded = _classify_dispatch_items(con, ROOT, plan)
         except DispatchError as exc:
             console.print(f"[bold red]ERROR:[/] {exc}")
+            _pause()
             return _MENU_BACK
 
         _clear_screen()
@@ -778,6 +780,7 @@ def _dispatch_for_project(project: str, *, back_label: str = "graphs"):
             console.print(
                 Text("No nodes are dispatchable now.", style="yellow")
             )
+            _pause()
             return _MENU_BACK
 
         target_items = [
@@ -819,6 +822,7 @@ def _dispatch_for_project(project: str, *, back_label: str = "graphs"):
             executor.strip() or None,
             project_hint=project,
         )
+        _pause()
         return _MENU_BACK
     finally:
         con.close()
