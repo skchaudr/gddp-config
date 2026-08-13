@@ -6,6 +6,7 @@ import os
 import sys
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 from io import StringIO
 from pathlib import Path
 from types import SimpleNamespace
@@ -354,12 +355,16 @@ class OverviewTests(unittest.TestCase):
     def test_interactive_jobs_starts_with_real_list_command(self):
         terminal = SimpleNamespace(getch=lambda: "b")
         with patch.object(gddp, "_import_module", return_value=terminal), \
-                patch.object(gddp, "run_runtime_jobs", return_value=0) as run, \
+                patch.object(
+                    gddp,
+                    "_runtime_job_items",
+                    return_value=[("job-1", "ready  node-a  2026-01-01")],
+                ) as listed, \
                 patch.object(gddp, "_clear_screen"):
             outcome = gddp.interactive_jobs()
 
         self.assertIs(outcome, gddp._MENU_BACK)
-        run.assert_called_once_with(["list"])
+        listed.assert_called_with(None, project=None)
 
     def test_interactive_jobs_can_filter_review_queue(self):
         keys = iter(["a", "b"])
@@ -370,16 +375,20 @@ class OverviewTests(unittest.TestCase):
             return terminal if name == "terminal" else fzf
 
         with patch.object(gddp, "_import_module", side_effect=import_module), \
-                patch.object(gddp, "run_runtime_jobs", return_value=0) as run, \
+                patch.object(
+                    gddp,
+                    "_runtime_job_items",
+                    return_value=[],
+                ) as listed, \
                 patch.object(gddp, "_clear_screen"):
             outcome = gddp.interactive_jobs()
 
         self.assertIs(outcome, gddp._MENU_BACK)
         self.assertEqual(
-            run.call_args_list,
+            listed.call_args_list,
             [
-                unittest.mock.call(["list"]),
-                unittest.mock.call(["list", "--state", "awaiting_review"]),
+                unittest.mock.call(None, project=None),
+                unittest.mock.call("awaiting_review", project=None),
             ],
         )
 
@@ -430,40 +439,63 @@ class OverviewTests(unittest.TestCase):
 
         self.assertIs(outcome, gddp._MENU_BACK)
         self.assertIn(unittest.mock.call(["show", "job-1"]), run.call_args_list)
-        self.assertGreaterEqual(
-            sum(1 for c in run.call_args_list if c == unittest.mock.call(["list"])),
-            1,
-        )
         operator.apply_state_change.assert_called_once_with(
             ref="job-1",
             state="ready",
             reason="operator reviewed recovery",
         )
 
-    def test_main_menu_opens_jobs_submenu(self):
-        with patch.object(gddp, "_menu_choice", side_effect=["j", "q"]), \
+    def test_main_menu_opens_graphs_submenu(self):
+        with patch.object(gddp, "_menu_choice", side_effect=["g", "q"]), \
                 patch.object(
-                    gddp, "interactive_jobs", return_value=gddp._MENU_BACK
-                ) as jobs, \
+                    gddp, "interactive_graphs", return_value=gddp._MENU_BACK
+                ) as graphs, \
                 patch.object(gddp, "_clear_screen"):
             gddp.interactive_menu()
 
-        jobs.assert_called_once_with()
+        graphs.assert_called_once_with()
 
-    def test_main_menu_opens_evaluations_submenu(self):
-        with patch.object(gddp, "_menu_choice", side_effect=["e", "q"]), \
+    def test_main_menu_opens_dispatch(self):
+        with patch.object(gddp, "_menu_choice", side_effect=["d", "q"]), \
                 patch.object(
-                    gddp, "interactive_evaluations", return_value=gddp._MENU_BACK
-                ) as evaluations, \
+                    gddp, "interactive_dispatch", return_value=gddp._MENU_BACK
+                ) as dispatch, \
                 patch.object(gddp, "_clear_screen"):
             gddp.interactive_menu()
 
-        evaluations.assert_called_once_with()
+        dispatch.assert_called_once_with()
 
     def test_main_menu_exits_on_ctrl_c(self):
         with patch.object(gddp, "_menu_choice", side_effect=KeyboardInterrupt), \
                 patch.object(gddp, "_clear_screen"):
             gddp.interactive_menu()
+
+    def test_partition_graphs_by_activity_archives_idle(self):
+        now = datetime(2026, 8, 13, tzinfo=timezone.utc)
+        job_times = {
+            "hot": now - timedelta(days=1),
+            "cold": now - timedelta(days=10),
+        }
+        with patch.object(gddp, "_graph_file_activity", return_value=now - timedelta(days=30)):
+            active, archive = gddp.partition_graphs_by_activity(
+                ["hot", "cold", "files-only"],
+                now=now,
+                job_times=job_times,
+            )
+        self.assertEqual([p for p, _ in active], ["hot"])
+        self.assertEqual([p for p, _ in archive], ["cold", "files-only"])
+        # newest first within archive
+        self.assertEqual(archive[0][0], "cold")
+
+    def test_interactive_graph_hub_routes_nodes(self):
+        with patch.object(gddp, "_menu_choice", side_effect=["n", "b"]), \
+                patch.object(
+                    gddp, "interactive_nodes", return_value=gddp._MENU_BACK
+                ) as nodes, \
+                patch.object(gddp, "_clear_screen"):
+            outcome = gddp.interactive_graph_hub("demo")
+        self.assertIs(outcome, gddp._MENU_BACK)
+        nodes.assert_called_once_with("demo")
 
     def test_node_status_label_exposes_node_index_desync(self):
         self.assertEqual(
@@ -511,7 +543,7 @@ class OverviewTests(unittest.TestCase):
         self.assertEqual(none.plain, "ready · Title")
 
     def test_interactive_status_all_and_one(self):
-        keys = iter(["a", "x", "o", "1", "x", "b"])
+        keys = iter(["a", "x", "o", "x", "b"])
         terminal = SimpleNamespace(
             getch=lambda: next(keys),
             clear_lines=lambda n: None,
@@ -550,6 +582,7 @@ class OverviewTests(unittest.TestCase):
                         "nodes": [{"id": "alpha", "status": "ready"}],
                     },
                 ), \
+                patch.object(gddp, "_pick_graph", return_value="demo"), \
                 patch.object(gddp, "_clear_screen"), \
                 patch.object(gddp.console, "print") as printed:
             outcome = gddp.interactive_status()

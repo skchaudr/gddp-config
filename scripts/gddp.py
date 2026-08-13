@@ -62,7 +62,7 @@ import sqlite3
 import subprocess
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 try:
@@ -501,8 +501,210 @@ def _show_frontier(selected: list[str]) -> None:
             con.close()
 
 
-def interactive_frontier():
+_GRAPH_ARCHIVE_AFTER = timedelta(days=7)
+_ARCHIVE_SENTINEL = "__archive__"
+
+
+def _parse_activity_ts(raw: str | None) -> datetime | None:
+    if not raw:
+        return None
+    text = str(raw).strip()
+    if not text:
+        return None
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        dt = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
+
+
+def _job_last_activity_by_project() -> dict[str, datetime]:
+    """project_id -> latest jobs.created_at from runtime queue DB (best effort)."""
+    out: dict[str, datetime] = {}
+    try:
+        db_path = resolve_runtime_root() / "db" / "queue.db"
+    except RuntimeError:
+        return out
+    if not db_path.is_file():
+        return out
+    try:
+        con = sqlite3.connect(f"file:{db_path.resolve()}?mode=ro", uri=True)
+        con.row_factory = sqlite3.Row
+        try:
+            rows = con.execute(
+                "SELECT project_id, MAX(created_at) AS last_at "
+                "FROM jobs WHERE project_id IS NOT NULL AND project_id != '' "
+                "GROUP BY project_id"
+            ).fetchall()
+        except sqlite3.Error:
+            return out
+        finally:
+            con.close()
+    except sqlite3.Error:
+        return out
+    for row in rows:
+        when = _parse_activity_ts(row["last_at"])
+        if when is not None:
+            out[str(row["project_id"])] = when
+    return out
+
+
+def _graph_file_activity(project_id: str) -> datetime:
+    """Latest mtime under graphs/<id>/ (project.yaml + node YAMLs)."""
+    root = ROOT / "graphs" / project_id
+    latest = 0.0
+    if not root.is_dir():
+        return datetime.fromtimestamp(0, tz=timezone.utc)
+    for path in root.rglob("*"):
+        if path.is_file():
+            try:
+                latest = max(latest, path.stat().st_mtime)
+            except OSError:
+                continue
+    if latest <= 0:
+        try:
+            latest = root.stat().st_mtime
+        except OSError:
+            return datetime.fromtimestamp(0, tz=timezone.utc)
+    return datetime.fromtimestamp(latest, tz=timezone.utc)
+
+
+def _graph_activity_at(
+    project_id: str,
+    job_times: dict[str, datetime] | None = None,
+) -> datetime:
+    """Most recent signal: last job or graph file edit."""
+    job_times = job_times if job_times is not None else _job_last_activity_by_project()
+    candidates = [_graph_file_activity(project_id)]
+    if project_id in job_times:
+        candidates.append(job_times[project_id])
+    return max(candidates)
+
+
+def _format_activity_age(when: datetime, *, now: datetime | None = None) -> str:
+    now = now or datetime.now(timezone.utc)
+    secs = int((now - when).total_seconds())
+    if secs < 60:
+        return "just now"
+    if secs < 3600:
+        return f"{secs // 60}m ago"
+    if secs < 86400:
+        return f"{secs // 3600}h ago"
+    days = secs // 86400
+    return "1d ago" if days == 1 else f"{days}d ago"
+
+
+def partition_graphs_by_activity(
+    project_ids: list[str] | None = None,
+    *,
+    now: datetime | None = None,
+    archive_after: timedelta = _GRAPH_ARCHIVE_AFTER,
+    job_times: dict[str, datetime] | None = None,
+) -> tuple[list[tuple[str, datetime]], list[tuple[str, datetime]]]:
+    """Split graphs into active vs archive (> archive_after idle), newest first."""
+    now = now or datetime.now(timezone.utc)
+    ids = project_ids if project_ids is not None else _graph_projects(ROOT)
+    job_times = job_times if job_times is not None else _job_last_activity_by_project()
+    active: list[tuple[str, datetime]] = []
+    archive: list[tuple[str, datetime]] = []
+    for pid in ids:
+        when = _graph_activity_at(pid, job_times)
+        if now - when <= archive_after:
+            active.append((pid, when))
+        else:
+            archive.append((pid, when))
+    active.sort(key=lambda item: item[1], reverse=True)
+    archive.sort(key=lambda item: item[1], reverse=True)
+    return active, archive
+
+
+def _graph_pick_items(
+    rows: list[tuple[str, datetime]],
+    *,
+    now: datetime | None = None,
+) -> list[tuple[str, str | Text]]:
+    """(project_id, '3d ago · N nodes') for paged menus."""
+    now = now or datetime.now(timezone.utc)
+    node_cli = _import_module("node_cli")
+    items: list[tuple[str, str | Text]] = []
+    for pid, when in rows:
+        age = _format_activity_age(when, now=now)
+        try:
+            count = len(node_cli.iter_nodes(ROOT, pid))
+            detail = f"{age} · {count} node{'s' if count != 1 else ''}"
+        except Exception:
+            detail = age
+        desc = Text()
+        desc.append(age, style="bold cyan" if (now - when) <= timedelta(days=2) else "dim")
+        if " · " in detail:
+            desc.append(detail[len(age):], style="dim")
+        items.append((pid, desc))
+    return items
+
+
+def _pick_graph(
+    heading: str,
+    *,
+    back_label: str = "main menu",
+    include_archive: bool = True,
+) -> str | object:
+    """Activity-sorted graph picker; optional archive bucket for idle graphs."""
+    active, archive = partition_graphs_by_activity()
+    now = datetime.now(timezone.utc)
+    while True:
+        items = _graph_pick_items(active, now=now)
+        if include_archive and archive:
+            items.append((
+                _ARCHIVE_SENTINEL,
+                Text(
+                    f"archive · {len(archive)} inactive (>7d)",
+                    style="dim",
+                ),
+            ))
+        if not items:
+            _clear_screen()
+            console.print(Text("No graphs found.", style="yellow"))
+            _pause()
+            return _MENU_BACK
+        picked = _pick_list(
+            heading,
+            items,
+            preview_cmd=_project_preview_cmd(),
+            back_label=back_label,
+        )
+        if picked in {_MENU_BACK, _MENU_QUIT}:
+            return picked
+        if picked == _ARCHIVE_SENTINEL:
+            arch_items = _graph_pick_items(archive, now=now)
+            if not arch_items:
+                console.print(Text("Archive empty.", style="dim"))
+                _pause()
+                continue
+            archived = _pick_list(
+                f"{heading} · archive",
+                arch_items,
+                preview_cmd=_project_preview_cmd(),
+                back_label="active graphs",
+            )
+            if archived is _MENU_QUIT:
+                return _MENU_QUIT
+            if archived is _MENU_BACK:
+                continue
+            return archived
+        return picked
+
+
+def interactive_frontier(project: str | None = None):
     """Derived frontier view; recomputes from live graph + runtime on open."""
+    if project:
+        _clear_screen()
+        _show_frontier([project])
+        _pause()
+        return _MENU_BACK
     frontier = _import_module("frontier")
     projects = frontier.project_ids(ROOT)
     if not projects:
@@ -511,7 +713,7 @@ def interactive_frontier():
     actions = {
         "a": ("all", "frontier for every project"),
         "o": ("one", "pick one project"),
-        "b": ("main menu", ""),
+        "b": ("back", ""),
         "q": ("quit", ""),
     }
     while True:
@@ -527,120 +729,116 @@ def interactive_frontier():
             _show_frontier(projects)
             _pause()
             continue
-        project = _pick_list(
-            "frontier · graphs",
-            [(pid, "") for pid in projects],
-            preview_cmd=_project_preview_cmd(),
-            back_label="frontier",
-        )
-        if project is _MENU_QUIT:
+        picked = _pick_graph("frontier · graphs", back_label="frontier")
+        if picked is _MENU_QUIT:
             return _MENU_QUIT
-        if project is _MENU_BACK:
+        if picked is _MENU_BACK:
             continue
         _clear_screen()
-        _show_frontier([project])
+        _show_frontier([str(picked)])
         _pause()
 
 
-def interactive_dispatch():
-    """Pick a graph and a genuinely dispatchable target with one-key menus."""
-    projects = _graph_projects(ROOT)
-    if not projects:
-        console.print("no graphs found")
-        return
-    project_items = [(project_id, "") for project_id in projects]
-    while True:
-        project = _pick_list(
-            "dispatch · graphs",
-            project_items,
-            preview_cmd=_project_preview_cmd(),
-            back_label="main menu",
-        )
-        if project is _MENU_QUIT:
-            return _MENU_QUIT
-        if project is _MENU_BACK:
-            return _MENU_BACK
+def _dispatch_for_project(project: str, *, back_label: str = "graphs"):
+    """Dispatchability table + target pick for one graph."""
+    try:
+        con = _connect_events_db(resolve_runtime_root() / "db" / "queue.db")
+    except DispatchError as exc:
+        console.print(f"[bold red]ERROR:[/] {exc}")
+        return _MENU_BACK
+    try:
         try:
-            con = _connect_events_db(resolve_runtime_root() / "db" / "queue.db")
+            plan = build_dispatch_plan(
+                ROOT, project, None, project_hint=project
+            )
+            movable, excluded = _classify_dispatch_items(con, ROOT, plan)
         except DispatchError as exc:
             console.print(f"[bold red]ERROR:[/] {exc}")
-            return
-        try:
-            try:
-                plan = build_dispatch_plan(
-                    ROOT, project, None, project_hint=project
-                )
-                movable, excluded = _classify_dispatch_items(con, ROOT, plan)
-            except DispatchError as exc:
-                console.print(f"[bold red]ERROR:[/] {exc}")
-                return
+            return _MENU_BACK
 
-            _clear_screen()
-            table = Table(title=f"dispatchability — {project}")
-            table.add_column("node", style="bold")
-            table.add_column("executor")
-            table.add_column("state")
-            for item in movable:
-                table.add_row(
-                    item["node_id"],
-                    item["executor"],
-                    Text("ready now", style="bold cyan"),
-                )
-            for item, reason in excluded:
-                table.add_row(
-                    item["node_id"],
-                    item["executor"],
-                    Text(str(reason), style="yellow"),
-                )
-            console.print(table)
-            if not movable:
-                console.print(
-                    Text("No nodes are dispatchable now.", style="yellow")
-                )
-                return
+        _clear_screen()
+        table = Table(title=f"dispatchability — {project}")
+        table.add_column("node", style="bold")
+        table.add_column("executor")
+        table.add_column("state")
+        for item in movable:
+            table.add_row(
+                item["node_id"],
+                item["executor"],
+                Text("ready now", style="bold cyan"),
+            )
+        for item, reason in excluded:
+            table.add_row(
+                item["node_id"],
+                item["executor"],
+                Text(str(reason), style="yellow"),
+            )
+        console.print(table)
+        if not movable:
+            console.print(
+                Text("No nodes are dispatchable now.", style="yellow")
+            )
+            return _MENU_BACK
 
-            target_items = [
+        target_items = [
+            (
+                project,
+                Text(
+                    f"entire dispatchable frontier · {len(movable)} node"
+                    f"{'s' if len(movable) != 1 else ''}",
+                    style="bold cyan",
+                ),
+            ),
+            *[
                 (
-                    project,
+                    item["node_id"],
                     Text(
-                        f"entire dispatchable frontier · {len(movable)} node"
-                        f"{'s' if len(movable) != 1 else ''}",
+                        f"{item['executor']} · ready now",
                         style="bold cyan",
                     ),
-                ),
-                *[
-                    (
-                        item["node_id"],
-                        Text(
-                            f"{item['executor']} · ready now",
-                            style="bold cyan",
-                        ),
-                    )
-                    for item in movable
-                ],
-            ]
-            target = _pick_list(
-                f"dispatch · {project}",
-                target_items,
-                back_label="graphs",
-            )
-            if target is _MENU_QUIT:
-                return _MENU_QUIT
-            if target is _MENU_BACK:
-                continue
-            executor = Prompt.ask(
-                "executor override (blank = configured routing)", default=""
-            )
-            _dispatch_flow(
-                con,
-                ROOT,
-                target,
-                executor.strip() or None,
-                project_hint=project,
-            )
-            return
-        finally:
-            con.close()
+                )
+                for item in movable
+            ],
+        ]
+        target = _pick_list(
+            f"dispatch · {project}",
+            target_items,
+            back_label=back_label,
+        )
+        if target is _MENU_QUIT:
+            return _MENU_QUIT
+        if target is _MENU_BACK:
+            return _MENU_BACK
+        executor = Prompt.ask(
+            "executor override (blank = configured routing)", default=""
+        )
+        _dispatch_flow(
+            con,
+            ROOT,
+            target,
+            executor.strip() or None,
+            project_hint=project,
+        )
+        return _MENU_BACK
+    finally:
+        con.close()
+
+
+def interactive_dispatch(project: str | None = None):
+    """Pick a graph (activity-sorted) and dispatch ready targets."""
+    if project:
+        return _dispatch_for_project(project, back_label="graph")
+    while True:
+        picked = _pick_graph("dispatch · graphs", back_label="main menu")
+        if picked is _MENU_QUIT:
+            return _MENU_QUIT
+        if picked is _MENU_BACK:
+            return _MENU_BACK
+        outcome = _dispatch_for_project(str(picked), back_label="graphs")
+        if outcome is _MENU_QUIT:
+            return _MENU_QUIT
+        # After a dispatch attempt, return to main (same as before).
+        return outcome
 
 
 def _import_module(name: str):
@@ -980,20 +1178,29 @@ def _batch_node_status(project: str, node_ids: list[str]):
     return _MENU_BACK
 
 
-def _runtime_job_items(state_filter: str | None = None) -> list[tuple[str, str]]:
+def _runtime_job_items(
+    state_filter: str | None = None,
+    project: str | None = None,
+) -> list[tuple[str, str]]:
     """(job_id, scan label) from the runtime queue DB."""
     jobs_status = load_runtime_jobs_module()
     con = jobs_status.connect()
     try:
         q = (
-            "SELECT job_id, node_id, queue_state, created_at FROM jobs"
+            "SELECT job_id, node_id, queue_state, created_at, project_id FROM jobs"
         )
-        params: tuple = ()
+        clauses: list[str] = []
+        params: list = []
         if state_filter:
-            q += " WHERE queue_state = ?"
-            params = (state_filter,)
+            clauses.append("queue_state = ?")
+            params.append(state_filter)
+        if project:
+            clauses.append("project_id = ?")
+            params.append(project)
+        if clauses:
+            q += " WHERE " + " AND ".join(clauses)
         q += " ORDER BY created_at DESC"
-        rows = con.execute(q, params).fetchall()
+        rows = con.execute(q, tuple(params)).fetchall()
         items: list[tuple[str, str]] = []
         for r in rows:
             created = str(r["created_at"] or "")[:10]
@@ -2294,7 +2501,7 @@ def interactive_evaluations():
     actions = {
         "r": ("refresh", "reload receipts"),
         "o": ("open", "open one evaluation"),
-        "b": ("main menu", ""),
+        "b": ("back", ""),
         "q": ("quit", ""),
     }
     while True:
@@ -2359,30 +2566,56 @@ def cmd_evaluations(_args) -> int:
     return 0
 
 
-def interactive_jobs():
+def interactive_jobs(project: str | None = None):
     """Review and update runtime jobs inside the human-operated menu.
 
     open/update use the rich paged list; ``f`` filters via fzf, ``m`` multi-
     selects for batch queue-state changes. Empty queue falls back to typing an id.
+    When ``project`` is set (graph hub), only that graph's jobs are shown.
     """
     state_filter: str | None = None
+    back_name = "graph" if project else "graphs"
     actions = {
-        "r": ("refresh", "show all runtime jobs"),
-        "a": ("awaiting review", "show the human review queue"),
-        "e": ("evaluations", "show evaluator result summary"),
+        "r": ("refresh", "reload this job list"),
+        "a": ("awaiting review", "human review queue"),
+        "e": ("evaluations", "evaluator result summary"),
         "o": ("open", "pick a job (f = filter)"),
         "u": ("update", "set queue state (space checks)"),
-        "b": ("main menu", ""),
+        "b": (back_name, ""),
         "q": ("quit", ""),
     }
     while True:
         _clear_screen()
-        heading = "jobs" if state_filter is None else f"jobs · {state_filter}"
+        if project and state_filter:
+            heading = f"jobs · {project} · {state_filter}"
+        elif project:
+            heading = f"jobs · {project}"
+        elif state_filter:
+            heading = f"jobs · {state_filter}"
+        else:
+            heading = "jobs"
         console.print(Text(heading, style="bold"))
-        argv = ["list"]
-        if state_filter:
-            argv.extend(["--state", state_filter])
-        run_runtime_jobs(argv)
+        try:
+            listed = _runtime_job_items(state_filter, project=project)
+        except RuntimeError as exc:
+            console.print(Text(f"ERROR: {exc}", style="red"))
+            listed = []
+        if listed:
+            for job_id, label in listed[:40]:
+                state = label.split("  ", 1)[0]
+                line = Text()
+                line.append(f"{job_id}  ", style="dim")
+                line.append(state, style=_graph_status_style(state))
+                rest = label[len(state):]
+                if rest:
+                    line.append(rest)
+                console.print(line)
+            if len(listed) > 40:
+                console.print(Text(f"  … {len(listed) - 40} more", style="dim"))
+        else:
+            console.print(Text("No jobs." + (
+                f" (project={project})" if project else ""
+            ), style="dim"))
         console.print()
 
         choice = _menu_choice(actions, default="r")
@@ -2404,7 +2637,7 @@ def interactive_jobs():
             continue
 
         try:
-            job_items = _runtime_job_items(state_filter)
+            job_items = _runtime_job_items(state_filter, project=project)
         except RuntimeError as exc:
             console.print(Text(f"ERROR: {exc}", style="red"))
             _pause()
@@ -2518,6 +2751,7 @@ def static_overview():
     table.add_column("group", style="bold cyan", no_wrap=True)
     table.add_column("owns")
     table.add_column("start with", style="dim", no_wrap=True)
+    table.add_row("menu", "dispatch or graphs (active first; archive >7d)", "gddp")
     table.add_row("node", "graph truth, authoring, runtime/evaluator join", "gddp node list")
     table.add_row("jobs", "runtime queue, results, and audited state changes", "gddp jobs list")
     table.add_row("evaluations", "evaluator receipts, verdicts, and timing", "gddp evaluations")
@@ -2525,70 +2759,111 @@ def static_overview():
     table.add_row("project", "project graph creation and validation", "gddp project -h")
     table.add_row("obsidian", "graph export", "gddp obsidian export")
     console.print(table)
-    console.print(Text("Run `gddp` in a terminal for the menu; use `gddp <group> -h` for commands.", style="dim"))
+    console.print(Text(
+        "TTY menu: dispatch | graphs (nodes/jobs/frontier/status live under a graph). "
+        "Shell groups still work: `gddp <group> -h`.",
+        style="dim",
+    ))
+
+
+def interactive_graph_hub(project: str):
+    """Everything for one graph: nodes, jobs, dispatch, frontier, status, validate."""
+    actions = {
+        "n": ("nodes", "review and update graph truth"),
+        "j": ("jobs", "runtime jobs for this graph"),
+        "d": ("dispatch", "dispatch ready nodes on this graph"),
+        "f": ("frontier", "ready / in flight / blocked"),
+        "s": ("status", "completion + node phases"),
+        "v": ("validate", "check this graph definition"),
+        "e": ("evaluations", "evaluator receipts (all graphs)"),
+        "b": ("graphs", ""),
+        "q": ("quit", ""),
+    }
+    while True:
+        _clear_screen()
+        console.print(
+            Text("graph", style="bold")
+            .append(f"  ·  {project}", style="bold cyan")
+        )
+        try:
+            choice = _menu_choice(actions, default="n")
+        except (EOFError, KeyboardInterrupt):
+            return _MENU_BACK
+        if choice == "q":
+            return _MENU_QUIT
+        if choice == "b":
+            return _MENU_BACK
+        try:
+            if choice == "n":
+                outcome = interactive_nodes(project)
+            elif choice == "j":
+                outcome = interactive_jobs(project)
+            elif choice == "d":
+                outcome = interactive_dispatch(project)
+                if outcome is not _MENU_QUIT:
+                    _pause()
+            elif choice == "f":
+                outcome = interactive_frontier(project)
+            elif choice == "s":
+                outcome = interactive_status(project)
+            elif choice == "v":
+                outcome = interactive_validate(project)
+            elif choice == "e":
+                outcome = interactive_evaluations()
+            else:
+                outcome = _MENU_BACK
+            if outcome is _MENU_QUIT:
+                return _MENU_QUIT
+        except SystemExit:
+            if choice == "v":
+                _pause()
+        except KeyboardInterrupt:
+            return _MENU_BACK
+
+
+def interactive_graphs():
+    """Activity-sorted graphs; idle (>7d) live under archive, not the main list."""
+    while True:
+        picked = _pick_graph("graphs", back_label="main menu")
+        if picked is _MENU_QUIT:
+            return _MENU_QUIT
+        if picked is _MENU_BACK:
+            return _MENU_BACK
+        outcome = interactive_graph_hub(str(picked))
+        if outcome is _MENU_QUIT:
+            return _MENU_QUIT
 
 
 def interactive_menu():
-    """Keep graph control in config while delegating the jobs section to runtime."""
+    """Front door: dispatch or graphs. Everything else is under a graph."""
     actions = {
-        "n": ("nodes", "review and update graph truth"),
-        "j": ("jobs", "review and update runtime jobs"),
-        "e": ("evaluations", "evaluator receipts, verdicts, and timing"),
-        "d": ("dispatch", "dispatch ready nodes through the event pipeline"),
-        "f": ("frontier", "derived operating frontier (read-only)"),
-        "s": ("status", "summarize graph completion"),
-        "v": ("validate", "validate graph definitions"),
+        "d": ("dispatch", "send ready work through the event pipeline"),
+        "g": ("graphs", "active graphs first; archive for idle (>7d)"),
         "q": ("quit", ""),
     }
     while True:
         _clear_screen()
         console.print(Text("gddp", style="bold").append("  ·  graph control plane", style="dim"))
         try:
-            choice = _menu_choice(actions, default="n")
+            choice = _menu_choice(actions, default="g")
         except (EOFError, KeyboardInterrupt):
             console.print()
             break
         if choice == "q":
             break
         try:
-            if choice == "n":
-                outcome = interactive_nodes()
-                if outcome is _MENU_QUIT:
-                    break
-            elif choice == "j":
-                outcome = interactive_jobs()
-                if outcome is _MENU_QUIT:
-                    break
-            elif choice == "e":
-                outcome = interactive_evaluations()
-                if outcome is _MENU_QUIT:
-                    break
-            elif choice == "d":
-                _clear_screen()
+            if choice == "d":
                 outcome = interactive_dispatch()
                 if outcome is _MENU_QUIT:
                     break
-                if outcome is _MENU_BACK:
-                    continue
-                _pause()
-            elif choice == "f":
-                outcome = interactive_frontier()
-                if outcome is _MENU_QUIT:
-                    break
-            elif choice == "s":
-                outcome = interactive_status()
-                if outcome is _MENU_QUIT:
-                    break
-            elif choice == "v":
-                outcome = interactive_validate()
+                if outcome is not _MENU_BACK:
+                    _pause()
+            elif choice == "g":
+                outcome = interactive_graphs()
                 if outcome is _MENU_QUIT:
                     break
         except SystemExit:
-            # Existing command handlers use SystemExit; one menu action should
-            # return to the control-plane menu instead of closing the CLI.
             pass
-            if choice == "v":
-                _pause()
         except KeyboardInterrupt:
             break
     _clear_screen()
@@ -3138,12 +3413,17 @@ def _render_project_status_detail(project_id: str) -> None:
         console.print(ev_scan)
 
 
-def interactive_status():
-    """Status menu: all projects summary or one project with node phases."""
+def interactive_status(project: str | None = None):
+    """Status for one graph, or all/one picker when no project is fixed."""
+    if project:
+        _clear_screen()
+        show_status(project)
+        _pause()
+        return _MENU_BACK
     actions = {
         "a": ("all", "every project completion summary"),
         "o": ("one", "pick one project — counts + node phases"),
-        "b": ("main menu", ""),
+        "b": ("back", ""),
         "q": ("quit", ""),
     }
     while True:
@@ -3159,32 +3439,27 @@ def interactive_status():
             show_status()
             _pause()
             continue
-        projects = _list_status_projects()
-        if not projects:
-            console.print(Text("No graphs found", style="yellow"))
-            _pause()
-            continue
-        project = _pick_list(
-            "status · projects",
-            [(pid, "") for pid in projects],
-            preview_cmd=_project_preview_cmd(),
-            back_label="status",
-        )
-        if project is _MENU_QUIT:
+        picked = _pick_graph("status · graphs", back_label="status")
+        if picked is _MENU_QUIT:
             return _MENU_QUIT
-        if project is _MENU_BACK:
+        if picked is _MENU_BACK:
             continue
         _clear_screen()
-        show_status(project)
+        show_status(str(picked))
         _pause()
 
 
-def interactive_validate():
-    """Validate menu: all graphs or one project."""
+def interactive_validate(project: str | None = None):
+    """Validate one graph, or all/one picker when no project is fixed."""
+    if project:
+        _clear_screen()
+        validate_project(project)
+        _pause()
+        return _MENU_BACK
     actions = {
         "a": ("all", "validate every project"),
         "o": ("one", "pick one project"),
-        "b": ("main menu", ""),
+        "b": ("back", ""),
         "q": ("quit", ""),
     }
     while True:
@@ -3200,23 +3475,13 @@ def interactive_validate():
             validate_project(None)
             _pause()
             continue
-        projects = _list_status_projects()
-        if not projects:
-            console.print(Text("No graphs found", style="yellow"))
-            _pause()
-            continue
-        project = _pick_list(
-            "validate · projects",
-            [(pid, "") for pid in projects],
-            preview_cmd=_project_preview_cmd(),
-            back_label="validate",
-        )
-        if project is _MENU_QUIT:
+        picked = _pick_graph("validate · graphs", back_label="validate")
+        if picked is _MENU_QUIT:
             return _MENU_QUIT
-        if project is _MENU_BACK:
+        if picked is _MENU_BACK:
             continue
         _clear_screen()
-        validate_project(project)
+        validate_project(str(picked))
         _pause()
 
 
