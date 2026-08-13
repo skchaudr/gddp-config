@@ -844,11 +844,11 @@ def _pick_list(
     back_label: str = "back",
     fzf_header: str | None = None,
 ):
-    """Rich paged list by default. Optional fzf via ``f`` / ``m`` keys.
+    """Rich paged list by default. Optional fzf via ``f``.
 
     multi=False → value | _MENU_BACK | _MENU_QUIT
     multi=True  → value | list[str] | _MENU_BACK | _MENU_QUIT
-      (list only when the operator steps into multi fzf with ``m``)
+      (list when space/m has checked 2+ rows and Enter is pressed)
     """
     del fzf_header  # callers used to pass verbose fzf chrome; paged owns help now
     return _paged_menu(
@@ -1158,6 +1158,17 @@ def _format_list_description(description: str | Text, room: int) -> Text:
     return Text(plain)
 
 
+def _checked_values(
+    items: list[tuple[str, str | Text]],
+    checked: set[str],
+):
+    """Checked ids in list order. One id stays a scalar (opens that item)."""
+    ordered = [value for value, _ in items if value in checked]
+    if not ordered:
+        return None
+    return ordered if len(ordered) > 1 else ordered[0]
+
+
 def _paged_menu(
     heading: str,
     items: list[tuple[str, str | Text]],
@@ -1171,7 +1182,10 @@ def _paged_menu(
 
     Optional fzf step-in (does not replace this path):
       ``f`` / Ctrl-F  — fuzzy filter + preview (single)
-      ``m``           — multi-select batch (when ``fzf_multi``)
+
+    When ``fzf_multi`` is set, space / ``m`` toggles a checkbox on the
+    current row. Enter with 2+ checked returns that list (batch);
+    Enter with 0–1 checked opens that one item.
 
     Static list content is redrawn in place (clear-to-end), not via a full
     terminal clear on every arrow key.
@@ -1193,6 +1207,7 @@ def _paged_menu(
     cursor = 0
     drawn = 0
     first_paint = True
+    checked: set[str] = set()
 
     while True:
         page_count = (len(items) + page_size - 1) // page_size
@@ -1206,26 +1221,36 @@ def _paged_menu(
         title = Text(heading, style="bold")
         if page_count > 1:
             title.append(f"  ·  {page + 1}/{page_count}", style="dim")
+        if fzf_multi:
+            n = len(checked)
+            title.append(
+                f"  ·  {n} selected",
+                style="green" if n else "dim",
+            )
         lines: list[Text] = [title]
         for offset, (value, description) in enumerate(visible, start=1):
             marker = "›" if offset - 1 == cursor else " "
             row = Text()
             row.append(f"{marker} {offset}", style="bold cyan")
+            if fzf_multi:
+                on = value in checked
+                row.append(" ✓" if on else "  ", style="green" if on else "dim")
             row.append(f"  {value}", style="bold")
-            used = 4 + len(str(offset)) + 2 + len(value) + 2
+            used = 4 + len(str(offset)) + (2 if fzf_multi else 0) + 2 + len(value) + 2
             room = max(12, width - used)
             row.append("  ")
             row.append_text(_format_list_description(description, room))
             lines.append(row)
 
         # One help line — no stacked chrome.
-        help_bits = ["↑/↓", "enter", "1-9"]
+        help_bits = ["↑/↓"]
+        if fzf_multi:
+            help_bits.append("space")
+        help_bits.extend(["enter", "1-9"])
         if page_count > 1:
             help_bits.append("←/→ page")
         if fzf_ok:
             help_bits.append("f filter")
-            if fzf_multi:
-                help_bits.append("m multi")
         help_bits.extend([f"b {back_label}", "q quit"])
         lines.append(Text("  " + " · ".join(help_bits), style="dim"))
 
@@ -1236,7 +1261,7 @@ def _paged_menu(
             clear_lines(drawn)
 
         for line in lines:
-            console.print(line)
+            console.print(line, overflow="crop", crop=True, no_wrap=True)
         drawn = len(lines)
 
         # Read keys here so navigation does not echo "up"/"down" or full-clear.
@@ -1249,7 +1274,18 @@ def _paged_menu(
             if choice == "\x1b":
                 choice = "b"
             if choice in {"\r", "\n"}:
+                if fzf_multi:
+                    picked = _checked_values(items, checked)
+                    if picked is not None:
+                        return picked
                 return visible[cursor][0]
+            if fzf_multi and choice in {" ", "\t", "m", "M"}:
+                value = visible[cursor][0]
+                if value in checked:
+                    checked.discard(value)
+                else:
+                    checked.add(value)
+                break
             if choice == "UP":
                 cursor = (cursor - 1) % len(visible)
                 break
@@ -1276,19 +1312,7 @@ def _paged_menu(
                     return selected[0]
                 first_paint = True  # fzf wrecked the screen; full redraw
                 break
-            # m — opt-in multi fzf (batch). Only when caller enabled it.
-            if choice in {"m", "M"} and fzf_ok and fzf_multi:
-                selected = _run_fzf(
-                    heading,
-                    items,
-                    preview_cmd=fzf_preview_cmd,
-                    multi=True,
-                )
-                if selected:
-                    return selected if len(selected) > 1 else selected[0]
-                first_paint = True
-                break
-            if choice in {"f", "F", "\x06", "m", "M"} and not fzf_ok:
+            if choice in {"f", "F", "\x06"} and not fzf_ok:
                 console.print(
                     Text("  fzf not installed (brew install fzf)", style="yellow")
                 )
@@ -1943,8 +1967,8 @@ def _node_status_label(doc: dict, entry: dict | None) -> str:
 def interactive_nodes(project: str | None = None):
     """Project → node → review/update loop for canonical graph truth.
 
-    Default path is the rich paged menu. ``f`` steps into fzf (filter/preview);
-    ``m`` multi-selects for batch graph-status when fzf is installed.
+    Default path is the rich paged menu. ``f`` steps into fzf (filter/preview).
+    Space / ``m`` checks rows; Enter with 2+ checked opens batch graph-status.
     """
     node_cli = _import_module("node_cli")
     fixed_project = project is not None
@@ -2304,7 +2328,7 @@ def interactive_jobs():
         "a": ("awaiting review", "show the human review queue"),
         "e": ("evaluations", "show evaluator result summary"),
         "o": ("open", "pick a job (f = filter)"),
-        "u": ("update", "set queue state (m = multi)"),
+        "u": ("update", "set queue state (space checks)"),
         "b": ("main menu", ""),
         "q": ("quit", ""),
     }
@@ -2369,7 +2393,7 @@ def interactive_jobs():
             _pause()
             continue
 
-        # update — paged list; m steps into multi fzf when wanted
+        # update — paged list; space/m checks rows for batch queue state
         if not job_items:
             console.print(Text("No jobs to update.", style="yellow"))
             _pause()

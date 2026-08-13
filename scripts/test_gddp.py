@@ -306,6 +306,51 @@ class OverviewTests(unittest.TestCase):
 
         self.assertEqual(selected, "node-2")
 
+    def test_paged_menu_space_toggles_native_multi(self):
+        items = [("n1", "a"), ("n2", "b"), ("n3", "c")]
+        keys = iter([" ", "DOWN", " ", "\r"])
+        terminal = self._paged_terminal(lambda: next(keys))
+        output = StringIO()
+        test_console = Console(file=output, width=80, color_system=None)
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "console", test_console):
+            selected = gddp._paged_menu("nodes", items, fzf_multi=True)
+        self.assertEqual(selected, ["n1", "n2"])
+        rendered = output.getvalue()
+        self.assertIn("2 selected", rendered)
+        self.assertIn("✓", rendered)
+        self.assertIn("space", rendered)
+
+    def test_paged_menu_m_toggles_without_opening_fzf(self):
+        items = [("n1", "a"), ("n2", "b")]
+        keys = iter(["m", "DOWN", "m", "\r"])
+        terminal = self._paged_terminal(lambda: next(keys))
+        fzf = SimpleNamespace(
+            available=lambda: True,
+            pick=lambda *a, **k: (_ for _ in ()).throw(
+                AssertionError("fzf multi must stay closed")
+            ),
+        )
+
+        def import_module(name):
+            if name == "terminal":
+                return terminal
+            if name == "fzf_pick":
+                return fzf
+            return __import__(name)
+
+        with patch.object(gddp, "_import_module", side_effect=import_module):
+            selected = gddp._paged_menu("nodes", items, fzf_multi=True)
+        self.assertEqual(selected, ["n1", "n2"])
+
+    def test_paged_menu_enter_with_no_checks_opens_current(self):
+        items = [("n1", "a"), ("n2", "b")]
+        keys = iter(["DOWN", "\r"])
+        terminal = self._paged_terminal(lambda: next(keys))
+        with patch.object(gddp, "_import_module", return_value=terminal):
+            selected = gddp._paged_menu("nodes", items, fzf_multi=True)
+        self.assertEqual(selected, "n2")
+
     def test_interactive_jobs_starts_with_real_list_command(self):
         terminal = SimpleNamespace(getch=lambda: "b")
         with patch.object(gddp, "_import_module", return_value=terminal), \

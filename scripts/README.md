@@ -65,8 +65,9 @@ and evaluator evidence remain runtime-owned while graph truth remains config-own
 Bare `gddp` opens the unified config-hosted menu in a terminal. Each submenu
 clears and redraws as one screen. **Default list path is the rich paged menu**
 (colored status · title). With `fzf` installed, **`f`** (or Ctrl-F) steps into
-fuzzy filter + YAML/`jobs show` preview; on node/job update lists, **`m`** opens
-multi-select for batch status/state. fzf never replaces the default path.
+fuzzy filter + YAML/`jobs show` preview. On node/job update lists, **space**
+(or **`m`**) checks rows in place; Enter with 2+ checked opens batch
+status/state. fzf never replaces the default path.
 Jobs writes still go through `jobs_status.py`. Redirected bare output prints a
 non-blocking command overview. Resolution uses `GDDP_RUNTIME_ROOT`, defaulting
 to the sibling `../gddp-runtime`; `GDDP_RUNTIME_PYTHON` can override the runtime

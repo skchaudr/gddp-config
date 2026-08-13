@@ -129,17 +129,19 @@ class GddpPickListFallbackTests(unittest.TestCase):
             )
         self.assertEqual(result, "chosen")
 
-    def test_paged_menu_m_returns_multi_selection(self):
+    def test_paged_menu_m_toggles_native_checks(self):
         import gddp
 
-        keys = iter(["m"])
+        keys = iter(["m", "DOWN", "m", "\r"])
         terminal = SimpleNamespace(
             getch=lambda: next(keys),
             clear_lines=lambda n: None,
         )
         fzf = SimpleNamespace(
             available=lambda: True,
-            pick=lambda *a, **k: ["n1", "n2"],
+            pick=lambda *a, **k: (_ for _ in ()).throw(
+                AssertionError("native multi must not open fzf")
+            ),
         )
 
         def import_module(name):
