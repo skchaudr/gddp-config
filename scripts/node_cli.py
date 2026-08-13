@@ -786,6 +786,21 @@ def _provenance_line(receipt: dict | None, acceptance: dict) -> str | None:
     )
 
 
+def _normalize_judgment(value: str | None) -> str:
+    """Map judged_pass / judged_fail → pass / fail for chips."""
+    raw = str(value or "?").strip()
+    key = raw.lower().replace("-", "_")
+    if key.startswith("judged_"):
+        key = key[len("judged_"):]
+    return {
+        "pass": "pass",
+        "passed": "pass",
+        "fail": "fail",
+        "failed": "fail",
+        "needs_more_evidence": "needs-more-evidence",
+    }.get(key, raw)
+
+
 def _criterion_lines(receipt: dict | None, acceptance: dict) -> list[tuple[str, str, str]]:
     """(criterion_id, judgment, confidence_or_empty) for the scan table."""
     rows: list[tuple[str, str, str]] = []
@@ -797,7 +812,7 @@ def _criterion_lines(receipt: dict | None, acceptance: dict) -> list[tuple[str, 
         seen.add(cid)
         conf = j.get("confidence")
         conf_s = "" if conf is None else str(conf)
-        rows.append((cid, str(j.get("judgment") or "?"), conf_s))
+        rows.append((cid, _normalize_judgment(j.get("judgment")), conf_s))
     for f in acceptance.get("criteria_findings") or []:
         if not isinstance(f, dict):
             continue
@@ -805,7 +820,7 @@ def _criterion_lines(receipt: dict | None, acceptance: dict) -> list[tuple[str, 
         if cid in seen:
             continue
         seen.add(cid)
-        rows.append((cid, str(f.get("judgment") or "?"), ""))
+        rows.append((cid, _normalize_judgment(f.get("judgment")), ""))
     return rows
 
 
