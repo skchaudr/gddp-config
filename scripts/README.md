@@ -270,4 +270,4 @@ Post-processes graphify output with node semantics for visualization.
 
 ## terminal.py — shared keypress helper
 
-Single keypress + arrow key decoding. Used by all TUI scripts.
+Single keypress + arrow key decoding (including modified CSI like `ESC[1;3A`). Unknown/incomplete sequences are ignored so they do not act as Escape. Used by all TUI scripts.

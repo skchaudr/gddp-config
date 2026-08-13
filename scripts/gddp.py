@@ -1048,6 +1048,8 @@ def _menu_choice(
         choice = getch()
         if choice == "\x03":
             raise KeyboardInterrupt
+        if not choice:
+            continue
         if choice == "\x1b":
             if "b" in by_key:
                 return "b"
@@ -1198,6 +1200,8 @@ def _paged_menu(
             choice = getch()
             if choice == "\x03":
                 raise KeyboardInterrupt
+            if not choice:
+                continue
             if choice == "\x1b":
                 choice = "b"
             if choice in {"\r", "\n"}:
@@ -1685,6 +1689,8 @@ def _node_review_pick_action(
         choice = getch()
         if choice == "\x03":
             raise KeyboardInterrupt
+        if not choice:
+            continue
         if choice == "\x1b":
             return "b"
         if choice in {"\r", "\n"}:

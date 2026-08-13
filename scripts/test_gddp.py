@@ -172,6 +172,22 @@ class OverviewTests(unittest.TestCase):
         with patch.object(gddp, "_import_module", return_value=terminal):
             self.assertEqual(gddp._menu_choice(actions, default="b"), "RIGHT")
 
+    def test_menu_choice_ignores_incomplete_escape(self):
+        """Failed CSI decode must not act as Escape/back or spam an error."""
+        keys = iter(["", "j"])
+        terminal = self._menu_terminal(lambda: next(keys))
+        actions = {
+            "n": ("nodes", ""),
+            "j": ("jobs", ""),
+            "b": ("back", ""),
+        }
+        output = StringIO()
+        test_console = Console(file=output, width=80, color_system=None)
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "console", test_console):
+            self.assertEqual(gddp._menu_choice(actions, default="n"), "j")
+        self.assertNotIn("is not an option", output.getvalue())
+
     def test_menu_choice_ignores_unregistered_horizontal_arrows(self):
         keys = iter(["LEFT", "b"])
         terminal = self._menu_terminal(lambda: next(keys))

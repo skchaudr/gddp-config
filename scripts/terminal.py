@@ -21,25 +21,69 @@ console = Console()
 
 # Arrow bytes can be split by terminal multiplexers. Keep bare Escape responsive
 # while allowing a realistic gap between bytes in the same control sequence.
-ESCAPE_SEQUENCE_TIMEOUT_SECONDS = 0.15
+# tmux escape-time is 100ms on this host; stay above that plus a small slop.
+ESCAPE_SEQUENCE_TIMEOUT_SECONDS = 0.25
+
+_ARROW_FINALS = {
+    "A": "UP",
+    "B": "DOWN",
+    "C": "RIGHT",
+    "D": "LEFT",
+    "H": "HOME",
+    "F": "END",
+}
+_TILDE_KEYS = {
+    "1": "HOME",
+    "4": "END",
+    "3": "DELETE",
+    "5": "PAGE_UP",
+    "6": "PAGE_DOWN",
+}
+
+
+def _map_csi(params: str, final: str) -> str:
+    """Map a complete CSI sequence. Unknown / focus / mouse → '' (not Escape)."""
+    if final in _ARROW_FINALS:
+        return _ARROW_FINALS[final]
+    if final == "~":
+        kind = params.split(";")[0] if params else ""
+        return _TILDE_KEYS.get(kind, "")
+    return ""
 
 
 def _decode_escape_sequence(first: str, read_available) -> str:
-    """Decode an arrow escape sequence while preserving a bare Escape key."""
+    """Decode arrows, including modified CSI (``ESC[1;3A``).
+
+    Bare Escape (no follower within the timeout) stays ``\\x1b``.
+    Incomplete or unknown CSI/SS3 returns ``''`` so callers do not treat a
+    failed arrow as back/quit, and leftover bytes are not leftover.
+    """
     if first != "\x1b":
         return first
     second = read_available()
-    if second not in {"[", "O"}:
+    if second is None:
         return "\x1b"
-    final = read_available()
-    return {
-        "A": "UP",
-        "B": "DOWN",
-        "C": "RIGHT",
-        "D": "LEFT",
-        "H": "HOME",
-        "F": "END",
-    }.get(final, "\x1b")
+    if second == "O":
+        final = read_available()
+        if final is None:
+            return ""
+        return _ARROW_FINALS.get(final, "")
+    if second != "[":
+        # ESC + other (alt-key, noise). Do not treat as back.
+        return ""
+
+    params: list[str] = []
+    while True:
+        ch = read_available()
+        if ch is None:
+            return ""
+        if len(ch) != 1:
+            return ""
+        code = ord(ch)
+        # CSI final byte: @ through ~ (0x40–0x7E)
+        if 0x40 <= code <= 0x7E:
+            return _map_csi("".join(params), ch)
+        params.append(ch)
 
 
 def clear_lines(n: int) -> None:

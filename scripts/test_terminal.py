@@ -26,15 +26,43 @@ class TerminalDecodeTests(unittest.TestCase):
     def test_arrow_escape_sequence_is_decoded(self):
         values = iter(["[", "C"])
         self.assertEqual(
-            terminal._decode_escape_sequence("\x1b", lambda: next(values)),
+            terminal._decode_escape_sequence("\x1b", lambda: next(values, None)),
             "RIGHT",
         )
 
-    def test_unknown_escape_sequence_falls_back_to_escape(self):
+    def test_unknown_escape_sequence_is_ignored(self):
         values = iter(["[", "Z"])
         self.assertEqual(
-            terminal._decode_escape_sequence("\x1b", lambda: next(values)),
-            "\x1b",
+            terminal._decode_escape_sequence("\x1b", lambda: next(values, None)),
+            "",
+        )
+
+    def test_modified_arrow_csi_is_decoded(self):
+        values = iter(["[", "1", ";", "3", "A"])
+        self.assertEqual(
+            terminal._decode_escape_sequence("\x1b", lambda: next(values, None)),
+            "UP",
+        )
+
+    def test_focus_event_is_not_escape(self):
+        values = iter(["[", "I"])
+        self.assertEqual(
+            terminal._decode_escape_sequence("\x1b", lambda: next(values, None)),
+            "",
+        )
+
+    def test_incomplete_csi_is_not_escape(self):
+        values = iter(["["])
+        self.assertEqual(
+            terminal._decode_escape_sequence("\x1b", lambda: next(values, None)),
+            "",
+        )
+
+    def test_ss3_arrow_is_decoded(self):
+        values = iter(["O", "B"])
+        self.assertEqual(
+            terminal._decode_escape_sequence("\x1b", lambda: next(values, None)),
+            "DOWN",
         )
 
     def test_getch_decodes_arrow_split_across_pty_reads(self):
@@ -72,6 +100,45 @@ class TerminalDecodeTests(unittest.TestCase):
                     except OSError:
                         break
             self.assertIn(b"KEY=RIGHT", output)
+        finally:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+            try:
+                os.waitpid(pid, 0)
+            except ChildProcessError:
+                pass
+
+    def test_getch_decodes_modified_arrow_csi(self):
+        """Ghostty/tmux send ESC[1;3A for alt-up; that must be UP, not Escape."""
+        pid, fd = pty.fork()
+        if pid == 0:
+            sys.stdin = open(0, encoding="utf-8", closefd=False)
+            os.write(1, b"READY\n")
+            os.write(1, f"KEY={terminal.getch()!r}\n".encode())
+            os._exit(0)
+
+        output = bytearray()
+        try:
+            deadline = time.monotonic() + 2
+            while b"READY" not in output and time.monotonic() < deadline:
+                readable, _, _ = select.select([fd], [], [], 0.1)
+                if readable:
+                    output.extend(os.read(fd, 4096))
+
+            self.assertIn(b"READY", output)
+            os.write(fd, b"\x1b[1;3A")
+
+            deadline = time.monotonic() + 2
+            while b"KEY=" not in output and time.monotonic() < deadline:
+                readable, _, _ = select.select([fd], [], [], 0.1)
+                if readable:
+                    try:
+                        output.extend(os.read(fd, 4096))
+                    except OSError:
+                        break
+            self.assertIn(b"KEY='UP'", output)
         finally:
             try:
                 os.close(fd)
