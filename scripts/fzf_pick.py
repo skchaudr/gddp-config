@@ -41,6 +41,7 @@ def pick(
     prompt: str = "pick> ",
     header: str = "",
     preview_cmd: str | None = None,
+    preview_window: str = "down:8:wrap",
     multi: bool = False,
     height: str = "90%",
     fzf_bin: str | None = None,
@@ -84,7 +85,7 @@ def pick(
             "--preview",
             preview_cmd,
             "--preview-window",
-            "right:50%:wrap",
+            preview_window,
         ])
 
     env = os.environ.copy()

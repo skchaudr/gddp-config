@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import io
 import sys
 import unittest
 from pathlib import Path
@@ -66,6 +67,7 @@ class FzfPickTests(unittest.TestCase):
         cmd = run.call_args.args[0]
         self.assertIn("--preview", cmd)
         self.assertIn("cat {1}.yaml", cmd)
+        self.assertIn("down:8:wrap", cmd)
 
     def test_full_line_stdout_still_extracts_value(self):
         # Older fzf without accept-nth may echo value\\tlabel.
@@ -172,16 +174,49 @@ class GddpPickListFallbackTests(unittest.TestCase):
             f'"{gddp.ROOT}/graphs/{{1}}/project.yaml"',
             project_cmd,
         )
-        self.assertIn(f"{gddp.ROOT}/graphs/{{1}}/project.yaml", project_cmd)
+        self.assertIn("fzf_preview.py project", project_cmd)
+        self.assertIn(" {1}", project_cmd)
         self.assertNotIn(
             f'"{gddp.ROOT}/graphs/gddp-runtime/nodes/{{1}}.yaml"',
             node_cmd,
         )
-        self.assertIn(
-            f"{gddp.ROOT}/graphs/gddp-runtime/nodes/{{1}}.yaml",
-            node_cmd,
-        )
+        self.assertIn("fzf_preview.py node", node_cmd)
+        self.assertIn(" {1}", node_cmd)
         self.assertIn("show {1}", job_cmd)
+
+    def test_fzf_items_puts_colored_status_before_id(self):
+        import gddp
+
+        desc = gddp._node_row_description(
+            "provisional",
+            "Build the GDDP_* environment-variable registry report",
+        )
+        value, label = gddp._fzf_items(
+            [("node-01-env-var-registry", desc)]
+        )[0]
+        self.assertEqual(value, "node-01-env-var-registry")
+        self.assertIn("\033[", label)
+        self.assertLess(label.find("provisional"), label.find("node-01-env-var-registry"))
+        self.assertIn("Build the GDDP_*", label)
+        self.assertNotIn(" · ", label)
+
+    def test_node_preview_card_is_short_and_has_no_yaml_keys(self):
+        import fzf_preview
+        import gddp
+
+        buf = io.StringIO()
+        with patch.object(sys, "stdout", buf):
+            fzf_preview.preview_node(
+                gddp.ROOT,
+                "gddp-dogfood",
+                "node-01-env-var-registry",
+            )
+        text = buf.getvalue()
+        self.assertIn("environment-variable registry", text)
+        self.assertIn("provisional", text)
+        self.assertNotIn("schema_version", text)
+        self.assertNotIn("acceptance_criteria", text)
+        self.assertLessEqual(len(text.splitlines()), 8)
 
 
 if __name__ == "__main__":

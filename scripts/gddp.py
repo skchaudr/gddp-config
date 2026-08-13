@@ -760,25 +760,55 @@ def _plain_desc(description: str | Text) -> str:
     return str(description) if description is not None else ""
 
 
+_RICH_TO_ANSI = {
+    "bold green": "\033[1;32m",
+    "bold yellow": "\033[1;33m",
+    "bold cyan": "\033[1;36m",
+    "bold blue": "\033[1;34m",
+    "bold magenta": "\033[1;35m",
+    "bold red": "\033[1;31m",
+    "bold white": "\033[1;37m",
+    "yellow": "\033[33m",
+    "magenta": "\033[35m",
+    "dim": "\033[2m",
+}
+
+
+def _ansi(text: str, style: str, width: int = 0) -> str:
+    """Fixed-width ANSI span for fzf ``--ansi`` labels."""
+    body = f"{text:<{width}}" if width else text
+    return f"{_RICH_TO_ANSI.get(style, '')}{body}\033[0m"
+
+
+def _split_list_desc(plain: str) -> tuple[str, str, str]:
+    """chip, phase, rest — from ``PASS · ready · title`` or ``ready · title``."""
+    if " · " not in plain:
+        return "", "", plain
+    parts = [p.strip() for p in plain.split(" · ", 2)]
+    if parts[0] in {"PASS", "FAIL"}:
+        return (
+            parts[0],
+            parts[1] if len(parts) > 1 else "",
+            parts[2] if len(parts) > 2 else "",
+        )
+    return "", parts[0], parts[1] if len(parts) > 1 else ""
+
+
 def _project_preview_cmd() -> str:
-    """fzf preview: head of project.yaml ({1} = project id).
+    """fzf preview: 4-line project card ({1} = project id).
 
     fzf shell-escapes placeholders (``{1}`` → ``'aa-cli'``). Never put
     ``{1}`` *inside* double quotes or the quotes become path characters:
     ``".../{1}/..."`` → ``".../'aa-cli'/..."`` → file not found.
     """
-    # Adjacent quoting: /abs/graphs/'id'/project.yaml resolves correctly.
-    return (
-        f'sed -n "1,80p" {ROOT}/graphs/{{1}}/project.yaml 2>/dev/null '
-        f'|| echo "(no project.yaml)"'
-    )
+    return f"{sys.executable} {SCRIPTS_DIR}/fzf_preview.py project {ROOT} {{1}}"
 
 
 def _node_preview_cmd(project: str) -> str:
-    """fzf preview: node YAML head ({1} = node id). See ``_project_preview_cmd``."""
+    """fzf preview: title/status/why card ({1} = node id)."""
     return (
-        f'sed -n "1,120p" {ROOT}/graphs/{project}/nodes/{{1}}.yaml 2>/dev/null '
-        f'|| echo "(no node file)"'
+        f"{sys.executable} {SCRIPTS_DIR}/fzf_preview.py "
+        f"node {ROOT} {project} {{1}}"
     )
 
 
@@ -793,7 +823,7 @@ def _job_preview_cmd() -> str:
         script = runtime_root / "scripts" / "jobs_status.py"
         return (
             f'GDDP_RUNTIME_ROOT={runtime_root} {py} {script} show {{1}} '
-            f'2>/dev/null | head -n 100 || echo "(job show failed)"'
+            f'2>/dev/null | head -n 8 || echo "(job show failed)"'
         )
     except RuntimeError as exc:
         return f'echo "runtime unavailable: {exc}"'
@@ -802,12 +832,25 @@ def _job_preview_cmd() -> str:
 def _fzf_items(
     items: list[tuple[str, str | Text]],
 ) -> list[tuple[str, str]]:
-    """(value, plain label) for fzf — rich styles do not survive fzf."""
+    """(value, ANSI label) — status column first so rows scan as columns."""
     out: list[tuple[str, str]] = []
     for value, description in items:
         lab = _plain_desc(description).strip()
-        display = f"{value}  {lab}" if lab and lab != value else value
-        out.append((value, display))
+        if not lab or lab == value:
+            out.append((value, value))
+            continue
+        chip, phase, rest = _split_list_desc(lab)
+        if phase:
+            bits = []
+            if chip:
+                bits.append(_ansi(chip, _graph_status_style(chip), 4))
+            bits.append(_ansi(phase, _graph_status_style(phase), 16))
+            bits.append(str(value))
+            if rest:
+                bits.append(rest)
+            out.append((value, "  ".join(bits)))
+            continue
+        out.append((value, f"{value}  {lab}"))
     return out
 
 
