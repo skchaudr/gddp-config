@@ -2901,11 +2901,50 @@ def interactive_graphs():
             return _MENU_QUIT
 
 
+def _heartbeat_loaded(label: str) -> bool:
+    try:
+        return subprocess.run(
+            ["launchctl", "print", f"gui/{os.getuid()}/{label}"],
+            capture_output=True,
+        ).returncode == 0
+    except OSError:
+        return False
+
+
+def interactive_heartbeat():
+    """Show control-plane state and offer the arm/disarm toggle."""
+    kit = resolve_runtime_root() / "deploy" / "mini-heartbeat"
+    labels = ("com.gddp.intake", "com.gddp.heartbeat")
+    _clear_screen()
+    loaded = {label: _heartbeat_loaded(label) for label in labels}
+    for label, on in loaded.items():
+        state = Text("ARMED", style="bold green") if on else Text("off", style="dim")
+        console.print(f"  {label}  ", state)
+    armed = any(loaded.values())
+    verb = "disarm" if armed else "arm"
+    script = "disarm.sh" if armed else "arm.sh"
+    try:
+        answer = Prompt.ask(
+            f"[cyan]{verb} the control plane?[/] (enter = yes, b = back)", default=""
+        ).strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        return _MENU_BACK
+    if answer in ("b", "back", "q"):
+        return _MENU_BACK
+    env = dict(os.environ)
+    if not armed:
+        env["MINI_HEARTBEAT_ARM"] = "1"
+    subprocess.run(["bash", str(kit / "bin" / script)], env=env, check=False)
+    _pause()
+    return _MENU_BACK
+
+
 def interactive_menu():
     """Front door: dispatch or graphs. Everything else is under a graph."""
     actions = {
         "d": ("dispatch", "send ready work through the event pipeline"),
         "g": ("graphs", "active graphs first; archive for idle (>7d)"),
+        "h": ("heartbeat", "arm/disarm the control plane (intake + heartbeat)"),
         "q": ("quit", ""),
     }
     while True:
@@ -2929,6 +2968,8 @@ def interactive_menu():
                 outcome = interactive_graphs()
                 if outcome is _MENU_QUIT:
                     break
+            elif choice == "h":
+                interactive_heartbeat()
         except SystemExit:
             pass
         except KeyboardInterrupt:
