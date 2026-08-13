@@ -438,6 +438,23 @@ class OverviewTests(unittest.TestCase):
             gddp._graph_status_style("awaiting review"),
         )
 
+    def test_verdict_chip_and_pass_style_are_distinct(self):
+        self.assertEqual(gddp._verdict_chip("pass"), "PASS")
+        self.assertEqual(gddp._verdict_chip("failed"), "FAIL")
+        self.assertEqual(gddp._verdict_chip("-"), "")
+        self.assertEqual(gddp._graph_status_style("pass"), "bold green")
+        self.assertNotEqual(
+            gddp._graph_status_style("pass"),
+            gddp._graph_status_style("awaiting review"),
+        )
+
+    def test_node_row_puts_pass_verdict_first(self):
+        text = gddp._node_row_description("awaiting review", "Title", "pass")
+        self.assertEqual(text.plain, "PASS · awaiting review · Title")
+        self.assertEqual(text.spans[0].style, "bold green")
+        none = gddp._node_row_description("ready", "Title", "-")
+        self.assertEqual(none.plain, "ready · Title")
+
     def test_interactive_status_all_and_one(self):
         keys = iter(["a", "x", "o", "1", "x", "b"])
         terminal = SimpleNamespace(
@@ -454,7 +471,9 @@ class OverviewTests(unittest.TestCase):
                 )
             ],
             fetch_runtime_evidence=lambda *a, **k: SimpleNamespace(
-                queue_state="awaiting_review", job_status="awaiting_review"
+                queue_state="awaiting_review",
+                job_status="awaiting_review",
+                verdict="pass",
             ),
         )
 
@@ -488,6 +507,7 @@ class OverviewTests(unittest.TestCase):
         )
         self.assertIn("status · all projects", rendered)
         self.assertIn("awaiting review", rendered)
+        self.assertIn("PASS", rendered)
 
     def test_show_status_all_uses_rich_counts(self):
         with patch.object(
@@ -991,6 +1011,19 @@ class ReviewSurfaceTests(unittest.TestCase):
         self.assertIsNotNone(receipt)
         self.assertEqual(receipt["verdict"], "pass")
         self.assertTrue(receipt["_receipt_path"].endswith("broken.json") is False)
+
+    def test_diff_view_styles_pass_verdict(self):
+        node_dir = Path(self.tempdir.name) / "verification" / "p" / "n"
+        self._write_receipt(node_dir, "r.json", verdict="pass", criteria_verdict="pass")
+        output = StringIO()
+        test_console = Console(file=output, force_terminal=True, width=80, color_system="truecolor")
+        with patch.object(gddp, "ROOT", Path(self.tempdir.name)), \
+                patch.object(gddp, "console", test_console), \
+                patch.object(gddp, "_resolve_project_repo", return_value=None):
+            gddp._render_evaluation_and_diff("p", "n")
+        rendered = output.getvalue()
+        self.assertIn("pass", rendered)
+        self.assertIn("\x1b[", rendered)
 
     def test_latest_receipt_none_without_dir(self):
         with patch.object(gddp, "ROOT", Path(self.tempdir.name)):

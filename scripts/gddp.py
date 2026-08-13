@@ -642,9 +642,13 @@ def _clear_screen() -> None:
 
 
 def _graph_status_style(status: str) -> str:
-    """Bright styles so list rows are scannable — review ≠ ready."""
+    """Bright styles so list rows are scannable — pass ≠ review ≠ ready."""
     plain = (status or "").strip().lower().replace("_", " ")
     if plain.startswith("desync"):
+        return "bold red"
+    if plain in {"pass", "passed"}:
+        return "bold green"
+    if plain in {"fail", "failed"}:
         return "bold red"
     if plain == "awaiting review":
         return "bold yellow"
@@ -666,6 +670,33 @@ def _graph_status_style(status: str) -> str:
         "intake": "dim",
         "classified": "dim",
     }.get(key, "bold white")
+
+
+def _verdict_chip(verdict: str | None) -> str:
+    """Uppercase evaluator chip, or empty when there is no verdict yet."""
+    raw = str(verdict or "").strip().lower().replace("-", "_")
+    if raw in {"pass", "passed"}:
+        return "PASS"
+    if raw in {"fail", "failed"}:
+        return "FAIL"
+    return ""
+
+
+def _node_row_description(
+    phase: str,
+    title: str = "",
+    verdict: str | None = None,
+) -> Text:
+    """List/status row: PASS/FAIL first, then runtime/graph phase, then title."""
+    desc = Text()
+    chip = _verdict_chip(verdict)
+    if chip:
+        desc.append(chip, style=_graph_status_style(chip))
+        desc.append(" · ")
+    desc.append(phase, style=_graph_status_style(phase))
+    if title:
+        desc.append(f" · {title}")
+    return desc
 
 
 def _node_menu_phase(
@@ -1495,12 +1526,15 @@ def _render_evaluation_and_diff(
         console.print(Text("no receipts under verification/ — nothing evaluated yet", style="dim"))
         return
     console.print(Text(f"latest receipt: {receipt['_receipt_path']}", style="dim"))
-    console.print(
-        f"verdict: [bold]{receipt.get('verdict')}[/bold]  "
-        f"criteria: {receipt.get('criteria_verdict')}  "
+    verdict = receipt.get("verdict")
+    line = Text("verdict: ")
+    line.append(str(verdict), style=_graph_status_style(str(verdict or "")))
+    line.append(
+        f"  criteria: {receipt.get('criteria_verdict')}  "
         f"confidence: {receipt.get('confidence')}  "
         f"generated: {receipt.get('generated_at')}"
     )
+    console.print(line)
     subject_diff = (receipt.get("deterministic") or {}).get("subject_diff") or {}
     if subject_diff.get("status") == "ok":
         console.print(Text(
@@ -1741,7 +1775,19 @@ def _node_review_menu(
         position = ""
         if len(siblings) > 1:
             position = f" · {siblings.index(node_id) + 1}/{len(siblings)}"
-        console.rule(f"{project} / {node_id}{position}", style="dim")
+        chip = ""
+        try:
+            ev = node_cli.fetch_runtime_evidence(ROOT, project, node_id)
+            chip = _verdict_chip(getattr(ev, "verdict", None))
+        except Exception:
+            chip = ""
+        rule = f"{project} / {node_id}{position}"
+        if chip:
+            rule = f"{rule} · {chip}"
+        rule_style = "bold green" if chip == "PASS" else (
+            "bold red" if chip == "FAIL" else "dim"
+        )
+        console.rule(rule, style=rule_style)
         node_cli.cmd_show(
             project=project,
             node_id=node_id,
@@ -1819,7 +1865,17 @@ def _node_review_menu(
             "q": ("quit", ""),
         }
         _clear_screen()
-        console.rule(f"{project} / {node_id}", style="dim")
+        status_rule = f"{project} / {node_id}"
+        if chip:
+            status_rule = f"{status_rule} · {chip}"
+        console.rule(
+            status_rule,
+            style=(
+                "bold green" if chip == "PASS"
+                else "bold red" if chip == "FAIL"
+                else "dim"
+            ),
+        )
         console.print(Text("graph status", style="bold"))
         status_choice = _menu_choice(status_actions, default="b")
         if status_choice == "q":
@@ -1914,19 +1970,19 @@ def interactive_nodes(project: str | None = None):
                 graph_status = _node_status_label(doc, entry)
                 queue_state = "-"
                 job_status = "-"
+                verdict = "-"
                 try:
                     ev = node_cli.fetch_runtime_evidence(ROOT, project, node_id)
                     queue_state = getattr(ev, "queue_state", "-") or "-"
                     job_status = getattr(ev, "job_status", "-") or "-"
+                    verdict = getattr(ev, "verdict", "-") or "-"
                 except Exception:
                     pass
                 phase = _node_menu_phase(graph_status, queue_state, job_status)
                 title = str(doc.get("title") or (entry or {}).get("title") or "")
-                desc = Text()
-                desc.append(phase, style=_graph_status_style(phase))
-                if title:
-                    desc.append(f" · {title}")
-                node_items.append((node_id, desc))
+                node_items.append(
+                    (node_id, _node_row_description(phase, title, verdict))
+                )
 
             picked = _pick_list(
                 f"nodes · {project}",
@@ -2875,22 +2931,29 @@ def _render_project_status_detail(project_id: str) -> None:
         return
 
     phase_counts: dict[str, int] = {}
+    verdict_counts: dict[str, int] = {}
     for node_id, doc, entry in node_rows:
         graph_status = _node_status_label(doc, entry)
         queue_state = "-"
         job_status = "-"
+        verdict = "-"
         try:
             ev = node_cli.fetch_runtime_evidence(ROOT, project_id, node_id)
             queue_state = getattr(ev, "queue_state", "-") or "-"
             job_status = getattr(ev, "job_status", "-") or "-"
+            verdict = getattr(ev, "verdict", "-") or "-"
         except Exception:
             pass
         phase = _node_menu_phase(graph_status, queue_state, job_status)
         phase_counts[phase] = phase_counts.get(phase, 0) + 1
+        chip = _verdict_chip(verdict)
+        if chip:
+            key = chip.lower()
+            verdict_counts[key] = verdict_counts.get(key, 0) + 1
         title = str(doc.get("title") or (entry or {}).get("title") or "")
         line = Text()
         line.append(f"  {node_id:<36}", style="bold")
-        line.append(phase, style=_graph_status_style(phase))
+        line.append_text(_node_row_description(phase, "", verdict))
         if title:
             line.append(f"  {title}", style="dim")
         console.print(line)
@@ -2899,6 +2962,10 @@ def _render_project_status_detail(project_id: str) -> None:
     scan = Text("  operator scan  ")
     scan.append_text(_status_counts_text(phase_counts))
     console.print(scan)
+    if verdict_counts:
+        ev_scan = Text("  evaluator       ")
+        ev_scan.append_text(_status_counts_text(verdict_counts))
+        console.print(ev_scan)
 
 
 def interactive_status():
