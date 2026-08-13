@@ -1,0 +1,49 @@
+schema_version: '1.0'
+schema_type: project_graph
+project_id: loop-soak
+project_name: Loop Soak — four-node binary-criteria loop proof
+description: Four trivially-graded nodes whose only purpose is exercising the full
+  loop — dispatch, pi_rpc execution, return, evaluation, provisional — under
+  real concurrency. Content is deliberately meaningless; the loop is the product.
+repo: /Users/sab-mini/repos/gddp-soak-target
+blueprint:
+  vision: A successful unattended loop run on demand. Two independent writes, then
+    two dependent nodes that must observe the first pair's landed work — testing
+    frontier ordering and base chaining, not just isolated execution.
+  architecture_notes: max_concurrent_jobs 4 to stress the persist path fixed in
+    gddp-runtime 7390d8c. frontier_auto_advance on; provisional flow unblocks the
+    dependent pair after evaluation.
+  major_capabilities:
+  - concurrent pi_rpc dispatch against a scratch repo
+  - dependency-gated frontier advance on provisional
+  - per-node verdicts with binary criteria
+graph_version: '1.0'
+created_at: '2026-08-13'
+last_updated: '2026-08-13'
+nodes_dir: nodes/
+nodes:
+- id: node-01-soak-alpha
+  title: Write soak/alpha.txt marker
+  status: ready
+  type: capability
+- id: node-02-soak-beta
+  title: Write soak/beta.txt marker
+  status: ready
+  type: capability
+- id: node-03-soak-chain
+  title: Chain off alpha's landed file
+  status: pending
+  type: capability
+- id: node-04-soak-manifest
+  title: Manifest the soak directory
+  status: pending
+  type: capability
+execution_policy:
+  default_executor: pi_rpc
+  max_concurrent_jobs: 4
+  frontier_auto_advance: true
+  retry_budget: 2
+  require_human_review_before_overnight: false
+  artifact_gate_enforced: true
+  allowed_repos:
+  - /Users/sab-mini/repos/gddp-soak-target

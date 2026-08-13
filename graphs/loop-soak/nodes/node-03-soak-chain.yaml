@@ -1,0 +1,29 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-03-soak-chain
+title: Chain off alpha's landed file
+type: capability
+why: Loop-soak dependency probe — proves a dependent node can observe its
+  parent's landed work. Content is meaningless by design.
+depends_on:
+- node-01-soak-alpha
+acceptance_criteria:
+- id: chain-exact
+  criterion: soak/chain.txt exists and its entire content is exactly
+    SOAK-ALPHA-OK-CHAINED (the content of node-01's marker with -CHAINED appended,
+    one line, no extra text)
+- id: report-exists
+  criterion: reports/loop-soak/node-03.md exists and states whether soak/alpha.txt
+    was visible on this node's base before editing (yes/no, with the command output)
+constraints:
+- Create exactly one new file under soak/ plus the report; change nothing else
+- Work only in the node worktree; commit on the node's result ref
+- If soak/alpha.txt is absent from the base, still write chain.txt per the
+  criterion and record the absence plainly in the report
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- reports/loop-soak/node-03.md
+status: pending
+priority: high
+unlocks: []

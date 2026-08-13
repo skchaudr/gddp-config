@@ -1,0 +1,26 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-04-soak-manifest
+title: Manifest the soak directory
+type: capability
+why: Loop-soak dependency probe — proves a dependent node can observe its
+  parent's landed work. Content is meaningless by design.
+depends_on:
+- node-02-soak-beta
+acceptance_criteria:
+- id: manifest-lists-beta
+  criterion: soak/manifest.txt exists and contains the line beta.txt (an ls-style
+    listing of the soak/ directory at execution time)
+- id: report-exists
+  criterion: reports/loop-soak/node-04.md exists and includes the actual ls output
+    of soak/ that the manifest was built from
+constraints:
+- Create exactly one new file under soak/ plus the report; change nothing else
+- Work only in the node worktree; commit on the node's result ref
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- reports/loop-soak/node-04.md
+status: pending
+priority: high
+unlocks: []

@@ -1,0 +1,25 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-02-soak-beta
+title: Write soak/beta.txt marker
+type: capability
+why: Loop-soak filler node — content is meaningless by design; the loop run is
+  the product under test.
+depends_on: []
+acceptance_criteria:
+- id: marker-exact
+  criterion: soak/beta.txt exists and its entire content is exactly SOAK-BETA-OK
+    (one line, no extra text)
+- id: report-exists
+  criterion: reports/loop-soak/node-02.md exists and states the exact command used
+    to verify the file content
+constraints:
+- Create exactly one new file under soak/ plus the report; change nothing else
+- Work only in the node worktree; commit on the node's result ref
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- reports/loop-soak/node-02.md
+status: ready
+priority: high
+unlocks: []
