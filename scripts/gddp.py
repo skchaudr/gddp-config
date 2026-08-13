@@ -17,6 +17,8 @@ Subcommands:
     jobs results      Summarize evaluator output
     jobs set          Change runtime job state with an audit reason
 
+    evaluations       List evaluator receipts (verdict + timing)
+
     watch [target]    Live view: fleet of attempts, or one node's diff + events
     steer <target>    Send an operator message into a running attempt's session
 
@@ -82,7 +84,18 @@ _MENU_BACK = object()
 _MENU_QUIT = object()
 _RUNTIME_JOB_COMMANDS = frozenset({"list", "show", "results", "set"})
 _CLI_COMMANDS = frozenset(
-    {"node", "jobs", "verify", "review", "receipt", "obsidian", "project", "watch", "steer"}
+    {
+        "node",
+        "jobs",
+        "evaluations",
+        "verify",
+        "review",
+        "receipt",
+        "obsidian",
+        "project",
+        "watch",
+        "steer",
+    }
 )
 _ABSTRACT_EXECUTION_MODES = frozenset({"agent", "human"})
 
@@ -2198,6 +2211,87 @@ def _confirm_job_state_change(ref: str, state: str) -> int:
         return 1
 
 
+def _evaluation_sources() -> tuple[Path | None, Path]:
+    receipt_root = ROOT / "verification"
+    try:
+        runtime_root = resolve_runtime_root()
+    except RuntimeError:
+        return None, receipt_root
+    db_path = runtime_root / "db" / "queue.db"
+    return (db_path if db_path.is_file() else None), receipt_root
+
+
+def interactive_evaluations():
+    """Browse evaluator receipts as their own evidence stream."""
+    evaluations = _import_module("evaluations")
+    actions = {
+        "r": ("refresh", "reload receipts"),
+        "o": ("open", "open one evaluation"),
+        "b": ("main menu", ""),
+        "q": ("quit", ""),
+    }
+    while True:
+        _clear_screen()
+        console.print(Text("evaluations", style="bold").append(
+            "  ·  evidence only — does not change graph status", style="dim"
+        ))
+        db_path, receipt_root = _evaluation_sources()
+        rows = evaluations.load_evaluation_rows(db_path=db_path, receipt_root=receipt_root)
+        if rows:
+            for row in rows:
+                print(evaluations.format_evaluation_row(row))
+            print(f"\n{len(rows)} evaluation(s)")
+        else:
+            print("No evaluator receipts yet.")
+        console.print()
+        choice = _menu_choice(actions, default="r")
+        if choice == "q":
+            return _MENU_QUIT
+        if choice == "b":
+            return _MENU_BACK
+        if choice == "r":
+            continue
+        if not rows:
+            _pause()
+            continue
+        items = [
+            (str(index), evaluations.format_evaluation_row(row))
+            for index, row in enumerate(rows)
+        ]
+        picked = _pick_list(
+            "open evaluation",
+            items,
+            multi=False,
+            back_label="evaluations",
+        )
+        if picked is _MENU_QUIT:
+            return _MENU_QUIT
+        if picked is _MENU_BACK:
+            continue
+        row = rows[int(picked)]
+        _clear_screen()
+        console.print(Text("evaluation", style="bold"))
+        if row.get("job_id") and row.get("source") == "result":
+            run_runtime_jobs(["show", str(row["job_id"])])
+        else:
+            evaluations.print_evaluation_detail(row)
+        _pause()
+
+
+def cmd_evaluations(_args) -> int:
+    """Print the evaluator receipt list for non-interactive use and tests."""
+    evaluations = _import_module("evaluations")
+    db_path, receipt_root = _evaluation_sources()
+    rows = evaluations.load_evaluation_rows(db_path=db_path, receipt_root=receipt_root)
+    if not rows:
+        print("No evaluator receipts yet.")
+        return 0
+    for row in rows:
+        print(evaluations.format_evaluation_row(row))
+    print(f"\n{len(rows)} evaluation(s)")
+    return 0
+
+
 def interactive_jobs():
     """Review and update runtime jobs inside the human-operated menu.
 
@@ -2359,6 +2453,7 @@ def static_overview():
     table.add_column("start with", style="dim", no_wrap=True)
     table.add_row("node", "graph truth, authoring, runtime/evaluator join", "gddp node list")
     table.add_row("jobs", "runtime queue, results, and audited state changes", "gddp jobs list")
+    table.add_row("evaluations", "evaluator receipts, verdicts, and timing", "gddp evaluations")
     table.add_row("verify", "node evaluation", "gddp verify node")
     table.add_row("project", "project graph creation and validation", "gddp project -h")
     table.add_row("obsidian", "graph export", "gddp obsidian export")
@@ -2371,6 +2466,7 @@ def interactive_menu():
     actions = {
         "n": ("nodes", "review and update graph truth"),
         "j": ("jobs", "review and update runtime jobs"),
+        "e": ("evaluations", "evaluator receipts, verdicts, and timing"),
         "d": ("dispatch", "dispatch ready nodes through the event pipeline"),
         "f": ("frontier", "derived operating frontier (read-only)"),
         "s": ("status", "summarize graph completion"),
@@ -2394,6 +2490,10 @@ def interactive_menu():
                     break
             elif choice == "j":
                 outcome = interactive_jobs()
+                if outcome is _MENU_QUIT:
+                    break
+            elif choice == "e":
+                outcome = interactive_evaluations()
                 if outcome is _MENU_QUIT:
                     break
             elif choice == "d":
@@ -3222,6 +3322,12 @@ def main(argv=None):
         "--project", default=None, help="One project — counts + node phases"
     )
     node_status.set_defaults(func=cmd_node_status)
+
+    evals_p = sub.add_parser(
+        "evaluations",
+        help="List evaluator receipts with verdict and timing",
+    )
+    evals_p.set_defaults(func=cmd_evaluations)
 
     jobs_p = sub.add_parser("jobs", help="Runtime jobs and evaluator evidence")
     jobs_p.set_defaults(func=cmd_jobs)

@@ -749,6 +749,23 @@ def _coverage_line(receipt: dict | None, acceptance: dict) -> str | None:
     )
 
 
+def _timing_line(receipt: dict | None, acceptance: dict) -> str | None:
+    timing = _pick(acceptance, receipt, "evaluation_timing")
+    if not isinstance(timing, dict) or not timing:
+        return None
+
+    def lane(name: str) -> str:
+        raw = timing.get(name) if isinstance(timing.get(name), dict) else {}
+        status = raw.get("status") or "n/a"
+        elapsed = raw.get("elapsed_s")
+        clock = "-" if elapsed is None else f"{elapsed}s"
+        return f"{status} {clock}"
+
+    wall = timing.get("wall_s")
+    wall_s = "-" if wall is None else f"{wall}s"
+    return f"wall={wall_s}  criteria={lane('criteria')}  integrity={lane('integrity')}"
+
+
 def _provenance_line(receipt: dict | None, acceptance: dict) -> str | None:
     commit_sha = _pick(acceptance, receipt, "evaluated_commit_sha")
     tree_sha = _pick(acceptance, receipt, "evaluated_tree_sha")
@@ -1298,6 +1315,9 @@ def _print_evaluation_payload(
         f"criteria={_paint(str(lane_criteria))}  "
         f"integrity={_paint(str(lane_integrity))}"
     )
+    timing_line = _timing_line(receipt, acceptance)
+    if timing_line:
+        _print_field("timing", timing_line, indent="  ")
     for side in ("criteria", "integrity"):
         if harness.get(side):
             # Error *messages* are prose — label red, body plain.

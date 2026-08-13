@@ -405,6 +405,16 @@ class OverviewTests(unittest.TestCase):
 
         jobs.assert_called_once_with()
 
+    def test_main_menu_opens_evaluations_submenu(self):
+        with patch.object(gddp, "_menu_choice", side_effect=["e", "q"]), \
+                patch.object(
+                    gddp, "interactive_evaluations", return_value=gddp._MENU_BACK
+                ) as evaluations, \
+                patch.object(gddp, "_clear_screen"):
+            gddp.interactive_menu()
+
+        evaluations.assert_called_once_with()
+
     def test_main_menu_exits_on_ctrl_c(self):
         with patch.object(gddp, "_menu_choice", side_effect=KeyboardInterrupt), \
                 patch.object(gddp, "_clear_screen"):
@@ -1080,7 +1090,15 @@ class ReviewRoutingTests(unittest.TestCase):
     def test_cli_commands_cover_all_subcommands(self):
         # _CLI_COMMANDS gates positional dispatch; a subcommand missing here is
         # silently swallowed as a node id (shipped once with 'review').
-        for name in ("node", "jobs", "verify", "review", "obsidian", "project"):
+        for name in (
+            "node",
+            "jobs",
+            "evaluations",
+            "verify",
+            "review",
+            "obsidian",
+            "project",
+        ):
             self.assertIn(name, gddp._CLI_COMMANDS)
 
 
