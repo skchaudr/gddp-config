@@ -1957,15 +1957,13 @@ def _node_review_pick_action(
     getch = terminal.getch
     clear_lines = getattr(terminal, "clear_lines", lambda _n: None)
 
-    # Cursor targets only — horizontal sibling nav is separate chrome.
+    # Primary work only. contract / trace / diff live under "more".
+    # Horizontal sibling nav (←/→) is separate chrome, not a peer option.
     selectables: list[tuple[str, str, str]] = [
-        ("e", "evaluation", "current-job evidence and any stale receipts"),
-        ("c", "contract", "intent, dependencies, and acceptance criteria"),
-        ("u", "update", "change graph status"),
-        ("t", "trace", "full evaluator and job history"),
-        ("d", "diff", "what the attempt actually changed + merge state"),
+        ("e", "evaluation", "verdict, why, criteria — current job evidence"),
+        ("u", "update", "set graph status (your decision)"),
+        ("m", "more", "contract · diff · trace"),
         ("b", "back", "choose another node"),
-        ("p", "projects", "choose another project"),
         ("q", "quit", ""),
     ]
     by_key = {key: i for i, (key, _, _) in enumerate(selectables)}
@@ -2106,31 +2104,44 @@ def _node_review_menu(
             )
             if _pause("u update · any other key returns to the node") != "u":
                 continue
-        if choice == "c":
+        elif choice == "m":
+            more = {
+                "c": ("contract", "intent, dependencies, acceptance criteria"),
+                "d": ("diff", "what the attempt changed + merge state"),
+                "t": ("trace", "full evaluator and job history"),
+                "b": ("back", ""),
+                "q": ("quit", ""),
+            }
             _clear_screen()
-            node_cli.cmd_show(
-                project=project,
-                node_id=node_id,
-                trace=False,
-                view="contract",
-            )
+            console.print(Text("more", style="bold").append(
+                f"  ·  {node_id}", style="dim"
+            ))
+            more_choice = _menu_choice(more, default="c")
+            if more_choice == "q":
+                return _MENU_QUIT
+            if more_choice == "b":
+                continue
+            _clear_screen()
+            if more_choice == "c":
+                node_cli.cmd_show(
+                    project=project,
+                    node_id=node_id,
+                    trace=False,
+                    view="contract",
+                )
+            elif more_choice == "t":
+                node_cli.cmd_show(
+                    project=project,
+                    node_id=node_id,
+                    trace=True,
+                    view="evaluation",
+                )
+            else:
+                _render_evaluation_and_diff(project, node_id)
             if _pause("u update · any other key returns to the node") != "u":
                 continue
-        if choice == "t":
-            _clear_screen()
-            node_cli.cmd_show(
-                project=project,
-                node_id=node_id,
-                trace=True,
-                view="evaluation",
-            )
-            if _pause("u update · any other key returns to the node") != "u":
-                continue
-        if choice == "d":
-            _clear_screen()
-            _render_evaluation_and_diff(project, node_id)
-            if _pause("u update · any other key returns to the node") != "u":
-                continue
+        elif choice != "u":
+            continue
 
         ready, gate_reason = node_cli.node_completion_readiness(project, node_id)
         complete_hint = (
@@ -2766,16 +2777,56 @@ def static_overview():
     ))
 
 
-def interactive_graph_hub(project: str):
-    """Everything for one graph: nodes, jobs, dispatch, frontier, status, validate."""
+def _graph_more_menu(project: str):
+    """Secondary graph tools — not on equal footing with nodes/dispatch."""
     actions = {
-        "n": ("nodes", "review and update graph truth"),
         "j": ("jobs", "runtime jobs for this graph"),
-        "d": ("dispatch", "dispatch ready nodes on this graph"),
         "f": ("frontier", "ready / in flight / blocked"),
         "s": ("status", "completion + node phases"),
         "v": ("validate", "check this graph definition"),
-        "e": ("evaluations", "evaluator receipts (all graphs)"),
+        "e": ("evaluations", "evaluator receipts"),
+        "b": ("back", ""),
+        "q": ("quit", ""),
+    }
+    while True:
+        _clear_screen()
+        console.print(
+            Text("more", style="bold")
+            .append(f"  ·  {project}", style="dim")
+        )
+        choice = _menu_choice(actions, default="j")
+        if choice == "q":
+            return _MENU_QUIT
+        if choice == "b":
+            return _MENU_BACK
+        try:
+            if choice == "j":
+                outcome = interactive_jobs(project)
+            elif choice == "f":
+                outcome = interactive_frontier(project)
+            elif choice == "s":
+                outcome = interactive_status(project)
+            elif choice == "v":
+                outcome = interactive_validate(project)
+            elif choice == "e":
+                outcome = interactive_evaluations()
+            else:
+                outcome = _MENU_BACK
+            if outcome is _MENU_QUIT:
+                return _MENU_QUIT
+        except SystemExit:
+            if choice == "v":
+                _pause()
+        except KeyboardInterrupt:
+            return _MENU_BACK
+
+
+def interactive_graph_hub(project: str):
+    """Primary work for one graph: nodes + dispatch. Rest under more."""
+    actions = {
+        "n": ("nodes", "review evidence and update graph truth"),
+        "d": ("dispatch", "send ready work on this graph"),
+        "m": ("more", "jobs · frontier · status · validate · evaluations"),
         "b": ("graphs", ""),
         "q": ("quit", ""),
     }
@@ -2796,27 +2847,18 @@ def interactive_graph_hub(project: str):
         try:
             if choice == "n":
                 outcome = interactive_nodes(project)
-            elif choice == "j":
-                outcome = interactive_jobs(project)
             elif choice == "d":
                 outcome = interactive_dispatch(project)
                 if outcome is not _MENU_QUIT:
                     _pause()
-            elif choice == "f":
-                outcome = interactive_frontier(project)
-            elif choice == "s":
-                outcome = interactive_status(project)
-            elif choice == "v":
-                outcome = interactive_validate(project)
-            elif choice == "e":
-                outcome = interactive_evaluations()
+            elif choice == "m":
+                outcome = _graph_more_menu(project)
             else:
                 outcome = _MENU_BACK
             if outcome is _MENU_QUIT:
                 return _MENU_QUIT
         except SystemExit:
-            if choice == "v":
-                _pause()
+            pass
         except KeyboardInterrupt:
             return _MENU_BACK
 

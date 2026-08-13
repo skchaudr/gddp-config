@@ -750,11 +750,11 @@ class OverviewTests(unittest.TestCase):
         self.assertIn("next", output.getvalue())
         self.assertIn("↑/↓ move", output.getvalue())
 
-    def test_node_review_up_down_enter_opens_contract(self):
+    def test_node_review_up_down_enter_opens_update(self):
         """↑/↓ walk the action menu; Enter opens the highlighted action."""
         views: list[tuple[str, str]] = []
-        # default cursor is evaluation (e); one DOWN → contract; Enter; pause; back
-        keys = iter(["DOWN", "\r", "x", "b"])
+        # default cursor is evaluation (e); one DOWN → update; Enter → status menu → back
+        keys = iter(["DOWN", "\r", "b", "b"])
         terminal = SimpleNamespace(
             getch=lambda: next(keys),
             clear_lines=lambda n: None,
@@ -767,6 +767,7 @@ class OverviewTests(unittest.TestCase):
         node_cli = SimpleNamespace(
             cmd_show=cmd_show,
             node_completion_readiness=lambda project, node_id: (False, "n/a"),
+            fetch_runtime_evidence=lambda *a, **k: SimpleNamespace(verdict="-"),
         )
 
         def import_module(name):
@@ -782,6 +783,38 @@ class OverviewTests(unittest.TestCase):
 
         self.assertIs(outcome, gddp._MENU_BACK)
         self.assertIn(("alpha", "summary"), views)
+
+    def test_node_review_more_opens_contract(self):
+        views: list[tuple[str, str]] = []
+        # m → c → pause → b
+        keys = iter(["m", "c", "x", "b"])
+        terminal = SimpleNamespace(
+            getch=lambda: next(keys),
+            clear_lines=lambda n: None,
+        )
+
+        def cmd_show(**kwargs):
+            views.append((kwargs.get("node_id", ""), kwargs.get("view", "")))
+            return 0
+
+        node_cli = SimpleNamespace(
+            cmd_show=cmd_show,
+            node_completion_readiness=lambda project, node_id: (False, "n/a"),
+            fetch_runtime_evidence=lambda *a, **k: SimpleNamespace(verdict="-"),
+        )
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp, "_clear_screen"):
+            outcome = gddp._node_review_menu(
+                "demo",
+                "alpha",
+                node_ids=["alpha"],
+            )
+
+        self.assertIs(outcome, gddp._MENU_BACK)
         self.assertIn(("alpha", "contract"), views)
 
     def test_node_review_up_from_top_wraps_to_quit_then_enter(self):

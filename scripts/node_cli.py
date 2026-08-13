@@ -786,7 +786,31 @@ def _provenance_line(receipt: dict | None, acceptance: dict) -> str | None:
     )
 
 
-def _findings_lines(receipt: dict | None, acceptance: dict) -> list[str]:
+def _criterion_lines(receipt: dict | None, acceptance: dict) -> list[tuple[str, str, str]]:
+    """(criterion_id, judgment, confidence_or_empty) for the scan table."""
+    rows: list[tuple[str, str, str]] = []
+    seen: set[str] = set()
+    for j in _as_dict((receipt or {}).get("semantic")).get("judgments") or []:
+        if not isinstance(j, dict):
+            continue
+        cid = str(j.get("criterion_id") or "?")
+        seen.add(cid)
+        conf = j.get("confidence")
+        conf_s = "" if conf is None else str(conf)
+        rows.append((cid, str(j.get("judgment") or "?"), conf_s))
+    for f in acceptance.get("criteria_findings") or []:
+        if not isinstance(f, dict):
+            continue
+        cid = str(f.get("criterion_id") or "?")
+        if cid in seen:
+            continue
+        seen.add(cid)
+        rows.append((cid, str(f.get("judgment") or "?"), ""))
+    return rows
+
+
+def _observation_lines(receipt: dict | None, acceptance: dict) -> list[str]:
+    """Integrity findings + graph observations (not criterion judgments)."""
     lines: list[str] = []
     acc_i = _as_dict(acceptance.get("integrity"))
     rec_i = _as_dict((receipt or {}).get("integrity"))
@@ -795,16 +819,18 @@ def _findings_lines(receipt: dict | None, acceptance: dict) -> list[str]:
             lines.append(f"[{f.get('severity')}] {f.get('summary')}")
     for o in rec_i.get("graph_observations") or acc_i.get("graph_observations") or []:
         if isinstance(o, dict):
-            lines.append(f"graph-obs [{o.get('severity')}] {o.get('summary')}")
-    for f in acceptance.get("criteria_findings") or []:
-        if isinstance(f, dict):
-            lines.append(f"criterion {f.get('criterion_id')}: {f.get('judgment')}")
-    for j in _as_dict((receipt or {}).get("semantic")).get("judgments") or []:
-        if isinstance(j, dict):
-            lines.append(
-                f"criterion {j.get('criterion_id')}: {j.get('judgment')} "
-                f"@ {j.get('confidence')}"
-            )
+            lines.append(f"[{o.get('severity')}] {o.get('summary')}")
+    return lines
+
+
+def _findings_lines(receipt: dict | None, acceptance: dict) -> list[str]:
+    """Legacy flat list (observations + criteria) for older callers/tests."""
+    lines = list(_observation_lines(receipt, acceptance))
+    for cid, judgment, conf in _criterion_lines(receipt, acceptance):
+        if conf:
+            lines.append(f"criterion {cid}: {judgment} @ {conf}")
+        else:
+            lines.append(f"criterion {cid}: {judgment}")
     return lines
 
 
@@ -1225,12 +1251,29 @@ def _section_heading(title: str, width: int | None = None) -> str:
     return "\n" + prefix + ("─" * max(0, line_width - len(prefix)))
 
 
+def _print_chip_row(parts: list[tuple[str, str]]) -> None:
+    """One scan line of 'label  VALUE' chips, values colored when tokens."""
+    chunks: list[str] = []
+    for label, value in parts:
+        chunks.append(f"{_ansi('2', label)} {_paint(str(value))}")
+    print("  " + "   ".join(chunks))
+
+
+def _print_wrapped_bullet(text: str, *, bullet: str = "•") -> None:
+    width = max(40, terminal_width() - 6)
+    for i, wline in enumerate(
+        _soft_wrap(f"{bullet} {text}", width, cont_indent="")
+    ):
+        print(f"    {wline}" if i == 0 else f"      {wline}")
+
+
 def _print_evaluation_payload(
     acceptance: dict,
     receipt: dict | None,
     *,
     verdict: str,
 ) -> None:
+    """Operator-first layout: verdict banner → next → why → criteria → notes → details."""
     lane, harness = _lane_fields(receipt, acceptance)
     criteria_verdict = _pick(acceptance, receipt, "criteria_verdict")
     criteria_confidence = _pick(acceptance, receipt, "criteria_confidence")
@@ -1251,67 +1294,86 @@ def _print_evaluation_payload(
     else:
         semantic_status = "not recorded"
 
-    _print_field("verdict", str(verdict))
-
-    primary_why, detail_why = _evaluator_reasoning_parts(receipt, acceptance)
-    print()
-    if primary_why:
-        _print_prose_block("why", primary_why)
-        if detail_why:
-            print()
-            _print_prose_block("integrity notes", detail_why)
-    else:
-        print(f"  {_ansi('2', 'why:')}                (not recorded)")
-
-    next_action = _pick(acceptance, receipt, "required_next_action")
-    print()
-    if next_action:
-        print(f"  {_ansi('2', 'next action:')}")
-        body = f"{next_action}  (evaluator recommendation, not a decision)"
-        for i, wline in enumerate(
-            _soft_wrap(body, max(40, terminal_width() - 4), cont_indent="")
-        ):
-            # Prose stays plain — only short status tokens get color elsewhere.
-            print(f"    {wline}" if i == 0 else f"      {wline}")
-    else:
-        print(f"  {_ansi('2', 'next action:')}        (none recorded)")
-
-    findings = _findings_lines(receipt, acceptance)
-    print()
-    if findings:
-        print(f"  {_ansi('2', 'findings / graph observations:')}")
-        for finding in findings:
-            for i, wline in enumerate(
-                _soft_wrap(
-                    f"• {finding}",
-                    max(40, terminal_width() - 4),
-                    cont_indent="",
-                )
-            ):
-                print(f"    {wline}" if i == 0 else f"      {wline}")
-    else:
-        print(f"  {_ansi('2', 'findings:')}           (none recorded)")
-
     integrity_verdict = integrity.get("verdict") or "not recorded"
-    criteria_label = criteria_verdict or "not recorded"
-    completeness_label = completeness or "not recorded"
-    lane_criteria = lane.get("criteria") or "not recorded"
-    lane_integrity = lane.get("integrity") or "not recorded"
-
-    print()
-    print(f"  {_ansi('1', 'evaluator details')}")
-    _print_field("criteria verdict", str(criteria_label), indent="  ")
+    criteria_label = str(criteria_verdict or "not recorded")
+    completeness_label = str(completeness or "not recorded")
     conf = (
-        criteria_confidence
+        str(criteria_confidence)
         if criteria_confidence is not None
         else "not recorded"
     )
-    _print_field("criteria confidence", str(conf), indent="  ")
-    _print_field("completeness", str(completeness_label), indent="  ")
+
+    # ── 1. Verdict banner (the only thing that must land first) ───────────
+    v_raw = str(verdict or "?")
+    print(f"  {_ansi('1', 'VERDICT')}  {_paint(v_raw)}")
+    _print_chip_row([
+        ("criteria", criteria_label),
+        ("@", conf),
+        ("integrity", str(integrity_verdict)),
+        ("complete", completeness_label),
+        ("semantic", semantic_status),
+    ])
+
+    # ── 2. Next action (decision-adjacent, still recommendation only) ─────
+    next_action = _pick(acceptance, receipt, "required_next_action")
+    print()
+    if next_action:
+        print(f"  {_ansi('1', 'NEXT')}  {next_action}")
+        print(f"  {_ansi('2', '(evaluator recommendation — not a decision)')}")
+    else:
+        print(f"  {_ansi('2', 'NEXT')}  (none recorded)")
+
+    # ── 3. Why (primary reasoning) ────────────────────────────────────────
+    primary_why, detail_why = _evaluator_reasoning_parts(receipt, acceptance)
+    print()
+    if primary_why:
+        _print_prose_block("WHY", primary_why)
+    else:
+        print(f"  {_ansi('1', 'WHY')}")
+        print(f"    {_ansi('2', '(not recorded)')}")
+
+    # ── 4. Criteria judgments (table, not buried in observations) ─────────
+    criteria_rows = _criterion_lines(receipt, acceptance)
+    print()
+    print(f"  {_ansi('1', 'CRITERIA')}")
+    if criteria_rows:
+        id_w = max(len(c[0]) for c in criteria_rows)
+        id_w = max(id_w, 8)
+        for cid, judgment, conf_s in criteria_rows:
+            conf_bit = f"  @{conf_s}" if conf_s else ""
+            print(
+                f"    {cid:<{id_w}}  {_paint(judgment)}{conf_bit}"
+            )
+    else:
+        print(f"    {_ansi('2', '(none recorded)')}")
+
+    # ── 5. Observations (integrity / graph only) ──────────────────────────
+    observations = _observation_lines(receipt, acceptance)
+    print()
+    print(f"  {_ansi('1', 'OBSERVATIONS')}")
+    if observations:
+        for item in observations:
+            _print_wrapped_bullet(item)
+    else:
+        print(f"    {_ansi('2', '(none)')}")
+
+    # ── 6. Integrity notes (long secondary prose — after the scan blocks) ─
+    if detail_why:
+        print()
+        _print_prose_block("INTEGRITY NOTES", detail_why)
+
+    # ── 7. Details (dim / secondary — provenance, lanes, timing) ──────────
+    print()
+    print(f"  {_ansi('2', '── details ──')}")
+    _print_field("criteria verdict", criteria_label, indent="  ")
+    _print_field("criteria confidence", conf, indent="  ")
+    _print_field("completeness", completeness_label, indent="  ")
     _print_field("semantic evaluation", str(semantic_status), indent="  ")
     _print_field("integrity verdict", str(integrity_verdict), indent="  ")
+    lane_criteria = lane.get("criteria") or "not recorded"
+    lane_integrity = lane.get("integrity") or "not recorded"
     print(
-        f"  lanes:               "
+        f"  {_ansi('2', 'lanes:')}              "
         f"criteria={_paint(str(lane_criteria))}  "
         f"integrity={_paint(str(lane_integrity))}"
     )
@@ -1320,7 +1382,6 @@ def _print_evaluation_payload(
         _print_field("timing", timing_line, indent="  ")
     for side in ("criteria", "integrity"):
         if harness.get(side):
-            # Error *messages* are prose — label red, body plain.
             print(f"  {_ansi('1;31', f'harness error ({side}):')}")
             print(f"    {harness[side]}")
     _print_field(
@@ -1335,51 +1396,77 @@ def _print_evaluation_payload(
     )
 
 
+def _print_job_banner(ev: RuntimeEvidence) -> None:
+    """Compact current-job strip — queue state next to the verdict, not after prose."""
+    print(f"  {_ansi('1', 'JOB')}")
+    if not ev.job_id:
+        print(f"    {_ansi('2', '(none)')}")
+        return
+    print(
+        f"    {_paint(str(ev.queue_state))}  "
+        f"{_ansi('2', ev.job_id)}  "
+        f"{_ansi('2', 'created ' + str(ev.job_created_at or '?'))}"
+    )
+    if str(ev.job_status or "") not in {"", str(ev.queue_state)}:
+        print(f"    status {_paint(str(ev.job_status))}")
+
+
 def _print_evaluation(ev: RuntimeEvidence) -> None:
     print(_ansi("1", "CURRENT EVALUATOR RESULT"))
+    # Job first so review state is visible before the prose wall.
+    _print_job_banner(ev)
+    print()
     if ev.has_current_evaluation:
         _print_evaluation_payload(
             ev.acceptance_check,
             ev.receipt if ev.receipt_source == "runtime_result" else None,
             verdict=ev.verdict,
         )
-        print(f"  source:              runtime result for {ev.result_job_id}")
-        print(f"  received:            {ev.result_received_at or 'not recorded'}")
+        print()
+        print(f"  {_ansi('2', '── receipt ──')}")
+        print(f"  {_ansi('2', 'source:')}             runtime result for {ev.result_job_id}")
+        print(f"  {_ansi('2', 'received:')}           {ev.result_received_at or 'not recorded'}")
         if ev.receipt_source == "runtime_result":
-            print(f"  receipt path:        {ev.receipt_path or 'not recorded'}")
+            print(f"  {_ansi('2', 'path:')}               {ev.receipt_path or 'not recorded'}")
     else:
         print("  MISSING — evaluator has not returned a result for the current job.")
         print("  This node is not ready for acceptance.")
 
     if ev.receipt_source == "standalone_receipt" and ev.receipt is not None:
-        print("\nOTHER RECEIPT — NOT CURRENT JOB EVIDENCE")
-        print("  source:              standalone/fallback receipt")
+        print()
+        print(_ansi("1;33", "OTHER RECEIPT — NOT CURRENT JOB EVIDENCE"))
+        print(f"  {_ansi('2', 'source:')}             standalone/fallback receipt")
         print(
-            f"  generated:           "
+            f"  {_ansi('2', 'generated:')}          "
             f"{ev.receipt.get('generated_at') or 'not recorded'}"
         )
+        print()
         _print_evaluation_payload(
             {},
             ev.receipt,
             verdict=ev.receipt_verdict,
         )
-        print(f"  receipt path:        {ev.receipt_path}")
+        print(f"  {_ansi('2', 'path:')}               {ev.receipt_path}")
 
     historical_count = len(ev.results_history) - int(ev.has_current_evaluation)
     if historical_count > 0:
+        print()
         print(
-            f"\nHISTORICAL RUNTIME RESULTS: {historical_count} "
-            "(not current-job evidence; open TRACE)"
+            f"  {_ansi('2', f'HISTORICAL RUNTIME RESULTS: {historical_count}')} "
+            f"{_ansi('2', '(not current-job evidence; open more → trace)')}"
         )
     if not ev.has_evaluation:
-        print("\nno evaluation evidence")
+        print()
+        print(f"  {_ansi('2', 'no evaluation evidence')}")
 
-    print("\nCURRENT RUNTIME JOB")
+    # Keep the named section for tests / shell greps; content is the banner above.
+    print()
+    print(_ansi("1", "CURRENT RUNTIME JOB"))
     if ev.job_id:
-        print(f"  job_id:              {ev.job_id}")
-        print(f"  created:             {ev.job_created_at or 'not recorded'}")
-        print(f"  queue state:         {ev.queue_state}")
-        print(f"  job status:          {ev.job_status}")
+        _print_field("job_id", str(ev.job_id))
+        _print_field("created", str(ev.job_created_at or "not recorded"))
+        _print_field("queue state", str(ev.queue_state))
+        _print_field("job status", str(ev.job_status))
     else:
         print("  (none)")
 
