@@ -14,12 +14,13 @@ Subcommands:
 
     jobs list         List runtime jobs and queue states
     jobs show         Show one runtime job and its evidence
+    jobs live         Live running executors (alias for watch)
     jobs results      Summarize evaluator output
     jobs set          Change runtime job state with an audit reason
 
     evaluations       List evaluator receipts (verdict + timing)
 
-    watch [target]    Live view: fleet of attempts, or one node's diff + events
+    watch [target]    Live running fleet (default); drill-in by node/job id
     steer <target>    Send an operator message into a running attempt's session
 
     <graph> [executor] [--yes]  Dispatch the graph's ready frontier (positional)
