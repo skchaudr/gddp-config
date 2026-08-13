@@ -2767,6 +2767,9 @@ def cmd_verify_node(args):
         "--attempt", "0",
         *(["--base", args.base] if getattr(args, "base", None) else []),
         "--semantic-mode", "live" if live else "offline",
+        # --live must select the Pi harness explicitly: auto resolves to the
+        # removed built-in runner and the evaluator refuses to start.
+        *(["--semantic-harness", "pi"] if live else []),
         "--integrity", "on" if live else "off",
     ]
     env = os.environ.copy()
