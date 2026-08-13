@@ -17,6 +17,9 @@ Subcommands:
     jobs results      Summarize evaluator output
     jobs set          Change runtime job state with an audit reason
 
+    watch [target]    Live view: fleet of attempts, or one node's diff + events
+    steer <target>    Send an operator message into a running attempt's session
+
     <graph> [executor] [--yes]  Dispatch the graph's ready frontier (positional)
     <node> [executor] [--yes]   Dispatch one ready node; --yes skips confirm
 
@@ -51,10 +54,12 @@ import argparse
 import importlib.util
 import json
 import os
+import re
 import secrets
 import sqlite3
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -77,7 +82,7 @@ _MENU_BACK = object()
 _MENU_QUIT = object()
 _RUNTIME_JOB_COMMANDS = frozenset({"list", "show", "results", "set"})
 _CLI_COMMANDS = frozenset(
-    {"node", "jobs", "verify", "review", "receipt", "obsidian", "project"}
+    {"node", "jobs", "verify", "review", "receipt", "obsidian", "project", "watch", "steer"}
 )
 _ABSTRACT_EXECUTION_MODES = frozenset({"agent", "human"})
 
@@ -2361,6 +2366,256 @@ def interactive_menu():
     console.print(Text("bye.", style="dim"))
 
 
+# ---------------------------------------------------------------------------
+# watch / steer — live observability + operator steering over the pi_rpc spool
+# ---------------------------------------------------------------------------
+# Read-only over filesystem truth: attempt dirs hold packet.json, pid,
+# worktree_path, events.jsonl, result.json. watch never writes; steer appends
+# one line to steer.jsonl, which the steer-aware supervisor drains.
+
+def _spool_root(runtime_root: Path) -> Path:
+    configured = os.environ.get("GDDP_PI_RPC_SPOOL_DIR") or os.environ.get(
+        "GDDP_LOCAL_SUBPROCESS_SPOOL_DIR"
+    )
+    root = (
+        Path(configured).expanduser()
+        if configured
+        else runtime_root / "jobs" / "local-subprocess-spool"
+    )
+    return root.resolve()
+
+
+def _attempt_info(attempt_dir: Path) -> dict | None:
+    packet_path = attempt_dir / "packet.json"
+    if not packet_path.is_file():
+        return None
+    try:
+        packet = json.loads(packet_path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    pid = None
+    try:
+        pid = int((attempt_dir / "pid").read_text().strip())
+    except (OSError, ValueError):
+        pass
+    alive = False
+    if pid:
+        try:
+            os.kill(pid, 0)
+            alive = True
+        except OSError:
+            pass
+    done = (attempt_dir / "result.json").is_file() or (
+        attempt_dir / "exit.json"
+    ).is_file()
+    worktree = None
+    try:
+        worktree = (attempt_dir / "worktree_path").read_text().strip() or None
+    except OSError:
+        pass
+    try:
+        last_write = (attempt_dir / "events.jsonl").stat().st_mtime
+    except OSError:
+        last_write = attempt_dir.stat().st_mtime
+    state = "running" if alive and not done else ("done" if done else "dead")
+    return {
+        "dir": attempt_dir,
+        "name": attempt_dir.name,
+        "job_id": str(packet.get("job_id") or ""),
+        "node_id": str(packet.get("node_id") or ""),
+        "pid": pid,
+        "state": state,
+        "worktree": worktree,
+        "last_write": last_write,
+        "created": attempt_dir.stat().st_ctime,
+    }
+
+
+def _scan_attempts(spool: Path) -> list[dict]:
+    if not spool.is_dir():
+        return []
+    found = []
+    for child in sorted(spool.iterdir()):
+        if child.is_dir():
+            info = _attempt_info(child)
+            if info:
+                found.append(info)
+    order = {"running": 0, "done": 1, "dead": 2}
+    found.sort(key=lambda a: (order[a["state"]], -a["created"]))
+    return found
+
+
+def _git(worktree: str, *git_args: str) -> str:
+    try:
+        return subprocess.run(
+            ["git", "-C", worktree, *git_args],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return ""
+
+
+def _diff_summary(worktree: str | None) -> tuple[str, int]:
+    """(compact 'Nf +X/-Y', untracked file count) for the attempt worktree."""
+    if not worktree or not Path(worktree).is_dir():
+        return "-", 0
+    shortstat = _git(worktree, "diff", "--shortstat", "HEAD")
+    files = re.search(r"(\d+) file", shortstat)
+    ins = re.search(r"(\d+) insertion", shortstat)
+    dele = re.search(r"(\d+) deletion", shortstat)
+    compact = (
+        f"{files.group(1) if files else 0}f "
+        f"+{ins.group(1) if ins else 0}/-{dele.group(1) if dele else 0}"
+    )
+    untracked = len(
+        _git(worktree, "ls-files", "--others", "--exclude-standard").split()
+    )
+    return compact, untracked
+
+
+def _age(ts: float, now: float) -> str:
+    seconds = max(0, int(now - ts))
+    if seconds < 60:
+        return f"{seconds}s"
+    if seconds < 3600:
+        return f"{seconds // 60}m"
+    return f"{seconds // 3600}h{(seconds % 3600) // 60:02d}m"
+
+
+def _event_brief(evt: dict) -> str:
+    et = evt.get("type") or (evt.get("event") or {}).get("type") or "?"
+    detail = ""
+    for key in ("name", "command", "path", "tool"):
+        value = evt.get(key) or (evt.get("event") or {}).get(key)
+        if isinstance(value, str) and value:
+            detail = value
+            break
+    return f"{et} {detail}".strip()[:110]
+
+
+def _recent_events(attempt_dir: Path, count: int = 8) -> list[str]:
+    events = attempt_dir / "events.jsonl"
+    try:
+        lines = events.read_text(errors="replace").splitlines()
+    except OSError:
+        return []
+    briefs = []
+    for line in lines[-200:]:
+        try:
+            evt = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        briefs.append(_event_brief(evt))
+    return briefs[-count:]
+
+
+def _find_attempt(attempts: list[dict], target: str) -> dict | None:
+    for info in attempts:
+        if target in (info["job_id"], info["node_id"], info["name"]):
+            return info
+    matches = [a for a in attempts if a["name"].startswith(target)]
+    return matches[0] if len(matches) == 1 else None
+
+
+def _render_fleet(attempts: list[dict], now: float) -> None:
+    print(f"gddp watch — {len(attempts)} attempt(s)  ({time.strftime('%H:%M:%S')})")
+    print(f"{'NODE':38} {'STATE':8} {'AGE':>7} {'DIFF':>28} {'QUIET':>6}")
+    for info in attempts:
+        shortstat, untracked = _diff_summary(info["worktree"])
+        diff = shortstat
+        if untracked:
+            diff = f"{diff} +{untracked}new"
+        quiet = _age(info["last_write"], now)
+        flag = " !" if info["state"] == "running" and now - info["last_write"] > 180 else ""
+        node = (info["node_id"] or info["name"])[:38]
+        print(
+            f"{node:38} {info['state']:8} {_age(info['created'], now):>7} "
+            f"{diff:>28} {quiet:>5}{flag}"
+        )
+
+
+def _render_single(info: dict, now: float) -> None:
+    print(
+        f"gddp watch {info['node_id'] or info['name']} — {info['state']}  "
+        f"age {_age(info['created'], now)}  pid {info['pid']}  "
+        f"({time.strftime('%H:%M:%S')})"
+    )
+    print(f"  worktree: {info['worktree'] or '-'}")
+    print(f"  job: {info['job_id'] or '-'}")
+    if (info["dir"] / "result.json").is_file():
+        print("  ** turn complete — verdict pending; review via: gddp review / gddp node browse")
+    print("\n-- diff vs HEAD " + "-" * 50)
+    if info["worktree"] and Path(info["worktree"]).is_dir():
+        stat = _git(info["worktree"], "diff", "--stat", "HEAD").strip()
+        lines = stat.splitlines()
+        print("\n".join(lines[-25:]) if lines else "  (clean)")
+        untracked = _git(
+            info["worktree"], "ls-files", "--others", "--exclude-standard"
+        ).split()
+        for path in untracked[:10]:
+            print(f"  [new] {path}")
+    else:
+        print("  (no worktree recorded yet)")
+    print("\n-- recent events " + "-" * 49)
+    events = _recent_events(info["dir"])
+    print("\n".join(f"  {e}" for e in events) if events else print("  (none)"))
+
+
+def cmd_watch(args) -> int:
+    runtime_root = resolve_runtime_root()
+    spool = _spool_root(runtime_root)
+    if not spool.is_dir():
+        print(f"no spool at {spool}; nothing has run yet", file=sys.stderr)
+        return 1
+    tty = sys.stdout.isatty()
+    while True:
+        attempts = _scan_attempts(spool)
+        if args.target:
+            info = _find_attempt(attempts, args.target)
+            if info is None:
+                print(f"no attempt matching {args.target!r}", file=sys.stderr)
+                return 1
+        if tty and not args.once:
+            sys.stdout.write("\033[2J\033[H")
+        now = time.time()
+        if args.target:
+            _render_single(info, now)
+        else:
+            _render_fleet(attempts, now)
+        if args.once or not tty:
+            return 0
+        time.sleep(args.interval)
+
+
+def cmd_steer(args) -> int:
+    runtime_root = resolve_runtime_root()
+    attempts = _scan_attempts(_spool_root(runtime_root))
+    info = _find_attempt(attempts, args.target)
+    if info is None:
+        print(f"no attempt matching {args.target!r}", file=sys.stderr)
+        return 1
+    if info["state"] != "running":
+        print(
+            f"{info['name']} is {info['state']}; steer only delivers to a running attempt",
+            file=sys.stderr,
+        )
+        return 1
+    message = " ".join(args.message).strip()
+    if not message:
+        print("empty steer message", file=sys.stderr)
+        return 1
+    line = json.dumps(
+        {"ts": datetime.now(timezone.utc).isoformat(), "message": message}
+    )
+    with (info["dir"] / "steer.jsonl").open("a", encoding="utf-8") as handle:
+        handle.write(line + "\n")
+    print(f"steer queued for {info['node_id'] or info['name']}: {message}")
+    print("delivered on the supervisor's next read cycle (needs the steer-aware runtime)")
+    return 0
+
+
 def cmd_overview(_args):
     if sys.stdin.isatty() and sys.stdout.isatty():
         return interactive_menu()
@@ -2894,6 +3149,23 @@ def main(argv=None):
 
     jobs_p = sub.add_parser("jobs", help="Runtime jobs and evaluator evidence")
     jobs_p.set_defaults(func=cmd_jobs)
+
+    watch_p = sub.add_parser(
+        "watch", help="Live view of running attempts (fleet, or one node's diff/events)"
+    )
+    watch_p.add_argument("target", nargs="?", default=None,
+                         help="node id, job id, or attempt-dir prefix; omit for fleet view")
+    watch_p.add_argument("--interval", type=float, default=2.0,
+                         help="refresh seconds (default 2)")
+    watch_p.add_argument("--once", action="store_true", help="render once and exit")
+    watch_p.set_defaults(func=cmd_watch)
+
+    steer_p = sub.add_parser(
+        "steer", help="Send an operator message into a running attempt's session"
+    )
+    steer_p.add_argument("target", help="node id, job id, or attempt-dir prefix")
+    steer_p.add_argument("message", nargs="+", help="message text")
+    steer_p.set_defaults(func=cmd_steer)
     jobs_sub = jobs_p.add_subparsers(dest="jobs_command")
 
     jobs_list = jobs_sub.add_parser("list", help="List jobs and queue states")
