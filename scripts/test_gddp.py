@@ -465,6 +465,35 @@ class OverviewTests(unittest.TestCase):
 
         dispatch.assert_called_once_with()
 
+    def test_main_menu_opens_live_watch(self):
+        with patch.object(gddp, "_menu_choice", side_effect=["w", "q"]), \
+                patch.object(
+                    gddp, "interactive_watch", return_value=gddp._MENU_BACK
+                ) as live, \
+                patch.object(gddp, "_clear_screen"):
+            gddp.interactive_menu()
+        live.assert_called_once_with()
+
+    def test_jobs_live_routes_to_watch(self):
+        with patch.object(gddp, "cmd_watch", return_value=0) as watch:
+            rc = gddp.main(["jobs", "live", "--once"])
+        self.assertEqual(rc, 0)
+        watch.assert_called_once()
+        ns = watch.call_args[0][0]
+        self.assertTrue(ns.once)
+        self.assertIsNone(ns.target)
+
+    def test_filter_attempts_running_only(self):
+        attempts = [
+            {"state": "running", "job_id": "j1", "node_id": "a", "project_id": "p"},
+            {"state": "done", "job_id": "j2", "node_id": "b", "project_id": "p"},
+            {"state": "dead", "job_id": "j3", "node_id": "c", "project_id": "q"},
+        ]
+        live = gddp._filter_attempts(attempts, running_only=True)
+        self.assertEqual([a["job_id"] for a in live], ["j1"])
+        all_a = gddp._filter_attempts(attempts, running_only=False)
+        self.assertEqual(len(all_a), 3)
+
     def test_main_menu_exits_on_ctrl_c(self):
         with patch.object(gddp, "_menu_choice", side_effect=KeyboardInterrupt), \
                 patch.object(gddp, "_clear_screen"):

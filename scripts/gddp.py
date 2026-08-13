@@ -2612,6 +2612,7 @@ def interactive_jobs(project: str | None = None):
     state_filter: str | None = None
     back_name = "graph" if project else "graphs"
     actions = {
+        "l": ("live", "running executors — refresh + events"),
         "r": ("refresh", "reload this job list"),
         "a": ("awaiting review", "human review queue"),
         "e": ("evaluations", "evaluator result summary"),
@@ -2654,11 +2655,14 @@ def interactive_jobs(project: str | None = None):
             ), style="dim"))
         console.print()
 
-        choice = _menu_choice(actions, default="r")
+        choice = _menu_choice(actions, default="l" if not state_filter else "r")
         if choice == "q":
             return _MENU_QUIT
         if choice == "b":
             return _MENU_BACK
+        if choice == "l":
+            interactive_watch(project)
+            continue
         if choice == "r":
             state_filter = None
             continue
@@ -2756,8 +2760,11 @@ def interactive_jobs(project: str | None = None):
 
 
 def cmd_jobs(args):
-    argv = []
     command = getattr(args, "jobs_command", None)
+    if command == "live":
+        # Same surface as `gddp watch` — packaged under jobs for discoverability.
+        return cmd_watch(args)
+    argv = []
     if command:
         argv.append(command)
     if command == "list" and args.state:
@@ -2787,7 +2794,8 @@ def static_overview():
     table.add_column("group", style="bold cyan", no_wrap=True)
     table.add_column("owns")
     table.add_column("start with", style="dim", no_wrap=True)
-    table.add_row("menu", "dispatch or graphs (active first; archive >7d)", "gddp")
+    table.add_row("menu", "dispatch · graphs · live · heartbeat", "gddp")
+    table.add_row("live", "running executors, diffs, events stream", "gddp watch / gddp jobs live")
     table.add_row("node", "graph truth, authoring, runtime/evaluator join", "gddp node list")
     table.add_row("jobs", "runtime queue, results, and audited state changes", "gddp jobs list")
     table.add_row("evaluations", "evaluator receipts, verdicts, and timing", "gddp evaluations")
@@ -2796,14 +2804,14 @@ def static_overview():
     table.add_row("obsidian", "graph export", "gddp obsidian export")
     console.print(table)
     console.print(Text(
-        "TTY menu: dispatch | graphs (nodes/jobs/frontier/status live under a graph). "
-        "Shell groups still work: `gddp <group> -h`.",
+        "TTY: d dispatch · g graphs · w live · h heartbeat. "
+        "Shell: `gddp watch`, `gddp jobs live`, `gddp <group> -h`.",
         style="dim",
     ))
 
 
 def _graph_more_menu(project: str):
-    """Secondary graph tools — not on equal footing with nodes/dispatch."""
+    """Secondary graph tools — not on equal footing with nodes/dispatch/live."""
     actions = {
         "j": ("jobs", "runtime jobs for this graph"),
         "f": ("frontier", "ready / in flight / blocked"),
@@ -2847,10 +2855,11 @@ def _graph_more_menu(project: str):
 
 
 def interactive_graph_hub(project: str):
-    """Primary work for one graph: nodes + dispatch. Rest under more."""
+    """Primary work for one graph: nodes, dispatch, live. Rest under more."""
     actions = {
         "n": ("nodes", "review evidence and update graph truth"),
         "d": ("dispatch", "send ready work on this graph"),
+        "w": ("live", "running executors for this graph"),
         "m": ("more", "jobs · frontier · status · validate · evaluations"),
         "b": ("graphs", ""),
         "q": ("quit", ""),
@@ -2876,6 +2885,8 @@ def interactive_graph_hub(project: str):
                 outcome = interactive_dispatch(project)
                 if outcome is not _MENU_QUIT:
                     _pause()
+            elif choice == "w":
+                outcome = interactive_watch(project)
             elif choice == "m":
                 outcome = _graph_more_menu(project)
             else:
@@ -2940,10 +2951,11 @@ def interactive_heartbeat():
 
 
 def interactive_menu():
-    """Front door: dispatch or graphs. Everything else is under a graph."""
+    """Front door: dispatch, graphs, live. Everything else is under a graph."""
     actions = {
         "d": ("dispatch", "send ready work through the event pipeline"),
         "g": ("graphs", "active graphs first; archive for idle (>7d)"),
+        "w": ("live", "running executors — fleet + drill-in"),
         "h": ("heartbeat", "arm/disarm the control plane (intake + heartbeat)"),
         "q": ("quit", ""),
     }
@@ -2968,6 +2980,8 @@ def interactive_menu():
                 outcome = interactive_graphs()
                 if outcome is _MENU_QUIT:
                     break
+            elif choice == "w":
+                interactive_watch()
             elif choice == "h":
                 interactive_heartbeat()
         except SystemExit:
@@ -3017,6 +3031,15 @@ def _attempt_info(attempt_dir: Path) -> dict | None:
             alive = True
         except OSError:
             pass
+    # Prefer supervisor.pid when worker pid file is stale/missing.
+    if not alive:
+        try:
+            spid = int((attempt_dir / "supervisor.pid").read_text().strip())
+            os.kill(spid, 0)
+            alive = True
+            pid = pid or spid
+        except (OSError, ValueError):
+            pass
     done = (attempt_dir / "result.json").is_file() or (
         attempt_dir / "exit.json"
     ).is_file()
@@ -3029,17 +3052,27 @@ def _attempt_info(attempt_dir: Path) -> dict | None:
         last_write = (attempt_dir / "events.jsonl").stat().st_mtime
     except OSError:
         last_write = attempt_dir.stat().st_mtime
-    state = "running" if alive and not done else ("done" if done else "dead")
+    # Done wins even if pid linger; otherwise alive process = running.
+    if done and not alive:
+        state = "done"
+    elif alive:
+        state = "running"
+    elif done:
+        state = "done"
+    else:
+        state = "dead"
     return {
         "dir": attempt_dir,
         "name": attempt_dir.name,
         "job_id": str(packet.get("job_id") or ""),
         "node_id": str(packet.get("node_id") or ""),
+        "project_id": str(packet.get("project_id") or ""),
         "pid": pid,
         "state": state,
         "worktree": worktree,
         "last_write": last_write,
         "created": attempt_dir.stat().st_ctime,
+        "events_path": str(attempt_dir / "events.jsonl"),
     }
 
 
@@ -3131,21 +3164,107 @@ def _find_attempt(attempts: list[dict], target: str) -> dict | None:
     return matches[0] if len(matches) == 1 else None
 
 
-def _render_fleet(attempts: list[dict], now: float) -> None:
-    print(f"gddp watch — {len(attempts)} attempt(s)  ({time.strftime('%H:%M:%S')})")
-    print(f"{'NODE':38} {'STATE':8} {'AGE':>7} {'DIFF':>28} {'QUIET':>6}")
+def _filter_attempts(
+    attempts: list[dict],
+    *,
+    running_only: bool = True,
+    project: str | None = None,
+) -> list[dict]:
+    """Default view is live work only; --all and project filters apply here."""
+    out = attempts
+    if running_only:
+        out = [a for a in out if a["state"] == "running"]
+    if project:
+        # Prefer packet project_id; fall back to DB job→project map.
+        job_projects = _job_project_map()
+        filtered = []
+        for a in out:
+            pid = a.get("project_id") or job_projects.get(a.get("job_id") or "", "")
+            if pid == project or (
+                not pid and a.get("node_id") and _node_in_project(project, a["node_id"])
+            ):
+                filtered.append(a)
+        out = filtered
+    return out
+
+
+def _job_project_map() -> dict[str, str]:
+    try:
+        jobs_status = load_runtime_jobs_module()
+        con = jobs_status.connect()
+    except Exception:
+        return {}
+    try:
+        rows = con.execute(
+            "SELECT job_id, project_id FROM jobs WHERE project_id IS NOT NULL"
+        ).fetchall()
+        return {
+            str(r["job_id"]): str(r["project_id"])
+            for r in rows
+            if r["job_id"] and r["project_id"]
+        }
+    except Exception:
+        return {}
+    finally:
+        try:
+            con.close()
+        except Exception:
+            pass
+
+
+def _node_in_project(project: str, node_id: str) -> bool:
+    try:
+        path = ROOT / "graphs" / project / "nodes" / f"{node_id}.yaml"
+        return path.is_file()
+    except OSError:
+        return False
+
+
+def _render_fleet(attempts: list[dict], now: float, *, running_only: bool) -> None:
+    scope = "running" if running_only else "all"
+    print(
+        f"gddp watch · {scope} — {len(attempts)} attempt(s)  "
+        f"({time.strftime('%H:%M:%S')})"
+    )
+    if not attempts:
+        print("  (none live right now)")
+        print("  tip: gddp watch --all   ·   gddp jobs live")
+        return
+    print(
+        f"{'NODE':34} {'STATE':8} {'AGE':>7} {'DIFF':>22} {'QUIET':>6}  JOB"
+    )
     for info in attempts:
         shortstat, untracked = _diff_summary(info["worktree"])
         diff = shortstat
         if untracked:
             diff = f"{diff} +{untracked}new"
         quiet = _age(info["last_write"], now)
-        flag = " !" if info["state"] == "running" and now - info["last_write"] > 180 else ""
-        node = (info["node_id"] or info["name"])[:38]
-        print(
-            f"{node:38} {info['state']:8} {_age(info['created'], now):>7} "
-            f"{diff:>28} {quiet:>5}{flag}"
+        flag = (
+            " !"
+            if info["state"] == "running" and now - info["last_write"] > 180
+            else ""
         )
+        node = (info["node_id"] or info["name"])[:34]
+        job = (info["job_id"] or "")[-14:]
+        state = info["state"]
+        # Color only when TTY — keep columns stable with plain tokens.
+        if sys.stdout.isatty():
+            color = {
+                "running": "\033[1;35m",
+                "done": "\033[1;32m",
+                "dead": "\033[1;31m",
+            }.get(state, "")
+            reset = "\033[0m" if color else ""
+            state_s = f"{color}{state:8}{reset}"
+        else:
+            state_s = f"{state:8}"
+        print(
+            f"{node:34} {state_s} {_age(info['created'], now):>7} "
+            f"{diff:>22} {quiet:>5}{flag}  {job}"
+        )
+    print()
+    print("  drill in:  gddp watch <node-id|job-id>")
+    print("  events:    tail -F <spool>/…/events.jsonl  (path in single view)")
 
 
 def _render_single(info: dict, now: float) -> None:
@@ -3154,10 +3273,15 @@ def _render_single(info: dict, now: float) -> None:
         f"age {_age(info['created'], now)}  pid {info['pid']}  "
         f"({time.strftime('%H:%M:%S')})"
     )
+    print(f"  job:      {info['job_id'] or '-'}")
     print(f"  worktree: {info['worktree'] or '-'}")
-    print(f"  job: {info['job_id'] or '-'}")
+    print(f"  spool:    {info['dir']}")
+    print(f"  events:   {info.get('events_path') or (info['dir'] / 'events.jsonl')}")
     if (info["dir"] / "result.json").is_file():
-        print("  ** turn complete — verdict pending; review via: gddp review / gddp node browse")
+        print(
+            "  ** turn complete — verdict pending; "
+            "review: gddp review / gddp node browse"
+        )
     print("\n-- diff vs HEAD " + "-" * 50)
     if info["worktree"] and Path(info["worktree"]).is_dir():
         stat = _git(info["worktree"], "diff", "--stat", "HEAD").strip()
@@ -3171,34 +3295,75 @@ def _render_single(info: dict, now: float) -> None:
     else:
         print("  (no worktree recorded yet)")
     print("\n-- recent events " + "-" * 49)
-    events = _recent_events(info["dir"])
-    print("\n".join(f"  {e}" for e in events) if events else print("  (none)"))
+    events = _recent_events(info["dir"], count=12)
+    if events:
+        print("\n".join(f"  {e}" for e in events))
+    else:
+        print("  (none)")
+    print("\n  live stream:  tail -F " + str(info.get("events_path") or (info["dir"] / "events.jsonl")))
 
 
 def cmd_watch(args) -> int:
+    """Live execution view. Default fleet = running only (`--all` for history)."""
     runtime_root = resolve_runtime_root()
     spool = _spool_root(runtime_root)
     if not spool.is_dir():
         print(f"no spool at {spool}; nothing has run yet", file=sys.stderr)
         return 1
     tty = sys.stdout.isatty()
-    while True:
-        attempts = _scan_attempts(spool)
-        if args.target:
-            info = _find_attempt(attempts, args.target)
-            if info is None:
-                print(f"no attempt matching {args.target!r}", file=sys.stderr)
-                return 1
-        if tty and not args.once:
-            sys.stdout.write("\033[2J\033[H")
-        now = time.time()
-        if args.target:
-            _render_single(info, now)
-        else:
-            _render_fleet(attempts, now)
-        if args.once or not tty:
-            return 0
-        time.sleep(args.interval)
+    running_only = not bool(getattr(args, "all", False))
+    project = getattr(args, "project", None) or None
+    try:
+        while True:
+            attempts = _scan_attempts(spool)
+            if args.target:
+                info = _find_attempt(attempts, args.target)
+                if info is None:
+                    # Retry against unfiltered spool names even if done.
+                    info = _find_attempt(_scan_attempts(spool), args.target)
+                if info is None:
+                    print(f"no attempt matching {args.target!r}", file=sys.stderr)
+                    return 1
+            else:
+                attempts = _filter_attempts(
+                    attempts, running_only=running_only, project=project
+                )
+            if tty and not args.once:
+                sys.stdout.write("\033[2J\033[H")
+            now = time.time()
+            if args.target:
+                _render_single(info, now)
+            else:
+                _render_fleet(attempts, now, running_only=running_only)
+            if args.once or not tty:
+                return 0
+            time.sleep(args.interval)
+    except KeyboardInterrupt:
+        print()
+        return 0
+
+
+def interactive_watch(project: str | None = None) -> object:
+    """Menu entry: live running fleet (project-scoped when under a graph)."""
+    _clear_screen()
+    console.print(Text("live", style="bold").append(
+        f"  ·  {project}" if project else "  ·  running attempts",
+        style="dim",
+    ))
+    console.print(Text("ctrl-c returns to menu", style="dim"))
+    console.print()
+    ns = argparse.Namespace(
+        target=None,
+        interval=2.0,
+        once=False,
+        all=False,
+        project=project,
+    )
+    try:
+        cmd_watch(ns)
+    except KeyboardInterrupt:
+        pass
+    return _MENU_BACK
 
 
 def cmd_steer(args) -> int:
@@ -3773,13 +3938,27 @@ def main(argv=None):
     jobs_p.set_defaults(func=cmd_jobs)
 
     watch_p = sub.add_parser(
-        "watch", help="Live view of running attempts (fleet, or one node's diff/events)"
+        "watch",
+        help="Live running executors (default: running only; drill-in by node/job)",
     )
-    watch_p.add_argument("target", nargs="?", default=None,
-                         help="node id, job id, or attempt-dir prefix; omit for fleet view")
-    watch_p.add_argument("--interval", type=float, default=2.0,
-                         help="refresh seconds (default 2)")
+    watch_p.add_argument(
+        "target",
+        nargs="?",
+        default=None,
+        help="node id, job id, or attempt-dir prefix; omit for fleet",
+    )
+    watch_p.add_argument(
+        "--interval", type=float, default=2.0, help="refresh seconds (default 2)"
+    )
     watch_p.add_argument("--once", action="store_true", help="render once and exit")
+    watch_p.add_argument(
+        "--all",
+        action="store_true",
+        help="include done/dead spool history (default: running only)",
+    )
+    watch_p.add_argument(
+        "--project", default=None, help="limit fleet to one graph/project id"
+    )
     watch_p.set_defaults(func=cmd_watch)
 
     steer_p = sub.add_parser(
@@ -3800,6 +3979,28 @@ def main(argv=None):
         "--full", action="store_true", help="Include criterion-level reasoning"
     )
     jobs_show.set_defaults(func=cmd_jobs)
+
+    jobs_live = jobs_sub.add_parser(
+        "live",
+        help="Live running executors (alias for gddp watch)",
+    )
+    jobs_live.add_argument(
+        "target",
+        nargs="?",
+        default=None,
+        help="node id, job id, or attempt prefix; omit for fleet",
+    )
+    jobs_live.add_argument(
+        "--interval", type=float, default=2.0, help="refresh seconds (default 2)"
+    )
+    jobs_live.add_argument("--once", action="store_true", help="render once and exit")
+    jobs_live.add_argument(
+        "--all", action="store_true", help="include done/dead history"
+    )
+    jobs_live.add_argument(
+        "--project", default=None, help="limit fleet to one graph/project id"
+    )
+    jobs_live.set_defaults(func=cmd_jobs, jobs_command="live")
 
     jobs_results = jobs_sub.add_parser("results", help="Summarize evaluator output")
     jobs_results.add_argument("--all", action="store_true", help="List every result row")
