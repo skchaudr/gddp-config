@@ -35,6 +35,24 @@ explicitly chose a non-agent-friendly interface that still remained low-friction
   list/show/results/set` routes through `gddp-runtime/scripts/jobs_status.py`;
   job writes must never change node YAML or project graph status.
 
+## Evaluation before human review
+
+- Human review is final acceptance after evaluation. It is never a fallback
+  for absent, interrupted, stale, or incorrectly bound evaluation evidence.
+- A job or node must not enter or appear as `awaiting_review` or `provisional`
+  unless a persisted evaluator receipt for the current job and attempt targets
+  the actual result commit and contains terminal criteria and integrity lanes.
+- An `evaluated` session flag, agent inspection, unbound manual receipt, stale
+  receipt, or semantic opinion without an integrity verdict is not evaluation.
+- Evaluation interruption or persistence failure must remain explicit,
+  retryable evaluation state. It must not be relabeled as human review work.
+- Executor and evaluator work must run independently of the operator's
+  interactive agent thread, with durable state, logs, and resumable or
+  retryable ownership. Never make a long foreground process in an interactive
+  agent session the sole owner of successful dispatch, evaluation, or receipt
+  persistence. Keep the main thread responsive; if no asynchronous path exists,
+  stop and report that missing capability instead of running synchronously.
+
 ## Project snapshot
 
 - **Language:** YAML / Markdown (primary) + a small `scripts/` Python package (validator + TUI scaffold). No runtime code, no build step.
