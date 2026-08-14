@@ -85,7 +85,7 @@ console = Console(soft_wrap=True, highlight=False, width=_PIPE_WIDTH)
 _MENU_BACK = object()
 _MENU_QUIT = object()
 _MENU_REFRESH = object()
-_RUNTIME_JOB_COMMANDS = frozenset({"list", "show", "results", "set"})
+_RUNTIME_JOB_COMMANDS = frozenset({"list", "show", "results", "set", "retry"})
 _CLI_COMMANDS = frozenset(
     {
         "node",
@@ -1998,6 +1998,7 @@ def _node_review_pick_action(
     selectables: list[tuple[str, str, str]] = [
         ("e", "evaluation", "verdict, why, criteria — current job evidence"),
         ("u", "update", "set graph status (your decision)"),
+        ("x", "reject + retry", "return to ready; retry with your fix-list"),
         ("m", "more", "contract · diff · trace"),
         ("b", "back", "choose another node"),
         ("q", "quit", ""),
@@ -2074,6 +2075,62 @@ def _node_review_pick_action(
         continue
 
 
+def _confirm_reject_and_retry(project: str, node_id: str) -> int:
+    """Record human rejection, return graph truth to ready, and retry the job."""
+    node_cli = _import_module("node_cli")
+    try:
+        evidence = node_cli.fetch_runtime_evidence(ROOT, project, node_id)
+    except Exception as exc:
+        console.print(Text(f"Could not load runtime evidence: {exc}", style="red"))
+        return 1
+    job_id = getattr(evidence, "job_id", None)
+    queue_state = getattr(evidence, "queue_state", None)
+    if not job_id or queue_state != "awaiting_review":
+        console.print(
+            Text(
+                f"Reject + retry requires an awaiting-review job; current state is "
+                f"{queue_state or 'missing'}.",
+                style="yellow",
+            )
+        )
+        return 1
+
+    _clear_screen()
+    console.rule(f"{project} / {node_id} · reject + retry", style="bold yellow")
+    actions = {
+        "y": ("yes", "reject this result and dispatch the next attempt"),
+        "n": ("no", "leave graph and runtime state unchanged"),
+    }
+    if _menu_choice(actions, default="n") != "y":
+        console.print(Text("Unchanged.", style="dim"))
+        return 1
+    try:
+        reason = Prompt.ask(Text("fix-list / reason", style="cyan")).strip()
+    except EOFError:
+        reason = ""
+    if not reason:
+        console.print(Text("Unchanged — a retry fix-list is required.", style="yellow"))
+        return 1
+
+    rc = node_cli.cmd_set_status(
+        project=project,
+        node_id=node_id,
+        status="ready",
+        yes=True,
+        reason=reason,
+    )
+    if rc != 0:
+        return rc
+    _offer_publish_graph_status(project, node_id, "ready", reason)
+    return run_runtime_jobs([
+        "retry",
+        str(job_id),
+        "--reason",
+        reason,
+        "--yes",
+    ])
+
+
 def _node_review_menu(
     project: str,
     node_id: str,
@@ -2140,6 +2197,10 @@ def _node_review_menu(
             )
             if _pause("u update · any other key returns to the node") != "u":
                 continue
+        elif choice == "x":
+            _confirm_reject_and_retry(project, node_id)
+            _pause()
+            continue
         elif choice == "m":
             more = {
                 "c": ("contract", "intent, dependencies, acceptance criteria"),
@@ -2794,6 +2855,10 @@ def cmd_jobs(args):
         argv.append("--all")
     elif command == "set":
         argv.extend([args.ref, args.state, "--reason", args.reason])
+        if args.yes:
+            argv.append("--yes")
+    elif command == "retry":
+        argv.extend([args.ref, "--reason", args.reason])
         if args.yes:
             argv.append("--yes")
     return run_runtime_jobs(argv)
@@ -4252,6 +4317,16 @@ def main(argv=None):
     )
     jobs_set.add_argument("--yes", action="store_true", help="Skip confirmation")
     jobs_set.set_defaults(func=cmd_jobs)
+
+    jobs_retry = jobs_sub.add_parser(
+        "retry", help="Reject a reviewed result and retry the same node"
+    )
+    jobs_retry.add_argument("ref", help="Job ID or uniquely matching node ID")
+    jobs_retry.add_argument(
+        "--reason", required=True, help="Human fix-list injected into the retry"
+    )
+    jobs_retry.add_argument("--yes", action="store_true", help="Skip confirmation")
+    jobs_retry.set_defaults(func=cmd_jobs)
 
     receipt_p = sub.add_parser(
         "receipt",

@@ -47,6 +47,15 @@ if ! ROOT="$(_resolve_root)"; then
   exit 1
 fi
 
+# Operator actions that dispatch work need the same executor environment as
+# the mini-heartbeat. Source its canonical local env before entering Python.
+_RUNTIME_ROOT="${GDDP_RUNTIME_ROOT:-$HOME/repos/gddp-runtime}"
+_RUNTIME_ENV="${MINI_HEARTBEAT_ENV:-$_RUNTIME_ROOT/deploy/mini-heartbeat/env/gddp.env}"
+if [[ -f "$_RUNTIME_ENV" ]]; then
+  # shellcheck disable=SC1090
+  source "$_RUNTIME_ENV"
+fi
+
 if [[ -x "$ROOT/.venv/bin/python" ]]; then
   PY="$ROOT/.venv/bin/python"
 else

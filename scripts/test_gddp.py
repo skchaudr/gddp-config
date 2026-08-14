@@ -103,6 +103,25 @@ class RuntimeJobsForwardingTests(unittest.TestCase):
             "--yes",
         ])
 
+    def test_jobs_retry_forwards_reason_to_runtime_boundary(self):
+        with patch.object(gddp, "run_runtime_jobs", return_value=0) as run:
+            rc = gddp.main([
+                "jobs",
+                "retry",
+                "job-1",
+                "--reason",
+                "new clean user is ready",
+                "--yes",
+            ])
+        self.assertEqual(rc, 0)
+        run.assert_called_once_with([
+            "retry",
+            "job-1",
+            "--reason",
+            "new clean user is ready",
+            "--yes",
+        ])
+
     def test_node_set_status_is_not_a_shell_subcommand(self):
         with patch.object(gddp.sys, "stderr", StringIO()), \
                 self.assertRaises(SystemExit) as exit_context:
@@ -833,6 +852,52 @@ class OverviewTests(unittest.TestCase):
         self.assertIs(outcome, gddp._MENU_BACK)
         self.assertRegex(output.getvalue(), r"(?m)^graph status$")
         self.assertIn("evaluator passed", output.getvalue())
+
+    def test_node_review_offers_reject_and_retry_action(self):
+        terminal = SimpleNamespace(
+            getch=lambda: "x",
+            clear_lines=lambda n: None,
+        )
+        output = StringIO()
+        test_console = Console(file=output, force_terminal=False, width=100)
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "console", test_console):
+            choice = gddp._node_review_pick_action(has_siblings=False)
+
+        self.assertEqual(choice, "x")
+        self.assertIn("reject + retry", output.getvalue())
+
+    def test_reject_and_retry_returns_graph_ready_then_retries_job(self):
+        node_cli = SimpleNamespace(
+            fetch_runtime_evidence=lambda *a, **k: SimpleNamespace(
+                job_id="job-1", queue_state="awaiting_review"
+            ),
+            cmd_set_status=Mock(return_value=0),
+        )
+        with patch.object(gddp, "_import_module", return_value=node_cli), \
+                patch.object(gddp, "_menu_choice", return_value="y"), \
+                patch.object(gddp.Prompt, "ask", return_value="new clean user"), \
+                patch.object(gddp, "_offer_publish_graph_status") as publish, \
+                patch.object(gddp, "run_runtime_jobs", return_value=0) as retry, \
+                patch.object(gddp, "_clear_screen"):
+            rc = gddp._confirm_reject_and_retry("demo", "node-1")
+
+        self.assertEqual(rc, 0)
+        node_cli.cmd_set_status.assert_called_once_with(
+            project="demo",
+            node_id="node-1",
+            status="ready",
+            yes=True,
+            reason="new clean user",
+        )
+        publish.assert_called_once_with("demo", "node-1", "ready", "new clean user")
+        retry.assert_called_once_with([
+            "retry",
+            "job-1",
+            "--reason",
+            "new clean user",
+            "--yes",
+        ])
 
     def test_node_review_left_right_move_to_sibling_nodes(self):
         """←/→ on the node view jumps prev/next without returning to the list."""
