@@ -11,7 +11,7 @@ from datetime import datetime, timedelta, timezone
 from io import StringIO
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from rich.console import Console
 
@@ -249,6 +249,20 @@ class OverviewTests(unittest.TestCase):
                 [("first", "1 node"), ("second", "2 nodes")],
             )
         self.assertEqual(selected, "second")
+
+    def test_paged_menu_refresh_has_chrome_and_returns_reload_signal(self):
+        terminal = self._paged_terminal(lambda: "r")
+        output = StringIO()
+        test_console = Console(file=output, width=100, color_system=None)
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "console", test_console):
+            selected = gddp._paged_menu(
+                "projects",
+                [("demo", "1 node")],
+                refreshable=True,
+            )
+        self.assertIs(selected, gddp._MENU_REFRESH)
+        self.assertIn("r refresh", output.getvalue())
 
     def test_paged_menu_labels_pages_and_cycles_both_directions(self):
         items = [(f"node-{i}", f"Node {i}") for i in range(1, 12)]
@@ -552,6 +566,29 @@ class OverviewTests(unittest.TestCase):
         # newest first within archive
         self.assertEqual(archive[0][0], "cold")
 
+    def test_graph_picker_refresh_requeries_activity(self):
+        now = datetime(2026, 8, 13, tzinfo=timezone.utc)
+        snapshots = [
+            ([('old', now)], []),
+            ([('new', now)], []),
+        ]
+        with patch.object(
+            gddp, "partition_graphs_by_activity", side_effect=snapshots
+        ) as partitioned, patch.object(
+            gddp,
+            "_graph_pick_items",
+            side_effect=lambda rows, now=None: [(pid, "") for pid, _ in rows],
+        ), patch.object(
+            gddp,
+            "_pick_list",
+            side_effect=[gddp._MENU_REFRESH, "new"],
+        ) as picked:
+            result = gddp._pick_graph("graphs")
+
+        self.assertEqual(result, "new")
+        self.assertEqual(partitioned.call_count, 2)
+        self.assertTrue(picked.call_args_list[0].kwargs["refreshable"])
+
     def test_interactive_graph_hub_routes_nodes(self):
         with patch.object(gddp, "_menu_choice", side_effect=["n", "b"]), \
                 patch.object(
@@ -687,6 +724,29 @@ class OverviewTests(unittest.TestCase):
         styles = {span.style for t in texts for span in t.spans}
         self.assertTrue(any(s and "green" in str(s) for s in styles))
         self.assertTrue(any(s and "cyan" in str(s) for s in styles))
+
+    def test_node_picker_refresh_requeries_runtime_evidence(self):
+        snapshots = [
+            [("alpha", {"title": "Alpha", "status": "running"}, {"status": "running"})],
+            [("alpha", {"title": "Alpha", "status": "complete"}, {"status": "complete"})],
+        ]
+        node_cli = SimpleNamespace(
+            iter_nodes=Mock(side_effect=snapshots),
+            fetch_runtime_evidence=lambda *a, **k: SimpleNamespace(
+                queue_state="-", job_status="-", verdict="-"
+            ),
+        )
+        with patch.object(gddp, "_import_module", return_value=node_cli), \
+                patch.object(
+                    gddp,
+                    "_pick_list",
+                    side_effect=[gddp._MENU_REFRESH, gddp._MENU_BACK],
+                ) as picked:
+            result = gddp.interactive_nodes("demo")
+
+        self.assertIs(result, gddp._MENU_BACK)
+        self.assertEqual(node_cli.iter_nodes.call_count, 2)
+        self.assertTrue(picked.call_args_list[0].kwargs["refreshable"])
 
     def test_node_workflow_reviews_and_updates_entirely_in_menu(self):
         # paged: project 1 → node 1 → update → complete → confirm → back out

@@ -84,6 +84,7 @@ _PIPE_WIDTH = None if sys.stdout.isatty() else 120
 console = Console(soft_wrap=True, highlight=False, width=_PIPE_WIDTH)
 _MENU_BACK = object()
 _MENU_QUIT = object()
+_MENU_REFRESH = object()
 _RUNTIME_JOB_COMMANDS = frozenset({"list", "show", "results", "set"})
 _CLI_COMMANDS = frozenset(
     {
@@ -676,12 +677,14 @@ def _pick_graph(
     back_label: str = "main menu",
     include_archive: bool = True,
 ) -> str | object:
-    """Activity-sorted graph picker; optional archive bucket for idle graphs."""
-    active, archive = partition_graphs_by_activity()
-    now = datetime.now(timezone.utc)
+    """Activity-sorted graph picker; ``r`` reloads graph and runtime state."""
+    archive_mode = False
     while True:
-        items = _graph_pick_items(active, now=now)
-        if include_archive and archive:
+        active, archive = partition_graphs_by_activity()
+        now = datetime.now(timezone.utc)
+        rows = archive if archive_mode else active
+        items = _graph_pick_items(rows, now=now)
+        if not archive_mode and include_archive and archive:
             items.append((
                 _ARCHIVE_SENTINEL,
                 Text(
@@ -690,35 +693,33 @@ def _pick_graph(
                 ),
             ))
         if not items:
+            if archive_mode:
+                console.print(Text("Archive empty.", style="dim"))
+                archive_mode = False
+                continue
             _clear_screen()
             console.print(Text("No graphs found.", style="yellow"))
             _pause()
             return _MENU_BACK
         picked = _pick_list(
-            heading,
+            f"{heading} · archive" if archive_mode else heading,
             items,
             preview_cmd=_project_preview_cmd(),
-            back_label=back_label,
+            back_label="active graphs" if archive_mode else back_label,
+            refreshable=True,
         )
-        if picked in {_MENU_BACK, _MENU_QUIT}:
-            return picked
+        if picked is _MENU_REFRESH:
+            continue
+        if picked is _MENU_QUIT:
+            return _MENU_QUIT
+        if picked is _MENU_BACK:
+            if archive_mode:
+                archive_mode = False
+                continue
+            return _MENU_BACK
         if picked == _ARCHIVE_SENTINEL:
-            arch_items = _graph_pick_items(archive, now=now)
-            if not arch_items:
-                console.print(Text("Archive empty.", style="dim"))
-                _pause()
-                continue
-            archived = _pick_list(
-                f"{heading} · archive",
-                arch_items,
-                preview_cmd=_project_preview_cmd(),
-                back_label="active graphs",
-            )
-            if archived is _MENU_QUIT:
-                return _MENU_QUIT
-            if archived is _MENU_BACK:
-                continue
-            return archived
+            archive_mode = True
+            continue
         return picked
 
 
@@ -1112,11 +1113,12 @@ def _pick_list(
     multi: bool = False,
     back_label: str = "back",
     fzf_header: str | None = None,
+    refreshable: bool = False,
 ):
     """Rich paged list by default. Optional fzf via ``f``.
 
-    multi=False → value | _MENU_BACK | _MENU_QUIT
-    multi=True  → value | list[str] | _MENU_BACK | _MENU_QUIT
+    multi=False → value | _MENU_BACK | _MENU_QUIT | _MENU_REFRESH
+    multi=True  → value | list[str] | _MENU_BACK | _MENU_QUIT | _MENU_REFRESH
       (list when space/m has checked 2+ rows and Enter is pressed)
     """
     del fzf_header  # callers used to pass verbose fzf chrome; paged owns help now
@@ -1126,6 +1128,7 @@ def _pick_list(
         back_label=back_label,
         fzf_preview_cmd=preview_cmd,
         fzf_multi=multi,
+        refreshable=refreshable,
     )
 
 
@@ -1455,6 +1458,7 @@ def _paged_menu(
     back_label: str = "back",
     fzf_preview_cmd: str | None = None,
     fzf_multi: bool = False,
+    refreshable: bool = False,
 ):
     """Rich cursor list: ↑/↓, Enter, numbers; ←/→ page.
 
@@ -1529,6 +1533,8 @@ def _paged_menu(
             help_bits.append("←/→ page")
         if fzf_ok:
             help_bits.append("f filter")
+        if refreshable:
+            help_bits.append("r refresh")
         help_bits.extend([f"b {back_label}", "q quit"])
         lines.append(Text("  " + " · ".join(help_bits), style="dim"))
 
@@ -1596,6 +1602,8 @@ def _paged_menu(
                 )
                 drawn += 1
                 continue
+            if refreshable and choice in {"r", "R"}:
+                return _MENU_REFRESH
             if choice in {"b", "B"}:
                 return _MENU_BACK
             if choice in {"q", "Q"}:
@@ -2278,7 +2286,10 @@ def interactive_nodes(project: str | None = None):
                 project_items,
                 preview_cmd=_project_preview_cmd(),
                 back_label="main menu",
+                refreshable=True,
             )
+            if project is _MENU_REFRESH:
+                continue
             if project in {_MENU_BACK, _MENU_QUIT}:
                 return project
 
@@ -2316,7 +2327,10 @@ def interactive_nodes(project: str | None = None):
                 preview_cmd=_node_preview_cmd(project),
                 multi=True,
                 back_label="projects",
+                refreshable=True,
             )
+            if picked is _MENU_REFRESH:
+                continue
             if picked is _MENU_QUIT:
                 return _MENU_QUIT
             if picked is _MENU_BACK:
