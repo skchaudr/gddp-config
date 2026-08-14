@@ -1,31 +1,30 @@
 schema_version: '1.0'
 schema_type: node
-node_id: node-12-eval-factual-rationale
+node_id: node-11-eval-factual-rationale
 title: 'Fixed queries 1-2: factual decision + rationale'
 type: capability
 why: Stage H. What decision was made; why was a specific choice made. Raw answers captured verbatim.
 depends_on:
-- node-11-verify-retrieval
+- node-10-verify-retrieval
 acceptance_criteria:
 - id: answers-captured
   criterion: '04-evaluation/results/q1-factual.md and q2-rationale.md each contain: the exact query asked, Khoj''s raw answer
     verbatim, and the retrieved evidence passages'
 - id: queries-predetermined
-  criterion: The exact queries come from 04-evaluation/queries/ files - written before asking, not adapted after seeing answers
+  criterion: 04-evaluation/queries/q1.txt and q2.txt were written before the queries were run
 constraints:
-- 'Thin-node contract: this yaml schedules the work; the semantic room''s CONTEXT.md and tasks/<task>.md hold the working
-  instructions. Read them first.'
-- Follow 04-evaluation/tasks/eval-factual-rationale.md
+- The governing memo is /Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md - read it first.
+- Write the exact query text to its queries/ file BEFORE asking Khoj; the memo's evaluation set is fixed and predetermined
 - Answer quality is recorded, never retried - weak answers are valid results
 - 'Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model
   xai/grok-4.6 via the subagent tool''s model parameter; close with one oracle or reviewer pass before returning'
 allowed_execution_modes:
 - pi_rpc
 required_artifacts:
-- 04-evaluation/results/q1-factual.md
-- 04-evaluation/results/q2-rationale.md
 - 04-evaluation/queries/q1.txt
 - 04-evaluation/queries/q2.txt
+- 04-evaluation/results/q1-factual.md
+- 04-evaluation/results/q2-rationale.md
 status: pending
 priority: high
 unlocks: []

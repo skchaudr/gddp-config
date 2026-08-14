@@ -1,23 +1,20 @@
 schema_version: '1.0'
 schema_type: node
-node_id: node-10-khoj-ingest
+node_id: node-09-khoj-ingest
 title: Ingest the snapshot into a clean Khoj corpus
 type: capability
 why: Stage F. Load the transformed corpus into a clean target corpus on the discovered Khoj deployment.
 depends_on:
-- node-09-khoj-transform
+- node-08-khoj-transform
 acceptance_criteria:
 - id: ingested
-  criterion: 03-ingestion/output/ingest-report.md records the exact ingestion method used, the target corpus name, and Khoj's
-    own confirmation (API response, logs, or UI state) that the files are present
+  criterion: 03-ingestion/output/ingest-report.md records the exact ingestion method, the target corpus name, and Khoj's own
+    confirmation (API response, logs, or UI state) that the files are present
 - id: clean-target
   criterion: The target corpus was empty or newly created for this run - stated in the report
 constraints:
-- 'Thin-node contract: this yaml schedules the work; the semantic room''s CONTEXT.md and tasks/<task>.md hold the working
-  instructions. Read them first.'
-- Follow 03-ingestion/tasks/khoj-ingest.md
-- Ingestion may require operator action if credentials are needed - record precisely what blocked and stop rather than guessing
-  secrets
+- The governing memo is /Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md - read it first.
+- If credentials are needed and unavailable, record precisely what blocked and stop - never guess secrets
 - 'Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model
   xai/grok-4.6 via the subagent tool''s model parameter; close with one oracle or reviewer pass before returning'
 allowed_execution_modes:

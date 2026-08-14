@@ -3,18 +3,19 @@ schema_type: project_graph
 project_id: myapi-part1
 project_name: 'MyAPI Part 1 - the first slice: decisions -> corpus -> Khoj answers'
 description: 'Can MyAPI turn a clean authoritative snapshot of project decisions into a reproducible corpus Khoj retrieves
-  and answers against? Query results end the slice regardless of answer quality. Source memo: GDDP v MyAPI Part 1 - the first
-  slice.md (2026-08-13).'
+  and answers against? Decision objects first, minimal scaffold only. Query results end the slice regardless of quality. Source
+  memo: GDDP v MyAPI Part 1 - the first slice.md (2026-08-13).'
 repo: /Users/sab-mini/repos/MyAPI
 blueprint:
   vision: 'GDDP schedules work the project itself knows how to explain: thin nodes point at ICM room task contracts; fresh
     pi_rpc agents execute per room; the slice ends with preserved Khoj answers to five fixed queries plus a negative control.'
-  architecture_notes: 'node-01 builds the ICM scaffold (rooms + task contracts); stages chain decisions -> corpus -> ingestion
-    -> evaluation; evaluation splits into three small nodes (12,13,14) running concurrently after retrieval verification;
-    node-15 closes. Executor trio per node: gpt-5.6-sol main, up to 5 grok-4.6 subagents, one oracle/review pass.'
+  architecture_notes: 'Stage A first: node-01 is the decision schema with only the memo''s minimal scaffold (rooms + short
+    CONTEXT stubs, AGENTS.md append-only). No task-contract layer in this slice. Stages chain decisions -> corpus -> ingestion
+    -> evaluation; evaluation splits three ways concurrent after retrieval verification; node-14 closes. Executor trio per
+    node: gpt-5.6-sol main, up to 5 grok-4.6 subagents, one oracle/review pass.'
   major_capabilities:
-  - ICM room scaffold authored as graph work
-  - reproducible corpus generation from canonical decision objects
+  - canonical decision-object schema + validated canonical set
+  - reproducible corpus generation
   - Khoj ingestion + retrieval verification
   - fixed-set evaluation with negative control, quality recorded not gated
 graph_version: '1.0'
@@ -22,63 +23,59 @@ created_at: '2026-08-13'
 last_updated: '2026-08-13'
 nodes_dir: nodes/
 nodes:
-- id: node-01-icm-scaffold
-  title: 'Build the Part 1 ICM scaffold: rooms, CONTEXT maps, task contracts'
+- id: node-01-decision-schema
+  title: Establish the canonical decision-object schema
   status: ready
   type: capability
-- id: node-02-decision-schema
-  title: Define the canonical decision-object schema
-  status: pending
-  type: capability
-- id: node-03-inventory-sources
+- id: node-02-inventory-sources
   title: Inventory authoritative decision sources
   status: pending
   type: capability
-- id: node-04-extract-decisions
+- id: node-03-extract-decisions
   title: Extract raw decision objects from inventoried sources
   status: pending
   type: capability
-- id: node-05-normalize-decisions
+- id: node-04-normalize-decisions
   title: Normalize raw decisions into canonical objects
   status: pending
   type: capability
-- id: node-06-validate-decision-set
+- id: node-05-validate-decision-set
   title: Validate the canonical decision set
   status: pending
   type: capability
-- id: node-07-build-corpus
+- id: node-06-build-corpus
   title: Build the fresh reproducible corpus snapshot
   status: pending
   type: capability
-- id: node-08-corpus-repro-check
+- id: node-07-corpus-repro-check
   title: Prove corpus reproducibility
   status: pending
   type: capability
-- id: node-09-khoj-transform
+- id: node-08-khoj-transform
   title: Produce the Khoj-ingestible representation
   status: pending
   type: capability
-- id: node-10-khoj-ingest
+- id: node-09-khoj-ingest
   title: Ingest the snapshot into a clean Khoj corpus
   status: pending
   type: capability
-- id: node-11-verify-retrieval
+- id: node-10-verify-retrieval
   title: Verify corpus presence and basic retrieval
   status: pending
   type: capability
-- id: node-12-eval-factual-rationale
+- id: node-11-eval-factual-rationale
   title: 'Fixed queries 1-2: factual decision + rationale'
   status: pending
   type: capability
-- id: node-13-eval-supersession-relationship
+- id: node-12-eval-supersession-relationship
   title: 'Fixed queries 3-4: supersession + relationship'
   status: pending
   type: capability
-- id: node-14-eval-negative-control
+- id: node-13-eval-negative-control
   title: 'Fixed query 5: negative control'
   status: pending
   type: capability
-- id: node-15-preserve-results
+- id: node-14-preserve-results
   title: Preserve run evidence and close Part 1
   status: pending
   type: capability
