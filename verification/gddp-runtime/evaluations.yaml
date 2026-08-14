@@ -1,0 +1,692 @@
+schema_type: node_evaluations
+schema_version: '1.0'
+project_id: gddp-runtime
+generated_at: '2026-08-14T21:05:48Z'
+source: gddp-runtime db/queue.db (results + decision_results)
+evaluations:
+  verdict-confidence-split:
+    verdict: pass
+    evaluated_at: '2026-07-11T16:31:56Z'
+    executor: jules
+    job_id: job_20260711T16020485
+    result_id: res_20260711T1631577924
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification-runtime-live/gddp-runtime/verdict-confidence-split.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: "The change preserves the node's intended role and graph integrity. \n\n**Intent preserved**:\
+      \ The node's 'why' identifies two distortions — (1) min(deterministic_floor, semantic) lets an indeterminate-dominated\
+      \ floor override confident semantic results, and (2) a single confidence scalar conflates criteria\
+      \ confidence with artifact completeness. Both are fixed:\n1. `_signals_semantic_blend` now defers\
+      \ to semantic confidence (instead of min()) when `indeterminate_criteria` are present, which is\
+      \ precisely when the semantic phase was invoked to decide.\n2. `VerdictReceipt` separates signals\
+      \ into `criteria_confidence`, `completeness`, and `graph_readiness` via the new `VerificationSignals`\
+      \ dataclass, so a node with passing semantic judgments but missing artifacts reads as high criteria_confidence\
+      \ + needs-more-evidence — honest, not 0.18.\n\n**Graph integrity preserved**: \n- Depends on `verification-receipt-contract`\
+      \ (complete) ✓\n- Unlocks nothing (empty array) — no downstream dependents affected ✓\n- Constraint\
+      \ compliance: only the three allowed files modified (+ test files) ✓\n- Verdict set and all 12 matrix\
+      \ rows unchanged ✓\n- Artifact gate preserved (row 5, 6, 7, 8, 9 still produce NEEDS_MORE_EVIDENCE)\
+      \ ✓\n- Backward compatibility maintained: `overall_confidence` property on `VerificationSignals`\
+      \ provides the legacy scalar; model_validator on `VerdictReceipt` fills in missing fields for old\
+      \ payloads; decision_loop/engine.py VerdictReceipt construction still works via validator defaults\
+      \ ✓\n- No __pycache__/.pyc files committed ✓\n\n**Edge cases handled**: the new `indeterminate_criteria`\
+      \ check (vs old `indeterminate_only`) always evaluates truthy in `_signals_semantic_blend` because\
+      \ all callers pass through rows that require `indeterminate_only` — correct by construction. Budget-exhausted\
+      \ rows still cap at 0.5. Graph_readiness correctly requires both high criteria_confidence and high\
+      \ completeness."
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification-runtime-live/gddp-runtime/verdict-confidence-split.json
+      verdict: pass
+      criteria_confidence: 0.9671428571428571
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.92
+        findings:
+        - severity: low
+          summary: The VerdictReceipt.confidence field changed from a virtual/compatibility-only field
+            (not present in model_dump) to a real Pydantic field. This is intentional — the orchestrator
+            now populates it from signals.overall_confidence, and the model_validator still reads legacy
+            payloads — but downstream code that relied on confidence being absent from serialized output
+            could see a behavioral change.
+          affected_node_ids:
+          - verdict-confidence-split
+        reasoning: "The change preserves the node's intended role and graph integrity. \n\n**Intent preserved**:\
+          \ The node's 'why' identifies two distortions — (1) min(deterministic_floor, semantic) lets\
+          \ an indeterminate-dominated floor override confident semantic results, and (2) a single confidence\
+          \ scalar conflates criteria confidence with artifact completeness. Both are fixed:\n1. `_signals_semantic_blend`\
+          \ now defers to semantic confidence (instead of min()) when `indeterminate_criteria` are present,\
+          \ which is precisely when the semantic phase was invoked to decide.\n2. `VerdictReceipt` separates\
+          \ signals into `criteria_confidence`, `completeness`, and `graph_readiness` via the new `VerificationSignals`\
+          \ dataclass, so a node with passing semantic judgments but missing artifacts reads as high criteria_confidence\
+          \ + needs-more-evidence — honest, not 0.18.\n\n**Graph integrity preserved**: \n- Depends on\
+          \ `verification-receipt-contract` (complete) ✓\n- Unlocks nothing (empty array) — no downstream\
+          \ dependents affected ✓\n- Constraint compliance: only the three allowed files modified (+ test\
+          \ files) ✓\n- Verdict set and all 12 matrix rows unchanged ✓\n- Artifact gate preserved (row\
+          \ 5, 6, 7, 8, 9 still produce NEEDS_MORE_EVIDENCE) ✓\n- Backward compatibility maintained: `overall_confidence`\
+          \ property on `VerificationSignals` provides the legacy scalar; model_validator on `VerdictReceipt`\
+          \ fills in missing fields for old payloads; decision_loop/engine.py VerdictReceipt construction\
+          \ still works via validator defaults ✓\n- No __pycache__/.pyc files committed ✓\n\n**Edge cases\
+          \ handled**: the new `indeterminate_criteria` check (vs old `indeterminate_only`) always evaluates\
+          \ truthy in `_signals_semantic_blend` because all callers pass through rows that require `indeterminate_only`\
+          \ — correct by construction. Budget-exhausted rows still cap at 0.5. Graph_readiness correctly\
+          \ requires both high criteria_confidence and high completeness."
+  canary-retry-proof:
+    verdict: pass
+    evaluated_at: '2026-07-12T07:16:34Z'
+    executor: jules
+    job_id: job_20260711T17104259
+    result_id: res_20260712T0837057851
+    attempts: 2
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification-runtime-live/gddp-runtime/canary-retry-proof.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The canary-retry-proof node''s intended role is a proof-of-concept that exercises
+      the retry loop. The work under review (HEAD 0623272) preserves this intent fully: (1) scripts/echo.py
+      exists with both echo(msg) and echo_loud(msg) — verified via import test; (2) docs/echo-usage.md
+      exists with usage examples for both functions; (3) all three required artifacts (decision.md, result-summary.md,
+      patch.diff) are present. Critically, the retry loop was proven live: the artifact .handoffs/artifacts/032-live-retry-proof-canary-fail-verdict.json
+      shows a fail verdict with file-path evidence on criterion 3, should_retry fired, and the overnight-readiness
+      checklist was updated to mark the retry loop as proven (x). Bugs discovered during the live canary
+      run (JSON double-parse in Jules adapter, redispatch TypeErrors) were fixed in the same pass. Graph
+      integrity is trivially preserved: the node has depends_on: [] and unlocks: [], so no upstream/downstream
+      edges exist to break. No graph config or DAG structure was modified. The only tension is the constraint
+      scope — runtime files beyond scripts/echo.py and docs/echo-usage.md were modified — but this was
+      in direct service of the node''s canary purpose (fixing retry-loop bugs discovered by the exercise),
+      the constraint checker cleared it, and the node''s ''why'' pre-acknowledges the constraint/artifact
+      tension.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification-runtime-live/gddp-runtime/canary-retry-proof.json
+      verdict: pass
+      criteria_confidence: 1.0
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.92
+        findings:
+        - severity: low
+          summary: Work modified files beyond the stated constraint scope ('Only create or modify scripts/echo.py
+            and docs/echo-usage.md'). This includes bugfixes in scripts/adapters/jules_action_adapter.py
+            (JSON double-parse fix) and scripts/runtime/return_router.py (redispatch fix), plus documentation
+            updates in docs/overnight-readiness.md and new handoff/artifact files. These were necessary
+            operational fixes discovered during the live retry loop exercise; the constraint checker (forbidden_pattern_scan)
+            validated them as clear. The known tension between constraints and required_artifacts is acknowledged
+            in the node's 'why' field.
+          affected_node_ids:
+          - canary-retry-proof
+        - severity: low
+          summary: scripts/__pycache__/ directory and .pyc files exist in the local working tree as Python
+            runtime artifacts. They are properly excluded via .gitignore (__pycache__/) and not committed
+            to git. No constraint violation on the 'do not commit' rule.
+          affected_node_ids:
+          - canary-retry-proof
+        reasoning: 'The canary-retry-proof node''s intended role is a proof-of-concept that exercises
+          the retry loop. The work under review (HEAD 0623272) preserves this intent fully: (1) scripts/echo.py
+          exists with both echo(msg) and echo_loud(msg) — verified via import test; (2) docs/echo-usage.md
+          exists with usage examples for both functions; (3) all three required artifacts (decision.md,
+          result-summary.md, patch.diff) are present. Critically, the retry loop was proven live: the
+          artifact .handoffs/artifacts/032-live-retry-proof-canary-fail-verdict.json shows a fail verdict
+          with file-path evidence on criterion 3, should_retry fired, and the overnight-readiness checklist
+          was updated to mark the retry loop as proven (x). Bugs discovered during the live canary run
+          (JSON double-parse in Jules adapter, redispatch TypeErrors) were fixed in the same pass. Graph
+          integrity is trivially preserved: the node has depends_on: [] and unlocks: [], so no upstream/downstream
+          edges exist to break. No graph config or DAG structure was modified. The only tension is the
+          constraint scope — runtime files beyond scripts/echo.py and docs/echo-usage.md were modified
+          — but this was in direct service of the node''s canary purpose (fixing retry-loop bugs discovered
+          by the exercise), the constraint checker cleared it, and the node''s ''why'' pre-acknowledges
+          the constraint/artifact tension.'
+  job-state-consistency:
+    verdict: pass
+    evaluated_at: '2026-07-26T08:22:49.182226+00:00'
+    executor: local_subprocess
+    job_id: job_20260726T081330259c7d2af87dc3
+    result_id: res_job_20260726T081
+    attempts: 2
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification-runtime-live/gddp-runtime/job-state-consistency/job_20260726T081330259c7d2af87dc3-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The node `job-state-consistency` aims to make jobs.status and jobs.queue_state agree
+      on every write path. The work under review fully preserves this intent.
+
+
+      **Root cause identified correctly**: decision.md traces the inconsistent row (job_20260711T16542651,
+      status=failed, queue_state=running) to `scripts/runtime/decision_loop/engine.py:_clean_stale_state`,
+      which previously only updated `status` without touching `queue_state`. The documented sequence of
+      events is coherent and matches the observed incident.
+
+
+      **Fix applied**: engine.py now writes `status=''expired'', queue_state=''expired''` together in
+      one UPDATE (line 68 of the patched file, confirmed present).
+
+
+      **All writers surveyed**: decision.md tables every write path and confirms they set both columns.
+      The rollback.py divergence (status=''failed'', queue_state=''cancelled'') is explicitly documented
+      as intentional via `INTENTIONAL_DIVERGENT_PAIRS`.
+
+
+      **Consistency check added**: `find_inconsistent_jobs()` in jobs_status.py, a `check` subcommand,
+      a section 5a baseline.sh probe, and 6 new tests (5 in test_jobs_status.py + 1 regression test in
+      test_decision_loop.py).
+
+
+      **Constraints honored**: No receipt semantics changed, no human review gate touched, no queue.db
+      schema changes, graph truth stays human-owned (reconciliation SQL recorded but NOT applied; graph-update.yaml
+      says `evidence_ready_for_human_review`).
+
+
+      **Graph integrity**: The node has no depends_on and no unlocks. No other node in the project lists
+      `job-state-consistency` as a dependency. The work is self-contained — it modifies only files it
+      should (engine.py, jobs_status.py, rollback.py, test files, baseline.sh) and does not touch any
+      shared graph infrastructure.
+
+
+      No evidence of drift, contradiction, or insufficient context. The work delivers exactly what the
+      node''s why + acceptance criteria + constraints describe.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification-runtime-live/gddp-runtime/job-state-consistency/job_20260726T081330259c7d2af87dc3-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9400000000000001
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: ded488b7d43b5de6102ce88b633ac725adc4aa6e
+      evaluated_commit_sha: 6c0a4b2ddc41ba6e796310c919749b8cb13bb5ff
+      merge_commit_sha: 6c0a4b2ddc41ba6e796310c919749b8cb13bb5ff
+      context_coverage:
+        criteria: high
+        integrity: high
+        overall: high
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.95
+        findings: []
+        reasoning: 'The node `job-state-consistency` aims to make jobs.status and jobs.queue_state agree
+          on every write path. The work under review fully preserves this intent.
+
+
+          **Root cause identified correctly**: decision.md traces the inconsistent row (job_20260711T16542651,
+          status=failed, queue_state=running) to `scripts/runtime/decision_loop/engine.py:_clean_stale_state`,
+          which previously only updated `status` without touching `queue_state`. The documented sequence
+          of events is coherent and matches the observed incident.
+
+
+          **Fix applied**: engine.py now writes `status=''expired'', queue_state=''expired''` together
+          in one UPDATE (line 68 of the patched file, confirmed present).
+
+
+          **All writers surveyed**: decision.md tables every write path and confirms they set both columns.
+          The rollback.py divergence (status=''failed'', queue_state=''cancelled'') is explicitly documented
+          as intentional via `INTENTIONAL_DIVERGENT_PAIRS`.
+
+
+          **Consistency check added**: `find_inconsistent_jobs()` in jobs_status.py, a `check` subcommand,
+          a section 5a baseline.sh probe, and 6 new tests (5 in test_jobs_status.py + 1 regression test
+          in test_decision_loop.py).
+
+
+          **Constraints honored**: No receipt semantics changed, no human review gate touched, no queue.db
+          schema changes, graph truth stays human-owned (reconciliation SQL recorded but NOT applied;
+          graph-update.yaml says `evidence_ready_for_human_review`).
+
+
+          **Graph integrity**: The node has no depends_on and no unlocks. No other node in the project
+          lists `job-state-consistency` as a dependency. The work is self-contained — it modifies only
+          files it should (engine.py, jobs_status.py, rollback.py, test files, baseline.sh) and does not
+          touch any shared graph infrastructure.
+
+
+          No evidence of drift, contradiction, or insufficient context. The work delivers exactly what
+          the node''s why + acceptance criteria + constraints describe.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: The inconsistent row job_20260711T16542651 is a canary-retry-proof job. Once this node's
+            reconciliation SQL is applied by the human operator, the canary row will be cleaned up, which
+            may simplify future heartbeat-crash-recovery tests that exercise crash-drill scenarios against
+            queue state.
+          affected_node_ids:
+          - canary-retry-proof
+          - heartbeat-crash-recovery
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+    human_decision: 'manual_status_change: Retire preserved pre-N2 canary; evidence retained'
+  pi-evaluator-harness:
+    verdict: fail
+    evaluated_at: '2026-07-26T11:09:47.988376+00:00'
+    executor: local_subprocess
+    job_id: job_20260726T1059546275a44bb7bbd0
+    result_id: res_job_20260726T105
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification-runtime-live/gddp-runtime/pi-evaluator-harness/job_20260726T1059546275a44bb7bbd0-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: "The node's work was verification-only: zero code changes to tracked files (empty\
+      \ git diff), creation of .venv/ (local, untracked) to enable the test suite, smoke-test files outside\
+      \ the repo, and the three required artifacts. The patch.diff is empty — the base commit already\
+      \ implements the pi evaluator harness. The artifacts correctly document the existing implementation\
+      \ and the live end-to-end test results (199 tests passed, live pi --print run produced a valid VerdictReceipt).\
+      \ \n\nThe node's intended role — 'Drive the semantic evaluator through the pi coding agent for live\
+      \ visibility' — is preserved. The pi_runner.py spawns pi with the typed submit_verdict extension,\
+      \ the orchestrator accepts the semantic_harness callable, the CLI exposes --semantic-harness {auto,pi,runner},\
+      \ and the decision_engine matrix is untouched. OpenAICompatibleRunner/AnthropicRunner/SemanticAgent\
+      \ are still present. Graph truth remains human-owned.\n\nTwo pre-existing conditions from the base\
+      \ commit are noted: (1) the guard extension is already loaded with mechanistic enforcement rather\
+      \ than using --exclude-tools exclusion as the constraint describes, and (2) the orchestrator now\
+      \ requires semantic_harness instead of it being optional. These affect downstream nodes (pi-evaluator-guard,\
+      \ evaluator-intent-integrity-verdict) and are documented as findings and graph_observations. Neither\
+      \ was introduced by this node's work, and neither prevents a 'pass' verdict for the verified implementation."
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification-runtime-live/gddp-runtime/pi-evaluator-harness/job_20260726T1059546275a44bb7bbd0-attempt0.json
+      verdict: fail
+      criteria_confidence: 0.9
+      completeness_status: not-run
+      required_next_action: Fix failing acceptance criteria and re-submit.
+      evaluated_tree_sha: 836f822aa5edf43383b65161b2b0f9651201e0a0
+      evaluated_commit_sha: 21ced0c2f11926e87dd85d9d6c5733b497d7ac44
+      merge_commit_sha: 21ced0c2f11926e87dd85d9d6c5733b497d7ac44
+      context_coverage:
+        criteria: not_run
+        integrity: low
+        overall: low
+      criteria_verdict: fail
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings:
+        - severity: low
+          summary: The node's constraint states that pi's edit/write/multi_edit/bash should be excluded
+            in this node, with the guard node swapping exclusion for mechanistic enforcement. The base
+            commit's pi_runner.py already loads gddp_verifier_guard.ts with mechanistic enforcement and
+            provides broad tool access (no --exclude-tools). The practical outcome (write tools are blocked)
+            matches the constraint's intent, but the mechanism differs from what the constraint describes.
+            This was pre-existing in the base commit, not introduced by this node's verification work.
+          affected_node_ids:
+          - pi-evaluator-harness
+          - pi-evaluator-guard
+        - severity: medium
+          summary: The orchestrator (orchestrator.py) raises RuntimeError when semantic_harness is None,
+            changing the parameter from 'optional, backward compatible' to effectively required. The criterion
+            states 'the default path is unchanged (backward compatible)' but the built-in SemanticAgent
+            fallback was removed. The bridge always provides semantic_harness, so production paths are
+            unaffected, but the --semantic-harness runner CLI path would crash with the current orchestrator.
+            This was pre-existing in the base commit.
+          affected_node_ids:
+          - pi-evaluator-harness
+        reasoning: "The node's work was verification-only: zero code changes to tracked files (empty git\
+          \ diff), creation of .venv/ (local, untracked) to enable the test suite, smoke-test files outside\
+          \ the repo, and the three required artifacts. The patch.diff is empty — the base commit already\
+          \ implements the pi evaluator harness. The artifacts correctly document the existing implementation\
+          \ and the live end-to-end test results (199 tests passed, live pi --print run produced a valid\
+          \ VerdictReceipt). \n\nThe node's intended role — 'Drive the semantic evaluator through the\
+          \ pi coding agent for live visibility' — is preserved. The pi_runner.py spawns pi with the typed\
+          \ submit_verdict extension, the orchestrator accepts the semantic_harness callable, the CLI\
+          \ exposes --semantic-harness {auto,pi,runner}, and the decision_engine matrix is untouched.\
+          \ OpenAICompatibleRunner/AnthropicRunner/SemanticAgent are still present. Graph truth remains\
+          \ human-owned.\n\nTwo pre-existing conditions from the base commit are noted: (1) the guard\
+          \ extension is already loaded with mechanistic enforcement rather than using --exclude-tools\
+          \ exclusion as the constraint describes, and (2) the orchestrator now requires semantic_harness\
+          \ instead of it being optional. These affect downstream nodes (pi-evaluator-guard, evaluator-intent-integrity-verdict)\
+          \ and are documented as findings and graph_observations. Neither was introduced by this node's\
+          \ work, and neither prevents a 'pass' verdict for the verified implementation."
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: medium
+          summary: The gddp_verifier_guard.ts extension is already loaded in pi_runner.py with full mechanistic
+            enforcement (block writes, dangerous bash, network; log tool trace). The pi-evaluator-guard
+            node's core mechanism is thus already implemented in the base commit. The guard node should
+            verify and harden rather than build from scratch. The runner already provides broad tool access
+            with no --exclude-tools, matching the guard node's 'runner-drops-exclude-tools' criterion.
+          affected_node_ids:
+          - pi-evaluator-guard
+        - severity: low
+          summary: The orchestrator's contract change (semantic_harness required instead of optional)
+            means the evaluator-intent-integrity-verdict node and any other downstream code calling verify()
+            must provide a semantic_harness. The bridge always does, but the change tightens the API contract
+            beyond what the criterion stated.
+          affected_node_ids:
+          - evaluator-intent-integrity-verdict
+          - pi-evaluator-guard
+      lane_status:
+        criteria: not_run
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+    human_decision: 'manual_status_change: orphaned pre-session-tracking dispatch; no executor_sessions
+      row exists; triaged during Node 2 stabilization prep'
+  heartbeat-crash-recovery:
+    verdict: fail
+    evaluated_at: '2026-07-26T11:17:32.304538+00:00'
+    executor: jules_api
+    job_id: job_20260726T1059546235f910ffd05c
+    result_id: res_1682865916150683
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification-runtime-live/gddp-runtime/heartbeat-crash-recovery/job_20260726T1059546235f910ffd05c-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The node heartbeat-crash-recovery aims to produce evidence artifacts proving crash
+      recovery properties that the code already claims but were previously unproven. The work delivers:
+      (1) test_crash_recovery.py with tests for stale claim recovery and atomic claim (no double-processing),
+      (2) test_launchd_recovery.py verifying the plist configuration, (3) a crash drill runbook in decision.md,
+      (4) a live recovery test script, and (5) a graph-update.yaml evidence artifact. The node''s intent
+      — ''prove heartbeat and intake survive crashes without losing or double-processing events'' — is
+      clearly recognizable and preserved. Graph integrity is preserved: the node has no depends_on/unlocks
+      neighbors, the graph-update.yaml is evidence-only (consistent with the constraint that graph truth
+      stays human-owned), and no downstream dependencies are affected. No constraints are violated: drills
+      use synthetic data (test DB), the 30-minute cutoff and atomic claim UPDATE are unchanged, plists
+      are not forked, and graph truth remains human-owned. The verdict is pass with high confidence (0.9).'
+    evidence_refs:
+    - .handoffs/artifacts/intake_restart_evidence.txt (script output shows 'launchctl not found, simulating
+      success')
+    - deploy/mini-heartbeat/launchd/com.gddp.intake.plist (KeepAlive=true configured)
+    - deploy/mini-heartbeat/test_launchd_recovery.py (verifies KeepAlive=true in plist)
+    - deploy/mini-heartbeat/test_live_recovery.sh (implements the drill)
+    - decision.md (Crash Drill Runbook section)
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification-runtime-live/gddp-runtime/heartbeat-crash-recovery/job_20260726T1059546235f910ffd05c-attempt0.json
+      verdict: fail
+      criteria_confidence: 0.15000000000000002
+      completeness_status: complete
+      required_next_action: Address semantic failures and re-submit.
+      evaluated_tree_sha: 4e9362721f8df46501809baf45e675f59143b9f7
+      evaluated_commit_sha: 4c0d5ae3b060e56221c5172b4a4dbfdf5ac57816
+      merge_commit_sha: 4c0d5ae3b060e56221c5172b4a4dbfdf5ac57816
+      context_coverage:
+        criteria: high
+        integrity: high
+        overall: high
+      criteria_verdict: fail
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings:
+        - severity: low
+          summary: test_launchd_recovery.py verifies plist KeepAlive flag but does not actually demonstrate
+            end-to-end intake restart after kill. The test_live_recovery.sh script attempts this but cannot
+            run because launchctl is unavailable. However, the crash drill runbook documents manual verification
+            steps, and the node's 'why' acknowledges the code already claims these properties.
+          affected_node_ids:
+          - heartbeat-crash-recovery
+        - severity: low
+          summary: patch_launchd.sh is declared in patch.diff as a new file but is absent from the filesystem.
+            This does not affect the evidence artifacts (decision.md, result-summary.md, graph-update.yaml,
+            test files) which are all present.
+          affected_node_ids:
+          - heartbeat-crash-recovery
+        reasoning: 'The node heartbeat-crash-recovery aims to produce evidence artifacts proving crash
+          recovery properties that the code already claims but were previously unproven. The work delivers:
+          (1) test_crash_recovery.py with tests for stale claim recovery and atomic claim (no double-processing),
+          (2) test_launchd_recovery.py verifying the plist configuration, (3) a crash drill runbook in
+          decision.md, (4) a live recovery test script, and (5) a graph-update.yaml evidence artifact.
+          The node''s intent — ''prove heartbeat and intake survive crashes without losing or double-processing
+          events'' — is clearly recognizable and preserved. Graph integrity is preserved: the node has
+          no depends_on/unlocks neighbors, the graph-update.yaml is evidence-only (consistent with the
+          constraint that graph truth stays human-owned), and no downstream dependencies are affected.
+          No constraints are violated: drills use synthetic data (test DB), the 30-minute cutoff and atomic
+          claim UPDATE are unchanged, plists are not forked, and graph truth remains human-owned. The
+          verdict is pass with high confidence (0.9).'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: heartbeat-crash-recovery is an independent node (no depends_on, no unlocks). Its completion
+            opens no downstream nodes in the current graph, but its evidence feeds into the broader overnight-readiness
+            proving ground that de-risks future autonomous operations.
+          affected_node_ids:
+          - heartbeat-crash-recovery
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      criteria_findings:
+      - criterion_id: intake-restart-proven
+        judgment: judged_fail
+        evidence:
+        - .handoffs/artifacts/intake_restart_evidence.txt (script output shows 'launchctl not found, simulating
+          success')
+        - deploy/mini-heartbeat/launchd/com.gddp.intake.plist (KeepAlive=true configured)
+        - deploy/mini-heartbeat/test_launchd_recovery.py (verifies KeepAlive=true in plist)
+        - deploy/mini-heartbeat/test_live_recovery.sh (implements the drill)
+        - decision.md (Crash Drill Runbook section)
+        reasoning: The criterion asks for evidence that intake killed mid-run IS restarted by launchd
+          and /health returns 200. The launchd plist is correctly configured with KeepAlive=true, and
+          test_launchd_recovery.py verifies this config. However, the actual execution evidence (intake_restart_evidence.txt)
+          shows the drill script ran on a system without launchctl and merely 'simulated success.' No
+          macOS transcript exists showing a real kill-9 + automatic restart + /health=200 cycle. The runbook
+          in decision.md describes the procedure but does not show it successfully executed. The mechanism
+          is in place but the proof-of-recovery is absent.
+    human_decision: 'manual_status_change: orphaned pre-session-tracking dispatch; no executor_sessions
+      row exists; triaged during Node 2 stabilization prep'
+  droid-executor-smoke:
+    verdict: pass
+    evaluated_at: '2026-08-03T12:23:14.968841+00:00'
+    executor: local_subprocess
+    job_id: job_20260803T121642479959d4537d76
+    result_id: res_ses_20260803T1216424766bc23989aba
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/gddp-runtime/droid-executor-smoke/job_20260803T121642479959d4537d76-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of droid-executor-smoke. The subject diff (base 6063078 → tip fc01337)
+      adds exactly one file, docs/executors/droid.md (60 insertions, status A); no existing file, graph
+      truth, or runtime DB was modified, satisfying both constraints. The node''s intended role — a smoke
+      node whose real artifact is documentation of the droid executor transport — is preserved: the doc
+      accurately covers the opt-in mechanism (allowed_execution_modes: [droid], mapped to DroidSubprocessAdapter
+      in dispatcher.py:32), the identical packet/worktree/commit-ref/spool/receipt contract vs local_subprocess
+      (confirmed against DroidSubprocessAdapter docstring and gddp.local_result.v1 HANDOFF_SCHEMA), host
+      config of model/autonomy via GDDP_DROID_SUBPROCESS_ARGV as a JSON argv array (confirmed against
+      _DROID_ARGV_ENV/_configured_argv), the built-in default (droid exec --auto high, droid''s default
+      model), the shared spool root GDDP_LOCAL_SUBPROCESS_SPOOL_DIR, and the project-canonical principle
+      that executor success is not graph truth (consistent with PROJECT-BRIEF and return-router). Graph
+      integrity is preserved: the node has no depends_on and no unlocks (leaf smoke node), so no dependent
+      relies on its output; graph status remains ''ready'' in config, consistent with human-owned graph
+      mutation. All factual claims in the doc were verified against the actual implementation; no contradictions
+      or veering from the node''s stated goal were found. Minor illustrative inconsistencies in example
+      argv (omitted --append-system-prompt; binary path spelling) are doc-quality nuances for lane 1,
+      not integrity drift.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/gddp-runtime/droid-executor-smoke/job_20260803T121642479959d4537d76-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9733333333333333
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: e248ab0b936a769f23f9add6baa993bf74670a20
+      evaluated_commit_sha: fc01337547cc3928b5d7181d11c6c19d71f73cd2
+      merge_commit_sha: fc01337547cc3928b5d7181d11c6c19d71f73cd2
+      context_coverage:
+        criteria: medium
+        integrity: low
+        overall: low
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.92
+        findings: []
+        reasoning: 'Fresh-eyes review of droid-executor-smoke. The subject diff (base 6063078 → tip fc01337)
+          adds exactly one file, docs/executors/droid.md (60 insertions, status A); no existing file,
+          graph truth, or runtime DB was modified, satisfying both constraints. The node''s intended role
+          — a smoke node whose real artifact is documentation of the droid executor transport — is preserved:
+          the doc accurately covers the opt-in mechanism (allowed_execution_modes: [droid], mapped to
+          DroidSubprocessAdapter in dispatcher.py:32), the identical packet/worktree/commit-ref/spool/receipt
+          contract vs local_subprocess (confirmed against DroidSubprocessAdapter docstring and gddp.local_result.v1
+          HANDOFF_SCHEMA), host config of model/autonomy via GDDP_DROID_SUBPROCESS_ARGV as a JSON argv
+          array (confirmed against _DROID_ARGV_ENV/_configured_argv), the built-in default (droid exec
+          --auto high, droid''s default model), the shared spool root GDDP_LOCAL_SUBPROCESS_SPOOL_DIR,
+          and the project-canonical principle that executor success is not graph truth (consistent with
+          PROJECT-BRIEF and return-router). Graph integrity is preserved: the node has no depends_on and
+          no unlocks (leaf smoke node), so no dependent relies on its output; graph status remains ''ready''
+          in config, consistent with human-owned graph mutation. All factual claims in the doc were verified
+          against the actual implementation; no contradictions or veering from the node''s stated goal
+          were found. Minor illustrative inconsistencies in example argv (omitted --append-system-prompt;
+          binary path spelling) are doc-quality nuances for lane 1, not integrity drift.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: This documentation is a natural input to the deferred neutral-executor-contract node,
+            which will canonize executor-neutral packet/attempt/result semantics; the droid doc's 'only
+            the adapter default argv and host env override differ' framing aligns with that trajectory.
+          affected_node_ids:
+          - neutral-executor-contract
+          - droid-executor-smoke
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  neutral-executor-contract:
+    verdict: pass
+    evaluated_at: '2026-08-14T04:56:33.267916+00:00'
+    executor: pi_rpc
+    job_id: job_20260814T04460933529bf8213815
+    result_id: res_ses_20260814T04460933db73d29ac9a0
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/gddp-runtime/neutral-executor-contract/job_20260814T04460933529bf8213815-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The work under review is a definitional deliverable for a definition node: docs/executor-contract.md
+      freezes the executor-neutral packet, attempt identity, and returned-result shape, with wire-shape
+      lock tests appended to test_executor_contract.py and refreshed attempt artifacts. Every material
+      claim was verified against source: NodePacket fields and determinism, SessionStatus 9-state vocabulary,
+      PatchResult/DispatchResult shapes, the ADAPTERS vs MEDIATED_ADAPTERS split (direct: jules_api/local_subprocess/droid/factory_mission/pi_rpc;
+      mediated: jules action path as inherited infrastructure), _build_node_packet, state_recorder.execution_attempt_id,
+      the executor_sessions.execution_attempt_id column, graph_updater as human-merged evidence PR, and
+      VerdictReceipt. Both claimed test runs reproduce exactly (37 passed; 103 passed). The four contract
+      sections map 1:1 to the four acceptance criteria, matching the node''s title and why. The node''s
+      role as the definitional spine for the 5-node chain is preserved: the downstream direct-executor-round-trip
+      node explicitly requires consuming this contract, which is exactly what is delivered. Constraints
+      are honored: no completion is claimed from tests or executor success (artifacts say ''ready for
+      human review; not accepted or complete'', graph status remains ''ready'' in gddp-config, human gate
+      explicit), the mediated pathway is preserved as inherited infrastructure rather than the command
+      bus, and direct transport is preferred. Graph integrity is preserved: the diff touches only runtime-repo
+      files (docs, tests, .gddp artifacts), no production code changed, no gddp-config mutation, and no
+      downstream breakage — the contract provides the types and registries the next node builds on. One
+      low-severity note: a hedged residual-risk claim about MissionAdapter dropping previous_findings
+      appears stale on HEAD (code currently renders them); this is evidence-accuracy, not an integrity
+      threat, and does not change the verdict.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/gddp-runtime/neutral-executor-contract/job_20260814T04460933529bf8213815-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.8125
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: a8e923fcfdc9bbc50e7565aacccba526da0dd6c1
+      evaluated_commit_sha: 49bd8abd773d4336eb935d6af9f6b330d10a8cf4
+      merge_commit_sha: 49bd8abd773d4336eb935d6af9f6b330d10a8cf4
+      execution_attempt_id: job_20260814T04460933529bf8213815:attempt:0
+      context_coverage:
+        criteria: high
+        integrity: high
+        overall: high
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings:
+        - severity: low
+          summary: Result-summary residual-risk note states MissionAdapter._packet_node historically dropped
+            previous_findings when projecting mission nodes, but on HEAD (tip 49bd8ab, identical to base
+            for production code) mission_adapter.py:546 renders previous_findings into the mission 'why'
+            with a §4 comment. The note is hedged ('if still open on HEAD') and does not affect the contract's
+            integrity — the contract doc states the forwarding rule and the code complies — but the note
+            is stale or at least ambiguous about current state.
+          affected_node_ids:
+          - neutral-executor-contract
+        reasoning: 'The work under review is a definitional deliverable for a definition node: docs/executor-contract.md
+          freezes the executor-neutral packet, attempt identity, and returned-result shape, with wire-shape
+          lock tests appended to test_executor_contract.py and refreshed attempt artifacts. Every material
+          claim was verified against source: NodePacket fields and determinism, SessionStatus 9-state
+          vocabulary, PatchResult/DispatchResult shapes, the ADAPTERS vs MEDIATED_ADAPTERS split (direct:
+          jules_api/local_subprocess/droid/factory_mission/pi_rpc; mediated: jules action path as inherited
+          infrastructure), _build_node_packet, state_recorder.execution_attempt_id, the executor_sessions.execution_attempt_id
+          column, graph_updater as human-merged evidence PR, and VerdictReceipt. Both claimed test runs
+          reproduce exactly (37 passed; 103 passed). The four contract sections map 1:1 to the four acceptance
+          criteria, matching the node''s title and why. The node''s role as the definitional spine for
+          the 5-node chain is preserved: the downstream direct-executor-round-trip node explicitly requires
+          consuming this contract, which is exactly what is delivered. Constraints are honored: no completion
+          is claimed from tests or executor success (artifacts say ''ready for human review; not accepted
+          or complete'', graph status remains ''ready'' in gddp-config, human gate explicit), the mediated
+          pathway is preserved as inherited infrastructure rather than the command bus, and direct transport
+          is preferred. Graph integrity is preserved: the diff touches only runtime-repo files (docs,
+          tests, .gddp artifacts), no production code changed, no gddp-config mutation, and no downstream
+          breakage — the contract provides the types and registries the next node builds on. One low-severity
+          note: a hedged residual-risk claim about MissionAdapter dropping previous_findings appears stale
+          on HEAD (code currently renders them); this is evidence-accuracy, not an integrity threat, and
+          does not change the verdict.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: The downstream direct-executor-round-trip node will consume this contract's direct
+            registry. The contract lists 'droid' as a full lifecycle conformer while the droid-executor-smoke
+            node remains provisional in the graph; the direct round trip should lean on proven transports
+            (jules_api/local_subprocess/pi_rpc) or prove droid first, to avoid depending on an unproven
+            transport.
+          affected_node_ids:
+          - direct-executor-round-trip
+          - droid-executor-smoke
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      evaluation_timing:
+        started_at: '2026-08-14T04:51:12.233697+00:00'
+        finished_at: '2026-08-14T04:56:32.954011+00:00'
+        wall_s: 320.715
+        criteria:
+          status: completed
+          elapsed_s: 159.556
+          tool_calls: 37
+        integrity:
+          status: completed
+          elapsed_s: 160.917
+          tool_calls: 24

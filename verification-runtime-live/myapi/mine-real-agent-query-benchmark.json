@@ -1,0 +1,1004 @@
+{
+  "project_id": "myapi",
+  "node_id": "mine-real-agent-query-benchmark",
+  "verdict": "needs-more-evidence",
+  "criteria_verdict": "needs-more-evidence",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.95,
+    "findings": [
+      {
+        "severity": "low",
+        "summary": "The local gddp/nodes/mine-real-agent-query-benchmark.yaml has allowed_execution_modes: [vm_worker, human] while the canonical config node specifies [local_subprocess]; the script (mine_agent_query_bank.py) runs locally with SSH fan-out, so local_subprocess is the accurate mode. This is a minor config drift that should be reconciled but does not affect the work produced.",
+        "affected_node_ids": [
+          "mine-real-agent-query-benchmark"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The acceptance criteria in the canonical config specify exact session counts (Mini: 183 Pi, 93 Codex; Air: 320 Pi, 554 Codex). Actual extracted counts differ slightly (Mini: 190 pi, 93 codex; Air: 321 pi, 579 codex). These differences are within expected range as sessions accumulate over time and reflect reality rather than error.",
+        "affected_node_ids": [
+          "mine-real-agent-query-benchmark"
+        ]
+      }
+    ],
+    "reasoning": "The node's stated purpose is to mine real agent-attempted questions from Pi/Codex sessions on both Mini and Air hosts, deduplicate, categorize, and publish a versioned benchmark consumable by downstream nodes (capture-live-vertex-baseline, prove-myapi-context-retrieval).\n\nThe work delivered:\n1. scripts/mine_agent_query_bank.py — a robust, read-only extractor that scans ~/.codex/sessions and ~/.pi/agent/sessions on both hosts, normalizes text, deduplicates, categorizes (knowledge/graphify_invocation/graphify_meta), and fingerprints every question.\n2. evals/question-bank/question-bank-manifest.json — 3244 unique questions with full provenance (host, store, session_path, line_index, timestamp). No raw text leaks into tracked files.\n3. evals/question-bank/benchmark-receipt.md — human-readable summary with per-store counts, categories, and shape breakdown (356 benchmark, 2888 conversational).\n4. tests/test_question_bank.py — 14 unit/integration tests validating normalization, categorization, filters, and artifact consistency.\n5. .gitignore entries ensuring questions.jsonl and _scratch/ are never tracked.\n\nEvery constraint is honored: read-only extraction (script only reads via filesystem/SSH cat), Pi/Codex-derived benchmark, raw transcript text gitignored, and Mini sessions integrated alongside Air (the 243 prior Mini questions are extended rather than discarded).\n\nThe manifest and receipt are directly consumable by downstream nodes as required by the 'question-bank-produced' criterion. Graph integrity is clean: this node has no upstream dependencies (depends_on: []), and its outputs feed capture-live-vertex-baseline and prove-myapi-context-retrieval as stated.\n\nTwo very minor observations (low severity): the local YAML copy lists allowed_execution_modes differently from the config, and actual session counts slightly exceed the original planning numbers — both are normal drift and do not threaten intent or graph integrity.",
+    "tool_trace": [
+      {
+        "ts": "2026-07-30T08:17:06.784Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_vYBe3gqQ0sGtfA5CK31y5511",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl -type f | head -80"
+      },
+      {
+        "ts": "2026-07-30T08:17:06.786Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ndkE6Z1YnzYWHhK04FYv0843",
+        "command": "find /Users/sab-mini/repos/gddp-config/graphs/myapi -type f -name \"*.yaml\" | sort"
+      },
+      {
+        "ts": "2026-07-30T08:17:06.809Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ndkE6Z1YnzYWHhK04FYv0843",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:06.812Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_vYBe3gqQ0sGtfA5CK31y5511",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:09.291Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_deWm95lEcmJXo7Lm6C7r8203",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-07-30T08:17:09.292Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_3OC7MiQmhNIJc74rQjKC5423",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/README.md"
+      },
+      {
+        "ts": "2026-07-30T08:17:09.292Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_ktxXIM8TdSh9DtANvOzY9753",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi/nodes/mine-real-agent-query-benchmark.yaml"
+      },
+      {
+        "ts": "2026-07-30T08:17:09.293Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_45pHyEhbZXcaOmLmPDqe4029",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi/nodes/capture-live-vertex-baseline.yaml"
+      },
+      {
+        "ts": "2026-07-30T08:17:09.296Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_deWm95lEcmJXo7Lm6C7r8203",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:09.296Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_45pHyEhbZXcaOmLmPDqe4029",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:09.297Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_ktxXIM8TdSh9DtANvOzY9753",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:09.297Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_3OC7MiQmhNIJc74rQjKC5423",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:11.921Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_LT5aBOCeSOEoQDIIfG778331",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/evals/question-bank/question-bank-manifest.json"
+      },
+      {
+        "ts": "2026-07-30T08:17:11.922Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_vGQ4dHHbBIIKsW1Il7nV1763",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/evals/question-bank/benchmark-receipt.md"
+      },
+      {
+        "ts": "2026-07-30T08:17:11.923Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_UGzHPolknlIaSWS7y5Cb2685",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi/nodes/prove-myapi-context-retrieval.yaml"
+      },
+      {
+        "ts": "2026-07-30T08:17:11.926Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_UGzHPolknlIaSWS7y5Cb2685",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:11.927Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_vGQ4dHHbBIIKsW1Il7nV1763",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:11.949Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_LT5aBOCeSOEoQDIIfG778331",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:15.245Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_U5kcFByGsYThFbI1sPbb7686",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl -name \"mine_agent_query_bank*\" -type f 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-30T08:17:15.245Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_zL0oMD6ULqyjPrzfg0Jw7751",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/scripts -type f 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-30T08:17:15.246Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_pOcOxOsbWCF3xDALqGfL3473",
+        "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/"
+      },
+      {
+        "ts": "2026-07-30T08:17:15.267Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_zL0oMD6ULqyjPrzfg0Jw7751",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:15.271Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_pOcOxOsbWCF3xDALqGfL3473",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:15.272Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_U5kcFByGsYThFbI1sPbb7686",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:17.469Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_qeD0AxDEItC0HWeGDZUg0649",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/scripts/mine_agent_query_bank.py"
+      },
+      {
+        "ts": "2026-07-30T08:17:17.473Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_qeD0AxDEItC0HWeGDZUg0649",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:20.473Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_gS4h65srhL6Dvy0SlHyQ4354",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl && ls -la evals/question-bank/"
+      },
+      {
+        "ts": "2026-07-30T08:17:20.474Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_DAkH2TjhfvZyVQawkQ626312",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl && cat .gitignore | head -50"
+      },
+      {
+        "ts": "2026-07-30T08:17:20.475Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_xHZlWCuZa3Xdoa1qNl7Q5450",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl && git -C . status --short 2>/dev/null || echo \"Not a git repo or no git available\""
+      },
+      {
+        "ts": "2026-07-30T08:17:20.495Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_DAkH2TjhfvZyVQawkQ626312",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:20.499Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_gS4h65srhL6Dvy0SlHyQ4354",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:20.614Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_xHZlWCuZa3Xdoa1qNl7Q5450",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:23.508Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_XxuX7IbO4sAMYQbY2SRj1234",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl && cat .git"
+      },
+      {
+        "ts": "2026-07-30T08:17:23.509Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_M59RVq0q0VwOnLuM7CFF2336",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl && find . -name \"questions.jsonl\" 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-30T08:17:23.510Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_8ZJF1DbkRyLw3ajuEOjj6895",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl && git -C . log --oneline -5 2>/dev/null || echo \"No git log\""
+      },
+      {
+        "ts": "2026-07-30T08:17:23.530Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_XxuX7IbO4sAMYQbY2SRj1234",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:23.536Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_M59RVq0q0VwOnLuM7CFF2336",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:23.556Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_8ZJF1DbkRyLw3ajuEOjj6895",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:29.076Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_P7Su8OC775OG5YSl9h2W0180",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl && grep -n \"question\\|jsonl\\|_scratch\" .gitignore 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-30T08:17:29.077Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_XYgNVDpcTINeAfloTjb34026",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl && ls -la evals/question-bank/_scratch/ 2>/dev/null || echo \"No _scratch dir\""
+      },
+      {
+        "ts": "2026-07-30T08:17:29.077Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_WSRJfN6FeQjPlPwHisr86171",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl && git -C . show --stat HEAD 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-07-30T08:17:29.098Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_P7Su8OC775OG5YSl9h2W0180",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:29.099Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_XYgNVDpcTINeAfloTjb34026",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:29.125Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_WSRJfN6FeQjPlPwHisr86171",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:32.268Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_LFAChRqcw8niHxE17LG18196",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl && git -C . show 4cdd96f --stat 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-30T08:17:32.268Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_XW2zNUvNx40nrkKZe2A69807",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl && git -C . show 4cdd96f --name-only 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-30T08:17:32.318Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_XW2zNUvNx40nrkKZe2A69807",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:32.333Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_LFAChRqcw8niHxE17LG18196",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:34.433Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_hVdDYRCBHGwomfqgyu2g2630",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/tests/test_question_bank.py"
+      },
+      {
+        "ts": "2026-07-30T08:17:34.434Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_YYIwHXA4HKAaKYApfVsu7718",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/gddp/nodes/mine-real-agent-query-benchmark.yaml"
+      },
+      {
+        "ts": "2026-07-30T08:17:34.437Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_hVdDYRCBHGwomfqgyu2g2630",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:34.438Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_YYIwHXA4HKAaKYApfVsu7718",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:49.933Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_3nVhzjjZsy2vHrhXG2Pv0004",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl && python3 -c \"\nimport json\nm = json.load(open('evals/question-bank/question-bank-manifest.json'))\nprint('Session counts:', json.dumps(m['session_counts'], indent=2))\nprint('Raw extraction counts:', json.dumps(m['raw_extraction_counts'], indent=2))\nprint('Category counts:', json.dumps(m['category_counts'], indent=2))\nprint('Shape counts:', json.dumps(m['shape_counts'], indent=2))\nprint('Unique question count:', m['unique_question_count'])\nprint('Bank version:', m['bank_version'])\nprint('Hosts scanned:', m['hosts_scanned'])\nprint('Per-store occurrence counts:', json.dumps(m['per_store_occurrence_counts'], indent=2))\n# Check first question for provenance fields\nq0 = m['questions'][0]\nprint('First question keys:', list(q0.keys()))\nprint('First question category:', q0.get('category'))\nprint('First question occurrences count:', len(q0.get('occurrences', [])))\nprint('First occurrence keys:', list(q0['occurrences'][0].keys()))\n\"\n"
+      },
+      {
+        "ts": "2026-07-30T08:17:50.067Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_3nVhzjjZsy2vHrhXG2Pv0004",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:53.823Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_a02zbnI4eImc0zEgmq0u4941",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi/project.yaml"
+      },
+      {
+        "ts": "2026-07-30T08:17:53.824Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_wzeUSDLeJJjyggWpVTO88111",
+        "command": "diff /Users/sab-mini/repos/gddp-config/graphs/myapi/nodes/mine-real-agent-query-benchmark.yaml /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/gddp/nodes/mine-real-agent-query-benchmark.yaml 2>/dev/null || true"
+      },
+      {
+        "ts": "2026-07-30T08:17:53.829Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_a02zbnI4eImc0zEgmq0u4941",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:17:53.851Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_wzeUSDLeJJjyggWpVTO88111",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-30T08:18:05.052Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_kw3RzBDk5N5mLJh6jcRC5656",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": null,
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.5,
+  "criteria_confidence": 0.974,
+  "completeness": 0.5,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "mini-air-coverage",
+        "criterion": "Both session stores are scanned — Mini (183 Pi, 93 Codex sessions) and Air (320 Pi, 554 Codex sessions) — with per-store extraction counts",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "per\\-store -> line 390: 'per-store'"
+        ],
+        "reasoning": "Scanned source files (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...) for identifiers named in the criterion (per-store). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "deduplicated-categorized",
+        "criterion": "Questions are normalized, deduplicated across hosts, and categorized (knowledge questions, graphify invocations, graphify meta-queries) with counts per category and per source store",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "meta\\-queries -> line 474: 'meta-queries'"
+        ],
+        "reasoning": "Scanned source files (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...) for identifiers named in the criterion (meta-queries). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "provenance-preserved",
+        "criterion": "Every question retains full provenance — source host, session store, session file path, timestamp, and line or message reference",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "question-bank-produced",
+        "criterion": "A versioned question bank artifact exists in a form directly consumable by capture-live-vertex-baseline and prove-myapi-context-retrieval",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "capture\\-live\\-vertex\\-baseline -> line 570: 'capture-live-vertex-baseline'",
+          "prove\\-myapi\\-context\\-retrieval -> line 571: 'prove-myapi-context-retrieval'"
+        ],
+        "reasoning": "Scanned source files (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...) for identifiers named in the criterion (capture-live-vertex-baseline, prove-myapi-context-retrieval). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "no-synthesis",
+        "criterion": "Every bank entry is an actual agent-attempted question from a session record; no synthesized or doc-derived questions are included",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "agent\\-attempted -> line 2: 'agent-attempted'"
+        ],
+        "reasoning": "Scanned source files (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...) for identifiers named in the criterion (agent-attempted, doc-derived). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Read-only extraction; never modify original session files",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "The query benchmark is Pi/Codex-derived by design; this restriction applies to the benchmark only, not to corpus sources",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Raw private transcript text stays outside tracked files; the repo receives only the extraction tooling, manifests, and aggregate receipts",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "The completed Mini extraction (243 questions) is input to be extended, not discarded or redone",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "question-bank-manifest.json": false,
+      "benchmark-receipt.md": false
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": []
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "mini-air-coverage",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "scripts/mine_agent_query_bank.py lines 288-332: collect_questions() iterates local and remote stores for both hosts",
+          "evals/question-bank/question-bank-manifest.json: hosts_scanned=[\"mini\",\"air\"], stores_scanned includes all 4 store paths",
+          "evals/question-bank/question-bank-manifest.json: raw_extraction_counts reports per-store raw message counts",
+          "evals/question-bank/question-bank-manifest.json: session_counts reports per-store session file counts",
+          "evals/question-bank/benchmark-receipt.md: Per-store extraction table with raw user message counts per host/store"
+        ],
+        "reasoning": "The mining script scans both hosts (mini locally, air via SSH) and both store types (pi_agent_sessions, codex_sessions) per host. The manifest and receipt both report per-store extraction counts. The actual session counts from disk (mini: 93 codex + 190 pi = 283; air: 579 codex + 321 pi = 900) differ from the parenthetical estimates in the original criterion text (183/93 and 320/554), but the criterion's core requirement — that both stores are scanned and per-store counts are reported — is fully satisfied. The local node YAML at gddp/nodes/mine-real-agent-query-benchmark.yaml uses the broader phrasing without specific numbers, confirming the exact counts are descriptive context, not acceptance constraints."
+      },
+      {
+        "criterion_id": "deduplicated-categorized",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "scripts/mine_agent_query_bank.py lines 48-79: normalize_text() strips instruction blocks, folds case, normalizes whitespace",
+          "scripts/mine_agent_query_bank.py lines 82-85: norm_key() produces stable dedup hash from normalized text",
+          "scripts/mine_agent_query_bank.py lines 188-217: categorize() returns knowledge|graphify_invocation|graphify_meta",
+          "scripts/mine_agent_query_bank.py lines 335-349: _register() uses by_key dict for cross-host dedup",
+          "evals/question-bank/question-bank-manifest.json: category_counts={knowledge:3236, graphify_invocation:4, graphify_meta:4}",
+          "evals/question-bank/question-bank-manifest.json: per_store_occurrence_counts with 4 store-specific occurrence tallies",
+          "evals/question-bank/benchmark-receipt.md: Category breakdown table and per-store occurrence counts"
+        ],
+        "reasoning": "The pipeline normalizes via normalize_text(), deduplicates using a SHA-256 hash of normalized text across all hosts/stores, and categorizes each question as knowledge, graphify_invocation, or graphify_meta. Both the manifest and receipt report per-category and per-store counts. The dedup is cross-host (mini and air questions collide correctly via normalized hash)."
+      },
+      {
+        "criterion_id": "provenance-preserved",
+        "judgment": "judged_pass",
+        "confidence": 0.99,
+        "evidence": [
+          "scripts/mine_agent_query_bank.py lines 348-368: _register() builds occurrence dict with host, store, session_path, line_index, timestamp, text_fingerprint, char_count",
+          "evals/question-bank/question-bank-manifest.json: each question has occurrences[] list with all provenance fields",
+          "Sample occurrence: host='air', store='codex_sessions', session_path='/Users/sab-mini/.codex/sessions/2026/06/12/rollout-...jsonl', line_index=611, timestamp='2026-06-18T02:43:33.344Z'",
+          "evals/question-bank/benchmark-receipt.md: Provenance section documents every tracked field"
+        ],
+        "reasoning": "Every question occurrence in the manifest includes host, store, session_path, line_index, and timestamp — all five provenance fields required by the criterion. The text_fingerprint and char_count fields provide additional provenance tracking."
+      },
+      {
+        "criterion_id": "question-bank-produced",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "evals/question-bank/question-bank-manifest.json exists with schema_version=1.0, bank_version=1.0.0, generated_at=2026-07-30T08:10:49+00:00",
+          "evals/question-bank/benchmark-receipt.md exists with session coverage, per-store counts, category breakdown",
+          "question-bank-manifest.json: questions_path='evals/question-bank/questions.jsonl', questions_path_is_tracked=False (gitignored per .gitignore)",
+          "question-bank-manifest.json: tracked_question_fields clearly documented",
+          ".gitignore: 'evals/question-bank/questions.jsonl' and 'evals/question-bank/_scratch/' entries",
+          "scripts/mine_agent_query_bank.py lines 510-530: manifest written with versioned schema, redacted questions",
+          "benchmark-receipt.md explicitly says 'suitable for capture-live-vertex-baseline and prove-myapi-context-retrieval'"
+        ],
+        "reasoning": "A versioned bank artifact (question-bank-manifest.json v1.0.0) exists with full aggregate counts and per-question provenance. The text-bearing JSONL is gitignored by design, per the constraint about private transcript text. The receipt explicitly describes the bank's suitability for the downstream nodes. Both required artifacts (manifest and receipt) are present."
+      },
+      {
+        "criterion_id": "no-synthesis",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "scripts/mine_agent_query_bank.py lines 235-265: _read_user_messages() reads actual session JSONL files, extracts user-role messages only",
+          "scripts/mine_agent_query_bank.py lines 268-280: iter_store() walks *.jsonl files from session directories",
+          "scripts/mine_agent_query_bank.py lines 122-170: looks_like_question() uses conservative heuristics, rejects setup prompts, pastes, confirmations",
+          "scripts/mine_agent_query_bank.py: No generation, synthesis, or doc-extraction step exists in the code",
+          "Argument parser (line 426): paths default to ~/.codex/sessions and ~/.pi/agent/sessions — actual agent session stores"
+        ],
+        "reasoning": "The extraction pipeline reads user messages exclusively from real session log files (~/.codex/sessions/*.jsonl and ~/.pi/agent/sessions/*.jsonl). There is no code path that generates synthetic questions, extracts from documentation, or creates questions from any source other than actual agent sessions. The filter aggressively rejects non-question content (setup prompts, pastes, very short confirmations)."
+      }
+    ],
+    "overall_reasoning": "All five acceptance criteria for node 'mine-real-agent-query-bank' are conclusively satisfied. The mining script (scripts/mine_agent_query_bank.py) is a well-structured, read-only extractor that scans both Mini (local) and Air (SSH) session stores, covering Pi agent sessions and Codex sessions per host. Questions are normalized, deduplicated across hosts via a text fingerprint hash, and categorized into knowledge/graphify_invocation/graphify_meta buckets. Every question occurrence carries full provenance (host, store, session_path, line_index, timestamp). The versioned question-bank-manifest.json (v1.0.0) and benchmark-receipt.md are present and correctly structured — the manifest carries aggregates and fingerprints only, with the text-bearing JSONL gitignored per constraint. All constraints are satisfied: read-only extraction, Pi/Codex derivation, private text outside tracked files, and Mini extraction extended (not discarded). The artifacts at evals/question-bank/ are directly consumable by the downstream nodes capture-live-vertex-baseline and prove-myapi-context-retrieval, as documented in the receipt.",
+    "risks": "None identified. The implementation is thorough, the code is well-structured, the required artifacts are present and consistent. The session count numbers in the original criterion description (e.g., 183 Pi sessions for Mini) differ from actual disk counts (190), but this is expected — the criterion describes store sizes at planning time, and the local node YAML correctly uses the general phrasing without specific numbers. The actual counts from the running extraction are authoritative.",
+    "followup_candidates": "Observed: test suite (test_question_bank.py) validates the miner's filter/dedup logic and artifact consistency but could not be executed due to pytest not being installed in the evaluation environment. This is a setup concern, not a criteria issue. If automated test execution is desired in the verification pipeline, install pytest and run `pytest tests/test_question_bank.py -v` to confirm the bank artifacts are self-consistent.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-07-30T08:15:46.322Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_3cE9ENGAUHuelvu1GHGT3643",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-07-30T08:15:46.323Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_UDR084GDR9kiAISYnPfM3568",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/README.md"
+        },
+        {
+          "ts": "2026-07-30T08:15:46.329Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_3cE9ENGAUHuelvu1GHGT3643",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:15:46.330Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_UDR084GDR9kiAISYnPfM3568",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:15:48.826Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Qh3mKY1hgbT6m4FVPiOU4448",
+          "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl -type f -name \"*.py\" -o -name \"*.json\" -o -name \"*.md\" -o -name \"*.yaml\" -o -name \"*.yml\" | head -80"
+        },
+        {
+          "ts": "2026-07-30T08:15:48.829Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_zHnujdWem9akC1Sth5bU4541",
+          "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/"
+        },
+        {
+          "ts": "2026-07-30T08:15:48.851Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_zHnujdWem9akC1Sth5bU4541",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:15:48.851Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Qh3mKY1hgbT6m4FVPiOU4448",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:15:51.763Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_NpAYNg6cFtUaSQ5k12ym7511",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/evals/question-bank/question-bank-manifest.json"
+        },
+        {
+          "ts": "2026-07-30T08:15:51.763Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_7A0qk0AeLwbKhaSFoyUE6629",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/evals/question-bank/benchmark-receipt.md"
+        },
+        {
+          "ts": "2026-07-30T08:15:51.765Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_7A0qk0AeLwbKhaSFoyUE6629",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:15:51.787Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_NpAYNg6cFtUaSQ5k12ym7511",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:15:54.984Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ki2HogQyAifnWuhUzZ9G9496",
+          "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/scripts/"
+        },
+        {
+          "ts": "2026-07-30T08:15:55.006Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ki2HogQyAifnWuhUzZ9G9496",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:15:56.937Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_yNmuM3u1WymiIz8iVTu31838",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/scripts/mine_agent_query_bank.py"
+        },
+        {
+          "ts": "2026-07-30T08:15:56.938Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_yNmuM3u1WymiIz8iVTu31838",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:16:09.102Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_soycG1iwckEgVA40DoXn6060",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/tests/test_question_bank.py"
+        },
+        {
+          "ts": "2026-07-30T08:16:09.103Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_3MJsGRgbpQg5Qhl5OsYE3212",
+          "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/evals/question-bank/"
+        },
+        {
+          "ts": "2026-07-30T08:16:09.106Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_soycG1iwckEgVA40DoXn6060",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:16:09.122Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_3MJsGRgbpQg5Qhl5OsYE3212",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:16:18.216Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_2Jevh5yFFiIFKyuDwe562614",
+          "command": "cat /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/.gitignore"
+        },
+        {
+          "ts": "2026-07-30T08:16:18.217Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_rpTbnqOzYKqulK6q7gMj0424",
+          "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl -name \"questions.jsonl\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-30T08:16:18.233Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_2Jevh5yFFiIFKyuDwe562614",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:16:18.239Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_rpTbnqOzYKqulK6q7gMj0424",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:16:21.234Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_ijm0covBXvMY29HwR6b19471",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi/nodes/capture-live-vertex-baseline.yaml"
+        },
+        {
+          "ts": "2026-07-30T08:16:21.235Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_n5LsPM074I6A5zaWqN8V3652",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/gddp"
+        },
+        {
+          "ts": "2026-07-30T08:16:21.236Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_n5LsPM074I6A5zaWqN8V3652",
+          "tool": "read",
+          "ok": false
+        },
+        {
+          "ts": "2026-07-30T08:16:21.237Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ijm0covBXvMY29HwR6b19471",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:16:23.810Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_MpLFZeVEu2z8nJj3v8Hl7832",
+          "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/gddp/"
+        },
+        {
+          "ts": "2026-07-30T08:16:23.811Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ndkn98P1Au1DV62KLNTc5066",
+          "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl -name \"*.yaml\" -path \"*/nodes/*\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-30T08:16:23.829Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_MpLFZeVEu2z8nJj3v8Hl7832",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:16:23.833Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ndkn98P1Au1DV62KLNTc5066",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:16:26.236Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_gqHQvSwBbsVX2cP7Bx689592",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/gddp/project.yaml"
+        },
+        {
+          "ts": "2026-07-30T08:16:26.237Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_8BDkmmSbpuQzLEHbYF445355",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/gddp/nodes/mine-real-agent-query-benchmark.yaml"
+        },
+        {
+          "ts": "2026-07-30T08:16:26.239Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_8BDkmmSbpuQzLEHbYF445355",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:16:26.240Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_gqHQvSwBbsVX2cP7Bx689592",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:16:34.788Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_DSJI2pdUh7jfkYVcfSB75219",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl && python3 -m pytest tests/test_question_bank.py -v 2>&1 | head -50"
+        },
+        {
+          "ts": "2026-07-30T08:16:35.274Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_DSJI2pdUh7jfkYVcfSB75219",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:16:39.064Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_mUb6mxCTts8A2ZSR1a3M7046",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl && python3 -c \"\nimport json\nwith open('evals/question-bank/question-bank-manifest.json') as f:\n    data = json.load(f)\n\n# Check top-level keys\nprint('Top-level keys:', list(data.keys()))\nprint()\n\n# Check a few questions\nfor q in data['questions'][:3]:\n    print('Question key:', q['key'])\n    print('  category:', q['category'])\n    print('  shape:', q['shape'])\n    print('  char_count:', q['char_count'])\n    print('  token_count_est:', q['token_count_est'])\n    print('  occurrences:', len(q['occurrences']))\n    for occ in q['occurrences'][:2]:\n        print('    host:', occ['host'])\n        print('    store:', occ['store'])\n        print('    session_path:', occ['session_path'][:50] + '...')\n        print('    line_index:', occ['line_index'])\n        print('    timestamp:', occ['timestamp'])\n        print('    text_fingerprint:', occ['text_fingerprint'])\n    print()\nprint('Total questions:', len(data['questions']))\nprint('Total occurrences:', sum(len(q['occurrences']) for q in data['questions']))\n\"\n"
+        },
+        {
+          "ts": "2026-07-30T08:16:39.145Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_mUb6mxCTts8A2ZSR1a3M7046",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:16:44.277Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_i84gqfgR0gpcOlAUAKt30341",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl && python3 -c \"\nimport json\nwith open('evals/question-bank/question-bank-manifest.json') as f:\n    data = json.load(f)\nprint('questions_path:', data.get('questions_path'))\nprint('questions_path_is_tracked:', data.get('questions_path_is_tracked'))\nprint('questions_count_in_jsonl:', data.get('questions_count_in_jsonl'))\nprint('tracked_question_fields:', data.get('tracked_question_fields'))\n\n# Check no private fields leaked into manifest questions\nprivate_fields = {'text', 'first_tokens', 'last_tokens'}\nfor q in data['questions']:\n    leaked = private_fields & set(q.keys())\n    if leaked:\n        print(f'LEAKED: {leaked} in key {q.get(\\\"key\\\")}')\nprint('No private field leaks detected.')\n\"\n"
+        },
+        {
+          "ts": "2026-07-30T08:16:44.357Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_i84gqfgR0gpcOlAUAKt30341",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-30T08:17:02.778Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_OdalL5TIiQrQvzJRlQ7I9699",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All five acceptance criteria for node 'mine-real-agent-query-bank' are conclusively satisfied. The mining script (scripts/mine_agent_query_bank.py) is a well-structured, read-only extractor that scans both Mini (local) and Air (SSH) session stores, covering Pi agent sessions and Codex sessions per host. Questions are normalized, deduplicated across hosts via a text fingerprint hash, and categorized into knowledge/graphify_invocation/graphify_meta buckets. Every question occurrence carries full provenance (host, store, session_path, line_index, timestamp). The versioned question-bank-manifest.json (v1.0.0) and benchmark-receipt.md are present and correctly structured — the manifest carries aggregates and fingerprints only, with the text-bearing JSONL gitignored per constraint. All constraints are satisfied: read-only extraction, Pi/Codex derivation, private text outside tracked files, and Mini extraction extended (not discarded). The artifacts at evals/question-bank/ are directly consumable by the downstream nodes capture-live-vertex-baseline and prove-myapi-context-retrieval, as documented in the receipt.",
+  "required_next_action": "Provide missing required artifacts and re-submit.",
+  "generated_at": "2026-07-30T08:18:05.230643+00:00",
+  "evaluated_tree_sha": "ea54e1a18e04cb460bdf20edb5a74f8f76fb9caa",
+  "evaluated_commit_sha": "e24a23d98934e7798f858b91bbfdb1fc2f78903c",
+  "merge_commit_sha": "e24a23d98934e7798f858b91bbfdb1fc2f78903c",
+  "pr_ref": null,
+  "job_id": "job_20260730T07003320299453cd3951",
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi/nodes/capture-live-vertex-baseline.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi/nodes/capture-live-vertex-baseline.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi/nodes/capture-live-vertex-baseline.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-p8adlljl/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "high"
+  }
+}

@@ -1,0 +1,574 @@
+{
+  "project_id": "gddp-dogfood",
+  "node_id": "node-07-hook-surface",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.93,
+    "findings": [],
+    "reasoning": "Fresh-eyes integrity review of node-07-hook-surface (T1 report-only canary, \"Inventory what fires on git commit/push\", depends_on=[] unlocks=[]). The subject diff (450eca1..5803d34) contains exactly one added file, reports/gddp-dogfood/07-hook-surface.md, and both result wrapper commits contain only that file — the \"Create only reports/gddp-dogfood/07-hook-surface.md\" constraint is honored and nothing outside the report path was written. The report delivers precisely what the node's title/why promise: a complete inventory of every hook surface (.agents/ Antigravity lifecycle hooks, .git/hooks samples, graphify) with what triggers each, and the config/install lines quoted (hooks.json JSON matches the file verbatim; git hooks = none installed with core.hooksPath unset at all scopes; graphify = absent with gitignore evidence quoted; archived mission pre-push installer quoted). I verified the report's factual claims against the live worktree: .agents/hooks.json content, the 13 .git/hooks samples, core.hooksPath unset, graphify config/graphify-out/AGENTS.md absence, .gitignore graphify lines, scripts/_archive/mission_push_guard.py present with live path gone, and .github/workflows/jules.yml (issues/labeled, not push). The pytest constraint is satisfied on its face (tail line quoted with failure-class explanation; lane 1 owns criterion adjudication). Because the node has no dependents/unlocks and the diff alters no source, config, or test files, nothing downstream can break; graph structure is untouched. The report's scope slightly exceeds the named surfaces (adjacent surfaces section), but this is within the node's why (making side effects visible — explicitly disambiguating what does NOT fire on commit/push) and is not drift. Verdict: pass with high confidence.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-11T06:05:23.998Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_jvm7wUDZiG9AuisLFLRT3644",
+        "path": "/tmp/gddp-eval-wt-979hxj8i/reports/gddp-dogfood/07-hook-surface.md"
+      },
+      {
+        "ts": "2026-08-11T06:05:23.998Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_1tTtCtqm9iBYjx5PdnaL4908",
+        "path": "/tmp/gddp-eval-wt-979hxj8i/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-11T06:05:23.999Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_eXWFt16935qqiHlXrDuN3698",
+        "path": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+      },
+      {
+        "ts": "2026-08-11T06:05:24.004Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_1tTtCtqm9iBYjx5PdnaL4908",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:05:24.005Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_jvm7wUDZiG9AuisLFLRT3644",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:05:24.005Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_eXWFt16935qqiHlXrDuN3698",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:05:27.462Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_pbfdWKNLBf60nucrWOYx5584",
+        "command": "ls -la /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/ 2>/dev/null | head -40; echo '---'; cat /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-07-hook-surface.yaml 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-11T06:05:27.463Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_5vZU4hrF0T8nIYpvEzw29639",
+        "command": "cd /tmp/gddp-eval-wt-979hxj8i && git log --oneline -5 2>/dev/null; echo '--- status ---'; git status --short 2>/dev/null | head -20; echo '--- diff stat ---'; git diff --stat 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61..HEAD 2>/dev/null | tail -10"
+      },
+      {
+        "ts": "2026-08-11T06:05:27.480Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_pbfdWKNLBf60nucrWOYx5584",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:05:27.494Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_5vZU4hrF0T8nIYpvEzw29639",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:05:31.532Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_wEwmQlBxWkcv2gvCc0a26453",
+        "command": "cd /tmp/gddp-eval-wt-979hxj8i && echo '=== commit 7ec5b89 ==='; git show --stat --format='%H %s' 7ec5b89 | head -20; echo; echo '=== commit 5803d34 ==='; git show --stat --format='%H %s' 5803d34 | head -20"
+      },
+      {
+        "ts": "2026-08-11T06:05:31.533Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_JrblENiqYVQZ6hrDYZIA7374",
+        "command": "cd /tmp/gddp-eval-wt-979hxj8i && echo '=== .agents ==='; ls -la .agents/ 2>/dev/null; ls -la .agents/hooks/ 2>/dev/null; echo '=== git hooks common dir ==='; git rev-parse --git-common-dir 2>/dev/null; ls \"$(git rev-parse --git-common-dir)/hooks/\" 2>/dev/null; echo '=== core.hooksPath ==='; git config --get core.hooksPath; echo \"exit=$?\""
+      },
+      {
+        "ts": "2026-08-11T06:05:31.549Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_wEwmQlBxWkcv2gvCc0a26453",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:05:31.561Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_JrblENiqYVQZ6hrDYZIA7374",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:05:38.179Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_0G3FXGFKlqmGEjlUOtEX4630",
+        "command": "cd /tmp/gddp-eval-wt-979hxj8i && echo '=== graphify config files ==='; ls -d graphify-out .graphify* graphify.toml graphify.yaml graphify.json 2>/dev/null; find . -maxdepth 2 -name 'graphify*' -not -path './.git/*' 2>/dev/null | head; echo '=== graphify in AGENTS.md ==='; grep -n 'graphify' AGENTS.md 2>/dev/null | head -5; echo '=== gitignore graphify ==='; grep -n -A4 'graphify' .gitignore 2>/dev/null | head -12; echo '=== mission push guard ==='; ls scripts/_archive/mission_push_guard.py 2>/dev/null; ls scripts/adapters/mission_push_guard.py 2>/dev/null || echo 'live path gone (matches report)'; echo '=== jules workflow ==='; sed -n '1,10p' .github/workflows/jules.yml 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-11T06:05:38.179Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_2e8YRD3YjH7NFz2mD8L11343",
+        "command": "cd /tmp/gddp-eval-wt-979hxj8i && echo '=== hooks.json ==='; cat .agents/hooks.json; echo; echo '=== README head ==='; head -40 README.md"
+      },
+      {
+        "ts": "2026-08-11T06:05:38.196Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_2e8YRD3YjH7NFz2mD8L11343",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:05:38.208Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_0G3FXGFKlqmGEjlUOtEX4630",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:06:07.618Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_4aNhEL1yma8VCzEYKoQm6149",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "This report establishes that NO hooks fire on git commit/push in gddp-runtime today (no graphify post-commit, no pre-commit/pre-push, core.hooksPath unset). The project's own operating loop therefore relies entirely on explicit dispatch/evaluation rather than any commit-time side effect — future nodes that assume a post-commit graph rebuild or hook-driven automation must trigger it explicitly.",
+        "affected_node_ids": [
+          "node-07-hook-surface",
+          "node-08-verification-module-map",
+          "node-09-heartbeat-module-map",
+          "node-10-agents-md-drift-report"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Report notes README still lists scripts/adapters/mission_push_guard.py as live while the file was archived (204148e) — documentation drift that the upcoming node-10 (AGENTS.md drift report) family of work may want to sweep up; not a problem for this node.",
+        "affected_node_ids": [
+          "node-07-hook-surface",
+          "node-10-agents-md-drift-report"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9733333333333333,
+  "criteria_confidence": 0.9733333333333333,
+  "completeness": 1.0,
+  "graph_readiness": 0.9733333333333333,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "report-exists",
+        "criterion": "reports/gddp-dogfood/07-hook-surface.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "gddp\\-dogfood -> line 314: 'gddp-dogfood'",
+          "hook\\-surface -> line 3: 'hook-surface'",
+          "non\\-empty -> line 314: 'non-empty'"
+        ],
+        "reasoning": "Scanned source files (reports/gddp-dogfood/07-hook-surface.md) for identifiers named in the criterion (gddp-dogfood, hook-surface, non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "hooks-listed",
+        "criterion": "report lists every hook surface in the repo (.agents/, .git/hooks if any, graphify config) with what triggers it",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "evidence",
+        "criterion": "report quotes the config lines that install each hook",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create only reports/gddp-dogfood/07-hook-surface.md",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Read-only outside that report path",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Run python3 -m pytest -q before finishing and quote its tail line in the report",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/gddp-dogfood/07-hook-surface.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+      "tip": "5803d340be850b5bf3f17a85d3e140228871959d",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/gddp-dogfood/07-hook-surface.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "reports/gddp-dogfood/07-hook-surface.md: 316 lines / 11,765 bytes, non-empty",
+          "git show HEAD:reports/gddp-dogfood/07-hook-surface.md md5 a9bcb2ee... == working-tree md5 (committed at HEAD 5803d34)",
+          "subject_diff shows single added file reports/gddp-dogfood/07-hook-surface.md"
+        ],
+        "reasoning": "The report exists, is non-empty, and is committed on the result ref. Content is a full structured inventory (method, findings, per-surface sections, acceptance checklist)."
+      },
+      {
+        "criterion_id": "hooks-listed",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          ".agents/hooks.json read in full: matches report's quoted JSON byte-for-byte (PreInvocation/PreToolUse/PostToolUse/Stop with command+timeout)",
+          "ls /data/repos/gddp-runtime/.git/hooks/: exactly the 13 *.sample files the report lists; no non-sample hooks; git config --get core.hooksPath -> unset (exit 1)",
+          "find for .graphify*/graphify.toml/yaml/json -> none; graphify-out/ absent; .gitignore lines 38-40, 56-57 contain graphify cache/out entries",
+          "scripts/_archive/mission_push_guard.py exists (lines 48-72 contain pre-push write_text + core.hooksPath append, matching report quote)",
+          ".github/workflows/jules.yml matches report quote (issues labeled event only)",
+          "setup.sh verified: no hook installation"
+        ],
+        "reasoning": "Every hook surface named by the criterion (.agents/, .git/hooks, graphify config) is listed with its trigger, and I independently confirmed each claim against the repo: agent hooks trigger on host session events (not git), .git/hooks contains only inert samples, graphify has no config/hook in-repo. Adjacent surfaces (archived mission pre-push guard, GitHub Actions issue-label workflow, intake webhooks, setup.sh) are additionally recorded with triggers. The side-effect map ties each operator action to what runs. No in-scope surface appears missed (.claude/, .vscode/, .gddp/, .ua/ contain no hook wiring)."
+      },
+      {
+        "criterion_id": "evidence",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "Report quotes .agents/hooks.json in full; repo file verified byte-identical",
+          "Report quotes .gitignore graphify lines; verified identical at lines 38-40 and 56-57",
+          "Report quotes graphify external install CLI (graphify hook install/uninstall/status) and documents no in-repo graphify install config",
+          "Report quotes scripts/_archive/mission_push_guard.py installer (pre-push write_text, core.hooksPath append); verified at lines 54-72",
+          "Report states 'None in this repo' for .git/hooks install config with verification commands; verified core.hooksPath unset and only samples present"
+        ],
+        "reasoning": "For surfaces with an install config (.agents/), the config lines are quoted verbatim. For surfaces with nothing installed (.git/hooks, graphify), the report quotes the closest install-relevant evidence (gitignore entries, external CLI docs) and documents absence — the honest fulfillment of 'quotes the config lines that install each hook' when no hook is installed. Quoted evidence matches the repo."
+      }
+    ],
+    "overall_reasoning": "All three acceptance criteria are satisfied with high confidence. The report exists, is non-empty, and is committed on the result ref. It lists every hook surface named by the node (.agents/, .git/hooks, graphify config) with what triggers each, and quotes the install config lines per surface; I independently verified every substantive claim against the repo: .agents/hooks.json quote is byte-identical, the common .git/hooks dir contains exactly the 13 stock samples listed with core.hooksPath unset, no graphify config exists in-repo, the archived mission push-guard installer snippet matches source, and the GitHub Actions workflow quote matches. The report even extends beyond scope to adjacent surfaces (archived pre-push guard, intake webhooks, setup.sh) and provides a side-effect map. Constraint items were also satisfied contextually: subject_diff shows only the report file created; the pytest tail line is quoted and cross-checked (my read-only rerun gave '1 failed, 625 passed in 36.65s' vs the report's '4 failed, 622 passed in 36.53s' — same 626-test total; the 4-vs-1 failure delta is environmental since the eval venv has Flask and the report explicitly stated the executor environment lacked Flask; the rig1 heartbeat failure reproduces identively in both runs). The deterministic checker's low-confidence no_probe entries for hooks-listed and evidence are resolved by direct semantic verification.",
+    "risks": "1) The quoted pytest tail line could not be reproduced verbatim in the eval sandbox ('1 failed, 625 passed' vs quoted '4 failed, 622 passed'); totals match and the delta is explained by Flask availability, but the exact figure is executor-worktree-specific and not independently reproducible here. 2) .git/hooks state is shared common-dir state of the gitdir, which can vary across clones; the report's claim was verified against the actual common dir (/data/repos/gddp-runtime/.git/hooks/), which is the correct grounding for this worktree. 3) The eval worktree's gitfile points to a different worktree than the executor's; this does not affect the report's conclusions since the common hooks dir is shared and was verified directly.",
+    "followup_candidates": "Observed: the report quotes pytest tail '4 failed, 622 passed in 36.53s' (executor worktree without Flask), while the eval-sandbox run yields '1 failed, 625 passed in 36.65s' (same 626-test total; rig1 heartbeat failure identical in both). The pytest constraint is not one of the three acceptance criteria, so it does not affect this verdict — but if the project wants the quoted tail line to be deterministically verifiable across environments, consider noting the environment dependency (Flask presence) in the constraint or the report. Also observed: README.md line 159 still lists scripts/adapters/mission_push_guard.py as live while it is archived (report flags this as documentation drift) — candidate for a future docs/cleanup node, out of scope here.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-11T06:03:25.092Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ijNeCVIeZz4BFRhUVvPh6922",
+          "command": "cd /tmp/gddp-eval-wt-979hxj8i && ls -la && echo \"---\" && git log --oneline -5 2>/dev/null && echo \"---\" && git status 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-11T06:03:25.093Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_E01lpGJtrF3TvsDl3gh58453",
+          "path": "/tmp/gddp-eval-wt-979hxj8i/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-11T06:03:25.106Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_E01lpGJtrF3TvsDl3gh58453",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:03:25.158Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ijNeCVIeZz4BFRhUVvPh6922",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:03:27.345Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_KzyNLuj9ZgWYxnqHGlBD7590",
+          "path": "/tmp/gddp-eval-wt-979hxj8i/reports/gddp-dogfood/07-hook-surface.md"
+        },
+        {
+          "ts": "2026-08-11T06:03:27.346Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_g4HnlATf8fHDo8UYn5gd7792",
+          "command": "cd /tmp/gddp-eval-wt-979hxj8i && echo \"=== .agents ===\" && find .agents -type f | head -50 && echo \"=== .git hooks (worktree) ===\" && ls -la .git/hooks/ 2>/dev/null | head -40 && echo \"=== git dir location ===\" && cat .git"
+        },
+        {
+          "ts": "2026-08-11T06:03:27.353Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_KzyNLuj9ZgWYxnqHGlBD7590",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:03:27.361Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_g4HnlATf8fHDo8UYn5gd7792",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:03:36.081Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_nkkbdViZOI7M2zTdnVhE3739",
+          "command": "cd /tmp/gddp-eval-wt-979hxj8i && echo \"=== hooks.json (diff vs report quote) ===\" && cat .agents/hooks.json && echo \"=== gitignore graphify lines ===\" && grep -n -i graphify .gitignore && echo \"=== archive push guard ===\" && ls -la scripts/_archive/mission_push_guard.py 2>/dev/null && grep -n \"pre-push\\|hooksPath\\|write_text\\|_PRE_PUSH_HOOK_ARG\" scripts/_archive/mission_push_guard.py 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-11T06:03:36.081Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_UOg58v2gD7EGmaxxSpOU6155",
+          "command": "cd /tmp/gddp-eval-wt-979hxj8i && echo \"=== graphify config search ===\" && find . -name '.graphify*' -o -name 'graphify.toml' -o -name 'graphify.yaml' -o -name 'graphify.json' 2>/dev/null | grep -v node_modules | head && echo \"=== non-sample hooks anywhere ===\" && find . -path ./.git -prune -o -name 'pre-commit' -print -o -name 'post-commit' -print -o -name 'pre-push' -print 2>/dev/null | head && echo \"=== jules workflow ===\" && cat .github/workflows/jules.yml 2>/dev/null && echo \"=== setup.sh ===\" && cat setup.sh"
+        },
+        {
+          "ts": "2026-08-11T06:03:36.102Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_nkkbdViZOI7M2zTdnVhE3739",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:03:36.111Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_UOg58v2gD7EGmaxxSpOU6155",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:03:43.339Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_NDxYk4xFw1b8Ln3L9oaG8780",
+          "command": "echo \"=== common hooks dir ===\" && ls -la /data/repos/gddp-runtime/.git/hooks/ 2>/dev/null || echo \"NOT ACCESSIBLE\"; echo \"=== core.hooksPath ===\" && git config --get core.hooksPath; echo \"exit=$?\"; git config --local --list 2>/dev/null | head; echo \"=== graphify anywhere in repo ===\" && grep -rn -i \"graphify\" --include=\"*.md\" --include=\"*.yml\" --include=\"*.yaml\" --include=\"*.toml\" --include=\"*.json\" --include=\"*.sh\" --include=\"*.py\" . 2>/dev/null | grep -v reports/ | grep -v \".git/\" | head -20"
+        },
+        {
+          "ts": "2026-08-11T06:03:43.339Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_x6VPtEgF7KXYsh0jJiF60372",
+          "command": "cd /tmp/gddp-eval-wt-979hxj8i && echo \"=== .gddp ===\" && find .gddp -type f | head && echo \"=== .claude ===\" && find .claude -type f | head && echo \"=== .ua ===\" && find .ua -type f | head && echo \"=== committed report vs working tree ===\" && git show HEAD:reports/gddp-dogfood/07-hook-surface.md | md5sum && md5sum reports/gddp-dogfood/07-hook-surface.md && echo \"=== report size ===\" && wc -lc reports/gddp-dogfood/07-hook-surface.md && echo \"=== diff of subject commits ===\" && git show --stat 5803d34 | head -20"
+        },
+        {
+          "ts": "2026-08-11T06:03:43.384Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_NDxYk4xFw1b8Ln3L9oaG8780",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:03:43.384Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_x6VPtEgF7KXYsh0jJiF60372",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:03:53.957Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_D7RlZnhZ6hsFjGRBuIG92891",
+          "command": "cd /tmp/gddp-eval-wt-979hxj8i && echo \"=== .claude settings ===\" && cat .claude/settings.local.json && echo \"=== .vscode ===\" && find .vscode -type f -exec cat {} \\; 2>/dev/null | head -30 && echo \"=== other hook-ish files repo-wide ===\" && grep -rln \"post-commit\\|pre-commit\\|pre-push\\|core.hooksPath\\|hook install\" --include=\"*.py\" --include=\"*.sh\" --include=\"*.json\" --include=\"*.md\" --include=\"*.yml\" --include=\"*.yaml\" . 2>/dev/null | grep -v reports/ | grep -v \".git/\" | head -20"
+        },
+        {
+          "ts": "2026-08-11T06:03:53.958Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_1NEDTIbrbe4SV4EWwaFh5611",
+          "command": "cd /tmp/gddp-eval-wt-979hxj8i && PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -5"
+        },
+        {
+          "ts": "2026-08-11T06:03:53.994Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_1NEDTIbrbe4SV4EWwaFh5611",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:03:54.001Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_D7RlZnhZ6hsFjGRBuIG92891",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:04:01.573Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_IeVEeLvu8Tj3WiSxCspF7757",
+          "command": "cd /tmp/gddp-eval-wt-979hxj8i && echo \"=== mission_evidence.py hook refs ===\" && grep -n -i \"hook\\|pre-push\\|pre-commit\" scripts/adapters/mission_evidence.py | head && echo \"=== AGENTS.md hook refs ===\" && grep -n -i \"hook\\|graphify\" AGENTS.md | head -20 && echo \"=== README hook refs ===\" && grep -n -i \"hook\\|graphify\" README.md | head -20 && echo \"=== any venv with pytest? ===\" && ls -d .venv venv 2>/dev/null; find / -maxdepth 4 -name \"pytest\" -type f 2>/dev/null | head -3"
+        },
+        {
+          "ts": "2026-08-11T06:04:02.355Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_IeVEeLvu8Tj3WiSxCspF7757",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:04:07.423Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_56mG9Zq2i694Dmfgf6oc0360",
+          "command": "cd /tmp/gddp-eval-wt-979hxj8i && PYTHONDONTWRITEBYTECODE=1 /tmp/gddp-pytest-venv/bin/python -m pytest -q -p no:cacheprovider 2>&1 | tail -6"
+        },
+        {
+          "ts": "2026-08-11T06:04:44.671Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_56mG9Zq2i694Dmfgf6oc0360",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:04:57.372Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_1VrnCsmcy0Nm9HyhT2Up6736",
+          "command": "cd /tmp/gddp-eval-wt-979hxj8i && git status --short | head -5 && echo \"clean-check-done\" && git show 7ec5b89 --stat | head -8"
+        },
+        {
+          "ts": "2026-08-11T06:04:57.391Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_1VrnCsmcy0Nm9HyhT2Up6736",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:05:17.914Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ELEGJJpBaaYjUmm8RLUn8746",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All three acceptance criteria are satisfied with high confidence. The report exists, is non-empty, and is committed on the result ref. It lists every hook surface named by the node (.agents/, .git/hooks, graphify config) with what triggers each, and quotes the install config lines per surface; I independently verified every substantive claim against the repo: .agents/hooks.json quote is byte-identical, the common .git/hooks dir contains exactly the 13 stock samples listed with core.hooksPath unset, no graphify config exists in-repo, the archived mission push-guard installer snippet matches source, and the GitHub Actions workflow quote matches. The report even extends beyond scope to adjacent surfaces (archived pre-push guard, intake webhooks, setup.sh) and provides a side-effect map. Constraint items were also satisfied contextually: subject_diff shows only the report file created; the pytest tail line is quoted and cross-checked (my read-only rerun gave '1 failed, 625 passed in 36.65s' vs the report's '4 failed, 622 passed in 36.53s' — same 626-test total; the 4-vs-1 failure delta is environmental since the eval venv has Flask and the report explicitly stated the executor environment lacked Flask; the rig1 heartbeat failure reproduces identively in both runs). The deterministic checker's low-confidence no_probe entries for hooks-listed and evidence are resolved by direct semantic verification.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-11T06:06:07.655271+00:00",
+  "evaluated_tree_sha": "0fc9a6e70805c77eda078a08fd6522de05de2efd",
+  "evaluated_commit_sha": "5803d340be850b5bf3f17a85d3e140228871959d",
+  "merge_commit_sha": "5803d340be850b5bf3f17a85d3e140228871959d",
+  "expected_base_commit_sha": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+  "pr_ref": null,
+  "job_id": "job_20260811T055756457be8b25accfc",
+  "execution_attempt_id": "job_20260811T055756457be8b25accfc:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-979hxj8i/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-979hxj8i/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-979hxj8i/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-979hxj8i/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-979hxj8i/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/tmp/gddp-eval-wt-979hxj8i/README.md"
+      ]
+    },
+    "overall": "medium"
+  }
+}

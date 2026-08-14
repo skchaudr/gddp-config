@@ -1,0 +1,1180 @@
+{
+  "project_id": "pi-harness-execution",
+  "node_id": "node-02-subagents-execute",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.9,
+    "findings": [],
+    "reasoning": "Fresh-eyes review of node-02-subagents-execute. The node's role — implement the paired audit's accepted proposals with full traceability, bounded to the audit, re-verified against current main, obsolete/blocked recorded — is preserved. The execute report exists (12KB), maps all 25 diff files to AC-1..AC-22 in §3, gives every AC a disposition with shell evidence in §4, and documents environment drift vs the audit snapshot (§2) which satisfies the re-verify-against-current-main constraint. I independently spot-checked the artifacts: validate-chain-agents.sh genuinely unions live package builtins with repo agents (fails on this eval host only because ~/.pi is absent — an environment artifact, not a defect); all 7 new agents are chain-referenced so they fall inside AC-6/F2 scope; apply-patches.sh removed the @viniraioli early-exit and added portable sed_i (AC-2); herdr imports now use @earendil-works/pi-ai (AC-16); model-dispatch resolution order matches code (AC-8); workflow doc rewritten to live posture with watchdog off-by-default and depth=2 documented as intentionally equal to default (AC-9/12/14). No settings.json/auth/credential files appear in the diff — the auth constraint holds. AC-17 skipped as speculative; AC-10/13/19 blocked with follow-ups; AC-21 (single commit+push to gddp ref) deferred to the outer harness per the packet's working-tree instruction and the work is nonetheless committed in the executor's result wrapper commit 62713f2 — a documented disposition, not a silent drop. Graph integrity: depends_on node-01 is complete with the audit present; node-02 unlocks nothing; no downstream node depends on it; no orphaned changes. Lane-1 criteria (e.g., pi --version output, exact AC proof values) are reported but their independent re-verification is lane 1's remit, not this review's.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-13T21:04:17.388Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_JQ233sccMpddVlg0eoRv3430",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && pwd && ls -la && echo \"---\" && cat PROJECT-BRIEF.md 2>/dev/null | head -100"
+      },
+      {
+        "ts": "2026-08-13T21:04:17.390Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_B512189X712NjnhYBZUD9593",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml"
+      },
+      {
+        "ts": "2026-08-13T21:04:17.390Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_jbsje7xkGjAyr3JR7QJP3128",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-execution/nodes/node-01-subagents-audit.yaml"
+      },
+      {
+        "ts": "2026-08-13T21:04:17.419Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_jbsje7xkGjAyr3JR7QJP3128",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:04:17.419Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_B512189X712NjnhYBZUD9593",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:04:17.507Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_JQ233sccMpddVlg0eoRv3430",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:04:20.786Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_fwy08BXSJHysZeXn8ruR3308",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && ls -la reports/ reports/pi-harness-execution/ 2>/dev/null && echo \"---GIT---\" && git log --oneline -5 2>/dev/null && echo \"---STATUS---\" && git status --short 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-13T21:04:20.786Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_ZVgQlgFmiQMrTv7YCWci6371",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y/reports/pi-harness-execution/subagents-execute.md"
+      },
+      {
+        "ts": "2026-08-13T21:04:20.795Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ZVgQlgFmiQMrTv7YCWci6371",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:04:21.160Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_fwy08BXSJHysZeXn8ruR3308",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:04:25.753Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_QVhRCpzGULi9ULjjJyYo3822",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && grep -n \"^## \\|^### \\|AC-1\\|AC-2\\|AC-3\\|AC-4\\|AC-5\\|AC-6\\|AC-7\\|AC-8\\|AC-9\\|AC-10\\|AC-11\\|AC-12\\|AC-13\\|AC-14\\|AC-15\\|AC-16\\|AC-17\\|AC-18\\|AC-19\\|AC-20\\|AC-21\\|AC-22\" reports/pi-harness-execution/subagents-audit.md | head -80"
+      },
+      {
+        "ts": "2026-08-13T21:04:25.755Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_IAI524ZEJrpv2UthoDFr8745",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && git diff --stat 4a967077f36eb0470cb1b19816de76a8e7ef9c70 62713f296b2a7b8c4187378421045cfd5c7cba83 2>/dev/null | tail -30"
+      },
+      {
+        "ts": "2026-08-13T21:04:25.819Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_QVhRCpzGULi9ULjjJyYo3822",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:04:25.856Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_IAI524ZEJrpv2UthoDFr8745",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:04:28.834Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_EFBw0HHFyHhYl9fva4pH0959",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y/reports/pi-harness-execution/subagents-audit.md"
+      },
+      {
+        "ts": "2026-08-13T21:04:28.835Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ZCGBvyyNv13TgU8Hs29m1518",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && git diff 4a967077f36eb0470cb1b19816de76a8e7ef9c70 62713f296b2a7b8c4187378421045cfd5c7cba83 -- agent/patches/apply-patches.sh agent/scripts/sync-subagent-assets.sh 2>/dev/null | head -160"
+      },
+      {
+        "ts": "2026-08-13T21:04:28.846Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_EFBw0HHFyHhYl9fva4pH0959",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:04:28.892Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ZCGBvyyNv13TgU8Hs29m1518",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:04:44.227Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_vrCvpb403h8uEX1KCk9d8070",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && git diff 4a967077f36eb0470cb1b19816de76a8e7ef9c70 62713f296b2a7b8c4187378421045cfd5c7cba83 --stat -- agent/agents/security-reviewer.md agent/agents/vision-glm.md agent/agents/vision-gemini-flash.md agent/extensions/herdr-boss/index.ts agent/extensions/herdr-room/index.ts agent/SUBAGENTS-MODEL-DISPATCH.md && echo \"=== settings/auth check ===\" && git diff --name-only 4a967077f36eb0470cb1b19816de76a8e7ef9c70 62713f296b2a7b8c4187378421045cfd5c7cba83 | grep -iE \"settings|auth|credential|secret|\\.pi/agent/settings\" || echo \"no settings/auth/credential files in diff\""
+      },
+      {
+        "ts": "2026-08-13T21:04:44.230Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_GsRzVYZbmE2tli2xhUXs5102",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && echo \"=== planner.md ===\" && head -20 agent/agents/planner.md && echo \"=== heavy-worker.md ===\" && head -20 agent/agents/heavy-worker.md && echo \"=== herdr-boss import ===\" && grep -n \"StringEnum\\|pi-ai\" agent/extensions/herdr-boss/index.ts agent/extensions/herdr-room/index.ts"
+      },
+      {
+        "ts": "2026-08-13T21:04:44.305Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_GsRzVYZbmE2tli2xhUXs5102",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:04:44.341Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_vrCvpb403h8uEX1KCk9d8070",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:04:47.896Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_OMQgh5vkLNjgIBBTegEp0270",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && git diff 4a967077f36eb0470cb1b19816de76a8e7ef9c70 62713f296b2a7b8c4187378421045cfd5c7cba83 -- agent/scripts/ensure-host-settings.py | head -140"
+      },
+      {
+        "ts": "2026-08-13T21:04:47.896Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Jm5ySrfYhsDZowkHvdYD1459",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && echo \"=== SUBAGENTS-MODEL-DISPATCH diff ===\" && git diff 4a967077f36eb0470cb1b19816de76a8e7ef9c70 62713f296b2a7b8c4187378421045cfd5c7cba83 -- agent/SUBAGENTS-MODEL-DISPATCH.md | head -80"
+      },
+      {
+        "ts": "2026-08-13T21:04:47.968Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_OMQgh5vkLNjgIBBTegEp0270",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:04:47.976Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Jm5ySrfYhsDZowkHvdYD1459",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:05:00.125Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_DvrmKvrSUwQiVwu3ZEE84821",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && echo \"=== validate-chain-agents.sh (read-only run) ===\" && bash agent/scripts/validate-chain-agents.sh 2>&1 | head -20; echo \"exit=$?\"; echo \"=== chain agent refs vs defined ===\" && jq -r '.. | objects | select(has(\"agent\")) | .agent' agent/chains/*.chain.json 2>/dev/null | sort -u | tr '\\n' ' '; echo; echo \"=== defined agents ===\" && ls agent/agents/*.md | sed 's|agent/agents/||; s|\\.md||' | tr '\\n' ' '; echo"
+      },
+      {
+        "ts": "2026-08-13T21:05:00.125Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_FqWSsvaZi2zDZQHZeN1R0110",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && echo \"=== validate-agent-models.sh ===\" && head -30 agent/scripts/validate-agent-models.sh && echo \"=== workflow diff stat ===\" && git diff 4a967077f36eb0470cb1b19816de76a8e7ef9c70 62713f296b2a7b8c4187378421045cfd5c7cba83 --stat -- agent/reference/subagent-workflow.md agent/patches/README.md"
+      },
+      {
+        "ts": "2026-08-13T21:05:00.194Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_FqWSsvaZi2zDZQHZeN1R0110",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:05:00.720Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_DvrmKvrSUwQiVwu3ZEE84821",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:05:05.979Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_00_Y4XfBRaMurrg2XAvdiZ60195",
+        "reason": "command matched blocked pattern",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && echo \"=== full validate-chain-agents.sh ===\" && cat agent/scripts/validate-chain-agents.sh && echo \"=== host ~/.pi? ===\" && ls ~/.pi/agent/agents/*.md 2>/dev/null | wc -l; ls ~/.pi/agent/npm/node_modules/pi-subagents 2>/dev/null | head -3 || echo \"no ~/.pi on this eval host\"",
+        "pattern": "\\b(?:curl|wget|ssh|scp|sftp|rsync|nc|netcat|telnet|ftp|pip|npm|pnpm|yarn|brew)\\b"
+      },
+      {
+        "ts": "2026-08-13T21:05:05.980Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Y4XfBRaMurrg2XAvdiZ60195",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-13T21:05:08.587Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_eNBMQEhIdFC8V8KR4W7K2063",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y/agent/scripts/validate-chain-agents.sh"
+      },
+      {
+        "ts": "2026-08-13T21:05:08.588Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_H8710Xa0IEVCYdayJ9Sx2035",
+        "command": "ls ~/.pi/agent/agents/*.md 2>/dev/null | wc -l; echo \"---\"; ls ~/.pi 2>/dev/null | head -5 || echo \"no ~/.pi dir on this eval host\""
+      },
+      {
+        "ts": "2026-08-13T21:05:08.597Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_eNBMQEhIdFC8V8KR4W7K2063",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:05:08.621Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_H8710Xa0IEVCYdayJ9Sx2035",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:05:16.064Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ml9TzxopQu19kANUijZq3683",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && echo \"=== which chains reference the new agents ===\" && for a in planner context-builder heavy-worker code-worker medium-worker budget-worker worker-phases; do echo -n \"$a: \"; grep -rl \"\\\"agent\\\": *\\\"$a\\\"\" agent/chains/ 2>/dev/null | sed 's|agent/chains/||' | tr '\\n' ' '; echo; done"
+      },
+      {
+        "ts": "2026-08-13T21:05:16.064Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_bzNkyxGp5DNAOlgsET5s4385",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && git diff 4a967077f36eb0470cb1b19816de76a8e7ef9c70 62713f296b2a7b8c4187378421045cfd5c7cba83 -- agent/reference/subagent-workflow.md | grep -E \"^[+-]\" | grep -vE \"^[+-]{3}\" | head -60"
+      },
+      {
+        "ts": "2026-08-13T21:05:16.171Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_bzNkyxGp5DNAOlgsET5s4385",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:05:16.316Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ml9TzxopQu19kANUijZq3683",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:05:30.595Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_xFYMNMAsh2OIo04wSvHr3637",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && diff <(git diff --name-only 4a967077f36eb0470cb1b19816de76a8e7ef9c70 62713f296b2a7b8c4187378421045cfd5c7cba83 | sort) <(sed -n '/## 8. Worktree file touch list/,/^```/p' reports/pi-harness-execution/subagents-execute.md | grep -oE 'agent/[^ ]+|harness/[^ ]+|reports/[^ ]+' | sed 's/[()]//g' | sort -u) && echo \"ALL DIFF FILES ACCOUNTED FOR IN TOUCH LIST\" || echo \"mismatch above\""
+      },
+      {
+        "ts": "2026-08-13T21:05:30.665Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_xFYMNMAsh2OIo04wSvHr3637",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T21:05:50.694Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_bQTqCyHEz2z2qiNAjc0F8146",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "AC-16's herdr StringEnum import fix (agent/extensions/herdr-{boss,room}/index.ts) lives in node-06-extensions-execute's territory (extensions pair). Node-06 should treat this as already-implemented during its re-audit rather than redoing or conflicting with it; the fix is committed and verifiable.",
+        "affected_node_ids": [
+          "node-02-subagents-execute",
+          "node-06-extensions-execute"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Node-08-instructions-execute will likely touch agent/reference/subagent-workflow.md and agent/scripts/, which node-02 already rewrote to live-host posture. Convergence risk on shared doc/script paths; serialize or diff-aware edits advised.",
+        "affected_node_ids": [
+          "node-02-subagents-execute",
+          "node-08-instructions-execute"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "Blocked AC-10 (durable async telemetry), AC-13 (parallel/chain recovery descriptors), and AC-19 (schema fence) require upstream pi-subagents changes and currently have no owning node in the graph; the report recommends upstream issues or a dedicated node. If these gaps matter to the portfolio narrative, a follow-up node should be added rather than leaving them as dangling report-only follow-ups.",
+        "affected_node_ids": [
+          "node-02-subagents-execute"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9,
+  "criteria_confidence": 0.9,
+  "completeness": 1.0,
+  "graph_readiness": 0.9,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "changes-mapped",
+        "criterion": "reports/pi-harness-execution/subagents-execute.md maps every change to the audit proposal it implements",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "pi\\-harness\\-execution -> line 6: 'pi-harness-execution'",
+          "subagents\\-execute -> line 1: 'subagents-execute'"
+        ],
+        "reasoning": "Scanned source files (reports/pi-harness-execution/subagents-execute.md) for identifiers named in the criterion (pi-harness-execution, subagents-execute). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "audit-plan-disposition",
+        "criterion": "report gives every acceptance-criteria item in the paired audit a disposition: implemented, skipped as speculative, obsolete on current main, or blocked with evidence",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (acceptance-criteria). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "pi-loads",
+        "criterion": "report includes output of pi --version (or equivalent load check) run after the changes, exiting 0",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "report-exists",
+        "criterion": "reports/pi-harness-execution/subagents-execute.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "pi\\-harness\\-execution -> line 6: 'pi-harness-execution'",
+          "subagents\\-execute -> line 1: 'subagents-execute'"
+        ],
+        "reasoning": "Scanned source files (reports/pi-harness-execution/subagents-execute.md) for identifiers named in the criterion (pi-harness-execution, subagents-execute, non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Before changing code, read reports/pi-harness-execution/subagents-audit.md; its findings and final acceptance-criteria section are the authoritative execution plan for this node",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Abort and report before making changes if the paired audit report is absent from the execution base",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Re-verify every selected proposal against current main after the codebase trim; record obsolete or blocked proposals instead of forcing stale changes",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Only implement proposals from the paired audit report; no unilateral improvements",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Do not modify settings.json auth or credential content",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node's result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/pi-harness-execution/subagents-execute.md": true
+    },
+    "deps_status": {
+      "node-01-subagents-audit": "complete"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "4a967077f36eb0470cb1b19816de76a8e7ef9c70",
+      "tip": "62713f296b2a7b8c4187378421045cfd5c7cba83",
+      "files": [
+        {
+          "status": "M",
+          "path": "agent/SUBAGENTS-MODEL-DISPATCH.md"
+        },
+        {
+          "status": "A",
+          "path": "agent/agents/budget-worker.md"
+        },
+        {
+          "status": "A",
+          "path": "agent/agents/code-worker.md"
+        },
+        {
+          "status": "A",
+          "path": "agent/agents/context-builder.md"
+        },
+        {
+          "status": "A",
+          "path": "agent/agents/heavy-worker.md"
+        },
+        {
+          "status": "A",
+          "path": "agent/agents/medium-worker.md"
+        },
+        {
+          "status": "A",
+          "path": "agent/agents/planner.md"
+        },
+        {
+          "status": "M",
+          "path": "agent/agents/security-reviewer.md"
+        },
+        {
+          "status": "M",
+          "path": "agent/agents/vision-gemini-flash.md"
+        },
+        {
+          "status": "M",
+          "path": "agent/agents/vision-gemini-pro.md"
+        },
+        {
+          "status": "M",
+          "path": "agent/agents/vision-glm.md"
+        },
+        {
+          "status": "M",
+          "path": "agent/agents/vision-grok.md"
+        },
+        {
+          "status": "A",
+          "path": "agent/agents/worker-phases.md"
+        },
+        {
+          "status": "M",
+          "path": "agent/extensions/herdr-boss/index.ts"
+        },
+        {
+          "status": "M",
+          "path": "agent/extensions/herdr-room/index.ts"
+        },
+        {
+          "status": "M",
+          "path": "agent/patches/README.md"
+        },
+        {
+          "status": "M",
+          "path": "agent/patches/apply-patches.sh"
+        },
+        {
+          "status": "M",
+          "path": "agent/reference/subagent-workflow.md"
+        },
+        {
+          "status": "M",
+          "path": "agent/scripts/ensure-host-settings.py"
+        },
+        {
+          "status": "A",
+          "path": "agent/scripts/sync-subagent-assets.sh"
+        },
+        {
+          "status": "A",
+          "path": "agent/scripts/validate-agent-models.sh"
+        },
+        {
+          "status": "A",
+          "path": "agent/scripts/validate-chain-agents.sh"
+        },
+        {
+          "status": "A",
+          "path": "harness/tests/completion-guard-remote-mutation.sh"
+        },
+        {
+          "status": "A",
+          "path": "harness/tests/validate-chain-agents.sh"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-harness-execution/subagents-execute.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 25,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "changes-mapped",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "reports/pi-harness-execution/subagents-execute.md §3 (change→audit proposal table)",
+          "git diff 4a96707..62713f2 (25 files) vs report §8 touch list — 1:1 match",
+          "agent/patches/apply-patches.sh (sed_i portable; pi-subagents patch ungated on @viniraioli) vs AC-2/S1",
+          "agent/extensions/herdr-{boss,room}/index.ts StringEnum from @earendil-works/pi-ai vs AC-16/F10",
+          "agent/SUBAGENTS-MODEL-DISPATCH.md resolution order + dated pins, worker≠reviewer vs AC-7/AC-8",
+          "agent/agents/{planner,context-builder,heavy-worker,code-worker,medium-worker,budget-worker,worker-phases}.md new + chain refs resolve vs AC-6",
+          "agent/scripts/{sync-subagent-assets,validate-chain-agents,validate-agent-models}.sh, harness/tests/*.sh vs AC-5/AC-6/AC-15/AC-4",
+          "agent/agents/vision-*.md + security-reviewer.md model pins repointed vs AC-15/F9"
+        ],
+        "reasoning": "The report's §3 table maps every changed file to a specific audit proposal (AC-1..AC-22 and findings S1/S2/S5, F1/F3/F4/F8/F9/F10). I independently diffed base 4a96707→tip 62713f2: all 25 files in the diff appear in the report's §8 touch list and each has at least one §3 row (e.g., vision/security fallbacks row covers the 5 agent files). Spot-verification of the actual changed content (apply-patches.sh portability, herdr StringEnum import, resolution-order doc, new agent files referenced by chains, validator scripts, repointed model pins) confirms the changes implement what the map claims. No diff file is unmapped; planner/context-builder additions are grounded in AC-6 (chains reference them; package builtins removed upstream, documented in §2 drift)."
+      },
+      {
+        "criterion_id": "audit-plan-disposition",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "reports/pi-harness-execution/subagents-execute.md §4 — 22 disposition rows (AC-1..AC-22)",
+          "reports/pi-harness-execution/subagents-audit.md §5 — authoritative AC-1..AC-22 list (must-fix 5, should-fix 7, nice-to-have 7, execution-contract 3)",
+          "Dispositions: implemented (AC-1..9,12,14,15,16,18,20,22), blocked w/ evidence (AC-10,13,19,21), obsolete (AC-11), skipped as speculative (AC-17)",
+          "AC-18 retired per audit §2.6 alternative path (report cites §2.6; audit S6 shows no reproduction)"
+        ],
+        "reasoning": "I cross-checked the report's §4 disposition table against the full AC-1..AC-22 list in the paired audit §5: exactly 22 rows, covering every item with no omissions. All four required disposition categories appear: implemented, skipped as speculative (AC-17), obsolete on current host (AC-11), and blocked with evidence (AC-10 upstream temp-dir root, AC-13 single-async recovery descriptor, AC-19 schema fence, AC-21 deferred to outer harness per packet). Each disposition row cites concrete evidence (command outputs, file/line references, upstream-dependency reasons). AC-18's 'implemented (retired)' matches the audit's permitted alternative (formal retirement with pointer to §2.6). Dispositions that depend on live-host state (e.g., ~/.local/bin/pi hook at line 57, 17/19 host counts, worker≠reviewer pins) are self-reported but internally consistent with repo-side artifacts and the drift table."
+      },
+      {
+        "criterion_id": "pi-loads",
+        "judgment": "judged_pass",
+        "confidence": 0.75,
+        "evidence": [
+          "reports/pi-harness-execution/subagents-execute.md §6 verification log: '$ pi --version' → '0.84.1' with '# exit 0'",
+          "reports/pi-harness-execution/subagents-execute.md §5 table: 'pi-loads — pass — pi --version → 0.84.1 exit 0 (after changes)'",
+          "Local corroboration: /opt/homebrew/bin/pi --version → 0.84.1, exit 0"
+        ],
+        "reasoning": "The criterion asks that the report include output of pi --version (or equivalent load check) run after the changes, exiting 0. The report includes it verbatim in §6 with an explicit exit-0 annotation and asserts pass in §5 'after changes'. I corroborated the version and exit code in this environment (pi → 0.84.1, exit 0), consistent with the report's §2 drift row (pi 0.83.0→0.84.1). Residual uncertainty: the ordering claim ('run after the changes') and the executor's actual run are self-reported and the eval sandbox lacks the live ~/.pi/agent host state to replay the exact post-change run; the recorded output matches the live binary version, which is the strongest available corroboration."
+      },
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 1.0,
+        "evidence": [
+          "reports/pi-harness-execution/subagents-execute.md exists, 12,154 bytes, non-empty",
+          "File committed in tip commit 62713f2 (git show --stat: reports/pi-harness-execution/subagents-execute.md, 181 insertions)"
+        ],
+        "reasoning": "The required artifact exists at the exact path, is non-empty (12 KB, 8 sections, 22-row disposition table), and is included in the result commit. No ambiguity."
+      }
+    ],
+    "overall_reasoning": "All four acceptance criteria for node-02-subagents-execute are satisfied. The report (reports/pi-harness-execution/subagents-execute.md) exists and is non-empty; its §3 table maps every one of the 25 changed files in the diff to a specific audit proposal (verified against git diff 4a96707..62713f2 and spot-checked in the changed files themselves); its §4 table disposes all 22 acceptance-criteria items from the paired audit (subagents-audit.md §5) using the full disposition vocabulary (implemented / skipped as speculative / obsolete on current host / blocked with evidence); and its §6 verification log includes `pi --version` → 0.84.1 with exit 0, corroborated by the live binary in this environment. Intent preservation holds: all changes trace to audit ACs/findings (no unilateral improvements found), settings.json auth/credential content is untouched (no settings.json in the diff), and the work is committed on a gddp/result-...-node-02-subagents-execute result ref. Two caveats do not change the verdict: (1) several disposition/verification claims depend on live-host state (~/.pi/agent, ~/.local/bin/pi hook) that is self-reported and not replayable in this sandbox; (2) audit AC-21's strict proof (commit trailer `GDDP-Node-Id: node-02-subagents-execute`, gddp receipt, push to a specific ref) is disposed in the report as blocked/deferred to the outer harness per the packet, and the actual result commit 62713f2 lacks the trailer — this is a disposition with evidence, which satisfies the audit-plan-disposition criterion, but is flagged for human confirmation.",
+    "risks": "1) Live-host verification claims in the report (grep on ~/.local/bin/pi → line 57, marker count 2 in live completion-guard.ts, 17/19 host counts, worker≠reviewer settings pins) are self-reported; the eval sandbox has no ~/.pi/agent tree to replay them, so those dispositions rest on the report's internal consistency plus repo-side corroboration. 2) AC-21 disposition: the result commit exists (62713f2 on gddp/result-...-node-02-subagents-execute-attempt-0-0779b04f...), but its message is a wrapper 'result(...)' commit without the audit-required `GDDP-Node-Id: node-02-subagents-execute` trailer or a visible gddp receipt; the report defers this to the outer harness per the packet, which I cannot independently verify from the repo. 3) The two new harness tests (completion-guard-remote-mutation.sh, validate-chain-agents.sh) cannot execute green in this sandbox because the live pi-subagents package dir under ~/.pi/agent is absent (validate-chain-agents reports the builtin agents unknown); the report claims ok (24 known agents = 17 repo + 7 builtins, arithmetically consistent) on the live host — environmental, not a code defect, but not independently re-run here. 4) No obvious secrets/credentials in the diff; settings.json itself is untracked and untouched.",
+    "followup_candidates": "1) Human clarification on AC-21: the paired audit's AC-21 requires exactly one commit ending with trailer `GDDP-Node-Id: node-02-subagents-execute` plus a gddp receipt pushed to refs/heads/gddp/98c883d8b9144665b937446e918d695b; the report disposes it as 'blocked/deferred by packet' (no push to main), and the outer-harness result commit 62713f2 lacks the trailer. Is AC-21 satisfied by the outer harness wrapper commit, or does the node need a follow-up result commit with the trailer? 2) Host-side evidence: the ~/.pi/agent and ~/.local/bin/pi verification outputs (line 57 hook, marker count, 17/19 counts, settings pins) are recorded in the report but were not replayable in the eval sandbox; if live-host proof is required for the audit-plan-disposition criterion, an executor run log from the live host would close that gap. 3) Observed: repo-side validator scripts fail in a sandbox without the live pi-subagents install; this is consistent with the report's live-host claims but the tests were not counted as acceptance evidence per the criteria — worth confirming the harness test suite is intended to run only against a configured host.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-13T21:01:36.161Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Zj3LNzp0JAmBTzqvvfhY6246",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && ls -la && echo \"---\" && find . -maxdepth 3 -type d | head -50"
+        },
+        {
+          "ts": "2026-08-13T21:01:36.165Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_HFWsaCWuN9113LLllugd6314",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-13T21:01:36.166Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_lAaXZG3BAJe8tGOort6T9900",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y/README.md"
+        },
+        {
+          "ts": "2026-08-13T21:01:36.184Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_HFWsaCWuN9113LLllugd6314",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:01:36.185Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_lAaXZG3BAJe8tGOort6T9900",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:01:36.254Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Zj3LNzp0JAmBTzqvvfhY6246",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:01:39.258Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_aorTi6VMYk4IEAtUxHYg2444",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && ls -la reports/ && echo \"---\" && ls -la reports/pi-harness-execution/ 2>/dev/null && echo \"---\" && wc -c reports/pi-harness-execution/subagents-execute.md reports/pi-harness-execution/subagents-audit.md 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-13T21:01:39.259Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_e686UTZWX7OvJQgtU1q40824",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml"
+        },
+        {
+          "ts": "2026-08-13T21:01:39.259Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_7VjjupXPLHsr9Tw88W4B5020",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-execution/nodes/node-01-subagents-audit.yaml"
+        },
+        {
+          "ts": "2026-08-13T21:01:39.272Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_e686UTZWX7OvJQgtU1q40824",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:01:39.274Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_7VjjupXPLHsr9Tw88W4B5020",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:01:39.305Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_aorTi6VMYk4IEAtUxHYg2444",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:01:41.355Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_a6uBOKDjO0y0yVMHUkdC6198",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y/reports/pi-harness-execution/subagents-execute.md"
+        },
+        {
+          "ts": "2026-08-13T21:01:41.360Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_a6uBOKDjO0y0yVMHUkdC6198",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:01:44.098Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_4pnqy5sbJp8Y17gtiOgY1003",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && grep -n \"^#\" reports/pi-harness-execution/subagents-audit.md"
+        },
+        {
+          "ts": "2026-08-13T21:01:44.098Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_kwLfhamkryVAK90zGAxM4749",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && grep -n \"AC-[0-9]\" reports/pi-harness-execution/subagents-audit.md | head -80"
+        },
+        {
+          "ts": "2026-08-13T21:01:44.133Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_4pnqy5sbJp8Y17gtiOgY1003",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:01:44.134Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_kwLfhamkryVAK90zGAxM4749",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:01:47.082Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_JmAWzi0kWNl6BbPgZ0OP4625",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y/reports/pi-harness-execution/subagents-audit.md"
+        },
+        {
+          "ts": "2026-08-13T21:01:47.086Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_JmAWzi0kWNl6BbPgZ0OP4625",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:01:59.078Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ku0IQFuX2wCQhPgizhd83806",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && git log --oneline -15 2>/dev/null; echo \"---STATUS---\"; git status --short 2>/dev/null | head -30; echo \"---BRANCH---\"; git branch -a 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-13T21:01:59.080Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_cd13900j5UdmhjqKeZfy0186",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y/agent/patches/apply-patches.sh"
+        },
+        {
+          "ts": "2026-08-13T21:01:59.088Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_cd13900j5UdmhjqKeZfy0186",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:02:00.662Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ku0IQFuX2wCQhPgizhd83806",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:02:07.267Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_0F3uafKGjRJI64tmMLxw8380",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && git show --stat 62713f2 2>/dev/null | head -40; echo \"===TRAILER===\"; git log -1 --format='%B' 62713f2 2>/dev/null | tail -5; echo \"===DIFF vs base: files===\"; git diff --stat 4a96707 62713f2 2>/dev/null | tail -30"
+        },
+        {
+          "ts": "2026-08-13T21:02:07.267Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_qL9gHOxHwqBFhQWzw4ym9500",
+          "command": "which pi; pi --version 2>&1 | head -3; echo \"exit=$?\""
+        },
+        {
+          "ts": "2026-08-13T21:02:07.477Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_0F3uafKGjRJI64tmMLxw8380",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:02:09.143Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_qL9gHOxHwqBFhQWzw4ym9500",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:02:14.400Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_LPCjlvOvbjRZtTHQsfBs8325",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && sed -n '1,60p' agent/SUBAGENTS-MODEL-DISPATCH.md"
+        },
+        {
+          "ts": "2026-08-13T21:02:14.400Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_5iDYysD0SWT6BHAjfi1w8468",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && grep -n \"StringEnum\\|pi-ai\" agent/extensions/herdr-boss/index.ts agent/extensions/herdr-room/index.ts; echo \"===herdr diff===\"; git diff 4a96707 62713f2 -- agent/extensions/herdr-boss/index.ts agent/extensions/herdr-room/index.ts"
+        },
+        {
+          "ts": "2026-08-13T21:02:14.429Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_LPCjlvOvbjRZtTHQsfBs8325",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:02:14.464Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_5iDYysD0SWT6BHAjfi1w8468",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:02:18.047Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Aawln2WdFWUHn8zGtP1V8232",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && echo \"=== sync-subagent-assets.sh ===\"; cat agent/scripts/sync-subagent-assets.sh; echo; echo \"=== validate-chain-agents.sh ===\"; cat agent/scripts/validate-chain-agents.sh"
+        },
+        {
+          "ts": "2026-08-13T21:02:18.048Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_oq2FQDZRcOBYxok6R2ew2712",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && echo \"=== validate-agent-models.sh ===\"; cat agent/scripts/validate-agent-models.sh; echo; echo \"=== completion-guard-remote-mutation.sh ===\"; cat harness/tests/completion-guard-remote-mutation.sh; echo; echo \"=== harness validate-chain-agents.sh ===\"; cat harness/tests/validate-chain-agents.sh"
+        },
+        {
+          "ts": "2026-08-13T21:02:18.081Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Aawln2WdFWUHn8zGtP1V8232",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:02:18.086Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_oq2FQDZRcOBYxok6R2ew2712",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:02:22.795Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_2yqJnJQwJUuQ5If8mcrz5047",
+          "reason": "command matched blocked pattern",
+          "command": "ls -d ~/.pi/agent 2>/dev/null && echo \"HOST_AGENT exists\" ; ls ~/.pi/agent/npm/node_modules/pi-subagents/ 2>/dev/null | head; echo \"---\"; ls ~/.pi/agent/agents/*.md 2>/dev/null | wc -l; ls ~/.pi/agent/chains/*.chain.json 2>/dev/null | wc -l",
+          "pattern": "\\b(?:curl|wget|ssh|scp|sftp|rsync|nc|netcat|telnet|ftp|pip|npm|pnpm|yarn|brew)\\b"
+        },
+        {
+          "ts": "2026-08-13T21:02:22.796Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_2yqJnJQwJUuQ5If8mcrz5047",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-13T21:02:22.796Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_GFziJE6Lt0Jii9aC0vJR7180",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && head -20 agent/agents/planner.md; echo \"===\"; head -20 agent/agents/context-builder.md; echo \"===\"; head -20 agent/agents/budget-worker.md"
+        },
+        {
+          "ts": "2026-08-13T21:02:22.864Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_GFziJE6Lt0Jii9aC0vJR7180",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:02:29.624Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_BpIkn3OQ6VXPTTXZyM0L6935",
+          "command": "ls -d ~/.pi/agent 2>/dev/null; echo \"---\"; find ~/.pi/agent -maxdepth 4 -type d -name pi-subagents 2>/dev/null | head -3; echo \"---agents---\"; ls ~/.pi/agent/agents/ 2>/dev/null | wc -l; ls ~/.pi/agent/chains/ 2>/dev/null | wc -l"
+        },
+        {
+          "ts": "2026-08-13T21:02:29.676Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_BpIkn3OQ6VXPTTXZyM0L6935",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:02:37.712Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_pj13eebMkBUcpuTIU0dY6582",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && ls agent/patches/; echo \"---chains---\"; ls agent/chains/ | head -25; echo \"---chain refs---\"; for f in agent/chains/*.chain.json; do jq -r '.. | objects | select(has(\"agent\")) | .agent' \"$f\" 2>/dev/null; done | sort -u"
+        },
+        {
+          "ts": "2026-08-13T21:02:37.713Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_otk74uY8FDBTrBfyNxqT9338",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && bash agent/scripts/validate-chain-agents.sh; echo \"exit=$?\""
+        },
+        {
+          "ts": "2026-08-13T21:02:37.990Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_pj13eebMkBUcpuTIU0dY6582",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:02:38.256Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_otk74uY8FDBTrBfyNxqT9338",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:02:45.520Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_MXlglRk1axy4KAkoCgcY3053",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && ls agent/agents/ | wc -l; ls agent/agents/; echo \"===workflow grep===\"; grep -n \"watchdog\\|maxSubagentDepth\\|0.47\\|PI_SUBAGENT_MAX_DEPTH\\|off by default\\|disabled\" agent/reference/subagent-workflow.md | head -25"
+        },
+        {
+          "ts": "2026-08-13T21:02:45.520Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_KQ9BtqN6k1W1nfbSlSXi1385",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && git diff 4a96707 62713f2 -- agent/scripts/ensure-host-settings.py | head -100"
+        },
+        {
+          "ts": "2026-08-13T21:02:45.600Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_KQ9BtqN6k1W1nfbSlSXi1385",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:02:45.602Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_MXlglRk1axy4KAkoCgcY3053",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:02:50.903Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_6M3nXgGnbLrkSymNCQk92099",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && git diff 4a96707 62713f2 -- agent/agents/vision-glm.md agent/agents/vision-gemini-flash.md agent/agents/security-reviewer.md agent/agents/vision-grok.md"
+        },
+        {
+          "ts": "2026-08-13T21:02:50.904Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_QIAfCPXarGCgTo2lesrm0273",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && sed -n '140,200p' agent/reference/subagent-workflow.md; echo \"===patches README===\"; cat agent/patches/README.md"
+        },
+        {
+          "ts": "2026-08-13T21:02:50.935Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_QIAfCPXarGCgTo2lesrm0273",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:02:50.962Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_6M3nXgGnbLrkSymNCQk92099",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:03:08.841Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_AkT68FP8HL7ARUixI5nz3922",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && grep -n \"0\\.40\\|0\\.47\\|0\\.83\\|0\\.84\\|version\" agent/reference/subagent-workflow.md | head -15; echo \"===playbook===\"; ls agent/reference/subagent-playbook.md 2>/dev/null && head -8 agent/reference/subagent-playbook.md; echo \"===config depth===\"; jq -r '.maxSubagentDepth // \"not set\"' agent/extensions/subagent/config.json 2>/dev/null; jq -r '.subagents.maxSubagentDepth // \"not set\"' agent/extensions/subagent/config.json 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-13T21:03:08.842Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_rEC2ggUlj45mWRU6wMfQ6050",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && grep -n \"maxSubagentDepth\" agent/extensions/subagent/config.json 2>/dev/null; echo \"---settings.json in repo?---\"; ls agent/settings.json 2>/dev/null; git log --all --oneline -- agent/settings.json 2>/dev/null | head -3; echo \"---diff touches settings?---\"; git diff 4a96707 62713f2 --name-only | grep -i settings; echo \"(none above = not touched)\""
+        },
+        {
+          "ts": "2026-08-13T21:03:08.937Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_AkT68FP8HL7ARUixI5nz3922",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:03:08.987Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_rEC2ggUlj45mWRU6wMfQ6050",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:03:28.657Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_MrihnP2N4EUKNx9wjkOn1484",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && git status --short | head; echo \"status-clean=$?\"; git rev-parse gddp/result-job_20260813T20512648dc21685ecb7c-job_20260813T20512648dc21685ecb7c-node-02-subagents-execute-attempt-0-0779b04f33e24ab3b2080a935eece1ff 2>/dev/null; git rev-parse 62713f2; echo \"---result branch matches tip?\"; echo \"---secret scan on diff---\"; git diff 4a96707 62713f2 | grep -iE \"api[_-]?key|secret|token|password|BEGIN (RSA|OPENSSH|PRIVATE)|AKIA|sk-[A-Za-z0-9]{20}\" | head -5; echo \"(no output above = no obvious secrets)\""
+        },
+        {
+          "ts": "2026-08-13T21:03:28.658Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_0aONVYRQLHzKyfShbaLV9158",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && sed -n '1,55p' reports/pi-harness-execution/subagents-execute.md | head -60; echo \"===S6 in audit (AC-18 reference)===\"; sed -n '292,303p' reports/pi-harness-execution/subagents-audit.md"
+        },
+        {
+          "ts": "2026-08-13T21:03:28.740Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_0aONVYRQLHzKyfShbaLV9158",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:03:29.008Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_MrihnP2N4EUKNx9wjkOn1484",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:03:45.419Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_5mWm30m9PRzYVlemdiUI8762",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y && grep -rn \"run-completion-guard-test\" harness/ .github/ 2>/dev/null | grep -v graphify-out; echo \"---\"; grep -c \"AC-[0-9]*\" reports/pi-harness-execution/subagents-execute.md; echo \"---count disposition rows in §4---\"; awk '/## 4\\./,/## 5\\./' reports/pi-harness-execution/subagents-execute.md | grep -c \"| \\*\\*AC-\""
+        },
+        {
+          "ts": "2026-08-13T21:03:45.711Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_5mWm30m9PRzYVlemdiUI8762",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T21:04:10.334Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ritv348AqQ2aDtW98XS29439",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All four acceptance criteria for node-02-subagents-execute are satisfied. The report (reports/pi-harness-execution/subagents-execute.md) exists and is non-empty; its §3 table maps every one of the 25 changed files in the diff to a specific audit proposal (verified against git diff 4a96707..62713f2 and spot-checked in the changed files themselves); its §4 table disposes all 22 acceptance-criteria items from the paired audit (subagents-audit.md §5) using the full disposition vocabulary (implemented / skipped as speculative / obsolete on current host / blocked with evidence); and its §6 verification log includes `pi --version` → 0.84.1 with exit 0, corroborated by the live binary in this environment. Intent preservation holds: all changes trace to audit ACs/findings (no unilateral improvements found), settings.json auth/credential content is untouched (no settings.json in the diff), and the work is committed on a gddp/result-...-node-02-subagents-execute result ref. Two caveats do not change the verdict: (1) several disposition/verification claims depend on live-host state (~/.pi/agent, ~/.local/bin/pi hook) that is self-reported and not replayable in this sandbox; (2) audit AC-21's strict proof (commit trailer `GDDP-Node-Id: node-02-subagents-execute`, gddp receipt, push to a specific ref) is disposed in the report as blocked/deferred to the outer harness per the packet, and the actual result commit 62713f2 lacks the trailer — this is a disposition with evidence, which satisfies the audit-plan-disposition criterion, but is flagged for human confirmation.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-13T21:05:50.755171+00:00",
+  "evaluated_tree_sha": "e0dadb7ce03a26f06022e23bc178a051c7a3b922",
+  "evaluated_commit_sha": "62713f296b2a7b8c4187378421045cfd5c7cba83",
+  "merge_commit_sha": "62713f296b2a7b8c4187378421045cfd5c7cba83",
+  "expected_base_commit_sha": "4a967077f36eb0470cb1b19816de76a8e7ef9c70",
+  "pr_ref": null,
+  "job_id": "job_20260813T20512648dc21685ecb7c",
+  "execution_attempt_id": "job_20260813T20512648dc21685ecb7c:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml",
+    "neighbor:node-01-subagents-audit": "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-execution/nodes/node-01-subagents-audit.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 4,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-execution/nodes/node-01-subagents-audit.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "low",
+      "offered": 4,
+      "content_accessed": 2,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-execution/nodes/node-01-subagents-audit.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml"
+      ],
+      "not_observed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-wqlzk_4y/README.md"
+      ]
+    },
+    "overall": "low"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-13T21:01:30.261488+00:00",
+    "finished_at": "2026-08-13T21:05:50.755093+00:00",
+    "wall_s": 260.49,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 160.093,
+      "tool_calls": 32
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 100.326,
+      "tool_calls": 21
+    }
+  }
+}

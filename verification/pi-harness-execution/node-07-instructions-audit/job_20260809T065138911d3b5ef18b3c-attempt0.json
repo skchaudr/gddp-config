@@ -1,0 +1,753 @@
+{
+  "project_id": "pi-harness-execution",
+  "node_id": "node-07-instructions-audit",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.88,
+    "findings": [
+      {
+        "severity": "low",
+        "summary": "Several evidence citations carry imprecise line numbers: the 'always-loaded prompt surface' claim is cited as agent/AGENTS.md:96 (actual 'Reference loading' text at 119-120) and agent/MEMORY.md:23 (actual at line 15); SUBAGENTS-MODEL-DISPATCH.md:7-10 (landmine text actually at 4-6); MEMORY.md:9-11 (actual 8-10). Quoted text is verbatim accurate so grep will locate it, but node-08-instructions-execute consumes AC-4 which embeds the AGENTS.md:96 / MEMORY.md:23 references and should locate the text by content, not line number.",
+        "affected_node_ids": [
+          "node-07-instructions-audit",
+          "node-08-instructions-execute"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "F-16 cites library/host-pi-layout.md (written during node-01) which is not present in the repo checkout — it may be host-only (~/.pi). The finding is marked 'Info (resolved)' and does not affect the audit's substance, but the pointer is unverifiable from the repo.",
+        "affected_node_ids": [
+          "node-07-instructions-audit"
+        ]
+      }
+    ],
+    "reasoning": "The work under review fully preserves node-07-instructions-audit's intended role. The report audits every surface named in the node's why (identity files, memory system, daily memory, skills, hook/steering, model tiers, spawn-vs-subagent, fleet discipline, notification hygiene, turn budget) and directly answers the CRITICAL deployment-context question with an evidence-backed 'what IS vs what is NOT injected' analysis tracing the resource-loader's candidate list (AGENTS.md/CLAUDE.md only) and the false 'always-loaded' documentation. External research is real and dated (Anthropic, Claude Code docs, arxiv, Lawson), not vibe suggestions. The report concludes with 12 actionable, verifiable acceptance criteria that map cleanly to node-08-instructions-execute's constraints (proposal-only implementation, no unilateral changes), preserving the audit->execute unlock chain. Graph integrity holds: the commit adds exactly one file (read-only constraint respected), sibling reports landed via their own commits per the five-independent-pairs architecture, and the report cross-references sibling audit findings consistently. Spot-checks of repo-side evidence (auto-mode.json failOpen, cwd-guard GUARD_ROOT, subagent config budgets, agent-guardrails systemPrompt append, AGENTS.md:5, code-scout front-matter) all verify. Only low-severity imprecision (line-number offsets in a few citations, one host-only pointer) noted — insufficient to alter the verdict; lane 1 owns evidence-criterion adjudication. Confidence 0.88 because host-path evidence (~/.pi/agent, /usr/lib/node_modules) cannot be re-verified from this checkout, though it is internally consistent and corroborated by sibling audits.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-09T08:11:55.123Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_m5iZE4dM5tEz7KtkOpBK6425",
+        "command": "pwd && ls -la && echo \"---\" && ls -la /home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-09T08:11:55.124Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_eIBCO7rVqS64aklVUVhP4358",
+        "path": "/tmp/gddp-eval-wt-87b00scr/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-09T08:11:55.138Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_eIBCO7rVqS64aklVUVhP4358",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:55.147Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_m5iZE4dM5tEz7KtkOpBK6425",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:57.966Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_2tN9w3LwJg3yn6l9kcQT6215",
+        "path": "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-07-instructions-audit.yaml"
+      },
+      {
+        "ts": "2026-08-09T08:11:57.967Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_jisVaoqjNBix5scqwodl2990",
+        "path": "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-08-instructions-execute.yaml"
+      },
+      {
+        "ts": "2026-08-09T08:11:57.968Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_bAkmLuOx4nEBVwe7vT0y5771",
+        "command": "ls -la /tmp/gddp-eval-wt-87b00scr/reports/pi-harness-execution/ 2>/dev/null; echo \"---\"; ls -la /tmp/gddp-eval-wt-87b00scr/reports/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-09T08:11:57.974Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_jisVaoqjNBix5scqwodl2990",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:57.974Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_2tN9w3LwJg3yn6l9kcQT6215",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:57.980Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_bAkmLuOx4nEBVwe7vT0y5771",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:12:02.251Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_PPyeswywNfzLF4vRJkkf0864",
+        "path": "/tmp/gddp-eval-wt-87b00scr/reports/pi-harness-execution/instructions-audit.md"
+      },
+      {
+        "ts": "2026-08-09T08:12:02.253Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_PPyeswywNfzLF4vRJkkf0864",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:12:11.427Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_OyQbdqFvlhGQ0wDYvFNx4136",
+        "command": "cd /tmp/gddp-eval-wt-87b00scr && git log --oneline -5 2>/dev/null; echo \"---STATUS---\"; git status --short 2>/dev/null | head -30; echo \"---REMOTE---\"; git remote -v 2>/dev/null | head -5"
+      },
+      {
+        "ts": "2026-08-09T08:12:11.427Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_FgxLdCrkz4LhcdAsfJWg4018",
+        "command": "cd /tmp/gddp-eval-wt-87b00scr && sed -n '90,100p' agent/AGENTS.md 2>/dev/null; echo \"===MEMORY.md 18-28===\"; sed -n '18,28p' agent/MEMORY.md 2>/dev/null; echo \"===daily-memory.ts 18-28===\"; sed -n '18,28p' agent/extensions/daily-memory.ts 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-09T08:12:11.454Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_FgxLdCrkz4LhcdAsfJWg4018",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:12:11.455Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_OyQbdqFvlhGQ0wDYvFNx4136",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:12:17.977Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_PLfOiaM6TtCUbosqF54g9382",
+        "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== commit 53daced files ===\"; git show --stat --format='%h %s' 53daced | head -20; echo; echo \"=== AGENTS.md line 96 ===\"; sed -n '94,98p' agent/AGENTS.md; echo \"=== MEMORY.md line 23 ===\"; sed -n '21,25p' agent/MEMORY.md"
+      },
+      {
+        "ts": "2026-08-09T08:12:17.978Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_uGkOmg4Hcx6cJqkNuFMp9476",
+        "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== diff of node-07 commit (harness files touched?) ===\"; git show --name-status --format='' 53daced; echo \"=== check other report commits touch only reports ===\"; git show --name-status --format='' d0b119b; git show --name-status --format='' df2932c; git show --name-status --format='' b6684c7"
+      },
+      {
+        "ts": "2026-08-09T08:12:17.995Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_PLfOiaM6TtCUbosqF54g9382",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:12:18.002Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_uGkOmg4Hcx6cJqkNuFMp9476",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:12:22.551Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_AZDiYB89V8V03G7xlqPJ8814",
+        "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== search 'Reference loading' ===\"; grep -n \"Reference loading\" agent/AGENTS.md; echo \"=== search 'Always-loaded' ===\"; grep -rn \"Always-loaded\\|always loaded\\|Always: SOUL\" agent/MEMORY.md agent/AGENTS.md 2>/dev/null; echo \"=== search 'SOUL.md, USER.md, AGENTS.md, MEMORY.md' ===\"; grep -rn \"SOUL.md, USER.md, AGENTS.md, MEMORY.md\" agent/ | head"
+      },
+      {
+        "ts": "2026-08-09T08:12:22.552Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ZlLvUaTlv1heUlOJ03pv0851",
+        "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== AGENTS.md total lines ===\"; wc -l agent/AGENTS.md agent/MEMORY.md; echo \"=== AGENTS.md around line 96 (from grep) ===\"; grep -n \"SOUL.md\" agent/AGENTS.md | head; echo \"=== MEMORY.md line numbers for SOUL/USER ===\"; grep -n \"SOUL.md\\|USER.md\\|AGENTS.md, MEMORY.md\" agent/MEMORY.md | head -20"
+      },
+      {
+        "ts": "2026-08-09T08:12:22.575Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ZlLvUaTlv1heUlOJ03pv0851",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:12:22.615Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_AZDiYB89V8V03G7xlqPJ8814",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:12:35.527Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_d437tWjz6ycnlJzdD50W4387",
+        "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== MEMORY.md lines 8-12, 30-34, 44-48, 54-58, 87-93, 95-106 ===\"; sed -n '8,12p;30,34p;44,48p;54,58p;87,93p;95,106p' agent/MEMORY.md"
+      },
+      {
+        "ts": "2026-08-09T08:12:35.527Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_zESUbOMFum6kvOeVduNs4380",
+        "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== SUBAGENTS-MODEL-DISPATCH.md ===\"; sed -n '1,20p' agent/SUBAGENTS-MODEL-DISPATCH.md; echo \"=== code-scout-gemini.md 14-20 ===\"; sed -n '14,20p' agent/agents/code-scout-gemini.md"
+      },
+      {
+        "ts": "2026-08-09T08:12:35.539Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_d437tWjz6ycnlJzdD50W4387",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:12:35.544Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_zESUbOMFum6kvOeVduNs4380",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:13:03.025Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Dqf8IHJAQ20DcUtnB0Fs4280",
+        "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== F-16 host-pi-layout.md (node-01 cross-ref) ===\"; ls library/host-pi-layout.md 2>/dev/null && grep -n \"defaultModel\\|defaultProvider\" library/host-pi-layout.md | head -5; echo \"=== auto-mode.json (SF-2) ===\"; sed -n '1,5p' agent/auto-mode.json 2>/dev/null; echo \"=== cwd-guard (SF-3) ===\"; sed -n '20,27p' agent/extensions/cwd-guard.ts 2>/dev/null; echo \"=== subagent config (F-9) ===\"; sed -n '5,10p' agent/extensions/subagent/config.json 2>/dev/null; echo \"=== guardrails systemPrompt append (F-14) ===\"; grep -n \"before_agent_start\\|systemPrompt\" agent/extensions/agent-guardrails.ts | head -8"
+      },
+      {
+        "ts": "2026-08-09T08:13:03.044Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Dqf8IHJAQ20DcUtnB0Fs4280",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:13:05.576Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_30DDSivgfz7URaUwXsYK2418",
+        "command": "cd /tmp/gddp-eval-wt-87b00scr && find . -name \"host-pi-layout*\" 2>/dev/null; echo \"---\"; ls library 2>/dev/null | head; echo \"--- repo gitignore for reports? ---\"; git check-ignore reports/pi-harness-execution/instructions-audit.md; echo \"exit=$?\""
+      },
+      {
+        "ts": "2026-08-09T08:13:05.596Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_30DDSivgfz7URaUwXsYK2418",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:13:23.953Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_8PA00ynTieGltLu6kiAw3766",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "node-09-portfolio-audit is status 'ready' in the graph but reports/pi-harness-execution/portfolio-audit.md does not exist anywhere in this commit range (only subagents-, tui-, extensions-, instructions-audit.md landed). Before node-10-portfolio-execute fires, node-09's required artifact must be committed; otherwise the fifth pair stalls or advances without its report.",
+        "affected_node_ids": [
+          "node-09-portfolio-audit",
+          "node-10-portfolio-execute"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "node-08-instructions-execute is the convergence point for a dense proposal set (12 ACs spanning loader behavior, deployment sync, model dispatch, budget visibility, and documentation truthfulness). Its human_gate: true is well-placed; recommend the human review verify the ACs that modify host state (~/.pi/agent files, settings.json agentOverrides) stay within the 'no unilateral improvements' constraint and the settings.json auth prohibition.",
+        "affected_node_ids": [
+          "node-08-instructions-execute"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.8766666666666666,
+  "criteria_confidence": 0.8766666666666666,
+  "completeness": 1.0,
+  "graph_readiness": 0.8766666666666666,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "report-exists",
+        "criterion": "reports/pi-harness-execution/instructions-audit.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "instructions\\-audit -> line 3: 'instructions-audit'"
+        ],
+        "reasoning": "Scanned source files (reports/pi-harness-execution/instructions-audit.md) for identifiers named in the criterion (pi-harness-execution, instructions-audit, non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "evidence-cited",
+        "criterion": "every finding cites a file:line or command output from the live harness",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "acceptance-criteria-included",
+        "criterion": "report concludes with actionable acceptance criteria for node-08-instructions-execute",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (node-08-instructions-execute). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Read-only: do not modify the harness; the only new file is the report under reports/pi-harness-execution/",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Verify every claim against the live checkout before writing it",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node's result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/pi-harness-execution/instructions-audit.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "df4642ec1e4661a333b660fa05643792f43799d6",
+      "tip": "53dacedbf58dff3eafa94d257416f12c9c352244",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/pi-harness-execution/extensions-audit.md"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-harness-execution/instructions-audit.md"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-harness-execution/subagents-audit.md"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-harness-execution/tui-audit.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 4,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "reports/pi-harness-execution/instructions-audit.md exists: 37,254 bytes, 387 lines",
+          "git show --stat 53daced: 'reports/pi-harness-execution/instructions-audit.md | 387 +++++++++++++'",
+          "report header: 'GDDP Node: node-07-instructions-audit', date 2026-08-09, BASE SHA d0b119b (parent of this node's commit 53daced)"
+        ],
+        "reasoning": "The required artifact exists, is substantial (37KB, ~387 lines), and is committed as the only file in this node's commit 53daced ('docs(gddp): audit agent instructions, memory, and deployment context injection'). The deterministic keyword-scan marked this indeterminate only because it could not confirm non-emptiness; direct inspection confirms a full report. Criterion satisfied."
+      },
+      {
+        "criterion_id": "evidence-cited",
+        "judgment": "judged_pass",
+        "confidence": 0.7,
+        "evidence": [
+          "All 3 seed findings (SF-1..3) and all 16 findings (F-1..16) contain an 'Evidence:' block with file:line citations and/or shell-command outputs with EXIT codes",
+          "Verified exact: /usr/lib/node_modules/@earendil-works/pi-coding-agent/dist/core/resource-loader.js:32 candidates=['AGENTS.md','AGENTS.MD','CLAUDE.md','CLAUDE.MD']; :82-107 loadProjectContextFiles (agentDir first, cwd-ancestor walk); :380-384 systemPromptSource; :808-816 discoverSystemPromptFile (.pi/SYSTEM.md then ~/.pi/agent/SYSTEM.md); :818-828 discoverAppendSystemPromptFile",
+          "Verified exact: agent/MEMORY.md lines 9-11, 23-24, 32, 46, 56, 89-92, 97, 101, 105, 106; agent/AGENTS.md lines 5, 31-34, 38-39, 41-46, 59-61; agent/auto-mode.json:2-3 ('enabled':false,'failOpen':true); agent/extensions/subagent/config.json:8 (maxSubagentSpawnsPerSession:40); root AGENTS.md:51-59 (dispatch-vs-spawn, Intercom); rg 'SOUL|USER\\.md|MEMORY\\.md' agent/extensions/*.ts -> 0 matches; agent/SOUL.md = 967 bytes; agent/agents/ = 10 files; subagents-runbook.md absent",
+          "Drift found: agent/AGENTS.md:96 cited for 'Reference loading' (actual line 119-120); agent/AGENTS.md:75-80 cited for memory protocol (actual 63-71); root AGENTS.md:88-94 cited for /skill: commands (actual 120-124); root AGENTS.md:103-107 cited for Obsidian protocol (actual 134-137); harness-state.ts:42-47/74-80 cited (actual readGuardLine ~33-37, injection ~105-128); daily-memory.ts:22-23 (actual 27-28); atuin.ts:34 (actual 29-33); MEMORY.md:23 for 'always-loaded prompt surface' (actual line 15); USER.md size 2662 vs actual 3756 bytes; code-scout-gemini.md:17/18 swapped"
+        ],
+        "reasoning": "Every finding cites file:line references and/or command outputs from the live harness — the citation form required by the criterion is present universally, and the cited content exists in the cited files. The most load-bearing evidence cluster (the resource-loader.js injection pipeline that underpins the report's central F-1 finding) verifies exactly against the installed harness on this machine, and MEMORY.md/AGENTS.md citations are predominantly exact. However, roughly 8-10 of ~45 spot-checked repo-file line references drift (a few by ~30 lines), and one byte-count claim is wrong. These are evidence-quality imprecisions, not fabrication, but they mean I cannot certify every citation as line-exact; hence medium confidence. Host-state claims (settings.json, ~/.pi/agent inventory, daily-memory staleness, Obsidian paths, `which atuin`) are unverifiable from this sandboxed HOME but are formatted as live command outputs and cross-referenced to sibling node-05 findings."
+      },
+      {
+        "criterion_id": "acceptance-criteria-included",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "Report final section at line 374: '## Acceptance Criteria for node-08-instructions-execute' (last heading; file ends with AC-12)",
+          "12 actionable ACs (AC-1..AC-12), each with concrete action plus verification step (e.g., AC-1: create SYSTEM.md/APPEND_SYSTEM.md, verify via pi --print-system-prompt; AC-3: cp/diff verification; AC-7: inject turn/subagent budget into harness-state.ts)",
+          "AC-4 and AC-5 reference specific fix locations (agent/AGENTS.md, agent/MEMORY.md, SUBAGENTS-MODEL-DISPATCH.md) and expected outcomes"
+        ],
+        "reasoning": "The report concludes with an explicit, dedicated acceptance-criteria section for node-08-instructions-execute. Each of the 12 criteria is actionable (specific files/commands) and verifiable, and they map directly to the report's findings (F-1 -> AC-1/AC-4, F-2 -> AC-2, F-3/F-4/F-5 -> AC-3, F-8 -> AC-5, SF-1/F-12 -> AC-6, F-9 -> AC-7, F-7 -> AC-8, F-11 -> AC-9, F-10 -> AC-10/AC-11, plus a budget-audit AC-12). The deterministic keyword scan reported 'no hit' only because it scanned source files rather than the report; direct inspection confirms the section. Criterion satisfied."
+      }
+    ],
+    "overall_reasoning": "Node-07-instructions-audit delivers a substantive, well-structured audit report that satisfies all three acceptance criteria. (1) report-exists: the 37KB file is present and committed as the sole file in this node's commit 53daced. (2) evidence-cited: every one of the 19 findings carries a file:line or command-output citation; the report's central claim — that the Pi resource-loader injects only AGENTS.md/CLAUDE.md and never SOUL.md/USER.md/MEMORY.md, contradicting the 'always-loaded prompt surface' documentation — was verified line-exact against the actual installed resource-loader.js on this machine, and MEMORY.md/AGENTS.md citations are predominantly exact. Caveat: ~8-10 repo-file line references drift (several by ~30 lines) and one byte-count claim is wrong; content exists in the cited files so this is imprecision rather than fabrication, but it bears on the 'verify every claim against the live checkout' constraint and warrants human spot-checking. (3) acceptance-criteria-included: the report ends with 12 actionable, verification-equipped ACs explicitly addressed to node-08-instructions-execute, mapped 1:1 to the findings. Constraints: the commit is read-only w.r.t. the harness (only the report file added); report's BASE SHA (d0b119b) is the parent commit, consistent with the executor contract. Overall the node's work is credible and complete; the only substantive open question is how strictly line-accuracy should be treated under the evidence-cited criterion.",
+    "risks": "1) Citation line drift: several repo-file line refs are off (agent/AGENTS.md:96 -> actual 119-120; agent/AGENTS.md:75-80 -> actual 63-71; root AGENTS.md:88-94 -> actual 120-124; root AGENTS.md:103-107 -> actual 134-137; harness-state.ts:42-47 and 74-80 -> actual ~33-37 and ~105-128; daily-memory.ts:22-23 -> actual 27-28; atuin.ts:34 -> actual 29-33; MEMORY.md:23 'always-loaded' -> actual line 15; USER.md size 2662 vs actual 3756 bytes; code-scout-gemini.md:17/18 swapped). All cited content exists in the cited files, and the load-bearing host-package citations (resource-loader.js) are exact, so this is quality erosion, not fabrication — but a strict reading of 'cites a file:line' could treat inaccurate line refs as invalid citations. 2) Host-state evidence (settings.json contents, ~/.pi/agent inventory, daily-memory staleness, Obsidian path absence, atuin absence, EXIT codes) cannot be verified from this sandbox (HOME is sandboxed, no ~/.pi). Plausible and internally consistent (cross-referenced to node-05 findings), but unverifiable here. 3) F-8's claim that agentOverrides pins all 6 subagents to xai/grok-4.5 depends on host ~/.pi/agent/settings.json, not visible in this checkout (agent/host-settings.desired.json exists but is a desired-state file). 4) The 4-file subject diff (base df4642e -> tip 53daced) includes sibling audit reports from node-01/03/05 commits in the same range; node-07's own commit adds only instructions-audit.md, so the read-only/one-file constraint is satisfied for this node — the cumulative diff should not be misread as this node modifying harness files.",
+    "followup_candidates": "1) Human clarification on evidence-cited strictness: several repo-file line citations drift from actual positions (AGENTS.md:96->119, root AGENTS.md:88-94->120-124 and 103-107->134-137, harness-state.ts:74-80->~105-128, daily-memory.ts:22-23->27-28, MEMORY.md:23->15 for the 'always-loaded' quote), while the critical host-package citations (resource-loader.js) are exact. If the criterion requires every file:line to be line-exact, this node fails evidence-cited; if it requires findings to be backed by verifiable citations to the live harness (which holds here), it passes. Which reading is intended? 2) Host-state claims (settings.json agentOverrides, daily-memory last entry 2026-08-03, Obsidian path absence, `which atuin` not found, enableSkillCommands:false) are unverifiable from this sandbox. Confirm the executor performed the audit against the live host (~/.pi, /usr/lib/node_modules/@earendil-works/pi-coding-agent) per the node's constraints before treating F-2/F-8/F-11/F-12/F-13 as confirmed. 3) Observed: report repeatedly defers to sibling node-05 findings ('Confirmed by node-05 F-8/F-3/F-4/F-6, SF-1/F-1') for seed findings and moshi-hooks/herdr claims. This is consistent with the parallel audit-pair design but means part of node-07's evidence is inherited rather than independently re-verified — confirm that is acceptable for this node. 4) Observed: USER.md byte-count claim (2662) does not match the checkout (3756 bytes) — minor factual slip; consider whether any other byte/size claims (e.g., 'host AGENTS.md 91 lines', 'host MEMORY.md 83 lines') need host-side re-verification.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-09T08:08:52.818Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_BC5JzTiweK06r52J29na1612",
+          "command": "cd /tmp/gddp-eval-wt-87b00scr && ls -la && echo \"---\" && ls -la reports/pi-harness-execution/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-09T08:08:52.819Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_38OGRsAV2lG5SKwfAHfJ6190",
+          "path": "/tmp/gddp-eval-wt-87b00scr/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-09T08:08:52.832Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_38OGRsAV2lG5SKwfAHfJ6190",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:08:52.838Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_BC5JzTiweK06r52J29na1612",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:08:54.364Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_XliORT0mvIHWK190eu4Z2370",
+          "path": "/tmp/gddp-eval-wt-87b00scr/reports/pi-harness-execution/instructions-audit.md"
+        },
+        {
+          "ts": "2026-08-09T08:08:54.367Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_XliORT0mvIHWK190eu4Z2370",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:11.373Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_8bp2o28S1S8qirDUG1F88761",
+          "command": "cd /tmp/gddp-eval-wt-87b00scr && cat .git && echo \"---\" && git log --oneline -15 2>/dev/null && echo \"---\" && git status --short 2>/dev/null | head -20 && echo \"---\" && git rev-parse HEAD 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-09T08:09:11.373Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_6uiquJjNczFJI8XzRaOG9191",
+          "command": "cd /tmp/gddp-eval-wt-87b00scr && wc -c reports/pi-harness-execution/instructions-audit.md && echo \"---\" && ls -la agent/USER.md agent/MEMORY.md agent/AGENTS.md agent/auto-mode.json 2>/dev/null && echo \"---\" && ls agent/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-09T08:09:11.392Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_6uiquJjNczFJI8XzRaOG9191",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:11.402Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_8bp2o28S1S8qirDUG1F88761",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:18.946Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_MZSi2QM7mk8Z1rPOn8nq8494",
+          "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== commit 53daced files ===\" && git show --stat --oneline 53daced | head -10 && echo && echo \"=== daily-memory.ts:20-26 ===\" && sed -n '20,26p' agent/extensions/daily-memory.ts && echo \"=== auto-mode.json:1-5 ===\" && sed -n '1,5p' agent/auto-mode.json && echo \"=== cwd-guard.ts:22-27 ===\" && sed -n '22,27p' agent/extensions/cwd-guard.ts"
+        },
+        {
+          "ts": "2026-08-09T08:09:18.946Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_nBBBZYTu6SaYPTrowKDd3695",
+          "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== AGENTS.md:94-98 (claim at :96) ===\" && sed -n '94,98p' agent/AGENTS.md && echo \"=== MEMORY.md:21-25 (claim at :23) ===\" && sed -n '21,25p' agent/MEMORY.md && echo \"=== code-scout-gemini.md:15-20 ===\" && sed -n '15,20p' agent/agents/code-scout-gemini.md && echo \"=== subagent/config.json ===\" && cat agent/extensions/subagent/config.json"
+        },
+        {
+          "ts": "2026-08-09T08:09:18.966Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_MZSi2QM7mk8Z1rPOn8nq8494",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:18.966Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_nBBBZYTu6SaYPTrowKDd3695",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:28.638Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_tkC3JE8a6s5GGtW7mrtJ7937",
+          "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== grep Reference loading in agent/AGENTS.md ===\" && grep -n \"Reference loading\\|SOUL.md\\|USER.md\\|MEMORY.md\" agent/AGENTS.md | head -20 && echo && echo \"=== grep prompt surface / always in agent/MEMORY.md ===\" && grep -n \"Always\\|prompt surface\\|SOUL\\|USER\" agent/MEMORY.md | head -20 && echo && echo \"=== grep in root AGENTS.md ===\" && grep -n \"Obsidian\\|memory_space\\|daily_memory\\|skill:\" AGENTS.md | head -20"
+        },
+        {
+          "ts": "2026-08-09T08:09:28.639Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_fRJgHKpPnjrIOz44pfqC3171",
+          "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== daily-memory.ts: script join ===\" && grep -n \"pi-daily-memory.py\\|existsSync\" agent/extensions/daily-memory.ts && echo \"=== atuin.ts:34 ===\" && grep -n \"atuin\" agent/extensions/atuin.ts | head -5 && echo \"=== harness-state.ts ===\" && grep -n \"readGuardLine\\|inactive\\|guardLine\\|steeringLine\" agent/extensions/harness-state.ts | head -15 && echo \"=== identity-anchor.ts ===\" && sed -n '8,16p' agent/extensions/identity-anchor.ts && echo \"=== agent-guardrails.ts ===\" && sed -n '30,45p' agent/extensions/agent-guardrails.ts && echo \"=== moshi-hooks.ts:105-112 ===\" && sed -n '105,112p' agent/extensions/moshi-hooks.ts"
+        },
+        {
+          "ts": "2026-08-09T08:09:28.660Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_tkC3JE8a6s5GGtW7mrtJ7937",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:28.668Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_fRJgHKpPnjrIOz44pfqC3171",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:48.682Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_PvHml3HKKTphZKczw2eG0862",
+          "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== agent/AGENTS.md:96 ===\" && sed -n '96p' agent/AGENTS.md && echo \"=== agent/AGENTS.md:119-120 ===\" && sed -n '119,120p' agent/AGENTS.md && echo \"=== agent/AGENTS.md:31-34 ===\" && sed -n '31,34p' agent/AGENTS.md && echo \"=== agent/AGENTS.md:38-39 ===\" && sed -n '38,39p' agent/AGENTS.md && echo \"=== agent/AGENTS.md:41-46 ===\" && sed -n '41,46p' agent/AGENTS.md && echo \"=== agent/AGENTS.md:59-61 ===\" && sed -n '59,61p' agent/AGENTS.md && echo \"=== agent/AGENTS.md:75-80 ===\" && sed -n '75,80p' agent/AGENTS.md"
+        },
+        {
+          "ts": "2026-08-09T08:09:48.683Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_phVrUTMs0KBWRGDdnn6F9448",
+          "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== MEMORY.md lines: 9-11,23,32,46-47,56,89-92,97,101,105,106 ===\" && for n in 9 10 11 23 32 46 47 56 89 90 91 92 97 101 105 106; do echo \"--- line $n:\"; sed -n \"${n}p\" agent/MEMORY.md; done"
+        },
+        {
+          "ts": "2026-08-09T08:09:48.706Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_PvHml3HKKTphZKczw2eG0862",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:48.730Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_phVrUTMs0KBWRGDdnn6F9448",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:10:06.925Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_yWQwNDvh7sQYQ4brXXIk7688",
+          "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== wc agent/AGENTS.md, MEMORY.md ===\" && wc -l agent/AGENTS.md agent/MEMORY.md && echo \"=== AGENTS.md:75-80 ===\" && sed -n '75,80p' agent/AGENTS.md && echo \"=== AGENTS.md:62-72 ===\" && sed -n '62,72p' agent/AGENTS.md && echo \"=== root AGENTS.md:51-59 ===\" && sed -n '51,59p' AGENTS.md && echo \"=== root AGENTS.md:88-94 ===\" && sed -n '88,94p' AGENTS.md && echo \"=== root AGENTS.md:103-107 ===\" && sed -n '103,107p' AGENTS.md"
+        },
+        {
+          "ts": "2026-08-09T08:10:06.925Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_4khX2ycskK8YbvUmNJMY2116",
+          "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== harness-state.ts:40-50 ===\" && sed -n '40,50p' agent/extensions/harness-state.ts && echo \"=== harness-state.ts:72-82 ===\" && sed -n '72,82p' agent/extensions/harness-state.ts && echo \"=== daily-memory.ts:25-32 ===\" && sed -n '25,32p' agent/extensions/daily-memory.ts && echo \"=== atuin.ts:28-36 ===\" && sed -n '28,36p' agent/extensions/atuin.ts && echo \"=== herdr-room/index.ts:1-14 ===\" && sed -n '1,14p' herdr-room/index.ts 2>/dev/null; echo \"=== herdr-boss/index.ts:1-16 ===\" && sed -n '1,16p' herdr-boss/index.ts 2>/dev/null; ls herdr-room herdr-boss 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-09T08:10:06.945Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_yWQwNDvh7sQYQ4brXXIk7688",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:10:06.954Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_4khX2ycskK8YbvUmNJMY2116",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-09T08:10:35.813Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_jOyVSvgyN7IbZFgrvSSg5277",
+          "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== rg SOUL/USER/MEMORY in extensions ===\" && (rg -n 'SOUL|USER\\.md|MEMORY\\.md' agent/extensions/*.ts 2>&1 | head -5; echo \"exit: $?\") && echo \"=== find herdr ===\" && (find . -iname '*herdr*' -not -path './.git/*' 2>/dev/null | head; echo \"exit: $?\") && echo \"=== SUBAGENTS-MODEL-DISPATCH.md ===\" && sed -n '1,16p' agent/SUBAGENTS-MODEL-DISPATCH.md && echo \"=== agents dir count ===\" && ls agent/agents/ && echo \"=== subagents-runbook.md search ===\" && (find . -iname '*subagents-runbook*' 2>/dev/null | head -3; echo \"exit: $?\")"
+        },
+        {
+          "ts": "2026-08-09T08:10:35.813Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_B9DbhgEUtPZz4M90mFG81966",
+          "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== SOUL.md bytes ===\" && wc -c agent/SOUL.md && echo \"=== USER.md bytes ===\" && wc -c agent/USER.md && echo \"=== root AGENTS.md skill lines ===\" && grep -n \"skill:\" AGENTS.md | head && echo \"=== root AGENTS.md line 120-124 ===\" && sed -n '120,124p' AGENTS.md && echo \"=== git log agent/AGENTS.md ===\" && git log --oneline -5 -- agent/AGENTS.md && echo \"=== git log AGENTS.md ===\" && git log --oneline -5 -- AGENTS.md && echo \"=== git log agent/MEMORY.md ===\" && git log --oneline -5 -- agent/MEMORY.md"
+        },
+        {
+          "ts": "2026-08-09T08:10:35.857Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_B9DbhgEUtPZz4M90mFG81966",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:10:35.923Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_jOyVSvgyN7IbZFgrvSSg5277",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:10:59.616Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ULLhS1t89k5qwR8dZUrI7592",
+          "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== ~/.pi ===\" && ls ~/.pi/agent/ 2>&1 | head -3; echo \"=== /usr/lib/node_modules/@earendil-works ===\" && ls /usr/lib/node_modules/@earendil-works/ 2>&1 | head -3; echo \"=== HOME ===\" && echo $HOME"
+        },
+        {
+          "ts": "2026-08-09T08:10:59.616Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_lyqyNfZzOa9PJfBolSdi6693",
+          "command": "cd /tmp/gddp-eval-wt-87b00scr && echo \"=== last 12 lines of report ===\" && tail -12 reports/pi-harness-execution/instructions-audit.md && echo \"=== heading grep ===\" && grep -n \"^## \\|^# \" reports/pi-harness-execution/instructions-audit.md && echo \"=== AC count ===\" && grep -c \"AC-\" reports/pi-harness-execution/instructions-audit.md"
+        },
+        {
+          "ts": "2026-08-09T08:10:59.644Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ULLhS1t89k5qwR8dZUrI7592",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:10:59.646Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_lyqyNfZzOa9PJfBolSdi6693",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:11:02.758Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_BtifXVEiEF00192syHya1312",
+          "command": "R=/usr/lib/node_modules/@earendil-works/pi-coding-agent/dist/core/resource-loader.js && echo \"=== exists ===\" && ls -la $R && echo \"=== line 30-34 ===\" && sed -n '30,34p' $R && echo \"=== line 82-107 ===\" && sed -n '82,107p' $R && echo \"=== line 378-386 ===\" && sed -n '378,386p' $R && echo \"=== line 806-830 ===\" && sed -n '806,830p' $R"
+        },
+        {
+          "ts": "2026-08-09T08:11:02.775Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_BtifXVEiEF00192syHya1312",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:11:51.260Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_lwTjWCxd90SOnpXd3Ot89580",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node-07-instructions-audit delivers a substantive, well-structured audit report that satisfies all three acceptance criteria. (1) report-exists: the 37KB file is present and committed as the sole file in this node's commit 53daced. (2) evidence-cited: every one of the 19 findings carries a file:line or command-output citation; the report's central claim — that the Pi resource-loader injects only AGENTS.md/CLAUDE.md and never SOUL.md/USER.md/MEMORY.md, contradicting the 'always-loaded prompt surface' documentation — was verified line-exact against the actual installed resource-loader.js on this machine, and MEMORY.md/AGENTS.md citations are predominantly exact. Caveat: ~8-10 repo-file line references drift (several by ~30 lines) and one byte-count claim is wrong; content exists in the cited files so this is imprecision rather than fabrication, but it bears on the 'verify every claim against the live checkout' constraint and warrants human spot-checking. (3) acceptance-criteria-included: the report ends with 12 actionable, verification-equipped ACs explicitly addressed to node-08-instructions-execute, mapped 1:1 to the findings. Constraints: the commit is read-only w.r.t. the harness (only the report file added); report's BASE SHA (d0b119b) is the parent commit, consistent with the executor contract. Overall the node's work is credible and complete; the only substantive open question is how strictly line-accuracy should be treated under the evidence-cited criterion.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-09T08:13:24.000251+00:00",
+  "evaluated_tree_sha": "6c81f7b6c89b7c46083a16cd4d38a51af95fb2d9",
+  "evaluated_commit_sha": "53dacedbf58dff3eafa94d257416f12c9c352244",
+  "merge_commit_sha": "53dacedbf58dff3eafa94d257416f12c9c352244",
+  "expected_base_commit_sha": "df4642ec1e4661a333b660fa05643792f43799d6",
+  "pr_ref": null,
+  "job_id": "job_20260809T065138911d3b5ef18b3c",
+  "execution_attempt_id": "job_20260809T065138911d3b5ef18b3c:attempt:0",
+  "evidence_manifest_sha256": "296b8f6dd1776a216dcef60b28a6b44e17ea4b1badf079aa5ffabef6fc3cb0ea",
+  "mission_receipt_id": "mis_e5da4907:node-07-instructions-audit:6e0dd3bb-8f0c-4f84-91ab-e9c3df606138",
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-87b00scr/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-87b00scr/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-87b00scr/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml",
+        "/tmp/gddp-eval-wt-87b00scr/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-87b00scr/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml",
+        "/tmp/gddp-eval-wt-87b00scr/README.md"
+      ]
+    },
+    "overall": "medium"
+  }
+}

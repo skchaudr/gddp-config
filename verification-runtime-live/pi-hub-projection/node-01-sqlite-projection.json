@@ -1,0 +1,901 @@
+{
+  "project_id": "pi-hub-projection",
+  "node_id": "node-01-sqlite-projection",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.85,
+    "findings": [],
+    "reasoning": "Fresh-eyes review of node-01-sqlite-projection. The delivered work faithfully implements the node's stated role: a stdlib-only projector (argparse/datetime/hashlib/json/os/sqlite3/sys/tempfile/pathlib/typing) that upserts pi-observe JSONL current-state into ~/.pi/agent/observability/pi-hub.db in WAL mode (enforced and asserted), with stable IDs matching the why (session_id, run:step, tool:source:call_id, source:id, instance_id), content-hash short-circuiting for idempotency, and append-only state_transitions on watched status/tool/acceptance/ownership fields. The source-stream contract matches agent/scripts/pi-observe.py exactly (same env-var default root, same file names, same observability dir). I executed --self-check in the checkout: WAL confirmed, run 1 counts match, run 2 inserts zero current-state rows, 10 transition rows captured on mutation, exit 0 — so the deterministic core of the node's promise is demonstrably real, not just reported. Graph integrity holds: the schema gives node-02 (localhost API) natural monotonic cursors (state_transitions.transition_id, projection_runs.run_id) plus sessions/events tables for cursor-polling endpoints, and node-04 (receipts ingestion) an extensible in-place projection (SCHEMA_SQL constant, importable connect()) that its own criterion explicitly allows adapting. Diff hygiene is clean: base→tip adds exactly the two intended files, no junk, no writes outside agent/observability/ and reports/pi-hub-projection/, and the gitignore/force-add story in the report checks out. Only residual uncertainty: live-run evidence (counts table, live delta) references host-local gitignored runtime state that cannot be independently reproduced from the checkout, and the script additionally projects hooks/artifacts beyond the five entities named in the why (documented, harmless superset consistent with the blueprint). Neither undermines the node's role or the dependents' foundation; both are noted as forward-looking observations.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-06T19:08:18.237Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_TdIGsYzSns4re61vqn5r5511",
+        "command": "pwd && ls -la && echo \"---\" && find . -type f | head -100"
+      },
+      {
+        "ts": "2026-08-06T19:08:18.239Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_pamHMsfkIuqBWnRp4OrT6106",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-06T19:08:18.240Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_nfNutD9lxZLOMYOsp4WW2469",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/README.md"
+      },
+      {
+        "ts": "2026-08-06T19:08:18.255Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_pamHMsfkIuqBWnRp4OrT6106",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:08:18.255Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_nfNutD9lxZLOMYOsp4WW2469",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:08:18.290Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_TdIGsYzSns4re61vqn5r5511",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:08:21.939Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_hUmkSoaKwEGRpdjMcsdx2326",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3 && ls -la agent/observability/ 2>/dev/null; echo \"---reports---\"; find reports -type f 2>/dev/null; echo \"---git status---\"; git status 2>/dev/null | head -30; echo \"---git log---\"; git log --oneline -10 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-06T19:08:21.940Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_WLndnqnVzhk7uwRPze683415",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-01-sqlite-projection.yaml"
+      },
+      {
+        "ts": "2026-08-06T19:08:21.940Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_tbZtpwIfOSJNeoqubB1U3489",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-02-localhost-api.yaml"
+      },
+      {
+        "ts": "2026-08-06T19:08:21.941Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_v5h5fvCjxheeOU8UT65p9272",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-04-receipts-ingestion.yaml"
+      },
+      {
+        "ts": "2026-08-06T19:08:21.945Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_WLndnqnVzhk7uwRPze683415",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:08:21.945Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_tbZtpwIfOSJNeoqubB1U3489",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:08:21.945Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_v5h5fvCjxheeOU8UT65p9272",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:08:22.089Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_hUmkSoaKwEGRpdjMcsdx2326",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:08:24.560Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_cvXAKnz5rEct4FRVS8MZ6084",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/reports/pi-hub-projection/node-01-sqlite-projection.md"
+      },
+      {
+        "ts": "2026-08-06T19:08:24.562Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_0vZZq3HWbjB1bJEF5Aky1782",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:08:24.564Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_cvXAKnz5rEct4FRVS8MZ6084",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:08:24.565Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_0vZZq3HWbjB1bJEF5Aky1782",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:08:27.218Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_dVRUSFtOf5MHsDSXhZhU1451",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:08:27.220Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_dVRUSFtOf5MHsDSXhZhU1451",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:08:29.120Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_u8Ou4MSRYnhANgroZfsd4621",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:08:29.124Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_u8Ou4MSRYnhANgroZfsd4621",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:08:31.007Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_QgNExn5ec7SaLdKDUMGB8538",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:08:31.009Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_QgNExn5ec7SaLdKDUMGB8538",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:08:32.737Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_ET_rFnp6rzOA9jkdSLMSaf92985",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:08:32.739Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ET_rFnp6rzOA9jkdSLMSaf92985",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:08:52.246Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_81pGt63L42lQahCP1juB2239",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3 && echo \"=== pi-observe script ===\" && ls -la agent/scripts/ 2>/dev/null | head -20 && echo \"=== is project.py tracked? ===\" && git ls-files agent/observability/ reports/pi-hub-projection/ && echo \"=== .gitignore observability ===\" && grep -n \"observability\" .gitignore && echo \"=== diff base..tip stat ===\" && git diff --stat 649aa13 3d3ae4c && echo \"=== files in result commits ===\" && git show --stat --oneline 510da7a | head -30 && git show --stat --oneline 3d3ae4c | head -30"
+      },
+      {
+        "ts": "2026-08-06T19:08:52.247Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_sYSWNgjog6JrhxgLd53r8039",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3 && echo \"=== observability jsonl sources present? ===\" && ls -la agent/observability/*.jsonl 2>/dev/null; echo \"---\"; find . -name \"pi-observe.py\" 2>/dev/null | head; echo \"=== any jsonl under agent/observability anywhere ===\" && find . -path ./node_modules -prune -o -name \"sessions.jsonl\" -print 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-06T19:08:52.311Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_sYSWNgjog6JrhxgLd53r8039",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:08:52.342Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_81pGt63L42lQahCP1juB2239",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:08:59.093Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_O6C7MWOltuFqRvJmmfAT6686",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3 && echo \"=== filenames written by pi-observe.py ===\" && grep -nE \"sessions\\.jsonl|subagents\\.jsonl|tools\\.jsonl|artifacts\\.jsonl|pi-instances\\.jsonl|hooks\\.jsonl\" agent/scripts/pi-observe.py | head -30 && echo \"=== PI_OBSERVE_ROOT / observability dir in pi-observe.py ===\" && grep -nE \"PI_OBSERVE_ROOT|observability\" agent/scripts/pi-observe.py | head -20"
+      },
+      {
+        "ts": "2026-08-06T19:08:59.094Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_2nRpr26iLfHUczMmMwaH7226",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3 && echo \"=== run self-check (read-only, temp dir) ===\" && python3 agent/observability/project.py --self-check 2>&1 | head -40; echo \"exit=$?\""
+      },
+      {
+        "ts": "2026-08-06T19:08:59.130Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_O6C7MWOltuFqRvJmmfAT6686",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:08:59.317Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_2nRpr26iLfHUczMmMwaH7226",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:09:29.552Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_VeTNZtcKpoPZToI2x4vh5435",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3 && echo \"=== pi-observe path derivation ===\" && sed -n '24,32p' agent/scripts/pi-observe.py && echo \"=== 3d3ae4c (empty wrapper?) ===\" && git show --stat 3d3ae4c | tail -5 && echo \"=== full list of files touched by job commits vs diff ===\" && git diff --name-status 649aa13 3d3ae4c && echo \"=== verify no other files created by job in tree (mtime cluster) ===\" && find . -newermt \"2026-08-06 12:05\" -type f -not -path \"./.git/*\" 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-06T19:09:29.642Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_VeTNZtcKpoPZToI2x4vh5435",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:10:01.179Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_EkdGZK5HyFwQig9gkyMI9005",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "node-02 and node-04 unlock concurrently after this node and both open the same pi-hub.db; node-04 will extend the schema (envelope/gate tables) in-place while node-02 may already be serving it. WAL + busy_timeout on the projector's connections help, but the graph should plan for the schema-extension moment (e.g., node-04 lands tables before node-02's cursor API is validated against them, or a documented migration step) to avoid a mid-flight schema change under a serving API.",
+        "affected_node_ids": [
+          "node-02-localhost-api",
+          "node-04-receipts-ingestion"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The live-evidence criteria (db-created, counts-match, idempotent-on-live, transitions-with-live-delta) can only be re-verified on the host because pi-hub.db and the jsonl sources are gitignored runtime state that never exists in a git checkout — this is why the eval harness sees 'pi-hub.db absent'. The reproducible in-checkout verification path is project.py --self-check; downstream nodes and the harness should lean on deterministic self-checks for their evidence rather than host-only live claims.",
+        "affected_node_ids": [
+          "node-01-sqlite-projection",
+          "node-02-localhost-api",
+          "node-04-receipts-ingestion"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9700000000000001,
+  "criteria_confidence": 0.9700000000000001,
+  "completeness": 1.0,
+  "graph_readiness": 0.9700000000000001,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "projection-script-exists",
+        "criterion": "agent/observability/project.py exists and runs with python3 stdlib only",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "db-created",
+        "criterion": "running the projection creates agent/observability/pi-hub.db with WAL journal mode",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "path_mentioned_missing",
+        "evidence": [
+          "agent/observability/pi-hub.db absent"
+        ],
+        "reasoning": "The criterion names source path(s) that are not present in the checkout. The harness did not scan unrelated files as substitutes.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "agent/observability/pi-hub.db absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "counts-match",
+        "criterion": "report shows projected row counts reconciled against the live jsonl sources (sessions, subagents, tools) at run time",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "idempotent",
+        "criterion": "a second consecutive run inserts zero new current-state rows (transition events excepted only when something actually changed); report shows the rerun evidence",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (current-state). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "transitions-recorded",
+        "criterion": "a state transition table exists and the report shows one real transition row captured across two runs with a mutated fixture or live delta",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "report-exists",
+        "criterion": "reports/pi-hub-projection/node-01-sqlite-projection.md exists with schema DDL, design decisions, and the count/idempotency evidence",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "pi\\-hub\\-projection -> line 380: 'pi-hub-projection'",
+          "node\\-01\\-sqlite\\-projection -> line 1: 'node-01-sqlite-projection'",
+          "DDL -> line 60: 'DDL'"
+        ],
+        "reasoning": "Scanned source files (reports/pi-hub-projection/node-01-sqlite-projection.md) for identifiers named in the criterion (pi-hub-projection, node-01-sqlite-projection, DDL). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create and modify files only under agent/observability/ and reports/pi-hub-projection/",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "python3 stdlib only (sqlite3, json, pathlib); no new dependencies, no pip installs",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "The upstream repo at ~/repos/_reference/sssf is read-only reference; never execute its installer or scripts",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Never run git add -A; stage only files this node created or changed",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node's result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/pi-hub-projection/node-01-sqlite-projection.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [
+      {
+        "criterion_id": "db-created",
+        "kind": "source_path",
+        "detail": "agent/observability/pi-hub.db absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "db-created",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "649aa132711e85bcca3b38cd3752e6f5f05b0543",
+      "tip": "3d3ae4c163032db51e4f73a067917f86046fc583",
+      "files": [
+        {
+          "status": "A",
+          "path": "agent/observability/project.py"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-hub-projection/node-01-sqlite-projection.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 2,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "projection-script-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "agent/observability/project.py tracked in result commit 3d3ae4c (git ls-files)",
+          "Imports read from file: argparse, datetime, hashlib, json, os, sqlite3, sys, tempfile, pathlib, typing — all stdlib",
+          "Ran `python3 agent/observability/project.py --self-check` → exit 0",
+          "Report section A documents path + stdlib-only import list matching code"
+        ],
+        "reasoning": "The file exists, is committed, parses, and runs. Every import is python3 stdlib; no third-party imports, no subprocess/pip usage anywhere in the 1366-line script. The self-check executed successfully with exit 0, confirming the script actually runs."
+      },
+      {
+        "criterion_id": "db-created",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "/Users/sab-mini/.pi/agent/observability/pi-hub.db exists on host with PRAGMA journal_mode=wal (read-only query)",
+          "project.py connect() executes PRAGMA journal_mode=WAL; project() raises RuntimeError if journal mode != wal (lines ~380-400)",
+          "Root .gitignore line 78 ignores agent/observability/ — DB is expected gitignored host-local runtime state",
+          "Report section B documents live WAL evidence (pi-hub.db / -wal / -shm present, journal_mode=wal)"
+        ],
+        "reasoning": "The deterministic 'pi-hub.db absent' flag is explained: the DB is deliberately gitignored runtime state under ~/.pi (per node brief's why text and the report's constraints note), so it is not in the checkout. The criterion is about run behavior, and that behavior is verified: the script enforces WAL (raises on any other mode) and the live DB exists in WAL mode. The report documents the evidence as the required artifact."
+      },
+      {
+        "criterion_id": "counts-match",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "Independent live check: source jsonl line counts (25/69/1093/9/46/31) exactly equal DB row counts (sessions/subagents/tools/artifacts/instances/hooks)",
+          "Report section C reconciliation table matches these numbers with strict match=yes for all six entities",
+          "project.py computes source_rows via load_jsonl on live files and db_rows_after via SELECT COUNT(*) per entity at run time, stored in projection_runs.report_json (run 1: writes=1273, source_rows=1273)",
+          "Live DB run 1 report_json totals confirm source_rows=1273, writes=1273"
+        ],
+        "reasoning": "The report shows projected row counts reconciled against the live jsonl sources for sessions, subagents, and tools (plus artifacts/instances/hooks) at run time, and I independently confirmed every count against the live sources and the live DB. The reconciliation is computed by the script from the actual source files each run, not hardcoded."
+      },
+      {
+        "criterion_id": "idempotent",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "Live DB run 2 report_json: current_state_inserts_or_updates=0, unchanged=1273, ok=True",
+          "Report section D documents run 2: writes=0, unchanged=1273, transitions=0, db_rows_after=1273",
+          "project.py short-circuits unchanged rows via content_hash comparison before any write",
+          "Self-check reproduced: run 2 on fixture writes 0 current-state rows, idempotent_ok=True; run 3 with mutated delta writes 3 rows and emits 10 transitions (the permitted exception when something changed)"
+        ],
+        "reasoning": "A second consecutive run inserts zero new current-state rows — verified in the live DB's stored run-2 report and reproduced via --self-check. The transition exception is honored: no transitions on an unchanged rerun (run 2: 0), transitions only when rows actually changed (run 3). The report shows the rerun evidence in section D as required."
+      },
+      {
+        "criterion_id": "transitions-recorded",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "state_transitions table exists (SCHEMA_SQL DDL in project.py and live DB)",
+          "Live DB state_transitions contains exactly 3 rows, all run_id=3, matching report E2 verbatim: 9349a3d1-4aca-4a91-95ec-3777745beded:0 status stopped→completed-by-projection-test, acceptance_status rejected→attested, last_tool read→write",
+          "Report E2 documents the live delta run (copied live jsonl, flipped one subagent) with transition rows; report E1 documents fixture-based self-check (10 transitions on mutate)",
+          "Self-check reproduced 10 transitions on the mutated fixture"
+        ],
+        "reasoning": "The state transition table exists and the report shows one real transition row captured across two runs with a live delta — actually three rows, which I verified byte-for-byte in the live DB against the report's table. The transition mechanism (watched fields: status/tool/acceptance/ownership) matches the node brief."
+      },
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "reports/pi-hub-projection/node-01-sqlite-projection.md exists (385 lines, tracked in result commit)",
+          "Section 'Schema DDL' contains full CREATE TABLE DDL for all tables incl. state_transitions",
+          "Section 'Design decisions' lists 7 decisions (stdlib, WAL, upserts, append-only transitions, no delete-on-missing, DB path, reference-only)",
+          "Sections C (counts), D (idempotency rerun), E (transitions) provide the count/idempotency evidence; section 'Acceptance mapping' maps each criterion to pass"
+        ],
+        "reasoning": "The report exists with schema DDL, design decisions, and count/idempotency evidence as required. Every verifiable claim in it matched my independent checks against the live sources and DB — the report is accurate, not aspirational."
+      }
+    ],
+    "overall_reasoning": "All six acceptance criteria are satisfied and were verified independently, not just from the report's claims. The script agent/observability/project.py exists, is stdlib-only, and runs (self-check exit 0). The WAL DB behavior is enforced in code (PRAGMA journal_mode=WAL, RuntimeError on non-WAL) and the live pi-hub.db on the host is in WAL mode; its absence from the checkout is expected because .gitignore ignores agent/observability/ — the deterministic 'path absent' flag is a false alarm, not a defect. Counts, idempotency, and transitions were all confirmed against the live database and its stored per-run reports (run 2 wrote 0 rows/1273 unchanged; run 3 captured 3 real transition rows on a live delta, matching the report verbatim). The report contains the full schema DDL, design decisions, and the count/idempotency/transition evidence. Constraints were honored: only the two allowed files were added, commits exist on the result ref, and no forbidden patterns were found. The work matches the node brief's intent (transactional WAL projection with stable IDs, upserts, transition events) and is compatible with downstream nodes (node-02 reads sessions/events/transitions; node-04 may adapt table names to node-01's schema).",
+    "risks": "1) The pi-hub.db binary is gitignored host-local runtime state, so the artifact exists only on the host at /Users/sab-mini/.pi/agent/observability — a fresh checkout cannot see the DB. This matches the node brief (DB located at ~/.pi/agent/observability/pi-hub.db) and is documented in the report, but a reviewer should confirm that the gitignore policy is intentional. 2) Verification of live-DB state relies on the host DB not having been touched since the run; timestamps are consistent (jsonl mtimes Jul 12/27, DB projected Aug 6, runs 1-3 stored). 3) I executed the script's --self-check during investigation (temp dirs only; git status remained clean) — evidence of runnable behavior, not part of the submitted trail. 4) The deterministic keyword scan for 'current-state' missed because the code/report use 'current_state' / 'current-state rows' phrasing — wording variance only, no substantive gap.",
+    "followup_candidates": "Human clarification for the harness's flagged question on db-created: 'Is the criterion path stale, or has the implementation not landed yet?' — Resolved: the DB is deliberately gitignored host-local runtime state (root .gitignore ignores agent/observability/); the implementation has landed and the live DB exists in WAL mode. Suggest confirming gitignoring the DB binary is the intended repo policy for this node and downstream nodes. Secondary observation: no separate test suite is listed in this node's acceptance criteria; the built-in --self-check is the verification mechanism and is documented in the report. If a standalone test artifact was intended, criteria should be updated; otherwise the verdict stands on the stated criteria.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-06T19:06:26.226Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_VJrkTDJDDm58q9wmbeRs5058",
+          "command": "pwd && ls -la && git -C . log --oneline -10 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-06T19:06:26.228Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_3qocFRVnw8vtHyEUbbLO7655",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/README.md"
+        },
+        {
+          "ts": "2026-08-06T19:06:26.242Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_3qocFRVnw8vtHyEUbbLO7655",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:06:26.505Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_VJrkTDJDDm58q9wmbeRs5058",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:06:28.512Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_jmbvMIFlJ1M776ZNTiSS8239",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-01-sqlite-projection.yaml"
+        },
+        {
+          "ts": "2026-08-06T19:06:28.513Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_L96QnZhwq6OFmaGdV5CH6019",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-06T19:06:28.515Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_jmbvMIFlJ1M776ZNTiSS8239",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:06:28.515Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_L96QnZhwq6OFmaGdV5CH6019",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:06:31.048Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_8p3Pj5j0qSlai5QcLOFl6671",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3 && ls -la agent/observability/ && echo \"---\" && ls -la reports/pi-hub-projection/ && echo \"---\" && wc -l agent/observability/project.py reports/pi-hub-projection/node-01-sqlite-projection.md"
+        },
+        {
+          "ts": "2026-08-06T19:06:31.049Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_xEDRtFSle3uaOiGgdOLc5896",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3 && git show --stat 3d3ae4c | head -30 && echo \"===\" && git show --stat 510da7a | head -30"
+        },
+        {
+          "ts": "2026-08-06T19:06:31.087Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_8p3Pj5j0qSlai5QcLOFl6671",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:06:31.116Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_xEDRtFSle3uaOiGgdOLc5896",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:06:33.590Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_bI7PLYSn0bn9J6ze8PQC6061",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/reports/pi-hub-projection/node-01-sqlite-projection.md"
+        },
+        {
+          "ts": "2026-08-06T19:06:33.593Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_bI7PLYSn0bn9J6ze8PQC6061",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:06:35.357Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_PMCxlQtQ9EnNOVrfnfJN4232",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/agent/observability/project.py"
+        },
+        {
+          "ts": "2026-08-06T19:06:35.361Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_PMCxlQtQ9EnNOVrfnfJN4232",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:06:37.250Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_ET_hu8CGEAfzXwOedGTD4lC5291",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/agent/observability/project.py"
+        },
+        {
+          "ts": "2026-08-06T19:06:37.254Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ET_hu8CGEAfzXwOedGTD4lC5291",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:06:38.810Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_ET_ikBcIFksBi0MgZ3sFd518867",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/agent/observability/project.py"
+        },
+        {
+          "ts": "2026-08-06T19:06:38.813Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ET_ikBcIFksBi0MgZ3sFd518867",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:06:40.718Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_ET_hEvLXgrMVdAJtlZkRkvH3623",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/agent/observability/project.py"
+        },
+        {
+          "ts": "2026-08-06T19:06:40.721Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ET_hEvLXgrMVdAJtlZkRkvH3623",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:06:42.727Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_ET_BazM0hespl0UuPIF3zmE4319",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/agent/observability/project.py"
+        },
+        {
+          "ts": "2026-08-06T19:06:42.730Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ET_BazM0hespl0UuPIF3zmE4319",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:06:59.074Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_zbyqL842o2TFaVmLQYOe2918",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3 && grep -n \"observability\" .gitignore | head -20; echo \"=== git tracked db files ===\"; git ls-files | grep -i \"\\.db\\|observability\" | head; echo \"=== find db files ===\"; find . -name \"*.db*\" 2>/dev/null | grep -v \".git/\" | head"
+        },
+        {
+          "ts": "2026-08-06T19:06:59.075Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_9Sr4f7RpnLkoeT7OTevm6203",
+          "command": "ls -la /Users/sab-mini/.pi/agent/observability/ 2>/dev/null | head -30; echo \"=== wc lines ===\"; wc -l /Users/sab-mini/.pi/agent/observability/*.jsonl 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-06T19:06:59.115Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_9Sr4f7RpnLkoeT7OTevm6203",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:06:59.144Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_zbyqL842o2TFaVmLQYOe2918",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:07:04.659Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_axFlnDkJ9ggrAKGOBzRb2800",
+          "command": "cd /Users/sab-mini/.pi/agent/observability && python3 -c \"\nimport sqlite3\nconn = sqlite3.connect('file:pi-hub.db?mode=ro', uri=True)\nprint('journal_mode:', conn.execute('PRAGMA journal_mode;').fetchone()[0])\nfor t in ['sessions','subagents','tools','artifacts','instances','hooks','state_transitions','projection_runs','source_snapshots','schema_meta']:\n    try:\n        print(f'{t}:', conn.execute(f'SELECT COUNT(*) FROM {t}').fetchone()[0])\n    except Exception as e:\n        print(t, 'ERR', e)\nprint('runs:', [tuple(r) for r in conn.execute('SELECT run_id, ok, source_dir FROM projection_runs ORDER BY run_id').fetchall()])\nprint('transition rows by run:')\nfor r in conn.execute('SELECT run_id, COUNT(*) FROM state_transitions GROUP BY run_id ORDER BY run_id').fetchall():\n    print(' ', r)\nconn.close()\n\""
+        },
+        {
+          "ts": "2026-08-06T19:07:04.660Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_bGEEAvCtkhGxMtZxkUDe7650",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3 && timeout 120 python3 agent/observability/project.py --self-check; echo \"EXIT: $?\""
+        },
+        {
+          "ts": "2026-08-06T19:07:04.674Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_bGEEAvCtkhGxMtZxkUDe7650",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:07:04.783Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_axFlnDkJ9ggrAKGOBzRb2800",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:07:12.236Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_kBymdycbQ4BBBZ9PBh550296",
+          "command": "cd /Users/sab-mini/.pi/agent/observability && python3 -c \"\nimport sqlite3, json\nconn = sqlite3.connect('file:pi-hub.db?mode=ro', uri=True)\nprint('=== transition rows ===')\nfor r in conn.execute('SELECT transition_id, entity_type, entity_id, field, old_value, new_value, run_id FROM state_transitions ORDER BY transition_id').fetchall():\n    print(r)\nprint()\nprint('=== run reports (totals) ===')\nfor r in conn.execute('SELECT run_id, report_json FROM projection_runs ORDER BY run_id').fetchall():\n    rj = json.loads(r[1])\n    t = rj['totals']\n    print(f\\\"run {r[0]}: source_rows={t['source_rows']} writes={t['current_state_inserts_or_updates']} unchanged={t['unchanged']} transitions={rj.get('transition_rows_this_run')} ok={rj['ok']}\\\")\nprint()\nprint('=== run 3 entity stats ===')\nr3 = json.loads(conn.execute(\\\"SELECT report_json FROM projection_runs WHERE run_id=3\\\").fetchone()[0])\nfor e, s in r3['entities'].items():\n    print(f\\\"  {e}: source={s['source_rows']} db={s['db_rows_after']} write={s['inserted_or_updated']} unchanged={s['unchanged']} strict={s['strict_source_equals_db']}\\\")\nconn.close()\n\""
+        },
+        {
+          "ts": "2026-08-06T19:07:12.237Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_yie3FcJdG6zeVuNUKGVd7671",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3 && python3 agent/observability/project.py --self-check; echo \"EXIT: $?\""
+        },
+        {
+          "ts": "2026-08-06T19:07:12.343Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_kBymdycbQ4BBBZ9PBh550296",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:07:12.426Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_yie3FcJdG6zeVuNUKGVd7671",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:07:33.408Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_m5JOxVfGr4ADWSbRPmUY4937",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3 && git status --short | head; echo \"=== diff between result commits ===\"; git diff --stat 510da7a 3d3ae4c; echo \"=== files in result commit ===\"; git show --name-only --format=\"\" 3d3ae4c"
+        },
+        {
+          "ts": "2026-08-06T19:07:33.409Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_EYD7DSSqfw3gmdxKnbQB0063",
+          "command": "grep -E \"acceptance_criteria|criterion:|depends_on|unlocks\" /Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-02-localhost-api.yaml /Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-04-receipts-ingestion.yaml | head -40"
+        },
+        {
+          "ts": "2026-08-06T19:07:33.424Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_EYD7DSSqfw3gmdxKnbQB0063",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:07:33.933Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_m5JOxVfGr4ADWSbRPmUY4937",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:08:11.944Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_g3DLDqgcon5qrmPFkOgy5871",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All six acceptance criteria are satisfied and were verified independently, not just from the report's claims. The script agent/observability/project.py exists, is stdlib-only, and runs (self-check exit 0). The WAL DB behavior is enforced in code (PRAGMA journal_mode=WAL, RuntimeError on non-WAL) and the live pi-hub.db on the host is in WAL mode; its absence from the checkout is expected because .gitignore ignores agent/observability/ — the deterministic 'path absent' flag is a false alarm, not a defect. Counts, idempotency, and transitions were all confirmed against the live database and its stored per-run reports (run 2 wrote 0 rows/1273 unchanged; run 3 captured 3 real transition rows on a live delta, matching the report verbatim). The report contains the full schema DDL, design decisions, and the count/idempotency/transition evidence. Constraints were honored: only the two allowed files were added, commits exist on the result ref, and no forbidden patterns were found. The work matches the node brief's intent (transactional WAL projection with stable IDs, upserts, transition events) and is compatible with downstream nodes (node-02 reads sessions/events/transitions; node-04 may adapt table names to node-01's schema).",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-06T19:10:01.309999+00:00",
+  "evaluated_tree_sha": "f83b5098ffcf6b29b03cd4cdaf9c188118fd6321",
+  "evaluated_commit_sha": "3d3ae4c163032db51e4f73a067917f86046fc583",
+  "merge_commit_sha": "3d3ae4c163032db51e4f73a067917f86046fc583",
+  "expected_base_commit_sha": "649aa132711e85bcca3b38cd3752e6f5f05b0543",
+  "pr_ref": null,
+  "job_id": "job_20260806T184954759c5ab68f44d0",
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-01-sqlite-projection.yaml",
+    "neighbor:node-02-localhost-api": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-02-localhost-api.yaml",
+    "neighbor:node-04-receipts-ingestion": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-04-receipts-ingestion.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 5,
+      "content_accessed": 3,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-01-sqlite-projection.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/README.md"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-02-localhost-api.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-04-receipts-ingestion.yaml"
+      ]
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 5,
+      "content_accessed": 5,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-01-sqlite-projection.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-02-localhost-api.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-04-receipts-ingestion.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zo9vxku3/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "high"
+  }
+}

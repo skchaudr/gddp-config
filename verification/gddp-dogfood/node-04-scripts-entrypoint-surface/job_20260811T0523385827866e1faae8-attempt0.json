@@ -1,0 +1,641 @@
+{
+  "project_id": "gddp-dogfood",
+  "node_id": "node-04-scripts-entrypoint-surface",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.9,
+    "findings": [],
+    "reasoning": "Fresh-eyes review of node-04-scripts-entrypoint-surface (T1 report-only canary). Intent: map the scripts/ CLI entrypoint surface so the CLI layer is reviewable, producing exactly one report artifact. The work delivers precisely that: a single added file (reports/gddp-dogfood/04-scripts-entrypoint-surface.md) covering all 9 non-test top-level scripts/*.py in a table, the jobs_status.py subcommand surface, real --help/invocation quotes for 6+ entrypoints, and the required pytest tail line. I spot-checked rollback.py --help, jobs_status.py --help, and echo.py against the live repo — the quoted output matches verbatim, so the report is genuine evidence, not fabrication (a fabricated report would have undermined the node's purpose of making the CLI layer reliably reviewable). Graph integrity: the diff base->tip contains exactly one file (A reports/gddp-dogfood/04-scripts-entrypoint-surface.md), the working tree is clean with no untracked junk, no file outside the report path was modified (read-only constraint honored), commit sits on the node result ref per the executor contract, and gddp-config graph truth is untouched. depends_on: [] and unlocks: [] mean no upstream obligations and no downstream consumer can be broken. The report does not touch sibling canary report paths (01/02/03 exist on other result refs, not in this lineage) or any source/runtime files. The only minor note — the report quotes a Flask-import traceback from a different session worktree path and a pytest tail of '4 failed, 622 passed' vs README's '633 passing' — is environmental (Flask absent on host), transparently disclosed in the report, and is acceptance-criteria evidence for lane 1, not an intent/graph-integrity defect. Intent preserved; graph integrity preserved.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-11T05:30:03.903Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_2zehjRSrA4KWUwIHqGsX2330",
+        "command": "cd /tmp/gddp-eval-wt-1f0gexss && ls -la && echo \"---\" && find . -type f -not -path './.git/*' | head -50"
+      },
+      {
+        "ts": "2026-08-11T05:30:03.904Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_yULFYgqA3CbuLuXKAF8b9740",
+        "path": "/tmp/gddp-eval-wt-1f0gexss/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-11T05:30:03.905Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_wBSsIxAwym8rmVKpUVsZ8276",
+        "path": "/tmp/gddp-eval-wt-1f0gexss/README.md"
+      },
+      {
+        "ts": "2026-08-11T05:30:03.918Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_yULFYgqA3CbuLuXKAF8b9740",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:30:03.918Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_wBSsIxAwym8rmVKpUVsZ8276",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:30:03.925Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_2zehjRSrA4KWUwIHqGsX2330",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:30:07.522Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_rC0ifi7lpscLJ3FTmmMd2175",
+        "command": "cd /tmp/gddp-eval-wt-1f0gexss && cat .git 2>/dev/null | head -3; echo \"---GIT LOG---\"; git log --oneline -5 2>/dev/null; echo \"---DIFF---\"; git diff 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61 51de49a6f4102c5fbe3762d2bda630be5116befc --stat 2>/dev/null; echo \"---REPORT---\"; ls -la reports/gddp-dogfood/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-11T05:30:07.523Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_U3EpEhgqhEZt5cYmkJ3p0521",
+        "command": "ls /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/ 2>/dev/null; echo \"---\"; cat /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-04-scripts-entrypoint-surface.yaml 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-11T05:30:07.540Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_U3EpEhgqhEZt5cYmkJ3p0521",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:30:07.545Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_rC0ifi7lpscLJ3FTmmMd2175",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:30:09.885Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_uP0PToqXpJua5LOYWcCp7156",
+        "path": "/tmp/gddp-eval-wt-1f0gexss/reports/gddp-dogfood/04-scripts-entrypoint-surface.md"
+      },
+      {
+        "ts": "2026-08-11T05:30:09.886Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_v4IOvG5dacFtBOQE0Czk7621",
+        "command": "cat /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml 2>/dev/null; echo \"===PROJECT.YAML===\"; cat /home/sab-mini/gddp-config/graphs/gddp-dogfood/project.yaml 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-11T05:30:09.893Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_uP0PToqXpJua5LOYWcCp7156",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:30:09.897Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_v4IOvG5dacFtBOQE0Czk7621",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:30:22.578Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_iCxmxLemDuQF2mFyMC9Z1687",
+        "command": "cd /tmp/gddp-eval-wt-1f0gexss && echo \"===STATUS===\"; git status --short 2>/dev/null | head -40; echo \"===UNTRACKED (excluding .git internals)===\"; git status --porcelain 2>/dev/null | grep '^??' | head -40; echo \"===TOP-LEVEL SCRIPTS/*.py===\"; ls scripts/*.py 2>/dev/null; echo \"===OTHER REPORTS===\"; find reports -type f 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-11T05:30:22.578Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_VsSApEyTOZTEZQtbqWsO9896",
+        "command": "cd /tmp/gddp-eval-wt-1f0gexss && echo \"===files changed between base and tip (full list)===\"; git diff --name-status 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61 51de49a6f4102c5fbe3762d2bda630be5116befc 2>/dev/null; echo \"===worktree diff vs tip===\"; git diff --stat 51de49a6f4102c5fbe3762d2bda630be5116befc 2>/dev/null; echo \"===last commit contents===\"; git show --stat HEAD 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-11T05:30:22.605Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_VsSApEyTOZTEZQtbqWsO9896",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:30:22.610Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_iCxmxLemDuQF2mFyMC9Z1687",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:30:43.215Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_hfUz7f6YYswHHWjA33nC7695",
+        "command": "cd /tmp/gddp-eval-wt-1f0gexss && echo \"=== rollback.py --help ===\"; python3 scripts/rollback.py --help 2>&1 | head -8; echo \"=== jobs_status.py --help (head) ===\"; python3 scripts/jobs_status.py --help 2>&1 | head -10; echo \"=== echo.py ===\"; python3 scripts/echo.py 2>&1 | head -3"
+      },
+      {
+        "ts": "2026-08-11T05:30:43.215Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_XjFuk0SdAuKG7o7edMul3780",
+        "command": "cd /tmp/gddp-eval-wt-1f0gexss && echo \"=== neighbor node files for context (02,03,05) ===\"; for f in node-02-archive-inventory node-03-docs-inventory node-05-test-suite-map; do echo \"--- $f ---\"; grep -E \"node_id|title|depends_on|unlocks|required_artifacts\" /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/$f.yaml 2>/dev/null; done; echo \"=== confirm no git objects for other report paths ===\"; git log --all --oneline -- 'reports/gddp-dogfood/01*' 'reports/gddp-dogfood/02*' 'reports/gddp-dogfood/03*' 2>/dev/null | head; echo \"(empty means none)\""
+      },
+      {
+        "ts": "2026-08-11T05:30:43.258Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_XjFuk0SdAuKG7o7edMul3780",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:30:43.357Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_hfUz7f6YYswHHWjA33nC7695",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:31:04.995Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_I9SaUfIjtowdLbPyqfPu4203",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "Sibling T1 canary reports (01-env-var-registry, 02-archive-inventory, 03-docs-inventory) exist on separate result refs but are not in this worktree's lineage at base 450eca1. When those nodes are human-accepted, their report files must land in the canonical branch; until then the reports/ dir shows only node-04's artifact. No conflict with this node, but keep an eye on how per-ref canary artifacts converge into graph truth.",
+        "affected_node_ids": [
+          "node-01-env-var-registry",
+          "node-02-archive-inventory",
+          "node-03-docs-inventory",
+          "node-04-scripts-entrypoint-surface"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The report's pytest run shows '4 failed, 622 passed' attributable to Flask being absent on the host (intake_server/rig1 tests import flask). node-05-test-suite-map will re-measure the suite; it should account for environment-dependent failures (missing deps) when characterizing test shape and slowest tests, and the evaluator should not treat those failures as node-04's defect.",
+        "affected_node_ids": [
+          "node-04-scripts-entrypoint-surface",
+          "node-05-test-suite-map"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9766666666666666,
+  "criteria_confidence": 0.9766666666666666,
+  "completeness": 1.0,
+  "graph_readiness": 0.9766666666666666,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "report-exists",
+        "criterion": "reports/gddp-dogfood/04-scripts-entrypoint-surface.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "scripts\\-entrypoint\\-surface -> line 3: 'scripts-entrypoint-surface'"
+        ],
+        "reasoning": "Scanned source files (reports/gddp-dogfood/04-scripts-entrypoint-surface.md) for identifiers named in the criterion (gddp-dogfood, scripts-entrypoint-surface, non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "entrypoints-listed",
+        "criterion": "report contains a table of scripts/*.py entrypoints with their argparse subcommands",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "real-output",
+        "criterion": "report quotes real --help or argparse output for at least 5 entrypoints",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create only reports/gddp-dogfood/04-scripts-entrypoint-surface.md",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Read-only outside that report path",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Run python3 -m pytest -q before finishing and quote its tail line in the report",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/gddp-dogfood/04-scripts-entrypoint-surface.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+      "tip": "51de49a6f4102c5fbe3762d2bda630be5116befc",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/gddp-dogfood/04-scripts-entrypoint-surface.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.99,
+        "evidence": [
+          "reports/gddp-dogfood/04-scripts-entrypoint-surface.md read in full (218 lines, 8564 bytes)",
+          "wc -c reports/gddp-dogfood/04-scripts-entrypoint-surface.md -> 8564",
+          "git diff --name-status 450eca1..51de49a -> A reports/gddp-dogfood/04-scripts-entrypoint-surface.md (218 insertions)"
+        ],
+        "reasoning": "The required report file exists at the exact path and is non-empty (8.5 KB of substantive content: method, tables, quotes, operator notes, validation). It was added in the node's result commit, matching the required artifact."
+      },
+      {
+        "criterion_id": "entrypoints-listed",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "ls scripts/*.py -> exactly echo, export_evaluations, gddp_node_receipt, init_db, intake_server, jobs_status, local_agent_executor, node_status_history, rollback (plus test_* excluded)",
+          "Report 'Entrypoint table' lists all 9 scripts with CLI style / subcommands / flags / __main__ behavior columns",
+          "Dedicated jobs_status.py subcommand table: list(--state), show(ref, --full), results(--all), set(ref, state, --reason, --yes)",
+          "python3 scripts/jobs_status.py <sub> --help output matches the report's subcommand table verbatim"
+        ],
+        "reasoning": "The report contains a table of scripts/*.py entrypoints covering every top-level non-test script in the repo, with a per-entrypoint row (CLI style, subcommands, flags/args, __main__ behavior) and a dedicated subcommand table for the only argparse-subparser entrypoint (jobs_status.py). The inventory matches the actual scripts/ directory exactly, and the flagged argparse/subcommand claims were independently confirmed against live --help output. The scope note (excludes test_*, runtime/, adapters/, _archive/) matches the repo layout."
+      },
+      {
+        "criterion_id": "real-output",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "python3 scripts/export_evaluations.py --help reproduces the report's quote verbatim",
+          "python3 scripts/gddp_node_receipt.py --help reproduces the report's quote verbatim",
+          "python3 scripts/jobs_status.py --help + list/show/results/set --help reproduce all five quoted blocks verbatim",
+          "python3 scripts/rollback.py --help reproduces the report's quote verbatim",
+          "python3 scripts/echo.py --help -> 'All tests passed!' (matches report; no argparse, real output)",
+          "python3 scripts/intake_server.py --help -> ModuleNotFoundError: No module named 'flask' (matches report quote; only the worktree path in the traceback differs)"
+        ],
+        "reasoning": "The report quotes real --help or invocation output for 5 distinct entrypoints (export_evaluations, gddp_node_receipt, jobs_status incl. all 4 subcommand helps, rollback, echo), exceeding the >=5 requirement. I re-ran each command in the current worktree and every quoted block matches byte-for-byte; the non-argparse invocation quotes (intake_server flask import error, echo output) also reproduce identically, confirming the output is real rather than fabricated. The one textual difference (traceback worktree path /tmp/gddp-agent-wt-_m3sjszt vs this worktree) is expected because the executor ran in a detached worktree."
+      }
+    ],
+    "overall_reasoning": "All three acceptance criteria for node-04-scripts-entrypoint-surface are satisfied by the report at reports/gddp-dogfood/04-scripts-entrypoint-surface.md. The file exists and is non-empty; it contains a complete table of all 9 top-level scripts/*.py entrypoints (verified against the repo's scripts/ directory) with their argparse/subcommand surfaces, including a dedicated jobs_status.py subcommand table; and it quotes real --help/argparse output for 5 entrypoints (6 counting subcommands), every quote of which I re-ran and confirmed byte-for-byte identical to live output in the current worktree. The report also adds genuine value beyond the minimum: it documents non-argparse entrypoints with real invocation results (echo, intake_server flask-import failure reproduced identically, local_agent_executor empty-stdin error, init_db side-effect warning, node_status_history import-only), plus operator guidance. Constraints observed: the subject diff contains only the report file (satisfying create-only/read-only constraints) and the pytest tail line is quoted in the Validation section (plausible: 611 repo test functions as a lower bound, 626 total quoted, with Flask-absent failures consistent with the environment). No intent or integrity concerns found; this is a T1 report-only canary and the report is accurate, scoped, and reviewable.",
+    "risks": "(1) The pytest tail line '4 failed, 622 passed in 36.77s' could not be independently re-run in this evaluation worktree: pytest is not installed for /usr/bin/python3 and the user-level pytest binary points at a Python lacking the _pytest module. The quote is plausible (611 repo test functions as a lower bound vs 626 quoted; Flask-absent failures consistent with the verified-absent flask module), and quoting the tail line is a constraint rather than an acceptance criterion, so it does not affect the criteria verdict. (2) The deterministic constraint checks for the pytest-run and commit constraints used only forbidden-pattern scans (weak method); however, the commit constraint is corroborated by the subject diff showing only the report file added, and the pytest quote is present in the report as required.",
+    "followup_candidates": "Observed: the report quotes pytest tail line '4 failed, 622 passed in 36.77s' but pytest could not be re-run in this evaluation worktree (module not installed for /usr/bin/python3; user-level pytest broken). Quoting the tail line is a node constraint, not an acceptance criterion, so this verdict stands on the criteria; if independent verification of the pytest tail line is desired, rerun `python3 -m pytest -q` in a pytest-equipped worktree at the result ref and confirm the quoted tail. Human clarification: should the 4 failures (Flask-absent intake tests) block this report-only canary node, or is the quoted tail line sufficient per the constraint wording?",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-11T05:28:58.459Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_ZwYYQ1oDOWpXFNciKdaY6610",
+          "path": "/tmp/gddp-eval-wt-1f0gexss/reports/gddp-dogfood/04-scripts-entrypoint-surface.md"
+        },
+        {
+          "ts": "2026-08-11T05:28:58.459Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_LIGfSAS9Evcg07H2KKEA3484",
+          "path": "/tmp/gddp-eval-wt-1f0gexss/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-11T05:28:58.465Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ZwYYQ1oDOWpXFNciKdaY6610",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:28:58.466Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_LIGfSAS9Evcg07H2KKEA3484",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:29:02.000Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_BpQPWQx0c16wJzcCLCzr1161",
+          "command": "cd /tmp/gddp-eval-wt-1f0gexss && ls scripts/*.py 2>/dev/null | head -50; echo \"---\"; ls scripts/ 2>/dev/null | head -60"
+        },
+        {
+          "ts": "2026-08-11T05:29:02.001Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ASAoBHav6qN4eAEK8A0f9060",
+          "command": "cd /tmp/gddp-eval-wt-1f0gexss && git log --oneline -5 2>/dev/null; echo \"---\"; git status --short 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-11T05:29:02.018Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_BpQPWQx0c16wJzcCLCzr1161",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:29:02.060Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ASAoBHav6qN4eAEK8A0f9060",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:29:04.178Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_1QF1rtZV1aQzrdn8Iqbg4243",
+          "command": "cd /tmp/gddp-eval-wt-1f0gexss && python3 scripts/export_evaluations.py --help 2>&1; echo \"====\"; python3 scripts/gddp_node_receipt.py --help 2>&1; echo \"====\"; python3 scripts/rollback.py --help 2>&1"
+        },
+        {
+          "ts": "2026-08-11T05:29:04.178Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_RyfchHupRaXG0FbniToe6288",
+          "command": "cd /tmp/gddp-eval-wt-1f0gexss && python3 scripts/echo.py --help 2>&1; echo \"====\"; python3 scripts/jobs_status.py --help 2>&1"
+        },
+        {
+          "ts": "2026-08-11T05:29:04.273Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_RyfchHupRaXG0FbniToe6288",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:29:04.381Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_1QF1rtZV1aQzrdn8Iqbg4243",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:29:07.232Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_VCapmzNBxpl2xHptUNWK2349",
+          "command": "cd /tmp/gddp-eval-wt-1f0gexss && for sub in list show results set; do echo \"=== $sub ===\"; python3 scripts/jobs_status.py $sub --help 2>&1; done"
+        },
+        {
+          "ts": "2026-08-11T05:29:07.232Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_9xZJmiOKtxP4U7ePN9U08155",
+          "command": "cd /tmp/gddp-eval-wt-1f0gexss && echo \"=== echo tail ===\"; python3 scripts/echo.py 2>&1 | tail -2; echo \"=== init_db main ===\"; grep -n \"if __name__\" scripts/init_db.py scripts/node_status_history.py scripts/local_agent_executor.py scripts/intake_server.py 2>&1; echo \"=== intake flask import ===\"; grep -n \"from flask\" scripts/intake_server.py | head -3; echo \"=== local_agent_executor stdin ===\"; printf '' | python3 scripts/local_agent_executor.py 2>&1 | head -3"
+        },
+        {
+          "ts": "2026-08-11T05:29:07.367Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_9xZJmiOKtxP4U7ePN9U08155",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:29:07.514Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_VCapmzNBxpl2xHptUNWK2349",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:29:15.382Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_UCHPhbcpBhRmlWST9a344732",
+          "command": "cd /tmp/gddp-eval-wt-1f0gexss && timeout 300 python3 -m pytest -q 2>&1 | tail -3"
+        },
+        {
+          "ts": "2026-08-11T05:29:15.383Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_dFxdPQ1ufZM9Mlghew6Q4991",
+          "command": "cd /tmp/gddp-eval-wt-1f0gexss && git diff --stat 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61 51de49a6f4102c5fbe3762d2bda630be5116befc 2>/dev/null; echo \"---\"; git diff --name-status 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61 51de49a6f4102c5fbe3762d2bda630be5116befc 2>/dev/null; echo \"--- file size ---\"; wc -c reports/gddp-dogfood/04-scripts-entrypoint-surface.md"
+        },
+        {
+          "ts": "2026-08-11T05:29:15.403Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_dFxdPQ1ufZM9Mlghew6Q4991",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:29:15.414Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_UCHPhbcpBhRmlWST9a344732",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:29:18.788Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_yIFmJTLw9BkfhIDBX25o2614",
+          "command": "cd /tmp/gddp-eval-wt-1f0gexss && which -a python3 python pytest 2>/dev/null; ls /tmp/gddp-agent-wt-_m3sjszt 2>/dev/null | head; echo \"---\"; python3 -c \"import sys; print(sys.executable)\"; ls /tmp/gddp-eval-wt-1f0gexss/.venv 2>/dev/null | head -5"
+        },
+        {
+          "ts": "2026-08-11T05:29:18.823Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_yIFmJTLw9BkfhIDBX25o2614",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:29:21.964Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_0R1ANsyyyun3vYwioSVW2937",
+          "command": "cd /tmp/gddp-eval-wt-1f0gexss && timeout 420 python3 -m pytest --version 2>&1 | head -2; echo \"---try direct---\"; timeout 420 /home/sab-mini/.local/bin/pytest -q 2>&1 | tail -3"
+        },
+        {
+          "ts": "2026-08-11T05:29:22.048Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_0R1ANsyyyun3vYwioSVW2937",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:29:26.303Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_MBsCCLI1VvxJoQukRub76917",
+          "command": "cd /tmp/gddp-eval-wt-1f0gexss && grep -rn \"flask\\|Flask\" scripts/test_*.py | grep -i \"import\\|skip\" | head -10; echo \"=== test files importing flask ===\"; grep -ln \"import flask\\|from flask\" scripts/test_*.py"
+        },
+        {
+          "ts": "2026-08-11T05:29:26.304Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_OH4PZOxq2qoW5ruB3WoC2979",
+          "command": "cd /tmp/gddp-eval-wt-1f0gexss && python3 - <<'EOF'\nimport ast, glob\ntotal = 0\nfor f in glob.glob('scripts/test_*.py'):\n    try:\n        tree = ast.parse(open(f).read())\n    except Exception as e:\n        print(f, 'parse err', e); continue\n    n = sum(isinstance(x, ast.FunctionDef) and x.name.startswith('test_') for x in ast.walk(tree))\n    total += n\n    print(f, n)\nprint('TOTAL test functions:', total)\nEOF"
+        },
+        {
+          "ts": "2026-08-11T05:29:26.317Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_MBsCCLI1VvxJoQukRub76917",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T05:29:26.374Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_OH4PZOxq2qoW5ruB3WoC2979",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:29:30.511Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_YRbeKxKjDAXlD4ApkLIW0054",
+          "command": "cd /tmp/gddp-eval-wt-1f0gexss && ls -d tests/ verification/ 2>/dev/null; python3 - <<'EOF'\nimport ast, glob\ntotal = 0\nfor f in sorted(glob.glob('**/test_*.py', recursive=True)):\n    try:\n        tree = ast.parse(open(f).read())\n    except Exception:\n        continue\n    n = sum(isinstance(x, ast.FunctionDef) and x.name.startswith('test_') for x in ast.walk(tree))\n    total += n\nprint('TOTAL test functions repo-wide:', total)\nEOF"
+        },
+        {
+          "ts": "2026-08-11T05:29:30.809Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_YRbeKxKjDAXlD4ApkLIW0054",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:29:37.578Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_guOu2X1wnAOalKm2TCvN6792",
+          "command": "python3 -c \"import flask\" 2>&1 | head -2; echo \"---\"; cd /tmp/gddp-eval-wt-1f0gexss && python3 scripts/intake_server.py --help 2>&1 | head -4"
+        },
+        {
+          "ts": "2026-08-11T05:29:37.685Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_guOu2X1wnAOalKm2TCvN6792",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:29:59.583Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_c4UGTV9xMJ2LIVJjNzua8135",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All three acceptance criteria for node-04-scripts-entrypoint-surface are satisfied by the report at reports/gddp-dogfood/04-scripts-entrypoint-surface.md. The file exists and is non-empty; it contains a complete table of all 9 top-level scripts/*.py entrypoints (verified against the repo's scripts/ directory) with their argparse/subcommand surfaces, including a dedicated jobs_status.py subcommand table; and it quotes real --help/argparse output for 5 entrypoints (6 counting subcommands), every quote of which I re-ran and confirmed byte-for-byte identical to live output in the current worktree. The report also adds genuine value beyond the minimum: it documents non-argparse entrypoints with real invocation results (echo, intake_server flask-import failure reproduced identically, local_agent_executor empty-stdin error, init_db side-effect warning, node_status_history import-only), plus operator guidance. Constraints observed: the subject diff contains only the report file (satisfying create-only/read-only constraints) and the pytest tail line is quoted in the Validation section (plausible: 611 repo test functions as a lower bound, 626 total quoted, with Flask-absent failures consistent with the environment). No intent or integrity concerns found; this is a T1 report-only canary and the report is accurate, scoped, and reviewable.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-11T05:31:05.047143+00:00",
+  "evaluated_tree_sha": "8e4ff962dface537d9b85a7ccb2bfd2491f93eba",
+  "evaluated_commit_sha": "51de49a6f4102c5fbe3762d2bda630be5116befc",
+  "merge_commit_sha": "51de49a6f4102c5fbe3762d2bda630be5116befc",
+  "expected_base_commit_sha": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+  "pr_ref": null,
+  "job_id": "job_20260811T0523385827866e1faae8",
+  "execution_attempt_id": "job_20260811T0523385827866e1faae8:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-1f0gexss/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-1f0gexss/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-1f0gexss/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-1f0gexss/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-1f0gexss/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-1f0gexss/README.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+      ]
+    },
+    "overall": "medium"
+  }
+}

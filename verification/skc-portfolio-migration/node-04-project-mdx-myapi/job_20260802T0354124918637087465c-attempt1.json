@@ -1,0 +1,613 @@
+{
+  "project_id": "skc-portfolio-migration",
+  "node_id": "node-04-project-mdx-myapi",
+  "verdict": "fail",
+  "criteria_verdict": "fail",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.72,
+    "findings": [],
+    "reasoning": "The work under review (commit 8d5180a) modifies only content/projects/myapi.mdx — the node's sole required artifact. The edits are squarely on-role: they tighten technical details toward myapi-brief.md (retrieval.py corrected to exactly 1,383 lines matching the brief verbatim, added Gemini enrichment pass and VM auto-shutdown-on-idle, both explicitly required in the brief's 'How it runs' / 'Technical Details' sections). The node's why (MyAPI page reflects personal search architecture, query classification, matches myapi-brief.md guidelines) is directly served; frontmatter was untouched so the 'valid frontmatter' constraint holds; no forbidden patterns; no out-of-scope file edits. The [SAB — ...] placeholders left in the content map one-to-one to the brief's 'Questions Only You Can Answer' section, which explicitly cannot be answered by an agent without fabrication — so deferring them is brief-compliant, not a drift. Graph structure is intact: depends_on/unlocks unchanged, and downstream node-08 (meta/OG/resume on __root.tsx) does not consume myapi content, so no dependent is at risk from this change. The lane-1 indeterminate criteria (brief path absent, no frontmatter probe) are acceptance-adjudication matters, not integrity defects of this change; the real issue is upstream node-02 being provisional (briefs/ never landed), which is why the in-repo criterion path is unsatisfiable — that belongs in graph observations, not this verdict.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-02T04:06:41.481Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_lpOLjh2q9ynvGTPdWjeH2477",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/node-02-briefs-import.yaml"
+      },
+      {
+        "ts": "2026-08-02T04:06:41.483Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_bwGrPTc494wAJtPAj20I1001",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/node-08-meta-seo-resume.yaml"
+      },
+      {
+        "ts": "2026-08-02T04:06:41.485Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_3G72aaC3Gb8NkptrPBCF7044",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ljhksgjq && pwd && ls -la && git status 2>/dev/null | head -40"
+      },
+      {
+        "ts": "2026-08-02T04:06:41.495Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_lpOLjh2q9ynvGTPdWjeH2477",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-02T04:06:41.496Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_bwGrPTc494wAJtPAj20I1001",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-02T04:06:41.728Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_3G72aaC3Gb8NkptrPBCF7044",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-02T04:06:44.695Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_SdVVQgVOv618L07N4gn52751",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ljhksgjq && find content -type f | sort && echo \"---BRIEFS---\" && ls -la briefs 2>&1 || echo \"NO briefs dir\" && echo \"---GITLOG---\" && git log --oneline -15 && echo \"---GIT SHOW STATS---\" && git show --stat HEAD | head -30"
+      },
+      {
+        "ts": "2026-08-02T04:06:44.696Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_FeUGzwSFU1U871oeSqea4003",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ljhksgjq && cat content/projects/myapi.mdx 2>&1 | head -80"
+      },
+      {
+        "ts": "2026-08-02T04:06:44.717Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_FeUGzwSFU1U871oeSqea4003",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-02T04:06:44.766Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_SdVVQgVOv618L07N4gn52751",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-02T04:06:49.249Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_csagqqzBdZ2yHH2FPl9g6631",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ljhksgjq && git diff 9095968 8d5180a -- content/projects/myapi.mdx"
+      },
+      {
+        "ts": "2026-08-02T04:06:49.250Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ZASuB6yosaw8ADDIp9Ms9874",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ljhksgjq && git show 9095968:content/projects/myapi.mdx 2>&1 | head -40; echo \"---SRC ROUTES---\"; ls src/routes 2>/dev/null; echo \"---LOVABLE---\"; ls -la .lovable 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-02T04:06:49.296Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_csagqqzBdZ2yHH2FPl9g6631",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-02T04:06:49.306Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ZASuB6yosaw8ADDIp9Ms9874",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-02T04:07:11.471Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_ogk5TTL75leP2VONf5D82792",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/node-01-asset-sync.yaml"
+      },
+      {
+        "ts": "2026-08-02T04:07:11.473Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Xp6JzfyBMvJmlxr05Scn9149",
+        "command": "ls /Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/ 2>&1; echo \"---SOURCE BRIEFS---\"; ls -la /Users/sab-mini/repos/saboorkc.dev/briefs/ 2>&1 || echo \"saboorkc.dev briefs dir missing\"; echo \"---MYAPI BRIEF HEAD---\"; head -60 /Users/sab-mini/repos/saboorkc.dev/briefs/myapi-brief.md 2>&1 || echo \"no myapi-brief.md\""
+      },
+      {
+        "ts": "2026-08-02T04:07:11.480Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ogk5TTL75leP2VONf5D82792",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-02T04:07:11.514Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Xp6JzfyBMvJmlxr05Scn9149",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-02T04:08:07.530Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_PQP4dFMV7lMdbsip1B9Z4932",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ljhksgjq && git show --name-status 8d5180a | tail -5 && echo \"---\" && grep -n \"date\\|title\\|description\\|tags\" content/projects/myapi.mdx | head -8"
+      },
+      {
+        "ts": "2026-08-02T04:08:07.590Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_PQP4dFMV7lMdbsip1B9Z4932",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-02T04:08:19.192Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_M3GgsMRyVxi6TgsawZ0e1218",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "node-02-briefs-import is provisional and briefs/ is absent in-repo, so node-04's criterion path briefs/myapi-brief.md cannot be verified in-repo even though the content substantively matches the source brief. The executor sourced the brief externally, but the graph's dependency contract remains unfulfilled. Before treating node-04 as fully done and advancing node-08 on it, either land node-02 (port briefs/) or update the criterion path — otherwise an unverifiable 'done' accumulates in the frontier.",
+        "affected_node_ids": [
+          "node-02-briefs-import",
+          "node-04-project-mdx-myapi"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Downstream convergence: node-08 depends on node-03/04/05 but its acceptance criteria target src/routes/__root.tsx only, so it is not blocked by provisional briefs/assets. However, if node-02 and node-01 later land and force MDX rework, node-08's meta work needn't be redone — low serialization risk.",
+        "affected_node_ids": [
+          "node-08-meta-seo-resume"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.30000000000000004,
+  "criteria_confidence": 0.30000000000000004,
+  "completeness": 1.0,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "myapi-mdx-updated",
+        "criterion": "content/projects/myapi.mdx aligns with briefs/myapi-brief.md technical details",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "briefs/myapi-brief.md absent",
+          "content/projects/myapi.md absent"
+        ],
+        "reasoning": "Scanned source files (content/projects/myapi.mdx) for identifiers named in the criterion (myapi-brief). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "briefs/myapi-brief.md absent, content/projects/myapi.md absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "frontmatter-valid",
+        "criterion": "Frontmatter contains title, description, tags, and date",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Keep frontmatter valid for TanStack Start / remark-mdx-frontmatter",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "content/projects/myapi.mdx": true
+    },
+    "deps_status": {
+      "node-02-briefs-import": "provisional"
+    },
+    "criteria_mismatches": [
+      {
+        "criterion_id": "myapi-mdx-updated",
+        "kind": "source_path",
+        "detail": "briefs/myapi-brief.md absent, content/projects/myapi.md absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "myapi-mdx-updated",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "9095968a87a9c64efa08c4f4176e2a214dc054ca",
+      "tip": "8d5180a482ad3bbefbc06d46fb22540a07bf939b",
+      "files": [
+        {
+          "status": "M",
+          "path": "content/projects/myapi.mdx"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "myapi-mdx-updated",
+        "judgment": "judged_fail",
+        "confidence": 0.7,
+        "evidence": [
+          "content/projects/myapi.mdx (HEAD 8d5180a): frontmatter + body; contains placeholder blockquotes '**[SAB — your origin moment goes here.]** ... This paragraph is the one I can't write for you.' and '**[SAB — the brief asks for numbers you have and I don't:]** ... VM spec and real monthly cost.'",
+          "briefs/myapi-brief.md ABSENT from HEAD/main/working tree (git ls-tree -r HEAD|main | grep brief -> none; git ls-files | grep -i brief -> none)",
+          "Node-02 result branch gddp/result-job_...-node-02-briefs-import-attempt-0-5c0944...:briefs/myapi-brief.md exists and is byte-identical (diff) to /Users/sab-mini/repos/saboorkc.dev/briefs/myapi-brief.md; node-02 status provisional, branch unmerged",
+          "git show 8d5180a (subject_diff): only content/projects/myapi.mdx modified; diff changed retrieval.py '~1,500 lines' -> '1,383 lines' and added Gemini-1.5-Flash enrichment sentence",
+          "Source brief myapi-brief.md: 'Gemini API for embeddings/reranking' vs MDX 'Gemini-1.5-Flash handles the enrichment pass — batch-extracting tags, projects, key assertions, and summaries from raw conversation logs'"
+        ],
+        "reasoning": "The criterion's ground-truth file (briefs/myapi-brief.md) does not exist in the deliverable repo — the upstream dependency node-02 never landed (provisional; briefs only on unmerged gddp branches), so in-repo alignment is unverifiable and the criterion's reference is dangling. Judged against the actual brief content (identical on the node-02 result branch, so it is the definitive reference text): the MDX aligns with 6 of the 7 'Technical Details to Include' (context_refinery/ normalizer; retrieval.py at exactly 1,383 lines — the executor's own edit; three retrieval lanes; Khoj vector-search backbone; 7 diagnostic buckets; corpus v1 direction), but one technical detail diverges (Gemini's role: brief says embeddings/reranking, MDX says enrichment pass) and the content retains two visible placeholder blockquotes covering the origin-moment narrative and the metrics (query-bank size, cold-start improvement, VM spec/cost) that the brief's sections 1 and 'Questions Only You Can Answer' explicitly require. The brief's 'Format' guidance expects finished prose, not placeholders. Substantial partial alignment exists, so a human with the actual MyAPI repo may accept the Gemini description as a correction and fill the placeholders — hence confidence is not high — but as submitted the criterion is not satisfied."
+      },
+      {
+        "criterion_id": "frontmatter-valid",
+        "judgment": "judged_pass",
+        "confidence": 0.85,
+        "evidence": [
+          "content/projects/myapi.mdx frontmatter: title: MyAPI; description: 'A retrieval layer for agents and humans ...'; tags: [Python, FastAPI, Khoj, Tailscale, RAG, Benchmarking]; date: null",
+          "src/lib/content.ts: ProjectFrontmatter declares 'date: string | null' — null date is an explicit, supported value for project files",
+          "content/projects/gddp.mdx and content/projects/pi-agent.mdx both use 'date: null' — established project-file pattern",
+          "src/lib/content.ts: featuredProjects sorted by order, not date; formatDate(null) returns '' — no date required by pipeline",
+          "YAML frontmatter block parses cleanly (structure verified; keys match typed schema)"
+        ],
+        "reasoning": "Frontmatter contains all four required fields — title, description, tags, and date. The date key is present with a YAML null value, which the repo's own ProjectFrontmatter type explicitly permits ('date: string | null'), matches the sibling project files (gddp, pi-agent), and is harmless to the pipeline since projects are ordered by 'order' and formatDate(null) returns ''. Frontmatter is valid for remark-mdx-frontmatter/TanStack Start consumption and the constraint scan found no forbidden patterns. Caveat: if 'contains date' was intended to mean a non-null date value, this would need a clarification; under the literal criterion and the codebase's established pattern, it passes."
+      }
+    ],
+    "overall_reasoning": "Node-04 (Polish MyAPI project MDX) executed on top of a repo state where its sole dependency (node-02-briefs-import) never landed: briefs/ is absent from HEAD/main and exists only on unmerged gddp/ branches (verified byte-identical to the source saboorkc.dev briefs). The executor modified only content/projects/myapi.mdx and clearly worked from the actual brief content (exact 1,383-line retrieval.py figure, auto-shutdown note, corpus v1 direction). Criterion 1 fails as submitted: the referenced brief file is missing from the deliverable (criterion path not stale — node-02 defines it and the file exists on unmerged branches), one technical detail diverges from the brief (Gemini role: embeddings/reranking vs enrichment pass), and two visible placeholder blockquotes remain in the rendered content for exactly the origin-moment and metrics the brief requires. Criterion 2 passes: title/description/tags/date are all present, with date: null explicitly supported by the repo's ProjectFrontmatter type and matching sibling project files. The frontmatter-validity constraint is satisfied. Graph-integrity concern: node-04 was advanced to a result commit while its dependency was provisional, so downstream node-08 (pending) depends on work whose reference inputs never merged.",
+    "risks": "1) briefs/ never merged to main: node-02's work sits on unmerged gddp branches; without it, criterion 1's ground truth is absent in the deliverable and nodes 03/05/06 (also depending on node-02) face the same problem. 2) Placeholder blockquotes in myapi.mdx are blockquote content, not comments — they would render to site visitors if published. 3) The Gemini-1.5-Flash enrichment-pass description diverges from the brief's 'Gemini API for embeddings/reranking'; the MDX may reflect the actual MyAPI repo more accurately than the June brief, but per the criterion's stated ground truth it is a mismatch — human confirmation needed. 4) date: null satisfies the literal criterion and the codebase pattern, but if a concrete date was intended for the project page, that intent is not met.",
+    "followup_candidates": "1) Human clarification: node-02-briefs-import is provisional and briefs/myapi-brief.md exists only on unmerged gddp branches — should node-02's briefs be merged into main (or the briefs imported) before node-04 can be accepted, since the criterion references an in-repo file? 2) Human clarification: the two '[SAB — ...]' placeholder blockquotes in content/projects/myapi.mdx (origin moment; query-bank/VM metrics) are visible content — should they be filled by Saboor or removed before the page publishes, and does their presence count as failure of brief alignment? 3) Human clarification: is 'date: null' acceptable for the 'contains date' criterion (matches gddp.mdx and pi-agent.mdx, supported by ProjectFrontmatter), or is a concrete date required? 4) Human clarification: the brief says 'Gemini API for embeddings/reranking' but the MDX says 'Gemini-1.5-Flash handles the enrichment pass' — which matches the actual MyAPI repo, and should the brief or the MDX be corrected?",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-02T04:04:17.956Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_qNDMiAU9iAMcXXx3IRX04708",
+          "command": "pwd && ls -la && echo \"---\" && git -C . status 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-02T04:04:17.958Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_oHQkw2DU8ULQLcHtumdq9005",
+          "command": "find . -type f -not -path './.git/*' | head -100"
+        },
+        {
+          "ts": "2026-08-02T04:04:17.985Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_oHQkw2DU8ULQLcHtumdq9005",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-02T04:04:18.334Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_qNDMiAU9iAMcXXx3IRX04708",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-02T04:04:21.103Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_ziQtgs1UxxzYH31lEjhx8286",
+          "path": "content/projects/myapi.mdx"
+        },
+        {
+          "ts": "2026-08-02T04:04:21.104Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_GRRrMHQmIAl5OzWbbKbS8108",
+          "command": "find . -iname '*brief*' -not -path './.git/*'; echo \"---\"; find content -type f; echo \"---\"; ls -la content/ 2>/dev/null; ls -la content/projects 2>/dev/null; ls -la content/blog 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-02T04:04:21.109Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ziQtgs1UxxzYH31lEjhx8286",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-02T04:04:21.155Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_GRRrMHQmIAl5OzWbbKbS8108",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-02T04:04:27.870Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_J4VM0g79C42a8NKVYvtW7104",
+          "command": "ls -la /Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/ 2>/dev/null || echo \"config dir not accessible\"; echo \"---\"; git log --oneline -15 2>/dev/null; echo \"---\"; git diff 9095968a87a9c64efa08c4f4176e2a214dc054ca..8d5180a482ad3bbefbc06d46fb22540a07bf939b -- content/projects/myapi.mdx 2>/dev/null | head -120"
+        },
+        {
+          "ts": "2026-08-02T04:04:27.870Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_8o3W1y8IkYTTT1zNeBJO2498",
+          "command": "cat /Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/node-02-briefs-import.yaml 2>/dev/null; echo \"===NODE08===\"; cat /Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/node-08-meta-seo-resume.yaml 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-02T04:04:27.878Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_8o3W1y8IkYTTT1zNeBJO2498",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-02T04:04:27.904Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_J4VM0g79C42a8NKVYvtW7104",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-02T04:04:34.858Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ZGVNxQyS4dZFHQpX5d1r9739",
+          "command": "cat /Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/node-04-project-mdx-myapi.yaml; echo \"===NODE01===\"; cat /Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/node-01-asset-sync.yaml"
+        },
+        {
+          "ts": "2026-08-02T04:04:34.858Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Ddgl2vivr5H5uCcWqGRn5165",
+          "command": "ls -la /Users/sab-mini/repos/saboorkc.dev/briefs/ 2>/dev/null || echo \"saboorkc.dev briefs dir not accessible\"; echo \"---\"; cat /Users/sab-mini/repos/saboorkc.dev/briefs/myapi-brief.md 2>/dev/null | head -80 || echo \"myapi-brief.md not readable\""
+        },
+        {
+          "ts": "2026-08-02T04:04:34.866Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ZGVNxQyS4dZFHQpX5d1r9739",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-02T04:04:34.867Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Ddgl2vivr5H5uCcWqGRn5165",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-02T04:05:02.254Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_18SKqujs7bhNXGXQeGzX9543",
+          "path": "src/lib/content.ts"
+        },
+        {
+          "ts": "2026-08-02T04:05:02.257Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_3ZH2ZUo8Cb549nK6wyxR7622",
+          "command": "for f in content/projects/gddp.mdx content/projects/pi-agent.mdx content/blog/dygma-raise.mdx; do echo \"=== $f ===\"; sed -n '1,15p' \"$f\"; done"
+        },
+        {
+          "ts": "2026-08-02T04:05:02.264Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_18SKqujs7bhNXGXQeGzX9543",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-02T04:05:02.295Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_3ZH2ZUo8Cb549nK6wyxR7622",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-02T04:05:28.939Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ZoSvDfTN38Pi6wq6QHD14467",
+          "command": "git ls-files | grep -i brief; echo \"exit: $?\"; echo \"---history---\"; git log --all --oneline -- 'briefs/*' | head; echo \"exit: $?\"; echo \"---HEAD tree top---\"; git ls-tree -r HEAD --name-only | head -40"
+        },
+        {
+          "ts": "2026-08-02T04:05:28.941Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Qkau0qJseAt0dDRSMAhs2177",
+          "command": "python3 - <<'EOF'\nimport sys\ntry:\n    import yaml\nexcept ImportError:\n    print(\"no pyyaml; trying node\")\n    sys.exit(0)\ntext = open('content/projects/myapi.mdx').read().split('---')[1]\ndata = yaml.safe_load(text)\nprint(\"keys:\", sorted(data.keys()))\nprint(\"title:\", data.get('title'))\nprint(\"description present:\", bool(data.get('description')))\nprint(\"tags:\", data.get('tags'))\nprint(\"date:\", repr(data.get('date')), \"| is None:\", data.get('date') is None)\nEOF\necho \"---node check---\"\nnode -e \"const fs=require('fs');const t=fs.readFileSync('content/projects/myapi.mdx','utf8');const fm=t.split('---')[1];console.log('raw frontmatter block ok, length', fm.length);\" 2>/dev/null || echo \"node not available\""
+        },
+        {
+          "ts": "2026-08-02T04:05:29.066Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ZoSvDfTN38Pi6wq6QHD14467",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-02T04:05:29.127Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Qkau0qJseAt0dDRSMAhs2177",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-02T04:05:32.365Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_UL8nHdn4FBKLQ3rGOfoY7064",
+          "reason": "command matched blocked pattern",
+          "command": "git log --all --oneline | head -30; echo \"===8d54bcb===\"; git show --stat 8d54bcb | head -30; echo \"===is 8d54bcb an ancestor of HEAD?===\"; git merge-base --is-ancestor 8d54bcb HEAD && echo \"YES ancestor\" || echo \"NO not ancestor\"",
+          "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+        },
+        {
+          "ts": "2026-08-02T04:05:32.366Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_UL8nHdn4FBKLQ3rGOfoY7064",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-02T04:05:32.366Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_23GjbHyyvSXoBQiLEYwX7007",
+          "command": "git log --all --diff-filter=D --oneline -- 'briefs/myapi-brief.md'; echo \"---which commits touched briefs---\"; git log --all --oneline -- 'briefs/*' ; echo \"---current branch refs---\"; git branch -a; git show-ref | head"
+        },
+        {
+          "ts": "2026-08-02T04:05:32.470Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_23GjbHyyvSXoBQiLEYwX7007",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-02T04:05:43.214Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_GyR14lqMXUUyI311QTF91050",
+          "command": "git show --stat 8d54bcb | head -25; echo \"===branch containing 8d54bcb===\"; git branch -a --contains 8d54bcb; echo \"===main has briefs?===\"; git ls-tree -r main --name-only | grep -i brief || echo \"main: NO briefs\"; echo \"===HEAD has briefs?===\"; git ls-tree -r HEAD --name-only | grep -i brief || echo \"HEAD: NO briefs\""
+        },
+        {
+          "ts": "2026-08-02T04:05:43.215Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_bP2GBPSgGDbLRjj07rMt3728",
+          "command": "echo \"===node-02 result branch tree===\"; git ls-tree -r gddp/result-job_20260802T01322170998ea744e437-job_20260802T01322170998ea744e437-node-02-briefs-import-attempt-0-5c094442bcad43cd89c3b9c2ddaca58d --name-only | grep -i brief; echo \"===node-02 attempt branch tree===\"; git ls-tree -r gddp/attempt-job_20260802T01322170998ea744e437-attempt-0 --name-only | grep -i brief"
+        },
+        {
+          "ts": "2026-08-02T04:05:43.282Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_bP2GBPSgGDbLRjj07rMt3728",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-02T04:05:43.313Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_GyR14lqMXUUyI311QTF91050",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-02T04:06:04.438Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_MqeplmpKyk8Km61mbBb44291",
+          "reason": "command matched blocked pattern",
+          "command": "git show gddp/result-job_20260802T01322170998ea744e437-job_20260802T01322170998ea744e437-node-02-briefs-import-attempt-0-5c094442bcad43cd89c3b9c2ddaca58d:briefs/myapi-brief.md > /tmp/result-brief.md 2>/dev/null && diff /tmp/result-brief.md /Users/sab-mini/repos/saboorkc.dev/briefs/myapi-brief.md && echo \"IDENTICAL to source brief\" || echo \"differs or unreadable\"; echo \"---\"; git rev-parse HEAD; git log -1 --format='%h %s' HEAD",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-02T04:06:04.439Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_MqeplmpKyk8Km61mbBb44291",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-02T04:06:08.151Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_BzPEQGqxIohcQZMSQufS2676",
+          "command": "diff <(git show gddp/result-job_20260802T01322170998ea744e437-job_20260802T01322170998ea744e437-node-02-briefs-import-attempt-0-5c094442bcad43cd89c3b9c2ddaca58d:briefs/myapi-brief.md) /Users/sab-mini/repos/saboorkc.dev/briefs/myapi-brief.md && echo \"IDENTICAL to source brief\" || echo \"differs\"; echo \"---\"; git rev-parse HEAD; git log -1 --format='%h %s' HEAD"
+        },
+        {
+          "ts": "2026-08-02T04:06:08.235Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_BzPEQGqxIohcQZMSQufS2676",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-02T04:06:34.781Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Q9zTcWjO2Ud6FjmnUvG61334",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node-04 (Polish MyAPI project MDX) executed on top of a repo state where its sole dependency (node-02-briefs-import) never landed: briefs/ is absent from HEAD/main and exists only on unmerged gddp/ branches (verified byte-identical to the source saboorkc.dev briefs). The executor modified only content/projects/myapi.mdx and clearly worked from the actual brief content (exact 1,383-line retrieval.py figure, auto-shutdown note, corpus v1 direction). Criterion 1 fails as submitted: the referenced brief file is missing from the deliverable (criterion path not stale — node-02 defines it and the file exists on unmerged branches), one technical detail diverges from the brief (Gemini role: embeddings/reranking vs enrichment pass), and two visible placeholder blockquotes remain in the rendered content for exactly the origin-moment and metrics the brief requires. Criterion 2 passes: title/description/tags/date are all present, with date: null explicitly supported by the repo's ProjectFrontmatter type and matching sibling project files. The frontmatter-validity constraint is satisfied. Graph-integrity concern: node-04 was advanced to a result commit while its dependency was provisional, so downstream node-08 (pending) depends on work whose reference inputs never merged.",
+  "required_next_action": "Address semantic failures and re-submit.",
+  "generated_at": "2026-08-02T04:08:19.225695+00:00",
+  "evaluated_tree_sha": "235468996bf8c420bd4475474d8187147c558994",
+  "evaluated_commit_sha": "8d5180a482ad3bbefbc06d46fb22540a07bf939b",
+  "merge_commit_sha": "8d5180a482ad3bbefbc06d46fb22540a07bf939b",
+  "expected_base_commit_sha": "9095968a87a9c64efa08c4f4176e2a214dc054ca",
+  "pr_ref": null,
+  "job_id": "job_20260802T0354124918637087465c",
+  "canonical_context": {
+    "readme": "UNAVAILABLE: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ljhksgjq/README.md does not exist",
+    "project_brief": "UNAVAILABLE: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ljhksgjq/PROJECT-BRIEF.md does not exist",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/node-01-asset-sync.yaml",
+    "neighbor:node-02-briefs-import": "/Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/node-02-briefs-import.yaml",
+    "neighbor:node-08-meta-seo-resume": "/Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/node-08-meta-seo-resume.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "none",
+      "offered": 3,
+      "content_accessed": 0,
+      "not_observed": 3,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/node-01-asset-sync.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/node-02-briefs-import.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/node-08-meta-seo-resume.yaml"
+      ]
+    },
+    "integrity": {
+      "rating": "low",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/node-01-asset-sync.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/node-02-briefs-import.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/skc-portfolio-migration/nodes/node-08-meta-seo-resume.yaml"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "none"
+  }
+}

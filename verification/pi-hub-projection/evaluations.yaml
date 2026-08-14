@@ -1,0 +1,400 @@
+schema_type: node_evaluations
+schema_version: '1.0'
+project_id: pi-hub-projection
+generated_at: '2026-08-14T21:05:48Z'
+source: gddp-runtime db/queue.db (results + decision_results)
+evaluations:
+  node-01-sqlite-projection:
+    verdict: pass
+    evaluated_at: '2026-08-06T19:10:01.459037+00:00'
+    executor: droid
+    job_id: job_20260806T184954759c5ab68f44d0
+    result_id: res_ses_20260806T1849547548b21d04a813
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/pi-hub-projection/node-01-sqlite-projection/job_20260806T184954759c5ab68f44d0-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node-01-sqlite-projection. The delivered work faithfully implements
+      the node''s stated role: a stdlib-only projector (argparse/datetime/hashlib/json/os/sqlite3/sys/tempfile/pathlib/typing)
+      that upserts pi-observe JSONL current-state into ~/.pi/agent/observability/pi-hub.db in WAL mode
+      (enforced and asserted), with stable IDs matching the why (session_id, run:step, tool:source:call_id,
+      source:id, instance_id), content-hash short-circuiting for idempotency, and append-only state_transitions
+      on watched status/tool/acceptance/ownership fields. The source-stream contract matches agent/scripts/pi-observe.py
+      exactly (same env-var default root, same file names, same observability dir). I executed --self-check
+      in the checkout: WAL confirmed, run 1 counts match, run 2 inserts zero current-state rows, 10 transition
+      rows captured on mutation, exit 0 — so the deterministic core of the node''s promise is demonstrably
+      real, not just reported. Graph integrity holds: the schema gives node-02 (localhost API) natural
+      monotonic cursors (state_transitions.transition_id, projection_runs.run_id) plus sessions/events
+      tables for cursor-polling endpoints, and node-04 (receipts ingestion) an extensible in-place projection
+      (SCHEMA_SQL constant, importable connect()) that its own criterion explicitly allows adapting. Diff
+      hygiene is clean: base→tip adds exactly the two intended files, no junk, no writes outside agent/observability/
+      and reports/pi-hub-projection/, and the gitignore/force-add story in the report checks out. Only
+      residual uncertainty: live-run evidence (counts table, live delta) references host-local gitignored
+      runtime state that cannot be independently reproduced from the checkout, and the script additionally
+      projects hooks/artifacts beyond the five entities named in the why (documented, harmless superset
+      consistent with the blueprint). Neither undermines the node''s role or the dependents'' foundation;
+      both are noted as forward-looking observations.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/pi-hub-projection/node-01-sqlite-projection/job_20260806T184954759c5ab68f44d0-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9700000000000001
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: f83b5098ffcf6b29b03cd4cdaf9c188118fd6321
+      evaluated_commit_sha: 3d3ae4c163032db51e4f73a067917f86046fc583
+      merge_commit_sha: 3d3ae4c163032db51e4f73a067917f86046fc583
+      context_coverage:
+        criteria: high
+        integrity: high
+        overall: high
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.85
+        findings: []
+        reasoning: 'Fresh-eyes review of node-01-sqlite-projection. The delivered work faithfully implements
+          the node''s stated role: a stdlib-only projector (argparse/datetime/hashlib/json/os/sqlite3/sys/tempfile/pathlib/typing)
+          that upserts pi-observe JSONL current-state into ~/.pi/agent/observability/pi-hub.db in WAL
+          mode (enforced and asserted), with stable IDs matching the why (session_id, run:step, tool:source:call_id,
+          source:id, instance_id), content-hash short-circuiting for idempotency, and append-only state_transitions
+          on watched status/tool/acceptance/ownership fields. The source-stream contract matches agent/scripts/pi-observe.py
+          exactly (same env-var default root, same file names, same observability dir). I executed --self-check
+          in the checkout: WAL confirmed, run 1 counts match, run 2 inserts zero current-state rows, 10
+          transition rows captured on mutation, exit 0 — so the deterministic core of the node''s promise
+          is demonstrably real, not just reported. Graph integrity holds: the schema gives node-02 (localhost
+          API) natural monotonic cursors (state_transitions.transition_id, projection_runs.run_id) plus
+          sessions/events tables for cursor-polling endpoints, and node-04 (receipts ingestion) an extensible
+          in-place projection (SCHEMA_SQL constant, importable connect()) that its own criterion explicitly
+          allows adapting. Diff hygiene is clean: base→tip adds exactly the two intended files, no junk,
+          no writes outside agent/observability/ and reports/pi-hub-projection/, and the gitignore/force-add
+          story in the report checks out. Only residual uncertainty: live-run evidence (counts table,
+          live delta) references host-local gitignored runtime state that cannot be independently reproduced
+          from the checkout, and the script additionally projects hooks/artifacts beyond the five entities
+          named in the why (documented, harmless superset consistent with the blueprint). Neither undermines
+          the node''s role or the dependents'' foundation; both are noted as forward-looking observations.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: medium
+          summary: node-02 and node-04 unlock concurrently after this node and both open the same pi-hub.db;
+            node-04 will extend the schema (envelope/gate tables) in-place while node-02 may already be
+            serving it. WAL + busy_timeout on the projector's connections help, but the graph should plan
+            for the schema-extension moment (e.g., node-04 lands tables before node-02's cursor API is
+            validated against them, or a documented migration step) to avoid a mid-flight schema change
+            under a serving API.
+          affected_node_ids:
+          - node-02-localhost-api
+          - node-04-receipts-ingestion
+        - severity: low
+          summary: The live-evidence criteria (db-created, counts-match, idempotent-on-live, transitions-with-live-delta)
+            can only be re-verified on the host because pi-hub.db and the jsonl sources are gitignored
+            runtime state that never exists in a git checkout — this is why the eval harness sees 'pi-hub.db
+            absent'. The reproducible in-checkout verification path is project.py --self-check; downstream
+            nodes and the harness should lean on deterministic self-checks for their evidence rather than
+            host-only live claims.
+          affected_node_ids:
+          - node-01-sqlite-projection
+          - node-02-localhost-api
+          - node-04-receipts-ingestion
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-02-localhost-api:
+    verdict: pass
+    evaluated_at: '2026-08-06T19:37:44.868588+00:00'
+    executor: droid
+    job_id: job_20260806T19243040cdb822e1f086
+    result_id: res_ses_20260806T19243040464f435ba4fa
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/pi-hub-projection/node-02-localhost-api/job_20260806T19243040cdb822e1f086-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'node-02-localhost-api delivers exactly what its why promises: a stdlib-only HTTP
+      API over pi-hub.db with monotonic cursor polling, hard-bound to 127.0.0.1 (non-loopback binds refused
+      at startup), read-only DB access (mode=ro + PRAGMA query_only + 405 on all mutation methods), ledger-sink-style
+      secret redaction, and an uncommon documented default port (18741) overridable via PI_HUB_API_PORT.
+      The report documents the endpoint list, cursor semantics, and bind/cursor/redaction/read-only evidence.
+      Graph integrity holds: the API''s stream tables (sessions, tools, state_transitions, subagents,
+      instances, artifacts, hooks) exactly match node-01''s project.py DDL and the live WAL DB (verified
+      read-only against ~/.pi/agent/observability/pi-hub.db; counts 25/1093/6 consistent with the report''s
+      25/1093/3 evidence-time snapshot). node-03''s downstream needs (sessions + transitions minimum)
+      are served with clearly documented cursor semantics, and node-03 retains its explicitly permitted
+      direct-DB fallback. Subject diff is confined to the allowed paths (agent/observability/, reports/pi-hub-projection/);
+      commits contain only this node''s files with no git add -A junk. No drift, no harm to dependents.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/pi-hub-projection/node-02-localhost-api/job_20260806T19243040cdb822e1f086-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9633333333333333
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 82ddb81acb24406e21696357d42e610c7832c6e8
+      evaluated_commit_sha: 798f356bbdd50f9dc15dd7824700aa4901ed3fa1
+      merge_commit_sha: 798f356bbdd50f9dc15dd7824700aa4901ed3fa1
+      context_coverage:
+        criteria: high
+        integrity: high
+        overall: high
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'node-02-localhost-api delivers exactly what its why promises: a stdlib-only HTTP API
+          over pi-hub.db with monotonic cursor polling, hard-bound to 127.0.0.1 (non-loopback binds refused
+          at startup), read-only DB access (mode=ro + PRAGMA query_only + 405 on all mutation methods),
+          ledger-sink-style secret redaction, and an uncommon documented default port (18741) overridable
+          via PI_HUB_API_PORT. The report documents the endpoint list, cursor semantics, and bind/cursor/redaction/read-only
+          evidence. Graph integrity holds: the API''s stream tables (sessions, tools, state_transitions,
+          subagents, instances, artifacts, hooks) exactly match node-01''s project.py DDL and the live
+          WAL DB (verified read-only against ~/.pi/agent/observability/pi-hub.db; counts 25/1093/6 consistent
+          with the report''s 25/1093/3 evidence-time snapshot). node-03''s downstream needs (sessions
+          + transitions minimum) are served with clearly documented cursor semantics, and node-03 retains
+          its explicitly permitted direct-DB fallback. Subject diff is confined to the allowed paths (agent/observability/,
+          reports/pi-hub-projection/); commits contain only this node''s files with no git add -A junk.
+          No drift, no harm to dependents.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: medium
+          summary: node-03's why mentions rendering envelopes and gates ('the exact nouns our projection
+            now serves'), but node-02's API exposes only sessions/events/transitions/subagents/instances/artifacts/hooks
+            — envelopes and gate_results are node-04's tables and are NOT served by this API. node-03
+            should plan to use its explicitly-allowed direct pi-hub.db read-only path (or extend the API)
+            for envelope/gate streams; do not assume the API serves them.
+          affected_node_ids:
+          - node-03-visualizer-fork
+          - node-04-receipts-ingestion
+        - severity: low
+          summary: Cursor semantics on current-state tables (sessions, subagents, instances, artifacts,
+            hooks, tools) use implicit SQLite rowid; node-01's upserts update rows in place so only newly
+            inserted rows advance the cursor. 'Rows newer than the cursor' holds for inserts; in-place
+            status changes surface via the append-only state_transitions stream. Downstream consumers
+            should treat rowid cursors as insert-order, which is consistent with node-02's documented
+            semantics.
+          affected_node_ids:
+          - node-03-visualizer-fork
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-04-receipts-ingestion:
+    verdict: pass
+    evaluated_at: '2026-08-06T19:46:33.736640+00:00'
+    executor: droid
+    job_id: job_20260806T1924304078da023a6802
+    result_id: res_ses_20260806T19243040828e41611940
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/pi-hub-projection/node-04-receipts-ingestion/job_20260806T1924304078da023a6802-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The work preserves node-04''s intended role precisely: it extends node-01''s projection
+      artifact (not a parallel pipeline) with envelopes/gate_results/receipt_source_files tables in the
+      same WAL pi-hub.db, ingests the GDDP verification receipts currently under ~/repos/gddp-config/verification/
+      with per-project counts and explicit skip inventory, enforces receipt_path NOT NULL per gate_results
+      row, and demonstrates incremental rerun behavior via content-hash short-circuiting. The report documents
+      source inventory, skips, counts, schema DDL, and acceptance mapping. Graph integrity holds: the
+      change is additive at schema and report levels, so node-02 (read-only cursor API over sessions/events/transitions)
+      is unaffected; node-04 depends only on node-01; the envelope/gate tables land in the same DB node-03''s
+      visualizer can read, fulfilling the why''s promise (''node-03''s visualizer renders verdicts alongside
+      sessions''). All constraints verified by code inspection: 2-file diff only, stdlib-only imports,
+      no subprocess/network, queue.db opened with mode=ro URI, self-check fixtures confined to tempfile,
+      no writes to guarded repos, committed on the result ref with no junk in the diff. Only caveats are
+      low-severity: lane 1''s acceptance evidence is indeterminate and the live counts are self-reported
+      (not re-executable in this review), and node-01''s provisional status predates this node''s work.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/pi-hub-projection/node-04-receipts-ingestion/job_20260806T1924304078da023a6802-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9259999999999999
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: e4116dc738f0624b66f5dc6e4c792ae4bb292576
+      evaluated_commit_sha: b88bebc28e945d1e6777153b865ee1e9afaf89bb
+      merge_commit_sha: b88bebc28e945d1e6777153b865ee1e9afaf89bb
+      context_coverage:
+        criteria: medium
+        integrity: high
+        overall: medium
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.85
+        findings:
+        - severity: low
+          summary: Live-run evidence (run 1/run 2 counts, 0 missing receipt_path) is self-reported in
+            the report and could not be independently re-executed in this read-only review (harness restricts
+            bash to inspection). Code paths and self-check fixture logic are internally consistent with
+            the claims, but final count arithmetic (412 gate_results vs 434+11 write-actions) rests on
+            same-run upserts of shared envelope families and was not executed. This is lane-1 verification
+            territory, not an integrity defect.
+          affected_node_ids:
+          - node-04-receipts-ingestion
+        reasoning: 'The work preserves node-04''s intended role precisely: it extends node-01''s projection
+          artifact (not a parallel pipeline) with envelopes/gate_results/receipt_source_files tables in
+          the same WAL pi-hub.db, ingests the GDDP verification receipts currently under ~/repos/gddp-config/verification/
+          with per-project counts and explicit skip inventory, enforces receipt_path NOT NULL per gate_results
+          row, and demonstrates incremental rerun behavior via content-hash short-circuiting. The report
+          documents source inventory, skips, counts, schema DDL, and acceptance mapping. Graph integrity
+          holds: the change is additive at schema and report levels, so node-02 (read-only cursor API
+          over sessions/events/transitions) is unaffected; node-04 depends only on node-01; the envelope/gate
+          tables land in the same DB node-03''s visualizer can read, fulfilling the why''s promise (''node-03''s
+          visualizer renders verdicts alongside sessions''). All constraints verified by code inspection:
+          2-file diff only, stdlib-only imports, no subprocess/network, queue.db opened with mode=ro URI,
+          self-check fixtures confined to tempfile, no writes to guarded repos, committed on the result
+          ref with no junk in the diff. Only caveats are low-severity: lane 1''s acceptance evidence is
+          indeterminate and the live counts are self-reported (not re-executable in this review), and
+          node-01''s provisional status predates this node''s work.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: node-02 and node-04 now both touch the same pi-hub.db (node-02 reads, project.py writes).
+            WAL mode supports concurrent readers, but node-02's API must open the db read-only with busy_timeout
+            (its constraints already require read-only); worth confirming when node-02 executes.
+          affected_node_ids:
+          - node-02-localhost-api
+          - node-04-receipts-ingestion
+        - severity: low
+          summary: node-03's visualizer will consume envelopes/gate_results which carry project_id, node_id,
+            verdict, and receipt_path — matching the operator target surface (job ID, phase, cost/status,
+            logs, pass/fail receipt path). Trajectory is good; recommend node-03 read via node-02's cursor
+            API or a read-only WAL connection to avoid writer lock contention.
+          affected_node_ids:
+          - node-03-visualizer-fork
+          - node-04-receipts-ingestion
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-03-visualizer-fork:
+    verdict: pass
+    evaluated_at: '2026-08-06T20:10:50.509138+00:00'
+    executor: droid
+    job_id: job_20260806T194245145f4077301ae5
+    result_id: res_ses_20260806T19513392749e5b036aff
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/pi-hub-projection/node-03-visualizer-fork/job_20260806T194245145f4077301ae5-attempt1.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Node-03''s intended role — fork the upstream SSSF visualizer as harness/apps/pi-hub-web
+      against the new projection schema — is fully realized and the change preserves graph integrity.
+      (1) Scope: the entire diff (52 added files) is confined to harness/apps/pi-hub-web/ and reports/pi-hub-projection/;
+      zero files outside the allowed trees; pi-hub-rs and all existing harness components untouched; worktree
+      clean. (2) Fork authenticity: LICENSE (MIT, Copyright 2026 IndyDevDan) retained, UPSTREAM.md records
+      the pinned SHA de31374882e7a4e3e5b7bb9bd09e69dc2f779356 which exactly matches the graph''s own pin,
+      and the component set (SessionsList/SessionCard/SessionTrace/PhaseDetail/envelopes/gates) mirrors
+      the upstream visualizer''s noun structure. (3) The data-layer decision to read pi-hub.db directly
+      (readonly + PRAGMA query_only) instead of node-02''s cursor HTTP API is explicitly sanctioned by
+      the node''s own why ("or directly to pi-hub.db read-only if simpler — decide and record why") and
+      is recorded with reasons in both the report and db.ts header — this is a documented, graph-sanctioned
+      choice, not executor drift. Node-02''s api.py was not modified (it does not exist in this worktree;
+      node-02 remains provisional). (4) Localhost binding fixes the upstream omission: server, vite, and
+      preview all bind 127.0.0.1 explicitly; non-loopback HOST is refused with exit 2; evidence (self-check.txt,
+      bind.json with external-interface connection refusal, health.json showing bind host) supports it.
+      (5) The app serves sessions and transitions from the projection with captured evidence, and the
+      report includes fork provenance, adaptation notes, and run instructions. Node-03 unlocks nothing,
+      so no downstream contract is at risk. Lane-1 indeterminate criteria (evidence sufficiency for app-exists/renders-our-data)
+      are not re-adjudicated here; from an integrity standpoint the work matches the node''s stated mandate
+      and the graph''s structure.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/pi-hub-projection/node-03-visualizer-fork/job_20260806T194245145f4077301ae5-attempt1.json
+      verdict: pass
+      criteria_confidence: 0.89
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: d8bfdabe6222fedc92ea833ffb0b0856a71be45c
+      evaluated_commit_sha: 106de218d76c21fc75c71f123b7733346327b52a
+      merge_commit_sha: 106de218d76c21fc75c71f123b7733346327b52a
+      context_coverage:
+        criteria: none
+        integrity: high
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.85
+        findings: []
+        reasoning: 'Node-03''s intended role — fork the upstream SSSF visualizer as harness/apps/pi-hub-web
+          against the new projection schema — is fully realized and the change preserves graph integrity.
+          (1) Scope: the entire diff (52 added files) is confined to harness/apps/pi-hub-web/ and reports/pi-hub-projection/;
+          zero files outside the allowed trees; pi-hub-rs and all existing harness components untouched;
+          worktree clean. (2) Fork authenticity: LICENSE (MIT, Copyright 2026 IndyDevDan) retained, UPSTREAM.md
+          records the pinned SHA de31374882e7a4e3e5b7bb9bd09e69dc2f779356 which exactly matches the graph''s
+          own pin, and the component set (SessionsList/SessionCard/SessionTrace/PhaseDetail/envelopes/gates)
+          mirrors the upstream visualizer''s noun structure. (3) The data-layer decision to read pi-hub.db
+          directly (readonly + PRAGMA query_only) instead of node-02''s cursor HTTP API is explicitly
+          sanctioned by the node''s own why ("or directly to pi-hub.db read-only if simpler — decide and
+          record why") and is recorded with reasons in both the report and db.ts header — this is a documented,
+          graph-sanctioned choice, not executor drift. Node-02''s api.py was not modified (it does not
+          exist in this worktree; node-02 remains provisional). (4) Localhost binding fixes the upstream
+          omission: server, vite, and preview all bind 127.0.0.1 explicitly; non-loopback HOST is refused
+          with exit 2; evidence (self-check.txt, bind.json with external-interface connection refusal,
+          health.json showing bind host) supports it. (5) The app serves sessions and transitions from
+          the projection with captured evidence, and the report includes fork provenance, adaptation notes,
+          and run instructions. Node-03 unlocks nothing, so no downstream contract is at risk. Lane-1
+          indeterminate criteria (evidence sufficiency for app-exists/renders-our-data) are not re-adjudicated
+          here; from an integrity standpoint the work matches the node''s stated mandate and the graph''s
+          structure.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: medium
+          summary: Node-03 reads pi-hub.db directly rather than through node-02's cursor API, bypassing
+            node-02's proven secret-redaction layer for the visualizer surface. Today this is mitigated
+            (read-only connection, prompts stubbed null, 127.0.0.1-only bind with external refusal verified),
+            but when node-04 lands envelopes/gate_results containing ADW/receipt content, those endpoints
+            will be served to the browser without node-02's redaction guarantees. If the operator wants
+            the redaction property on the browser surface, a later node should route visualizer reads
+            through the API or add redaction to db.ts. This is a graph-design tension (node-02's why says
+            'read through one API, not raw SQLite' vs node-03's why explicitly permitting direct read)
+            created by the graph text itself; the executor followed its assigned node.
+          affected_node_ids:
+          - node-03-visualizer-fork
+          - node-02-localhost-api
+          - node-04-receipts-ingestion
+        - severity: low
+          summary: The upstream reference tree ~/repos/_reference/sssf is absent on this host, so the
+            fork provenance SHA cannot be re-verified against the live reference. The recorded SHA matches
+            the graph's pinned SHA exactly and the artifact set is internally consistent, but a future
+            provenance re-check or public release should confirm the fork genuinely derives from de313748.
+          affected_node_ids:
+          - node-03-visualizer-fork
+        - severity: low
+          summary: Two result commits (ce93bb9 and 106de21) for the same job carry identical trees; harness
+            wrapper noise, not a node-03 defect. Also, the git add -A note in the diff metadata concerns
+            executor staging behavior (lane-1 constraint territory); the committed tree itself contains
+            only the node's 52 intended files with node_modules/dist properly gitignored.
+          affected_node_ids:
+          - node-03-visualizer-fork
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null

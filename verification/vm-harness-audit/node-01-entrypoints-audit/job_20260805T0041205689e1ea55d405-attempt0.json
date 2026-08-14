@@ -1,0 +1,726 @@
+{
+  "project_id": "vm-harness-audit",
+  "node_id": "node-01-entrypoints-audit",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.95,
+    "findings": [],
+    "reasoning": "Fresh-eyes review of node-01-entrypoints-audit's work (reports/01-entrypoints.md, the sole diff over base c80abae). The change preserves the node's intended role exactly: it baselines the VM launcher surface (pi-lite/pi-full/pi-studio documented as absent, correctly cross-referenced against node-05's future-split doctrine), deployment checkouts (gddp-runtime/gddp-config paths + HEAD hashes + stale-checkout warnings), the exact heartbeat env wiring (gddp.env var set including GDDP_DROID_SUBPROCESS_ARGV with full argv breakdown), the droid custom model config and proxy endpoint (settings.local.json custom:Grok-4.5-sub-(Hermes)-0 -> 127.0.0.1:8645), and a bounded reachability probe (curl --max-time 5, within the 10s constraint, no model generations). I verified the factual grounding live on khoj-38: droid binary (152553600 bytes, --version 0.186.0), hermes proxy pid 17690 listening on 127.0.0.1:8645 with --provider xai, gddp.env present with the documented GDDP_* variables and model id, settings.local.json containing grok-4.5/displayName/provider/maxOutputTokens/8645 references, and node-05 YAML confirming the pi-lite/pi-full/pi-studio framing. The recorded checkout HEADs (a3dc805, 7a6f533) were the true HEADs at audit time (00:42:54Z); both repos advanced ~10 min later with the harness's own YAML-quoting/verifier fix commits (185e6fe, e68ed45), so the snapshot is honest and point-in-time, not fabricated. Graph integrity: depends_on=[] respected; nothing outside reports/ modified; the artifact is committed on main (origin/main = 325c7f1 carries a byte-identical tree to the reviewed commit), so node-02-extensions-audit's dependency is satisfiable; the report's references to the 5-node renumber and node-05 match actual config history; no graph truth or runtime state touched. The detached-HEAD 'result' wrapper commit (4345bd8) is the harness's expected wrapper pattern and adds no content. Verdict: pass; no human review required.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-05T00:54:50.126Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_NUVBRynh50gwdnzgrGs60613",
+        "command": "cd /tmp/gddp-eval-wt-3gqcbq5w && pwd && ls -la && git log --oneline -10 2>/dev/null; echo \"---STATUS---\"; git status 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-05T00:54:50.127Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_0VDeUtiRT3PwDAyReY1G5694",
+        "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml"
+      },
+      {
+        "ts": "2026-08-05T00:54:50.128Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_Q1KvubZKDaTLMo7gtVNY5585",
+        "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-02-extensions-audit.yaml"
+      },
+      {
+        "ts": "2026-08-05T00:54:50.144Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_0VDeUtiRT3PwDAyReY1G5694",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T00:54:50.144Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_Q1KvubZKDaTLMo7gtVNY5585",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T00:54:50.153Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_NUVBRynh50gwdnzgrGs60613",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T00:54:52.234Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_HIP74EJyig0t6TPIs5lU9030",
+        "command": "cd /tmp/gddp-eval-wt-3gqcbq5w && ls -la reports/ && wc -l reports/01-entrypoints.md && echo \"---DIFF---\" && git diff c80abae..HEAD --stat && echo \"---\" && git show --stat HEAD | head -20"
+      },
+      {
+        "ts": "2026-08-05T00:54:52.235Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_pLps6wng3p1URLY2TdSg8721",
+        "path": "/tmp/gddp-eval-wt-3gqcbq5w/reports/01-entrypoints.md"
+      },
+      {
+        "ts": "2026-08-05T00:54:52.241Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_pLps6wng3p1URLY2TdSg8721",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T00:54:52.254Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_HIP74EJyig0t6TPIs5lU9030",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T00:55:02.874Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_qNyZogmVw8z4DUuH7oB45320",
+        "command": "cd /tmp/gddp-eval-wt-3gqcbq5w && echo \"---BRANCHES---\" && git branch -a -vv 2>/dev/null; echo \"---HEAD---\" && git rev-parse HEAD && git symbolic-ref HEAD 2>&1; echo \"---REMOTE---\" && git remote -v; echo \"---REFLOG---\" && git reflog -5 2>/dev/null; echo \"---ALL COMMITS---\" && git log --all --oneline --graph | head -20"
+      },
+      {
+        "ts": "2026-08-05T00:55:02.875Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_GWPu3EucHuN7MCP3f9a21225",
+        "command": "cd /tmp/gddp-eval-wt-3gqcbq5w && echo \"---git show 13a47e8---\" && git show --stat 13a47e8 | head -25; echo \"---check .git file---\" && cat .git; echo \"---gitdir---\" && ls -la .git 2>/dev/null || true"
+      },
+      {
+        "ts": "2026-08-05T00:55:02.896Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_GWPu3EucHuN7MCP3f9a21225",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T00:55:02.902Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_qNyZogmVw8z4DUuH7oB45320",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T00:55:13.782Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_gtcSAygsnxHu21T19qcX7337",
+        "command": "cd /tmp/gddp-eval-wt-3gqcbq5w && echo \"---main tree---\" && git ls-tree -r main --name-only; echo \"---diff 13a47e8 vs 325c7f1---\" && git diff 13a47e8 325c7f1 --stat; echo \"---diff c80abae..325c7f1---\" && git diff c80abae 325c7f1 --stat; echo \"---does main have report?---\" && git show main:reports/01-entrypoints.md 2>&1 | head -5; echo \"---file hash on main vs worktree---\" && git show main:reports/01-entrypoints.md | md5sum && md5sum reports/01-entrypoints.md"
+      },
+      {
+        "ts": "2026-08-05T00:55:13.818Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_gtcSAygsnxHu21T19qcX7337",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T00:55:22.426Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_xYPLH4090v2xhgCLXnQG2592",
+        "command": "echo \"---whoami/host---\"; whoami; hostname 2>/dev/null; echo \"---droid---\"; ls -la /home/sab-mini/.local/bin/droid 2>&1; /home/sab-mini/.local/bin/droid --version 2>&1 | head -3; echo \"---checkouts---\"; cd /home/sab-mini/gddp-runtime 2>/dev/null && git log -1 --oneline 2>&1; cd /home/sab-mini/gddp-config 2>/dev/null && git log -1 --oneline 2>&1; echo \"---gddp.env---\"; ls -la /home/sab-mini/gddp-runtime/deploy/mini-heartbeat/env/gddp.env 2>&1; echo \"---factory settings---\"; ls -la /home/sab-mini/.factory/settings.local.json 2>&1; echo \"---proxy 8645---\"; ss -lntp 2>/dev/null | grep 8645 || echo \"ss unavailable or no listener\""
+      },
+      {
+        "ts": "2026-08-05T00:55:22.427Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_01_W6lY8MQUuXcSm7O3alw39226",
+        "reason": "command matched blocked pattern",
+        "command": "echo \"---launchers---\"; for l in pi-lite pi-full pi-studio; do command -v $l || echo \"$l: not found\"; done; echo \"---pi---\"; ls -la /usr/bin/pi 2>&1; /usr/bin/pi --version 2>&1 | head -2; echo \"---hermes---\"; ls -la /home/sab-mini/.local/bin/hermes 2>&1; echo \"---curl probe (read-only, 5s timeout)---\"; curl -sS --max-time 5 -H 'Authorization: Bearer hermes-local' http://127.0.0.1:8645/v1/models 2>&1 | head -c 400; echo",
+        "pattern": "\\b(?:curl|wget|ssh|scp|sftp|rsync|nc|netcat|telnet|ftp|pip|npm|pnpm|yarn|brew)\\b"
+      },
+      {
+        "ts": "2026-08-05T00:55:22.427Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_W6lY8MQUuXcSm7O3alw39226",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-05T00:55:23.845Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_xYPLH4090v2xhgCLXnQG2592",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T00:55:33.639Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_xPCj3X2l8cFGljuOnG0P2473",
+        "command": "echo \"---runtime log---\"; cd /home/sab-mini/gddp-runtime && git log -8 --format='%h %ci %s' 2>&1; echo \"---is a3dc805 in history?---\"; git cat-file -t a3dc805e19f32dc1828542fbf179c7e4067aab10 2>&1; git log -1 --format='%h %ci %s' a3dc805e19f32dc1828542fbf179c7e4067aab10 2>&1"
+      },
+      {
+        "ts": "2026-08-05T00:55:33.640Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_DUdy2esJMaE3eSq4PSip3941",
+        "command": "echo \"---config log---\"; cd /home/sab-mini/gddp-config && git log -8 --format='%h %ci %s' 2>&1; echo \"---is 7a6f533 in history?---\"; git cat-file -t 7a6f533a6a8309f06b90b8d26c03a92999f0d408 2>&1; git log -1 --format='%h %ci %s' 7a6f533a6a8309f06b90b8d26c03a92999f0d408 2>&1; echo \"---graph node-05 mention: pi-lite future split?---\"; grep -rn \"pi-lite\\|pi-full\\|pi-studio\" /home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/ 2>/dev/null | head -10"
+      },
+      {
+        "ts": "2026-08-05T00:55:33.656Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_xPCj3X2l8cFGljuOnG0P2473",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T00:55:33.661Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_DUdy2esJMaE3eSq4PSip3941",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T00:55:44.002Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_00_6tioYTnHOa4rXn7Xe1Lh0378",
+        "reason": "command matched blocked pattern",
+        "command": "ENV=/home/sab-mini/gddp-runtime/deploy/mini-heartbeat/env/gddp.env; echo \"---var names present in gddp.env---\"; grep -oE '^export [A-Z_]+' $ENV 2>/dev/null; echo \"---GDDP_DROID_SUBPROCESS_ARGV (masked)---\"; grep 'GDDP_DROID_SUBPROCESS_ARGV' $ENV 2>/dev/null | sed -E 's/([\"'\"'\"'])[^\"'\"'\"']*(custom:Grok[^\"'\"'\"']*)/\\1\\2/; s/(local_agent_executor\\.py)[^,]*/\\1/; s/(--append-system-prompt)[^\"'\"'\"']*/\\1 <redacted>/' | cut -c1-200; echo \"---model id present?---\"; grep -c 'custom:Grok-4.5-sub-(Hermes)-0' $ENV 2>/dev/null",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-05T00:55:44.002Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_6tioYTnHOa4rXn7Xe1Lh0378",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-05T00:55:44.002Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_BQbLOD2sCAuijUouF1ub8771",
+        "command": "S=/home/sab-mini/.factory/settings.local.json; echo \"---settings exists---\"; ls -la $S; echo \"---customModels baseUrl/model (masked keys only)---\"; grep -oE '\"(displayName|model|provider|baseUrl|apiKey|maxOutputTokens)\"[^,}]*' $S 2>/dev/null | grep -iE 'grok|8645|generic|hermes-local|65536' | head -12; echo \"---proxy process---\"; ps -p 17690 -o pid,etime,cmd --no-headers 2>/dev/null | cut -c1-160"
+      },
+      {
+        "ts": "2026-08-05T00:55:44.034Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_BQbLOD2sCAuijUouF1ub8771",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T00:55:47.593Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_NuyipGba3A8eJeJ4rfGf4731",
+        "command": "ENV=/home/sab-mini/gddp-runtime/deploy/mini-heartbeat/env/gddp.env; echo \"---var names in gddp.env---\"; grep -oE '^export [A-Z_]+' \"$ENV\"; echo \"---model id count---\"; grep -c 'custom:Grok-4.5-sub-(Hermes)-0' \"$ENV\"; echo \"---droid argv line, first 150 chars---\"; grep 'GDDP_DROID_SUBPROCESS_ARGV' \"$ENV\" | cut -c1-150; echo \"---baseUrl in settings---\"; grep -c '127.0.0.1:8645' /home/sab-mini/.factory/settings.local.json; echo \"---hermes launcher---\"; ls -la /home/sab-mini/.local/bin/hermes"
+      },
+      {
+        "ts": "2026-08-05T00:55:47.611Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_NuyipGba3A8eJeJ4rfGf4731",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T00:56:06.220Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_FrghotLHtwouRRLGtOZ31398",
+        "command": "cd /tmp/gddp-eval-wt-3gqcbq5w && echo \"---diff 13a47e8..4345bd8 (wrapper content)---\"; git diff --stat 13a47e8 4345bd8; echo \"---diff c80abae..HEAD (net work)---\"; git diff --stat c80abae HEAD; echo \"---worktree tree---\"; git ls-tree -r HEAD --name-only; echo \"---untracked---\"; git status --porcelain"
+      },
+      {
+        "ts": "2026-08-05T00:56:06.239Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_FrghotLHtwouRRLGtOZ31398",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T00:56:22.952Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_FQArq6CEyU2fO49kknY27497",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "The gddp-runtime and gddp-config checkouts advanced ~10 minutes after node-01's audit snapshot (harness's own fix commits 185e6fe 'tolerate non-string YAML criteria/constraints' and e68ed45 'quote Read-only constraint scalars'). Node-01's recorded HEAD hashes are correct for the audit moment but are already stale; downstream nodes (esp. node-02 and node-05) should re-read current checkout state rather than trusting the recorded hashes, since the config repo is actively edited during the run.",
+        "affected_node_ids": [
+          "node-02-extensions-audit",
+          "node-05-separation-proposal"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Node-05's why explicitly consumes node-01's report as authoring input for the pi-lite/pi-full/pi-studio repo split. The report's launcher-gap finding (all three absent; live surface = /usr/bin/pi 0.83.0 plus helpers) is exactly the evidence node-05 needs — good downstream convergence, no risk.",
+        "affected_node_ids": [
+          "node-05-separation-proposal"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9342857142857143,
+  "criteria_confidence": 0.9342857142857143,
+  "completeness": 1.0,
+  "graph_readiness": 0.9342857142857143,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "report-exists",
+        "criterion": "reports/01-entrypoints.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "non\\-empty -> line 239: 'non-empty'"
+        ],
+        "reasoning": "Scanned source files (reports/01-entrypoints.md) for identifiers named in the criterion (non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "launchers-documented",
+        "criterion": "report documents pi-lite, pi-full, and pi-studio launchers with their resolved binary/symlink paths (or records each as absent)",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (pi-lite, pi-full, pi-studio). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "droid-documented",
+        "criterion": "report documents the droid binary path and version output",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "checkouts-documented",
+        "criterion": "report documents gddp-runtime and gddp-config checkout paths with their current HEAD commit hashes",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (gddp-runtime, gddp-config, HEAD). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "env-documented",
+        "criterion": "report documents GDDP_* environment wiring (gddp.env or equivalent), including GDDP_DROID_SUBPROCESS_ARGV if set",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (GDDP_, GDDP_DROID_SUBPROCESS_ARGV). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "model-path-documented",
+        "criterion": "report documents the droid custom model configuration and the proxy endpoint (host:port) it targets",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "proxy-reachable",
+        "criterion": "report records a bounded reachability probe of the proxy endpoint (e.g. curl with explicit timeout) and its result",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Read-only: inspect and report only; do not modify any file outside reports/",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Probes must use explicit timeouts of 10 seconds or less; no full model generations",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work to this repository (skchaudr/pi-harness-audit) on branch main",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/01-entrypoints.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "c80abae9070c32e74d17b61528c7ff44a8f37e52",
+      "tip": "4345bd80cdbafcaedc9738a35586f1ca2e368abe",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/01-entrypoints.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "reports/01-entrypoints.md read in full: 254 lines, substantive markdown content",
+          "git show main:reports/01-entrypoints.md | wc -l -> 254",
+          "git diff main --stat -- reports/ -> empty (worktree identical to main commit 325c7f1)"
+        ],
+        "reasoning": "File exists, is 254 lines of non-trivial content, and is committed on main. Direct file read confirms existence and non-emptiness without ambiguity."
+      },
+      {
+        "criterion_id": "launchers-documented",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "Report §2 table lists pi-lite / pi-full / pi-studio each as ABSENT with searched locations enumerated",
+          "Report §2 related-names table documents pi, pi-acp, pi-call, pi-runs, pi-route, pi-cline, gddp with resolved symlink paths",
+          "Live check: command -v pi-lite / pi-full / pi-studio -> all absent; /usr/bin/pi symlink matches report"
+        ],
+        "reasoning": "Criterion allows 'records each as absent' — the report does exactly that in a per-launcher table, and additionally documents the resolved paths of related existing launchers. Independent PATH verification corroborates the absence claim."
+      },
+      {
+        "criterion_id": "droid-documented",
+        "judgment": "judged_pass",
+        "confidence": 0.96,
+        "evidence": [
+          "Report §3: path /home/sab-mini/.local/bin/droid, realpath, ELF type, mode/size 152553600 bytes, version output 0.186.0",
+          "Live check: /home/sab-mini/.local/bin/droid exists, 152553600 bytes, `droid --version` prints 0.186.0"
+        ],
+        "reasoning": "Report documents both the binary path and the version output verbatim; live environment corroborates both facts exactly."
+      },
+      {
+        "criterion_id": "checkouts-documented",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "Report §4.1: gddp-runtime @ a3dc805e19f32dc1828542fbf179c7e4067aab10 and gddp-config @ 7a6f533a6a8309f06b90b8d26c03a92999f0d408 with full hashes, branch, remote; §4.2 documents secondary/stale checkouts",
+          "Live check: both checkouts exist at the documented paths; live HEADs have since advanced to 185e6fe (runtime) and e68ed45 (config) — fix commits from this review cycle"
+        ],
+        "reasoning": "The criterion asks the report to document checkout paths with their current HEAD hashes; the report provides full 40-char hashes plus commit subjects for both checkouts, matching the audit-time snapshot (2026-08-05T00:42Z). The live HEADs advancing afterward (YAML-quoting and criteria-tolerance fixes evidently generated during this review) does not falsify the documented snapshot; report vs. current-live divergence is noted as a context risk, not a criterion failure."
+      },
+      {
+        "criterion_id": "env-documented",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "Report §5.1-5.2: env file /home/sab-mini/gddp-runtime/deploy/mini-heartbeat/env/gddp.env, loader, and full GDDP_* variable listing including GDDP_DROID_SUBPROCESS_ARGV (set, full argv rendered)",
+          "Report §5.3 documents process env at audit time; §5.4 breaks down the droid argv",
+          "Live check: gddp.env exists at documented path; GDDP_DROID_SUBPROCESS_ARGV content matches report rendering"
+        ],
+        "reasoning": "Report documents the GDDP_* wiring from both file and live-process perspectives, and GDDP_DROID_SUBPROCESS_ARGV is set and fully quoted. Independent inspection of the live env file corroborates."
+      },
+      {
+        "criterion_id": "model-path-documented",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "Report §6.2: model id custom:Grok-4.5-sub-(Hermes)-0, displayName, model grok-4.5, provider, baseUrl http://127.0.0.1:8645/v1, proxy host:port 127.0.0.1:8645, apiKey, maxOutputTokens, settings index 7",
+          "Live check: /home/sab-mini/.factory/settings.local.json customModels[7] = 'Grok 4.5 sub (Hermes)' / grok-4.5 / generic-chat-completion-api / http://127.0.0.1:8645/v1 — exact match"
+        ],
+        "reasoning": "Report documents the custom model configuration and the proxy endpoint it targets with full detail; live settings file corroborates index, model id, provider, and baseUrl exactly."
+      },
+      {
+        "criterion_id": "proxy-reachable",
+        "judgment": "judged_pass",
+        "confidence": 0.85,
+        "evidence": [
+          "Report §7 Probe A: curl -sS --max-time 5 GET /v1/models -> exit 0, 200 OK, grok-4.5 listed among 10 models",
+          "Report §7 Probe B: curl --max-time 5 GET / -> 404 in ~0.006s (TCP/HTTP up, root not a route)",
+          "Report explicitly states no chat/completions generation performed; timeouts 5s <= 10s constraint",
+          "Evaluator sandbox blocks network (curl refused), so the probe could not be independently re-run"
+        ],
+        "reasoning": "Criterion requires the report to record a bounded reachability probe and its result — provided in full detail (command, explicit --max-time 5 timeout, exit code, HTTP status, model list, interpretation). Timeout satisfies the ≤10s probe constraint and no model generations were performed. Slight confidence discount only because the underlying reachability claim could not be re-verified from the read-only sandbox, but the criterion is a documentation criterion and is clearly met."
+      }
+    ],
+    "overall_reasoning": "All seven acceptance criteria for node-01-entrypoints-audit are satisfied by reports/01-entrypoints.md. The report exists (254 lines, committed on main at 325c7f1 with worktree identical) and explicitly documents, each in a dedicated section with an acceptance checklist mapping criteria to evidence: (1) launchers pi-lite/pi-full/pi-studio recorded as ABSENT with searched paths plus resolved symlink paths for related launchers; (2) droid binary path and version 0.186.0; (3) gddp-runtime and gddp-config paths with full 40-char HEAD hashes; (4) GDDP_* env wiring from the live gddp.env including the full GDDP_DROID_SUBPROCESS_ARGV; (5) droid custom model config and proxy endpoint 127.0.0.1:8645; (6) two bounded reachability probes with explicit --max-time 5 timeouts and recorded results. Independent spot-verification on the live host corroborated the droid binary/version, launcher absence, gddp.env GDDP_DROID_SUBPROCESS_ARGV, and settings.local.json customModels[7] (grok-4.5, 127.0.0.1:8645) exactly. Constraints also hold: the only file added outside nothing is reports/01-entrypoints.md (read-only respected), probes use 5s timeouts with no generations, and the report is committed on main. The sole divergence observed is that the live gddp-runtime/gddp-config HEADs have advanced past the report's recorded hashes due to fix commits (YAML scalar quoting, criteria tolerance) generated during this review cycle — a snapshot-vs-live staleness note, not a criterion failure, since the report documented the audit-time state with full hashes.",
+    "risks": "1. Snapshot staleness: recorded HEADs (a3dc805 / 7a6f533) no longer equal live HEADs (185e6fe / e68ed45) because the gddp repos advanced during this review cycle; the report documented the audit-time state, which is what the criterion requires, but downstream nodes should not assume those hashes are current. 2. Proxy reachability (criterion proxy-reachable) could not be independently re-probed: the evaluator sandbox hard-blocks network (curl refused); judgment rests on the report's recorded probe, which is well-formed and satisfies the bounded-timeout constraint. 3. Duplicate 'docs: add node-01 entrypoints audit report' commits exist (13a47e8 on a branch, 325c7f1 on main) with identical content — a harness/wrapper artifact, not an executor defect; the report is present on main as required. 4. The live env file is mode 0600 with redacted secrets in the report; the report appropriately redacts DEEPSEEK_API_KEY values.",
+    "followup_candidates": "Observed: the report's recorded gddp-runtime/gddp-config HEAD hashes (a3dc805/7a6f533) are now stale vs live (185e6fe/e68ed45, which are fix commits from this review cycle). The criterion is a documentation criterion and the audit-time snapshot is valid, but confirm whether the human intends node-01 acceptance to track the live-moving HEADs; if so, note that a re-audit would be needed each time the gddp repos advance. Also observed: proxy reachability could not be re-verified from the read-only evaluator sandbox (network blocked); the report records a 200 OK on /v1/models with grok-4.5 listed — if independent live confirmation is desired, run the bounded probe manually on the host.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-05T00:53:16.105Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_MXj7qH7aHhu4wfPnio3m4138",
+          "command": "cd /tmp/gddp-eval-wt-3gqcbq5w && ls -la && git log --oneline -5 2>/dev/null; echo \"---\"; git status 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-05T00:53:16.106Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_JRLfvg8Za2HLCDpsIWRv7590",
+          "path": "/tmp/gddp-eval-wt-3gqcbq5w/reports/01-entrypoints.md"
+        },
+        {
+          "ts": "2026-08-05T00:53:16.120Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_JRLfvg8Za2HLCDpsIWRv7590",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T00:53:16.130Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_MXj7qH7aHhu4wfPnio3m4138",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T00:53:27.691Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_j1KoPRp1iQi2Hns4vg4E3630",
+          "command": "cd /tmp/gddp-eval-wt-3gqcbq5w && git branch -a 2>/dev/null; echo \"---\"; git log --all --oneline -10 2>/dev/null; echo \"---\"; git show --stat HEAD 2>/dev/null | head -20; echo \"---\"; git diff c80abae..HEAD --stat 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-05T00:53:27.691Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_2QWEuaJhj8mtzlsE6iYn5885",
+          "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml"
+        },
+        {
+          "ts": "2026-08-05T00:53:27.692Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_29JdypNfOxdPQ3NgaD5S0627",
+          "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-02-extensions-audit.yaml"
+        },
+        {
+          "ts": "2026-08-05T00:53:27.699Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_2QWEuaJhj8mtzlsE6iYn5885",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T00:53:27.699Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_29JdypNfOxdPQ3NgaD5S0627",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T00:53:27.714Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_j1KoPRp1iQi2Hns4vg4E3630",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T00:53:36.380Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_dUY80EsQyFwJq3wqkEk46619",
+          "command": "ls -la /home/sab-mini/.local/bin/droid 2>/dev/null && /home/sab-mini/.local/bin/droid --version 2>/dev/null | head -2; echo \"---runtime---\"; cd /home/sab-mini/gddp-runtime 2>/dev/null && git log -1 --oneline 2>/dev/null; echo \"---config---\"; cd /home/sab-mini/gddp-config 2>/dev/null && git log -1 --oneline 2>/dev/null; echo \"---env---\"; ls -la /home/sab-mini/gddp-runtime/deploy/mini-heartbeat/env/gddp.env 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-05T00:53:36.380Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ZHF0OJ6fZtJSz7icyzri6590",
+          "command": "grep -o 'GDDP_DROID_SUBPROCESS_ARGV=[^ ]*' /home/sab-mini/gddp-runtime/deploy/mini-heartbeat/env/gddp.env 2>/dev/null | head -c 200; echo; echo \"---settings---\"; python3 -c \"\nimport json\nd=json.load(open('/home/sab-mini/.factory/settings.local.json'))\nfor i,cm in enumerate(d.get('customModels',[])):\n    if 'Grok' in cm.get('displayName','') or 'grok-4.5' in str(cm.get('model','')):\n        print(i, cm.get('displayName'), cm.get('model'), cm.get('provider'), cm.get('baseUrl'))\n\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-05T00:53:36.432Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ZHF0OJ6fZtJSz7icyzri6590",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T00:53:37.809Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_dUY80EsQyFwJq3wqkEk46619",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T00:53:52.644Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_3SGcKTlPqZoWkTntUOOJ2818",
+          "reason": "command matched blocked pattern",
+          "command": "for c in pi-lite pi-full pi-studio; do command -v $c >/dev/null 2>&1 && echo \"$c FOUND: $(command -v $c)\" || echo \"$c absent\"; done; echo \"---probe---\"; timeout 8 curl -sS --max-time 5 -o /dev/null -w 'exit=%{exitcode} http=%{http_code} time=%{time_total}\\n' -H 'Authorization: Bearer hermes-local' http://127.0.0.1:8645/v1/models 2>&1; echo \"curl_exit=$?\"",
+          "pattern": "\\b(?:curl|wget|ssh|scp|sftp|rsync|nc|netcat|telnet|ftp|pip|npm|pnpm|yarn|brew)\\b"
+        },
+        {
+          "ts": "2026-08-05T00:53:52.644Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_3SGcKTlPqZoWkTntUOOJ2818",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-05T00:53:52.645Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_01_VE7OqWy2ioSuojiwmKRO6954",
+          "reason": "command matched blocked pattern",
+          "command": "cd /tmp/gddp-eval-wt-3gqcbq5w && git log --all --oneline --format='%h %s (%an %ad)' --date=iso 2>/dev/null | head; echo \"---main vs HEAD---\"; git rev-parse main 2>/dev/null; git rev-parse HEAD; git merge-base --is-ancestor HEAD main 2>/dev/null && echo \"HEAD is ancestor of main\" || echo \"HEAD NOT ancestor of main\"; echo \"---\"; git log main --oneline -3",
+          "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+        },
+        {
+          "ts": "2026-08-05T00:53:52.645Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_VE7OqWy2ioSuojiwmKRO6954",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-05T00:53:58.394Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_jABmVNmjoxd7yuMllXOO9613",
+          "command": "for c in pi-lite pi-full pi-studio; do command -v $c >/dev/null 2>&1 && echo \"$c FOUND: $(command -v $c)\" || echo \"$c absent\"; done; echo \"---pi---\"; ls -la /usr/bin/pi /usr/bin/pi-acp 2>/dev/null | head -5; echo \"---git---\"; cd /tmp/gddp-eval-wt-3gqcbq5w && git rev-parse main; git rev-parse HEAD; git log main --oneline -4; echo \"---is HEAD on main?---\"; git branch --contains HEAD 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-05T00:53:58.416Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_jABmVNmjoxd7yuMllXOO9613",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T00:54:10.417Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ria7JGnxm1661UjsxR2f9963",
+          "command": "cd /tmp/gddp-eval-wt-3gqcbq5w && echo \"---main has report?---\"; git show main:reports/01-entrypoints.md 2>/dev/null | wc -l; echo \"---diff main vs worktree---\"; git diff main --stat -- reports/ 2>/dev/null; echo \"(empty diff = identical)\"; echo \"---commit parentage---\"; git log --oneline --format='%h %s | parents: %p' -2 2>/dev/null; echo \"---13a47e8 vs 325c7f1---\"; git show 13a47e8 --stat --format='%h %s' 2>/dev/null | head -5"
+        },
+        {
+          "ts": "2026-08-05T00:54:10.439Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ria7JGnxm1661UjsxR2f9963",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T00:54:44.866Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_8dGrHFvQMR8FFLHFR74H2499",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All seven acceptance criteria for node-01-entrypoints-audit are satisfied by reports/01-entrypoints.md. The report exists (254 lines, committed on main at 325c7f1 with worktree identical) and explicitly documents, each in a dedicated section with an acceptance checklist mapping criteria to evidence: (1) launchers pi-lite/pi-full/pi-studio recorded as ABSENT with searched paths plus resolved symlink paths for related launchers; (2) droid binary path and version 0.186.0; (3) gddp-runtime and gddp-config paths with full 40-char HEAD hashes; (4) GDDP_* env wiring from the live gddp.env including the full GDDP_DROID_SUBPROCESS_ARGV; (5) droid custom model config and proxy endpoint 127.0.0.1:8645; (6) two bounded reachability probes with explicit --max-time 5 timeouts and recorded results. Independent spot-verification on the live host corroborated the droid binary/version, launcher absence, gddp.env GDDP_DROID_SUBPROCESS_ARGV, and settings.local.json customModels[7] (grok-4.5, 127.0.0.1:8645) exactly. Constraints also hold: the only file added outside nothing is reports/01-entrypoints.md (read-only respected), probes use 5s timeouts with no generations, and the report is committed on main. The sole divergence observed is that the live gddp-runtime/gddp-config HEADs have advanced past the report's recorded hashes due to fix commits (YAML scalar quoting, criteria tolerance) generated during this review cycle — a snapshot-vs-live staleness note, not a criterion failure, since the report documented the audit-time state with full hashes.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-05T00:56:23.012632+00:00",
+  "evaluated_tree_sha": "29c1f7c7f0a237a4fc94636fa11b348bce0ed619",
+  "evaluated_commit_sha": "4345bd80cdbafcaedc9738a35586f1ca2e368abe",
+  "merge_commit_sha": "4345bd80cdbafcaedc9738a35586f1ca2e368abe",
+  "expected_base_commit_sha": "c80abae9070c32e74d17b61528c7ff44a8f37e52",
+  "pr_ref": null,
+  "job_id": "job_20260805T0041205689e1ea55d405",
+  "canonical_context": {
+    "readme": "UNAVAILABLE: /tmp/gddp-eval-wt-3gqcbq5w/README.md does not exist",
+    "project_brief": "UNAVAILABLE: /tmp/gddp-eval-wt-3gqcbq5w/PROJECT-BRIEF.md does not exist",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml",
+    "neighbor:node-02-extensions-audit": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-02-extensions-audit.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "low",
+      "offered": 2,
+      "content_accessed": 2,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml",
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-02-extensions-audit.yaml"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "low",
+      "offered": 2,
+      "content_accessed": 2,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml",
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-02-extensions-audit.yaml"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "low"
+  }
+}

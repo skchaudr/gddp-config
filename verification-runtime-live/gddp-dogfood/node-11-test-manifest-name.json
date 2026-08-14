@@ -1,0 +1,1181 @@
+{
+  "project_id": "gddp-dogfood",
+  "node_id": "node-11-test-manifest-name",
+  "verdict": "needs-human-review",
+  "criteria_verdict": "needs-human-review",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.9,
+    "findings": [
+      {
+        "severity": "low",
+        "summary": "Constraint 'Run python3 -m pytest -q before finishing and quote its tail line in the commit or a short note' does not appear satisfied: commit 7f25085 body quotes no pytest output and no accompanying short note quoting a tail line was found in the repo. This is a constraint-evidence gap for lane 1, not an intent or graph-integrity failure. Sandbox lacks pytest so the suite run could not be independently re-executed here; the presence of test_manifest_name.cpython-313.pyc (post-commit timestamp) confirms the file imports cleanly under Python 3.13.",
+        "affected_node_ids": [
+          "node-11-test-manifest-name"
+        ]
+      }
+    ],
+    "reasoning": "The node's intended role is pure-function unit coverage of _manifest_name in scripts/adapters/mission_evidence.py: small, independent, mechanically verifiable. The delivered change is exactly one new file (scripts/adapters/test_manifest_name.py, 59 lines) placed next to its module and following sibling test-file conventions; git diff base..tip shows no production-code or other-test-file modifications. I manually traced all four tests against the live _manifest_name implementation (safe stem keeps alnum/dash/underscore, unsafe chars become '-', edge dashes stripped, sha256[:12] digest appended, deterministic, 'feature' fallback when fully stripped) and every assertion is consistent with actual behavior. The evaluator's source_path mismatch (heartbeat alternative absent) is a non-issue: _manifest_name exists only in scripts/adapters/, and the primary criterion path is present. Graph integrity is preserved: the node has no depends_on/unlocks, so no edges are added or broken and no downstream node can be affected; the T3 frontier siblings (nodes 12-16) remain independent. Only caveat: the pytest-tail-quote constraint shows no evidence of being met in the commit or a note — flagged low for lane 1's constraint review; it does not change the integrity verdict. Confidence is high on intent and graph preservation; the sole unverifiable element (live pytest suite-green) belongs to lane 1.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-11T06:57:42.348Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_2Jj2RMDaOdZQhgAbYnVS0921",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && ls -la && git log --oneline -10 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-11T06:57:42.349Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_v9qguSikGLQ45bpCX8ic7365",
+        "path": "/tmp/gddp-eval-wt-0zwtboev/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-11T06:57:42.363Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_v9qguSikGLQ45bpCX8ic7365",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:57:42.371Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_2Jj2RMDaOdZQhgAbYnVS0921",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:57:44.439Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_M8egf0r7DhAyDj9fGbPF0423",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && git show --stat 7f25085 && echo \"=====DIFF=====\" && git show 7f25085"
+      },
+      {
+        "ts": "2026-08-11T06:57:44.439Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_LekQkO7ZeJ5i9GPMIVzq0418",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && ls scripts/adapters/ && echo \"=====\" && ls scripts/runtime/heartbeat/ 2>/dev/null; echo \"=====\" && cat pytest.ini"
+      },
+      {
+        "ts": "2026-08-11T06:57:44.459Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_M8egf0r7DhAyDj9fGbPF0423",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:57:44.460Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_LekQkO7ZeJ5i9GPMIVzq0418",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:57:46.256Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_zyzprwQuEps40fZQvAJX5223",
+        "path": "/tmp/gddp-eval-wt-0zwtboev/scripts/adapters/mission_evidence.py"
+      },
+      {
+        "ts": "2026-08-11T06:57:46.256Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ORApXxMBaK4fCAdCH2Rm2035",
+        "command": "cd /home/sab-mini/gddp-config && find . -name \"*.yaml\" -path \"*gddp-dogfood*\" | head -40"
+      },
+      {
+        "ts": "2026-08-11T06:57:46.263Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_zyzprwQuEps40fZQvAJX5223",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:57:46.285Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ORApXxMBaK4fCAdCH2Rm2035",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:57:49.391Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_mNCzhbzlqMwbSoIPhuoq7850",
+        "path": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-11-test-manifest-name.yaml"
+      },
+      {
+        "ts": "2026-08-11T06:57:49.391Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_M7VNKoWHCBo1wkJIJJMR9551",
+        "command": "cd /home/sab-mini/gddp-config/graphs/gddp-dogfood && cat project.yaml"
+      },
+      {
+        "ts": "2026-08-11T06:57:49.397Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_mNCzhbzlqMwbSoIPhuoq7850",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:57:49.399Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_M7VNKoWHCBo1wkJIJJMR9551",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:57:54.245Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_h9nJRpJlqx8iclbwQZEy0624",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && git show 689c6b6 --stat | head -30 && echo \"=====\" && git log -1 --format='%B' 689c6b6"
+      },
+      {
+        "ts": "2026-08-11T06:57:54.245Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_VFILitvPjHEGOLHnvFOe8096",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && git status --short | head -20 && echo \"=====DIFF vs base=====\" && git diff 450eca1..HEAD --stat"
+      },
+      {
+        "ts": "2026-08-11T06:57:54.264Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_h9nJRpJlqx8iclbwQZEy0624",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:57:54.269Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_VFILitvPjHEGOLHnvFOe8096",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:57:57.216Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_mlW8MWWvcv57jw9FWSWC3617",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && python3 -m pytest scripts/adapters/test_manifest_name.py -q 2>&1 | tail -15"
+      },
+      {
+        "ts": "2026-08-11T06:57:57.217Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_9QGifhviGfaIrkWMCPuQ4324",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && ls .gddp .handoffs 2>/dev/null | head -30 && echo \"=====\" && cat result-summary.md && echo \"=====\" && grep -rn \"pytest\" .gddp/ 2>/dev/null | head -10"
+      },
+      {
+        "ts": "2026-08-11T06:57:57.239Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_9QGifhviGfaIrkWMCPuQ4324",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:57:57.249Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_mlW8MWWvcv57jw9FWSWC3617",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:58:05.198Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_00_cDzHDlbU21cqAFUjsEI95572",
+        "reason": "command matched blocked pattern",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && python3 - <<'EOF'\nimport sys, hashlib, re\nsys.path.insert(0, '.')\nfrom scripts.adapters.mission_evidence import _manifest_name\n\n_NAME_RE = re.compile(r\"^(?P<stem>[A-Za-z0-9_-]+)--(?P<digest>[0-9a-f]{12})\\.json$\")\ndef _expected_digest(feature_id): return hashlib.sha256(feature_id.encode()).hexdigest()[:12]\ndef _parse(name):\n    m = _NAME_RE.fullmatch(name)\n    assert m is not None, f\"unexpected: {name!r}\"\n    return m.group(\"stem\"), m.group(\"digest\")\n\n# Test 1\nfid = \"Node_Alpha-01\"\nstem, digest = _parse(_manifest_name(fid))\nassert stem == \"Node_Alpha-01\" and digest == _expected_digest(fid), (stem, digest)\n\n# Test 2\nfid = \"!!weird name/with.spaces!!\"\nstem, digest = _parse(_manifest_name(fid))\nassert stem == \"weird-name-with-spaces\", stem\nassert set(stem) <= set(\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_\")\nassert digest == _expected_digest(fid)\n\n# Test 3\nfid = \"feature/with spaces & symbols\"\nfirst = _manifest_name(fid); second = _manifest_name(fid)\nassert first == second\nstem, digest = _parse(first)\nassert len(digest) == 12 and re.fullmatch(r\"[0-9a-f]{12}\", digest)\nassert digest == _expected_digest(fid)\nassert first == f\"{stem}--{digest}.json\"\n\n# Test 4\nfid = \"!!!\"\nname = _manifest_name(fid)\nstem, digest = _parse(name)\nassert stem == \"feature\" and digest == _expected_digest(fid)\nassert name == f\"feature--{digest}.json\"\nprint(\"ALL 4 TESTS PASS against live implementation\")\nEOF",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-11T06:58:05.198Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_cDzHDlbU21cqAFUjsEI95572",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-11T06:58:05.199Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_lnoxTCuGL7HUnCofjHoG1860",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && git log --all --oneline -- .gddp/ | head -5; echo \"=====\"; git ls-files .gddp/ | head; echo \"=====untracked=====\"; git status --porcelain | head -20"
+      },
+      {
+        "ts": "2026-08-11T06:58:05.239Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_lnoxTCuGL7HUnCofjHoG1860",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:58:25.704Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_naBCznOl5LJKROLUFhdW6060",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && grep -n \"manifest_name\" scripts/adapters/test_mission_evidence.py | head; echo \"=====imports in sibling tests=====\"; head -20 scripts/adapters/test_mission_evidence.py; echo \"=====\"; head -12 scripts/adapters/test_mission_git_verify.py"
+      },
+      {
+        "ts": "2026-08-11T06:58:25.704Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_dalZvKSMJrEcTC60TmT17815",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && grep -rn \"node-11\\|test_manifest_name\\|manifest_name\" .handoffs/ 2>/dev/null | head -10; echo \"=====AGENTS executor contract (result ref)=====\"; grep -n \"result ref\\|result_ref\\|pytest\" AGENTS.md | head -20"
+      },
+      {
+        "ts": "2026-08-11T06:58:25.719Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_naBCznOl5LJKROLUFhdW6060",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:58:25.729Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_dalZvKSMJrEcTC60TmT17815",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:58:28.881Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_4eh5RsFalQFiHQxr6I1H8151",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && sed -n '90,140p' AGENTS.md"
+      },
+      {
+        "ts": "2026-08-11T06:58:28.882Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_MJOus3DYKeJwTRLA9Udo8102",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && grep -rn \"manifest_name\\|test_manifest\" scripts/runtime/heartbeat/ 2>/dev/null | head; echo \"=====check heartbeat module for _manifest_name=====\"; grep -rln \"_manifest_name\" scripts/ | head"
+      },
+      {
+        "ts": "2026-08-11T06:58:28.891Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_4eh5RsFalQFiHQxr6I1H8151",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:58:28.902Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_MJOus3DYKeJwTRLA9Udo8102",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:58:32.283Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_XrEUxOxoCA0Zn2yN6sFe6115",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && ls -la --time-style=full-iso scripts/adapters/__pycache__/ | grep -i \"manifest\\|mission_evidence\"; echo \"=====git times=====\"; git log -1 --format='%ci %s' 7f25085; git log -1 --format='%ci %s' 689c6b6"
+      },
+      {
+        "ts": "2026-08-11T06:58:32.283Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_mviE6c6MANwEg5MSuJBo9136",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && sed -n '140,200p' AGENTS.md"
+      },
+      {
+        "ts": "2026-08-11T06:58:32.295Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_mviE6c6MANwEg5MSuJBo9136",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:58:32.299Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_XrEUxOxoCA0Zn2yN6sFe6115",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:58:44.668Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_1ro5z3w4azRAcKzSikVW3714",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && grep -rn \"passed\\|failed\\|tail\" .gddp/result-summary.md 2>/dev/null; echo \"=====any note files from this job=====\"; find . -newer 7f25085 -name \"*.md\" -not -path \"./.git/*\" 2>/dev/null | head; echo \"=====other T3 test files?=====\"; ls scripts/adapters/ | grep -E \"topological|render_item|completion|normalize|select_handoff\"; ls scripts/runtime/heartbeat/ | grep -E \"test_topological|test_render|test_completion|test_normalize|test_select\""
+      },
+      {
+        "ts": "2026-08-11T06:58:44.669Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_IWYBBoTHgN3Amc0gpB3O5378",
+        "command": "cd /tmp/gddp-eval-wt-0zwtboev && git diff 450eca1..HEAD --name-only && echo \"=====verify no production change=====\" && git diff 450eca1..HEAD -- scripts/adapters/mission_evidence.py | wc -l && echo \"=====branch/head state=====\" && git branch --show-current && git rev-parse HEAD"
+      },
+      {
+        "ts": "2026-08-11T06:58:44.689Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_1ro5z3w4azRAcKzSikVW3714",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:58:44.695Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_IWYBBoTHgN3Amc0gpB3O5378",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:59:04.288Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_a2NQS9ZWtQmFsl7cyK9K7414",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "Frontier has 6 independent ready test nodes (node-11..node-16) in the same T3 tranche with max_concurrent_jobs=1; they serialize by policy, not by graph dependency. Each adds one test file next to its module in scripts/adapters/ — consistent with this node's shape, so subsequent nodes should follow the same one-file, no-production-change pattern. No convergence risk observed.",
+        "affected_node_ids": [
+          "node-12-test-topological-order",
+          "node-13-test-render-item",
+          "node-14-test-completion-id-digest",
+          "node-15-test-normalize-digest",
+          "node-16-test-select-handoff"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.4,
+  "criteria_confidence": 0.4,
+  "completeness": 1.0,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "test-file-exists",
+        "criterion": "scripts/adapters/test_manifest_name.py exists (or scripts/runtime/heartbeat/test_manifest_name.py matching the target module location) and contains tests for _manifest_name",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "test_manifest_name -> line 23: 'test_manifest_name'",
+          "test_manifest_name -> line 23: 'test_manifest_name'",
+          "manifest_name -> line 1: 'manifest_name'",
+          "scripts/runtime/heartbeat/test_manifest_name.py absent"
+        ],
+        "reasoning": "Scanned source files (scripts/adapters/test_manifest_name.py) for identifiers named in the criterion (test_manifest_name, test_manifest_name, manifest_name). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "scripts/runtime/heartbeat/test_manifest_name.py absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "behavior-covered",
+        "criterion": "the tests assert that safe filename keeps alphanumerics/dash/underscore, appends a 12-hex digest, and is deterministic",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "suite-green",
+        "criterion": "python3 -m pytest -q passes with only the 3 known flask-import failures (ModuleNotFoundError: flask); the new test file passes",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...) for identifiers named in the criterion (flask-import, ModuleNotFoundError). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create exactly one new test file for _manifest_name in scripts/adapters/mission_evidence.py next to its module",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Do not modify production code or other test files",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Run python3 -m pytest -q before finishing and quote its tail line in the commit or a short note",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "scripts/adapters/test_manifest_name.py": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [
+      {
+        "criterion_id": "test-file-exists",
+        "kind": "source_path",
+        "detail": "scripts/runtime/heartbeat/test_manifest_name.py absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "test-file-exists",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+      "tip": "689c6b6df049f5933d20badac12cc5cf5461e989",
+      "files": [
+        {
+          "status": "A",
+          "path": "scripts/adapters/test_manifest_name.py"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "test-file-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "scripts/adapters/test_manifest_name.py present (git diff 450eca1..689c6b6: single added file 'A scripts/adapters/test_manifest_name.py')",
+          "File imports _manifest_name from scripts.adapters.mission_evidence and defines 4 test functions (test_manifest_name_keeps_alphanumerics_dash_underscore, test_manifest_name_replaces_unsafe_chars_and_strips_edge_dashes, test_manifest_name_digest_is_12_hex_and_deterministic, test_manifest_name_falls_back_to_feature_when_fully_stripped)",
+          "Production module scripts/adapters/mission_evidence.py defines _manifest_name at line 764; test file is adjacent, matching required_artifacts and constraint 'next to its module'",
+          "Deterministic mismatch 'scripts/runtime/heartbeat/test_manifest_name.py absent' is the alternative arm of the criterion's OR clause; primary path satisfied"
+        ],
+        "reasoning": "The criterion is an OR of two acceptable paths. The primary path (scripts/adapters/test_manifest_name.py) exists, is exactly the node's required artifact, sits next to the target module, and contains four tests that import and exercise _manifest_name. The deterministic check's source_path mismatch refers to the unused alternative path and is a false positive. All sub-requirements met."
+      },
+      {
+        "criterion_id": "behavior-covered",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "test_manifest_name_keeps_alphanumerics_dash_underscore: asserts stem == 'Node_Alpha-01' (alphanumerics/dash/underscore preserved) and digest == sha256(feature_id)[:12]",
+          "test_manifest_name_replaces_unsafe_chars_and_strips_edge_dashes: asserts stem == 'weird-name-with-spaces' and set(stem) <= [A-Za-z0-9-_]",
+          "test_manifest_name_digest_is_12_hex_and_deterministic: asserts first == second (deterministic), len(digest) == 12, re.fullmatch(r'[0-9a-f]{12}'), digest == sha256(feature_id)[:12], and name == f'{stem}--{digest}.json' (12-hex digest appended)",
+          "Production _manifest_name (mission_evidence.py:764-769): keeps alnum/_- chars, replaces others with '-', strips edge dashes, appends sha256(feature_id).hexdigest()[:12], falls back to 'feature'"
+        ],
+        "reasoning": "All three required behaviors are asserted by the tests: (1) safe filename keeps alphanumerics/dash/underscore (tests 1 and 2), (2) appends a 12-hex digest (test 3 asserts length 12, hex charset, and the --digest.json suffix, cross-checked against sha256[:12]), (3) deterministic (test 3 asserts first == second). The assertions match the production implementation, which I executed directly (e.g., _manifest_name('Node_Alpha-01') = 'Node_Alpha-01--2307414e4b14.json'). Criterion fully covered."
+      },
+      {
+        "criterion_id": "suite-green",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "Full suite, executor venv (/tmp/gddp-pytest-venv, flask 3.1.3), clean env: '630 passed in 36.26s' — 0 failures",
+          "No-flask simulation (meta_path blocker raising ModuleNotFoundError for flask): '3 failed, 627 passed' — failures exactly test_intake_server::test_health_returns_ok_with_webhook_verification_when_secret_resolved, test_intake_server::test_health_returns_503_when_secret_unresolved, test_intake_webhook_roundtrip::test_signed_webhook_post_creates_event_row_and_raw_payload, all ModuleNotFoundError: No module named 'flask' at scripts/intake_server.py:24",
+          "New test file standalone: '4 passed in 0.03s' via pytest; also passed within both full-suite runs",
+          "Initial observed failure deploy/rig1-heartbeat/test_rig1_render_plist.py::test_render_heartbeat_invokes_real_runner_module was caused by ambient GDDP_PROJECT_ID=pi-harness-execution / GDDP_PROJECT_REPO=/home/sab-mini/Pi-Coding-Agent leaking into the pre-existing test; with those unset the file passes 6/6; test file identical to base commit"
+        ],
+        "reasoning": "The criterion describes the suite state the executor was expected to produce: green except the 3 known flask-import failures, with the new test file passing. Both interpretations reproduce cleanly: with flask installed the suite is fully green (630 passed), and with flask absent exactly the 3 named ModuleNotFoundError: flask failures occur with everything else (627 tests, including the 4 new ones) passing. The new test file passes in both environments. The single extra failure I initially observed is a pre-existing environment-leak artifact of the harness's own ambient env vars, not caused by this node and not part of the criterion's expectation. Confidence is high but not 1.0 because I could not run in the executor's literal process environment (pytest absent from /usr/bin/python3; I used the discovered venv and a faithful no-flask import simulation)."
+      },
+      {
+        "criterion_id": "constraint-exactly-one-test-file",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "git diff 450eca1..689c6b6 --name-status shows exactly one entry: 'A scripts/adapters/test_manifest_name.py'",
+          "File located at scripts/adapters/, adjacent to scripts/adapters/mission_evidence.py"
+        ],
+        "reasoning": "The node diff contains exactly one new file, placed next to its target module as required. Constraint satisfied."
+      },
+      {
+        "criterion_id": "constraint-no-prod-other-test-modification",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "git diff 450eca1..689c6b6 --name-status shows a single added file and zero modifications",
+          "git status --porcelain empty (worktree clean)"
+        ],
+        "reasoning": "No production code or other test files were modified; the only change is the addition of the new test file. Constraint satisfied."
+      },
+      {
+        "criterion_id": "constraint-pytest-tail-line-quoted",
+        "judgment": "indeterminate",
+        "confidence": 0.6,
+        "evidence": [
+          "Commit 7f25085 body: 'test(adapters): unit-cover _manifest_name sanitization and digest / Add scripts/adapters/test_manifest_name.py for safe stem, 12-hex digest, determinism, and fully-stripped fallback. Co-Authored-By: Pi + composer-2' — no pytest tail line",
+          "Result commit 689c6b6 body: 'result(job=job_20260811T06462276d87387f5952d, attempt=...:attempt:0)' — no pytest tail line",
+          "No note file added in diff; .gddp/result-summary.md and .gddp/patch.diff are stale July artifacts from neutral-executor-contract (pre-existing at base)",
+          "Independent reproduction shows the suite state the criterion expects (630 passed with flask; exactly 3 ModuleNotFoundError: flask failures without; new test passes in both)"
+        ],
+        "reasoning": "The constraint required running pytest and quoting its tail line in the commit or a short note. Neither commit quotes a tail line and no note was added, so the required evidence artifact is absent. The underlying run outcome described by criterion suite-green is, however, reproducible exactly, suggesting the run plausibly occurred. This is a process-evidence gap (completeness concern), not a failure of the acceptance criteria themselves; flagged for human confirmation."
+      },
+      {
+        "criterion_id": "constraint-commit-per-executor-contract",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "7f25085 test(adapters): unit-cover _manifest_name sanitization and digest (author Pi, committed by skchaudr)",
+          "689c6b6 result(job=job_20260811T06462276d87387f5952d, attempt=...:attempt:0) wrapper commit on top"
+        ],
+        "reasoning": "The work is committed: an implementation commit plus a result-ref wrapper commit per the executor contract. Constraint satisfied."
+      }
+    ],
+    "overall_reasoning": "All three acceptance criteria are satisfied with high confidence. (1) test-file-exists: scripts/adapters/test_manifest_name.py exists as the node's only diff addition, sits next to its module scripts/adapters/mission_evidence.py, and contains four tests that import and exercise _manifest_name; the deterministic check's 'scripts/runtime/heartbeat/test_manifest_name.py absent' mismatch is a false positive because that is the unused alternative arm of an OR clause. (2) behavior-covered: the tests assert retention of alphanumerics/dash/underscore (stem checks and allowed-set assertion), a 12-hex digest suffix (length-12, [0-9a-f]{12}, equality with sha256(feature_id)[:12], and the {stem}--{digest}.json shape), and determinism (first == second); assertions match the production implementation, which I executed directly. (3) suite-green: reproduced in the executor's venv with flask installed (630 passed, 0 failed) and in a faithful no-flask simulation (3 failed — exactly the named ModuleNotFoundError: flask failures at scripts/intake_server.py:24 — 627 passed); the new test file passes standalone (4/4) and in both full runs. The one additional failure seen in an unfiltered run (deploy/rig1-heartbeat/test_rig1_render_plist.py) is a pre-existing environment-leak artifact caused by the harness's own ambient GDDP_PROJECT_ID/GDDP_PROJECT_REPO exports, not by this node, and passes 6/6 in a clean env. Constraints: exactly one test file added next to its module (pass), no production/other-test modifications (pass, verified via diff and clean worktree), commit per executor contract (pass). One process-evidence gap: neither commit quotes the pytest tail line and no short note was added, so constraint 3's evidence requirement is unverifiable from the artifact trail even though the criterion's described suite state reproduces exactly. Intent/integrity preserved: the node is a T3 tiny pure-function test node and the work is precisely that — one new test file, no production changes, no graph truth mutation, no canon violations.",
+    "risks": "1) Constraint 'Run python3 -m pytest -q before finishing and quote its tail line in the commit or a short note' has no visible evidence: neither commit (7f25085, 689c6b6) contains a pytest tail line and no note file was added; the diff is only the new test file. I independently reproduced the expected suite state (630 passed with flask; exactly 3 ModuleNotFoundError: flask failures without), but whether the executor actually ran pytest before finishing cannot be confirmed from the repo. 2) Pre-existing environment sensitivity: deploy/rig1-heartbeat/test_rig1_render_plist.py fails whenever GDDP_PROJECT_ID/GDDP_PROJECT_REPO are exported in the ambient environment (as they are in this harness's shell), because _base_render_env does not pin them. Unrelated to this node, but it produced a spurious red run during evaluation and could do so for future nodes. 3) The deterministic evaluator's source_path mismatch for test-file-exists is a false positive caused by the criterion's OR clause; automated keyword/path scans on OR-criteria may mislead until handled. 4) I could not run pytest with the system python (/usr/bin/python3 lacks pytest and flask); all suite results come from the discovered venv (/tmp/gddp-pytest-venv) and a no-flask simulation via a sys.meta_path blocker, which reproduced the exact ModuleNotFoundError site and count.",
+    "followup_candidates": "1) Human clarification on constraint 3: 'Observed: neither the implementation commit (7f25085) nor the result commit (689c6b6) quotes the pytest tail line, and no short note file was added (diff contains only the new test file). The suite state described by criterion suite-green is independently reproducible (630 passed with flask; exactly the 3 known ModuleNotFoundError: flask failures without; new test passes in both). Was the tail-line quote intentionally omitted, or should this constraint's evidence requirement be enforced/updated?' 2) Human clarification on the deterministic mismatch: 'The deterministic check flagged scripts/runtime/heartbeat/test_manifest_name.py absent as a source_path mismatch for test-file-exists, but the criterion is an OR clause and the primary path (scripts/adapters/test_manifest_name.py, matching the node's required_artifacts) is satisfied. Is the heartbeat path stale in the criterion text?' 3) Pre-existing, out-of-scope observation: 'deploy/rig1-heartbeat/test_rig1_render_plist.py fails when GDDP_PROJECT_ID/GDDP_PROJECT_REPO are exported in the environment (leaks via subprocess env merge); it passes 6/6 in a clean env. Consider pinning these in _base_render_env to avoid spurious red runs in harness environments.'",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-11T06:51:58.539Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_LNT3U39JjfYmD7T7BduB1859",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && ls -la && git log --oneline -5 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-11T06:51:58.540Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_IiyH8tMdlag3g5ZV6axV1193",
+          "path": "/tmp/gddp-eval-wt-0zwtboev/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-11T06:51:58.552Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_IiyH8tMdlag3g5ZV6axV1193",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:51:58.559Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_LNT3U39JjfYmD7T7BduB1859",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:52:00.136Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_avDC2ar374HFRwjEI7pS0555",
+          "path": "/tmp/gddp-eval-wt-0zwtboev/scripts/adapters/test_manifest_name.py"
+        },
+        {
+          "ts": "2026-08-11T06:52:00.137Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_uTe6tLGE1WOT6yjTzHO51595",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && ls scripts/adapters/ && git show --stat 7f25085 | head -30 && git show --stat 689c6b6 | head -20"
+        },
+        {
+          "ts": "2026-08-11T06:52:00.144Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_avDC2ar374HFRwjEI7pS0555",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:52:00.155Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_uTe6tLGE1WOT6yjTzHO51595",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:52:02.850Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_uNGRdYaqtYDUnX4VmEJv0295",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && grep -n \"_manifest_name\" scripts/adapters/mission_evidence.py | head; echo ---; sed -n '1,80p' scripts/adapters/mission_evidence.py"
+        },
+        {
+          "ts": "2026-08-11T06:52:02.850Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_JB4ca7Ru0LqUtCdZhdjA3516",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && cat pytest.ini requirements.txt"
+        },
+        {
+          "ts": "2026-08-11T06:52:02.863Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_uNGRdYaqtYDUnX4VmEJv0295",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:52:02.864Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_JB4ca7Ru0LqUtCdZhdjA3516",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:52:04.143Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ET_DHMo9CyxRIX6baNPrxCk6234",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && sed -n '755,800p' scripts/adapters/mission_evidence.py"
+        },
+        {
+          "ts": "2026-08-11T06:52:04.152Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ET_DHMo9CyxRIX6baNPrxCk6234",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:52:10.337Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_FND857YALaw8aAL2halE3876",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -15"
+        },
+        {
+          "ts": "2026-08-11T06:52:10.338Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_5FexjdIgvJSXhAO05F304118",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && python3 -c \"import flask\" 2>&1; python3 -m pytest --version 2>&1 | head -2"
+        },
+        {
+          "ts": "2026-08-11T06:52:10.372Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_FND857YALaw8aAL2halE3876",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:52:10.420Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_5FexjdIgvJSXhAO05F304118",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:52:13.537Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_mGqyU9l3fVc3EQEJ8NR80863",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && git show 689c6b6 --stat; echo ===; git show 689c6b6 --format=\"%B\" -s; echo ===; git show 7f25085 --format=\"%B\" -s; echo ===; find . -maxdepth 3 -name \"*.venv\" -o -maxdepth 3 -name \"venv\" -o -maxdepth 3 -name \".venv\" 2>/dev/null | head; ls .gddp 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-11T06:52:13.537Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Wpms0G0fMS494h3d3Y5n3188",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && find . -name \"*.pyc\" -newer .gitignore 2>/dev/null | head -3; git status --short | head; echo ===; git diff 450eca1..689c6b6 --stat"
+        },
+        {
+          "ts": "2026-08-11T06:52:13.569Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_mGqyU9l3fVc3EQEJ8NR80863",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:52:13.616Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Wpms0G0fMS494h3d3Y5n3188",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:52:16.109Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_zQeyQgL0zZlSPCmS7Odf4285",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && git show 689c6b6 --format=\"%H %s\" --stat | head; echo ===RESULT-SUMMARY===; cat .gddp/result-summary.md; echo ===DECISION===; cat .gddp/decision.md"
+        },
+        {
+          "ts": "2026-08-11T06:52:16.123Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_zQeyQgL0zZlSPCmS7Odf4285",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:52:23.529Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_erhaj6lkH8iq3gwhUyLC2312",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && git log 450eca1..689c6b6 --format=\"%H%n%B%n=====\"; echo; git show 689c6b6 --stat --format=fuller | head -20"
+        },
+        {
+          "ts": "2026-08-11T06:52:23.529Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_TUmm2lJT2QgI0letLhh01478",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && python3 - <<'EOF'\nimport sys, types, importlib.util, traceback\n# Try importing mission_evidence directly\ntry:\n    from scripts.adapters import mission_evidence\n    print(\"import OK:\", mission_evidence.__file__)\n    f = mission_evidence._manifest_name\n    print(\"_manifest_name('Node_Alpha-01') =\", f(\"Node_Alpha-01\"))\n    print(\"_manifest_name('!!weird name/with.spaces!!') =\", f(\"!!weird name/with.spaces!!\"))\n    print(\"_manifest_name('feature/with spaces & symbols') =\", f(\"feature/with spaces & symbols\"))\n    print(\"_manifest_name('!!!') =\", f(\"!!!\"))\nexcept Exception as e:\n    traceback.print_exc()\nEOF"
+        },
+        {
+          "ts": "2026-08-11T06:52:23.544Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_erhaj6lkH8iq3gwhUyLC2312",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:52:23.635Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_TUmm2lJT2QgI0letLhh01478",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:52:26.467Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_zgQDClSiyjgQP0qBcRqJ5655",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && python3 - <<'EOF'\nimport importlib.util, traceback\nspec = importlib.util.spec_from_file_location(\"tmn\", \"scripts/adapters/test_manifest_name.py\")\nmod = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(mod)\ntests = [n for n in dir(mod) if n.startswith(\"test_\")]\npassed = failed = 0\nfor t in tests:\n    try:\n        getattr(mod, t)()\n        print(\"PASS\", t)\n        passed += 1\n    except Exception as e:\n        print(\"FAIL\", t, repr(e))\n        failed += 1\nprint(f\"== {passed} passed, {failed} failed ==\")\nEOF"
+        },
+        {
+          "ts": "2026-08-11T06:52:26.559Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_zgQDClSiyjgQP0qBcRqJ5655",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:52:36.856Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_neafGLs4HTN8UWdicJ2w8594",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && grep -rln \"import flask\\|from flask\" scripts/ --include=\"*.py\" | head -20; echo ===; grep -rln \"import flask\\|from flask\" scripts/ --include=\"test_*.py\" | head -20; echo ===; find / -maxdepth 4 -name \"pytest\" -type f 2>/dev/null | head -5; echo ===VENV===; find / -maxdepth 4 -name \"activate\" -path \"*venv*\" 2>/dev/null | head -5"
+        },
+        {
+          "ts": "2026-08-11T06:52:36.856Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_HwUmAQ9zHqJ7O2R5ci3J3035",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && git ls-tree -r 689c6b6 --name-only | head -40; echo ===; git status --short"
+        },
+        {
+          "ts": "2026-08-11T06:52:36.882Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_HwUmAQ9zHqJ7O2R5ci3J3035",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:52:37.094Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_neafGLs4HTN8UWdicJ2w8594",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:52:38.871Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_xmpMaSRFeAyo2OftQtb03889",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && PYTHONDONTWRITEBYTECODE=1 /tmp/gddp-pytest-venv/bin/python -m pytest -q -p no:cacheprovider 2>&1 | tail -25"
+        },
+        {
+          "ts": "2026-08-11T06:53:16.163Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_xmpMaSRFeAyo2OftQtb03889",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:53:22.636Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_g7EHZ0zXhXhhXWKzOJf75514",
+          "command": "/tmp/gddp-pytest-venv/bin/python -c \"import flask; print('flask', flask.__version__)\" 2>&1; echo ===; grep -rln \"intake_server\\|import flask\" scripts/ --include=\"test_*.py\"; echo ===; grep -rln \"flask\" deploy/ --include=\"*.py\" | head; echo ===; grep -rn \"ModuleNotFoundError\\|flask\" docs/ readiness-report-2026-07-18.md 2>/dev/null | grep -i flask | head"
+        },
+        {
+          "ts": "2026-08-11T06:53:22.636Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_01_yjcBLRDEXdP7HqsdX6qU6379",
+          "reason": "command matched blocked pattern",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && git stash list; git worktree list; echo ===; git show 450eca1:deploy/rig1-heartbeat/test_rig1_render_plist.py > /tmp/base_plist_test.py 2>/dev/null && diff <(git show 450eca1:deploy/rig1-heartbeat/test_rig1_render_plist.py) deploy/rig1-heartbeat/test_rig1_render_plist.py && echo \"plist test unchanged from base\"",
+          "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+        },
+        {
+          "ts": "2026-08-11T06:53:22.637Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_yjcBLRDEXdP7HqsdX6qU6379",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T06:53:22.909Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_g7EHZ0zXhXhhXWKzOJf75514",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:53:38.065Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_HE14BbStr3lnLNdwVTS49653",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && diff <(git show 450eca1:deploy/rig1-heartbeat/test_rig1_render_plist.py) deploy/rig1-heartbeat/test_rig1_render_plist.py && echo \"PLIST TEST IDENTICAL TO BASE\"; echo ===; grep -n \"import\\|flask\" scripts/test_intake_server.py | head -8; echo ---; grep -n \"import\\|flask\" scripts/test_intake_webhook_roundtrip.py | head -8; echo ---; grep -n \"import\\|flask\" scripts/test_runtime_root_config.py | head -8"
+        },
+        {
+          "ts": "2026-08-11T06:53:38.065Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_JNVL4LCLOZZz3dBhqFC58599",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && ls .handoffs/ | tail -12; echo ===; grep -rln \"node-11\\|test_manifest_name\\|manifest_name\" .handoffs/ docs/ .gddp/ 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-11T06:53:38.088Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_HE14BbStr3lnLNdwVTS49653",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:53:38.106Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_JNVL4LCLOZZz3dBhqFC58599",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:53:42.273Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_HGLq7jf8dbDBh5sdJcOb0830",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && grep -rn \"from flask\\|import flask\" --include=\"test_*.py\" . | grep -v \".git/\" | grep -v \"sys.modules\\|# \" | head -20; echo ===DIRECT===; grep -rn \"^from flask\\|^import flask\" --include=\"*.py\" . | grep -v \".git/\" | head"
+        },
+        {
+          "ts": "2026-08-11T06:53:42.274Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_nWKXvZ9S7UKNhcql0nNi6614",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && sed -n '1,40p' scripts/test_intake_server.py"
+        },
+        {
+          "ts": "2026-08-11T06:53:42.290Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_nWKXvZ9S7UKNhcql0nNi6614",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:53:42.298Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_HGLq7jf8dbDBh5sdJcOb0830",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:53:53.477Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_bhVXiKIpmBBlrmCUOxzU9798",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && sed -n '1,80p' deploy/rig1-heartbeat/test_rig1_render_plist.py"
+        },
+        {
+          "ts": "2026-08-11T06:53:53.477Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_k0BPBnpzVCfuFLcLC0zd1879",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && grep -rn \"pi-harness-execution\\|gddp-runtime\" deploy/rig1-heartbeat/*.py | head -10"
+        },
+        {
+          "ts": "2026-08-11T06:53:53.487Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_bhVXiKIpmBBlrmCUOxzU9798",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:53:53.491Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_k0BPBnpzVCfuFLcLC0zd1879",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:54:01.274Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_cZ4T8RPvvWxZW2r2YH7s2739",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && ls deploy/rig1-heartbeat/ deploy/rig1-heartbeat/bin/ deploy/rig1-heartbeat/launchd/ 2>/dev/null; echo ===; grep -n \"project\\|PROJECT\" deploy/rig1-heartbeat/bin/common.sh | head; echo ===TEMPLATE===; grep -n \"project\\|PROJECT\" deploy/rig1-heartbeat/launchd/com.gddp.rig1.heartbeat.plist 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-11T06:54:01.274Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_rPac6whRmnb1tSyuj2RR6972",
+          "command": "env | grep -i \"gddp\\|project\\|repo\" | head"
+        },
+        {
+          "ts": "2026-08-11T06:54:01.289Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_cZ4T8RPvvWxZW2r2YH7s2739",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:54:01.290Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_rPac6whRmnb1tSyuj2RR6972",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:54:04.267Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_HtDddAdK4eIV8o3TK7ET5262",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && sed -n '1,60p' deploy/rig1-heartbeat/bin/common.sh"
+        },
+        {
+          "ts": "2026-08-11T06:54:04.276Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_HtDddAdK4eIV8o3TK7ET5262",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:54:07.588Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_QUEokG3mdhDZFpMsHfAG5981",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && grep -rn \"pi-harness-execution\" --include=\"*.sh\" --include=\"*.plist\" --include=\"*.py\" --include=\"*.env\" . 2>/dev/null | grep -v \".git/\" | head; echo ===; env | grep -i \"PROJECT_ID\"; echo \"exit=$?\"; grep -n \"render_plist\" deploy/rig1-heartbeat/bin/common.sh"
+        },
+        {
+          "ts": "2026-08-11T06:54:07.608Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_QUEokG3mdhDZFpMsHfAG5981",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:54:15.994Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_yLd3P2T0xgeSBlr0J2K11119",
+          "reason": "command matched blocked pattern",
+          "command": "mkdir -p /tmp/nofake && cat > /tmp/nofake/sitecustomize.py <<'EOF'\nimport sys\nclass _NoFlask:\n    def find_spec(self, name, path=None, target=None):\n        if name == \"flask\" or name.startswith(\"flask.\"):\n            raise ModuleNotFoundError(\"No module named 'flask'\")\nsys.meta_path.insert(0, _NoFlask())\nEOF\ncd /tmp/gddp-eval-wt-0zwtboev && env -u GDDP_PROJECT_ID PYTHONPATH=/tmp/nofake PYTHONDONTWRITEBYTECODE=1 /tmp/gddp-pytest-venv/bin/python -m pytest -q -p no:cacheprovider 2>&1 | tail -8",
+          "pattern": "(?:^|\\s|&&|\\|\\|)\\s*mkdir\\s"
+        },
+        {
+          "ts": "2026-08-11T06:54:15.994Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_yLd3P2T0xgeSBlr0J2K11119",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T06:54:24.693Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_wSEB82n14AXVrEEGTvUM6808",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && env -u GDDP_PROJECT_ID PYTHONDONTWRITEBYTECODE=1 /tmp/gddp-pytest-venv/bin/python -c \"\nimport sys\nclass _NoFlask:\n    def find_spec(self, name, path=None, target=None):\n        if name == 'flask' or name.startswith('flask.'):\n            raise ModuleNotFoundError(\\\"No module named 'flask'\\\")\nsys.meta_path.insert(0, _NoFlask())\nimport pytest\nsys.exit(pytest.main(['-q', '-p', 'no:cacheprovider']))\n\" 2>&1 | tail -8"
+        },
+        {
+          "ts": "2026-08-11T06:55:01.557Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_wSEB82n14AXVrEEGTvUM6808",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:55:09.033Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_pgmJd8rwX3pCvgSwiZBG3672",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && env -u GDDP_PROJECT_ID PYTHONDONTWRITEBYTECODE=1 /tmp/gddp-pytest-venv/bin/python -c \"\nimport sys\nclass _NoFlask:\n    def find_spec(self, name, path=None, target=None):\n        if name == 'flask' or name.startswith('flask.'):\n            raise ModuleNotFoundError(\\\"No module named 'flask'\\\")\nsys.meta_path.insert(0, _NoFlask())\nimport pytest\nsys.exit(pytest.main(['-q', '-p', 'no:cacheprovider', 'deploy/rig1-heartbeat/test_rig1_render_plist.py::test_render_heartbeat_invokes_real_runner_module', 'scripts/test_intake_server.py::test_health_returns_ok_with_webhook_verification_when_secret_resolved', 'scripts/test_intake_webhook_roundtrip.py::test_signed_webhook_post_creates_event_row_and_raw_payload']))\n\" 2>&1 | tail -40"
+        },
+        {
+          "ts": "2026-08-11T06:55:09.750Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_pgmJd8rwX3pCvgSwiZBG3672",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:55:16.260Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_UFYWT2afv3CYAlPB5FPK8515",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && env -u GDDP_PROJECT_ID PYTHONDONTWRITEBYTECODE=1 /tmp/gddp-pytest-venv/bin/python -m pytest -q -p no:cacheprovider deploy/rig1-heartbeat/test_rig1_render_plist.py::test_render_heartbeat_invokes_real_runner_module 2>&1 | grep -A12 \"def test_render_heartbeat_invokes\" | head -20; echo \"=== env check ===\"; env -u GDDP_PROJECT_ID bash -c 'echo \"GDDP_PROJECT_ID=[$GDDP_PROJECT_ID]\"'"
+        },
+        {
+          "ts": "2026-08-11T06:55:16.794Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_UFYWT2afv3CYAlPB5FPK8515",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:55:20.432Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_JQoVTDVfsprd9qDNdOiz5687",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && env -u GDDP_PROJECT_ID -u GDDP_PROJECT_REPO PYTHONDONTWRITEBYTECODE=1 /tmp/gddp-pytest-venv/bin/python -m pytest -q -p no:cacheprovider deploy/rig1-heartbeat/test_rig1_render_plist.py 2>&1 | tail -3; echo \"=== ambient ===\"; env | grep -E \"^GDDP_PROJECT\""
+        },
+        {
+          "ts": "2026-08-11T06:55:21.052Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_JQoVTDVfsprd9qDNdOiz5687",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:55:26.568Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_COYeyzbkCNViA3fGXrpU1293",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && env -u GDDP_PROJECT_ID -u GDDP_PROJECT_REPO PYTHONDONTWRITEBYTECODE=1 /tmp/gddp-pytest-venv/bin/python -m pytest -q -p no:cacheprovider 2>&1 | tail -3"
+        },
+        {
+          "ts": "2026-08-11T06:56:03.436Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_COYeyzbkCNViA3fGXrpU1293",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:56:05.880Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_fe2Dy1ZYezAmSWQ88eRC7773",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && env -u GDDP_PROJECT_ID -u GDDP_PROJECT_REPO PYTHONDONTWRITEBYTECODE=1 /tmp/gddp-pytest-venv/bin/python -c \"\nimport sys\nclass _NoFlask:\n    def find_spec(self, name, path=None, target=None):\n        if name == 'flask' or name.startswith('flask.'):\n            raise ModuleNotFoundError(\\\"No module named 'flask'\\\")\nsys.meta_path.insert(0, _NoFlask())\nimport pytest\nsys.exit(pytest.main(['-q', '-p', 'no:cacheprovider']))\n\" 2>&1 | tail -6"
+        },
+        {
+          "ts": "2026-08-11T06:56:42.345Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_fe2Dy1ZYezAmSWQ88eRC7773",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:56:48.579Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_wCQRObeKQoKzzTonLVRy6251",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && head -20 .gddp/patch.diff 2>/dev/null; echo ===; grep -n \"pytest\\|passed\\|failed\" .gddp/patch.diff 2>/dev/null | head; echo ===; git log --all --oneline --grep=\"pytest\" | head -5; echo ===; git show 7f25085 --format=fuller -s"
+        },
+        {
+          "ts": "2026-08-11T06:56:48.609Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_wCQRObeKQoKzzTonLVRy6251",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:57:01.618Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_nvWMJmghVn5Rc2dXE5WG7667",
+          "command": "cd /tmp/gddp-eval-wt-0zwtboev && env -u GDDP_PROJECT_ID -u GDDP_PROJECT_REPO PYTHONDONTWRITEBYTECODE=1 /tmp/gddp-pytest-venv/bin/python -m pytest -q -p no:cacheprovider scripts/adapters/test_manifest_name.py 2>&1 | tail -3; echo ===; git status --porcelain | wc -l; git diff 450eca1..689c6b6 --name-status"
+        },
+        {
+          "ts": "2026-08-11T06:57:02.055Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_nvWMJmghVn5Rc2dXE5WG7667",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:57:38.624Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_UVIXZUieJ5BM3n7NwuhF4725",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All three acceptance criteria are satisfied with high confidence. (1) test-file-exists: scripts/adapters/test_manifest_name.py exists as the node's only diff addition, sits next to its module scripts/adapters/mission_evidence.py, and contains four tests that import and exercise _manifest_name; the deterministic check's 'scripts/runtime/heartbeat/test_manifest_name.py absent' mismatch is a false positive because that is the unused alternative arm of an OR clause. (2) behavior-covered: the tests assert retention of alphanumerics/dash/underscore (stem checks and allowed-set assertion), a 12-hex digest suffix (length-12, [0-9a-f]{12}, equality with sha256(feature_id)[:12], and the {stem}--{digest}.json shape), and determinism (first == second); assertions match the production implementation, which I executed directly. (3) suite-green: reproduced in the executor's venv with flask installed (630 passed, 0 failed) and in a faithful no-flask simulation (3 failed — exactly the named ModuleNotFoundError: flask failures at scripts/intake_server.py:24 — 627 passed); the new test file passes standalone (4/4) and in both full runs. The one additional failure seen in an unfiltered run (deploy/rig1-heartbeat/test_rig1_render_plist.py) is a pre-existing environment-leak artifact caused by the harness's own ambient GDDP_PROJECT_ID/GDDP_PROJECT_REPO exports, not by this node, and passes 6/6 in a clean env. Constraints: exactly one test file added next to its module (pass), no production/other-test modifications (pass, verified via diff and clean worktree), commit per executor contract (pass). One process-evidence gap: neither commit quotes the pytest tail line and no short note was added, so constraint 3's evidence requirement is unverifiable from the artifact trail even though the criterion's described suite state reproduces exactly. Intent/integrity preserved: the node is a T3 tiny pure-function test node and the work is precisely that — one new test file, no production changes, no graph truth mutation, no canon violations.",
+  "required_next_action": "Human review required for unresolved semantic judgments.",
+  "generated_at": "2026-08-11T06:59:04.335664+00:00",
+  "evaluated_tree_sha": "2fc2258ee92d2012ab259f6f17fdc8a2bc786abc",
+  "evaluated_commit_sha": "689c6b6df049f5933d20badac12cc5cf5461e989",
+  "merge_commit_sha": "689c6b6df049f5933d20badac12cc5cf5461e989",
+  "expected_base_commit_sha": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+  "pr_ref": null,
+  "job_id": "job_20260811T06462276d87387f5952d",
+  "execution_attempt_id": "job_20260811T06462276d87387f5952d:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-0zwtboev/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-0zwtboev/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-0zwtboev/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-0zwtboev/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-0zwtboev/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-0zwtboev/README.md"
+      ]
+    },
+    "overall": "medium"
+  }
+}

@@ -1,0 +1,783 @@
+{
+  "project_id": "pi-harness-execution",
+  "node_id": "node-09-portfolio-audit",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.9,
+    "findings": [
+      {
+        "severity": "low",
+        "summary": "One citation is off by one line: report AF-4 cites docs/IMPLEMENTATION-PLAN.md:57 for the needle/HANDOFF-finetune.md link; the link is actually at line 58. Substance of the finding (dead link) verified correct; only the line number is off.",
+        "affected_node_ids": [
+          "node-09-portfolio-audit"
+        ]
+      }
+    ],
+    "reasoning": "node-09-portfolio-audit's work (reports/pi-harness-execution/portfolio-audit.md, committed as a9f0898 on the result ref) fully preserves the node's intended role. The report covers every element of the node's why: Needle/Gemma/Mercury naming, Pi Capability Cascade concept, repo hygiene, README/docs quality, and showable-vs-embarrassing surfaces, and it concludes with 12 actionable acceptance criteria plus a gate check that node-10-portfolio-execute can consume directly (node-10 is constrained to implement only proposals from this report). Spot-checking ~25 factual claims against the live checkout confirmed the report is evidence-faithful: exact file:line citations (.claude.md:4/9, needle/README.md:61/67, infra-topology.md:4/12/17, .gitignore:38/36/49-50, README.md:33, IMPLEMENTATION-PLAN.md:48/63), the 161M size and largest-file table, counts (756 tracked/433 commits at write time, 83 .handoffs files, 27 docs files, 15 harness tests), the passing needle router contract test (6 OK), and structural absences (harness/tui/requirements.txt, needle/HANDOFF-finetune.md, droid-wiki/). Graph integrity is preserved: node-09 has no depends_on (root of its pair), its required artifact exists and is committed, and the node's own commit adds only the report — the other four report files in the base→tip diff come from sibling audit nodes' commits, consistent with the five-independent-pairs architecture and the 'only new file is the report' constraint. The single discrepancy (off-by-one line citation for the HANDOFF-finetune link) is cosmetic and does not affect the report's utility to the dependent node. Lane-1 indeterminate statuses on the evidence-cited criterion are noted but my independent verification of the citations supersedes that uncertainty for integrity purposes.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-09T08:11:02.579Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_2qRcKb24chTjWnWs2iyn6297",
+        "command": "ls -la /tmp/gddp-eval-wt-gd0ele81/ 2>/dev/null && echo \"---\" && find /tmp/gddp-eval-wt-gd0ele81 -type f | head -50"
+      },
+      {
+        "ts": "2026-08-09T08:11:02.580Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Uh7CZPX0BjnX6BIsHNft6136",
+        "command": "ls -la /home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-09T08:11:02.601Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_2qRcKb24chTjWnWs2iyn6297",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:02.601Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Uh7CZPX0BjnX6BIsHNft6136",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:04.677Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_fsn4TAj813E4r7xhObnf3362",
+        "path": "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-09-portfolio-audit.yaml"
+      },
+      {
+        "ts": "2026-08-09T08:11:04.678Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_lPUXjd88q2gWaZlADHTl5815",
+        "path": "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-10-portfolio-execute.yaml"
+      },
+      {
+        "ts": "2026-08-09T08:11:04.679Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_vOsBrOzOlJp3KrPqqw3x1666",
+        "path": "/tmp/gddp-eval-wt-gd0ele81/reports/pi-harness-execution/portfolio-audit.md"
+      },
+      {
+        "ts": "2026-08-09T08:11:04.683Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_vOsBrOzOlJp3KrPqqw3x1666",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:04.683Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_fsn4TAj813E4r7xhObnf3362",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:04.684Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_lPUXjd88q2gWaZlADHTl5815",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:16.020Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_xc5tstNz7XKRYTGTxQd61424",
+        "command": "cd /tmp/gddp-eval-wt-gd0ele81 && git log --oneline -8 2>/dev/null; echo \"---BASE---\"; git rev-parse df4642ec1e4661a333b660fa05643792f43799d6 2>&1; echo \"---TIP---\"; git rev-parse a9f0898967521da8cf913de294144a60364172dd 2>&1; echo \"---DIFF NAMES---\"; git diff --name-status df4642ec1e4661a333b660fa05643792f43799d6 a9f0898967521da8cf913de294144a60364172dd 2>&1"
+      },
+      {
+        "ts": "2026-08-09T08:11:16.020Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ihW7oD1KkgMPk4WEVdRj7235",
+        "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"---.github---\" && find .github -type f 2>&1 | head; echo \"---.gitignore:36-50---\" && sed -n '30,52p' .gitignore 2>&1; echo \"---harness/tests count---\" && ls harness/tests/ 2>&1 | head -20; echo \"---agent/patches---\" && ls agent/patches/*.test.* 2>&1"
+      },
+      {
+        "ts": "2026-08-09T08:11:16.045Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_xc5tstNz7XKRYTGTxQd61424",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:16.055Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ihW7oD1KkgMPk4WEVdRj7235",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:28.243Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_cCaTV3rmtZjKE9dYRuUZ4716",
+        "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"---parent of tip---\" && git rev-parse a9f0898^ 2>&1; echo \"---files in tip commit---\" && git show --stat --format=\"%h %s\" a9f0898 2>&1 | head -10; echo \"---agent/patches---\" && ls agent/patches/ 2>&1; echo \"---run-completion-guard-test.mjs exists?---\" && ls -la agent/patches/run-completion-guard-test.mjs 2>&1; echo \"---tui requirements---\" && ls harness/tui/requirements.txt 2>&1; echo \"---needle HANDOFF---\" && ls needle/HANDOFF-finetune.md 2>&1; echo \"---droid-wiki---\" && test -d droid-wiki && echo EXISTS || echo MISSING"
+      },
+      {
+        "ts": "2026-08-09T08:11:28.244Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_US6UJRCvS4YRmSsPDOhi9075",
+        "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"---README.md line 33---\" && sed -n '30,36p' README.md 2>&1; echo \"---IMPLEMENTATION-PLAN 55-62---\" && sed -n '55,62p' docs/IMPLEMENTATION-PLAN.md 2>&1; echo \"---IMPLEMENTATION-PLAN 46-50, 118-122---\" && sed -n '46,50p' docs/IMPLEMENTATION-PLAN.md && sed -n '118,122p' docs/IMPLEMENTATION-PLAN.md"
+      },
+      {
+        "ts": "2026-08-09T08:11:28.266Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_US6UJRCvS4YRmSsPDOhi9075",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:28.271Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_cCaTV3rmtZjKE9dYRuUZ4716",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:41.986Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ZMIX851U9aDGPcIzKzno3210",
+        "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"---IMPLEMENTATION-PLAN line 63---\" && sed -n '63p' docs/IMPLEMENTATION-PLAN.md; echo \"---PROJECT-BRIEF line 72---\" && sed -n '70,74p' PROJECT-BRIEF.md; echo \"---path leak scan---\" && rg -l -i 'saboor|sab-mini|sab-ssd|skchaudr|saboors-macbook|tailnet' --type md 2>/dev/null | head -20; echo \"---.claude.md tracked?---\" && git ls-files .claude.md; echo \"---auto-mode tracked?---\" && git ls-files agent/auto-mode.json; git check-ignore agent/auto-mode.json; echo \"exit=$?\""
+      },
+      {
+        "ts": "2026-08-09T08:11:41.987Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_dFkxjhNvnDEP6As6oRgC4918",
+        "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"---repo size---\" && git ls-files | xargs du -ch 2>/dev/null | tail -1; echo \"---largest files---\" && git ls-files | xargs du -h 2>/dev/null | sort -rh | head -7; echo \"---handoffs count---\" && ls .handoffs/ | wc -l; echo \"---gddp/artifacts count---\" && git ls-files gddp/artifacts/ | wc -l; echo \"---.ua tracked count---\" && git ls-files .ua/ | wc -l; echo \"---docs count---\" && ls docs/ | wc -l; ls docs/archive-sab-dev-home/ 2>/dev/null | wc -l; echo \"---tracked files total---\" && git ls-files | wc -l; echo \"---commits---\" && git rev-list --count HEAD"
+      },
+      {
+        "ts": "2026-08-09T08:11:42.036Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ZMIX851U9aDGPcIzKzno3210",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:42.065Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_dFkxjhNvnDEP6As6oRgC4918",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:49.870Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_qxYa40vj71zPvhaHHkIl5342",
+        "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"---handoffs tracked---\" && git ls-files .handoffs/ | wc -l; echo \"---handoffs on disk (all files)---\" && find .handoffs -type f | wc -l; echo \"---docs tracked---\" && git ls-files docs/ | wc -l; echo \"---docs/archive-sab-dev-home tracked---\" && git ls-files docs/archive-sab-dev-home/ | wc -l; echo \"---docs on disk---\" && find docs -type f | wc -l; echo \"---docs/archive-sab-dev-home on disk---\" && find docs/archive-sab-dev-home -type f | wc -l; echo \"---handoffs size---\" && du -sh .handoffs 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-09T08:11:49.871Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_RLRDFKwp2frhEQT2uUP82935",
+        "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"---router contract test header---\" && head -20 needle/test_router_contract.py 2>&1; echo \"---completion-guard test mjs---\" && sed -n '1,40p' agent/patches/run-completion-guard-test.mjs 2>&1"
+      },
+      {
+        "ts": "2026-08-09T08:11:49.895Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_RLRDFKwp2frhEQT2uUP82935",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:49.916Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_qxYa40vj71zPvhaHHkIl5342",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:12:06.667Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_xe0kpDPElPsJ8a2R6YR38659",
+        "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"---needle/README.md:59-68---\" && sed -n '59,68p' needle/README.md; echo \"---.claude.md:1-20---\" && sed -n '1,20p' .claude.md; echo \"---infra-topology:1-20---\" && sed -n '1,20p' agent/reference/infra-topology.md"
+      },
+      {
+        "ts": "2026-08-09T08:12:06.668Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_HClisVd6tHEKKfGOvSIy7896",
+        "command": "cd /tmp/gddp-eval-wt-gd0ele81/needle && timeout 60 python3 test_router_contract.py 2>&1 | tail -8; echo \"exit=$?\""
+      },
+      {
+        "ts": "2026-08-09T08:12:06.668Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_n1Pz55oDDcH4XPUGkeD66703",
+        "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"---sibling reports---\" && head -5 reports/pi-harness-execution/subagents-audit.md reports/pi-harness-execution/tui-audit.md reports/pi-harness-execution/extensions-audit.md reports/pi-harness-execution/instructions-audit.md 2>&1 | head -30; echo \"---wc---\" && wc -l reports/pi-harness-execution/*.md"
+      },
+      {
+        "ts": "2026-08-09T08:12:06.689Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_xe0kpDPElPsJ8a2R6YR38659",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:12:06.698Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_n1Pz55oDDcH4XPUGkeD66703",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:12:06.841Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_HClisVd6tHEKKfGOvSIy7896",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:12:32.830Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_PLUsOty7C3V03CFgWxqg8527",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "Cross-pair convergence risk in the execute wave: portfolio AC-4 (add .github/workflows/test.yml running needle tests) and AC-5 (fix/remove the failing agent/patches/run-completion-guard-test.mjs) target surfaces that node-02-subagents-execute (agent/patches is subagents territory) and potentially node-04/06 may also touch; AC-7 (harness/tui/requirements.txt gitignore fix + creating the requirements file) overlaps node-04-tui-execute territory. Since each execute node is constrained to implement only its own audit's proposals, overlapping proposals could produce conflicting edits to .gitignore, agent/patches, or harness/tui across parallel jobs. Recommend serializing or explicit ownership handoff for those files before the execute wave fires.",
+        "affected_node_ids": [
+          "node-10-portfolio-execute",
+          "node-02-subagents-execute",
+          "node-04-tui-execute"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "node-10-portfolio-execute carries human_gate: true and its AC-1 (P0 path scrub across archive/incident_reports, agent/reference, needle/README.md, .claude.md) is the most invasive proposal set in the graph, overlapping the 'Do not modify settings.json auth' constraint and touching tracked-but-ignored files (AF-5/AF-6). Plan human review capacity for this node specifically.",
+        "affected_node_ids": [
+          "node-10-portfolio-execute"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9766666666666666,
+  "criteria_confidence": 0.9766666666666666,
+  "completeness": 1.0,
+  "graph_readiness": 0.9766666666666666,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "report-exists",
+        "criterion": "reports/pi-harness-execution/portfolio-audit.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "portfolio\\-audit -> line 3: 'portfolio-audit'"
+        ],
+        "reasoning": "Scanned source files (reports/pi-harness-execution/portfolio-audit.md) for identifiers named in the criterion (pi-harness-execution, portfolio-audit, non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "evidence-cited",
+        "criterion": "every finding cites a file:line or command output from the live harness",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "acceptance-criteria-included",
+        "criterion": "report concludes with actionable acceptance criteria for node-10-portfolio-execute",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (node-10-portfolio-execute). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Read-only: do not modify the harness; the only new file is the report under reports/pi-harness-execution/",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Verify every claim against the live checkout before writing it",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node's result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/pi-harness-execution/portfolio-audit.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "df4642ec1e4661a333b660fa05643792f43799d6",
+      "tip": "a9f0898967521da8cf913de294144a60364172dd",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/pi-harness-execution/extensions-audit.md"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-harness-execution/instructions-audit.md"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-harness-execution/portfolio-audit.md"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-harness-execution/subagents-audit.md"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-harness-execution/tui-audit.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 5,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 1.0,
+        "evidence": [
+          "reports/pi-harness-execution/portfolio-audit.md exists, 491 lines, ~30KB",
+          "wc -l reports/pi-harness-execution/portfolio-audit.md -> 491",
+          "git show --stat a9f0898 -> 1 file changed, 491 insertions(+), reports/pi-harness-execution/portfolio-audit.md"
+        ],
+        "reasoning": "The required artifact exists in the repo at the node's commit (a9f0898) and is a substantial 491-line document, far exceeding non-empty."
+      },
+      {
+        "criterion_id": "evidence-cited",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "14 findings (SF-1..5, AF-1..9) each carry file:line citations (43 inline file:line patterns) and/or live command-output blocks (8 fenced code blocks with `$` commands, `exit=`/`OK`/`AssertionError` result lines, and evidence tables)",
+          "Verified vs actual checkout: .github = exactly 3 files under ISSUE_TEMPLATE, no workflows (SF-1); harness/tests = 15 files, agent/patches = 2 test files, no package.json (SF-2); PYTHONDONTWRITEBYTECODE=1 python3 -B needle/test_router_contract.py -> 'Ran 6 tests in 0.024s OK' (matches report verbatim)",
+          ".gitignore:38 bare requirements.txt; harness/bin/pi-hub-tui:11 REQ=; harness/tui/requirements.txt missing (SF-3)",
+          "docs/IMPLEMENTATION-PLAN.md:57,59,60 contain exactly the cited links; needle/HANDOFF-finetune.md missing (SF-4/AF-4)",
+          "docs/pi-tui-perf-test-scope.md:79,146 match; no tier1/mock-terminal artifacts (SF-5)",
+          "AF-1: all 12 cited leak lines verified verbatim (archive/incident_reports/*:4, infra-topology.md:4/12/17, needle/README.md:61/67, .claude.md:4/9/17, gddp/project.yaml:7)",
+          "AF-2: git ls-files | du -> 161M total; top-4 largest files match (41M/30M/22M/18M)",
+          "AF-5/AF-6: .gitignore:49-50 and :36 match; agent/auto-mode.json and .claude.md tracked (git ls-files returns them), check-ignore exit 1",
+          "AF-7/AF-9: 83 tracked .handoffs, 17 tracked gddp/artifacts, 27 docs (10 under archive-sab-dev-home) — all match"
+        ],
+        "reasoning": "Every one of the 14 findings cites file:line references or command output from the live checkout, and a large sample of those citations (12 of 14 findings, including all critical ones) was verified directly against the repository state and found accurate. One caveat: SF-2's specific AssertionError at run-completion-guard-test.mjs:29:8 could not be reproduced in this sandbox (HOME redirected to /tmp/gddp-pi-home-*, so jiti cannot load), though the assertion exists at the cited line and the script does exit 1; the router-contract claim was reproduced exactly."
+      },
+      {
+        "criterion_id": "acceptance-criteria-included",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "Report's final section (lines 411-491) is titled '## Acceptance criteria for `node-10-portfolio-execute`'",
+          "AC-1..AC-12 each contain: checkbox, P0-P3 priority, concrete action, and a verification command (rg, git ls-files, git check-ignore, du/awk, git diff --check)",
+          "AC-12 is a final presentability gate with explicit verification commands",
+          "tail of file confirms the acceptance-criteria section is the concluding content"
+        ],
+        "reasoning": "The report concludes with 12 actionable, testable acceptance criteria explicitly addressed to node-10-portfolio-execute, each with a stated verification procedure — exactly what the criterion requires."
+      }
+    ],
+    "overall_reasoning": "All three acceptance criteria for node-09-portfolio-audit are satisfied. (1) The report exists and is non-empty (491 lines). (2) Every finding (SF-1..5, AF-1..9) cites file:line references and/or live command output; I directly verified a broad sample of the citations against the actual repo state and found them accurate — including the .github structure, test-file counts, missing package.json, exact line contents of .gitignore/README/IMPLEMENTATION-PLAN/perf-scope docs, all 12 operator-path leak sites, repo size (161M, top-4 files), tracked-but-ignored files, and the .handoffs/gddp-artifacts/docs counts. The needle router contract test claim was reproduced verbatim (6 tests OK). The one unreproducible item was SF-2's specific AssertionError message for the completion-guard test, which could not load in this sandboxed HOME but has its cited assertion at line 29:8 and does exit 1. (3) The report concludes with an 'Acceptance criteria for node-10-portfolio-execute' section containing 12 actionable, verifiable ACs. Constraints also hold: the portfolio commit (a9f0898) adds exactly one file (the report — the other four reports/ files in the run diff belong to sibling audit nodes), and the commit sits on the result refs (gddp/98c883d8..., gddp/result-job_20260809T0651389160e1e3a53654-..., pushed to origin).",
+    "risks": "1. SF-2's completion-guard failure could not be reproduced in this sandbox because os.homedir() resolves to /tmp/gddp-pi-home-* (module load error rather than the cited AssertionError at line 29:8). The assertion text exists at the cited location and the script exits 1 either way, so the finding stands, but exact-message reproduction requires the real ~/.pi install. 2. Minor numeric rounding: report states .handoffs at 448 KB while du shows 436K (block rounding) — immaterial to findings. 3. Report's '756 tracked files / 433 commits' figures are correct for the audit-time base (53daced: 756 files, 433 commits); at HEAD they read 757/434 because the report itself was added. 4. I did not re-run every command cited (e.g., git check-ignore variants), but verified the corresponding state directly.",
+    "followup_candidates": "Observed: the deterministic checks for 'acceptance-criteria-included' and 'evidence-cited' had no registered probe / scanned no source files and returned indeterminate; semantic review confirms both are met in the report body. No follow-up needed on criteria. Optional human clarification: SF-2 claims `node agent/patches/run-completion-guard-test.mjs` fails with AssertionError at 29:8 — reproduced exit=1 but with a module-load error in a sandboxed HOME; if exact-message verification matters, re-run on the real /home/sab-mini environment. Not listed in acceptance criteria, so it does not affect the verdict.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-09T08:08:52.901Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_TsMlUtfLCsbm0aeFH5Un4684",
+          "path": "/tmp/gddp-eval-wt-gd0ele81/reports/pi-harness-execution/portfolio-audit.md"
+        },
+        {
+          "ts": "2026-08-09T08:08:52.902Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_7EiwUuyBkh05ZOn4MeJI2744",
+          "path": "/tmp/gddp-eval-wt-gd0ele81/README.md"
+        },
+        {
+          "ts": "2026-08-09T08:08:52.903Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_LJobwUPdvCO3SRFTMOcH6786",
+          "path": "/tmp/gddp-eval-wt-gd0ele81/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-09T08:08:52.910Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_TsMlUtfLCsbm0aeFH5Un4684",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:08:52.910Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_7EiwUuyBkh05ZOn4MeJI2744",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:08:52.910Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_LJobwUPdvCO3SRFTMOcH6786",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:00.361Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_1lANTpXOfOFEXVrWOr970150",
+          "command": "cd /tmp/gddp-eval-wt-gd0ele81 && ls -la && wc -l reports/pi-harness-execution/*.md && echo \"---GIT LOG---\" && git log --oneline -15 2>/dev/null && echo \"---GIT STATUS---\" && git status --short 2>/dev/null | head -30"
+        },
+        {
+          "ts": "2026-08-09T08:09:00.362Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_b6hOa70eWJRCs95D5akG2522",
+          "command": "ls -la /home/sab-mini/Pi-Coding-Agent 2>/dev/null && echo \"EXISTS\" || echo \"NOT ACCESSIBLE: $?\""
+        },
+        {
+          "ts": "2026-08-09T08:09:00.380Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_b6hOa70eWJRCs95D5akG2522",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:00.754Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_1lANTpXOfOFEXVrWOr970150",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:09.404Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_iBWK0p6xMrqo2YqvnnVf7067",
+          "command": "cd /tmp/gddp-eval-wt-gd0ele81 && cat .git && echo \"---BRANCH---\" && git branch --show-current && echo \"---REMOTE---\" && git remote -v | head -4 && echo \"---LIVE REPO HEAD---\" && git -C /home/sab-mini/Pi-Coding-Agent log --oneline -3 2>&1 && echo \"---LIVE REPO REPORTS?---\" && ls /home/sab-mini/Pi-Coding-Agent/reports 2>&1"
+        },
+        {
+          "ts": "2026-08-09T08:09:09.404Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_9rZZCDUyI104W1OdtTZk8905",
+          "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"=== SF-1: .github contents ===\" && find .github -type f && ls .github/workflows 2>&1 && echo \"=== SF-2: test files ===\" && ls harness/tests/ | wc -l && ls agent/patches/*test* 2>/dev/null && echo \"=== package.json check ===\" && ls package.json agent/package.json harness/package.json 2>&1"
+        },
+        {
+          "ts": "2026-08-09T08:09:09.423Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_9rZZCDUyI104W1OdtTZk8905",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-09T08:09:09.427Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_iBWK0p6xMrqo2YqvnnVf7067",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-09T08:09:24.003Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_bQM5gHOnXEVFBAebBlva0377",
+          "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"=== SF-2: harness/tests count ===\" && ls harness/tests/ | grep -cE '\\.(test\\.mjs|\\.sh)$' ; ls harness/tests/ | wc -l && echo \"=== agent/patches test files ===\" && ls agent/patches/ | grep -i test && echo \"=== SF-3: .gitignore line 38 ===\" && sed -n '36,39p' .gitignore && echo \"=== harness/bin/pi-hub-tui lines 11-15 ===\" && sed -n '11,15p' harness/bin/pi-hub-tui && echo \"=== tui requirements exists? ===\" && ls harness/tui/requirements.txt 2>&1"
+        },
+        {
+          "ts": "2026-08-09T08:09:24.004Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_m2S5oGRlcWu1ahvmaekm2096",
+          "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"=== SF-4: IMPLEMENTATION-PLAN lines 57-60 ===\" && sed -n '57,60p' docs/IMPLEMENTATION-PLAN.md && echo \"=== SF-5: perf-test-scope line 79,146 ===\" && sed -n '79p;146p' docs/pi-tui-perf-test-scope.md && echo \"=== AF-3: README line 33 ===\" && sed -n '33p' README.md && echo \"=== AF-4: HANDOFF-finetune exists? ===\" && ls needle/HANDOFF* 2>&1 && echo \"=== AF-5: .gitignore 49-50 ===\" && sed -n '49,50p' .gitignore && echo \"=== auto-mode tracked? ===\" && git ls-files agent/auto-mode.json && echo \"=== AF-6: .claude.md tracked? ===\" && git ls-files .claude.md && sed -n '36p' .gitignore && sed -n '4p;9p' .claude.md"
+        },
+        {
+          "ts": "2026-08-09T08:09:24.029Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_m2S5oGRlcWu1ahvmaekm2096",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-09T08:09:24.030Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_bQM5gHOnXEVFBAebBlva0377",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-09T08:09:34.703Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_8xR0JlUMSrDLitU67VuR7804",
+          "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"=== .gitignore lines 36, 49-50 ===\" && sed -n '36p;49p;50p' .gitignore | cat -A | head -5 && echo \"=== .claude.md tracked? ===\" && git ls-files .claude.md | cat && echo \"EXIT:$?\" && echo \"=== harness/tests listing ===\" && ls harness/tests/"
+        },
+        {
+          "ts": "2026-08-09T08:09:34.704Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_nb3bKCr0XizLUrjKN4gt4037",
+          "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"=== AF-1 leak lines ===\" && sed -n '4p' archive/incident_reports/2026-05-20-evidence-integrity-invalid-eval-report.md && sed -n '4p' archive/incident_reports/2026-05-20-unauthorized-repo-mutation.md && sed -n '4p;12p;17p' agent/reference/infra-topology.md && sed -n '61p;67p' needle/README.md && grep -n 'repo:' gddp/project.yaml | head -2 && echo \"=== AF-2 repo size ===\" && git ls-files | xargs du -ch 2>/dev/null | tail -1 && git ls-files | xargs du -h 2>/dev/null | sort -rh | head -4 && echo \"=== AF-7 counts ===\" && ls .handoffs | wc -l && ls gddp/artifacts | wc -l && echo \"=== AF-9 docs ===\" && ls docs | wc -l && ls docs/archive-sab-dev-home | wc -l"
+        },
+        {
+          "ts": "2026-08-09T08:09:34.723Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_8xR0JlUMSrDLitU67VuR7804",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:34.762Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_nb3bKCr0XizLUrjKN4gt4037",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:46.523Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_VSnXhPKvCMNVFMcJD0bT7548",
+          "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"=== HEAD ===\" && git rev-parse HEAD && git log --oneline -1 && echo \"=== .handoffs tracked files ===\" && git ls-files .handoffs | wc -l && find .handoffs -type f | wc -l && echo \"=== gddp/artifacts tracked ===\" && git ls-files gddp/artifacts | wc -l && find gddp/artifacts -type f 2>/dev/null | wc -l && echo \"=== docs tracked ===\" && git ls-files docs | wc -l && find docs -maxdepth 1 -type f | wc -l && echo \"=== docs/archive-sab-dev-home ===\" && git ls-files docs/archive-sab-dev-home | wc -l && find docs/archive-sab-dev-home -type f | wc -l"
+        },
+        {
+          "ts": "2026-08-09T08:09:46.523Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_hw6eBBuFSCc5QB3r91tv7746",
+          "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"=== .handoffs tracked size ===\" && git ls-files -z .handoffs | du -ch --files0-from=- 2>/dev/null | tail -1 && echo \"=== gddp/artifacts size ===\" && git ls-files -z gddp/artifacts | du -ch --files0-from=- 2>/dev/null | tail -1 && echo \"=== .gitignore line 38 confirm bare requirements ===\" && awk 'NR==38' .gitignore && echo \"=== auto-mode.json tracked+ignored confirm ===\" && git check-ignore agent/auto-mode.json; echo \"check-ignore exit: $?\" && echo \"=== SF-5 find check ===\" && find harness -iname \"*mock*terminal*\" -o -iname \"*tier1*\" -o -iname \"*perf-test*\" | head -5; echo \"find exit: $?\""
+        },
+        {
+          "ts": "2026-08-09T08:09:46.570Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_hw6eBBuFSCc5QB3r91tv7746",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:46.574Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_VSnXhPKvCMNVFMcJD0bT7548",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:56.069Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_YNsdqzt0VEV6L3ScQo8E5906",
+          "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"=== .claude.md lines 3-4, 9, 17 ===\" && sed -n '3p;4p;9p;17p' .claude.md && echo \"=== repo tracked file count ===\" && git ls-files | wc -l && echo \"=== commit count ===\" && git rev-list --count HEAD && echo \"=== report final section ===\" && grep -n \"^## \" reports/pi-harness-execution/portfolio-audit.md | tail -3 && echo \"=== last 12 lines of report ===\" && tail -12 reports/pi-harness-execution/portfolio-audit.md"
+        },
+        {
+          "ts": "2026-08-09T08:09:56.069Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_d8MKnIgaMXzEw3h6p1WX9725",
+          "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"=== completion-guard test head ===\" && sed -n '1,35p' agent/patches/run-completion-guard-test.mjs && echo \"=== test_router_contract.py head ===\" && sed -n '1,20p' needle/test_router_contract.py"
+        },
+        {
+          "ts": "2026-08-09T08:09:56.085Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_d8MKnIgaMXzEw3h6p1WX9725",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:56.099Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_YNsdqzt0VEV6L3ScQo8E5906",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:10:06.317Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ynlR7UbcRqqkfnVNxcUu6853",
+          "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"=== files in portfolio commit ===\" && git show --stat --format=\"%h %s\" a9f0898 | head -10 && echo \"=== refs containing a9f0898 ===\" && git branch -a --contains a9f0898 2>/dev/null; git tag --contains a9f0898 2>/dev/null | head -3; echo \"=== detached? ===\" && git symbolic-ref -q HEAD && echo \"ON BRANCH\" || echo \"DETACHED\" && echo \"=== worktrees ===\" && git worktree list 2>/dev/null | head -10"
+        },
+        {
+          "ts": "2026-08-09T08:10:06.317Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Bz3k5PjaQW8P97RkfVt79502",
+          "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"=== report heading count of findings ===\" && grep -cE '^\\*\\*(SF|AF)-[0-9]+:' reports/pi-harness-execution/portfolio-audit.md && echo \"=== findings that lack file:line or code-block citation (manual scan check) ===\" && grep -nE '^\\*\\*(SF|AF)-[0-9]+:' reports/pi-harness-execution/portfolio-audit.md && echo \"=== count of inline file:line patterns ===\" && grep -oE '[a-zA-Z0-9_./-]+\\.(md|mjs|ts|py|json|yaml|sh|tsx):[0-9]+' reports/pi-harness-execution/portfolio-audit.md | wc -l && echo \"=== count of command-output code blocks ===\" && grep -c '^\\$ ' reports/pi-harness-execution/portfolio-audit.md"
+        },
+        {
+          "ts": "2026-08-09T08:10:06.330Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Bz3k5PjaQW8P97RkfVt79502",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-09T08:10:06.348Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ynlR7UbcRqqkfnVNxcUu6853",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:10:10.587Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ai5JH5XdVGCQR59hl4eW5393",
+          "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"=== finding headings ===\" && grep -nE '^### (SF|AF)-' reports/pi-harness-execution/portfolio-audit.md && echo \"=== inline file:line citations ===\" && grep -oE '[a-zA-Z0-9_./-]+\\.(md|mjs|ts|py|json|yaml|sh|tsx|yml):[0-9]+' reports/pi-harness-execution/portfolio-audit.md | wc -l && echo \"=== command-output lines (\\$ blocks) ===\" && grep -c '^    \\$ \\|^    [a-zA-Z0-9_-]*=' reports/pi-harness-execution/portfolio-audit.md && echo \"=== code blocks ===\" && grep -c '^```' reports/pi-harness-execution/portfolio-audit.md"
+        },
+        {
+          "ts": "2026-08-09T08:10:10.605Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ai5JH5XdVGCQR59hl4eW5393",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-09T08:10:14.133Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_8IK9wJVEpPAKM14IsPvY8962",
+          "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"=== dollar-prefixed command lines ===\" ; grep -c '^\\$ ' reports/pi-harness-execution/portfolio-audit.md ; echo \"=== code fences ===\" ; grep -c '^```' reports/pi-harness-execution/portfolio-audit.md ; echo \"=== indented command-output blocks ===\" ; grep -c '^    \\$ ' reports/pi-harness-execution/portfolio-audit.md ; echo \"=== result/exit lines ===\" ; grep -cE '^(exit=|OK|AssertionError)' reports/pi-harness-execution/portfolio-audit.md"
+        },
+        {
+          "ts": "2026-08-09T08:10:14.149Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_8IK9wJVEpPAKM14IsPvY8962",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:10:32.253Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_AE2ECvfuC3qqZVoXQeWO2923",
+          "command": "cd /tmp/gddp-eval-wt-gd0ele81 && echo \"=== run completion-guard test ===\" && node agent/patches/run-completion-guard-test.mjs 2>&1 | head -8; echo \"exit=${PIPESTATUS[0]}\" ; echo \"=== run router contract test (no bytecode) ===\" && PYTHONDONTWRITEBYTECODE=1 python3 -B needle/test_router_contract.py 2>&1 | tail -6; echo \"exit=${PIPESTATUS[0]}\" ; echo \"=== check no new files created ===\" && git status --short | head -10"
+        },
+        {
+          "ts": "2026-08-09T08:10:32.448Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_AE2ECvfuC3qqZVoXQeWO2923",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:10:58.085Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_6IzfM5heDWfyOmwIRXIj5115",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All three acceptance criteria for node-09-portfolio-audit are satisfied. (1) The report exists and is non-empty (491 lines). (2) Every finding (SF-1..5, AF-1..9) cites file:line references and/or live command output; I directly verified a broad sample of the citations against the actual repo state and found them accurate — including the .github structure, test-file counts, missing package.json, exact line contents of .gitignore/README/IMPLEMENTATION-PLAN/perf-scope docs, all 12 operator-path leak sites, repo size (161M, top-4 files), tracked-but-ignored files, and the .handoffs/gddp-artifacts/docs counts. The needle router contract test claim was reproduced verbatim (6 tests OK). The one unreproducible item was SF-2's specific AssertionError message for the completion-guard test, which could not load in this sandboxed HOME but has its cited assertion at line 29:8 and does exit 1. (3) The report concludes with an 'Acceptance criteria for node-10-portfolio-execute' section containing 12 actionable, verifiable ACs. Constraints also hold: the portfolio commit (a9f0898) adds exactly one file (the report — the other four reports/ files in the run diff belong to sibling audit nodes), and the commit sits on the result refs (gddp/98c883d8..., gddp/result-job_20260809T0651389160e1e3a53654-..., pushed to origin).",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-09T08:12:32.871781+00:00",
+  "evaluated_tree_sha": "2641fec238af19621b0c3b8a135f40691b9540ec",
+  "evaluated_commit_sha": "a9f0898967521da8cf913de294144a60364172dd",
+  "merge_commit_sha": "a9f0898967521da8cf913de294144a60364172dd",
+  "expected_base_commit_sha": "df4642ec1e4661a333b660fa05643792f43799d6",
+  "pr_ref": null,
+  "job_id": "job_20260809T0651389160e1e3a53654",
+  "execution_attempt_id": "job_20260809T0651389160e1e3a53654:attempt:0",
+  "evidence_manifest_sha256": "216811c196fbbf4c71f0fb7ab25fe1f51a5661ebba63d06ba558541f6c7a8fe4",
+  "mission_receipt_id": "mis_e5da4907:node-09-portfolio-audit:703f99e2-e789-402e-88b6-b88b8878a937",
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-gd0ele81/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-gd0ele81/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-gd0ele81/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-gd0ele81/README.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml"
+      ]
+    },
+    "integrity": {
+      "rating": "none",
+      "offered": 3,
+      "content_accessed": 0,
+      "not_observed": 3,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml",
+        "/tmp/gddp-eval-wt-gd0ele81/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-gd0ele81/README.md"
+      ]
+    },
+    "overall": "none"
+  }
+}

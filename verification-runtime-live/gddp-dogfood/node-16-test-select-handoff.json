@@ -1,0 +1,792 @@
+{
+  "project_id": "gddp-dogfood",
+  "node_id": "node-16-test-select-handoff",
+  "verdict": "fail",
+  "criteria_verdict": "fail",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.88,
+    "findings": [],
+    "reasoning": "The node's role — pure-function unit coverage for _select_handoff in scripts/adapters/mission_evidence.py, latest-wins by default and worker-session pinning — is preserved exactly. The single added file scripts/adapters/test_select_handoff.py sits next to its module (the criterion's alternative scripts/runtime/heartbeat/ path is the 'or' branch for a different module location and is irrelevant here; the primary path is satisfied). All 5 tests were replayed against the real production _select_handoff via direct import and every assertion holds, including is-identity semantics, so the tests genuinely cover the promised behavior and are not vacuous. Constraints hold: exactly one new test file (diff is a single A-status file), no production code or other test files touched, pytest tail line quoted in the commit (dcdd1f8: '4 failed, 627 passed … new test_select_handoff.py: 5 passed'), and work committed per the executor contract (dcdd1f8 + wrapper result commit c11c83f; working tree clean). Graph integrity is unaffected: node-16 is a terminal leaf (depends_on: [], unlocks: []) per config YAML, so nothing downstream depends on it and nothing upstream changed. I could not run pytest in this environment (module not installed), which caps confidence slightly, but the direct-module verification plus the surgical one-file diff make the intent and graph verdict unambiguous.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-11T07:48:36.518Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_HiJJUvjG1fZUM11SybgS6588",
+        "command": "cd /tmp/gddp-eval-wt-9aftnpbs && ls -la && echo \"---GIT LOG---\" && git log --oneline -10 2>/dev/null && echo \"---GIT STATUS---\" && git status 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-11T07:48:36.519Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_issoLgqPPTpRLXp4m9270014",
+        "path": "/tmp/gddp-eval-wt-9aftnpbs/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-11T07:48:36.533Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_issoLgqPPTpRLXp4m9270014",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:48:36.547Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_HiJJUvjG1fZUM11SybgS6588",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:48:39.236Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_jPm6f1LknSrZhVQlJXtt2321",
+        "command": "cd /tmp/gddp-eval-wt-9aftnpbs && echo \"===TEST FILE===\" && cat scripts/adapters/test_select_handoff.py && echo \"\" && echo \"===MISSION_EVIDENCE EXISTS?===\" && ls -la scripts/adapters/ && echo \"===DIFF STAT===\" && git diff 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61..c11c83fc0730cddda3b32fa8928a23d8aa5dddcc --stat"
+      },
+      {
+        "ts": "2026-08-11T07:48:39.237Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_fDsEZ70VGjuWiTctPVB44579",
+        "command": "cd /tmp/gddp-eval-wt-9aftnpbs && echo \"===SELECT_HANDOFF in production===\" && grep -rn \"_select_handoff\" scripts/ --include=\"*.py\" | grep -v test_ | head -30"
+      },
+      {
+        "ts": "2026-08-11T07:48:39.256Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_jPm6f1LknSrZhVQlJXtt2321",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:48:39.258Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_fDsEZ70VGjuWiTctPVB44579",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:48:41.221Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_IdgwpkdSlAjyTsPktTxs7644",
+        "path": "/tmp/gddp-eval-wt-9aftnpbs/scripts/adapters/mission_evidence.py"
+      },
+      {
+        "ts": "2026-08-11T07:48:41.221Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_rHZBUFqT76ycneY83tmt8796",
+        "path": "/tmp/gddp-eval-wt-9aftnpbs/scripts/adapters/mission_evidence.py"
+      },
+      {
+        "ts": "2026-08-11T07:48:41.224Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_IdgwpkdSlAjyTsPktTxs7644",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:48:41.224Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_rHZBUFqT76ycneY83tmt8796",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:48:51.323Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_1p50JvzkK7lSjPUTLDxw3742",
+        "command": "cd /tmp/gddp-eval-wt-9aftnpbs && echo \"===COMMIT MESSAGES (full)===\" && git log --format='=== %h %s%n%b' -3 && echo \"\" && echo \"===HEAD OF mission_evidence.py imports===\" && head -60 scripts/adapters/mission_evidence.py"
+      },
+      {
+        "ts": "2026-08-11T07:48:51.324Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_vhCiTGc8ir5moQmE5beB6583",
+        "command": "cd /tmp/gddp-eval-wt-9aftnpbs && echo \"===NODE-16 YAML===\" && cat /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-16-test-select-handoff.yaml 2>/dev/null; echo \"===NODE-11 YAML (analogous earlier node)===\" && cat /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-11-test-manifest-name.yaml 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-11T07:48:51.337Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_1p50JvzkK7lSjPUTLDxw3742",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:48:51.341Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_vhCiTGc8ir5moQmE5beB6583",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:49:02.139Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_caAVh0WDq9RveoIVnCel6904",
+        "command": "cd /tmp/gddp-eval-wt-9aftnpbs && cat pytest.ini && echo \"===FULL DIFF===\" && git diff 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61..c11c83fc0730cddda3b32fa8928a23d8aa5dddcc"
+      },
+      {
+        "ts": "2026-08-11T07:49:02.139Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_qfNlzNfvYbbxsRLxlvNv8813",
+        "command": "cd /tmp/gddp-eval-wt-9aftnpbs && python3 -m pytest scripts/adapters/test_select_handoff.py -q 2>&1 | tail -15"
+      },
+      {
+        "ts": "2026-08-11T07:49:02.152Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_caAVh0WDq9RveoIVnCel6904",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:49:02.173Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_qfNlzNfvYbbxsRLxlvNv8813",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:49:09.391Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_DWxbOGUeZJjg4nybD0FY4219",
+        "command": "cd /tmp/gddp-eval-wt-9aftnpbs && PYTHONDONTWRITEBYTECODE=1 python3 - <<'EOF'\nfrom collections.abc import Mapping, Sequence\ndef _string(v):\n    return v if isinstance(v, str) else (\"\" if v is None else str(v))\ndef _select_handoff(handoffs, worker_session_id):\n    if not handoffs:\n        return None\n    if worker_session_id is not None:\n        for handoff in reversed(handoffs):\n            if _string(handoff.get(\"workerSessionId\")) == worker_session_id:\n                return handoff\n    return handoffs[-1]\n\n# Replicate each test assertion\nolder = {\"workerSessionId\": \"ws-1\", \"commitId\": \"aaa\"}\nnewer = {\"workerSessionId\": \"ws-2\", \"commitId\": \"bbb\"}\nassert _select_handoff([older, newer], None) is newer\nassert _select_handoff([older, newer], \"\") is newer\nfirst = {\"workerSessionId\": \"ws-target\", \"commitId\": \"aaa\"}\nmiddle = {\"workerSessionId\": \"ws-other\", \"commitId\": \"bbb\"}\nlast = {\"workerSessionId\": \"ws-other\", \"commitId\": \"ccc\"}\nassert _select_handoff([first, middle, last], \"ws-target\") is first\nolder_match = {\"workerSessionId\": \"ws-target\", \"commitId\": \"aaa\"}\nother = {\"workerSessionId\": \"ws-other\", \"commitId\": \"bbb\"}\nnewer_match = {\"workerSessionId\": \"ws-target\", \"commitId\": \"ccc\"}\nassert _select_handoff([older_match, other, newer_match], \"ws-target\") is newer_match\nassert _select_handoff([], None) is None\nassert _select_handoff([], \"ws-1\") is None\nassert _select_handoff([older, newer], \"ws-missing\") is newer\nprint(\"ALL 5 TEST SHAPES PASS AGAINST PRODUCTION SEMANTICS\")\n\n# Also import the real module and check identity semantics hold (same objects returned)\nfrom scripts.adapters.mission_evidence import _select_handoff as real\nassert real([older, newer], None) is newer\nassert real([first, middle, last], \"ws-target\") is first\nprint(\"REAL MODULE IMPORT + IDENTITY SEMANTICS OK\")\nEOF"
+      },
+      {
+        "ts": "2026-08-11T07:49:09.391Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_vrAcU92oFjpSLZkvnTrW6538",
+        "command": "cd /tmp/gddp-eval-wt-9aftnpbs && echo \"===GRAPH NODES DIR===\" && ls /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/ && echo \"===project.yaml (tranches/policy)===\" && cat /home/sab-mini/gddp-config/graphs/gddp-dogfood/project.yaml 2>/dev/null | head -60 && echo \"===node_status_history mentions node-16?===\" && grep -rn \"node-16\" node_status_history/ 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-11T07:49:09.411Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_vrAcU92oFjpSLZkvnTrW6538",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:49:09.494Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_DWxbOGUeZJjg4nybD0FY4219",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:49:22.279Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ODDgBjEzWXZUhpoHCRsi4788",
+        "command": "cd /tmp/gddp-eval-wt-9aftnpbs && echo \"===pre-existing coverage of _select_handoff in other test files?===\" && grep -rln \"_select_handoff\" scripts/ --include=\"test_*.py\" && echo \"===git status after my inspection===\" && git status --short | head && echo \"(clean if empty)\" && echo \"===working tree vs base: only 1 file===\" && git diff --name-status 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61..HEAD"
+      },
+      {
+        "ts": "2026-08-11T07:49:22.300Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ODDgBjEzWXZUhpoHCRsi4788",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:49:34.307Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_rEsIjieI2xm6pr9vZdve8302",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "Executor's quoted suite tail reports 4 failures (3 flask ModuleNotFoundError + 1 'pre-existing rig1 plist project-name assert') while the suite-green criterion expects only the 3 known flask failures — the known-failure baseline appears to have drifted. The extra failure is claimed pre-existing and is provably outside this node's diff (zero changes to other files), so it does not threaten node-16's role, but the identical suite-green criterion is shared by sibling nodes 11-15 and their executors/humans should carry this updated baseline context.",
+        "affected_node_ids": [
+          "node-11-test-manifest-name",
+          "node-12-test-topological-order",
+          "node-13-test-render-item",
+          "node-14-test-completion-id-digest",
+          "node-15-test-normalize-digest",
+          "node-16-test-select-handoff"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.4,
+  "criteria_confidence": 0.4,
+  "completeness": 1.0,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "test-file-exists",
+        "criterion": "scripts/adapters/test_select_handoff.py exists (or scripts/runtime/heartbeat/test_select_handoff.py matching the target module location) and contains tests for _select_handoff",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "test_select_handoff -> line 6: 'test_select_handoff'",
+          "test_select_handoff -> line 6: 'test_select_handoff'",
+          "select_handoff -> line 3: 'select_handoff'",
+          "scripts/runtime/heartbeat/test_select_handoff.py absent"
+        ],
+        "reasoning": "Scanned source files (scripts/adapters/test_select_handoff.py) for identifiers named in the criterion (test_select_handoff, test_select_handoff, select_handoff). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "scripts/runtime/heartbeat/test_select_handoff.py absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "behavior-covered",
+        "criterion": "the tests assert that latest handoff wins by default and a worker session id pins selection when provided",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "suite-green",
+        "criterion": "python3 -m pytest -q passes with only the 3 known flask-import failures (ModuleNotFoundError: flask); the new test file passes",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...) for identifiers named in the criterion (flask-import, ModuleNotFoundError). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create exactly one new test file for _select_handoff in scripts/adapters/mission_evidence.py next to its module",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Do not modify production code or other test files",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Run python3 -m pytest -q before finishing and quote its tail line in the commit or a short note",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "scripts/adapters/test_select_handoff.py": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [
+      {
+        "criterion_id": "test-file-exists",
+        "kind": "source_path",
+        "detail": "scripts/runtime/heartbeat/test_select_handoff.py absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "test-file-exists",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+      "tip": "c11c83fc0730cddda3b32fa8928a23d8aa5dddcc",
+      "files": [
+        {
+          "status": "A",
+          "path": "scripts/adapters/test_select_handoff.py"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "test-file-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "subject_diff: file 'scripts/adapters/test_select_handoff.py' status 'A' in commit dcdd1f8 (work) + c11c83f (result wrapper); working tree clean",
+          "read scripts/adapters/test_select_handoff.py: 5 test functions, all named test_select_handoff_* and all calling _select_handoff imported from scripts.adapters.mission_evidence",
+          "scripts/adapters/mission_evidence.py:432 defines _select_handoff (module location matches the test file location)",
+          "deterministic mismatch detail 'scripts/runtime/heartbeat/test_select_handoff.py absent' is moot: the criterion is an OR and the primary path scripts/adapters/test_select_handoff.py exists"
+        ],
+        "reasoning": "The primary criterion path exists exactly where the module lives (scripts/adapters/ next to mission_evidence.py) and the file contains five tests that each exercise _select_handoff. The deterministic mismatch about the alternative scripts/runtime/heartbeat/ path is irrelevant because the OR's first branch is satisfied."
+      },
+      {
+        "criterion_id": "behavior-covered",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "test_select_handoff_latest_wins_by_default: asserts _select_handoff([older, newer], worker_session_id=None) is newer and worker_session_id='' is newer",
+          "test_select_handoff_worker_session_id_pins_selection: asserts ws-target pins to first handoff even though it is not the last",
+          "test_select_handoff_worker_session_id_prefers_latest_match: asserts the latest matching session wins",
+          "production semantics at mission_evidence.py:432-444: if worker_session_id is not None, scan reversed(handoffs) for matching workerSessionId; else return handoffs[-1]",
+          "direct execution of all 5 test functions in this environment: 5/5 PASS"
+        ],
+        "reasoning": "The tests assert exactly the two required behaviors — latest-wins by default (None and '' both select the newest handoff) and worker-session-id pinning (selection returns the pinned session's handoff even when it is not the last, preferring the latest match). Assertions match the production implementation's actual semantics, and the tests pass when executed directly."
+      },
+      {
+        "criterion_id": "suite-green",
+        "judgment": "judged_fail",
+        "confidence": 0.6,
+        "evidence": [
+          "commit dcdd1f8 message quotes the required pytest tail: '4 failed, 627 passed in 37.15s' with breakdown '(3 flask ModuleNotFoundError + 1 pre-existing rig1 plist project-name assert; new test_select_handoff.py: 5 passed)'",
+          "criterion text: 'python3 -m pytest -q passes with only the 3 known flask-import failures (ModuleNotFoundError: flask); the new test file passes'",
+          "deploy/rig1-heartbeat/test_rig1_render_plist.py asserts pinned ProgramArguments ['--project', 'gddp-runtime', '--repo'] and WorkingDirectory '/tmp/gddp-runtime' — the source of the 4th (non-flask) failure",
+          "git diff 450eca1..c11c83f: exactly one file added (scripts/adapters/test_select_handoff.py); no production code or other tests modified, so the rig1 failure is provably pre-existing and not caused by this node",
+          "pytest not installed in the eval environment (no network), so the full suite could not be independently re-run; direct execution of the new test file's 5 tests passes"
+        ],
+        "reasoning": "The criterion permits only the 3 known flask-import failures. The executor's own quoted tail line — the artifact the criterion requires — reports 4 failures, one more than allowed: a rig1 plist project-name assertion in deploy/rig1-heartbeat/ that is unrelated to this node's diff (the diff adds only the test file). The 'new test file passes' sub-part is satisfied (verified 5/5 here). Judging the criterion as written, the reported suite state does not match 'only the 3 known flask-import failures'. Confidence is capped because the suite could not be re-run in this environment and because the extra failure is demonstrably pre-existing, which may indicate a criterion-authoring gap (baseline documented as 3 failures while the environment has 4) rather than an implementation defect."
+      }
+    ],
+    "overall_reasoning": "The node's core work is correct and minimal: exactly one new test file (scripts/adapters/test_select_handoff.py) was created next to its module, covering _select_handoff's latest-wins default and worker-session pinning with assertions that match the production implementation (verified 5/5 tests pass by direct execution). No production code or other test files were modified; all four constraints (single new test file, no other modifications, pytest tail quoted in the commit, work committed with a result ref) are satisfied per the subject diff and commit history. The one criterion in genuine doubt is suite-green: the executor's quoted tail reports '4 failed, 627 passed' — the 3 allowed flask ModuleNotFoundError failures plus a pre-existing rig1 plist project-name assertion failure that the criterion text does not permit. Since the diff provably cannot have introduced that 4th failure, this reads as a criterion-baseline mismatch rather than an implementation defect, but the criterion as written is not met. A human should decide whether to treat the rig1 failure as part of the 'known' baseline (and update the criterion text) or require a run with only the 3 flask failures. Note: pytest is not installed in this evaluation sandbox, so full-suite state rests on the executor's quoted tail line (the exact evidence the criterion demands) plus the verified passing of the new test file.",
+    "risks": "(1) Full-suite state could not be independently re-verified here (pytest unavailable, no network); the '4 failed, 627 passed' figure rests on the executor's commit-quoted tail line, which is the evidence the criterion itself requires. (2) Interpretation risk on suite-green: 'only the 3 known flask-import failures' is contradicted by a 4th pre-existing rig1 plist failure; a lenient reading (criterion author unaware of the rig1 baseline failure) would pass the node, a strict reading fails it — this is the human decision point. (3) The rig1 failure is environment-dependent (pinned paths/user in deploy/rig1-heartbeat/test_rig1_render_plist.py), so the same suite may report different failure counts on different hosts.",
+    "followup_candidates": "Human clarification: the pytest tail quoted in commit dcdd1f8 reports '4 failed, 627 passed' — 3 flask ModuleNotFoundError failures (allowed by the criterion) plus 1 pre-existing rig1 plist project-name assert in deploy/rig1-heartbeat/test_rig1_render_plist.py. The diff adds only scripts/adapters/test_select_handoff.py, so the 4th failure is provably unrelated to this node's work. Was the rig1 plist failure part of the 'known' baseline when suite-green was written? If the known baseline is 4 failures, update the criterion text and rerun; otherwise suite-green fails as written and a corrected run (or criterion) is needed. Separately: pytest is not installed in this evaluation sandbox, so the full-suite result was not independently re-run — only the new test file's 5 tests were verified directly.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-11T07:46:57.801Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_m972Fnh1RME9Lhq8E3gX2810",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && ls -la && git log --oneline -5 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-11T07:46:57.802Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_Cw8pLiTtt8UkYTIKUOOb5897",
+          "path": "/tmp/gddp-eval-wt-9aftnpbs/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-11T07:46:57.816Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Cw8pLiTtt8UkYTIKUOOb5897",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:46:57.824Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_m972Fnh1RME9Lhq8E3gX2810",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:46:59.891Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_GJIt5BIfuFZsFQyAoxa49852",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && git show --stat c11c83f | head -30 && echo \"---\" && git show --stat dcdd1f8 | head -30"
+        },
+        {
+          "ts": "2026-08-11T07:46:59.892Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_gC5BwAcGGtFCT0vktmRH1272",
+          "path": "/tmp/gddp-eval-wt-9aftnpbs/scripts/adapters/test_select_handoff.py"
+        },
+        {
+          "ts": "2026-08-11T07:46:59.898Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_gC5BwAcGGtFCT0vktmRH1272",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:46:59.908Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_GJIt5BIfuFZsFQyAoxa49852",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:02.055Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_n5xwMxte6hq8tSbT8PEi2465",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && grep -n \"_select_handoff\" scripts/adapters/mission_evidence.py | head && echo \"---\" && sed -n \"$(grep -n 'def _select_handoff' scripts/adapters/mission_evidence.py | cut -d: -f1),+40p\" scripts/adapters/mission_evidence.py"
+        },
+        {
+          "ts": "2026-08-11T07:47:02.056Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_AJowyTPaQ1bhcvyne8t59980",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && git diff 450eca1..c11c83f --stat && echo \"---untracked---\" && git status --porcelain"
+        },
+        {
+          "ts": "2026-08-11T07:47:02.077Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_n5xwMxte6hq8tSbT8PEi2465",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T07:47:02.116Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_AJowyTPaQ1bhcvyne8t59980",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:03.434Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_ET_tHom7RC8AT2dEm9JrBmT3493",
+          "path": "/tmp/gddp-eval-wt-9aftnpbs/scripts/adapters/mission_evidence.py"
+        },
+        {
+          "ts": "2026-08-11T07:47:03.434Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ET_rH6YsDEPd86LtXc6pWI56173",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && sed -n '100,140p' scripts/adapters/mission_evidence.py"
+        },
+        {
+          "ts": "2026-08-11T07:47:03.441Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ET_tHom7RC8AT2dEm9JrBmT3493",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:03.444Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ET_rH6YsDEPd86LtXc6pWI56173",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:10.876Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_qVHahr0vxTFuz5nktkHO4505",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && cat pytest.ini && echo \"---\" && python3 -m pytest --version 2>&1 | head -3 && echo \"---\" && python3 -c \"import flask\" 2>&1 | head -2"
+        },
+        {
+          "ts": "2026-08-11T07:47:10.877Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_bRsj1ACUPzjtjWiS3mAY4700",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && ls scripts/adapters/__init__.py scripts/__init__.py 2>&1; ls scripts/adapters/ | head -20"
+        },
+        {
+          "ts": "2026-08-11T07:47:10.895Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_bRsj1ACUPzjtjWiS3mAY4700",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:10.952Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_qVHahr0vxTFuz5nktkHO4505",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:16.243Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_hu8JKFcqZYUMePduEa3v5353",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && head -40 scripts/adapters/mission_evidence.py | grep -n \"^import\\|^from\" && echo \"---imports of test---\" && head -10 scripts/adapters/test_select_handoff.py"
+        },
+        {
+          "ts": "2026-08-11T07:47:16.244Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_po8NSRblyi838CqFLzm28224",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && grep -rln \"rig1\\|plist\\|project_name\\|project-name\" scripts --include=\"*.py\" | head -10 && echo \"---\" && grep -rn \"flask\" scripts --include=\"*.py\" -l | head -10"
+        },
+        {
+          "ts": "2026-08-11T07:47:16.258Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_hu8JKFcqZYUMePduEa3v5353",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:16.271Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_po8NSRblyi838CqFLzm28224",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:19.425Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_3ZHK4YLIllEOkgFjOcbh5276",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && python3 - <<'EOF'\nfrom scripts.adapters.mission_evidence import _select_handoff\nimport scripts.adapters.test_select_handoff as t\n\n# replicate the test functions\nfor name in dir(t):\n    if name.startswith(\"test_\"):\n        fn = getattr(t, name)\n        try:\n            fn()\n            print(f\"PASS {name}\")\n        except Exception as e:\n            print(f\"FAIL {name}: {type(e).__name__}: {e}\")\nEOF"
+        },
+        {
+          "ts": "2026-08-11T07:47:19.535Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_3ZHK4YLIllEOkgFjOcbh5276",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:25.110Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_S7Zq5L3XedsCpgVKG5ty8937",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && grep -rln \"rig1\\|\\.plist\\|plistlib\" scripts --include=\"*.py\" | head && echo \"---\" && grep -rn \"project_name\\|project-name\" scripts --include=\"*.py\" | grep -i \"plist\\|rig\" | head"
+        },
+        {
+          "ts": "2026-08-11T07:47:25.110Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_JhiTsWYLZ75szoYkaAgU7407",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && git log --oneline -3 -- scripts/runtime/ && echo \"--- check if any test file mentions project-name plist ---\" && grep -rln \"project.name\\|project_name\" scripts --include=\"test*.py\" | head"
+        },
+        {
+          "ts": "2026-08-11T07:47:25.133Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_JhiTsWYLZ75szoYkaAgU7407",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:25.137Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_S7Zq5L3XedsCpgVKG5ty8937",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:27.566Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_K768mjwLc5FnTqkpIO8N9205",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && grep -rn \"plist\" scripts --include=\"*.py\" | head && echo \"--- fixture dirs ---\" && find scripts -name \"*.plist\" -o -name \"*rig*\" 2>/dev/null | head && echo \"--- plist in docs ---\" && grep -rln \"plist\" docs deploy 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-11T07:47:27.566Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_SVFD7Hbg3MtlePgE3LBV0421",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && grep -rn \"projectName\\|project_name\" scripts/runtime/heartbeat/test_mission_config.py | head && echo \"---\" && grep -rn \"projectName\\|project_name\" scripts --include=\"*.py\" | grep -v \"test_\" | head"
+        },
+        {
+          "ts": "2026-08-11T07:47:27.589Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_SVFD7Hbg3MtlePgE3LBV0421",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:27.593Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_K768mjwLc5FnTqkpIO8N9205",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:29.367Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ET_fb8dyUbFgabwy34ZRDZt2322",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && grep -n \"project_name\\|plist\\|assert\" deploy/rig1-heartbeat/test_rig1_render_plist.py | head -20"
+        },
+        {
+          "ts": "2026-08-11T07:47:29.368Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ET_iqM8kdRLu5kZmtonNK3K8656",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && grep -rn \"project_name\\|projectName\" deploy/rig1-heartbeat/ --include=\"*.py\" | head && echo \"---config used by rig1 tests---\" && ls deploy/rig1-heartbeat/"
+        },
+        {
+          "ts": "2026-08-11T07:47:29.378Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ET_fb8dyUbFgabwy34ZRDZt2322",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:29.384Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ET_iqM8kdRLu5kZmtonNK3K8656",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:45.839Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_sMb8sLlroY6Bkwkphfch7754",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && ls .handoffs/ 2>/dev/null | tail -5 && grep -rln \"flask\" .handoffs/ docs/ 2>/dev/null | head -8"
+        },
+        {
+          "ts": "2026-08-11T07:47:45.839Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_WDNUg34Fihe4mzDSig5a5653",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && grep -rn \"4 failed\\|3 failed\\|flask\" docs/run-journal-2026-08-06-pi-hub-projection.md 2>/dev/null | head && echo \"---readiness---\" && grep -n \"flask\\|failed\" readiness-report-2026-07-18.md | head"
+        },
+        {
+          "ts": "2026-08-11T07:47:45.857Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_WDNUg34Fihe4mzDSig5a5653",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:45.859Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_sMb8sLlroY6Bkwkphfch7754",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:58.736Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_12Jau5u0o1XhE7UeRsBz7041",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && sed -n '1,70p' deploy/rig1-heartbeat/test_rig1_render_plist.py"
+        },
+        {
+          "ts": "2026-08-11T07:47:58.737Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_G6vi7jKfN34hccuVbJXz3120",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && git diff 450eca1 dcdd1f8 --stat && git show dcdd1f8 --format=\"%B\" | head -20 && echo \"---files changed in work commit---\" && git show dcdd1f8 --name-only --format=\"\" "
+        },
+        {
+          "ts": "2026-08-11T07:47:58.746Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_12Jau5u0o1XhE7UeRsBz7041",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:47:58.758Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_G6vi7jKfN34hccuVbJXz3120",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:48:01.888Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_NHtmT2telkoKOjxiv1xv1644",
+          "command": "cd /tmp/gddp-eval-wt-9aftnpbs && ls -la .pytest_cache/ 2>/dev/null && cat .pytest_cache/v/cache/lastfailed 2>/dev/null | head -20; echo \"---node yaml---\"; cat /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-16-test-select-handoff.yaml 2>/dev/null || find / -name \"node-16*\" -path \"*gddp-dogfood*\" 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-11T07:48:01.901Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_NHtmT2telkoKOjxiv1xv1644",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:48:31.344Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_45LOVvhhT4jZwKZapanv6482",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "The node's core work is correct and minimal: exactly one new test file (scripts/adapters/test_select_handoff.py) was created next to its module, covering _select_handoff's latest-wins default and worker-session pinning with assertions that match the production implementation (verified 5/5 tests pass by direct execution). No production code or other test files were modified; all four constraints (single new test file, no other modifications, pytest tail quoted in the commit, work committed with a result ref) are satisfied per the subject diff and commit history. The one criterion in genuine doubt is suite-green: the executor's quoted tail reports '4 failed, 627 passed' — the 3 allowed flask ModuleNotFoundError failures plus a pre-existing rig1 plist project-name assertion failure that the criterion text does not permit. Since the diff provably cannot have introduced that 4th failure, this reads as a criterion-baseline mismatch rather than an implementation defect, but the criterion as written is not met. A human should decide whether to treat the rig1 failure as part of the 'known' baseline (and update the criterion text) or require a run with only the 3 flask failures. Note: pytest is not installed in this evaluation sandbox, so full-suite state rests on the executor's quoted tail line (the exact evidence the criterion demands) plus the verified passing of the new test file.",
+  "required_next_action": "Address semantic failures and re-submit.",
+  "generated_at": "2026-08-11T07:49:34.343067+00:00",
+  "evaluated_tree_sha": "2cf52a52afe0cbc8017588552cc7aeea4919e356",
+  "evaluated_commit_sha": "c11c83fc0730cddda3b32fa8928a23d8aa5dddcc",
+  "merge_commit_sha": "c11c83fc0730cddda3b32fa8928a23d8aa5dddcc",
+  "expected_base_commit_sha": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+  "pr_ref": null,
+  "job_id": "job_20260811T074122770d605a639517",
+  "execution_attempt_id": "job_20260811T074122770d605a639517:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-9aftnpbs/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-9aftnpbs/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-9aftnpbs/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-9aftnpbs/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-9aftnpbs/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-9aftnpbs/README.md"
+      ]
+    },
+    "overall": "medium"
+  }
+}

@@ -1,0 +1,924 @@
+{
+  "project_id": "pi-harness-hygiene",
+  "node_id": "node-02-chain-pin-repair",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.93,
+    "findings": [
+      {
+        "severity": "low",
+        "summary": "The criterion text names 'settings.json enabledModels' but agent/settings.json is absent from the repo checkout; the node's report explicitly documents this and anchors verification on the live ~/.pi/agent/settings.json (39 entries). I independently confirmed that file exists and that all 15 chain pins (including all 3 replacement model ids, verbatim) are members of its enabledModels, so the interpretation is sound and documented. Flagging only for transparency; lane 1 adjudicates the path naming.",
+        "affected_node_ids": [
+          "node-02-chain-pin-repair"
+        ]
+      }
+    ],
+    "reasoning": "Fresh-eyes integrity review of node-02-chain-pin-repair. The node's intended role: repair every dead model pin in agent/chains/*.chain.json to the closest doctrine-equivalent model present in settings.json enabledModels, changing nothing else, and report the work. The diff (base 649aa13 -> tip 1fc7b6e) is exactly 5 files: 4 chain JSONs with only 'model' value substitutions (14 changed lines, all model lines, 0 structural/step/agent/order changes) plus reports/node-02-chain-pin-repair.md (the required artifact). I verified against the live enabledModels at /Users/sab-mini/.pi/agent/settings.json (39 entries) that all 15 pins across 19 chain files are members (0 dead), that the three replacement ids (xai/grok-4.5, xai/grok-build-0.1, openai-codex/gpt-5.6-sol) appear verbatim in that set, that all chain files parse as JSON, and that the report's before->after table matches the actual diff exactly (7 substitutions across 4 files, with one-line rationales). The node's 'why' candidate list was verified rather than trusted, and one additional dead pin (grok-cli/grok-4.5 in dual-builder-implement) was found and repaired — consistent with 'Repair every dead pin'. Constraints hold: no edits to settings.json, agent/agents/, or any file outside the 4 chains + report; work committed on the result ref via two wrapper commits with a clean tree. Graph integrity: node-02 depends_on [] and unlocks [], so nothing downstream can be broken; node-01 (extension hygiene) owns agent/extensions/, a disjoint subtree, and this diff touches no file in that scope, so the concurrent non-overlapping dispatch design is preserved. Intent is recognizable and fully realized; verdict pass.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-06T18:03:22.228Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Ag3udRFGQ5FfznHyAADD2846",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && pwd && ls -la"
+      },
+      {
+        "ts": "2026-08-06T18:03:22.230Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_3Q1lUB0MnT962b8Z9zQL5941",
+        "command": "ls -la /Users/sab-mini/repos/gddp-config/graphs/pi-harness-hygiene/nodes/ 2>/dev/null; echo \"---\"; cat /Users/sab-mini/repos/gddp-config/graphs/pi-harness-hygiene/nodes/node-02-chain-pin-repair.yaml 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-06T18:03:22.259Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Ag3udRFGQ5FfznHyAADD2846",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:03:22.262Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_3Q1lUB0MnT962b8Z9zQL5941",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:03:24.766Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_R2jx8kvrHTfVeYXc4nTE0014",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && git status 2>&1 | head -30; echo \"=== LOG ===\"; git log --oneline -10 2>&1"
+      },
+      {
+        "ts": "2026-08-06T18:03:24.767Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_AkEthOZoY17hdRLNfgxi3819",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && ls -la agent/chains/ && echo \"===\" && ls -la reports/ && echo \"===\" && find . -name \"settings.json\" -not -path \"./.git/*\" 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-06T18:03:24.827Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_AkEthOZoY17hdRLNfgxi3819",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:03:24.914Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_R2jx8kvrHTfVeYXc4nTE0014",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:03:29.387Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_AWlkzVI4Vqew5jiOqg2k3921",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && git diff 649aa13..1fc7b6e --stat && echo \"=== FULL DIFF (chains) ===\" && git diff 649aa13..1fc7b6e -- agent/chains/"
+      },
+      {
+        "ts": "2026-08-06T18:03:29.388Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_1HFLPmjffL6d5cawSSRn2995",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && grep -rl \"enabledModels\" --include=\"*.json\" . 2>/dev/null | grep -v \".git/\" | head; echo \"---\"; find . -name \"*.json\" -path \"*agent*\" | grep -iv chain | head -20; echo \"---agent dir---\"; ls agent/"
+      },
+      {
+        "ts": "2026-08-06T18:03:29.456Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_AWlkzVI4Vqew5jiOqg2k3921",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:03:29.500Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_1HFLPmjffL6d5cawSSRn2995",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:03:32.505Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_6yR9qh6pTAYnEqXgUEp56169",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && grep -rn \"enabledModels\" --include=\"*.json\" . 2>/dev/null | grep -v \".git/\" | head -20"
+      },
+      {
+        "ts": "2026-08-06T18:03:32.506Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_gucy0rQ4tJ6DeJRgnBb99834",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && find . -name \"settings.json\" -not -path \"./.git/*\" -not -path \"./node_modules/*\" 2>/dev/null; echo \"---\"; cat .claude/settings.json | head -60"
+      },
+      {
+        "ts": "2026-08-06T18:03:32.538Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_gucy0rQ4tJ6DeJRgnBb99834",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:03:32.577Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_6yR9qh6pTAYnEqXgUEp56169",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:03:35.505Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_0sFGIdPrF76Mv6YwuLF94041",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && cat agent/host-settings.desired.json"
+      },
+      {
+        "ts": "2026-08-06T18:03:35.506Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_nc1D93UB8MkuYO3LdVVT3284",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && cat reports/node-02-chain-pin-repair.md"
+      },
+      {
+        "ts": "2026-08-06T18:03:35.528Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_0sFGIdPrF76Mv6YwuLF94041",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:03:35.529Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_nc1D93UB8MkuYO3LdVVT3284",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:03:44.418Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_1QWnGifPzRCR0JtYJm9o4963",
+        "command": "ls -la ~/.pi/agent/settings.json 2>&1; echo \"---\"; cat ~/.pi/agent/settings.json 2>/dev/null | head -80"
+      },
+      {
+        "ts": "2026-08-06T18:03:44.419Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_270VxIaiyrdIq4AweA5s9776",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && for f in agent/chains/*.chain.json; do python3 -c \"import json,sys; json.load(open('$f'))\" && echo \"OK $f\" || echo \"BAD $f\"; done"
+      },
+      {
+        "ts": "2026-08-06T18:03:44.446Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_1QWnGifPzRCR0JtYJm9o4963",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:03:45.023Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_270VxIaiyrdIq4AweA5s9776",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:03:48.815Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_HhzH8adfQl8jVffiWQHy0802",
+        "command": "ls -la /Users/sab-mini/.pi/agent/settings.json 2>&1; echo \"---\"; python3 -c \"\nimport json\nd=json.load(open('/Users/sab-mini/.pi/agent/settings.json'))\nem=d.get('enabledModels',[])\nprint('count:',len(em))\nfor m in em: print(m)\n\" 2>&1"
+      },
+      {
+        "ts": "2026-08-06T18:03:48.815Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_HEKxyZGEGZlKUiqWr8Qg2387",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && python3 -c \"\nimport json,glob,os\npins=[]\nfor f in sorted(glob.glob('agent/chains/*.chain.json')):\n    d=json.load(open(f))\n    def walk(o):\n        if isinstance(o,dict):\n            if 'model' in o and isinstance(o['model'],str): pins.append((f,o['model']))\n            for v in o.values(): walk(v)\n        elif isinstance(o,list):\n            for v in o: walk(v)\n    walk(d)\nprint('total pins:',len(pins))\nfor f,m in pins: print(f.split('/')[-1], m)\n\""
+      },
+      {
+        "ts": "2026-08-06T18:03:48.873Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_HhzH8adfQl8jVffiWQHy0802",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:03:48.879Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_HEKxyZGEGZlKUiqWr8Qg2387",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:04:02.537Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_00_DX5bjs7qUoFcZwpxQomL0598",
+        "reason": "command matched blocked pattern",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && python3 - <<'EOF'\nimport json, subprocess\nbase='649aa132711e85bcca3b38cd3752e6f5f05b0543'; tip='1fc7b6ed35a4d2c7ac0d0ddbf985e1509d718955'\nout=subprocess.run(['git','show',f'{tip}:agent/chains/build-audit.chain.json'],capture_output=True,text=True).stdout\nold=subprocess.run(['git','show',f'{base}:agent/chains/build-audit.chain.json'],capture_output=True,text=True).stdout\ndef strip_model(o):\n    if isinstance(o,dict):\n        return {k:(('<MODEL>') if k=='model' else strip_model(v)) for k,v in o.items()}\n    if isinstance(o,list): return [strip_model(x) for x in o]\n    return o\nfor f in ['build-audit.chain.json','dual-builder-implement.chain.json','pre-run-gate.chain.json','trio-implement.chain.json']:\n    n=json.loads(subprocess.run(['git','show',f'{tip}:agent/chains/{f}'],capture_output=True,text=True).stdout)\n    o=json.loads(subprocess.run(['git','show',f'{base}:agent/chains/{f}'],capture_output=True,text=True).stdout)\n    print(f, 'STRUCTURE IDENTICAL EXCEPT model values:', strip_model(n)==strip_model(o))\nEOF",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-06T18:04:02.538Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_DX5bjs7qUoFcZwpxQomL0598",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-06T18:04:02.539Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_2zQfV2yJl8wgqlN8BVpK1306",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && echo \"=== 4110ee3 vs 649aa13 ===\"; git diff --stat 649aa13 4110ee3; echo \"=== 1fc7b6e vs 4110ee3 ===\"; git diff --stat 4110ee3 1fc7b6e"
+      },
+      {
+        "ts": "2026-08-06T18:04:02.539Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_TiJypmrXw2GWwMS292AM4658",
+        "command": "cat /Users/sab-mini/repos/gddp-config/graphs/pi-harness-hygiene/nodes/node-01-extension-noise-cleanup.yaml; echo \"=== BRIEF ===\"; head -60 /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-06T18:04:02.569Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_TiJypmrXw2GWwMS292AM4658",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:04:02.607Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_2zQfV2yJl8wgqlN8BVpK1306",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:04:12.059Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_00_LVjuQQSLONQ3o512RnrJ6354",
+        "reason": "command matched blocked pattern",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && python3 -c \"\nimport json,subprocess\nbase='649aa132711e85bcca3b38cd3752e6f5f05b0543'; tip='1fc7b6ed35a4d2c7ac0d0ddbf985e1509d718955'\ndef strip(o):\n    if isinstance(o,dict): return {k:('<M>' if k=='model' else strip(v)) for k,v in o.items()}\n    if isinstance(o,list): return [strip(x) for x in o]\n    return o\nfor f in ['build-audit.chain.json','dual-builder-implement.chain.json','pre-run-gate.chain.json','trio-implement.chain.json']:\n    n=json.loads(subprocess.run(['git','show',tip+':agent/chains/'+f],capture_output=True,text=True).stdout)\n    o=json.loads(subprocess.run(['git','show',base+':agent/chains/'+f],capture_output=True,text=True).stdout)\n    print(f, 'only-model-values-changed:', strip(n)==strip(o))\n\"",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-06T18:04:12.060Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_LVjuQQSLONQ3o512RnrJ6354",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-06T18:04:12.060Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_anKZNcfqyBuWtr4aCmCB1326",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && python3 -c \"\nimport json\nem=set(json.load(open('/Users/sab-mini/.pi/agent/settings.json'))['enabledModels'])\nimport glob\npins=[]\nfor f in sorted(glob.glob('agent/chains/*.chain.json')):\n    d=json.load(open(f))\n    def walk(o):\n        if isinstance(o,dict):\n            if 'model' in o and isinstance(o['model'],str): pins.append((f,o['model']))\n            for v in o.values(): walk(v)\n        elif isinstance(o,list):\n            for v in o: walk(v)\n    walk(d)\ndead=[(f,m) for f,m in pins if m not in em]\nprint('total pins:',len(pins),'dead:',len(dead))\nfor x in dead: print('DEAD',x)\n\""
+      },
+      {
+        "ts": "2026-08-06T18:04:12.142Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_anKZNcfqyBuWtr4aCmCB1326",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:04:21.149Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_agNdP4H3brFQ2kABmhHg5950",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && git diff 649aa13 1fc7b6e -- agent/chains/ | grep -E '^[+-]' | grep -v '^[+-][+-]' | grep -v '\"model\"'"
+      },
+      {
+        "ts": "2026-08-06T18:04:21.150Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Yiu3a7VH1Vskacto3IKc1377",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && git diff 649aa13 1fc7b6e -- agent/chains/ | grep -cE '^[+-]\"model\"'; echo \"--- non-model changed lines (should be empty above) ---\"; git show 1fc7b6e --stat --oneline | head"
+      },
+      {
+        "ts": "2026-08-06T18:04:21.190Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_agNdP4H3brFQ2kABmhHg5950",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-06T18:04:21.207Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Yiu3a7VH1Vskacto3IKc1377",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:04:26.187Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_eNDmUOQ8ujeHl6a6U6zL3495",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && git diff 649aa13 1fc7b6e -- agent/chains/ | grep -E '^[+-][^+-]' | wc -l; echo \"--- of those, model lines:\"; git diff 649aa13 1fc7b6e -- agent/chains/ | grep -E '^[+-][^+-]' | grep -c '\"model\"'; echo \"--- non-model changed lines:\"; git diff 649aa13 1fc7b6e -- agent/chains/ | grep -E '^[+-][^+-]' | grep -v '\"model\"' | wc -l"
+      },
+      {
+        "ts": "2026-08-06T18:04:26.276Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_eNDmUOQ8ujeHl6a6U6zL3495",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T18:04:52.447Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_646euM13v4qsTa5eyueu0594",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "Forward note: the tracked agent/host-settings.desired.json lists only 2 enabledModels while the live host settings.json lists 39; node-02 correctly anchored on the live host file and documented the discrepancy. Future chain-pin nodes in this graph should make the authoritative settings source explicit (repo-tracked vs live host) to avoid verification ambiguity.",
+        "affected_node_ids": [
+          "node-02-chain-pin-repair"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.954,
+  "criteria_confidence": 0.954,
+  "completeness": 1.0,
+  "graph_readiness": 0.954,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "pins-resolved",
+        "criterion": "every model id pinned anywhere in agent/chains/*.chain.json is present in settings.json enabledModels; report includes the verification method and its output",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "path_mentioned_missing",
+        "evidence": [
+          "chain.js absent",
+          "settings.js absent"
+        ],
+        "reasoning": "The criterion names source path(s) that are not present in the checkout. The harness did not scan unrelated files as substitutes.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "chain.js absent, settings.js absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "json-valid",
+        "criterion": "all agent/chains/*.chain.json files parse as valid JSON after edits",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "path_mentioned_missing",
+        "evidence": [
+          "chain.js absent"
+        ],
+        "reasoning": "The criterion names source path(s) that are not present in the checkout. The harness did not scan unrelated files as substitutes.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "chain.js absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "semantics-preserved",
+        "criterion": "no chain step, agent, or structure was added, removed, or reordered — only model id values changed; the diff confirms this",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "changes-documented",
+        "criterion": "reports/node-02-chain-pin-repair.md lists every changed pin as before -> after with a one-line rationale (or records that no changes were needed and why the candidates were false)",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "node\\-02\\-chain\\-pin\\-repair -> line 1: 'node-02-chain-pin-repair'"
+        ],
+        "reasoning": "Scanned source files (reports/node-02-chain-pin-repair.md) for identifiers named in the criterion (node-02-chain-pin-repair, one-line). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "report-exists",
+        "criterion": "reports/node-02-chain-pin-repair.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "node\\-02\\-chain\\-pin\\-repair -> line 1: 'node-02-chain-pin-repair'"
+        ],
+        "reasoning": "Scanned source files (reports/node-02-chain-pin-repair.md) for identifiers named in the criterion (node-02-chain-pin-repair, non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Only modify model id values inside agent/chains/*.chain.json",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Do not edit settings.json, agent/agents/, or any other file",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Replacement models must come from settings.json enabledModels exactly as spelled there",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node's result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/node-02-chain-pin-repair.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [
+      {
+        "criterion_id": "pins-resolved",
+        "kind": "source_path",
+        "detail": "chain.js absent, settings.js absent"
+      },
+      {
+        "criterion_id": "json-valid",
+        "kind": "source_path",
+        "detail": "chain.js absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "pins-resolved",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "criterion_id": "json-valid",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "649aa132711e85bcca3b38cd3752e6f5f05b0543",
+      "tip": "1fc7b6ed35a4d2c7ac0d0ddbf985e1509d718955",
+      "files": [
+        {
+          "status": "M",
+          "path": "agent/chains/build-audit.chain.json"
+        },
+        {
+          "status": "M",
+          "path": "agent/chains/dual-builder-implement.chain.json"
+        },
+        {
+          "status": "M",
+          "path": "agent/chains/pre-run-gate.chain.json"
+        },
+        {
+          "status": "M",
+          "path": "agent/chains/trio-implement.chain.json"
+        },
+        {
+          "status": "A",
+          "path": "reports/node-02-chain-pin-repair.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 5,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "pins-resolved",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "agent/chains/*.chain.json (19 files) scanned; 15 total string 'model' pins extracted",
+          "python membership check of all 15 pins against /Users/sab-mini/.pi/agent/settings.json enabledModels (39 entries): 0 dead",
+          "reports/node-02-chain-pin-repair.md 'Verification method and output' section documents method (load enabledModels from ~/.pi/agent/settings.json, walk chain files, membership check, json.load, git diff) and output (7 dead pre-edit; post-edit 15 pins 0 dead)",
+          "grep for grok-cli|gpt-5.6-terra|grok-composer across agent/chains/: no matches",
+          "agent/settings.json absent from repo; gitignored per .gitignore line 157; report discloses this and names live ~/.pi/agent/settings.json as authoritative source"
+        ],
+        "reasoning": "Every pinned model id in every chain file is present in the live enabledModels set (verified directly against the actual file the report names as source, count 39 matches the report). The report includes the verification method and its output as required. The only caveat is that the criterion's 'settings.json' is not a tracked repo file — the authoritative file is the gitignored live ~/.pi/agent/settings.json, which I read and verified. The deterministic harness flagged 'chain.js/settings.js absent' — that is a path-derivation artifact; the implementation has landed and the evidence paths exist."
+      },
+      {
+        "criterion_id": "json-valid",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "python3 -c json.load on all 19 agent/chains/*.chain.json: every file prints OK",
+          "git diff base..tip touches only 4 chain files + new report"
+        ],
+        "reasoning": "All agent/chains/*.chain.json files parse as valid JSON after edits. Verified directly by parsing each file with Python's json module."
+      },
+      {
+        "criterion_id": "semantics-preserved",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "git diff 649aa13..1fc7b6e shows only '-model'/'+model' line changes in 4 chain files (7 substitutions); grep of changed lines excluding '\"model\"' returns nothing",
+          "sorted-key JSON structural diff base vs tip for build-audit, dual-builder-implement, pre-run-gate, trio-implement: identical except model values",
+          "chain files key inventory: only key 'model' holds model references (no modelId/fallbackModels variants)"
+        ],
+        "reasoning": "The diff confirms only model id values changed — no chain step, agent, label, task, or ordering was added, removed, or reordered. Both raw line-level and structural JSON-level diffs agree."
+      },
+      {
+        "criterion_id": "changes-documented",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "reports/node-02-chain-pin-repair.md 'Changed pins (before → after)' table: 7 rows, each with File | Step label | Before | After | Rationale",
+          "count of substitutions in git diff = 7, matching the 7 table rows",
+          "report also lists unchanged pins and chains without model fields"
+        ],
+        "reasoning": "Every changed pin is listed before → after with a one-line rationale. The table's 7 rows exactly match the 7 model substitutions in the diff."
+      },
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.99,
+        "evidence": [
+          "reports/node-02-chain-pin-repair.md exists in checkout at tip 1fc7b6e",
+          "wc -l = 73 lines, non-empty",
+          "git diff --stat shows report added (A) with 73 insertions"
+        ],
+        "reasoning": "The required report file exists and is non-empty (73 lines of substantive content)."
+      }
+    ],
+    "overall_reasoning": "All five acceptance criteria are satisfied. The work is committed on the node's result ref (refs/heads/gddp/result-...-node-02-chain-pin-repair-... → 1fc7b6e; work in 4110ee3) and the diff is minimal: 7 model-id substitutions across 4 chain files plus the required report. I independently verified (a) all 15 model pins across all 19 chain files are members of the live ~/.pi/agent/settings.json enabledModels (39 entries — I read the file directly, count and contents match the report), (b) all 19 chain files parse as JSON, (c) structural and raw diffs show only model values changed, (d) the report lists every changed pin before→after with a one-line rationale, and (e) the report exists and is non-empty. The deterministic harness's 'path_mentioned_missing' flags for pins-resolved and json-valid ('chain.js absent, settings.js absent') are path-derivation artifacts: the real paths are agent/chains/*.chain.json (present) and the gitignored live settings.json (untracked by design; the report discloses this and names the live file as the authoritative source). The only material caveat is that the criterion's 'settings.json' reference resolves to an untracked live file rather than a repo-tracked one — the report handles this transparently and my direct verification against that file confirms the claim. Constraints also hold: only model values in chain files changed (plus the required report), replacements are spelled exactly as in enabledModels, and no settings.json/agent/agents/ edits occurred. Note the live repo HEAD is still at the base commit (649aa13) — the repaired pins exist only on the result ref pending the human sync decision, which matches the graph's design (pause for review).",
+    "risks": "1. The criterion's source of truth ('settings.json enabledModels') is a gitignored, untracked live file (~/.pi/agent/settings.json), not a repo-tracked file; the repo contains only agent/host-settings.desired.json (2-model subset). My verification reads the live file as it exists now; there is no in-repo git history to prove the enabledModels set at edit time, though the 39-entry count and contents match the report's claim. 2. Because settings.json is untracked, I cannot rule out (via git) that the live file was edited around the time of the node's execution (e.g., to add xai/grok-build-0.1); likelihood is low since those models also appear in pre-existing subagents.agentOverrides. 3. Live repo HEAD remains at base 649aa13 — the live working-tree chain files still pin the old dead models until a sync/merge decision is made on the result ref (by design per the graph's 'pause for human review'). 4. The deterministic harness's path_mentioned_missing flags are harness-side path-derivation errors, not repo defects; a human should confirm the harness path normalization rather than treat the criteria as stale.",
+    "followup_candidates": "1. Human clarification on pins-resolved/json-valid: the deterministic harness flagged 'chain.js absent, settings.js absent' — the implementation HAS landed (files are agent/chains/*.chain.json; settings.json is intentionally gitignored and lives at ~/.pi/agent/settings.json). Was the criterion's 'settings.json' intended to mean the gitignored live file (as the report assumed and as I verified), or a repo-tracked settings.json that does not exist? If a tracked file was expected, the criterion path is stale and should be updated. 2. Observed (context, not criteria): the live settings.json still references dead model openai-codex/gpt-5.6-terra in subagents.agentOverrides (planner.model and worker.fallbackModels) even though it is not in enabledModels — out of scope for this chain-pin node, but a possible hygiene follow-up. 3. Observed: the report claims enabledModels read 2026-08-06 while the live file mtime is 2026-08-05 03:17 — consistent (unchanged since), no issue; no action needed.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-06T18:00:50.548Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_j15eiCFyVHSIeHvI34zR7957",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && ls -la && echo \"---\" && git status 2>&1 | head -30"
+        },
+        {
+          "ts": "2026-08-06T18:00:50.550Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_CoccpSZpeRvpuIl9D1ht4620",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j/README.md"
+        },
+        {
+          "ts": "2026-08-06T18:00:50.562Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_CoccpSZpeRvpuIl9D1ht4620",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:00:51.107Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_j15eiCFyVHSIeHvI34zR7957",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:00:53.935Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_MkGF7seYFSvfLxR5lmvK2850",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && git log --oneline -5 && echo \"---DIFFSTAT---\" && git diff 649aa132711e85bcca3b38cd3752e6f5f05b0543 1fc7b6ed35a4d2c7ac0d0ddbf985e1509d718955 --stat"
+        },
+        {
+          "ts": "2026-08-06T18:00:53.936Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_PLKVvOjqpS5JauydNMgy5897",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && ls agent/chains/ && echo \"---\" && ls reports/"
+        },
+        {
+          "ts": "2026-08-06T18:00:53.959Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_PLKVvOjqpS5JauydNMgy5897",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:00:54.006Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_MkGF7seYFSvfLxR5lmvK2850",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:00:56.372Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_kTFj1VrfqccOdhYPJXyt0704",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && git diff 649aa132711e85bcca3b38cd3752e6f5f05b0543 1fc7b6ed35a4d2c7ac0d0ddbf985e1509d718955"
+        },
+        {
+          "ts": "2026-08-06T18:00:56.373Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_xyiVQ8etPYHH4C89DJwN0096",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j/reports/node-02-chain-pin-repair.md"
+        },
+        {
+          "ts": "2026-08-06T18:00:56.378Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_xyiVQ8etPYHH4C89DJwN0096",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:00:56.422Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_kTFj1VrfqccOdhYPJXyt0704",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:01:02.880Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_DmeQiiHOzmvix03YIzuE1207",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && ls -la agent/ | head -40 && echo \"---settings.json?---\" && ls -la agent/settings.json 2>&1; echo \"---host-settings---\" && ls -la agent/host-settings.desired.json 2>&1"
+        },
+        {
+          "ts": "2026-08-06T18:01:02.881Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_4yMg6mEha8C298A9lRcq6955",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && for f in agent/chains/*.chain.json; do python3 -c \"import json,sys; json.load(open('$f')); print('OK $f')\" 2>&1 | tail -1; done"
+        },
+        {
+          "ts": "2026-08-06T18:01:02.909Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_DmeQiiHOzmvix03YIzuE1207",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:01:03.472Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_4yMg6mEha8C298A9lRcq6955",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:01:13.471Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_PtVfpqYIl8pAEouYhnNp6138",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && cat agent/host-settings.desired.json && echo \"---models.json---\" && cat agent/models.json && echo \"---gitignore settings---\" && grep -n \"settings\" .gitignore"
+        },
+        {
+          "ts": "2026-08-06T18:01:13.472Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_HNrw8kX6hJqli2kjVy927583",
+          "command": "ls -la /Users/sab-mini/.pi/agent/settings.json 2>&1; echo \"---\"; ls /Users/sab-mini/.pi 2>&1 | head -5"
+        },
+        {
+          "ts": "2026-08-06T18:01:13.493Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_HNrw8kX6hJqli2kjVy927583",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:01:13.509Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_PtVfpqYIl8pAEouYhnNp6138",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:01:21.607Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_8jFdviuJScYRDvcJ0qE83337",
+          "command": "cat /Users/sab-mini/.pi/agent/settings.json"
+        },
+        {
+          "ts": "2026-08-06T18:01:21.609Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_fGr5zHnaGXzwqkfa1r1n9467",
+          "command": "cd /Users/sab-mini/.pi && git rev-parse HEAD 2>&1 && git log --oneline -3 2>&1 && echo \"---diff eval vs live chains---\" && diff -r /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j/agent/chains /Users/sab-mini/.pi/agent/chains 2>&1 | head -20"
+        },
+        {
+          "ts": "2026-08-06T18:01:21.638Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_8jFdviuJScYRDvcJ0qE83337",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:01:21.687Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_fGr5zHnaGXzwqkfa1r1n9467",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:01:38.992Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_BjvLdquugi49mcg4G5MR2262",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && python3 - <<'EOF'\nimport json, glob, os\n\n# live enabled set (authoritative per report and actual live file)\nenabled = json.load(open('/Users/sab-mini/.pi/agent/settings.json'))['enabledModels']\nprint(\"enabledModels count:\", len(enabled))\neset = set(enabled)\n\npins = []\nfor f in sorted(glob.glob('agent/chains/*.chain.json')):\n    data = json.load(open(f))\n    # walk all dicts, collect \"model\" string values\n    def walk(o, path):\n        if isinstance(o, dict):\n            for k, v in o.items():\n                if k == \"model\" and isinstance(v, str):\n                    pins.append((f, path, v))\n                else:\n                    walk(v, path + [k])\n        elif isinstance(o, list):\n            for i, v in enumerate(o):\n                walk(v, path + [i])\n    walk(data, [])\nprint(\"total pins:\", len(pins))\ndead = [(f, p, m) for f, p, m in pins if m not in eset]\nprint(\"DEAD:\", dead if dead else \"none\")\nfor f, p, m in pins:\n    print((\"OK  \" if m in eset else \"DEAD\"), f, m)\nEOF"
+        },
+        {
+          "ts": "2026-08-06T18:01:38.994Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_01_IxX8moam2S7oh4UQCfVA9720",
+          "reason": "command matched blocked pattern",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && python3 - <<'EOF'\nimport json, subprocess\n\nbase = '649aa132711e85bcca3b38cd3752e6f5f05b0543'\ntip = '1fc7b6ed35a4d2c7ac0d0ddbf985e1509d718955'\nfiles = ['agent/chains/build-audit.chain.json','agent/chains/dual-builder-implement.chain.json',\n         'agent/chains/pre-run-gate.chain.json','agent/chains/trio-implement.chain.json']\nfor f in files:\n    old = json.loads(subprocess.check_output(['git','show',f'{base}:{f}']))\n    new = json.loads(subprocess.check_output(['git','show',f'{tip}:{f}']))\n    def models(o, acc):\n        if isinstance(o, dict):\n            for k,v in o.items():\n                if k == 'model' and isinstance(v,str):\n                    acc.append(v)\n                else:\n                    models(v, acc)\n        elif isinstance(o, list):\n            for i in o: models(i, acc)\n    mo, mn = [], []\n    models(old, mo); models(new, mn)\n    # structural compare ignoring model values\n    def scrub(o):\n        if isinstance(o, dict):\n            return {k: (scrub(v) if k!='model' else '<MODEL>') for k,v in o.items()}\n        if isinstance(o, list):\n            return [scrub(i) for i in o]\n        return o\n    same = scrub(old) == scrub(new)\n    print(f\"{f}: structure-identical-except-model={same} models_old={mo} models_new={mn}\")\nEOF",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-06T18:01:38.995Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_IxX8moam2S7oh4UQCfVA9720",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-06T18:01:39.089Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_BjvLdquugi49mcg4G5MR2262",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:02:11.036Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_4V1DAE9OEVcQfQMmg9tZ2904",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && git diff 649aa132711e85bcca3b38cd3752e6f5f05b0543 1fc7b6ed35a4d2c7ac0d0ddbf985e1509d718955 -- agent/chains/ | grep -E '^[+-]' | grep -v '^[+-][+-]' | grep -v '\"model\"' | head; echo \"EXIT:$?\""
+        },
+        {
+          "ts": "2026-08-06T18:02:11.037Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_WJXNVu8J5b7xGHBWGwFF8815",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && for f in build-audit dual-builder-implement pre-run-gate trio-implement; do echo \"== $f ==\"; diff <(git show 649aa132711e85bcca3b38cd3752e6f5f05b0543:agent/chains/$f.chain.json | python3 -c \"import json,sys;d=json.load(sys.stdin);print(json.dumps(d,sort_keys=True,indent=1))\") <(git show 1fc7b6ed35a4d2c7ac0d0ddbf985e1509d718955:agent/chains/$f.chain.json | python3 -c \"import json,sys;d=json.load(sys.stdin);print(json.dumps(d,sort_keys=True,indent=1))\") | head -40; done"
+        },
+        {
+          "ts": "2026-08-06T18:02:11.084Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_4V1DAE9OEVcQfQMmg9tZ2904",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:02:11.220Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_WJXNVu8J5b7xGHBWGwFF8815",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:02:30.627Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ViiquAMWEaCGFy5cweBq5083",
+          "command": "cd /Users/sab-mini/.pi && git branch -a --contains 1fc7b6ed35a4d2c7ac0d0ddbf985e1509d718955 2>&1 | head; echo \"---refs---\"; git for-each-ref | grep -i -E \"result|node-02|chain\" | head -20; echo \"---show commits---\"; git show --stat --oneline 4110ee3 2>&1 | head -15; git show --stat --oneline 1fc7b6e 2>&1 | head -15"
+        },
+        {
+          "ts": "2026-08-06T18:02:30.628Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_BZB6nu6wlCqChsK4YWTU3819",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && echo \"--- report line count ---\" && wc -l reports/node-02-chain-pin-repair.md && echo \"--- any model pins referencing candidates in other chain files? ---\" && grep -rn \"grok-cli\\|gpt-5.6-terra\\|grok-composer\" agent/chains/ ; echo \"grep-exit:$?\""
+        },
+        {
+          "ts": "2026-08-06T18:02:30.655Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_BZB6nu6wlCqChsK4YWTU3819",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:02:30.709Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ViiquAMWEaCGFy5cweBq5083",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:02:48.694Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_uOA9k6nt5ihkJx1UTXl78475",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j && python3 - <<'EOF'\nimport json, glob\nkeys = set()\nfor f in glob.glob('agent/chains/*.chain.json'):\n    d = json.load(open(f))\n    def walk(o):\n        if isinstance(o, dict):\n            for k, v in o.items():\n                keys.add(k)\n                walk(v)\n        elif isinstance(o, list):\n            for i in o: walk(i)\n    walk(d)\nprint(\"all keys in chain files:\", sorted(keys))\nEOF"
+        },
+        {
+          "ts": "2026-08-06T18:02:48.776Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_uOA9k6nt5ihkJx1UTXl78475",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T18:03:17.820Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_IVSMW4JZsZXXs7AYXhbp9080",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All five acceptance criteria are satisfied. The work is committed on the node's result ref (refs/heads/gddp/result-...-node-02-chain-pin-repair-... → 1fc7b6e; work in 4110ee3) and the diff is minimal: 7 model-id substitutions across 4 chain files plus the required report. I independently verified (a) all 15 model pins across all 19 chain files are members of the live ~/.pi/agent/settings.json enabledModels (39 entries — I read the file directly, count and contents match the report), (b) all 19 chain files parse as JSON, (c) structural and raw diffs show only model values changed, (d) the report lists every changed pin before→after with a one-line rationale, and (e) the report exists and is non-empty. The deterministic harness's 'path_mentioned_missing' flags for pins-resolved and json-valid ('chain.js absent, settings.js absent') are path-derivation artifacts: the real paths are agent/chains/*.chain.json (present) and the gitignored live settings.json (untracked by design; the report discloses this and names the live file as the authoritative source). The only material caveat is that the criterion's 'settings.json' reference resolves to an untracked live file rather than a repo-tracked one — the report handles this transparently and my direct verification against that file confirms the claim. Constraints also hold: only model values in chain files changed (plus the required report), replacements are spelled exactly as in enabledModels, and no settings.json/agent/agents/ edits occurred. Note the live repo HEAD is still at the base commit (649aa13) — the repaired pins exist only on the result ref pending the human sync decision, which matches the graph's design (pause for review).",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-06T18:04:52.565145+00:00",
+  "evaluated_tree_sha": "f164c8eb54cb2ede065065ce3def81f5cec21fa6",
+  "evaluated_commit_sha": "1fc7b6ed35a4d2c7ac0d0ddbf985e1509d718955",
+  "merge_commit_sha": "1fc7b6ed35a4d2c7ac0d0ddbf985e1509d718955",
+  "expected_base_commit_sha": "649aa132711e85bcca3b38cd3752e6f5f05b0543",
+  "pr_ref": null,
+  "job_id": "job_20260806T17462778ff5f449ee0fd",
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-hygiene/nodes/node-01-extension-noise-cleanup.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j/README.md"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-hygiene/nodes/node-01-extension-noise-cleanup.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j/PROJECT-BRIEF.md"
+      ]
+    },
+    "integrity": {
+      "rating": "none",
+      "offered": 3,
+      "content_accessed": 0,
+      "not_observed": 3,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-hygiene/nodes/node-01-extension-noise-cleanup.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d4oqcj7j/README.md"
+      ]
+    },
+    "overall": "none"
+  }
+}

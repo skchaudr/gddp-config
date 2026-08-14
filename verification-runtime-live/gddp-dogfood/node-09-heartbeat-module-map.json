@@ -1,0 +1,729 @@
+{
+  "project_id": "gddp-dogfood",
+  "node_id": "node-09-heartbeat-module-map",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.9,
+    "findings": [],
+    "reasoning": "The node's role is a T1 report-only canary: produce a one-line-per-module map of scripts/runtime/heartbeat/ that keeps the operating surface legible. The delivered report (the only file in the diff, base 450eca1 → tip 0bd1602) fully realizes that role: it inventories all 25 modules (12 production + 13 test) under the target directory with one-line purposes that I spot-verified against actual module docstrings (AST-parsed) — all consistent, none fabricated. It describes the tick flow (events → dispatch → reconcile → evaluate) with a phase diagram and ownership table, and quotes the required pytest tail line ('4 failed, 622 passed in 36.88s') naming 4 failing test files that all exist in the repo, so the claim is plausible and consistent with the cited node-05 baseline. Constraints are honored: only the report file was created, nothing else modified, work committed on the result ref (diff is exactly 1 added file). Graph integrity is preserved: the node has depends_on: [] and unlocks: [], nothing downstream consumes its output, and the change touches nothing outside the report path. No intent or graph drift detected; the map is accurate enough that downstream human consumers get a legible, correct surface.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-11T06:26:19.986Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_oJTUxvaCddZehlnLwLN96371",
+        "command": "cd /tmp/gddp-eval-wt-vmyqnb67 && ls -la && echo \"---\" && git log --oneline -5 2>/dev/null && echo \"---\" && git status 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-11T06:26:19.987Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_uGAE0Rzv5OgOXm5Nihv64286",
+        "command": "ls -la /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-11T06:26:20.008Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_uGAE0Rzv5OgOXm5Nihv64286",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:26:20.012Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_oJTUxvaCddZehlnLwLN96371",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:26:22.287Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_UnBO69wSnu29nI1PODDc9087",
+        "path": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-09-heartbeat-module-map.yaml"
+      },
+      {
+        "ts": "2026-08-11T06:26:22.288Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_wlRsHmDgqZHimoah81Hs7249",
+        "path": "/tmp/gddp-eval-wt-vmyqnb67/reports/gddp-dogfood/09-heartbeat-module-map.md"
+      },
+      {
+        "ts": "2026-08-11T06:26:22.288Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_0cdBKthFmTJurJ4zB6tc8212",
+        "command": "ls -la /tmp/gddp-eval-wt-vmyqnb67/scripts/runtime/heartbeat/ 2>/dev/null && echo \"---\" && find /tmp/gddp-eval-wt-vmyqnb67/scripts/runtime/heartbeat/ -type f 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-11T06:26:22.298Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_UnBO69wSnu29nI1PODDc9087",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:26:22.298Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_wlRsHmDgqZHimoah81Hs7249",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:26:22.302Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_0cdBKthFmTJurJ4zB6tc8212",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:26:32.277Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_Z8WvIItKMkqBAxSWhyEm8006",
+        "path": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-10-agents-md-drift-report.yaml"
+      },
+      {
+        "ts": "2026-08-11T06:26:32.277Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_1VrVBmfx0bicmLJ3PJSi1533",
+        "path": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-08-verification-module-map.yaml"
+      },
+      {
+        "ts": "2026-08-11T06:26:32.277Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_tMAHFq2TmvSigtu7LSrJ1060",
+        "command": "ls -la /tmp/gddp-eval-wt-vmyqnb67/reports/gddp-dogfood/ 2>/dev/null && echo \"---PROJECT BRIEF (head)---\" && head -60 /tmp/gddp-eval-wt-vmyqnb67/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-11T06:26:32.283Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Z8WvIItKMkqBAxSWhyEm8006",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:26:32.284Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_1VrVBmfx0bicmLJ3PJSi1533",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:26:32.289Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_tMAHFq2TmvSigtu7LSrJ1060",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:26:37.306Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_zcE7XxKK2whFLLoaeB1z3735",
+        "command": "cd /tmp/gddp-eval-wt-vmyqnb67 && git show --stat HEAD | head -30 && echo \"===DIFF FILES===\" && git diff --name-status 450eca1..HEAD && echo \"===HEARTBEAT FILE COUNT===\" && ls scripts/runtime/heartbeat/ | wc -l"
+      },
+      {
+        "ts": "2026-08-11T06:26:37.307Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Mp0jVmFMfB9qEagzLJM22271",
+        "command": "cd /tmp/gddp-eval-wt-vmyqnb67/scripts/runtime/heartbeat && for f in runner.py classifier.py scope_checker.py job_factory.py dispatcher.py reconciler.py state_recorder.py graph_reader.py frontier.py provisional_status.py completion_discipline.py; do echo \"=== $f ===\"; head -8 \"$f\" | grep -iE '\"\"\"|#|class |def |\"\"\"' | head -4; done"
+      },
+      {
+        "ts": "2026-08-11T06:26:37.328Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_zcE7XxKK2whFLLoaeB1z3735",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:26:37.352Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Mp0jVmFMfB9qEagzLJM22271",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:26:39.477Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Cbn2AzNRyYmskwmbIY4f7286",
+        "command": "cd /tmp/gddp-eval-wt-vmyqnb67/scripts/runtime/heartbeat && for f in runner.py classifier.py scope_checker.py job_factory.py dispatcher.py reconciler.py state_recorder.py graph_reader.py frontier.py provisional_status.py; do echo \"=== $f ===\"; python3 -c \"\nimport ast,sys\nt=ast.parse(open('$f').read())\nd=ast.get_docstring(t)\nprint((d or 'NO DOCSTRING').split(chr(10))[0][:160])\n\"; done"
+      },
+      {
+        "ts": "2026-08-11T06:26:40.027Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Cbn2AzNRyYmskwmbIY4f7286",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:26:46.899Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_OsVZHeM4HzxLShow4Vwb9453",
+        "command": "cd /tmp/gddp-eval-wt-vmyqnb67 && echo \"--- pytest.ini ---\" && cat pytest.ini && echo \"--- failing test files referenced in report ---\" && ls deploy/rig1-heartbeat/test_rig1_render_plist.py scripts/test_intake_server.py scripts/test_intake_webhook_roundtrip.py 2>&1 && echo \"--- reports sibling dir ---\" && ls reports/ && echo \"--- report tail quoted line ---\" && grep -n \"622 passed\\|4 failed\" reports/gddp-dogfood/09-heartbeat-module-map.md"
+      },
+      {
+        "ts": "2026-08-11T06:26:46.914Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_OsVZHeM4HzxLShow4Vwb9453",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:27:02.588Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_a40DJwCWOQmCaPhtw1X16626",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "Sibling canaries node-08 (provisional), node-09 (ready), node-10 (ready) are independent with no unlocks; sequential max_concurrent_jobs=1 execution means no convergence risk. The reports/ tree currently holds only 09; earlier canary reports (01-08) live elsewhere or are pending — expected for the tranche-gated frontier, not a defect.",
+        "affected_node_ids": [
+          "node-08-verification-module-map",
+          "node-09-heartbeat-module-map",
+          "node-10-agents-md-drift-report"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9733333333333333,
+  "criteria_confidence": 0.9733333333333333,
+  "completeness": 1.0,
+  "graph_readiness": 0.9733333333333333,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "report-exists",
+        "criterion": "reports/gddp-dogfood/09-heartbeat-module-map.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "heartbeat\\-module\\-map -> line 1: 'heartbeat-module-map'"
+        ],
+        "reasoning": "Scanned source files (reports/gddp-dogfood/09-heartbeat-module-map.md) for identifiers named in the criterion (gddp-dogfood, heartbeat-module-map, non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "all-modules",
+        "criterion": "every module under scripts/runtime/heartbeat/ is listed with a one-line purpose",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...) for identifiers named in the criterion (one-line). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "flow",
+        "criterion": "report describes the tick flow: events -> dispatch -> reconcile -> evaluate",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create only reports/gddp-dogfood/09-heartbeat-module-map.md",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Read-only outside that report path",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Run python3 -m pytest -q before finishing and quote its tail line in the report",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/gddp-dogfood/09-heartbeat-module-map.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+      "tip": "0bd1602ea782f5324c794215a3dba6838a7edad0",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/gddp-dogfood/09-heartbeat-module-map.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 1.0,
+        "evidence": [
+          "ls -la reports/gddp-dogfood/09-heartbeat-module-map.md -> 7687 bytes, non-empty",
+          "full read of reports/gddp-dogfood/09-heartbeat-module-map.md (143 lines, headings, tables, ASCII flow diagram, validation tail line)"
+        ],
+        "reasoning": "The file exists at the exact required path and is clearly non-empty (7687 bytes / 143 lines of substantive content: title, generation metadata, tick-flow section, module inventory tables, validation section). The deterministic scan already found the identifier string match; direct read confirms the file is real and substantial."
+      },
+      {
+        "criterion_id": "all-modules",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "python3 comparison: 25 .py files on disk vs 25 table rows in report -> MISSING: [], EXTRA: [], rows lacking purpose cell: []",
+          "spot checks: classifier.py (classify: 'Only issue.opened events trigger dispatch', 'requires an explicit node: <id> tag'), scope_checker.py (check_scope, 'No active job already running', SATISFIED_DEP_STATUSES={'complete','provisional'}), job_factory.py (build_job, 'Builds a job payload from a NodeData and event'), completion_discipline.py (submit_completion with completion_id/digest, actions proceed/stored/duplicate/quarantined), provisional_status.py ('complete is human-only graph truth; this module never writes it', human_gate skip), runner.py (run_heartbeat, reconcile_sessions, EvaluationBatch, advance_frontier)"
+        ],
+        "reasoning": "Every module under scripts/runtime/heartbeat/ — 12 production modules plus 13 test modules, i.e., all 25 .py files — is listed in the report's inventory tables, each with a one-line purpose. Verified programmatically (set difference empty both ways) and by manual spot checks confirming the stated purposes accurately reflect the module implementations (docstrings and function names match). An earlier grep-based extraction appeared to omit test_mission_pipeline_e2e.py, but that was a shell backtick-quoting artifact; Python parsing confirmed the row exists at line 121. Confidence slightly below 1.0 only because 'module' is not formally defined (tests included — a superset, so coverage holds either way)."
+      },
+      {
+        "criterion_id": "flow",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "report section 'Tick flow: events → dispatch → reconcile → evaluate' with ASCII diagram covering Phase 0 RECONCILE (reconciler.reconcile_sessions), Phase A EVENTS → PLAN (classifier.classify, job_factory.build_job), Phase B/C DISPATCH (dispatcher.dispatch/dispatch_engagement), finally EVALUATE (EvaluationBatch.finalize, provisional_status.maybe_mark_provisional), plus a phase-ownership table naming runner, classifier, scope_checker, dispatcher, reconciler, completion_discipline, state_recorder, frontier, provisional_status",
+          "runner.py spot check: run_heartbeat at line 142 orchestrates reconcile_sessions (line 191), advance_frontier (203), reconcile_reviewed_jobs (209); EvaluationBatch imported at 45"
+        ],
+        "reasoning": "The report explicitly and accurately describes the tick flow with all four named stages — events (claim/classify/plan), dispatch, reconcile (collect/finalize), evaluate — both in prose, an ASCII diagram, and a phase-ownership table, consistent with the actual runner code. The report notes the deliberate within-tick ordering nuance (reconcile/evaluate frees capacity before new dispatch), which matches the code, and the section title itself states 'events → dispatch → reconcile → evaluate'. The criterion asks that the report describe this flow; it does so in detail. Minor residual uncertainty: if the criterion intended the literal arrow sequence to be the exact runtime execution order (rather than the conceptual cycle being described), the report explains an intentional ordering difference — but the criterion's wording is 'describes the tick flow', which is satisfied."
+      }
+    ],
+    "overall_reasoning": "All three acceptance criteria for node-09-heartbeat-module-map are satisfied by the submitted evidence. (1) The report exists at reports/gddp-dogfood/09-heartbeat-module-map.md and is non-empty (7687 bytes, 143 lines). (2) Every module under scripts/runtime/heartbeat/ — all 25 .py files (12 production + 13 test) — is listed with a one-line purpose; verified by exact set comparison (no missing, no extra, no purpose-less rows) and by spot-checking six module purposes against the actual source code. (3) The report describes the tick flow (events → dispatch → reconcile → evaluate) in a dedicated section with an ASCII diagram and phase-ownership table, and the description is consistent with the actual runner/reconciler/dispatcher/classifier code. Constraints were also honored: the base→HEAD diff contains exactly one file (the report), the working tree is clean (create-only/read-only constraints met), and the report quotes a pytest tail line per the constraint (though pytest is not installed in this sandbox so the quote could not be re-run here). The earlier ambiguous findings from the deterministic lane — the apparent miss of test_mission_pipeline_e2e.py and the absence of flow identifiers — were resolved by direct Python parsing and source inspection; both were false negatives/artifacts of keyword scanning and shell quoting, not real gaps.",
+    "risks": "1) The pytest tail line quoted in the report ('4 failed, 622 passed in 36.88s') could not be independently re-verified: python3 -m pytest -q fails in this sandbox with 'No module named pytest'. The quote is present and internally consistent with the four named failures, but verification was impossible here. This is a constraint rather than an acceptance criterion, and the deterministic constraint scan (forbidden_pattern_scan) is a weak method for it; I instead verified the create-only/read-only/commit constraints directly via git diff and git status, which are solid. 2) Criterion 'flow' lists the stages as 'events -> dispatch -> reconcile -> evaluate', while the report accurately notes that within a tick the runtime reconciles/evaluates before planning new events (to free capacity); if the criterion was intended as a strict runtime ordering assertion rather than 'describe the cycle', a human may want to confirm the intended reading — the report is factually consistent with the code either way. 3) One-line purposes for test modules were cross-checked only by filename/context; production module purposes were spot-checked against source and all matched, giving high confidence the inventory is accurate, but not every one of the 25 rows was deeply validated.",
+    "followup_candidates": "Observed: the report quotes pytest tail line '4 failed, 622 passed in 36.88s' and names four suite failures, but pytest is not installed in the verification sandbox so the run could not be reproduced. The pytest run is listed in the node's constraints, not in its acceptance criteria, so it does not affect this verdict. Was re-running the suite intended as acceptance evidence for this node? If yes, update the node criteria to include the suite result and rerun; otherwise this verdict stands. — Separately: criterion 'flow' states 'events -> dispatch -> reconcile -> evaluate', while the report (correctly, per runner.py) describes reconcile/evaluate occurring before events->plan within a tick. Please confirm the criterion intends 'describe the conceptual cycle' (satisfied) rather than 'assert exact runtime ordering' (which would contradict the code).",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-11T06:24:28.316Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_tiVWJ37U6thwXokXmaV48729",
+          "command": "ls -la /tmp/gddp-eval-wt-vmyqnb67/ && echo \"---\" && ls -la /tmp/gddp-eval-wt-vmyqnb67/reports/gddp-dogfood/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-11T06:24:28.317Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_gg0weZxyv2UfrrxL6Eda3183",
+          "command": "find /tmp/gddp-eval-wt-vmyqnb67/scripts/runtime/heartbeat -type f 2>/dev/null | sort; echo \"---\"; ls -la /tmp/gddp-eval-wt-vmyqnb67/scripts/runtime/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-11T06:24:28.335Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_tiVWJ37U6thwXokXmaV48729",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:24:28.338Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_gg0weZxyv2UfrrxL6Eda3183",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:24:30.000Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_ulgXBX7nRBfa73y1Cgo72064",
+          "path": "/tmp/gddp-eval-wt-vmyqnb67/reports/gddp-dogfood/09-heartbeat-module-map.md"
+        },
+        {
+          "ts": "2026-08-11T06:24:30.001Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_enlNYealBjDl8tebW4NF8268",
+          "command": "cd /tmp/gddp-eval-wt-vmyqnb67 && git log --oneline -5 2>/dev/null; echo \"---\"; git show --stat HEAD 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-11T06:24:30.009Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ulgXBX7nRBfa73y1Cgo72064",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:24:30.016Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_enlNYealBjDl8tebW4NF8268",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:24:38.390Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Vzg0nhVQmtLXjUfCDxr58548",
+          "command": "cd /tmp/gddp-eval-wt-vmyqnb67 && echo \"=== Files on disk (excluding __pycache__) ===\" && find scripts/runtime/heartbeat -maxdepth 1 -type f -name '*.py' | sort && echo && echo \"=== Modules mentioned in report (table rows) ===\" && grep -oE '^\\| `[a-z_]+\\.py`' reports/gddp-dogfood/09-heartbeat-module-map.md | sed 's/^| `//;s/`$//' | sort"
+        },
+        {
+          "ts": "2026-08-11T06:24:38.403Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Vzg0nhVQmtLXjUfCDxr58548",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:24:41.651Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ccpO2FQF2fOAXhkw4WnD0035",
+          "command": "cd /tmp/gddp-eval-wt-vmyqnb67 && diff <(find scripts/runtime/heartbeat -maxdepth 1 -type f -name '*.py' | sed 's|scripts/runtime/heartbeat/||' | sort) <(grep -oE '^\\| `[a-z_]+\\.py`' reports/gddp-dogfood/09-heartbeat-module-map.md | sed 's/^| `//;s/`$//' | sort) && echo \"IDENTICAL: every .py file under heartbeat/ is listed in the report\""
+        },
+        {
+          "ts": "2026-08-11T06:24:41.651Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_oFNdUWCp4Pk8oObPRzUt3164",
+          "command": "cd /tmp/gddp-eval-wt-vmyqnb67 && echo \"=== spot check: purposes vs actual module contents ===\" && head -25 scripts/runtime/heartbeat/classifier.py | grep -iE '\"\"\"|def |class ' | head -8; echo \"---dispatcher---\"; grep -nE '^def |^\"\"\"' scripts/runtime/heartbeat/dispatcher.py | head -6; echo \"---reconciler---\"; grep -nE '^def |^\"\"\"' scripts/runtime/heartbeat/reconciler.py | head -8; echo \"---provisional_status---\"; grep -nE '^def |^\"\"\"' scripts/runtime/heartbeat/provisional_status.py | head -6; echo \"---scope_checker---\"; grep -nE '^def |^\"\"\"' scripts/runtime/heartbeat/scope_checker.py | head -6"
+        },
+        {
+          "ts": "2026-08-11T06:24:41.672Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ccpO2FQF2fOAXhkw4WnD0035",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T06:24:41.681Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_oFNdUWCp4Pk8oObPRzUt3164",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:24:49.316Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ExTvNBO65nmPvaTjTt3L2503",
+          "command": "cd /tmp/gddp-eval-wt-vmyqnb67 && echo \"=== grep for mission_pipeline in report ===\" && grep -n \"mission_pipeline\" reports/gddp-dogfood/09-heartbeat-module-map.md; echo \"=== table rows containing 'End-to-end' ===\" && grep -n \"End-to-end\" reports/gddp-dogfood/09-heartbeat-module-map.md; echo \"=== raw lines around test_mission rows ===\" && grep -n \"test_mission\" reports/gddp-dogfood/09-heartbeat-module-map.md | cat -A | head"
+        },
+        {
+          "ts": "2026-08-11T06:24:49.331Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ExTvNBO65nmPvaTjTt3L2503",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:24:53.533Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_PLgxH1a1sXHSHj1EWaBD6667",
+          "reason": "command matched blocked pattern",
+          "command": "cd /tmp/gddp-eval-wt-vmyqnb67 && echo \"=== re-run extraction ===\" && grep -oE '^| \\`[a-z_]+\\.py\\`' reports/gddp-dogfood/09-heartbeat-module-map.md | sed 's/^| `//;s/`$//' | sort > /tmp/report_rows.txt && wc -l /tmp/report_rows.txt && grep -c \"mission_pipeline\" /tmp/report_rows.txt; echo \"=== disk list ===\" && find scripts/runtime/heartbeat -maxdepth 1 -type f -name '*.py' | sed 's|scripts/runtime/heartbeat/||' | sort > /tmp/disk_rows.txt && wc -l /tmp/disk_rows.txt && echo \"=== diff ===\" && diff /tmp/disk_rows.txt /tmp/report_rows.txt && echo \"IDENTICAL\"",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-11T06:24:53.533Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_PLgxH1a1sXHSHj1EWaBD6667",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T06:24:56.408Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_yPXi35yMZel6vJgR6W283805",
+          "command": "cd /tmp/gddp-eval-wt-vmyqnb67 && diff <(find scripts/runtime/heartbeat -maxdepth 1 -type f -name '*.py' | sed 's|scripts/runtime/heartbeat/||' | sort) <(grep -oE '^| \\`[a-z_]+\\.py\\`' reports/gddp-dogfood/09-heartbeat-module-map.md | sed 's/^| `//;s/`$//' | sort); echo \"diff exit: $?\""
+        },
+        {
+          "ts": "2026-08-11T06:24:56.408Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_CgwE8bmXlslEnHVKuYAj9737",
+          "command": "cd /tmp/gddp-eval-wt-vmyqnb67 && grep -oE '^| \\`[a-z_]+\\.py\\`' reports/gddp-dogfood/09-heartbeat-module-map.md | wc -l; echo \"---\"; grep -oE '^| \\`[a-z_]+\\.py\\`' reports/gddp-dogfood/09-heartbeat-module-map.md | grep -c \"mission_pipeline\""
+        },
+        {
+          "ts": "2026-08-11T06:24:56.432Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_yPXi35yMZel6vJgR6W283805",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:24:56.433Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_CgwE8bmXlslEnHVKuYAj9737",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T06:25:02.708Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_jm0z1PlsgOpoBBoe071G3471",
+          "command": "cd /tmp/gddp-eval-wt-vmyqnb67 && python3 - <<'EOF'\nimport os, re\n\nreport = open('reports/gddp-dogfood/09-heartbeat-module-map.md').read()\ndisk = sorted(f for f in os.listdir('scripts/runtime/heartbeat') if f.endswith('.py'))\n\nrows = re.findall(r'^\\| `([a-z_0-9]+\\.py)` \\|', report, re.M)\nreported = sorted(set(rows))\n\nprint(\"disk files:\", len(disk))\nprint(\"report rows:\", len(reported))\nmissing = sorted(set(disk) - set(reported))\nextra = sorted(set(reported) - set(disk))\nprint(\"MISSING from report:\", missing)\nprint(\"EXTRA in report (not on disk):\", extra)\n\n# check each reported row has a one-line purpose (non-empty after the backtick cell)\nlines = [l for l in report.splitlines() if l.startswith('| `') and '.py`' in l]\nno_purpose = [l for l in lines if re.search(r'\\.py` \\|\\s*\\|', l)]\nprint(\"rows lacking a purpose cell:\", no_purpose)\nEOF"
+        },
+        {
+          "ts": "2026-08-11T06:25:02.750Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_jm0z1PlsgOpoBBoe071G3471",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:25:11.641Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_TwI1PKvOqeHqf1utB3734126",
+          "reason": "command matched blocked pattern",
+          "command": "cd /tmp/gddp-eval-wt-vmyqnb67 && echo \"=== classifier.py classify ===\" && grep -n \"def classify\\|node: <id>\\|issue.opened\\|matched_node\" scripts/runtime/heartbeat/classifier.py | head -8; echo \"=== scope_checker.check_scope ===\" && grep -n \"def check_scope\\|active job\\|depends_on\\|complete\\|provisional\" scripts/runtime/heartbeat/scope_checker.py | head -10; echo \"=== job_factory ===\" && grep -n \"def build_job\\|NodeData\\|artifacts\" scripts/runtime/heartbeat/job_factory.py | head -6; echo \"=== runner flow markers ===\" && grep -n \"def run_heartbeat\\|def _plan_dispatches\\|def _execute_dispatches\\|reconcile\\|EvaluationBatch\\|advance_frontier\" scripts/runtime/heartbeat/runner.py | head -12; echo \"=== completion_discipline ===\" && grep -n \"completion\\|digest\\|quarantine\\|def \" scripts/runtime/heartbeat/completion_discipline.py | head -10",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-11T06:25:11.642Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_TwI1PKvOqeHqf1utB3734126",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T06:25:19.013Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_l3TaJydZJoSKiuj8AWdS5979",
+          "reason": "command matched blocked pattern",
+          "command": "cd /tmp/gddp-eval-wt-vmyqnb67 && python3 - <<'EOF'\nimport re\n\ndef heads(path, pats, n=6):\n    lines = open(path).read().splitlines()\n    out = []\n    for i, l in enumerate(lines):\n        if any(p in l for p in pats):\n            out.append(f\"{i+1}: {l.strip()[:110]}\")\n        if len(out) >= n:\n            break\n    return out\n\nfor f, pats in [\n    ('scripts/runtime/heartbeat/classifier.py', ['def classify', 'issue.opened', 'node:', 'matched_node_id']),\n    ('scripts/runtime/heartbeat/scope_checker.py', ['def check_scope', 'active job', 'depends_on', 'complete', 'provisional']),\n    ('scripts/runtime/heartbeat/job_factory.py', ['def build_job', 'NodeData', 'artifacts']),\n    ('scripts/runtime/heartbeat/runner.py', ['def run_heartbeat', '_plan_dispatches', '_execute_dispatches', 'reconcile', 'EvaluationBatch', 'advance_frontier']),\n    ('scripts/runtime/heartbeat/completion_discipline.py', ['def ', 'completion', 'digest', 'quarantine']),\n    ('scripts/runtime/heartbeat/state_recorder.py', ['def ', 'insert_job', 'insert_executor_session', 'insert_queue_record']),\n]:\n    print(f\"--- {f} ---\")\n    for r in heads(f, pats):\n        print(r)\n    print()\nEOF",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-11T06:25:19.013Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_l3TaJydZJoSKiuj8AWdS5979",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T06:25:37.513Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Ra2yG7X6l9w9zh4FMupU8842",
+          "command": "grep -n -E \"def classify|issue.opened|node:|matched_node_id\" /tmp/gddp-eval-wt-vmyqnb67/scripts/runtime/heartbeat/classifier.py | head -8"
+        },
+        {
+          "ts": "2026-08-11T06:25:37.513Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_lCrCvWzfYTlocmhTYY9L9361",
+          "command": "grep -n -E \"def run_heartbeat|_plan_dispatches|_execute_dispatches|reconcile|EvaluationBatch|advance_frontier\" /tmp/gddp-eval-wt-vmyqnb67/scripts/runtime/heartbeat/runner.py | head -14"
+        },
+        {
+          "ts": "2026-08-11T06:25:37.524Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Ra2yG7X6l9w9zh4FMupU8842",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:25:37.527Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_lCrCvWzfYTlocmhTYY9L9361",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:25:40.958Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_0e367tmlVMfyGcH5RFJW8846",
+          "command": "grep -n -E \"def check_scope|active job|depends_on|complete|provisional\" /tmp/gddp-eval-wt-vmyqnb67/scripts/runtime/heartbeat/scope_checker.py | head -10"
+        },
+        {
+          "ts": "2026-08-11T06:25:40.959Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_g84jaZdvzlMTTxwBt3jU9104",
+          "command": "grep -n -E \"def build_job|NodeData|artifacts\" /tmp/gddp-eval-wt-vmyqnb67/scripts/runtime/heartbeat/job_factory.py | head -6"
+        },
+        {
+          "ts": "2026-08-11T06:25:40.959Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_sbfmUNC5AQ7FP0jHbi1D5256",
+          "command": "grep -n -E \"def |completion|digest|quarantine\" /tmp/gddp-eval-wt-vmyqnb67/scripts/runtime/heartbeat/completion_discipline.py | head -12"
+        },
+        {
+          "ts": "2026-08-11T06:25:40.959Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_03_Kdkkmm50wrU8d8cPfgyR4669",
+          "command": "grep -n -E \"def maybe_mark_provisional|human_gate|never|provisional\" /tmp/gddp-eval-wt-vmyqnb67/scripts/runtime/heartbeat/provisional_status.py | head -10"
+        },
+        {
+          "ts": "2026-08-11T06:25:40.975Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_0e367tmlVMfyGcH5RFJW8846",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:25:40.975Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_g84jaZdvzlMTTxwBt3jU9104",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:25:40.976Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_sbfmUNC5AQ7FP0jHbi1D5256",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:25:40.979Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_Kdkkmm50wrU8d8cPfgyR4669",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:25:46.082Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_UgGdGS4YMuKLqgbwsbjD6398",
+          "command": "cd /tmp/gddp-eval-wt-vmyqnb67 && timeout 180 python3 -m pytest -q 2>&1 | tail -3"
+        },
+        {
+          "ts": "2026-08-11T06:25:46.111Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_UgGdGS4YMuKLqgbwsbjD6398",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:25:49.912Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Q3lXePGIqNS0gt6oqsaK1125",
+          "command": "cd /tmp/gddp-eval-wt-vmyqnb67 && git status --porcelain; echo \"status-exit:$?\"; git diff 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61..HEAD --stat"
+        },
+        {
+          "ts": "2026-08-11T06:25:49.962Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Q3lXePGIqNS0gt6oqsaK1125",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:26:15.826Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Zg9V8OExC8dh5Pg5rVMD3067",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All three acceptance criteria for node-09-heartbeat-module-map are satisfied by the submitted evidence. (1) The report exists at reports/gddp-dogfood/09-heartbeat-module-map.md and is non-empty (7687 bytes, 143 lines). (2) Every module under scripts/runtime/heartbeat/ — all 25 .py files (12 production + 13 test) — is listed with a one-line purpose; verified by exact set comparison (no missing, no extra, no purpose-less rows) and by spot-checking six module purposes against the actual source code. (3) The report describes the tick flow (events → dispatch → reconcile → evaluate) in a dedicated section with an ASCII diagram and phase-ownership table, and the description is consistent with the actual runner/reconciler/dispatcher/classifier code. Constraints were also honored: the base→HEAD diff contains exactly one file (the report), the working tree is clean (create-only/read-only constraints met), and the report quotes a pytest tail line per the constraint (though pytest is not installed in this sandbox so the quote could not be re-run here). The earlier ambiguous findings from the deterministic lane — the apparent miss of test_mission_pipeline_e2e.py and the absence of flow identifiers — were resolved by direct Python parsing and source inspection; both were false negatives/artifacts of keyword scanning and shell quoting, not real gaps.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-11T06:27:02.633440+00:00",
+  "evaluated_tree_sha": "45fed8099ef142a42e550b3e1fc9bcdc85aefac8",
+  "evaluated_commit_sha": "0bd1602ea782f5324c794215a3dba6838a7edad0",
+  "merge_commit_sha": "0bd1602ea782f5324c794215a3dba6838a7edad0",
+  "expected_base_commit_sha": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+  "pr_ref": null,
+  "job_id": "job_20260811T06185867300807387d68",
+  "execution_attempt_id": "job_20260811T06185867300807387d68:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-vmyqnb67/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-vmyqnb67/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "none",
+      "offered": 3,
+      "content_accessed": 0,
+      "not_observed": 3,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-vmyqnb67/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-vmyqnb67/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "none",
+      "offered": 3,
+      "content_accessed": 0,
+      "not_observed": 3,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-vmyqnb67/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-vmyqnb67/README.md"
+      ]
+    },
+    "overall": "none"
+  }
+}

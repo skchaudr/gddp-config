@@ -1,0 +1,875 @@
+{
+  "project_id": "pi-harness-execution",
+  "node_id": "node-03-tui-audit",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.92,
+    "findings": [],
+    "reasoning": "Fresh-eyes integrity review of node-03-tui-audit. Intent: the node's why asks for (1) a performance audit of Pi's TUI under heavy workloads, (2) exploration of alternatives (my-pi-hybrid, Zed/ACP, other Pi TUIs/frontends), (3) Grok Build TUI as the reference bar, and (4) an assessment of what Pi could adopt. The delivered report (reports/pi-harness-execution/tui-audit.md, 583 lines) covers all four: findings F1-F8 with measured scaling data (up to 48k-line sessions, 16ms frame-budget crossings, 99.67% waste ratio, spinner-driven repaints, clearOnShrink scrollback wipes, resize O(history), superlinear streaming, archived tool-display extension, unimplemented perf-test program); §4 alternatives (omp solves F1/F3/F4 via a same-lineage fork with an append-only render contract; pi-acp sidesteps rendering into Zed; my-pi-hybrid honestly ruled out as absent with broken in-repo links and mis-scoped; pi-hub-tui/pi-hub-rs assessed as dashboards, not session front-ends); §5 Grok feature-for-feature with live 'grok doctor' output; §6 ranked adoption list; §8 actionable acceptance criteria (AC-1..AC-21) for node-04-tui-execute with file:line anchors and bench assertions. Graph integrity: the node's own commit (df2932c) adds exactly one file (the report), honoring the read-only constraint and the commit-on-result-ref contract; no harness modification. I independently verified ~25 evidence anchors against the live checkout and host: tui.js:96-104 render walk, :123 MIN_RENDER_INTERVAL_MS=16, :127 clearOnShrink default-off, :997 full render call, :1011 CSI 3J, :1082 clearOnShrink branch, :149 fullRedraws; interactive-mode.js:277/:280/:1417/:1447/:2311; loader.js:3/54/65; text.js:39; markdown.js:77; settings-manager.js:784/789; pi-tui-perf-test-scope.md:8/25/145-146; ARCHIVED.md:3/9/29; dispatch-routing.md:53/88; IMPLEMENTATION-PLAN.md:51/59/60/148 (broken ../my-pi-hybrid links confirmed); harness/tui/app.py:19/:347; Cargo.toml:15-16; .gitignore:38; herdr imports of @mariozechner/pi-ai; zero 1049 (alt-screen) occurrences; PI_DEBUG_REDRAW/PI_TUI_WRITE_LOG referenced only in the scope doc. Host state matches byte-exact: ~/.pi/agent/settings.json terminal {\"clearOnShrink\":true,\"showTerminalProgress\":true}; the largest live session file at 3,931,457 bytes / 1,135 records; grok-1.0.0 163MB binary with screen_mode=fullscreen, compact_mode, collapsed_edit_blocks, auto_cadence_enabled; global package inventory matching §4.1 exactly; my-pi-hybrid absent; @oh-my-pi/pi-tui/src/tui.ts header quote verbatim. The downstream node-04-tui-execute (human_gate, 'only implement proposals from the paired audit report', changes-mapped criterion) is well-served: the ACs are concrete, independently checkable, and AC-21 enforces diffable before/after with the same anchors. The subagents-audit.md present in the subject diff range is node-01's sibling commit (b6684c7) inside the diff window df4642e..df2932c — an eval-range artifact explicitly anticipated by the deterministic note, not this node's work. No intent or graph-integrity problems found; verdict pass.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-09T08:10:42.258Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_cYbW67qVSfP65d82c8fw1133",
+        "command": "cd /tmp/gddp-eval-wt-phbn8t81 && ls -la && echo \"---\" && find . -type f | head -50"
+      },
+      {
+        "ts": "2026-08-09T08:10:42.259Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_s1wmFLUR8RUvY10InJSv3543",
+        "path": "/tmp/gddp-eval-wt-phbn8t81/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-09T08:10:42.291Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_cYbW67qVSfP65d82c8fw1133",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:10:42.299Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_s1wmFLUR8RUvY10InJSv3543",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:10:44.661Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_f9A9AUzRQ2BQ2khXenDD2753",
+        "path": "/tmp/gddp-eval-wt-phbn8t81/reports/pi-harness-execution/tui-audit.md"
+      },
+      {
+        "ts": "2026-08-09T08:10:44.662Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_jF6I1i9WqibHKorQ90Zu5206",
+        "path": "/tmp/gddp-eval-wt-phbn8t81/README.md"
+      },
+      {
+        "ts": "2026-08-09T08:10:44.663Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_gIm87mjDHZHLFKdz7BXJ0310",
+        "command": "ls -la /home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/ 2>/dev/null && echo \"---\" && ls -la /home/sab-mini/gddp-config/graphs/pi-harness-execution/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-09T08:10:44.671Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_f9A9AUzRQ2BQ2khXenDD2753",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:10:44.671Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_jF6I1i9WqibHKorQ90Zu5206",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:10:44.677Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_gIm87mjDHZHLFKdz7BXJ0310",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:10:47.804Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_sVutSgl6Np0UqvFHHAUp5197",
+        "path": "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-03-tui-audit.yaml"
+      },
+      {
+        "ts": "2026-08-09T08:10:47.804Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_fPYEcDHxjedM0u1jUVI65700",
+        "path": "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-04-tui-execute.yaml"
+      },
+      {
+        "ts": "2026-08-09T08:10:47.804Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_LDRa7vTjhM8wdhZEN3V16072",
+        "path": "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-01-subagents-audit.yaml"
+      },
+      {
+        "ts": "2026-08-09T08:10:47.804Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_CyPedCYel8vb0rTSGAJN2259",
+        "path": "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml"
+      },
+      {
+        "ts": "2026-08-09T08:10:47.807Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_sVutSgl6Np0UqvFHHAUp5197",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:10:47.807Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_fPYEcDHxjedM0u1jUVI65700",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:10:47.807Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_LDRa7vTjhM8wdhZEN3V16072",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:10:47.808Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_CyPedCYel8vb0rTSGAJN2259",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:01.573Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_l67Ez3GykgCeHlotqQyq1354",
+        "command": "cd /tmp/gddp-eval-wt-phbn8t81 && git log --oneline -15 2>/dev/null; echo \"---STATUS---\"; git status --short 2>/dev/null | head -20; echo \"---BRANCH---\"; git branch -a 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-09T08:11:01.573Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_01_81T29iVetRAGmI70sKgg5137",
+        "reason": "command matched blocked pattern",
+        "command": "ls -la /home/sab-mini/Pi-Coding-Agent 2>/dev/null | head -5; echo \"---\"; ls /usr/lib/node_modules/@earendil-works/ 2>/dev/null; echo \"---\"; npm ls -g --depth=0 2>/dev/null | head -20",
+        "pattern": "\\b(?:curl|wget|ssh|scp|sftp|rsync|nc|netcat|telnet|ftp|pip|npm|pnpm|yarn|brew)\\b"
+      },
+      {
+        "ts": "2026-08-09T08:11:01.574Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_81T29iVetRAGmI70sKgg5137",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-09T08:11:01.606Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_l67Ez3GykgCeHlotqQyq1354",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:08.689Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Ay0lM6r3C9IakBzGb2V52717",
+        "command": "cd /tmp/gddp-eval-wt-phbn8t81 && echo \"=== diff b6684c7..df2932c (this node's commit) ===\" && git diff --stat b6684c7 df2932c && echo && echo \"=== files in commit df2932c ===\" && git show --stat --format=\"%H %s\" df2932c | head -20 && echo && echo \"=== diff df4642e..df2932c (subject diff) ===\" && git diff --stat df4642e df2932c"
+      },
+      {
+        "ts": "2026-08-09T08:11:08.689Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_8bsqhL7QIJAGFsSGMJan6429",
+        "command": "cd /tmp/gddp-eval-wt-phbn8t81 && for f in docs/pi-tui-perf-test-scope.md agent/extensions/pi-tool-display/ARCHIVED.md agents/orchestrator/dispatch-routing.md docs/IMPLEMENTATION-PLAN.md harness/tui/app.py harness/bin/pi-hub-tui harness/pi-hub-rs/Cargo.toml harness/pi-hub-rs/LESSON.md agent/extensions/advisor-mode.ts agent/extensions/answer-noise-trim.ts agent/extensions/mutation-confirm.ts agent/extensions/browse.ts; do if [ -e \"$f\" ]; then echo \"OK   $f\"; else echo \"MISS $f\"; fi; done"
+      },
+      {
+        "ts": "2026-08-09T08:11:08.703Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_8bsqhL7QIJAGFsSGMJan6429",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:08.713Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Ay0lM6r3C9IakBzGb2V52717",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:15.579Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_J8S9y0mEXzMISpctRt1R7646",
+        "command": "cd /tmp/gddp-eval-wt-phbn8t81 && echo \"=== pi-tui-perf-test-scope.md line counts & key lines ===\" && wc -l docs/pi-tui-perf-test-scope.md && sed -n '8p;25p;145,146p' docs/pi-tui-perf-test-scope.md && echo && echo \"=== ARCHIVED.md lines 3,9,29 ===\" && sed -n '3p;9p;29p' agent/extensions/pi-tool-display/ARCHIVED.md && echo && echo \"=== dispatch-routing.md 53,88 ===\" && sed -n '53p;88p' agents/orchestrator/dispatch-routing.md"
+      },
+      {
+        "ts": "2026-08-09T08:11:15.579Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_jnlVtWLRe7nIgZB074aB1129",
+        "command": "cd /tmp/gddp-eval-wt-phbn8t81 && echo \"=== IMPLEMENTATION-PLAN.md 51,59,60,148 ===\" && sed -n '51p;59p;60p;148p' docs/IMPLEMENTATION-PLAN.md && echo && echo \"=== harness/bin/pi-hub-tui 11,18,24 ===\" && sed -n '11p;18p;24p' harness/bin/pi-hub-tui && echo && echo \"=== .gitignore line 38 ===\" && sed -n '38p' .gitignore && echo && echo \"=== harness/tui listing ===\" && ls harness/tui/"
+      },
+      {
+        "ts": "2026-08-09T08:11:15.596Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_J8S9y0mEXzMISpctRt1R7646",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:15.599Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_jnlVtWLRe7nIgZB074aB1129",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:22.973Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_MYVhl6g2MVzsproeL0Cg1755",
+        "command": "cd /tmp/gddp-eval-wt-phbn8t81 && echo \"=== harness/tui/app.py 19,307,347,372,384,390 ===\" && sed -n '19p;347p' harness/tui/app.py && echo && echo \"=== pi-hub-rs Cargo.toml 15-16 ===\" && sed -n '15,16p' harness/pi-hub-rs/Cargo.toml && echo && echo \"=== advisor-mode.ts 178,187 ===\" && sed -n '178p;187p' agent/extensions/advisor-mode.ts && echo && echo \"=== herdr/mux.ts:7 ===\" && sed -n '7p' agent/extensions/herdr/mux.ts && echo && echo \"=== harness/tests listing ===\" && ls harness/tests/ && echo && echo \"=== .github ===\" && find .github -type f 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-09T08:11:22.973Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_PKytHSrvvZKGLG2UHu974210",
+        "command": "echo \"=== installed pi package ===\"; ls -la /usr/lib/node_modules/@earendil-works/ 2>/dev/null || echo \"not present\"; echo; echo \"=== pi-tui dist ===\"; ls /usr/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/ 2>/dev/null || echo \"not present\"; echo; echo \"=== ~/.pi/agent/settings.json ===\"; cat ~/.pi/agent/settings.json 2>/dev/null | head -30 || echo \"not present\"; echo; echo \"=== pi version ===\"; pi --version 2>/dev/null || echo \"pi not on PATH\""
+      },
+      {
+        "ts": "2026-08-09T08:11:22.998Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_MYVhl6g2MVzsproeL0Cg1755",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:25.168Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_PKytHSrvvZKGLG2UHu974210",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:31.512Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_jsOqlfu5EyAU4fWBHMUR0997",
+        "command": "TUI=/usr/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui/dist; IM=/usr/lib/node_modules/@earendil-works/pi-coding-agent/dist/modes/interactive; echo \"=== tui.js:96-104 render walk ===\"; sed -n '96,104p' $TUI/tui.js; echo; echo \"=== tui.js:123,127 ===\"; sed -n '123p;127p' $TUI/tui.js; echo; echo \"=== tui.js:997 ===\"; sed -n '997p' $TUI/tui.js; echo; echo \"=== tui.js:1011,1082 ===\"; sed -n '1011p;1082p' $TUI/tui.js; echo; echo \"=== tui.js:149 fullRedraws, 1050-1051 ===\"; sed -n '149p;1050,1051p' $TUI/tui.js"
+      },
+      {
+        "ts": "2026-08-09T08:11:31.512Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_4PgWMueDhSSs7ivZrIdO9356",
+        "command": "TUI=/usr/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui/dist; IM=/usr/lib/node_modules/@earendil-works/pi-coding-agent/dist/modes/interactive; echo \"=== interactive-mode.js:277,280 ===\"; sed -n '277p;280p' $IM/interactive-mode.js; echo; echo \"=== interactive-mode.js:1417,1447 ===\"; sed -n '1417p;1447p' $IM/interactive-mode.js; echo; echo \"=== interactive-mode.js:2311 ===\"; sed -n '2311p' $IM/interactive-mode.js; echo; echo \"=== loader.js:3,54,65 ===\"; sed -n '3p;54p;65p' $IM/components/loader.js; echo; echo \"=== status-indicator.js:1,5,15 ===\"; sed -n '1p;5p;15p' $IM/components/status-indicator.js; echo; echo \"=== text.js:39, markdown.js:77 ===\"; sed -n '39p' $IM/components/text.js; sed -n '77p' $IM/components/markdown.js; echo; echo \"=== settings-manager.js:784,789 ===\"; sed -n '784p;789p' $IM/../core/settings-manager.js 2>/dev/null || find /usr/lib/node_modules/@earendil-works/pi-coding-agent/dist -name settings-manager.js | head -2"
+      },
+      {
+        "ts": "2026-08-09T08:11:31.559Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_jsOqlfu5EyAU4fWBHMUR0997",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:31.581Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_4PgWMueDhSSs7ivZrIdO9356",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:35.944Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_5B1W5ZLbpSDNCXqzTCBz8885",
+        "command": "TUI=/usr/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui/dist; echo \"=== find loader/text/markdown ===\"; find /usr/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui -name 'loader.js' -o -name 'text.js' -o -name 'markdown.js' 2>/dev/null; echo; echo \"=== loader.js:3,54,65 in pi-tui ===\"; L=$(find /usr/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui -name 'loader.js' | head -1); sed -n '3p;54p;65p' \"$L\"; echo; echo \"=== text.js:39 ===\"; T=$(find /usr/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui -name 'text.js' | head -1); sed -n '39p' \"$T\"; echo; echo \"=== markdown.js:77 ===\"; M=$(find /usr/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui -name 'markdown.js' | head -1); sed -n '77p' \"$M\"; echo; echo \"=== settings-manager.js:784,789 ===\"; sed -n '784p;789p' /usr/lib/node_modules/@earendil-works/pi-coding-agent/dist/core/settings-manager.js"
+      },
+      {
+        "ts": "2026-08-09T08:11:35.978Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_5B1W5ZLbpSDNCXqzTCBz8885",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:46.779Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ixDFCtqsMLSF2QIl7f393903",
+        "command": "echo \"=== settings.json ===\"; ls -la ~/.pi/agent/settings.json 2>/dev/null; jq -c '.terminal' ~/.pi/agent/settings.json 2>/dev/null || cat ~/.pi/agent/settings.json 2>/dev/null | head -20; echo; echo \"=== largest live session file ===\"; ls -la ~/.pi/agent/sessions/--data-repos-Pi-Coding-Agent--/2026-07-31T22-09-32-585Z_019fba39-b7a9-7800-8e1a-8d859101ca0f.jsonl 2>/dev/null || echo \"not present\"; echo; echo \"=== grok ===\"; ls -la ~/.grok/downloads/ 2>/dev/null | head; grep -E 'screen_mode|compact_mode|collapsed_edit_blocks|auto_cadence_enabled' ~/.grok/config.toml 2>/dev/null; echo; echo \"=== oh-my-pi / pi-acp ===\"; ls /usr/lib/node_modules/@oh-my-pi/ 2>/dev/null; ls /usr/lib/node_modules/pi-acp/ 2>/dev/null | head -5"
+      },
+      {
+        "ts": "2026-08-09T08:11:46.780Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_PmrROpJ5rPtKBnturHQL4247",
+        "command": "echo \"=== omp pi-tui src header ===\"; head -8 /usr/lib/node_modules/@oh-my-pi/pi-coding-agent/node_modules/@oh-my-pi/pi-tui/src/tui.ts 2>/dev/null || find /usr/lib/node_modules/@oh-my-pi -maxdepth 4 -name 'tui.ts' 2>/dev/null | head -3; echo; echo \"=== grok version ===\"; grok --version 2>/dev/null || echo \"grok not on PATH\"; echo; echo \"=== worktree check ===\"; ls -d /data/repos/Pi-Coding-Agent-wt-gddp-98c883d8b9144665b937446e918d695b 2>/dev/null || echo \"worktree not present (eval sandbox)\"; echo; echo \"=== pi-tui-bench scripts ===\"; ls /tmp/pi-tui-bench/ 2>/dev/null || echo \"no bench scripts in eval sandbox\""
+      },
+      {
+        "ts": "2026-08-09T08:11:46.805Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_PmrROpJ5rPtKBnturHQL4247",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:46.816Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ixDFCtqsMLSF2QIl7f393903",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:51.397Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_DYrRY3tlP3CJOOLznwN56570",
+        "command": "echo \"=== ~/.pi ===\"; ls -la ~/.pi 2>/dev/null | head -20 || echo \"no ~/.pi\"; echo; echo \"=== settings.json search ===\"; find ~/.pi -maxdepth 2 -name 'settings.json' 2>/dev/null; find /home/sab-mini -maxdepth 3 -name 'settings.json' -path '*/.pi/*' 2>/dev/null | head -3; echo; echo \"=== ~/.grok ===\"; ls -la ~/.grok 2>/dev/null | head -15 || echo \"no ~/.grok\"; echo; echo \"=== whoami/home ===\"; whoami; echo $HOME"
+      },
+      {
+        "ts": "2026-08-09T08:11:51.455Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_DYrRY3tlP3CJOOLznwN56570",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:55.140Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_MIe5ubu0odBjxqt61OSe0151",
+        "command": "echo \"=== real settings.json ===\"; jq -c '.terminal' /home/sab-mini/.pi/agent/settings.json 2>/dev/null || head -30 /home/sab-mini/.pi/agent/settings.json 2>/dev/null || echo \"no settings.json\"; echo; echo \"=== live session ===\"; ls -la \"/home/sab-mini/.pi/agent/sessions/--data-repos-Pi-Coding-Agent--/2026-07-31T22-09-32-585Z_019fba39-b7a9-7800-8e1a-8d859101ca0f.jsonl\" 2>/dev/null || echo \"session file not present\"; echo; echo \"=== grok ===\"; ls -la /home/sab-mini/.grok/downloads/ 2>/dev/null | head -5; grep -E 'screen_mode|compact_mode|collapsed_edit_blocks|auto_cadence_enabled' /home/sab-mini/.grok/config.toml 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-09T08:11:55.141Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_01_SJVafkLkIJvuIdQ47wTo9354",
+        "reason": "command matched blocked pattern",
+        "command": "echo \"=== npm global inventory (real host) ===\"; ls /usr/lib/node_modules/ | head -30; echo; echo \"=== my-pi-hybrid search ===\"; ls -d /home/sab-mini/my-pi-hybrid /data/repos/my-pi-hybrid /home/sab-mini/repos/my-pi-hybrid 2>/dev/null || echo \"my-pi-hybrid not present (matches report §4.3)\"",
+        "pattern": "\\b(?:curl|wget|ssh|scp|sftp|rsync|nc|netcat|telnet|ftp|pip|npm|pnpm|yarn|brew)\\b"
+      },
+      {
+        "ts": "2026-08-09T08:11:55.141Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_SJVafkLkIJvuIdQ47wTo9354",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-09T08:11:55.165Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_MIe5ubu0odBjxqt61OSe0151",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:11:59.973Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_eI3YNbSoVIQjwa5qPQYB9065",
+        "command": "echo \"=== record count of largest session ===\"; grep -c '\"type\"' \"/home/sab-mini/.pi/agent/sessions/--data-repos-Pi-Coding-Agent--/2026-07-31T22-09-32-585Z_019fba39-b7a9-7800-8e1a-8d859101ca0f.jsonl\" 2>/dev/null; wc -l \"/home/sab-mini/.pi/agent/sessions/--data-repos-Pi-Coding-Agent--/2026-07-31T22-09-32-585Z_019fba39-b7a9-7800-8e1a-8d859101ca0f.jsonl\"; echo; echo \"=== global packages (ls) ===\"; ls /usr/lib/node_modules/ 2>/dev/null; echo; echo \"=== my-pi-hybrid ===\"; ls -d /home/sab-mini/my-pi-hybrid /data/repos/my-pi-hybrid /home/sab-mini/repos/my-pi-hybrid 2>/dev/null || echo \"not present\""
+      },
+      {
+        "ts": "2026-08-09T08:11:59.995Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_eI3YNbSoVIQjwa5qPQYB9065",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:12:26.085Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_zrcXjSP2OrdkMLGhd41M5277",
+        "command": "cd /tmp/gddp-eval-wt-phbn8t81 && echo \"=== herdr imports ===\"; grep -n 'pi-ai\\|@mariozechner\\|@earendil' agent/extensions/herdr/mux.ts agent/extensions/herdr-boss/index.ts agent/extensions/herdr-room/index.ts 2>/dev/null | head -8; echo; echo \"=== answer-noise-trim 314,346,357,368 / mutation-confirm 415 ===\"; sed -n '314p' agent/extensions/answer-noise-trim.ts; sed -n '415p' agent/extensions/mutation-confirm.ts; echo; echo \"=== PI_DEBUG_REDRAW / PI_TUI_WRITE_LOG refs ===\"; grep -rn 'PI_DEBUG_REDRAW\\|PI_TUI_WRITE_LOG' --include='*.md' --include='*.js' --include='*.ts' . 2>/dev/null | grep -v node_modules | head -6"
+      },
+      {
+        "ts": "2026-08-09T08:12:26.085Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_AE2KGlBgf4rjOEvIhBwe2672",
+        "command": "echo \"=== pi --help export/rpc (report §4.2/§5 claims) ===\"; pi --help 2>/dev/null | grep -iE 'export|rpc|mode' | head -8; echo; echo \"=== tui.js alt-screen check (grep 1049) ===\"; grep -c '1049' /usr/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui/dist/tui.js; echo; echo \"=== pi-tool-display archived + replacements not installed ===\"; ls /usr/lib/node_modules/ | grep -iE 'pi-claude-style|pi-minimal' || echo \"replacements not installed (matches F8)\""
+      },
+      {
+        "ts": "2026-08-09T08:12:26.123Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_zrcXjSP2OrdkMLGhd41M5277",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:12:27.911Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_AE2KGlBgf4rjOEvIhBwe2672",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-09T08:12:47.554Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_jeP5JfrnpucvQ5ampsvv9201",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "node-04-tui-execute will need AC-4/AC-5 to touch ~/.pi/agent/settings.json (clearOnShrink=false), which lives outside the graph's allowed_repos (/home/sab-mini/Pi-Coding-Agent). Execution policy needs a carve-out or the operator applies the host-config edit manually; also AC-1 (committed Tier-1 harness) is the linchpin — land it first so the execute node does not depend on the /tmp/pi-tui-bench scripts this audit left outside the repo (the report already anticipates this: 'until it exists, the /tmp scripts reproduce every number here').",
+        "affected_node_ids": [
+          "node-04-tui-execute"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The eval subject-diff range df4642e..df2932c spans two nodes' commits (subagents-audit.md from node-01, tui-audit.md from node-03) because sibling audit commits share the wrapper-commit lineage (git add -A). Graph-level verification of node-01 and node-03 result refs should treat the other report's presence in the range as expected, not a violation.",
+        "affected_node_ids": [
+          "node-01-subagents-audit",
+          "node-03-tui-audit"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9500000000000001,
+  "criteria_confidence": 0.9500000000000001,
+  "completeness": 1.0,
+  "graph_readiness": 0.9500000000000001,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "report-exists",
+        "criterion": "reports/pi-harness-execution/tui-audit.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "tui\\-audit -> line 3: 'tui-audit'"
+        ],
+        "reasoning": "Scanned source files (reports/pi-harness-execution/tui-audit.md) for identifiers named in the criterion (pi-harness-execution, tui-audit, non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "evidence-cited",
+        "criterion": "every finding cites a file:line or command output from the live harness",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "acceptance-criteria-included",
+        "criterion": "report concludes with actionable acceptance criteria for node-04-tui-execute",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (node-04-tui-execute). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Read-only: do not modify the harness; the only new file is the report under reports/pi-harness-execution/",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Verify every claim against the live checkout before writing it",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node's result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/pi-harness-execution/tui-audit.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "df4642ec1e4661a333b660fa05643792f43799d6",
+      "tip": "df2932c9e220dfa3d4af7ef7d7b121ef0be3d46a",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/pi-harness-execution/subagents-audit.md"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-harness-execution/tui-audit.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 2,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 1.0,
+        "evidence": [
+          "reports/pi-harness-execution/tui-audit.md exists: 583 lines, 34,806 bytes",
+          "wc -l reports/pi-harness-execution/tui-audit.md -> 583",
+          "git show --stat df2932c: 1 file changed, 583 insertions(+)"
+        ],
+        "reasoning": "The required artifact exists at the exact path and is a substantial 583-line, ~34.8 KB document (title, scope/method, 8 findings, alternatives assessment, Grok comparison, adoption plan, gaps, and acceptance criteria). Non-empty requirement trivially satisfied."
+      },
+      {
+        "criterion_id": "evidence-cited",
+        "judgment": "judged_pass",
+        "confidence": 0.85,
+        "evidence": [
+          "Report contains ~80 file:line-style citations (grep -cE '\\.(js|ts|md|sh|toml|py):[0-9]+' = 80) plus multiple verbatim command outputs",
+          "Spot-verified in-repo anchors all accurate: docs/pi-tui-perf-test-scope.md:8/:25/:145-146 (metrics sink / Tier 1 / node --test acceptance); harness/tui/app.py:19 (textual import) and :347 (_refresh_display); harness/bin/pi-hub-tui:11 (REQ), :18 (import textual gate); .gitignore:38 (requirements.txt); harness/pi-hub-rs/Cargo.toml:15-16 (crossterm 0.28, ratatui 0.29); harness/tests/pi-hub-rs-launcher-smoke.sh:15-23 (empty Cargo.toml/main.rs, fake bin); agent/extensions/pi-tool-display/ARCHIVED.md:3/:9/:29; agents/orchestrator/dispatch-routing.md:53/:88; docs/IMPLEMENTATION-PLAN.md:51/:59/:60/:148 (my-pi-hybrid refs + broken ../my-pi-hybrid links)",
+          "F8 line anchors verified exactly: advisor-mode.ts:178 (setStatus), :187 (setWidget); answer-noise-trim.ts:314/:346/:357/:368 (setStatus calls); mutation-confirm.ts:415 (setStatus); browse.ts:227 (tui.requestRender()); herdr/mux.ts:7 (HERDR_BIN)",
+          "Command-output claims verified: ls harness/tests matches all 15 files listed in F7; find .github shows only ISSUE_TEMPLATE files; git log --oneline -- docs/pi-tui-perf-test-scope.md -> 0be3250 exactly as cited; rg PI_DEBUG_REDRAW|PI_TUI_WRITE_LOG matches only docs:91/:118",
+          "F1-F6 include benchmark tables from /tmp/pi-tui-bench/*.mjs plus live-host observations (~/.pi/agent/settings.json via jq, ~/.pi/agent/sessions/...jsonl transcript stats)"
+        ],
+        "reasoning": "Every numbered finding (F1-F8) cites file:line anchors and/or command/benchmark output from the live harness. The in-repo anchors and command outputs were independently spot-verified against this checkout and are accurate to the line. Confidence is 0.85 rather than 1.0 because the F1-F6 anchors pointing into the installed package (/usr/lib/node_modules/@earendil-works/...) and host-local paths (~/.pi/agent/sessions/, /tmp/pi-tui-bench/) cannot be re-verified from the eval worktree — they are plausible and internally consistent (quoted source excerpts, deterministic invariants like byte counts/fullRedrawCount flagged as portable vs VM-specific ms), but only a host-side check can confirm them. One minor naming discrepancy noted in a non-finding section (4.4 says '@mariozechner/pi-ai'; the actual import is '@mariozechner/pi-coding-agent'), which does not affect the findings' citation quality."
+      },
+      {
+        "criterion_id": "acceptance-criteria-included",
+        "judgment": "judged_pass",
+        "confidence": 1.0,
+        "evidence": [
+          "Section '## 8. Acceptance criteria for node-04-tui-execute' is the final section (line 489 through end of file at line 583; tail -5 shows AC-21 as last content)",
+          "21 checkbox items AC-1..AC-21 across sections A-H (Instrumentation/regression gate, Fix F3, Fix F2, Fix F1/F5, Fix F4, Alternatives posture, Grok parity, Contract hygiene)",
+          "Each item is independently checkable with concrete assertions, thresholds and anchors (e.g. AC-4 jq -c '.terminal' ~/.pi/agent/settings.json; AC-5 full_redraw_count delta 0 and ansi_bytes < 1024; AC-10 lines_generated ratio < 2; AC-14 full_redraw_count <= 2 on 10 resize burst)"
+        ],
+        "reasoning": "The report concludes with a dedicated acceptance-criteria section for the paired execute node node-04-tui-execute, containing 21 actionable, measurable, independently checkable items with file anchors and explicit today-vs-target values. This directly satisfies the criterion."
+      }
+    ],
+    "overall_reasoning": "Node-03-tui-audit's required artifact exists and is non-empty; every finding cites file:line anchors and/or command outputs from the live harness (the in-repo citations and command-output claims were spot-verified against this checkout and are accurate); and the report concludes with 21 actionable, independently checkable acceptance criteria for node-04-tui-execute. The read-only constraint holds for this node's commit (df2932c adds exactly reports/pi-harness-execution/tui-audit.md, 583 insertions; subagents-audit.md belongs to the separate node-01 commit b6684c7, which is why the base-to-tip diff lists both). The commit exists as the checkout tip with a node-appropriate message, consistent with the executor contract. Remaining uncertainty is confined to anchors that point at the installed package (/usr/lib/node_modules) and host-local paths (~/.pi, /tmp/pi-tui-bench) that only a host-side run can re-verify; the report is transparent about this layout and about which measurements are VM-specific. All three acceptance criteria judged pass.",
+    "risks": "1) F1-F6 evidence anchors point primarily at the installed runtime /usr/lib/node_modules/@earendil-works/pi-coding-agent/dist/... (v0.83.0) and host-local files (~/.pi/agent/sessions/..., /tmp/pi-tui-bench/*.mjs), which are not present in the repo or the eval worktree; only a run on the actual host can confirm those line numbers, byte counts, and the 71,184-line transcript claim. 2) Minor naming discrepancy: §4.4 says herdr extensions import '@mariozechner/pi-ai', but the actual import (agent/extensions/herdr/mux.ts:5) is '@mariozechner/pi-coding-agent' — substance (non-@earendil-works import) holds but the package name is misquoted. 3) The eval worktree is a detached-HEAD copy at the tip commit; whether the commit was pushed to the node's named result ref (gddp/98c883d8...) cannot be verified here (no network), though the commit itself exists with the correct message and report-only diff.",
+    "followup_candidates": "Observed: all in-repo file:line citations and command-output claims in the report were independently verified as accurate against the live checkout. Not counted toward the verdict beyond the evidence-cited criterion. Two clarifications for the human: (a) Criterion 'evidence-cited' says 'from the live harness' — the report's F1-F6 anchors are against the installed npm package (/usr/lib/node_modules/@earendil-works/...) rather than the repo checkout's own TUI surfaces (harness/pi-hub-rs, harness/tui are dashboards, not the interactive TUI). Is installed-runtime evidence the intended meaning of 'live harness'? If strict repo-checkout-only evidence was intended, those anchors would need re-pointing; if installed-runtime is fine, the criterion is fully met. (b) Minor: report §4.4 writes the herdr import as '@mariozechner/pi-ai' while the source says '@mariozechner/pi-coding-agent' — worth a one-line correction for report hygiene.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-09T08:08:52.882Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_dubzaAUnWXuhS5wfK5a25103",
+          "path": "/tmp/gddp-eval-wt-phbn8t81/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-09T08:08:52.883Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_Rcfnq5tSDRQwmlsFOw4d6520",
+          "path": "/tmp/gddp-eval-wt-phbn8t81/README.md"
+        },
+        {
+          "ts": "2026-08-09T08:08:52.885Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_4Jquus5tN9zEXWlrIg9H3463",
+          "command": "ls -la /tmp/gddp-eval-wt-phbn8t81/ && find /tmp/gddp-eval-wt-phbn8t81 -maxdepth 3 -type d | head -50"
+        },
+        {
+          "ts": "2026-08-09T08:08:52.899Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_dubzaAUnWXuhS5wfK5a25103",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:08:52.900Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Rcfnq5tSDRQwmlsFOw4d6520",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:08:52.909Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_4Jquus5tN9zEXWlrIg9H3463",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:08:54.596Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_0ldNQXdQDbWOzmg3nCh06891",
+          "path": "/tmp/gddp-eval-wt-phbn8t81/reports/pi-harness-execution/tui-audit.md"
+        },
+        {
+          "ts": "2026-08-09T08:08:54.597Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_7q0wGq4q1cJm4ujSP9aX1966",
+          "command": "cd /tmp/gddp-eval-wt-phbn8t81 && ls -la reports/pi-harness-execution/ && wc -l reports/pi-harness-execution/*.md && git log --oneline -5 2>/dev/null; git status --short 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-09T08:08:54.604Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_0ldNQXdQDbWOzmg3nCh06891",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:08:54.897Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_7q0wGq4q1cJm4ujSP9aX1966",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:10.436Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_LoDIL96ZUzGULlhJgrSs7884",
+          "command": "cd /tmp/gddp-eval-wt-phbn8t81 && echo \"=== docs/pi-tui-perf-test-scope.md lines 5-30, 140-150 ===\" && sed -n '5,30p' docs/pi-tui-perf-test-scope.md && echo \"...\" && sed -n '140,150p' docs/pi-tui-perf-test-scope.md"
+        },
+        {
+          "ts": "2026-08-09T08:09:10.436Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_dprr9oagDPRTmy2BSXXp3606",
+          "command": "cd /tmp/gddp-eval-wt-phbn8t81 && echo \"=== harness/tui/ ===\" && ls -la harness/tui/ && echo \"=== .gitignore line 38 ===\" && sed -n '36,40p' .gitignore && echo \"=== harness/pi-hub-rs/Cargo.toml lines 12-18 ===\" && sed -n '12,18p' harness/pi-hub-rs/Cargo.toml"
+        },
+        {
+          "ts": "2026-08-09T08:09:10.448Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_LoDIL96ZUzGULlhJgrSs7884",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:10.453Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_dprr9oagDPRTmy2BSXXp3606",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:16.501Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_ar7VPzuOLyeUqYwCbaQj8254",
+          "reason": "command matched blocked pattern",
+          "command": "cd /tmp/gddp-eval-wt-phbn8t81 && echo \"=== pi-tui-perf-test-scope.md lines 22-28 and 143-148 ===\" && awk 'NR==22||NR==23||NR==24||NR==25||NR==26||NR==27||NR==28' docs/pi-tui-perf-test-scope.md && echo \"---\" && awk 'NR>=143 && NR<=148' docs/pi-tui-perf-test-scope.md && echo \"=== harness/bin/pi-hub-tui lines 8-26 ===\" && sed -n '8,26p' harness/bin/pi-hub-tui && echo \"=== harness/tests/pi-hub-rs-launcher-smoke.sh lines 12-24 ===\" && sed -n '12,24p' harness/tests/pi-hub-rs-launcher-smoke.sh",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-09T08:09:16.502Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ar7VPzuOLyeUqYwCbaQj8254",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-09T08:09:16.502Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_V2ZUlpsJI9EMsRb88MIg6234",
+          "command": "cd /tmp/gddp-eval-wt-phbn8t81 && echo \"=== ARCHIVED.md lines 1-12 and 27-31 ===\" && sed -n '1,12p' agent/extensions/pi-tool-display/ARCHIVED.md && echo \"---\" && sed -n '27,31p' agent/extensions/pi-tool-display/ARCHIVED.md && echo \"=== dispatch-routing.md lines 50-56, 85-90 ===\" && sed -n '50,56p' agents/orchestrator/dispatch-routing.md && echo \"---\" && sed -n '85,90p' agents/orchestrator/dispatch-routing.md && echo \"=== IMPLEMENTATION-PLAN.md lines 49-62, 146-150 ===\" && sed -n '49,62p' docs/IMPLEMENTATION-PLAN.md && echo \"---\" && sed -n '146,150p' docs/IMPLEMENTATION-PLAN.md"
+        },
+        {
+          "ts": "2026-08-09T08:09:16.520Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_V2ZUlpsJI9EMsRb88MIg6234",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:27.017Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_DiEa5MsA5yXDnlaPEHr72062",
+          "command": "cd /tmp/gddp-eval-wt-phbn8t81 && sed -n '22,28p' docs/pi-tui-perf-test-scope.md && echo '---143-148---' && sed -n '143,148p' docs/pi-tui-perf-test-scope.md && echo '=== pi-hub-tui 8-26 ===' && sed -n '8,26p' harness/bin/pi-hub-tui && echo '=== launcher-smoke 12-24 ===' && sed -n '12,24p' harness/tests/pi-hub-rs-launcher-smoke.sh"
+        },
+        {
+          "ts": "2026-08-09T08:09:27.017Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_RMUkyp3fWclqBNgAF7cw6420",
+          "command": "cd /tmp/gddp-eval-wt-phbn8t81 && echo '=== harness/tests listing ===' && ls harness/tests && echo '=== .github tree ===' && find .github -type f | sort && echo '=== harness/tui/app.py:15-22 ===' && sed -n '15,22p' harness/tui/app.py && echo '=== app.py:345-349 ===' && sed -n '345,349p' harness/tui/app.py"
+        },
+        {
+          "ts": "2026-08-09T08:09:27.036Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_DiEa5MsA5yXDnlaPEHr72062",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:27.039Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_RMUkyp3fWclqBNgAF7cw6420",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:44.286Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_QibVU2qJRgalJvox8JWG5625",
+          "command": "cd /tmp/gddp-eval-wt-phbn8t81 && echo '=== herdr/mux.ts:1-15 ===' && sed -n '1,15p' agent/extensions/herdr/mux.ts && echo '=== advisor-mode.ts 175-190 ===' && sed -n '175,190p' agent/extensions/advisor-mode.ts && echo '=== answer-noise-trim.ts 310-370 ===' && sed -n '310,370p' agent/extensions/answer-noise-trim.ts | grep -n 'setStatus\\|setWidget' "
+        },
+        {
+          "ts": "2026-08-09T08:09:44.286Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_xMi5f8IrvhGNGjb4v87d9259",
+          "command": "cd /tmp/gddp-eval-wt-phbn8t81 && echo '=== mutation-confirm.ts around 410-420 ===' && sed -n '410,420p' agent/extensions/mutation-confirm.ts && echo '=== browse.ts around 220-230 ===' && sed -n '220,230p' agent/extensions/browse.ts && echo '=== git log for scope doc ===' && git log --oneline -5 -- docs/pi-tui-perf-test-scope.md && echo '=== rg PI_DEBUG_REDRAW / PI_TUI_WRITE_LOG ===' && grep -rn 'PI_DEBUG_REDRAW\\|PI_TUI_WRITE_LOG' --include='*.md' --include='*.ts' --include='*.js' --include='*.mjs' . 2>/dev/null | head -10"
+        },
+        {
+          "ts": "2026-08-09T08:09:44.303Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_QibVU2qJRgalJvox8JWG5625",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:09:44.325Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_xMi5f8IrvhGNGjb4v87d9259",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:10:03.175Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Pqp2yF19k088LgpiPfDO7549",
+          "command": "cd /tmp/gddp-eval-wt-phbn8t81 && echo '=== branch ===' && git branch --show-current 2>/dev/null && echo '=== tui-audit commit stat ===' && git show --stat df2932c --format='%H%n%s' | head -12 && echo '=== files changed in tui commit ===' && git diff-tree --no-commit-id --name-only -r df2932c && echo '=== tail of report ===' && tail -5 reports/pi-harness-execution/tui-audit.md && echo '=== head of report ===' && head -3 reports/pi-harness-execution/tui-audit.md"
+        },
+        {
+          "ts": "2026-08-09T08:10:03.176Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_oI2d5sLlAAA2w4UVePiQ4885",
+          "command": "cd /tmp/gddp-eval-wt-phbn8t81 && echo '=== section 8 headings ===' && grep -n '^## ' reports/pi-harness-execution/tui-audit.md && echo '=== AC items count ===' && grep -c 'AC-[0-9]*' reports/pi-harness-execution/tui-audit.md && echo '=== file:line citations in findings (sample count) ===' && grep -cE '\\.(js|ts|md|sh|toml|py):[0-9]+' reports/pi-harness-execution/tui-audit.md"
+        },
+        {
+          "ts": "2026-08-09T08:10:03.194Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_oI2d5sLlAAA2w4UVePiQ4885",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:10:03.198Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Pqp2yF19k088LgpiPfDO7549",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:10:08.366Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_W8h79lykL2PaxYkaXhVY1847",
+          "command": "cd /tmp/gddp-eval-wt-phbn8t81 && cat .git && echo '=== HEAD ===' && git rev-parse HEAD && git symbolic-ref HEAD 2>&1 | head -2 && echo '=== git status ===' && git status --short | head -10 && echo '=== worktree status ===' && git status | head -5"
+        },
+        {
+          "ts": "2026-08-09T08:10:08.402Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_W8h79lykL2PaxYkaXhVY1847",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-09T08:10:37.041Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_hn4WBdjL70z5AdLbHZvi9122",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node-03-tui-audit's required artifact exists and is non-empty; every finding cites file:line anchors and/or command outputs from the live harness (the in-repo citations and command-output claims were spot-verified against this checkout and are accurate); and the report concludes with 21 actionable, independently checkable acceptance criteria for node-04-tui-execute. The read-only constraint holds for this node's commit (df2932c adds exactly reports/pi-harness-execution/tui-audit.md, 583 insertions; subagents-audit.md belongs to the separate node-01 commit b6684c7, which is why the base-to-tip diff lists both). The commit exists as the checkout tip with a node-appropriate message, consistent with the executor contract. Remaining uncertainty is confined to anchors that point at the installed package (/usr/lib/node_modules) and host-local paths (~/.pi, /tmp/pi-tui-bench) that only a host-side run can re-verify; the report is transparent about this layout and about which measurements are VM-specific. All three acceptance criteria judged pass.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-09T08:12:47.635457+00:00",
+  "evaluated_tree_sha": "b7670700dbc603f7d971854be27e1768c9e10d5b",
+  "evaluated_commit_sha": "df2932c9e220dfa3d4af7ef7d7b121ef0be3d46a",
+  "merge_commit_sha": "df2932c9e220dfa3d4af7ef7d7b121ef0be3d46a",
+  "expected_base_commit_sha": "df4642ec1e4661a333b660fa05643792f43799d6",
+  "pr_ref": null,
+  "job_id": "job_20260809T06513889815eb902c787",
+  "execution_attempt_id": "job_20260809T06513889815eb902c787:attempt:0",
+  "evidence_manifest_sha256": "1038764829446291ceeb5ad078b14f891e1ed4425a6d654763b2460beace18a1",
+  "mission_receipt_id": "mis_e5da4907:node-03-tui-audit:74a79b0b-71f9-48d9-aac5-e9583412d223",
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-phbn8t81/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-phbn8t81/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-phbn8t81/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-phbn8t81/README.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml"
+      ]
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/home/sab-mini/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml",
+        "/tmp/gddp-eval-wt-phbn8t81/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-phbn8t81/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "medium"
+  }
+}

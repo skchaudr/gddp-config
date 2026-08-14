@@ -1,0 +1,654 @@
+schema_type: node_evaluations
+schema_version: '1.0'
+project_id: skc-portfolio-migration
+generated_at: '2026-08-14T21:05:48Z'
+source: gddp-runtime db/queue.db (results + decision_results)
+evaluations:
+  node-02-briefs-import:
+    verdict: pass
+    evaluated_at: '2026-08-02T02:33:57.451583+00:00'
+    executor: local_subprocess
+    job_id: job_20260802T01322170998ea744e437
+    result_id: res_ses_20260802T0132217010c13881d1cb
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/skc-portfolio-migration/node-02-briefs-import/job_20260802T01322170998ea744e437-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Node-02-briefs-import''s role is to provide the four writing briefs (gddp, myapi,
+      pi-agent, dygma-raise) as in-repo context at briefs/ paths that downstream nodes 03-06 depend on.
+      The work under review does exactly that: the diff (base 9095968 → tip 5d2ae9f) adds only the 4 expected
+      files with 232 insertions and nothing else — no collateral changes to src/, content/, configs, or
+      other files that could affect dependents. I verified each file is byte-for-byte identical to its
+      source at /Users/sab-mini/repos/saboorkc.dev/briefs/, satisfying both constraints (copy from source,
+      preserve original markdown text). All four required_artifact paths exist in the working tree, and
+      each downstream neighbor (node-03, 04, 05, 06) references briefs/<name>-brief.md paths that all
+      resolve. Node-02 has no upstream dependencies (depends_on: []), so nothing upstream is violated.
+      The unlock contract is fully satisfied and the working tree is clean. Lane 1''s indeterminate keyword-scan
+      results are a methodology artifact (scanning src/ for markdown filenames), not evidence of missing
+      work — artifacts_present confirms all 4, and my direct read/diff verification corroborates. Intent
+      preserved, graph integrity preserved.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/skc-portfolio-migration/node-02-briefs-import/job_20260802T01322170998ea744e437-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.985
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: bbf8e9f05ada3a57e7f35831ec026bea7751768c
+      evaluated_commit_sha: 5d2ae9fd59ccadee3c380e8feeb79eff81e731e5
+      merge_commit_sha: 5d2ae9fd59ccadee3c380e8feeb79eff81e731e5
+      context_coverage:
+        criteria: none
+        integrity: low
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.93
+        findings: []
+        reasoning: 'Node-02-briefs-import''s role is to provide the four writing briefs (gddp, myapi,
+          pi-agent, dygma-raise) as in-repo context at briefs/ paths that downstream nodes 03-06 depend
+          on. The work under review does exactly that: the diff (base 9095968 → tip 5d2ae9f) adds only
+          the 4 expected files with 232 insertions and nothing else — no collateral changes to src/, content/,
+          configs, or other files that could affect dependents. I verified each file is byte-for-byte
+          identical to its source at /Users/sab-mini/repos/saboorkc.dev/briefs/, satisfying both constraints
+          (copy from source, preserve original markdown text). All four required_artifact paths exist
+          in the working tree, and each downstream neighbor (node-03, 04, 05, 06) references briefs/<name>-brief.md
+          paths that all resolve. Node-02 has no upstream dependencies (depends_on: []), so nothing upstream
+          is violated. The unlock contract is fully satisfied and the working tree is clean. Lane 1''s
+          indeterminate keyword-scan results are a methodology artifact (scanning src/ for markdown filenames),
+          not evidence of missing work — artifacts_present confirms all 4, and my direct read/diff verification
+          corroborates. Intent preserved, graph integrity preserved.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Downstream nodes 03 and 05 also depend on node-01-asset-sync for diagram SVGs (/images/gddp-dispatch-flow.svg,
+            /images/pi-agent-guardrail-engine.svg). Those assets come from a different node; worth confirming
+            node-01's artifacts land before 03/05 fire, though unrelated to this node's work.
+          affected_node_ids:
+          - node-03-project-mdx-gddp
+          - node-05-project-mdx-pi-agent
+          - node-01-asset-sync
+        - severity: low
+          summary: Briefs contain absolute-path voice references (e.g., /Users/saboor/repos/MyAPI-fuels-prime-Pi.md)
+            that downstream agents cannot resolve. This is inherited verbatim from source per the preserve-text
+            constraint, so not a defect here, but nodes 03-06 should treat briefs as tone/technical guidance
+            rather than resolvable paths.
+          affected_node_ids:
+          - node-03-project-mdx-gddp
+          - node-04-project-mdx-myapi
+          - node-05-project-mdx-pi-agent
+          - node-06-blog-mdx-dygma
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-01-asset-sync:
+    verdict: pass
+    evaluated_at: '2026-08-02T02:34:09.359181+00:00'
+    executor: local_subprocess
+    job_id: job_20260802T013221704d8e9fa5b61b
+    result_id: res_ses_20260802T0132217080af3ef40c8a
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/skc-portfolio-migration/node-01-asset-sync/job_20260802T013221704d8e9fa5b61b-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node-01-asset-sync. Node intent: ensure skc-new has all technical
+      SVG diagrams (GDDP dispatch flow, Pi Agent guardrail engine) and assets from saboorkc.dev, copied
+      verbatim, under public/images/. Verified directly in the repo: (1) both required artifacts exist
+      and are git-tracked under public/images/; (2) both are byte-identical (cmp clean) to their sources
+      in /Users/sab-mini/repos/saboorkc.dev/public/images/, satisfying the verbatim-copy constraint —
+      note gddp-dispatch-flow.svg pre-existed in base commit 9095968 but is identical to source, so no
+      gap; (3) both are well-formed SVG (xmllint clean) with proper <svg> structure; (4) the full base→tip
+      diff is exactly one added file (public/images/pi-agent-guardrail-engine.svg) with a clean working
+      tree — no out-of-repo edits, no unrelated changes, no leftover junk, honoring the ''do not edit
+      outside skc-new'' constraint. Graph integrity: node-01 unlocks node-03 (references /images/gddp-dispatch-flow.svg)
+      and node-05 (references /images/pi-agent-guardrail-engine.svg); both assets exist at public/images/
+      and will be served at /images/... root paths under TanStack Start static serving, so downstream
+      path expectations are met. Node-03/node-05 additionally block on node-02-briefs-import, which is
+      expected serialization, not a defect of this node. Acceptance-criteria status was ''indeterminate''
+      in lane 1 due to a source-scan method limitation, but that is lane 1''s concern; on the merits the
+      deliverables are present, correct, and verbatim. No intent drift, no graph harm.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/skc-portfolio-migration/node-01-asset-sync/job_20260802T013221704d8e9fa5b61b-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.97
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 93016b1533fc2e902c3be91b2d247d6a4b2d5e7d
+      evaluated_commit_sha: f6ca2d7841e0b0e914b2cb81450839b672ef47cd
+      merge_commit_sha: f6ca2d7841e0b0e914b2cb81450839b672ef47cd
+      context_coverage:
+        criteria: low
+        integrity: low
+        overall: low
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.92
+        findings: []
+        reasoning: 'Fresh-eyes review of node-01-asset-sync. Node intent: ensure skc-new has all technical
+          SVG diagrams (GDDP dispatch flow, Pi Agent guardrail engine) and assets from saboorkc.dev, copied
+          verbatim, under public/images/. Verified directly in the repo: (1) both required artifacts exist
+          and are git-tracked under public/images/; (2) both are byte-identical (cmp clean) to their sources
+          in /Users/sab-mini/repos/saboorkc.dev/public/images/, satisfying the verbatim-copy constraint
+          — note gddp-dispatch-flow.svg pre-existed in base commit 9095968 but is identical to source,
+          so no gap; (3) both are well-formed SVG (xmllint clean) with proper <svg> structure; (4) the
+          full base→tip diff is exactly one added file (public/images/pi-agent-guardrail-engine.svg) with
+          a clean working tree — no out-of-repo edits, no unrelated changes, no leftover junk, honoring
+          the ''do not edit outside skc-new'' constraint. Graph integrity: node-01 unlocks node-03 (references
+          /images/gddp-dispatch-flow.svg) and node-05 (references /images/pi-agent-guardrail-engine.svg);
+          both assets exist at public/images/ and will be served at /images/... root paths under TanStack
+          Start static serving, so downstream path expectations are met. Node-03/node-05 additionally
+          block on node-02-briefs-import, which is expected serialization, not a defect of this node.
+          Acceptance-criteria status was ''indeterminate'' in lane 1 due to a source-scan method limitation,
+          but that is lane 1''s concern; on the merits the deliverables are present, correct, and verbatim.
+          No intent drift, no graph harm.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Downstream nodes node-03-project-mdx-gddp and node-05-project-mdx-pi-agent reference
+            the copied SVGs via root-relative /images/... paths and also depend on node-02-briefs-import
+            (still pending). Once node-02 completes, both MDX nodes can fire in parallel; assets they
+            need are already in place, so no serialization risk beyond the planned briefs gate.
+          affected_node_ids:
+          - node-02-briefs-import
+          - node-03-project-mdx-gddp
+          - node-05-project-mdx-pi-agent
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-04-project-mdx-myapi:
+    verdict: fail
+    evaluated_at: '2026-08-02T04:08:19.338678+00:00'
+    executor: local_subprocess
+    job_id: job_20260802T0354124918637087465c
+    result_id: res_ses_20260802T03541883cb152f96129f
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/skc-portfolio-migration/node-04-project-mdx-myapi/job_20260802T0354124918637087465c-attempt1.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The work under review (commit 8d5180a) modifies only content/projects/myapi.mdx —
+      the node''s sole required artifact. The edits are squarely on-role: they tighten technical details
+      toward myapi-brief.md (retrieval.py corrected to exactly 1,383 lines matching the brief verbatim,
+      added Gemini enrichment pass and VM auto-shutdown-on-idle, both explicitly required in the brief''s
+      ''How it runs'' / ''Technical Details'' sections). The node''s why (MyAPI page reflects personal
+      search architecture, query classification, matches myapi-brief.md guidelines) is directly served;
+      frontmatter was untouched so the ''valid frontmatter'' constraint holds; no forbidden patterns;
+      no out-of-scope file edits. The [SAB — ...] placeholders left in the content map one-to-one to the
+      brief''s ''Questions Only You Can Answer'' section, which explicitly cannot be answered by an agent
+      without fabrication — so deferring them is brief-compliant, not a drift. Graph structure is intact:
+      depends_on/unlocks unchanged, and downstream node-08 (meta/OG/resume on __root.tsx) does not consume
+      myapi content, so no dependent is at risk from this change. The lane-1 indeterminate criteria (brief
+      path absent, no frontmatter probe) are acceptance-adjudication matters, not integrity defects of
+      this change; the real issue is upstream node-02 being provisional (briefs/ never landed), which
+      is why the in-repo criterion path is unsatisfiable — that belongs in graph observations, not this
+      verdict.'
+    evidence_refs:
+    - 'content/projects/myapi.mdx (HEAD 8d5180a): frontmatter + body; contains placeholder blockquotes
+      ''**[SAB — your origin moment goes here.]** ... This paragraph is the one I can''t write for you.''
+      and ''**[SAB — the brief asks for numbers you have and I don''t:]** ... VM spec and real monthly
+      cost.'''
+    - briefs/myapi-brief.md ABSENT from HEAD/main/working tree (git ls-tree -r HEAD|main | grep brief
+      -> none; git ls-files | grep -i brief -> none)
+    - Node-02 result branch gddp/result-job_...-node-02-briefs-import-attempt-0-5c0944...:briefs/myapi-brief.md
+      exists and is byte-identical (diff) to /Users/sab-mini/repos/saboorkc.dev/briefs/myapi-brief.md;
+      node-02 status provisional, branch unmerged
+    - 'git show 8d5180a (subject_diff): only content/projects/myapi.mdx modified; diff changed retrieval.py
+      ''~1,500 lines'' -> ''1,383 lines'' and added Gemini-1.5-Flash enrichment sentence'
+    - 'Source brief myapi-brief.md: ''Gemini API for embeddings/reranking'' vs MDX ''Gemini-1.5-Flash
+      handles the enrichment pass — batch-extracting tags, projects, key assertions, and summaries from
+      raw conversation logs'''
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/skc-portfolio-migration/node-04-project-mdx-myapi/job_20260802T0354124918637087465c-attempt1.json
+      verdict: fail
+      criteria_confidence: 0.30000000000000004
+      completeness_status: complete
+      required_next_action: Address semantic failures and re-submit.
+      evaluated_tree_sha: 235468996bf8c420bd4475474d8187147c558994
+      evaluated_commit_sha: 8d5180a482ad3bbefbc06d46fb22540a07bf939b
+      merge_commit_sha: 8d5180a482ad3bbefbc06d46fb22540a07bf939b
+      context_coverage:
+        criteria: none
+        integrity: low
+        overall: none
+      criteria_verdict: fail
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.72
+        findings: []
+        reasoning: 'The work under review (commit 8d5180a) modifies only content/projects/myapi.mdx —
+          the node''s sole required artifact. The edits are squarely on-role: they tighten technical details
+          toward myapi-brief.md (retrieval.py corrected to exactly 1,383 lines matching the brief verbatim,
+          added Gemini enrichment pass and VM auto-shutdown-on-idle, both explicitly required in the brief''s
+          ''How it runs'' / ''Technical Details'' sections). The node''s why (MyAPI page reflects personal
+          search architecture, query classification, matches myapi-brief.md guidelines) is directly served;
+          frontmatter was untouched so the ''valid frontmatter'' constraint holds; no forbidden patterns;
+          no out-of-scope file edits. The [SAB — ...] placeholders left in the content map one-to-one
+          to the brief''s ''Questions Only You Can Answer'' section, which explicitly cannot be answered
+          by an agent without fabrication — so deferring them is brief-compliant, not a drift. Graph structure
+          is intact: depends_on/unlocks unchanged, and downstream node-08 (meta/OG/resume on __root.tsx)
+          does not consume myapi content, so no dependent is at risk from this change. The lane-1 indeterminate
+          criteria (brief path absent, no frontmatter probe) are acceptance-adjudication matters, not
+          integrity defects of this change; the real issue is upstream node-02 being provisional (briefs/
+          never landed), which is why the in-repo criterion path is unsatisfiable — that belongs in graph
+          observations, not this verdict.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: medium
+          summary: node-02-briefs-import is provisional and briefs/ is absent in-repo, so node-04's criterion
+            path briefs/myapi-brief.md cannot be verified in-repo even though the content substantively
+            matches the source brief. The executor sourced the brief externally, but the graph's dependency
+            contract remains unfulfilled. Before treating node-04 as fully done and advancing node-08
+            on it, either land node-02 (port briefs/) or update the criterion path — otherwise an unverifiable
+            'done' accumulates in the frontier.
+          affected_node_ids:
+          - node-02-briefs-import
+          - node-04-project-mdx-myapi
+        - severity: low
+          summary: 'Downstream convergence: node-08 depends on node-03/04/05 but its acceptance criteria
+            target src/routes/__root.tsx only, so it is not blocked by provisional briefs/assets. However,
+            if node-02 and node-01 later land and force MDX rework, node-08''s meta work needn''t be redone
+            — low serialization risk.'
+          affected_node_ids:
+          - node-08-meta-seo-resume
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      criteria_findings:
+      - criterion_id: myapi-mdx-updated
+        judgment: judged_fail
+        evidence:
+        - 'content/projects/myapi.mdx (HEAD 8d5180a): frontmatter + body; contains placeholder blockquotes
+          ''**[SAB — your origin moment goes here.]** ... This paragraph is the one I can''t write for
+          you.'' and ''**[SAB — the brief asks for numbers you have and I don''t:]** ... VM spec and real
+          monthly cost.'''
+        - briefs/myapi-brief.md ABSENT from HEAD/main/working tree (git ls-tree -r HEAD|main | grep brief
+          -> none; git ls-files | grep -i brief -> none)
+        - Node-02 result branch gddp/result-job_...-node-02-briefs-import-attempt-0-5c0944...:briefs/myapi-brief.md
+          exists and is byte-identical (diff) to /Users/sab-mini/repos/saboorkc.dev/briefs/myapi-brief.md;
+          node-02 status provisional, branch unmerged
+        - 'git show 8d5180a (subject_diff): only content/projects/myapi.mdx modified; diff changed retrieval.py
+          ''~1,500 lines'' -> ''1,383 lines'' and added Gemini-1.5-Flash enrichment sentence'
+        - 'Source brief myapi-brief.md: ''Gemini API for embeddings/reranking'' vs MDX ''Gemini-1.5-Flash
+          handles the enrichment pass — batch-extracting tags, projects, key assertions, and summaries
+          from raw conversation logs'''
+        reasoning: 'The criterion''s ground-truth file (briefs/myapi-brief.md) does not exist in the deliverable
+          repo — the upstream dependency node-02 never landed (provisional; briefs only on unmerged gddp
+          branches), so in-repo alignment is unverifiable and the criterion''s reference is dangling.
+          Judged against the actual brief content (identical on the node-02 result branch, so it is the
+          definitive reference text): the MDX aligns with 6 of the 7 ''Technical Details to Include''
+          (context_refinery/ normalizer; retrieval.py at exactly 1,383 lines — the executor''s own edit;
+          three retrieval lanes; Khoj vector-search backbone; 7 diagnostic buckets; corpus v1 direction),
+          but one technical detail diverges (Gemini''s role: brief says embeddings/reranking, MDX says
+          enrichment pass) and the content retains two visible placeholder blockquotes covering the origin-moment
+          narrative and the metrics (query-bank size, cold-start improvement, VM spec/cost) that the brief''s
+          sections 1 and ''Questions Only You Can Answer'' explicitly require. The brief''s ''Format''
+          guidance expects finished prose, not placeholders. Substantial partial alignment exists, so
+          a human with the actual MyAPI repo may accept the Gemini description as a correction and fill
+          the placeholders — hence confidence is not high — but as submitted the criterion is not satisfied.'
+  node-06-blog-mdx-dygma:
+    verdict: needs-human-review
+    evaluated_at: '2026-08-02T04:25:59.534479+00:00'
+    executor: local_subprocess
+    job_id: job_20260802T035412499ce8b40eaac3
+    result_id: res_ses_20260802T035418843ae181e0d650
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/skc-portfolio-migration/node-06-blog-mdx-dygma/job_20260802T035412499ce8b40eaac3-attempt1.json
+    intent_preserved: false
+    graph_integrity_preserved: false
+    evaluator_note: 'Fresh-eyes review of node-06-blog-mdx-dygma. The content edit itself is in the right
+      artifact (content/blog/dygma-raise.mdx) and is a genuine improvement: it replaced AI-inferred, brief-flagged-as-possibly-wrong
+      details with the real system (F16 hyper key, three Raise layers, 40+ Hammerspoon bindings, indicator
+      dots) sourced from the in-repo 2-Week Documentation Review post, and frontmatter (title/description/tags/date)
+      is intact per the constraint. However, the node''s intended role — align the post with briefs/dygma-raise-brief.md,
+      which node-02-briefs-import was contracted to provide — was not preserved: the brief file does not
+      exist anywhere in the subject''s tree, node-02''s result sits on an unmerged side branch and remains
+      provisional, and the work instead aligned against an adjacent document while explicitly deferring
+      the brief''s personal-voice requirements to the human. That is a subtle but real veer from the node''s
+      stated purpose (drift), and the dependency edge in the graph was not honored in execution — the
+      frontier advanced node-06 (and its result was recorded) without node-02''s output folded in, leaving
+      the criterion unverifiable in-repo (consistent with lane-1''s indeterminate status and its open
+      question about whether the criterion path is stale or the implementation hasn''t landed). The change
+      harms nothing downstream — node-08''s depends_on does not include node-06 — but a human should look
+      before this result is accepted or propagated, and node-02''s briefs should be landed in the main
+      line first. This is a guardrail call: not a block (content is an improvement, not harmful), but
+      the intent and dependency contract are not intact as stated.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/skc-portfolio-migration/node-06-blog-mdx-dygma/job_20260802T035412499ce8b40eaac3-attempt1.json
+      verdict: needs-human-review
+      criteria_confidence: 0.3
+      completeness_status: partial
+      required_next_action: Integrity verdict 'drift' halts progression (criteria verdict was 'needs-more-evidence').
+        Human review required; no dependent node may dispatch on this node.
+      evaluated_tree_sha: 0b32a1bb8237a9300f03d05ba6c61391e110a07f
+      evaluated_commit_sha: d7adaaf3201e22235b16104ccee9805c7a5abe12
+      merge_commit_sha: d7adaaf3201e22235b16104ccee9805c7a5abe12
+      context_coverage:
+        criteria: none
+        integrity: low
+        overall: none
+      criteria_verdict: needs-more-evidence
+      integrity:
+        verdict: drift
+        intent_preserved: false
+        graph_integrity_preserved: false
+        required_human_review: true
+        confidence: 0.78
+        findings:
+        - severity: high
+          summary: Node-06 executed and produced a result while its declared dependency node-02-briefs-import
+            was provisional and its required input briefs/dygma-raise-brief.md is absent from the subject
+            tree (absent at base 9095968, tip d7adaaf, and in the working tree). Node-02's briefs result
+            (commit 8d54bcb, all 4 brief files) lives only on an unmerged side branch and is not an ancestor
+            of the tip. The node's primary criterion ('aligns with briefs/dygma-raise-brief.md') is therefore
+            unverifiable in-repo, and the execution bypassed the declared dependency edge.
+          affected_node_ids:
+          - node-06-blog-mdx-dygma
+          - node-02-briefs-import
+        - severity: medium
+          summary: The edit aligned the post with the sibling '2-Week Documentation Review' document (11-tailored-guides-review.mdx)
+            rather than the brief, and the AUTHOR NOTE left in the MDX defers the brief's core personal-voice
+            requirements (origin story, hard before/after numbers, date verification) to the human. The
+            result is a well-sourced draft, not the brief-aligned post the node's why ('matches dygma-raise-brief.md
+            guidelines for ergonomics and custom keymaps') promises.
+          affected_node_ids:
+          - node-06-blog-mdx-dygma
+        reasoning: 'Fresh-eyes review of node-06-blog-mdx-dygma. The content edit itself is in the right
+          artifact (content/blog/dygma-raise.mdx) and is a genuine improvement: it replaced AI-inferred,
+          brief-flagged-as-possibly-wrong details with the real system (F16 hyper key, three Raise layers,
+          40+ Hammerspoon bindings, indicator dots) sourced from the in-repo 2-Week Documentation Review
+          post, and frontmatter (title/description/tags/date) is intact per the constraint. However, the
+          node''s intended role — align the post with briefs/dygma-raise-brief.md, which node-02-briefs-import
+          was contracted to provide — was not preserved: the brief file does not exist anywhere in the
+          subject''s tree, node-02''s result sits on an unmerged side branch and remains provisional,
+          and the work instead aligned against an adjacent document while explicitly deferring the brief''s
+          personal-voice requirements to the human. That is a subtle but real veer from the node''s stated
+          purpose (drift), and the dependency edge in the graph was not honored in execution — the frontier
+          advanced node-06 (and its result was recorded) without node-02''s output folded in, leaving
+          the criterion unverifiable in-repo (consistent with lane-1''s indeterminate status and its open
+          question about whether the criterion path is stale or the implementation hasn''t landed). The
+          change harms nothing downstream — node-08''s depends_on does not include node-06 — but a human
+          should look before this result is accepted or propagated, and node-02''s briefs should be landed
+          in the main line first. This is a guardrail call: not a block (content is an improvement, not
+          harmful), but the intent and dependency contract are not intact as stated.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: medium
+          summary: 'Frontier sequencing risk: node-02-briefs-import''s result (all 4 briefs, commit 8d54bcb)
+            exists only on a side branch and is not merged into main; nodes 03/04/05 (also ''ready'' and
+            depending on node-02) likely face the same missing-briefs situation as node-06. Fold node-02''s
+            result into the main line and mark node-02 done before accepting downstream content results,
+            or the brief-alignment criteria across the content tier will remain unverifiable.'
+          affected_node_ids:
+          - node-02-briefs-import
+          - node-03-project-mdx-gddp
+          - node-04-project-mdx-myapi
+          - node-05-project-mdx-pi-agent
+          - node-06-blog-mdx-dygma
+        - severity: low
+          summary: 'Edge asymmetry: node-06 declares unlocks: [node-08-meta-seo-resume], but node-08''s
+            depends_on lists only node-03/04/05 and not node-06. If node-06 is meant to gate node-08,
+            node-08''s depends_on should be reconciled; otherwise node-06''s unlock claim is misleading
+            for frontier computation.'
+          affected_node_ids:
+          - node-06-blog-mdx-dygma
+          - node-08-meta-seo-resume
+      lane_status:
+        criteria: timed-out
+        integrity: completed
+      harness_error:
+        criteria: 'pi timed out after 1200s (preserved logs: stdout=/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-pi-stdout-m8xv0jyv
+          stderr=/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-pi-stderr-ips2hgxq)'
+        integrity: null
+  node-07-tanstack-vercel-preset:
+    verdict: needs-human-review
+    evaluated_at: '2026-08-02T11:05:08.366979+00:00'
+    executor: local_subprocess
+    job_id: job_20260802T103412209d09756760ad
+    result_id: res_ses_20260802T10341221e9334be1e885
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/skc-portfolio-migration/node-07-tanstack-vercel-preset/job_20260802T103412209d09756760ad-attempt0.json
+    intent_preserved: false
+    graph_integrity_preserved: false
+    evaluator_note: pi timed out after 1200s
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/skc-portfolio-migration/node-07-tanstack-vercel-preset/job_20260802T103412209d09756760ad-attempt0.json
+      verdict: needs-human-review
+      criteria_confidence: 0.875
+      completeness_status: complete
+      required_next_action: Integrity verdict 'unknown' halts progression (criteria verdict was 'pass').
+        Human review required; no dependent node may dispatch on this node.
+      evaluated_tree_sha: 5c3c4debdc6ed78e801b6e895eb1e490b2239751
+      evaluated_commit_sha: a2d5b632c30a6db15bb2b120004e35e369ac53ff
+      merge_commit_sha: a2d5b632c30a6db15bb2b120004e35e369ac53ff
+      context_coverage:
+        criteria: none
+        integrity: low
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: unknown
+        intent_preserved: false
+        graph_integrity_preserved: false
+        required_human_review: true
+        confidence: 0.0
+        findings: []
+        reasoning: pi timed out after 1200s
+        lane_status: timed-out
+        harness_error: 'pi timed out after 1200s (preserved logs: stdout=/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-integrity-stdout-8sk9m56r
+          stderr=/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-integrity-stderr-t1uvwgkn)'
+      lane_status:
+        criteria: completed
+        integrity: timed-out
+      harness_error:
+        criteria: null
+        integrity: 'pi timed out after 1200s (preserved logs: stdout=/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-integrity-stdout-8sk9m56r
+          stderr=/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-integrity-stderr-t1uvwgkn)'
+  node-03-project-mdx-gddp:
+    verdict: pass
+    evaluated_at: '2026-08-02T11:13:05.879213+00:00'
+    executor: local_subprocess
+    job_id: job_20260802T10341221c42401f4727e
+    result_id: res_ses_20260802T1044127494439f7b0bcf
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/skc-portfolio-migration/node-03-project-mdx-gddp/job_20260802T10341221c42401f4727e-attempt2.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node-03-project-mdx-gddp. The node''s role: polish content/projects/gddp.mdx
+      so the GDDP page reflects the architecture, includes the dispatch SVG diagram, and aligns with briefs/gddp-brief.md.
+      The subject diff (single file: content/projects/gddp.mdx) preserves and upgrades the diagram reference
+      (/images/gddp-dispatch-flow.svg, which resolves to public/images/gddp-dispatch-flow.svg — present,
+      tracked, well-formed SVG synced by node-01), and adds a brief-required technical detail (scripts/dry_run.py).
+      Graph integrity: both depends_on artifacts are present and tracked; the unlocked node (node-08-meta-seo-resume)
+      works on src/routes/__root.tsx and has no structural dependency on the MDX body or the img tag,
+      so nothing downstream is broken; no collateral changes to other nodes'' artifacts or config. Frontmatter
+      is unchanged and valid (constraint held). The change is on-target, not veering — the residual [SAB
+      — ...] markers correspond to brief items only the human can answer (origin story, usage numbers,
+      Pi-Agent origin), meaning the ''voice-aligned'' acceptance criterion is unfinished; that is lane
+      1''s domain and is already indeterminate with a human question queued. Because acceptance for this
+      node is genuinely gated on human answers (and the placeholders confirm the voice polish is incomplete),
+      required_human_review=true even though the integrity verdict is pass — a human should confirm the
+      copy is final before node-08 fires. The deterministic result''s ''absent'' claims (gddp.md, images/...
+      at root) are scanner path-resolution false negatives, not real absences; I verified the actual files
+      on disk. Confidence 0.85: the only residual uncertainty is rendering polish (Tailwind token classes
+      on the img), which does not affect graph integrity.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/skc-portfolio-migration/node-03-project-mdx-gddp/job_20260802T10341221c42401f4727e-attempt2.json
+      verdict: pass
+      criteria_confidence: 0.875
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: fc4a7688f85acba28289f96512fb3d19cd003f93
+      evaluated_commit_sha: 5946f4a086b4ea6e1c73769967be6562f0118a21
+      merge_commit_sha: 5946f4a086b4ea6e1c73769967be6562f0118a21
+      context_coverage:
+        criteria: low
+        integrity: low
+        overall: low
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: true
+        confidence: 0.85
+        findings: []
+        reasoning: 'Fresh-eyes review of node-03-project-mdx-gddp. The node''s role: polish content/projects/gddp.mdx
+          so the GDDP page reflects the architecture, includes the dispatch SVG diagram, and aligns with
+          briefs/gddp-brief.md. The subject diff (single file: content/projects/gddp.mdx) preserves and
+          upgrades the diagram reference (/images/gddp-dispatch-flow.svg, which resolves to public/images/gddp-dispatch-flow.svg
+          — present, tracked, well-formed SVG synced by node-01), and adds a brief-required technical
+          detail (scripts/dry_run.py). Graph integrity: both depends_on artifacts are present and tracked;
+          the unlocked node (node-08-meta-seo-resume) works on src/routes/__root.tsx and has no structural
+          dependency on the MDX body or the img tag, so nothing downstream is broken; no collateral changes
+          to other nodes'' artifacts or config. Frontmatter is unchanged and valid (constraint held).
+          The change is on-target, not veering — the residual [SAB — ...] markers correspond to brief
+          items only the human can answer (origin story, usage numbers, Pi-Agent origin), meaning the
+          ''voice-aligned'' acceptance criterion is unfinished; that is lane 1''s domain and is already
+          indeterminate with a human question queued. Because acceptance for this node is genuinely gated
+          on human answers (and the placeholders confirm the voice polish is incomplete), required_human_review=true
+          even though the integrity verdict is pass — a human should confirm the copy is final before
+          node-08 fires. The deterministic result''s ''absent'' claims (gddp.md, images/... at root) are
+          scanner path-resolution false negatives, not real absences; I verified the actual files on disk.
+          Confidence 0.85: the only residual uncertainty is rendering polish (Tailwind token classes on
+          the img), which does not affect graph integrity.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: medium
+          summary: Verification scanner reported false negatives for this node ('content/projects/gddp.md
+            absent', 'images/gddp-dispatch-flow.svg absent') because it resolved criterion paths literally
+            (`.md` instead of `.mdx`; root-relative `images/` instead of `public/images/`). The files
+            exist on disk and are git-tracked. Downstream verification nodes (e.g., node-09-build-lint-pass)
+            and any human re-check using the same scan output may be misled; the scan layer should resolve
+            artifact paths relative to repo root with the public/ prefix.
+          affected_node_ids:
+          - node-03-project-mdx-gddp
+          - node-09-build-lint-pass
+        - severity: low
+          summary: gddp.mdx retains three [SAB — ...] placeholder markers (origin story, real usage numbers,
+            Pi-Agent connection) that the brief explicitly reserves for the human author. Node-08 and
+            node-09 should not assume gddp.mdx is final copy; the voice-aligned criterion is pending human
+            input.
+          affected_node_ids:
+          - node-03-project-mdx-gddp
+          - node-08-meta-seo-resume
+          - node-09-build-lint-pass
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+    human_decision: 'manual_status_change: auth restored: plist re-rendered, executor model now zai/glm-5.2'
+  node-05-project-mdx-pi-agent:
+    verdict: needs-more-evidence
+    evaluated_at: '2026-08-02T11:38:59.138210+00:00'
+    executor: local_subprocess
+    job_id: job_20260802T111008608547300a2d30
+    result_id: res_ses_20260802T111008608e19e250a4d7
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/skc-portfolio-migration/node-05-project-mdx-pi-agent/job_20260802T111008608547300a2d30-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The node''s stated role — include the guardrail SVG diagram and align Pi Agent MDX
+      with the brief — is fully preserved. The diff adds the exact image reference (/images/pi-agent-guardrail-engine.svg)
+      and a paragraph on the deterministic guardrail pipeline that matches the brief''s ''harness as governance''
+      section (deterministic rules before execution, no model in the path, fails-closed DEFAULT-DENY).
+      Upstream assumptions hold: the SVG exists at public/images/pi-agent-guardrail-engine.svg (node-01)
+      and briefs/pi-agent-brief.md exists (node-02). The reference path follows the same root-relative
+      /images/ convention already used by node-03''s gddp.mdx, keeping the repo''s image handling consistent.
+      The change is strictly scoped (1 file, 4 insertions, frontmatter untouched), so the remark-mdx-frontmatter
+      constraint is honored and downstream node-08 (which edits src/routes/__root.tsx) is unaffected.
+      The lane-1 ''absent'' flags stem from scanner path-resolution quirks (.md vs .mdx, relative vs root-relative
+      paths), not missing implementation — an adjudication concern, not an integrity defect.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/skc-portfolio-migration/node-05-project-mdx-pi-agent/job_20260802T111008608547300a2d30-attempt0.json
+      verdict: needs-more-evidence
+      criteria_confidence: 0.35
+      completeness_status: partial
+      required_next_action: Re-run semantic investigation with sufficient budget.
+      evaluated_tree_sha: ce12c1c9072a0f5b8ac63e8738523036033f0d77
+      evaluated_commit_sha: 619da804d83e4fdbb3ad4620c4cd58e0d24db49b
+      merge_commit_sha: 619da804d83e4fdbb3ad4620c4cd58e0d24db49b
+      context_coverage:
+        criteria: none
+        integrity: low
+        overall: none
+      criteria_verdict: needs-more-evidence
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.92
+        findings: []
+        reasoning: 'The node''s stated role — include the guardrail SVG diagram and align Pi Agent MDX
+          with the brief — is fully preserved. The diff adds the exact image reference (/images/pi-agent-guardrail-engine.svg)
+          and a paragraph on the deterministic guardrail pipeline that matches the brief''s ''harness
+          as governance'' section (deterministic rules before execution, no model in the path, fails-closed
+          DEFAULT-DENY). Upstream assumptions hold: the SVG exists at public/images/pi-agent-guardrail-engine.svg
+          (node-01) and briefs/pi-agent-brief.md exists (node-02). The reference path follows the same
+          root-relative /images/ convention already used by node-03''s gddp.mdx, keeping the repo''s image
+          handling consistent. The change is strictly scoped (1 file, 4 insertions, frontmatter untouched),
+          so the remark-mdx-frontmatter constraint is honored and downstream node-08 (which edits src/routes/__root.tsx)
+          is unaffected. The lane-1 ''absent'' flags stem from scanner path-resolution quirks (.md vs
+          .mdx, relative vs root-relative paths), not missing implementation — an adjudication concern,
+          not an integrity defect.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: The deterministic verification scanner flagged 'images/pi-agent-guardrail-engine.svg
+            absent' and 'content/projects/pi-agent.md absent' despite the implementation landing (file
+            exists at public/images/, reference present in the .mdx). The scanner appears to resolve paths
+            relative to a different root and expects .md rather than .mdx. Upcoming sibling nodes (node-03,
+            node-04, node-06) use the same /images/ convention and brief-based criteria, so they may produce
+            the same false mismatches; verification tooling path handling should be watched, not the content.
+          affected_node_ids:
+          - node-05-project-mdx-pi-agent
+          - node-03-project-mdx-gddp
+          - node-04-project-mdx-myapi
+          - node-06-blog-mdx-dygma
+      lane_status:
+        criteria: timed-out
+        integrity: completed
+      harness_error:
+        criteria: 'pi timed out after 1200s (preserved logs: stdout=/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-pi-stdout-xlrphr85
+          stderr=/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-pi-stderr-jmnw8jry)'
+        integrity: null
+    human_decision: 'manual_status_change: auth restored: plist re-rendered, executor model now zai/glm-5.2'

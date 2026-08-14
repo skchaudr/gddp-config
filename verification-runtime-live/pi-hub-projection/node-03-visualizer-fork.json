@@ -1,0 +1,1182 @@
+{
+  "project_id": "pi-hub-projection",
+  "node_id": "node-03-visualizer-fork",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.85,
+    "findings": [],
+    "reasoning": "Node-03's intended role — fork the upstream SSSF visualizer as harness/apps/pi-hub-web against the new projection schema — is fully realized and the change preserves graph integrity. (1) Scope: the entire diff (52 added files) is confined to harness/apps/pi-hub-web/ and reports/pi-hub-projection/; zero files outside the allowed trees; pi-hub-rs and all existing harness components untouched; worktree clean. (2) Fork authenticity: LICENSE (MIT, Copyright 2026 IndyDevDan) retained, UPSTREAM.md records the pinned SHA de31374882e7a4e3e5b7bb9bd09e69dc2f779356 which exactly matches the graph's own pin, and the component set (SessionsList/SessionCard/SessionTrace/PhaseDetail/envelopes/gates) mirrors the upstream visualizer's noun structure. (3) The data-layer decision to read pi-hub.db directly (readonly + PRAGMA query_only) instead of node-02's cursor HTTP API is explicitly sanctioned by the node's own why (\"or directly to pi-hub.db read-only if simpler — decide and record why\") and is recorded with reasons in both the report and db.ts header — this is a documented, graph-sanctioned choice, not executor drift. Node-02's api.py was not modified (it does not exist in this worktree; node-02 remains provisional). (4) Localhost binding fixes the upstream omission: server, vite, and preview all bind 127.0.0.1 explicitly; non-loopback HOST is refused with exit 2; evidence (self-check.txt, bind.json with external-interface connection refusal, health.json showing bind host) supports it. (5) The app serves sessions and transitions from the projection with captured evidence, and the report includes fork provenance, adaptation notes, and run instructions. Node-03 unlocks nothing, so no downstream contract is at risk. Lane-1 indeterminate criteria (evidence sufficiency for app-exists/renders-our-data) are not re-adjudicated here; from an integrity standpoint the work matches the node's stated mandate and the graph's structure.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-06T20:08:39.394Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_mFZlBDh7gbmnfHwiHOO36137",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-03-visualizer-fork.yaml"
+      },
+      {
+        "ts": "2026-08-06T20:08:39.395Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_XXmp5Vne11odnZf0CYJI7394",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-02-localhost-api.yaml"
+      },
+      {
+        "ts": "2026-08-06T20:08:39.396Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_2aHYVKyB7IYABcgGyCHB9720",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-01-sqlite-projection.yaml"
+      },
+      {
+        "ts": "2026-08-06T20:08:39.396Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_SFtE2rUYPdJczpb6TB3q6915",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-06T20:08:39.402Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_mFZlBDh7gbmnfHwiHOO36137",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:08:39.403Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_2aHYVKyB7IYABcgGyCHB9720",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:08:39.403Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_XXmp5Vne11odnZf0CYJI7394",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:08:39.404Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_SFtE2rUYPdJczpb6TB3q6915",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:08:46.694Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_df2WZVKZENLH7Kotz0kZ1115",
+        "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/ && echo \"---\" && ls /Users/sab-mini/.pi 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-06T20:08:46.696Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_XqwU4rr02qSUBvVTrhgR6566",
+        "command": "cd /Users/sab-mini/.pi 2>/dev/null && git log --oneline -5 2>/dev/null; echo \"---status---\"; git status --short 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-06T20:08:46.726Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_df2WZVKZENLH7Kotz0kZ1115",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:08:46.843Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_XqwU4rr02qSUBvVTrhgR6566",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:08:51.111Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_EH6T8E00jcDgB1S8lHxT1082",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0 && cat .git && echo \"---\" && git log --oneline -8 2>/dev/null; echo \"---branches---\"; git branch -a 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-06T20:08:51.112Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_XBBgHzx8OJL0IHHjyQJj1241",
+        "command": "cd /Users/sab-mini/.pi && git log --oneline -3 106de218d76c21fc75c71f123b7733346327b52a 2>/dev/null; echo \"exit: $?\"; git cat-file -t 106de218d76c21fc75c71f123b7733346327b52a 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-06T20:08:51.168Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_XBBgHzx8OJL0IHHjyQJj1241",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:08:51.173Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_EH6T8E00jcDgB1S8lHxT1082",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:08:55.172Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_v1L1Mz3ED6dErAuOEH4r0521",
+        "command": "cd /Users/sab-mini/.pi && git diff --stat 68b2d5e..106de21 | tail -60"
+      },
+      {
+        "ts": "2026-08-06T20:08:55.173Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_aWAacb3VTFwWlSORNntv4306",
+        "command": "cd /Users/sab-mini/.pi && git diff --name-status 68b2d5e..106de21 | grep -v -E \"^(A|M)\\s+(harness/apps/pi-hub-web/|reports/pi-hub-projection/)\" | head -40"
+      },
+      {
+        "ts": "2026-08-06T20:08:55.224Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_aWAacb3VTFwWlSORNntv4306",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:08:55.234Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_v1L1Mz3ED6dErAuOEH4r0521",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:09:02.595Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_8bLZSvzyV7xTUr499Iml2058",
+        "path": "/Users/sab-mini/.pi/reports/pi-hub-projection/node-03-visualizer-fork.md"
+      },
+      {
+        "ts": "2026-08-06T20:09:02.597Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_8bLZSvzyV7xTUr499Iml2058",
+        "tool": "read",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-06T20:09:07.023Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_b5S6w8abVir8FwOEQ2U30947",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0 && ls reports/pi-hub-projection/ harness/apps/ 2>/dev/null && echo \"---report exists?---\" && ls -la reports/pi-hub-projection/node-03-visualizer-fork.md"
+      },
+      {
+        "ts": "2026-08-06T20:09:07.025Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_uJImV2jztZkuSmqkdahV8041",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0 && ls agent/observability/ 2>/dev/null; echo \"---db---\"; ls -la agent/observability/pi-hub.db 2>/dev/null; find . -name \"pi-hub.db\" -not -path \"./.git/*\" 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-06T20:09:07.055Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_b5S6w8abVir8FwOEQ2U30947",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:09:07.076Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_uJImV2jztZkuSmqkdahV8041",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:09:09.195Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_UcBEhJdZ9v1WYPj7X4z52395",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/reports/pi-hub-projection/node-03-visualizer-fork.md"
+      },
+      {
+        "ts": "2026-08-06T20:09:09.198Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_UcBEhJdZ9v1WYPj7X4z52395",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:09:28.311Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_MvwJjkGiy6TjkIHhzYTe2606",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/harness/apps/pi-hub-web/server/index.ts"
+      },
+      {
+        "ts": "2026-08-06T20:09:28.312Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_8nLE6qTpDOUm0KMbvoLR0681",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/harness/apps/pi-hub-web/LICENSE"
+      },
+      {
+        "ts": "2026-08-06T20:09:28.313Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_q6RsFGQ5Zdw4smjA4xsX4210",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/harness/apps/pi-hub-web/UPSTREAM.md"
+      },
+      {
+        "ts": "2026-08-06T20:09:28.317Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_MvwJjkGiy6TjkIHhzYTe2606",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:09:28.317Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_8nLE6qTpDOUm0KMbvoLR0681",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:09:28.317Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_q6RsFGQ5Zdw4smjA4xsX4210",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:09:32.515Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_1eQ7LSStF4meJ3q7RUe42067",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/harness/apps/pi-hub-web && head -80 server/db.ts && echo \"=== grep read-only ===\" && grep -n \"query_only\\|mode=ro\\|readonly\\|read_only\\|immutable\" server/db.ts | head -20"
+      },
+      {
+        "ts": "2026-08-06T20:09:32.516Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ztzp6P4u9DKPjtgakNax6688",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/harness/apps/pi-hub-web && cat package.json && echo \"=== self-check head ===\" && head -40 scripts/self-check.ts"
+      },
+      {
+        "ts": "2026-08-06T20:09:32.544Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ztzp6P4u9DKPjtgakNax6688",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:09:32.546Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_1eQ7LSStF4meJ3q7RUe42067",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:09:36.712Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_f59D8UZsqrusLzcMfXQy7813",
+        "command": "cd ~/repos/_reference/sssf 2>/dev/null && git rev-parse HEAD 2>/dev/null; git cat-file -t de31374882e7a4e3e5b7bb9bd09e69dc2f779356 2>/dev/null && echo \"SHA exists\"; ls .claude/skills/sssf/apps/ 2>/dev/null; ls .claude/skills/sssf/apps/visualizer 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-06T20:09:36.713Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_qgv4kJtLVzumOOzwxWfA7026",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/reports/pi-hub-projection/evidence-node-03 && for f in bind.json health.json self-check.txt server-bind.txt server-bind2.txt ui-headers.txt; do echo \"=== $f ===\"; head -25 \"$f\"; done"
+      },
+      {
+        "ts": "2026-08-06T20:09:36.765Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_qgv4kJtLVzumOOzwxWfA7026",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:09:36.772Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_f59D8UZsqrusLzcMfXQy7813",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:09:40.489Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_kRchEWuB3NrtAOP5gnYB6485",
+        "command": "ls -la ~/repos/_reference/ 2>/dev/null; echo \"---\"; ls ~/repos/_reference/sssf 2>/dev/null | head; echo \"exit: $?\""
+      },
+      {
+        "ts": "2026-08-06T20:09:40.490Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ZTuOWboFkSJ8Hx0Pp62Q0194",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0 && git log --format='%H %s' 68b2d5e..106de21 && echo \"=== diff between the two result commits ===\" && git diff --stat ce93bb9..106de21 | tail -5"
+      },
+      {
+        "ts": "2026-08-06T20:09:40.517Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_kRchEWuB3NrtAOP5gnYB6485",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:09:40.554Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ZTuOWboFkSJ8Hx0Pp62Q0194",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:10:02.768Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_uN87kHKXRFLGrBo0Dyzv0460",
+        "command": "find ~ -maxdepth 4 -iname \"*sssf*\" -not -path \"*/node_modules/*\" 2>/dev/null | head; echo \"---\"; find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T -maxdepth 2 -iname \"*sssf*\" 2>/dev/null | head; echo \"---gitignore---\"; cat /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/harness/apps/pi-hub-web/.gitignore"
+      },
+      {
+        "ts": "2026-08-06T20:10:02.769Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_qO89cJVgO2fl8I35PT5W5281",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/reports/pi-hub-projection/evidence-node-03 && echo \"=== sessions.json ===\" && python3 -c \"import json;d=json.load(open('sessions.json'));print(json.dumps(d,indent=1)[:800])\" 2>/dev/null; echo \"=== transitions.json ===\" && python3 -c \"import json;d=json.load(open('transitions.json'));print(json.dumps(d,indent=1)[:800])\" 2>/dev/null; echo \"=== events.json ===\" && python3 -c \"import json;d=json.load(open('events.json'));print(json.dumps(d,indent=1)[:600])\" 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-06T20:10:02.858Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_uN87kHKXRFLGrBo0Dyzv0460",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:10:02.943Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_qO89cJVgO2fl8I35PT5W5281",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:10:20.753Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_k8aTalPiZbXYTJZ8RXGv6021",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/harness/apps/pi-hub-web/vite.config.ts"
+      },
+      {
+        "ts": "2026-08-06T20:10:20.754Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_rmgetojtCiooMmDBfccg9377",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0 && echo \"=== any changes outside allowed trees in full diff? ===\" && git diff --name-status 68b2d5e..106de21 | awk '{print $1}' | sort | uniq -c && echo \"=== paths outside allowed ===\" && git diff --name-only 68b2d5e..106de21 | grep -v -E \"^(harness/apps/pi-hub-web/|reports/pi-hub-projection/)\" | wc -l && echo \"=== git status of worktree ===\" && git status --short | head"
+      },
+      {
+        "ts": "2026-08-06T20:10:20.757Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_k8aTalPiZbXYTJZ8RXGv6021",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:10:20.850Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_rmgetojtCiooMmDBfccg9377",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T20:10:50.331Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_gt0WmqpoVpNf2x0O7UJL6274",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "Node-03 reads pi-hub.db directly rather than through node-02's cursor API, bypassing node-02's proven secret-redaction layer for the visualizer surface. Today this is mitigated (read-only connection, prompts stubbed null, 127.0.0.1-only bind with external refusal verified), but when node-04 lands envelopes/gate_results containing ADW/receipt content, those endpoints will be served to the browser without node-02's redaction guarantees. If the operator wants the redaction property on the browser surface, a later node should route visualizer reads through the API or add redaction to db.ts. This is a graph-design tension (node-02's why says 'read through one API, not raw SQLite' vs node-03's why explicitly permitting direct read) created by the graph text itself; the executor followed its assigned node.",
+        "affected_node_ids": [
+          "node-03-visualizer-fork",
+          "node-02-localhost-api",
+          "node-04-receipts-ingestion"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The upstream reference tree ~/repos/_reference/sssf is absent on this host, so the fork provenance SHA cannot be re-verified against the live reference. The recorded SHA matches the graph's pinned SHA exactly and the artifact set is internally consistent, but a future provenance re-check or public release should confirm the fork genuinely derives from de313748.",
+        "affected_node_ids": [
+          "node-03-visualizer-fork"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Two result commits (ce93bb9 and 106de21) for the same job carry identical trees; harness wrapper noise, not a node-03 defect. Also, the git add -A note in the diff metadata concerns executor staging behavior (lane-1 constraint territory); the committed tree itself contains only the node's 52 intended files with node_modules/dist properly gitignored.",
+        "affected_node_ids": [
+          "node-03-visualizer-fork"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.89,
+  "criteria_confidence": 0.89,
+  "completeness": 1.0,
+  "graph_readiness": 0.89,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "app-exists",
+        "criterion": "harness/apps/pi-hub-web exists with the upstream visualizer forked and its LICENSE notice retained in the directory",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (pi-hub-web, LICENSE). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "localhost-bound",
+        "criterion": "any server component binds 127.0.0.1 explicitly (fix the upstream omission); report shows the bind configuration and evidence",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "renders-our-data",
+        "criterion": "the app serves at least sessions and transitions from our projection; report includes the queries/endpoints adapted and a rendered-output description or captured artifact",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (rendered-output). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "no-placeholder-tests",
+        "criterion": "any test/lint/build commands carried over from upstream that are placeholder echoes are either replaced with real commands or removed; report lists what was found and done",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "report-exists",
+        "criterion": "reports/pi-hub-projection/node-03-visualizer-fork.md exists with fork provenance (upstream SHA), adaptation notes, and run instructions",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "pi\\-hub\\-projection -> line 124: 'pi-hub-projection'",
+          "node\\-03\\-visualizer\\-fork -> line 1: 'node-03-visualizer-fork'",
+          "SHA -> line 25: 'SHA'"
+        ],
+        "reasoning": "Scanned source files (reports/pi-hub-projection/node-03-visualizer-fork.md) for identifiers named in the criterion (pi-hub-projection, node-03-visualizer-fork, SHA). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create and modify files only under harness/apps/pi-hub-web/ and reports/pi-hub-projection/",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "The upstream repo at ~/repos/_reference/sssf is read-only reference; never execute its installer or scripts",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Do not modify pi-hub-rs or any existing harness component",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Never run git add -A; stage only files this node created or changed",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node's result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/pi-hub-projection/node-03-visualizer-fork.md": true
+    },
+    "deps_status": {
+      "node-02-localhost-api": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "68b2d5e57a082e5f75cfeccd2beb958768e038d8",
+      "tip": "106de218d76c21fc75c71f123b7733346327b52a",
+      "files": [
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/.gitignore"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/.oxlintrc.json"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/LICENSE"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/UPSTREAM.md"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/bun.lock"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/index.html"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/package.json"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/public/logo.svg"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/public/models/claude.png"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/public/models/gemini.png"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/public/models/kimi.png"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/public/models/openai.png"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/public/models/zai.png"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/scripts/self-check.ts"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/server/db.ts"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/server/index.ts"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/shared/types.ts"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/App.vue"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/components/DetailSection.vue"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/components/PhaseDetail.vue"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/components/PhaseDots.vue"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/components/SessionCard.vue"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/components/SessionTrace.vue"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/components/SessionsList.vue"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/components/StatChip.vue"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/components/StatusChip.vue"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/lib/api.ts"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/lib/events.ts"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/lib/format.ts"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/lib/highlight.ts"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/lib/markdown.ts"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/lib/models.ts"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/lib/router.ts"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/lib/types.ts"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/main.ts"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/src/style.css"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/tsconfig.json"
+        },
+        {
+          "status": "A",
+          "path": "harness/apps/pi-hub-web/vite.config.ts"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-hub-projection/evidence-node-03/bind.json"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-hub-projection/evidence-node-03/events.json"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-hub-projection/evidence-node-03/health.json"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-hub-projection/evidence-node-03/self-check.txt"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-hub-projection/evidence-node-03/server-bind.txt"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-hub-projection/evidence-node-03/server-bind2.txt"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-hub-projection/evidence-node-03/server.txt"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-hub-projection/evidence-node-03/session-detail.json"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-hub-projection/evidence-node-03/sessions.json"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-hub-projection/evidence-node-03/summary.json"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-hub-projection/evidence-node-03/transitions.json"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-hub-projection/evidence-node-03/ui-headers.txt"
+        }
+      ],
+      "truncated": true,
+      "file_count": 52,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "app-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.8,
+        "evidence": [
+          "harness/apps/pi-hub-web/ tree (src/, server/, shared/, scripts/, public/, vite.config.ts, package.json, index.html)",
+          "harness/apps/pi-hub-web/LICENSE — MIT text, 'Copyright (c) 2026 IndyDevDan'",
+          "harness/apps/pi-hub-web/UPSTREAM.md — sha de31374882e7a4e3e5b7bb9bd09e69dc2f779356, path .claude/skills/sssf/apps/visualizer",
+          "reports/pi-hub-projection/node-03-visualizer-fork.md lines 20-32 (fork provenance table)",
+          "server/db.ts `export const SssfDb = PiHubDb` deprecated alias for upstream port continuity"
+        ],
+        "reasoning": "harness/apps/pi-hub-web exists as a complete Vue/Bun app with the MIT LICENSE notice retained in the directory and a provenance file recording the upstream SHA de31374882e7a4e3e5b7bb9bd09e69dc2f779356, which matches the graph blueprint's pinned de313748 and the node's why. Fork lineage is internally consistent (deprecated SssfDb alias, upstream script inventory, schema-mapping table). Caveat: the upstream repo ~/repos/_reference/sssf is host-local and not present in this eval sandbox, so byte-level correspondence and the 'IndyDevDan' copyright holder could not be cross-verified; no counter-evidence exists."
+      },
+      {
+        "criterion_id": "localhost-bound",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "server/index.ts resolveBindHost(): always returns '127.0.0.1'; refuses non-loopback HOST with process.exit(2)",
+          "server/index.ts Bun.serve({ hostname: BIND_HOST, port: PORT, ... })",
+          "vite.config.ts server.host='127.0.0.1', preview.host='127.0.0.1', proxy target http://127.0.0.1:$API_PORT",
+          "reports/pi-hub-projection/evidence-node-03/bind.json (loopback_ok=true, 192.168.1.186 Connection refused)",
+          "reports/pi-hub-projection/evidence-node-03/health.json (bind: {host:'127.0.0.1'})",
+          "reports/pi-hub-projection/evidence-node-03/self-check.txt (refuse_non_loopback, server_starts_loopback, bind_log_mentions_127, external_interface_refused all PASS)",
+          "report 'Localhost bind (fixes upstream omission)' section lines 90-155"
+        ],
+        "reasoning": "Every server path binds 127.0.0.1 explicitly: the Bun API server passes hostname=127.0.0.1 (non-loopback env values are refused with exit 2 and an explanatory message), and Vite dev/preview/proxy are hard-set to 127.0.0.1. Captured evidence demonstrates loopback boot logs, health payload reporting bind host/port, and an external-interface probe being refused. The report documents the configuration and evidence, satisfying the criterion fully."
+      },
+      {
+        "criterion_id": "renders-our-data",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "server/index.ts routes GET /api/sessions, GET /api/transitions, GET /api/sessions/:id(/events|envelopes|gates)",
+          "server/db.ts sessions() (FROM sessions), transitions() (FROM state_transitions), events() (FROM tools + state_transitions)",
+          "reports/pi-hub-projection/evidence-node-03/sessions.json (real session rows with adw_id/status/phases)",
+          "reports/pi-hub-projection/evidence-node-03/transitions.json (status stopped→completed-by-projection-test, acceptance_status rejected→attested)",
+          "reports/pi-hub-projection/evidence-node-03/health.json (sessions:25, transitions:6)",
+          "reports/pi-hub-projection/evidence-node-03/ui-index.html + ui-headers.txt (built SPA served at /, HTTP 200, title 'Pi Hub')",
+          "src/lib/api.ts fetchSessions/fetchTransitions; src/App.vue + SessionsList.vue poll and render",
+          "report 'Renders our projection data' + 'Rendered UI description' sections lines 157-203"
+        ],
+        "reasoning": "The server serves both sessions and the transitions stream from the node-01 projection tables (sessions, state_transitions) via a readonly SQLite adapter, with captured API responses and health counts demonstrating live data (25 sessions, 6 transitions). The report includes the adapted endpoints table, schema mapping, and a rendered-output description plus captured artifacts (ui-index.html, ui-headers.txt). Frontend components consume the endpoints. Fully satisfies the criterion; the only softness is that live-DB output is host-local, but artifacts constitute the record."
+      },
+      {
+        "criterion_id": "no-placeholder-tests",
+        "judgment": "judged_pass",
+        "confidence": 0.85,
+        "evidence": [
+          "harness/apps/pi-hub-web/package.json scripts: dev/server/dev:all/build/preview/typecheck/lint/self-check — all real commands (vite, vue-tsc, oxlint, bun run scripts/self-check.ts); no 'echo' placeholder anywhere",
+          "report 'Placeholder tests / scripts' section lines 205-236: documents upstream scripts found (no echo placeholders), retained/improved real commands, added self-check",
+          "scripts/self-check.ts — real smoke test (bind refusal, loopback start, health, sessions, transitions)"
+        ],
+        "reasoning": "The final package.json contains no placeholder echo scripts: every test/lint/build/dev command is a real tool invocation, and a substantive self-check script was added. The report lists what was found upstream ('No placeholder echo test scripts were present upstream') and what was done (kept real commands, added self-check), matching the criterion's reporting requirement. Upstream's original package.json is not accessible in this sandbox to independently confirm the 'before' state, but the criterion's observable end-state and reporting duty are met."
+      },
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "reports/pi-hub-projection/node-03-visualizer-fork.md exists (289 lines)",
+          "Fork provenance table (line 25): Upstream SHA de31374882e7a4e3e5b7bb9bd09e69dc2f779356, path .claude/skills/sssf/apps/visualizer, license MIT, extract method 'git archive de313748'",
+          "Adaptation notes: 'Data-layer decision' (lines 35-90), 'Schema mapping (upstream ← projection)', 'Endpoints adapted'",
+          "Run instructions: 'How to run' section (lines 238-260) with bun install/server/dev/self-check commands and env overrides",
+          "Acceptance mapping table (lines 273-281)"
+        ],
+        "reasoning": "The required report exists at the required path and contains all three mandated elements: fork provenance (upstream SHA, path, license, extract method), adaptation notes (data-layer decision with rationale, schema mapping, endpoint adaptations), and run instructions (prerequisites, commands, env overrides). High confidence."
+      }
+    ],
+    "overall_reasoning": "All five acceptance criteria for node-03-visualizer-fork are satisfied based on direct inspection of the committed code, the evidence artifacts under reports/pi-hub-projection/evidence-node-03/, and the node report. (1) app-exists: harness/apps/pi-hub-web exists with the MIT LICENSE retained in the directory and provenance records citing upstream SHA de31374882e7a4e3e5b7bb9bd09e69dc2f779356 (matching the graph's pinned de313748); fork lineage is consistent though upstream is host-local and not byte-verifiable here. (2) localhost-bound: the Bun server passes hostname=127.0.0.1 to Bun.serve with a hard loopback resolver that refuses non-loopback HOST (exit 2), and Vite dev/preview/proxy are pinned to 127.0.0.1; captured evidence (bind.json, health.json, server-bind*.txt, self-check.txt) confirms loopback-only binding and external-interface refusal; the report documents the config and evidence. (3) renders-our-data: /api/sessions and /api/transitions serve real projection rows (sessions, state_transitions tables via readonly SQLite), with captured JSON artifacts (25 sessions, 6 transitions), a served built SPA (ui-index.html, ui-headers.txt), and report sections covering adapted endpoints, queries, and rendered-output description. (4) no-placeholder-tests: package.json contains only real commands (vite/vue-tsc/oxlint/self-check), no echo placeholders; the report lists what was found and done. (5) report-exists: the report is present with fork provenance (SHA, path, license, extract method), adaptation notes (data-layer decision + rationale, schema mapping, endpoints), and run instructions. Constraints also hold on the observable diff: all 52 added files are confined to harness/apps/pi-hub-web/ and reports/pi-hub-projection/; no pi-hub-rs or other harness component was touched; working tree is clean. The dependency node-02 is provisional, and the fork deliberately reads pi-hub.db directly instead of the node-02 cursor API — a decision the node's 'why' explicitly permits if recorded, which it is.",
+    "risks": "1. Upstream provenance not byte-verifiable in this sandbox: ~/repos/_reference/sssf is host-local (missing here), so the 'forked from upstream' claim and the LICENSE copyright holder ('Copyright (c) 2026 IndyDevDan') rest on internally consistent records (UPSTREAM.md, report, package.json description, deprecated SssfDb alias) plus the SHA matching the graph's pin, not on a direct diff. 2. The 'Never run git add -A' constraint cannot be verified from the diff alone; two wrapper result commits (ce93bb9, 106de21) exist for the same attempt per the executor contract, and the deterministic note flags that wrapper commits may include untracked leftovers — however, every staged file in the subject diff falls inside the two allowed paths. 3. Live-data evidence (25 sessions/6 transitions) is from the host-local pi-hub.db at evidence time; if the DB is later re-projected, captured artifacts remain the record of what was rendered. 4. node-02 (dependency) is marked provisional; the fork's direct-DB decision deviates from the literal 'adapt to node-02's cursor API' phrasing, though the node's why explicitly allows direct read-only DB access when simpler and recorded.",
+    "followup_candidates": "1. Human clarification: the upstream repo ~/repos/_reference/sssf is not accessible in this eval sandbox, so the retained MIT notice (copyright 'IndyDevDan') and the fork's byte-level correspondence to upstream SHA de313748 could not be cross-verified. Please confirm the LICENSE matches upstream's actual notice; if verification requires host-local access, consider a provenance artifact captured from the reference tree. 2. Human clarification: the fork reads pi-hub.db directly (readonly) instead of consuming node-02's cursor HTTP API, with the rationale recorded in the report (server/db.ts header + 'Data-layer decision'). node-02 remains provisional. Confirm this recorded deviation is acceptable per the node's 'why' ('or directly to pi-hub.db read-only if simpler — decide and record why'). 3. Observed: captured evidence (self-check transcript, bind/health JSON, UI artifacts) demonstrates the criteria but was generated against the host-local live DB; no automated suite is listed in the acceptance criteria, so it was not counted toward the verdict. If runtime evidence should be reproduced by evaluators, note that bun/dist are gitignored and require `bun install && bun run build` on the host.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-06T20:06:39.812Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_RAJjwL4ZNZvBzHbmxFKh5273",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0 && ls -la && echo \"---\" && git log --oneline -5 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-06T20:06:39.814Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_JoUn0J1UAqKlaYl2HTgl7906",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/reports/pi-hub-projection/node-03-visualizer-fork.md"
+        },
+        {
+          "ts": "2026-08-06T20:06:39.826Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_JoUn0J1UAqKlaYl2HTgl7906",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:06:39.969Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_RAJjwL4ZNZvBzHbmxFKh5273",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:06:43.187Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_B5cvkJeRkaUzW6f6YOdL4590",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/harness/apps/pi-hub-web && ls -la && echo \"--- LICENSE ---\" && head -5 LICENSE && echo \"--- UPSTREAM.md ---\" && cat UPSTREAM.md && echo \"--- package.json ---\" && cat package.json"
+        },
+        {
+          "ts": "2026-08-06T20:06:43.188Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_DlNYQtrhcWqf8uPerbeP1726",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/harness/apps/pi-hub-web/server/index.ts"
+        },
+        {
+          "ts": "2026-08-06T20:06:43.194Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_DlNYQtrhcWqf8uPerbeP1726",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:06:43.228Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_B5cvkJeRkaUzW6f6YOdL4590",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:06:50.299Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_kJHDHltI8ASyy9CIVZxF6775",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/harness/apps/pi-hub-web && cat vite.config.ts && echo \"=== index.html ===\" && cat index.html && echo \"=== .gitignore ===\" && cat .gitignore && echo \"=== scripts ===\" && ls -la scripts/ && echo \"=== server ===\" && ls -la server/ shared/ && echo \"=== src ===\" && find src -type f | sort"
+        },
+        {
+          "ts": "2026-08-06T20:06:50.300Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_3GZiEfhnyuxCdj1hCRaj4695",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/reports/pi-hub-projection && ls -la evidence-node-03/ 2>/dev/null && echo \"=== bind.json ===\" && cat evidence-node-03/bind.json 2>/dev/null && echo \"=== health.json ===\" && cat evidence-node-03/health.json 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-06T20:06:50.336Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_3GZiEfhnyuxCdj1hCRaj4695",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:06:50.351Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_kJHDHltI8ASyy9CIVZxF6775",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:06:54.930Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_UpZ6W2qSDkFUvwW4Rzhl9140",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/reports/pi-hub-projection/evidence-node-03 && echo \"=== self-check.txt ===\" && cat self-check.txt && echo \"=== summary.json ===\" && cat summary.json && echo \"=== ui-headers.txt ===\" && cat ui-headers.txt && echo \"=== ui-index.html ===\" && cat ui-index.html && echo \"=== server.txt ===\" && cat server.txt"
+        },
+        {
+          "ts": "2026-08-06T20:06:54.931Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_WrrgDO5UPOBsFszsCobJ3274",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/harness/apps/pi-hub-web/scripts/self-check.ts"
+        },
+        {
+          "ts": "2026-08-06T20:06:54.936Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_WrrgDO5UPOBsFszsCobJ3274",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:06:54.972Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_UpZ6W2qSDkFUvwW4Rzhl9140",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:06:58.802Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_YkhRiu9l2lVEL1NPcxZs9845",
+          "command": "ls -la ~/repos/_reference/sssf 2>/dev/null && echo \"=== git log ===\" && cd ~/repos/_reference/sssf && git log --oneline -2 2>/dev/null && echo \"=== visualizer dir ===\" && ls -la .claude/skills/sssf/apps/visualizer 2>/dev/null && echo \"=== upstream LICENSE ===\" && head -4 LICENSE 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-06T20:06:58.804Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_SE0PqD1Jbblux0JvLSa70779",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/reports/pi-hub-projection/evidence-node-03 && echo \"=== sessions.json ===\" && cat sessions.json && echo \"=== transitions.json ===\" && cat transitions.json && echo \"=== session-detail.json ===\" && cat session-detail.json && echo \"=== events.json ===\" && head -40 events.json"
+        },
+        {
+          "ts": "2026-08-06T20:06:58.827Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_YkhRiu9l2lVEL1NPcxZs9845",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-06T20:06:58.842Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_SE0PqD1Jbblux0JvLSa70779",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:07:06.593Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_WabgYIqqbT16QHez8YTY5175",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/harness/apps/pi-hub-web/server/db.ts"
+        },
+        {
+          "ts": "2026-08-06T20:07:06.594Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_nOoemC8xFspnAyJpKAiK7313",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0 && git log --all --oneline -10 && echo \"=== files in the two result commits ===\" && git show --stat --oneline ce93bb9 | head -30 && echo \"=== diffstat 68b2d5e..106de21 ===\" && git diff --stat 68b2d5e 106de21 | tail -5 && echo \"=== check any file outside allowed paths in diff ===\" && git diff --name-status 68b2d5e 106de21 | grep -v '^A\\s\\+harness/apps/pi-hub-web/' | grep -v '^A\\s\\+reports/pi-hub-projection/' || echo \"NONE outside allowed paths\""
+        },
+        {
+          "ts": "2026-08-06T20:07:06.599Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_WabgYIqqbT16QHez8YTY5175",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:07:06.703Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_nOoemC8xFspnAyJpKAiK7313",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:07:13.139Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_dUn42AqAP22xMZfgEJmv0100",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/harness/apps/pi-hub-web && echo \"=== src/lib/api.ts ===\" && cat src/lib/api.ts && echo \"=== src/App.vue ===\" && cat src/App.vue"
+        },
+        {
+          "ts": "2026-08-06T20:07:13.144Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_zx1aRJ7bRgQFZbz7i9qT4230",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0 && echo \"=== top-level LICENSE ===\" && cat LICENSE && echo \"=== pi-hub-web LICENSE vs repo LICENSE diff ===\" && diff LICENSE harness/apps/pi-hub-web/LICENSE && echo \"(identical)\" || echo \"(differs — see above)\"; echo \"=== search repo for de313748 ===\" && grep -rn \"de313748\" --include=\"*.md\" --include=\"*.ts\" --include=\"*.json\" . 2>/dev/null | grep -v node_modules | head -10"
+        },
+        {
+          "ts": "2026-08-06T20:07:13.165Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_dUn42AqAP22xMZfgEJmv0100",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:07:13.236Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_zx1aRJ7bRgQFZbz7i9qT4230",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:07:22.152Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_E12041SoruZZGvQRYK4a9494",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0 && ls -la vendor/ 2>/dev/null && echo \"=== search for sssf/visualizer copies ===\" && find . -path ./node_modules -prune -o -type d -name \"visualizer\" -print 2>/dev/null | head && echo \"=== search IndyDevDan ===\" && grep -rn \"IndyDevDan\" . 2>/dev/null | grep -v node_modules | head && echo \"=== search upstream audit docs ===\" && grep -rln \"sssf\" docs/ audits/ .handoffs/ 2>/dev/null | head -10"
+        },
+        {
+          "ts": "2026-08-06T20:07:22.153Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_XxLtwqrVTjWQuQlzA5di9461",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/harness/apps/pi-hub-web && echo \"=== SessionsList.vue (head 80) ===\" && head -80 src/components/SessionsList.vue && echo \"=== grep transitions in src ===\" && grep -rn \"transitions\\|fetchTransitions\" src/ | head -20"
+        },
+        {
+          "ts": "2026-08-06T20:07:22.188Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_XxLtwqrVTjWQuQlzA5di9461",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:07:23.680Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_E12041SoruZZGvQRYK4a9494",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:07:36.291Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_NJftrcxf44IqAFL30Alu4383",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0 && echo \"=== server-bind.txt ===\" && cat reports/pi-hub-projection/evidence-node-03/server-bind.txt && echo \"=== server-bind2.txt ===\" && cat reports/pi-hub-projection/evidence-node-03/server-bind2.txt && echo \"=== git status (short) ===\" && git status --short | head -20 && echo \"=== untracked outside allowed paths? ===\" && git status --porcelain | awk '{print $2}' | grep -v '^harness/apps/pi-hub-web/' | grep -v '^reports/pi-hub-projection/' || echo \"none\" && echo \"=== audits dir ===\" && ls audits/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-06T20:07:36.292Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Qc1wpmp0r2YigXdIzhAt1902",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0 && echo \"=== events.json tail ===\" && tail -c 600 reports/pi-hub-projection/evidence-node-03/events.json && echo && echo \"=== SessionTrace: events/transitions usage ===\" && grep -n \"events\\|fetchEvents\\|fetchTransitions\" harness/apps/pi-hub-web/src/components/SessionTrace.vue | head -15 && echo \"=== check commits touched pi-hub-rs or harness beyond pi-hub-web ===\" && git diff --name-status 68b2d5e 106de21 | grep -iv \"pi-hub-web\\|pi-hub-projection\" || echo \"NONE\""
+        },
+        {
+          "ts": "2026-08-06T20:07:36.350Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Qc1wpmp0r2YigXdIzhAt1902",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:07:36.777Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_NJftrcxf44IqAFL30Alu4383",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:08:01.331Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_QufAa4L2vJGcuvKQaLJQ7937",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0 && grep -n \"## \" reports/pi-hub-projection/node-03-visualizer-fork.md && echo \"---\" && grep -n \"How to run\\|Upstream SHA\\|Adaptation\\|Endpoints adapted\\|Placeholder\" reports/pi-hub-projection/node-03-visualizer-fork.md | head"
+        },
+        {
+          "ts": "2026-08-06T20:08:01.363Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_QufAa4L2vJGcuvKQaLJQ7937",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T20:08:34.265Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Od5SUDQrNEHze3wG1stg5775",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All five acceptance criteria for node-03-visualizer-fork are satisfied based on direct inspection of the committed code, the evidence artifacts under reports/pi-hub-projection/evidence-node-03/, and the node report. (1) app-exists: harness/apps/pi-hub-web exists with the MIT LICENSE retained in the directory and provenance records citing upstream SHA de31374882e7a4e3e5b7bb9bd09e69dc2f779356 (matching the graph's pinned de313748); fork lineage is consistent though upstream is host-local and not byte-verifiable here. (2) localhost-bound: the Bun server passes hostname=127.0.0.1 to Bun.serve with a hard loopback resolver that refuses non-loopback HOST (exit 2), and Vite dev/preview/proxy are pinned to 127.0.0.1; captured evidence (bind.json, health.json, server-bind*.txt, self-check.txt) confirms loopback-only binding and external-interface refusal; the report documents the config and evidence. (3) renders-our-data: /api/sessions and /api/transitions serve real projection rows (sessions, state_transitions tables via readonly SQLite), with captured JSON artifacts (25 sessions, 6 transitions), a served built SPA (ui-index.html, ui-headers.txt), and report sections covering adapted endpoints, queries, and rendered-output description. (4) no-placeholder-tests: package.json contains only real commands (vite/vue-tsc/oxlint/self-check), no echo placeholders; the report lists what was found and done. (5) report-exists: the report is present with fork provenance (SHA, path, license, extract method), adaptation notes (data-layer decision + rationale, schema mapping, endpoints), and run instructions. Constraints also hold on the observable diff: all 52 added files are confined to harness/apps/pi-hub-web/ and reports/pi-hub-projection/; no pi-hub-rs or other harness component was touched; working tree is clean. The dependency node-02 is provisional, and the fork deliberately reads pi-hub.db directly instead of the node-02 cursor API — a decision the node's 'why' explicitly permits if recorded, which it is.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-06T20:10:50.370719+00:00",
+  "evaluated_tree_sha": "d8bfdabe6222fedc92ea833ffb0b0856a71be45c",
+  "evaluated_commit_sha": "106de218d76c21fc75c71f123b7733346327b52a",
+  "merge_commit_sha": "106de218d76c21fc75c71f123b7733346327b52a",
+  "expected_base_commit_sha": "68b2d5e57a082e5f75cfeccd2beb958768e038d8",
+  "pr_ref": null,
+  "job_id": "job_20260806T194245145f4077301ae5",
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-01-sqlite-projection.yaml",
+    "neighbor:node-02-localhost-api": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-02-localhost-api.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "none",
+      "offered": 4,
+      "content_accessed": 0,
+      "not_observed": 4,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-01-sqlite-projection.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-02-localhost-api.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 3,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-01-sqlite-projection.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-02-localhost-api.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xd8it_g0/README.md"
+      ]
+    },
+    "overall": "none"
+  }
+}

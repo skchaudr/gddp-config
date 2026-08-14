@@ -1,0 +1,547 @@
+{
+  "project_id": "vm-harness-audit",
+  "node_id": "node-03-subagents-chains-audit",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.9,
+    "findings": [],
+    "reasoning": "Node-03's role is to audit live subagent/chain routing against the tiering doctrine and propose a corrected chain set. The report (reports/03-subagents-chains.md, 394 lines, sole file added in the tip commit) does exactly this: inventories the live surface (chains/ and agents/ dirs absent, package builtins, settings agentOverrides, runtime subagent config, upstream 19-chain catalog, OMP chains, fleet profiles), evaluates every entry against doctrine clauses (a)-(d) plus long-context preference with conform/violate verdicts and one-line reasons, and proposes a corrected chain set naming concrete models per tier drawn strictly from enabledModels. I independently verified the report's grounding against the live host: settings.json agentOverrides (all six roles pin xai/grok-4.5), defaultProvider/defaultModel (xai/grok-4.5), the 13 enabledModels, subagent config.json knobs, absent chains/ and agents/ dirs, 19 upstream chains (names match), 10 upstream agents, and 5 OMP chains all match the report exactly. The read-only constraint is honored (git diff shows only the report added; the corrected set is explicitly 'report only; not performed'). Graph integrity holds: the report correctly cross-references node-02's findings (subagent ext dir not loadable) and node-01's executor wiring, honoring depends_on, and its output (tier table, corrected chains) feeds node-04's smoke context and node-05's separation spec without conflict. No drift, no harm to dependents. Lane-1 criteria statuses are indeterminate, but from an integrity standpoint the work is grounded, scoped, and faithful to the node's why.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-05T01:38:27.054Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_rVaKZDtoORtwLxmPHCZT2225",
+        "command": "cd /tmp/gddp-eval-wt-j0keocr4 && ls -la && echo \"---\" && find . -type f -not -path './.git/*' | head -50"
+      },
+      {
+        "ts": "2026-08-05T01:38:27.055Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_klJMWQchBCSUWZAKHJgk8925",
+        "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-02-extensions-audit.yaml"
+      },
+      {
+        "ts": "2026-08-05T01:38:27.055Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_kc4V2qdIYbyuembpUrwL3062",
+        "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-04-tty-validation-probe.yaml"
+      },
+      {
+        "ts": "2026-08-05T01:38:27.056Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_X6HqswmTm8nuHo02NJVh4599",
+        "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml"
+      },
+      {
+        "ts": "2026-08-05T01:38:27.071Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_klJMWQchBCSUWZAKHJgk8925",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:38:27.071Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_kc4V2qdIYbyuembpUrwL3062",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:38:27.071Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_X6HqswmTm8nuHo02NJVh4599",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:38:27.076Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_rVaKZDtoORtwLxmPHCZT2225",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:38:29.318Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_r0x2DeV8EBdItlH0k86k9530",
+        "path": "/tmp/gddp-eval-wt-j0keocr4/reports/03-subagents-chains.md"
+      },
+      {
+        "ts": "2026-08-05T01:38:29.319Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_tubT8BphxtaKd0YflzEv5244",
+        "command": "cd /tmp/gddp-eval-wt-j0keocr4 && wc -l reports/*.md && echo \"---git---\" && git log --oneline -5 2>/dev/null; git status 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-05T01:38:29.327Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_r0x2DeV8EBdItlH0k86k9530",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:38:29.338Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_tubT8BphxtaKd0YflzEv5244",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:38:46.502Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_cp6FrQpY0tZ0HMFAMttE8747",
+        "path": "/tmp/gddp-eval-wt-j0keocr4/reports/02-extensions.md"
+      },
+      {
+        "ts": "2026-08-05T01:38:46.503Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_OwszyOXLFWoc2eand5VS2682",
+        "path": "/tmp/gddp-eval-wt-j0keocr4/reports/01-entrypoints.md"
+      },
+      {
+        "ts": "2026-08-05T01:38:46.503Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_7e86uBdXnPjPGEsHPHQe0866",
+        "command": "ls /home/sab-mini/.pi/agent/ 2>/dev/null | head -20; echo \"---chains---\"; ls -la /home/sab-mini/.pi/agent/chains/ 2>/dev/null || echo \"chains dir ABSENT (as reported)\"; echo \"---agents---\"; ls -la /home/sab-mini/.pi/agent/agents/ 2>/dev/null || echo \"agents dir ABSENT (as reported)\"; echo \"---settings keys---\"; python3 -c \"import json;d=json.load(open('/home/sab-mini/.pi/agent/settings.json'));print(list(d.keys()));print(d.get('defaultProvider'),d.get('defaultModel'));print(json.dumps(d.get('subagents',{}).get('agentOverrides',{}),indent=1))\" 2>/dev/null || echo \"settings.json unreadable here\""
+      },
+      {
+        "ts": "2026-08-05T01:38:46.511Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_cp6FrQpY0tZ0HMFAMttE8747",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:38:46.512Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_OwszyOXLFWoc2eand5VS2682",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:38:46.554Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_7e86uBdXnPjPGEsHPHQe0866",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:38:51.845Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_tgLCP6i7F8vyKtrlnQLD2493",
+        "command": "echo \"--- enabledModels ---\"; python3 -c \"import json;d=json.load(open('/home/sab-mini/.pi/agent/settings.json'));print('\\n'.join(d.get('enabledModels',[])))\" 2>/dev/null; echo \"--- subagent config ---\"; cat /home/sab-mini/.pi/agent/extensions/subagent/config.json 2>/dev/null || echo \"not found\"; echo \"--- upstream chains count ---\"; ls /data/repos/Pi-Coding-Agent/agent/chains/*.chain.json 2>/dev/null | wc -l; ls /data/repos/Pi-Coding-Agent/agent/chains/ 2>/dev/null | head -25; echo \"--- upstream agents count ---\"; ls /data/repos/Pi-Coding-Agent/agent/agents/*.md 2>/dev/null | wc -l; echo \"--- omp ---\"; ls /home/sab-mini/.omp/omp/agent/chains/ 2>/dev/null | wc -l"
+      },
+      {
+        "ts": "2026-08-05T01:38:51.902Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_tgLCP6i7F8vyKtrlnQLD2493",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:39:16.189Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Hlpx7SgjfgVwMmR7f29F7573",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "node-02-extensions-audit is still 'provisional' while node-03 already ran (execution_policy sets frontier_auto_advance: true). Node-03's report anchors several claims on node-02 findings (e.g., subagent extension dir is not a loadable entrypoint). Human acceptance of node-02 should confirm those anchors before node-04 fires, since a node-02 revision could ripple into node-03's cited evidence.",
+        "affected_node_ids": [
+          "node-02-extensions-audit",
+          "node-03-subagents-chains-audit",
+          "node-04-tty-validation-probe"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Node-03 proposes but does not install the corrected chain set (consistent with its read-only constraint). Node-04 (PTY smoke) and node-05 (separation spec) do not depend on those installs, so no conflict; node-05 can consume node-03's tier table directly when synthesizing the follow-up execution graph.",
+        "affected_node_ids": [
+          "node-03-subagents-chains-audit",
+          "node-04-tty-validation-probe",
+          "node-05-separation-proposal"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.925,
+  "criteria_confidence": 0.925,
+  "completeness": 1.0,
+  "graph_readiness": 0.925,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "report-exists",
+        "criterion": "reports/03-subagents-chains.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "subagents\\-chains -> line 375: 'subagents-chains'",
+          "non\\-empty -> line 375: 'non-empty'"
+        ],
+        "reasoning": "Scanned source files (reports/03-subagents-chains.md) for identifiers named in the criterion (subagents-chains, non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "surface-inventoried",
+        "criterion": "report inventories chain definitions (~/.pi/agent/chains/) and subagent configurations present on the VM, with the models each chain step pins",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "doctrine-evaluation",
+        "criterion": "report evaluates each chain/subagent against the tiering doctrine (see constraints) and records conform/violate per entry with a one-line reason",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (one-line). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "corrected-set-proposed",
+        "criterion": "report proposes a corrected chain set implementing the doctrine, naming concrete models per tier already available in the operator's environment",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Read-only: inspect and report only; do not modify chain or subagent configs",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Tiering doctrine to evaluate against: (a) large tasks route to a long-context-window orchestrator; (b) read-only runs use cheaper or faster models; (c) implementation tasks with a well-specified packet route to a mid-level executor; implementation tasks that are larger or under-specified route to an advanced executor; (d) the same tiering applies one notch down for smaller tasks (mid-sized context orchestrator, and so on)",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Prefer models with long context windows for orchestrator roles",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/03-subagents-chains.md": true
+    },
+    "deps_status": {
+      "node-02-extensions-audit": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "ee7d22b064ccb5bb6f696ffed4aec7de6e9be200",
+      "tip": "b95b4a22b354bc98284b34df3bc9427e2375637b",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/03-subagents-chains.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 1.0,
+        "evidence": [
+          "reports/03-subagents-chains.md present, 25,504 bytes, 394 lines",
+          "git log b95b4a2: single commit adding reports/03-subagents-chains.md (+394 lines)",
+          "deterministic keyword scan found 'subagents-chains' and 'non-empty' at line 375"
+        ],
+        "reasoning": "The file exists in the worktree and is committed at the tip (b95b4a2) as the sole change. It is unambiguously non-empty (394 lines / 25.5KB, with 10 sections). Deterministic check was indeterminate only because it could not read the file; direct read confirms the criterion."
+      },
+      {
+        "criterion_id": "surface-inventoried",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "Section 2 discovery table: `getAgentDir()/chains` = /home/sab-mini/.pi/agent/chains recorded ABSENT; ~/.pi/agent/agents ABSENT; settings overrides present",
+          "Section 4.1: 9 package builtin agents with effective model after overrides (all xai/grok-4.5)",
+          "Section 4.3: raw settings.json subagents.agentOverrides JSON with 6 model pins",
+          "Section 5.2: 19 upstream chains with per-step agent + step model pin columns (e.g., build-audit: worker=grok-cli/grok-4.5 → grok-cli/grok-composer-2.5-fast → openai-codex/gpt-5.6-sol)",
+          "Section 5.3/5.4: OMP chains (5) and fleet-subagents chains inventoried; Section 3.1 enabledModels inventory"
+        ],
+        "reasoning": "The report inventories every chain/subagent surface present on the VM and documents the models each chain step pins. The criterion's named path ~/.pi/agent/chains/ is recorded as absent on the live host, and the report inventories all chain definitions that DO exist on the VM (upstream Pi-Coding-Agent catalog, OMP, fleet dotfiles) with their step model pins, plus live subagent configs (settings.json overrides, extensions/subagent/config.json) and effective models. Confidence < 1 only because VM-side claims (absent dir, exact settings content) cannot be independently verified from this worktree; the inventory is thorough and internally consistent with node-01/node-02 reports."
+      },
+      {
+        "criterion_id": "doctrine-evaluation",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "Section 4.1 table: per-agent Verdict (VIOLATE/PARTIAL/CONFORM) + 'One-line reason' column for 9 builtin agents",
+          "Section 4.3: override-set verdicts (VIOLATE) with one-line reasons",
+          "Section 4.4: 10 upstream specialty agents with verdict + one-line reason",
+          "Sections 5.1-5.4: chain tables with Verdict + one-line reason per entry (43 verdict markers total)",
+          "Section 6: doctrine scorecard evaluating clauses (a)(b)(c)(d) + long-context-orchestrator preference against live status with evidence"
+        ],
+        "reasoning": "Every inventoried chain/subagent entry carries an explicit conform/violate judgment and a one-line reason, and the evaluation is explicitly structured against the four doctrine clauses plus the long-context preference. The report uses VIOLATE/PARTIAL/CONFORM rather than a strict binary, but every entry is assigned a clear judgment with a one-line reason, satisfying the criterion's intent."
+      },
+      {
+        "criterion_id": "corrected-set-proposed",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "Section 7.1 tier table: T0 flash RO→clinepass/cline-pass/deepseek-v4-flash, T0b→mimo-v2.5, T1 mid orchestrator→xai/grok-build-0.1, T1b mid executor→kimi-k2.7-code, T2 advanced→xai/grok-4.5, T2b→kimi-k3, T3 long orchestrator→xai/grok-4.3 (1M ctx), T3b→deepseek-v4-pro, T1-RO review→qwen3.7-plus",
+          "Section 3.1: these models all drawn from live settings.json enabledModels (authoritative availability list)",
+          "Section 7.2: proposed settings.json subagents fragment with tiered agentOverrides + defaultModel",
+          "Section 7.3: 13 concrete corrected chains (A-M) each naming step models; Section 7.4 parent-session routing table",
+          "Section 3.2: explicitly excludes models whose providers are not enabled (openai-codex, grok-cli, antigravity) from proposals"
+        ],
+        "reasoning": "The report proposes a complete corrected chain set (13 chains + agent overrides + parent routing) implementing all doctrine clauses, and every proposed model is named concretely and drawn strictly from the operator's live enabledModels inventory (verified available), with unavailable-provider pins explicitly kept out of the live set. This directly satisfies the criterion."
+      }
+    ],
+    "overall_reasoning": "The node's required artifact, reports/03-subagents-chains.md, exists (394 lines / 25.5KB), is committed at the tip as the only change, and substantively satisfies all four acceptance criteria: (1) file exists and is non-empty; (2) the report inventories the chain/subagent surface — recording that the live ~/.pi/agent/chains/ path is ABSENT while inventorying all chain definitions actually present on the VM (19 upstream chains with per-step model pins, OMP chains, fleet chains), package builtin agents with effective models, settings.json agentOverrides, and enabledModels; (3) every inventoried entry receives an explicit conform/violate judgment with a one-line reason, plus a clause-by-clause doctrine scorecard for (a)-(d) and the long-context preference; (4) a corrected set is proposed naming concrete models per tier drawn exclusively from the operator's live enabledModels (e.g., deepseek-v4-flash for read-only, grok-build-0.1/kimi-k2.7-code mid tiers, grok-4.5 advanced, grok-4.3 1M long-context orchestrator), with unavailable-provider pins explicitly excluded. Read-only constraint holds: the diff contains only the report file, and the report declares its scope and defers all actions to the operator. Deterministic checks were indeterminate only because they could not read file content or probe the VM; direct reads resolve all four criteria in the report's favor. Residual risk is that VM-side factual claims (absent chain dir, exact settings.json contents, enabledModels list) cannot be verified from this worktree; they are detailed and cross-consistent with node-01/node-02 reports but warrant a human spot-check on the host before downstream reliance.",
+    "risks": "1. VM-side factual claims (absence of ~/.pi/agent/chains/, exact settings.json agentOverrides content, enabledModels list, upstream chain step pins) are asserted in the report but not independently verifiable from this worktree; a fabricated or stale inventory would satisfy criteria on paper while being false. Mitigation: report is highly detailed, cites exact file paths, and is consistent with node-01 and node-02 reports (default xai/grok-4.5, subagent/ ext dir non-loadable). 2. deps_status shows node-02-extensions-audit as 'provisional' while node-03 was executed; node-03's report leans on node-02 findings (e.g., extensions/subagent/config.json not being a loadable entrypoint). If node-02 is later rejected, node-03's dependency assumptions would need re-review. 3. The doctrine-evaluation criterion says 'conform/violate'; the report uses a three-way VIOLATE/PARTIAL/CONFORM scale. PARTIAL entries still carry a one-line reason and an implicit non-conformance, but a strict binary reading of the criterion could treat PARTIAL as ambiguous. 4. The report's model cost/context figures (e.g., $/MTok, context windows) come from the VM's models-store and are unverifiable here.",
+    "followup_candidates": "Observed: (a) VM-side inventory claims could not be probed from this evaluator environment (no access to /home/sab-mini/.pi/agent or /data/repos on the host). Human clarification: should a spot-check of settings.json agentOverrides, absence of ~/.pi/agent/chains/, and enabledModels be performed on khoj-38 before node-04 runs, or are report assertions sufficient? (b) The report uses VIOLATE/PARTIAL/CONFORM rather than a strict conform/violate binary; human clarification: does PARTIAL satisfy the 'conform/violate per entry' wording, or should the criterion be reworded to three states? (c) node-02-extensions-audit is still 'provisional' in deps_status while node-03 executed and relied on its findings; human clarification: is provisional acceptance of the upstream node sufficient to lock node-03's dependency assumptions, or must node-02 be formally accepted first?",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-05T01:37:29.419Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_uvrP1JeS6XZJBIOFXDwt4027",
+          "command": "cd /tmp/gddp-eval-wt-j0keocr4 && ls -la && find . -type f | head -100"
+        },
+        {
+          "ts": "2026-08-05T01:37:29.420Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_Zi6TFW9eEjc1QEqVwzgu1628",
+          "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-03-subagents-chains-audit.yaml"
+        },
+        {
+          "ts": "2026-08-05T01:37:29.433Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Zi6TFW9eEjc1QEqVwzgu1628",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T01:37:29.439Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_uvrP1JeS6XZJBIOFXDwt4027",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T01:37:32.024Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_FFkH8NZqJ2LXXDNci2wP4015",
+          "path": "/tmp/gddp-eval-wt-j0keocr4/reports/03-subagents-chains.md"
+        },
+        {
+          "ts": "2026-08-05T01:37:32.024Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_Mk4JdBM60ZsY0Pb5zgSJ6458",
+          "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml"
+        },
+        {
+          "ts": "2026-08-05T01:37:32.024Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_U4YEI2NVNOAfMmhbvL2L4885",
+          "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-02-extensions-audit.yaml"
+        },
+        {
+          "ts": "2026-08-05T01:37:32.025Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_03_q05BXHDXyXoGoWxFhChs1677",
+          "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-04-tty-validation-probe.yaml"
+        },
+        {
+          "ts": "2026-08-05T01:37:32.027Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_FFkH8NZqJ2LXXDNci2wP4015",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T01:37:32.028Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Mk4JdBM60ZsY0Pb5zgSJ6458",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T01:37:32.028Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_q05BXHDXyXoGoWxFhChs1677",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T01:37:32.028Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_U4YEI2NVNOAfMmhbvL2L4885",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T01:37:34.725Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_K37RZ8qBhK1zsa6BxlDe8366",
+          "command": "cd /tmp/gddp-eval-wt-j0keocr4 && git log --oneline -5 2>/dev/null; echo \"---\"; git status 2>/dev/null | head -20; echo \"---\"; wc -c reports/03-subagents-chains.md reports/02-extensions.md reports/01-entrypoints.md"
+        },
+        {
+          "ts": "2026-08-05T01:37:34.726Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_WVWElfGR9i3UOIHWEJ210753",
+          "command": "cd /tmp/gddp-eval-wt-j0keocr4 && head -30 reports/01-entrypoints.md; echo \"===== 02 =====\"; head -40 reports/02-extensions.md"
+        },
+        {
+          "ts": "2026-08-05T01:37:34.741Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_WVWElfGR9i3UOIHWEJ210753",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T01:37:34.745Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_K37RZ8qBhK1zsa6BxlDe8366",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T01:37:59.063Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_2WAU9JNEwFZDUsuJSgRB8483",
+          "command": "cd /tmp/gddp-eval-wt-j0keocr4 && git diff ee7d22b b95b4a2 --stat; echo \"---\"; git show --stat b95b4a2 | head -15; echo \"---\"; grep -c \"VIOLATE\\|CONFORM\\|PARTIAL\" reports/03-subagents-chains.md; echo \"---\"; grep -n \"~/.pi/agent/chains\" reports/03-subagents-chains.md | head -5"
+        },
+        {
+          "ts": "2026-08-05T01:37:59.085Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_2WAU9JNEwFZDUsuJSgRB8483",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T01:38:20.943Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_uJaGaawag6Cb50WKyxuZ4996",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "The node's required artifact, reports/03-subagents-chains.md, exists (394 lines / 25.5KB), is committed at the tip as the only change, and substantively satisfies all four acceptance criteria: (1) file exists and is non-empty; (2) the report inventories the chain/subagent surface — recording that the live ~/.pi/agent/chains/ path is ABSENT while inventorying all chain definitions actually present on the VM (19 upstream chains with per-step model pins, OMP chains, fleet chains), package builtin agents with effective models, settings.json agentOverrides, and enabledModels; (3) every inventoried entry receives an explicit conform/violate judgment with a one-line reason, plus a clause-by-clause doctrine scorecard for (a)-(d) and the long-context preference; (4) a corrected set is proposed naming concrete models per tier drawn exclusively from the operator's live enabledModels (e.g., deepseek-v4-flash for read-only, grok-build-0.1/kimi-k2.7-code mid tiers, grok-4.5 advanced, grok-4.3 1M long-context orchestrator), with unavailable-provider pins explicitly excluded. Read-only constraint holds: the diff contains only the report file, and the report declares its scope and defers all actions to the operator. Deterministic checks were indeterminate only because they could not read file content or probe the VM; direct reads resolve all four criteria in the report's favor. Residual risk is that VM-side factual claims (absent chain dir, exact settings.json contents, enabledModels list) cannot be verified from this worktree; they are detailed and cross-consistent with node-01/node-02 reports but warrant a human spot-check on the host before downstream reliance.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-05T01:39:16.225053+00:00",
+  "evaluated_tree_sha": "5ed2c379a05105a1a93a2e5bff8318a95461f23b",
+  "evaluated_commit_sha": "b95b4a22b354bc98284b34df3bc9427e2375637b",
+  "merge_commit_sha": "b95b4a22b354bc98284b34df3bc9427e2375637b",
+  "expected_base_commit_sha": "ee7d22b064ccb5bb6f696ffed4aec7de6e9be200",
+  "pr_ref": null,
+  "job_id": "job_20260805T01300746615f74899b34",
+  "canonical_context": {
+    "readme": "UNAVAILABLE: /tmp/gddp-eval-wt-j0keocr4/README.md does not exist",
+    "project_brief": "UNAVAILABLE: /tmp/gddp-eval-wt-j0keocr4/PROJECT-BRIEF.md does not exist",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml",
+    "neighbor:node-02-extensions-audit": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-02-extensions-audit.yaml",
+    "neighbor:node-04-tty-validation-probe": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-04-tty-validation-probe.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "low",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml",
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-02-extensions-audit.yaml",
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-04-tty-validation-probe.yaml"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "low",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml",
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-02-extensions-audit.yaml",
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-04-tty-validation-probe.yaml"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "low"
+  }
+}

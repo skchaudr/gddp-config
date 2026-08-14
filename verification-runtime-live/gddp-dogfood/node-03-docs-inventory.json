@@ -1,0 +1,573 @@
+{
+  "project_id": "gddp-dogfood",
+  "node_id": "node-03-docs-inventory",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.95,
+    "findings": [],
+    "reasoning": "Fresh-eyes review of node-03-docs-inventory. The node's intended role — inventory docs/ and flag references to removed machinery so the doc surface stays honest — is fully preserved. I independently walked docs/ (115 files) and cross-checked the report's inventory: exact bidirectional match, every file listed with a one-line summary, no omissions, no fabricated paths. The drift-flag list is present and accurate: mission_push_guard genuinely appears at docs/mission-mode-research/06-post-mission-code-review.md:43 (and the module is verifiably archived in scripts/_archive/, absent from scripts/adapters/), while verify_planned_feature_ids and _feature_drift_reason have zero matches in docs/ and are correctly listed as empty. Graph integrity is preserved: git diff base..tip shows exactly one file added (reports/gddp-dogfood/03-docs-inventory.md, 178 lines), nothing outside the required report path was touched, the work is committed on the result ref per the executor contract, and the working tree is clean. The node has depends_on: [] and unlocks: [] in both the blueprint and node YAML, and sibling nodes (node-01, node-02) are independent report-only canaries with no coupling to this output, so no downstream consumer depends on this report's shape. The pytest tail line is quoted with a transparent note about the Flask-absent host limitation (4 failed, 622 passed). Only cosmetic blemish is a duplicated '## Validation' heading, which does not affect intent or graph integrity.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-11T05:14:07.932Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_zY3qXEu7DKTdnNohdkDY2622",
+        "command": "cd /tmp/gddp-eval-wt-cxys6eai && ls -la && echo \"---\" && git log --oneline -10 2>/dev/null && echo \"---\" && git status 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-11T05:14:07.933Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_LQaUKwb40Le2AYhrEwEh4393",
+        "command": "ls -la /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/ 2>/dev/null && echo \"---\" && cat /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-03-docs-inventory.yaml 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-11T05:14:07.957Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_LQaUKwb40Le2AYhrEwEh4393",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:14:07.959Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_zY3qXEu7DKTdnNohdkDY2622",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:14:10.174Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Gn5TMODPTJXjxKaxfPQL7353",
+        "command": "cd /tmp/gddp-eval-wt-cxys6eai && ls -la reports/gddp-dogfood/ && echo \"===REPORT===\" && cat reports/gddp-dogfood/03-docs-inventory.md"
+      },
+      {
+        "ts": "2026-08-11T05:14:10.175Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_jxuFSuH1hYebEort4dRg7167",
+        "command": "cd /tmp/gddp-eval-wt-cxys6eai && find docs -type f | sort"
+      },
+      {
+        "ts": "2026-08-11T05:14:10.189Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Gn5TMODPTJXjxKaxfPQL7353",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:14:10.193Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_jxuFSuH1hYebEort4dRg7167",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:14:14.785Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_00_B0Pg7HV3Uhv9laNv9KY29933",
+        "reason": "command matched blocked pattern",
+        "command": "cd /tmp/gddp-eval-wt-cxys6eai && find docs -type f | sort > /tmp/actual_docs.txt && wc -l /tmp/actual_docs.txt && grep -oP '`docs/[^`]+`' reports/gddp-dogfood/03-docs-inventory.md | tr -d '`' | sort > /tmp/report_docs.txt && wc -l /tmp/report_docs.txt && echo \"=== IN REPORT BUT NOT ON DISK ===\" && comm -23 /tmp/report_docs.txt /tmp/actual_docs.txt && echo \"=== ON DISK BUT NOT IN REPORT ===\" && comm -13 /tmp/report_docs.txt /tmp/actual_docs.txt",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-11T05:14:14.785Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_B0Pg7HV3Uhv9laNv9KY29933",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-11T05:14:14.785Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_3ShE0B5o01dPYpyxGJNt5234",
+        "command": "cd /tmp/gddp-eval-wt-cxys6eai && grep -rn \"mission_push_guard\\|verify_planned_feature_ids\\|_feature_drift_reason\" docs/ | head -20"
+      },
+      {
+        "ts": "2026-08-11T05:14:14.806Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_3ShE0B5o01dPYpyxGJNt5234",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:14:21.547Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_R04sfeuQxZ8tW1IFoypa8740",
+        "command": "cd /tmp/gddp-eval-wt-cxys6eai && python3 -c \"\nimport os, re\nactual = set()\nfor root, dirs, files in os.walk('docs'):\n    for f in files:\n        actual.add(os.path.join(root, f))\ntxt = open('reports/gddp-dogfood/03-docs-inventory.md').read()\nreport = set(re.findall(r'\\x60docs/[^\\x60]+\\x60', txt))\nreport = {p.strip('\\x60') for p in report}\nprint('actual count:', len(actual))\nprint('report entries:', len(report))\nprint('IN REPORT NOT ON DISK:', sorted(report - actual))\nprint('ON DISK NOT IN REPORT:', sorted(actual - report))\n\""
+      },
+      {
+        "ts": "2026-08-11T05:14:21.547Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_O3H7na0IAJc5Cpu4C5bE2586",
+        "command": "cd /tmp/gddp-eval-wt-cxys6eai && sed -n '38,50p' docs/mission-mode-research/06-post-mission-code-review.md"
+      },
+      {
+        "ts": "2026-08-11T05:14:21.564Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_O3H7na0IAJc5Cpu4C5bE2586",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:14:21.586Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_R04sfeuQxZ8tW1IFoypa8740",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:14:28.673Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_GDItFKpHmb9FTdvS467R6470",
+        "command": "cd /tmp/gddp-eval-wt-cxys6eai && git show --stat fcf7910 | head -20 && echo \"=====\" && git show --stat adae636 | head -20 && echo \"=====\" && git diff 450eca1..adae636 --stat"
+      },
+      {
+        "ts": "2026-08-11T05:14:28.674Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_QScJwTNnaBfrJOnOkF8Z7793",
+        "command": "cd /tmp/gddp-eval-wt-cxys6eai && grep -rln \"verify_planned_feature_ids\\|_feature_drift_reason\" docs/ ; echo \"exit=$?\" ; grep -rn \"mission_push_guard\" scripts/ 2>/dev/null | head -5 ; echo \"---archive check---\" ; ls scripts/_archive/ 2>/dev/null | grep -i \"push\\|guard\" ; ls scripts/adapters/ 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-11T05:14:28.674Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_lopy2WjvApiHQDp6eGU85097",
+        "command": "cat /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml && echo \"=====\" && cat /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-02-archive-inventory.yaml"
+      },
+      {
+        "ts": "2026-08-11T05:14:28.699Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_GDItFKpHmb9FTdvS467R6470",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:14:28.701Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_lopy2WjvApiHQDp6eGU85097",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:14:28.710Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_QScJwTNnaBfrJOnOkF8Z7793",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:14:47.933Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_OpzyCciAg9flkvKv91GP2485",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "Sibling canaries node-01 and node-02 (provisional) share the same report-only pattern and the same 'run pytest and quote tail' constraint; on this host pytest will likely reproduce the same 4-failed baseline (Flask absent), which should be treated as an environment artifact, not node-caused failure, when those nodes are evaluated.",
+        "affected_node_ids": [
+          "node-01-env-var-registry",
+          "node-02-archive-inventory"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The drift flag on docs/mission-mode-research/06-post-mission-code-review.md (describes mission_push_guard as live/acceptable) is a candidate target for a future T4 docs-cleanup node once tranche gating allows edits; the flag list in this report gives the cleanup node a concrete, verifiable starting point.",
+        "affected_node_ids": [
+          "node-03-docs-inventory"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9766666666666666,
+  "criteria_confidence": 0.9766666666666666,
+  "completeness": 1.0,
+  "graph_readiness": 0.9766666666666666,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "report-exists",
+        "criterion": "reports/gddp-dogfood/03-docs-inventory.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "docs\\-inventory -> line 3: 'docs-inventory'"
+        ],
+        "reasoning": "Scanned source files (reports/gddp-dogfood/03-docs-inventory.md) for identifiers named in the criterion (gddp-dogfood, docs-inventory, non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "all-docs",
+        "criterion": "every file under docs/ is listed with a one-line summary",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...) for identifiers named in the criterion (one-line). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "drift-flags",
+        "criterion": "report has a flag list of docs referencing mission_push_guard, verify_planned_feature_ids, or _feature_drift_reason (the list may be empty, but it must be present)",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "mission_push_guard -> line 10: 'mission_push_guard'"
+        ],
+        "reasoning": "Scanned source files (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...) for identifiers named in the criterion (mission_push_guard, verify_planned_feature_ids, feature_drift_reason). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create only reports/gddp-dogfood/03-docs-inventory.md",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Read-only outside that report path",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Run python3 -m pytest -q before finishing and quote its tail line in the report",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/gddp-dogfood/03-docs-inventory.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+      "tip": "adae636b9a533aa3537838ca0b7e4de83f1609dd",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/gddp-dogfood/03-docs-inventory.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.99,
+        "evidence": [
+          "reports/gddp-dogfood/03-docs-inventory.md exists (14,768 bytes) and is fully populated",
+          "Full file read: title, method, inventory table (115 rows), counts, drift flag list, validation section",
+          "subject_diff confirms single added file: reports/gddp-dogfood/03-docs-inventory.md"
+        ],
+        "reasoning": "The required report file exists at the exact required path and is non-empty with substantial content. Deterministic scan confirmed presence; semantic review confirms substantive, non-placeholder content."
+      },
+      {
+        "criterion_id": "all-docs",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "find docs -type f yields 115 files",
+          "Report inventory table contains exactly 115 rows, each a backticked docs/ path with a one-line summary",
+          "comm -3 comparison of actual paths vs report paths: zero files missing, zero stale/extra paths (only diffs are the three drift-term table rows, expected)",
+          "Report's own count: 'Total files under docs/: 115'"
+        ],
+        "reasoning": "Every file under docs/ (recursive, including archive/, artifacts/, mission-mode-research/ subdirectories, and raw probe captures) is listed exactly once with a one-line summary. The inventory is complete and accurate against an independent enumeration."
+      },
+      {
+        "criterion_id": "drift-flags",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "Report contains 'Drift flag list' section with all three search terms and per-term match table (lines 146-152)",
+          "Independent grep -r for the three identifiers across docs/ finds exactly one match: mission_push_guard at docs/mission-mode-research/06-post-mission-code-review.md line 43",
+          "Report's claim (mission_push_guard: 1 file at line 43; verify_planned_feature_ids: 0; _feature_drift_reason: 0) matches independent scan exactly",
+          "Report includes summary counts and union flagged-paths list"
+        ],
+        "reasoning": "The flag list is present as required (criterion allows an empty list but requires presence), covers all three identifiers, and its contents are independently verified as accurate — including the 'no matches' rows for the two identifiers with zero hits."
+      }
+    ],
+    "overall_reasoning": "All three acceptance criteria are satisfied, verified semantically against the actual repository. The report exists and is non-empty; an independent recursive enumeration of docs/ (115 files) matches the report's inventory table exactly with no missing or stale entries and every row carrying a one-line summary; and the drift flag list is present with all three identifiers, independently confirmed accurate (one real match for mission_push_guard at docs/mission-mode-research/06-post-mission-code-review.md:43, zero for the other two terms). Constraints are also satisfied as observed: only the report file was created (git show --stat HEAD shows one added file), the worktree is clean, a commit with the job/attempt ref exists, and the report quotes a pytest tail line as required. The report's node-03 scope (docs inventory + drift flags) is faithful to the node's 'why' — keeping the doc surface honest after the demolition.",
+    "risks": "The quoted pytest tail line ('4 failed, 622 passed in 37.06s', 626 total) deviates from the README's claimed 633 passing; the report attributes the 4 failures to Flask absence on host PATH. This is plausible but not independently verifiable in this read-only session (running pytest would write cache files), and it is a constraint-reporting matter, not an acceptance criterion. One-line summaries for raw probe artifacts are path-role labels rather than deep content summaries; structurally each row satisfies 'one-line summary' but deep accuracy of every summary was not hand-verified.",
+    "followup_candidates": "Observed: git log shows two result commits (fcf7910, adae636) carrying the same job/attempt ref, with only the tip adding the report; likely a wrapper commit. Not a criteria concern, but was the duplicate result commit intended? Also observed: report quotes pytest tail '4 failed, 622 passed' vs README's '633 passing', explained as Flask absence in the environment. Pytest outcome is not listed in the node's acceptance criteria, so it was not counted toward the verdict — was an all-green pytest run intended as part of this node's evidence? If yes, update the criteria and rerun; otherwise this verdict stands.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-11T05:13:14.951Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_V2hnEhopYpHs3ekk92jg7140",
+          "command": "cd /tmp/gddp-eval-wt-cxys6eai && ls -la && echo \"---\" && ls -la reports/gddp-dogfood/ 2>/dev/null && echo \"---\" && ls docs/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-11T05:13:14.952Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_qRv6D6d2UuKJGnfiWlru6147",
+          "path": "/tmp/gddp-eval-wt-cxys6eai/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-11T05:13:14.953Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_sdg3gkkQEa9yPiFLD40H1568",
+          "path": "/tmp/gddp-eval-wt-cxys6eai/README.md"
+        },
+        {
+          "ts": "2026-08-11T05:13:14.967Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_qRv6D6d2UuKJGnfiWlru6147",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:13:14.968Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_sdg3gkkQEa9yPiFLD40H1568",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:13:14.975Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_V2hnEhopYpHs3ekk92jg7140",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:13:16.812Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_CgcDYAxLnECyQo0KOzhZ5317",
+          "path": "/tmp/gddp-eval-wt-cxys6eai/reports/gddp-dogfood/03-docs-inventory.md"
+        },
+        {
+          "ts": "2026-08-11T05:13:16.814Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_CgcDYAxLnECyQo0KOzhZ5317",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:13:20.786Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_Y8cMbnJTiYlLqnBOkEnQ8846",
+          "reason": "command matched blocked pattern",
+          "command": "cd /tmp/gddp-eval-wt-cxys6eai && find docs -type f | sort > /tmp/docs_actual.txt && wc -l /tmp/docs_actual.txt && echo \"---\" && find docs -type f | wc -l",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-11T05:13:20.786Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Y8cMbnJTiYlLqnBOkEnQ8846",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T05:13:20.786Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_TBMw2grt4RJFOoVG26hl5114",
+          "command": "cd /tmp/gddp-eval-wt-cxys6eai && grep -n \"mission_push_guard\\|verify_planned_feature_ids\\|_feature_drift_reason\" -r docs/ 2>/dev/null | head -50; echo \"exit: $?\""
+        },
+        {
+          "ts": "2026-08-11T05:13:20.803Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_TBMw2grt4RJFOoVG26hl5114",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:13:23.850Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_OEC4evT0Jzi3vg0OWqdF7391",
+          "command": "cd /tmp/gddp-eval-wt-cxys6eai && find docs -type f | sort"
+        },
+        {
+          "ts": "2026-08-11T05:13:23.861Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_OEC4evT0Jzi3vg0OWqdF7391",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:13:26.961Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_lGW0idYn5h6RRdzIMUe48632",
+          "command": "cd /tmp/gddp-eval-wt-cxys6eai && find docs -type f | wc -l && echo \"--- report inventory rows ---\" && grep -c '^| `docs/' reports/gddp-dogfood/03-docs-inventory.md"
+        },
+        {
+          "ts": "2026-08-11T05:13:26.961Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_vEfGEGyVZKOsuGyfDJNG7735",
+          "command": "cd /tmp/gddp-eval-wt-cxys6eai && comm -3 <(find docs -type f | sort) <(grep -oP '^\\| `\\K[^`]+' reports/gddp-dogfood/03-docs-inventory.md | sort)"
+        },
+        {
+          "ts": "2026-08-11T05:13:26.975Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_lGW0idYn5h6RRdzIMUe48632",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:13:26.981Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_vEfGEGyVZKOsuGyfDJNG7735",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:13:43.755Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_GSwcceXaHf65p6XmnPzr7914",
+          "command": "cd /tmp/gddp-eval-wt-cxys6eai && git log --oneline -3 && echo \"---status---\" && git status --porcelain | head -20 && echo \"---show stat---\" && git show --stat --oneline HEAD | head -10"
+        },
+        {
+          "ts": "2026-08-11T05:13:43.755Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_U4wmEjdO5dW5I2fdWycn7505",
+          "command": "cd /tmp/gddp-eval-wt-cxys6eai && grep -n \"mission_push_guard\\|verify_planned_feature_ids\\|_feature_drift_reason\" reports/gddp-dogfood/03-docs-inventory.md | head -20"
+        },
+        {
+          "ts": "2026-08-11T05:13:43.774Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_U4wmEjdO5dW5I2fdWycn7505",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:13:43.816Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_GSwcceXaHf65p6XmnPzr7914",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:14:03.664Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_5TT9TzLABVefP020jpJN2119",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All three acceptance criteria are satisfied, verified semantically against the actual repository. The report exists and is non-empty; an independent recursive enumeration of docs/ (115 files) matches the report's inventory table exactly with no missing or stale entries and every row carrying a one-line summary; and the drift flag list is present with all three identifiers, independently confirmed accurate (one real match for mission_push_guard at docs/mission-mode-research/06-post-mission-code-review.md:43, zero for the other two terms). Constraints are also satisfied as observed: only the report file was created (git show --stat HEAD shows one added file), the worktree is clean, a commit with the job/attempt ref exists, and the report quotes a pytest tail line as required. The report's node-03 scope (docs inventory + drift flags) is faithful to the node's 'why' — keeping the doc surface honest after the demolition.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-11T05:14:47.969863+00:00",
+  "evaluated_tree_sha": "d8eaa3fa79a0c5816fccaa1fb4ed7d90401120dd",
+  "evaluated_commit_sha": "adae636b9a533aa3537838ca0b7e4de83f1609dd",
+  "merge_commit_sha": "adae636b9a533aa3537838ca0b7e4de83f1609dd",
+  "expected_base_commit_sha": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+  "pr_ref": null,
+  "job_id": "job_20260811T050749687060a7379f96",
+  "execution_attempt_id": "job_20260811T050749687060a7379f96:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-cxys6eai/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-cxys6eai/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-cxys6eai/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-cxys6eai/README.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+      ]
+    },
+    "integrity": {
+      "rating": "none",
+      "offered": 3,
+      "content_accessed": 0,
+      "not_observed": 3,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-cxys6eai/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-cxys6eai/README.md"
+      ]
+    },
+    "overall": "none"
+  }
+}

@@ -1,0 +1,682 @@
+{
+  "project_id": "gddp-runtime",
+  "node_id": "pi-evaluator-harness",
+  "verdict": "fail",
+  "criteria_verdict": "fail",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.9,
+    "findings": [
+      {
+        "severity": "low",
+        "summary": "The node's constraint states that pi's edit/write/multi_edit/bash should be excluded in this node, with the guard node swapping exclusion for mechanistic enforcement. The base commit's pi_runner.py already loads gddp_verifier_guard.ts with mechanistic enforcement and provides broad tool access (no --exclude-tools). The practical outcome (write tools are blocked) matches the constraint's intent, but the mechanism differs from what the constraint describes. This was pre-existing in the base commit, not introduced by this node's verification work.",
+        "affected_node_ids": [
+          "pi-evaluator-harness",
+          "pi-evaluator-guard"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "The orchestrator (orchestrator.py) raises RuntimeError when semantic_harness is None, changing the parameter from 'optional, backward compatible' to effectively required. The criterion states 'the default path is unchanged (backward compatible)' but the built-in SemanticAgent fallback was removed. The bridge always provides semantic_harness, so production paths are unaffected, but the --semantic-harness runner CLI path would crash with the current orchestrator. This was pre-existing in the base commit.",
+        "affected_node_ids": [
+          "pi-evaluator-harness"
+        ]
+      }
+    ],
+    "reasoning": "The node's work was verification-only: zero code changes to tracked files (empty git diff), creation of .venv/ (local, untracked) to enable the test suite, smoke-test files outside the repo, and the three required artifacts. The patch.diff is empty — the base commit already implements the pi evaluator harness. The artifacts correctly document the existing implementation and the live end-to-end test results (199 tests passed, live pi --print run produced a valid VerdictReceipt). \n\nThe node's intended role — 'Drive the semantic evaluator through the pi coding agent for live visibility' — is preserved. The pi_runner.py spawns pi with the typed submit_verdict extension, the orchestrator accepts the semantic_harness callable, the CLI exposes --semantic-harness {auto,pi,runner}, and the decision_engine matrix is untouched. OpenAICompatibleRunner/AnthropicRunner/SemanticAgent are still present. Graph truth remains human-owned.\n\nTwo pre-existing conditions from the base commit are noted: (1) the guard extension is already loaded with mechanistic enforcement rather than using --exclude-tools exclusion as the constraint describes, and (2) the orchestrator now requires semantic_harness instead of it being optional. These affect downstream nodes (pi-evaluator-guard, evaluator-intent-integrity-verdict) and are documented as findings and graph_observations. Neither was introduced by this node's work, and neither prevents a 'pass' verdict for the verified implementation.",
+    "tool_trace": [
+      {
+        "ts": "2026-07-26T11:07:35.978Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_RHWPheJogUFtApJWd2ZP9551",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/pi-evaluator-harness.yaml"
+      },
+      {
+        "ts": "2026-07-26T11:07:35.978Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_TjWVzQcQwOS7nGVVeusB6964",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/pi-evaluator-guard.yaml"
+      },
+      {
+        "ts": "2026-07-26T11:07:35.979Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_U6WmoiqgGJA1IbCk8TzL2765",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/semantic-submit-verdict-tool.yaml"
+      },
+      {
+        "ts": "2026-07-26T11:07:35.979Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_2ZiVo1MPPzc20z6feinD5775",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/semantic-validation-retry.yaml"
+      },
+      {
+        "ts": "2026-07-26T11:07:35.979Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_04_lL2ona69Elv2g4ulaool3183",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/verification-receipt-contract.yaml"
+      },
+      {
+        "ts": "2026-07-26T11:07:35.984Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_TjWVzQcQwOS7nGVVeusB6964",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:35.984Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_RHWPheJogUFtApJWd2ZP9551",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:35.984Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_U6WmoiqgGJA1IbCk8TzL2765",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:35.984Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_2ZiVo1MPPzc20z6feinD5775",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:35.985Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_04_lL2ona69Elv2g4ulaool3183",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:39.594Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_8VSFWBkfyVICAMKkgaFo0559",
+        "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/"
+      },
+      {
+        "ts": "2026-07-26T11:07:39.595Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Obyl3DrqZ3E8THp1ZoUJ4066",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/ -maxdepth 2 -type f | head -50"
+      },
+      {
+        "ts": "2026-07-26T11:07:39.615Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_8VSFWBkfyVICAMKkgaFo0559",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:39.615Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Obyl3DrqZ3E8THp1ZoUJ4066",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:42.264Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_4KmUnmjXnAU6fKC59an65083",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/patch.diff"
+      },
+      {
+        "ts": "2026-07-26T11:07:42.264Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_1M6NiuyrfQbeVA4AuRiY4575",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/decision.md"
+      },
+      {
+        "ts": "2026-07-26T11:07:42.264Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_UGHM5gSNTpbrjLGYup0z2023",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/result-summary.md"
+      },
+      {
+        "ts": "2026-07-26T11:07:42.266Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_4KmUnmjXnAU6fKC59an65083",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:42.267Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_UGHM5gSNTpbrjLGYup0z2023",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:42.267Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_1M6NiuyrfQbeVA4AuRiY4575",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:44.415Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_W34BgH2DlRlrPdBVgQn39586",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification -type f | sort"
+      },
+      {
+        "ts": "2026-07-26T11:07:44.437Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_W34BgH2DlRlrPdBVgQn39586",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:47.158Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_EihUezlIp0r3OT7r7KcO0151",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts"
+      },
+      {
+        "ts": "2026-07-26T11:07:47.159Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_TJrCdkeA1x6sLUfnmPOL7499",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/semantic/pi_runner.py"
+      },
+      {
+        "ts": "2026-07-26T11:07:47.160Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_ly6aN2BeC3tQFhye7Ne16841",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/orchestrator.py"
+      },
+      {
+        "ts": "2026-07-26T11:07:47.163Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_EihUezlIp0r3OT7r7KcO0151",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:47.164Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_TJrCdkeA1x6sLUfnmPOL7499",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:47.165Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_ly6aN2BeC3tQFhye7Ne16841",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:50.380Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_Xy3eOJvVzMHveb5G1AzS1055",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/cli.py"
+      },
+      {
+        "ts": "2026-07-26T11:07:50.381Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_okqx3AmzlMftJur8WiSi5738",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/semantic/pi_harness/gddp_verifier_guard.ts"
+      },
+      {
+        "ts": "2026-07-26T11:07:50.381Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_KuibTza9pzEZYaA4EN1d3191",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/semantic/context_builder.py"
+      },
+      {
+        "ts": "2026-07-26T11:07:50.384Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_KuibTza9pzEZYaA4EN1d3191",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:50.384Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_okqx3AmzlMftJur8WiSi5738",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:50.385Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Xy3eOJvVzMHveb5G1AzS1055",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:54.190Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_t68HdGU1GhN1GFqNqrP53731",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/schemas.py"
+      },
+      {
+        "ts": "2026-07-26T11:07:54.191Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_kudL951mqdUjzZtTTtbt0868",
+        "command": "grep -n \"class OpenAICompatibleRunner\\|class AnthropicRunner\\|class SemanticAgent\\|class SemanticOutput\\|class VerdictReceipt\\|class IntegrityOutput\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/semantic/agent.py /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/schemas.py /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/decision_engine.py 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-26T11:07:54.199Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_t68HdGU1GhN1GFqNqrP53731",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:54.220Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_kudL951mqdUjzZtTTtbt0868",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:57.026Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_gsz3ZTXTh98ZlJiQjcSN5038",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/decision_engine.py"
+      },
+      {
+        "ts": "2026-07-26T11:07:57.026Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_kHWfRvFxZwD2cDlSatmU9321",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/semantic/pi_environment.py"
+      },
+      {
+        "ts": "2026-07-26T11:07:57.029Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_gsz3ZTXTh98ZlJiQjcSN5038",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:07:57.029Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_kHWfRvFxZwD2cDlSatmU9321",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:08:20.531Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_ySYSUrfZqqjSxOesrmEV3392",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/semantic/agent.py"
+      },
+      {
+        "ts": "2026-07-26T11:08:20.532Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_tpk93NL9gL1L6WZJ7MaW2000",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/integrity_combiner.py"
+      },
+      {
+        "ts": "2026-07-26T11:08:20.535Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ySYSUrfZqqjSxOesrmEV3392",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:08:20.536Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_tpk93NL9gL1L6WZJ7MaW2000",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:08:43.725Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_Re6LtwyrVs3pfyliCVKB6261",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/bridge.py"
+      },
+      {
+        "ts": "2026-07-26T11:08:43.727Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Re6LtwyrVs3pfyliCVKB6261",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:09:05.564Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_lMlW3RNpILV6amwEVQTS1138",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/semantic/integrity_runner.py"
+      },
+      {
+        "ts": "2026-07-26T11:09:05.565Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_0s045xkPG2nvWjYnLAqO9268",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/scripts/runtime/verification/semantic/pi_harness/gddp_integrity.ts"
+      },
+      {
+        "ts": "2026-07-26T11:09:05.567Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_lMlW3RNpILV6amwEVQTS1138",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:09:05.568Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_0s045xkPG2nvWjYnLAqO9268",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:09:25.427Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_d2wMeXITkQsWEnb14Oql4891",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo && git status --short --branch 2>/dev/null; echo \"---\"; git log --oneline -3 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-26T11:09:25.428Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_90vTTVguClH7s5cctU7m9119",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo && git diff --stat HEAD 2>/dev/null; echo \"---\"; git diff HEAD -- scripts/ 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-07-26T11:09:25.533Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_90vTTVguClH7s5cctU7m9119",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:09:25.535Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_d2wMeXITkQsWEnb14Oql4891",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:09:28.298Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_VWBjuXRhpJycOIKpbE2q5120",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo && git show --stat HEAD 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-26T11:09:28.336Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_VWBjuXRhpJycOIKpbE2q5120",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:09:47.871Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_rWtjSLxZvk8VNvxH1m249764",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "The gddp_verifier_guard.ts extension is already loaded in pi_runner.py with full mechanistic enforcement (block writes, dangerous bash, network; log tool trace). The pi-evaluator-guard node's core mechanism is thus already implemented in the base commit. The guard node should verify and harden rather than build from scratch. The runner already provides broad tool access with no --exclude-tools, matching the guard node's 'runner-drops-exclude-tools' criterion.",
+        "affected_node_ids": [
+          "pi-evaluator-guard"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The orchestrator's contract change (semantic_harness required instead of optional) means the evaluator-intent-integrity-verdict node and any other downstream code calling verify() must provide a semantic_harness. The bridge always does, but the change tightens the API contract beyond what the criterion stated.",
+        "affected_node_ids": [
+          "evaluator-intent-integrity-verdict",
+          "pi-evaluator-guard"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9,
+  "criteria_confidence": 0.9,
+  "completeness": 1.0,
+  "graph_readiness": 0.0,
+  "completeness_status": "not-run",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "pi-extension-registers-submit-verdict",
+        "criterion": "scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts registers a typed submit_verdict terminal tool whose parameters mirror SemanticOutput and that writes the verdict JSON to $GDDP_VERDICT_OUT with terminate:true",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "gddp_verifier -> line 2: 'gddp_verifier'",
+          "submit_verdict -> line 2: 'submit_verdict'",
+          "SemanticOutput -> line 10: 'SemanticOutput'",
+          "JSON -> line 15: 'JSON'",
+          "GDDP_VERDICT_OUT -> line 12: 'GDDP_VERDICT_OUT'"
+        ],
+        "reasoning": "Scanned source files (scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts) for identifiers named in the criterion (pi_harness, gddp_verifier, submit_verdict, SemanticOutput, JSON, GDDP_VERDICT_OUT). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "pi-runner-drives-pi",
+        "criterion": "scripts/runtime/verification/semantic/pi_runner.py spawns pi in --print mode with the extension loaded, a pi-specific system prompt, and the target repo as cwd; it reads the verdict file and returns a SemanticOutput",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "SemanticOutput -> line 19: 'SemanticOutput'"
+        ],
+        "reasoning": "Scanned source files (scripts/runtime/verification/semantic/pi_runner.py) for identifiers named in the criterion (pi_runner, pi-specific, SemanticOutput). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "orchestrator-harness-hook",
+        "criterion": "scripts/runtime/verification/orchestrator.py accepts an optional semantic_harness callable that, when set, replaces SemanticAgent.run(); the default path is unchanged (backward compatible)",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "semantic_harness -> line 26: 'semantic_harness'",
+          "SemanticAgent -> line 9: 'SemanticAgent'"
+        ],
+        "reasoning": "Scanned source files (scripts/runtime/verification/orchestrator.py) for identifiers named in the criterion (semantic_harness, SemanticAgent). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "cli-harness-flag",
+        "criterion": "scripts/runtime/verification/cli.py exposes --semantic-harness {auto,pi,runner} (auto resolves to runner so existing behavior is unchanged) plus --semantic-thinking and --semantic-pi-model",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "semantic\\-harness -> line 148: 'semantic-harness'",
+          "semantic\\-thinking -> line 159: 'semantic-thinking'",
+          "semantic\\-pi\\-model -> line 164: 'semantic-pi-model'"
+        ],
+        "reasoning": "Scanned source files (scripts/runtime/verification/cli.py) for identifiers named in the criterion (semantic-harness, semantic-thinking, semantic-pi-model). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "live-run-produces-valid-receipt",
+        "criterion": "a live --semantic-harness pi run against a vault-doctor node produces a VerdictReceipt with populated criteria_confidence, completeness_status, and semantic judgments; the decision_engine decides the verdict, not pi",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "semantic\\-harness -> line 26: 'semantic-harness'",
+          "vault\\-doctor -> line 59: 'vault-doctor'",
+          "VerdictReceipt -> line 26: 'VerdictReceipt'",
+          "criteria_confidence -> line 387: 'criteria_confidence'",
+          "completeness_status -> line 388: 'completeness_status'",
+          "decision_engine -> line 7: 'decision_engine'"
+        ],
+        "reasoning": "Scanned source files (scripts/adapters/__init__.py, scripts/adapters/executor_protocol.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_api_adapter.py...) for identifiers named in the criterion (semantic-harness, vault-doctor, VerdictReceipt, criteria_confidence, completeness_status, decision_engine). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "suite-green",
+        "criterion": ".venv/bin/python -m pytest -q scripts/runtime/verification (the repo venv interpreter, not system python3) passes with no regressions",
+        "status": "fail",
+        "confidence": 0.9,
+        "method": "command_proof",
+        "evidence": [
+          "$ .venv/bin/python -m pytest -q scripts/runtime/verification",
+          "exit 127",
+          "/bin/sh: .venv/bin/python: No such file or directory"
+        ],
+        "reasoning": "Ran `.venv/bin/python -m pytest -q scripts/runtime/verification` (exit 127). Command failed.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "do not change the decision_engine matrix or the VerdictReceipt contract in this node",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "do not remove the OpenAICompatibleRunner/AnthropicRunner path; pi is an option, not a replacement",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "pi's edit/write/multi_edit/bash are excluded in this node (the sibling guard node later swaps exclusion for mechanistic enforcement)",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "keep the harness model-agnostic across pi providers (deepseek/zai/gemini/openrouter)",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "graph truth stays human-owned; this node produces evidence only",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "decision.md": true,
+      "result-summary.md": true,
+      "patch.diff": true
+    },
+    "deps_status": {
+      "semantic-submit-verdict-tool": "complete",
+      "semantic-validation-retry": "complete",
+      "verification-receipt-contract": "complete"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": []
+  },
+  "semantic": null,
+  "decision_reasoning": "Fix failing acceptance criteria and re-submit.",
+  "required_next_action": "Fix failing acceptance criteria and re-submit.",
+  "generated_at": "2026-07-26T11:09:47.899788+00:00",
+  "evaluated_tree_sha": "836f822aa5edf43383b65161b2b0f9651201e0a0",
+  "evaluated_commit_sha": "21ced0c2f11926e87dd85d9d6c5733b497d7ac44",
+  "merge_commit_sha": "21ced0c2f11926e87dd85d9d6c5733b497d7ac44",
+  "pr_ref": null,
+  "job_id": "job_20260726T1059546275a44bb7bbd0",
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml",
+    "neighbor:semantic-submit-verdict-tool": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/semantic-submit-verdict-tool.yaml",
+    "neighbor:semantic-validation-retry": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/semantic-validation-retry.yaml",
+    "neighbor:verification-receipt-contract": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/verification-receipt-contract.yaml",
+    "neighbor:pi-evaluator-guard": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/pi-evaluator-guard.yaml"
+  },
+  "context_coverage": {
+    "criteria": "not_run",
+    "integrity": {
+      "rating": "low",
+      "offered": 7,
+      "content_accessed": 4,
+      "not_observed": 3,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/pi-evaluator-guard.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/semantic-submit-verdict-tool.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/semantic-validation-retry.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/verification-receipt-contract.yaml"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-6uext8oo/README.md"
+      ]
+    },
+    "overall": "low"
+  }
+}

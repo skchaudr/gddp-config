@@ -1,0 +1,375 @@
+{
+  "project_id": "test-project",
+  "node_id": "gate-continuation-smoke-b",
+  "verdict": "blocked",
+  "criteria_verdict": "blocked",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.93,
+    "findings": [],
+    "reasoning": "The work under review for gate-continuation-smoke-b is a single bounded change: commit 345f5df adds only gate-smoke/b.txt (git diff 345f5df^ HEAD shows exactly one new file), containing exactly \"B passed\\n\" (hexdump verifies trailing newline). It preserves gate-smoke/a.txt byte-for-byte unchanged since the upstream marker-A commit a796443 (empty diff; content exactly \"A passed\\n\"), satisfying the inherited marker-a criterion and the \"Preserve gate-smoke/a.txt unchanged\" constraint. No graph configuration or runtime database files were touched: the repo tree at HEAD contains only README.md, gate-smoke/a.txt, and gate-smoke/b.txt, and the gddp-config node YAMLs predate the attempt (23:37-23:38 vs 23:42 commit). The node's why — prove GDDP dispatches downstream work building on the passing predecessor's result commit — is exactly what the commit history shows (a796443 marker A precedes 345f5df marker B), and with unlocks: [] nothing downstream depends on this node. Node intent and graph integrity are both preserved; the lane-1 'indeterminate' criteria status stems from the keyword-scan method finding no source files and does not reflect an intent or graph-structure problem, since the artifacts verify the criteria at file level.",
+    "tool_trace": [
+      {
+        "ts": "2026-07-31T06:47:40.220Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_BKxJv8j1SGeybwUz8tat3959",
+        "command": "pwd && ls -la"
+      },
+      {
+        "ts": "2026-07-31T06:47:40.222Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_LkFLQqamhhQz2j9zHH5t4263",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/test-project/nodes/gate-continuation-smoke-b.yaml"
+      },
+      {
+        "ts": "2026-07-31T06:47:40.223Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_9XzM2Y46PJzCfVkQhmn21059",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/test-project/nodes/gate-continuation-smoke-a.yaml"
+      },
+      {
+        "ts": "2026-07-31T06:47:40.223Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_rtlk8BKcjHwNMSeobT2P0824",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/test-project/nodes/canary-retry-proof.yaml"
+      },
+      {
+        "ts": "2026-07-31T06:47:40.234Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_LkFLQqamhhQz2j9zHH5t4263",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-31T06:47:40.235Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_rtlk8BKcjHwNMSeobT2P0824",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-31T06:47:40.235Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_9XzM2Y46PJzCfVkQhmn21059",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-31T06:47:40.243Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_BKxJv8j1SGeybwUz8tat3959",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-31T06:47:41.842Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Iw4PIlTAGT9Ww2xDjNNR0672",
+        "command": "find . -type f -not -path './.git/*' | head -50; echo \"---\"; ls -la gate-smoke/; echo \"---\"; cat README.md; echo \"---\"; cat .git 2>/dev/null | head -5"
+      },
+      {
+        "ts": "2026-07-31T06:47:41.879Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Iw4PIlTAGT9Ww2xDjNNR0672",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-31T06:47:43.492Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ET_9xmJq4auyEBNaZjq8W8V3830",
+        "command": "echo \"--- a.txt (hexdump) ---\"; xxd gate-smoke/a.txt; echo \"--- b.txt (hexdump) ---\"; xxd gate-smoke/b.txt; echo \"--- diff vs HEAD ---\"; git diff HEAD --stat 2>/dev/null; git diff HEAD 2>/dev/null | head -40; echo \"--- status ---\"; git status --short 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-31T06:47:43.800Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ET_9xmJq4auyEBNaZjq8W8V3830",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-31T06:47:45.919Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_419SckUPwsQFZhRl4ezK6818",
+        "command": "git log --oneline -10 2>/dev/null; echo \"---\"; git log --stat -3 2>/dev/null | head -40; echo \"---\"; git show --stat HEAD 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-07-31T06:47:45.987Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_419SckUPwsQFZhRl4ezK6818",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-31T06:47:49.078Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_LMBNbyVO1Dg1TeqOfvJR3379",
+        "command": "echo \"=== a796443 (marker A) ===\"; git show --stat a796443 | head -15; echo; echo \"=== 345f5df (b.txt) ===\"; git show --stat 345f5df | head -15; echo; echo \"=== 77ba473 ===\"; git show --stat 77ba473 | head -15; echo; echo \"=== 0deaab2 ===\"; git show --stat 0deaab2 | head -15"
+      },
+      {
+        "ts": "2026-07-31T06:47:49.172Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_LMBNbyVO1Dg1TeqOfvJR3379",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-31T06:47:52.478Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_00_W8lduHjq8DcRlyH55vAm5137",
+        "reason": "command matched blocked pattern",
+        "command": "echo \"=== full diff of current-node attempt (parent of 345f5df -> HEAD) ===\"; git diff 345f5df~1 HEAD --stat; echo; echo \"=== full diff content ===\"; git diff 345f5df~1 HEAD; echo; echo \"=== diff of a.txt since marker-A commit ===\"; git diff a796443 HEAD -- gate-smoke/a.txt; echo \"(empty means unchanged)\"; echo; echo \"=== files at HEAD ===\"; git ls-tree -r --name-only HEAD",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-07-31T06:47:52.479Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_W8lduHjq8DcRlyH55vAm5137",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-07-31T06:47:58.154Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_C1mdfKOJC1OYEmCVB7ZQ6992",
+        "command": "git diff 345f5df^ HEAD"
+      },
+      {
+        "ts": "2026-07-31T06:47:58.155Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_rnXL1SaAJ4qivmQVt9ea8097",
+        "command": "git diff a796443 HEAD -- gate-smoke/a.txt; echo \"exit=$? (empty above means a.txt unchanged since marker A commit)\""
+      },
+      {
+        "ts": "2026-07-31T06:47:58.193Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_C1mdfKOJC1OYEmCVB7ZQ6992",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-31T06:47:58.193Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_rnXL1SaAJ4qivmQVt9ea8097",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-31T06:48:00.717Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_pX8iVum70LMkP4AIszrJ7380",
+        "command": "git ls-tree -r --name-only HEAD"
+      },
+      {
+        "ts": "2026-07-31T06:48:00.717Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_AABer2um1kQewIYozB3g0248",
+        "command": "git diff 64f6d70 HEAD --name-status; echo \"exit=$?\""
+      },
+      {
+        "ts": "2026-07-31T06:48:00.755Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_pX8iVum70LMkP4AIszrJ7380",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-31T06:48:00.756Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_AABer2um1kQewIYozB3g0248",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-31T06:48:17.099Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_xqv2zMf3Mfu1GKS8KEuj5168",
+        "command": "git status; echo \"---\"; git diff HEAD --name-only; echo \"(empty = worktree matches HEAD)\""
+      },
+      {
+        "ts": "2026-07-31T06:48:17.099Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_cRy8nMCShWbrNqC6jFh58903",
+        "command": "ls -la /Users/sab-mini/repos/gddp-config/graphs/test-project/nodes/; echo \"---\"; stat -f \"%Sm %N\" -t \"%Y-%m-%d %H:%M\" /Users/sab-mini/repos/gddp-config/graphs/test-project/nodes/*.yaml 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-31T06:48:17.124Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_cRy8nMCShWbrNqC6jFh58903",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-31T06:48:17.153Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_xqv2zMf3Mfu1GKS8KEuj5168",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-31T06:48:33.122Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_fzRw2Hx32DpnZtKDGVMs6888",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "gate-continuation-smoke-a remains status 'provisional' in graph truth (deps_status) while this downstream node has already fired on its result commit. This is the canary's intended design (dispatch on the predecessor's result commit), but the chain's formal pass status converges on lane 1's judgment of the upstream node; if upstream is judged failed, reconciliation of the inherited a.txt assumption will be needed.",
+        "affected_node_ids": [
+          "gate-continuation-smoke-a",
+          "gate-continuation-smoke-b"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.5,
+  "criteria_confidence": 1.0,
+  "completeness": 0.5,
+  "graph_readiness": 0.0,
+  "completeness_status": "not-run",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "marker-a-inherited",
+        "criterion": "gate-smoke/a.txt exists unchanged and contains exactly \"A passed\\n\"",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (gate-smoke). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "marker-b-exact",
+        "criterion": "gate-smoke/b.txt exists and contains exactly \"B passed\\n\"",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (gate-smoke). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "change-is-bounded",
+        "criterion": "This attempt adds only gate-smoke/b.txt",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (gate-smoke). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Preserve gate-smoke/a.txt unchanged",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Do not modify graph configuration or runtime databases",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Add only gate-smoke/b.txt",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "gate-smoke/b.txt": true
+    },
+    "deps_status": {
+      "gate-continuation-smoke-a": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": []
+  },
+  "semantic": null,
+  "decision_reasoning": "Complete dependency nodes before re-verification.",
+  "required_next_action": "Complete dependency nodes before re-verification.",
+  "generated_at": "2026-07-31T06:48:33.154492+00:00",
+  "evaluated_tree_sha": "6904883892c3f0545dd9819b75b8fdaa0509a4f8",
+  "evaluated_commit_sha": "0deaab297ebdb0bbc50dd9d98e5a8520ed6b0234",
+  "merge_commit_sha": "0deaab297ebdb0bbc50dd9d98e5a8520ed6b0234",
+  "pr_ref": null,
+  "job_id": "job_20260731T064235715749899df0e6",
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hekapr7s/README.md",
+    "project_brief": "UNAVAILABLE: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hekapr7s/PROJECT-BRIEF.md does not exist",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/test-project/nodes/canary-retry-proof.yaml",
+    "neighbor:gate-continuation-smoke-a": "/Users/sab-mini/repos/gddp-config/graphs/test-project/nodes/gate-continuation-smoke-a.yaml"
+  },
+  "context_coverage": {
+    "criteria": "not_run",
+    "integrity": {
+      "rating": "low",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/test-project/nodes/canary-retry-proof.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/test-project/nodes/gate-continuation-smoke-a.yaml"
+      ],
+      "not_observed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hekapr7s/README.md"
+      ]
+    },
+    "overall": "low"
+  }
+}

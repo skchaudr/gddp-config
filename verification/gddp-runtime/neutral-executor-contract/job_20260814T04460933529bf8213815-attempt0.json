@@ -1,0 +1,1189 @@
+{
+  "project_id": "gddp-runtime",
+  "node_id": "neutral-executor-contract",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.9,
+    "findings": [
+      {
+        "severity": "low",
+        "summary": "Result-summary residual-risk note states MissionAdapter._packet_node historically dropped previous_findings when projecting mission nodes, but on HEAD (tip 49bd8ab, identical to base for production code) mission_adapter.py:546 renders previous_findings into the mission 'why' with a §4 comment. The note is hedged ('if still open on HEAD') and does not affect the contract's integrity — the contract doc states the forwarding rule and the code complies — but the note is stale or at least ambiguous about current state.",
+        "affected_node_ids": [
+          "neutral-executor-contract"
+        ]
+      }
+    ],
+    "reasoning": "The work under review is a definitional deliverable for a definition node: docs/executor-contract.md freezes the executor-neutral packet, attempt identity, and returned-result shape, with wire-shape lock tests appended to test_executor_contract.py and refreshed attempt artifacts. Every material claim was verified against source: NodePacket fields and determinism, SessionStatus 9-state vocabulary, PatchResult/DispatchResult shapes, the ADAPTERS vs MEDIATED_ADAPTERS split (direct: jules_api/local_subprocess/droid/factory_mission/pi_rpc; mediated: jules action path as inherited infrastructure), _build_node_packet, state_recorder.execution_attempt_id, the executor_sessions.execution_attempt_id column, graph_updater as human-merged evidence PR, and VerdictReceipt. Both claimed test runs reproduce exactly (37 passed; 103 passed). The four contract sections map 1:1 to the four acceptance criteria, matching the node's title and why. The node's role as the definitional spine for the 5-node chain is preserved: the downstream direct-executor-round-trip node explicitly requires consuming this contract, which is exactly what is delivered. Constraints are honored: no completion is claimed from tests or executor success (artifacts say 'ready for human review; not accepted or complete', graph status remains 'ready' in gddp-config, human gate explicit), the mediated pathway is preserved as inherited infrastructure rather than the command bus, and direct transport is preferred. Graph integrity is preserved: the diff touches only runtime-repo files (docs, tests, .gddp artifacts), no production code changed, no gddp-config mutation, and no downstream breakage — the contract provides the types and registries the next node builds on. One low-severity note: a hedged residual-risk claim about MissionAdapter dropping previous_findings appears stale on HEAD (code currently renders them); this is evidence-accuracy, not an integrity threat, and does not change the verdict.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-14T04:53:57.462Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_lqheNcWQCYdgirXUbfiL1518",
+        "command": "pwd && ls -la && echo \"---\" && ls -la .gddp/ 2>/dev/null && echo \"---\" && ls -la docs/ 2>/dev/null && echo \"---\" && ls -la scripts/adapters/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T04:53:57.463Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_0M4EB4698iK4DENQdzcw7703",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/direct-executor-round-trip.yaml"
+      },
+      {
+        "ts": "2026-08-14T04:53:57.478Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_0M4EB4698iK4DENQdzcw7703",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:53:57.531Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_lqheNcWQCYdgirXUbfiL1518",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:53:59.731Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_fEM0xcungeSahfsyJr3P8800",
+        "path": "docs/executor-contract.md"
+      },
+      {
+        "ts": "2026-08-14T04:53:59.732Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_uL9Oz2NJH2vSGibzsreN9821",
+        "path": ".gddp/decision.md"
+      },
+      {
+        "ts": "2026-08-14T04:53:59.732Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_PNHmDPDsX170ASbBYNdP4251",
+        "path": ".gddp/result-summary.md"
+      },
+      {
+        "ts": "2026-08-14T04:53:59.734Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_fEM0xcungeSahfsyJr3P8800",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:53:59.735Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_PNHmDPDsX170ASbBYNdP4251",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:53:59.735Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_uL9Oz2NJH2vSGibzsreN9821",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:54:02.678Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_LBV49ZAjLKrelZNuEPRM4500",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && git log --oneline -5 2>/dev/null; echo \"---STATUS---\"; git status --short 2>/dev/null | head -30; echo \"---BASE vs TIP---\"; git diff e2e5f30536e66b8ce09125b70e297fad88102823 49bd8abd773d4336eb935d6af9f6b330d10a8cf4 --stat 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T04:54:02.679Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_vtycnY3jLOS2k2SEsqrW6194",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && wc -l .gddp/patch.diff && head -100 .gddp/patch.diff"
+      },
+      {
+        "ts": "2026-08-14T04:54:02.705Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_vtycnY3jLOS2k2SEsqrW6194",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:54:02.998Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_LBV49ZAjLKrelZNuEPRM4500",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:54:07.214Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_fwHl6U0y3XsxFLC5Qq7r3289",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && sed -n '100,396p' .gddp/patch.diff"
+      },
+      {
+        "ts": "2026-08-14T04:54:07.230Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_fwHl6U0y3XsxFLC5Qq7r3289",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:54:10.940Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_O9pOOh0D7PELlIaTlqCN0770",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -n \"class NodePacket\\|class DispatchResult\\|class SessionStatus\\|class PatchResult\\|class SessionRef\\|class ExecutorAdapter\\|class VerdictReceipt\" scripts/adapters/executor_protocol.py"
+      },
+      {
+        "ts": "2026-08-14T04:54:10.940Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_r6dRrqrIBxOItUiABvJK6387",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -rn \"ADAPTERS\\|MEDIATED_ADAPTERS\" scripts/runtime/ scripts/dispatch* scripts/ 2>/dev/null | grep -v test | grep -v \".pyc\" | head -20"
+      },
+      {
+        "ts": "2026-08-14T04:54:10.967Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_O9pOOh0D7PELlIaTlqCN0770",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:54:11.133Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_r6dRrqrIBxOItUiABvJK6387",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:54:13.320Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_VOGyZuhtCIky8IhHoPLF9131",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && sed -n '30,60p' scripts/runtime/heartbeat/dispatcher.py"
+      },
+      {
+        "ts": "2026-08-14T04:54:13.321Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ljJFWaBgHKW0JNSjwJ3o5012",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && sed -n '40,260p' scripts/adapters/executor_protocol.py"
+      },
+      {
+        "ts": "2026-08-14T04:54:13.349Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_VOGyZuhtCIky8IhHoPLF9131",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:54:13.349Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ljJFWaBgHKW0JNSjwJ3o5012",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:54:17.671Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_K2j2Tz3vn6RJJSrBjRuq9729",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && env -u PYTHONPATH -u PYTHONHOME /opt/homebrew/bin/python3 -m pytest scripts/adapters/test_executor_contract.py -q 2>&1 | tail -5"
+      },
+      {
+        "ts": "2026-08-14T04:54:17.672Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_opVjNUksYGa5JWyFNXjd0331",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && git show e2e5f30536e66b8ce09125b70e297fad88102823:scripts/adapters/test_executor_contract.py 2>/dev/null | wc -l; echo \"---base had executor-contract.md?---\"; git ls-tree e2e5f30536e66b8ce09125b70e297fad88102823 docs/ 2>/dev/null | grep -i contract; echo \"---tip---\"; git ls-tree 49bd8abd773d4336eb935d6af9f6b330d10a8cf4 docs/ 2>/dev/null | grep -i contract"
+      },
+      {
+        "ts": "2026-08-14T04:54:17.772Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_opVjNUksYGa5JWyFNXjd0331",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:54:32.590Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_K2j2Tz3vn6RJJSrBjRuq9729",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:54:35.387Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_rbtr9KVEHGPfGzwjDZat6116",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && env -u PYTHONPATH -u PYTHONHOME /opt/homebrew/bin/python3 -m pytest scripts/adapters/test_executor_contract.py scripts/adapters/test_jules_action_adapter.py scripts/runtime/heartbeat/test_executor_sessions.py -q 2>&1 | tail -3"
+      },
+      {
+        "ts": "2026-08-14T04:54:35.388Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_wiEGRoZ62GhginQQ4bM67671",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml"
+      },
+      {
+        "ts": "2026-08-14T04:54:35.392Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_wiEGRoZ62GhginQQ4bM67671",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:55:22.549Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_rbtr9KVEHGPfGzwjDZat6116",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:55:26.634Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_g9Xpj6ao6bNmbUEDxaHT7017",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-14T04:55:26.635Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Xsuvk3oKyU5w0JdtUKLN2615",
+        "command": "ls /Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/ && echo \"---\" && cat /Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/neutral-executor-contract.yaml 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T04:55:26.639Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_g9Xpj6ao6bNmbUEDxaHT7017",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:55:26.659Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Xsuvk3oKyU5w0JdtUKLN2615",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:55:33.292Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_CNApR0Nv0y7WF3uq2GAM8323",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -rn \"_build_node_packet\" scripts/runtime/heartbeat/dispatcher.py | head -3; echo \"---\"; grep -rn \"execution_attempt_id\" scripts/runtime/state_recorder.py 2>/dev/null | head -5; echo \"---\"; grep -rn \"execution_attempt_id\" scripts/runtime/heartbeat/state_recorder.py 2>/dev/null | head -5; echo \"---find state_recorder---\"; find scripts -name \"*.py\" | xargs grep -ln \"def execution_attempt_id\" 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T04:55:33.293Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Sz79CCTIFSXBMng9T2b86572",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -rln \"graph_updater\" scripts/ | grep -v test | head; echo \"---\"; grep -rn \"execution_attempt_id\" scripts/runtime/heartbeat/*.py | grep -i \"schema\\|create\\|column\\|ALTER\\|executor_sessions\" | head -8; echo \"---sqlite schema---\"; grep -rn \"execution_attempt_id\" scripts/init_db.py scripts/runtime/db.py scripts/runtime/*.py 2>/dev/null | head -8"
+      },
+      {
+        "ts": "2026-08-14T04:55:33.420Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_CNApR0Nv0y7WF3uq2GAM8323",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:55:33.448Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Sz79CCTIFSXBMng9T2b86572",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:55:36.637Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_MumPk8nPFxSXceiagAFq7714",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && head -40 scripts/runtime/graph_updater.py; echo \"---\"; grep -rn \"awaiting_review\" scripts/runtime/ --include=\"*.py\" | grep -v test | head -8"
+      },
+      {
+        "ts": "2026-08-14T04:55:36.637Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_QvuTH5lSeGm5LYTwjufR4467",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -rn \"previous_findings\" scripts/adapters/*.py scripts/runtime/heartbeat/*.py | grep -v test | head -12"
+      },
+      {
+        "ts": "2026-08-14T04:55:36.696Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_QvuTH5lSeGm5LYTwjufR4467",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:55:36.707Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_MumPk8nPFxSXceiagAFq7714",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:56:00.712Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_MGxu1nmEgfjeZdXFBYrG4257",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -rn \"class VerdictReceipt\" scripts/ | head -3; echo \"---mission previous_findings context---\"; sed -n '530,570p' scripts/adapters/mission_adapter.py"
+      },
+      {
+        "ts": "2026-08-14T04:56:00.712Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_zg6GYltunlbS0TwpVGe72908",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && git diff e2e5f30536e66b8ce09125b70e297fad88102823 49bd8abd773d4336eb935d6af9f6b330d10a8cf4 -- scripts/adapters/test_executor_contract.py | grep -c \"^+def test\\|^+class\"; echo \"---any production code changed besides tests/docs/gddp?---\"; git diff --name-only e2e5f30536e66b8ce09125b70e297fad88102823 49bd8abd773d4336eb935d6af9f6b330d10a8cf4"
+      },
+      {
+        "ts": "2026-08-14T04:56:00.795Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_zg6GYltunlbS0TwpVGe72908",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:56:00.823Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_MGxu1nmEgfjeZdXFBYrG4257",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T04:56:32.904Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_IfzKFPub8Ii8dNeX0Q9g5064",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "The downstream direct-executor-round-trip node will consume this contract's direct registry. The contract lists 'droid' as a full lifecycle conformer while the droid-executor-smoke node remains provisional in the graph; the direct round trip should lean on proven transports (jules_api/local_subprocess/pi_rpc) or prove droid first, to avoid depending on an unproven transport.",
+        "affected_node_ids": [
+          "direct-executor-round-trip",
+          "droid-executor-smoke"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.8125,
+  "criteria_confidence": 0.8125,
+  "completeness": 1.0,
+  "graph_readiness": 0.8125,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "executor-neutral-packet",
+        "criterion": "The same complete node packet can be given to any executor without changing the node's meaning",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "execution-attempt-identity",
+        "criterion": "GDDP can identify and track each execution attempt independently of the executor being used",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "GDDP -> line 2: 'GDDP'"
+        ],
+        "reasoning": "Scanned source files (scripts/_archive/arxiv_search.py, scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py...) for identifiers named in the criterion (GDDP). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "shared-result-shape",
+        "criterion": "Every executor returns work through one shared, understandable result shape",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "evidence-only-no-graph-mutation",
+        "criterion": "Executor output remains evidence only and does not change graph truth automatically",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model xai/grok-4.6 via the subagent tool's model parameter; close with one oracle or reviewer pass before returning",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "One executor-neutral packet and returned-result contract across all current and future executors",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Preserve any mediated pathway as inherited infrastructure rather than the required command bus",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Prefer a direct transport for the short node round trip",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Do not mark this node complete from executor success, passing tests, or an evaluator verdict",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "decision.md": true,
+      "result-summary.md": true,
+      "patch.diff": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "e2e5f30536e66b8ce09125b70e297fad88102823",
+      "tip": "49bd8abd773d4336eb935d6af9f6b330d10a8cf4",
+      "files": [
+        {
+          "status": "M",
+          "path": ".gddp/decision.md"
+        },
+        {
+          "status": "M",
+          "path": ".gddp/patch.diff"
+        },
+        {
+          "status": "M",
+          "path": ".gddp/result-summary.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/executor-contract.md"
+        },
+        {
+          "status": "M",
+          "path": "scripts/adapters/test_executor_contract.py"
+        }
+      ],
+      "truncated": false,
+      "file_count": 5,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "executor-neutral-packet",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "scripts/adapters/executor_protocol.py — NodePacket is a frozen dataclass with deep-frozen nested JSON (MappingProxyType/tuples), deterministic to_json_value()/to_json()",
+          "scripts/runtime/heartbeat/dispatcher.py:216-263 — _build_node_packet(job) constructs the packet with no reference to the executor; dispatch() (line ~108-117) passes the same packet to whichever adapter is selected",
+          "scripts/adapters/test_executor_contract.py — test_dispatch_returns_common_receipt_and_passes_same_node_packet (parametrized over jules/jules_api/local_subprocess/droid) asserts the identical NodePacket reaches every adapter; test_jules_renderers_preserve_the_same_packet_semantics asserts goal/why/constraints/criteria/artifacts/attempt/findings survive issue-body and session-prompt rendering; test_node_packet_wire_shape_is_stable_and_attempt_id_is_executor_free asserts exact key set and that 'executor' never appears in the serialized packet",
+          "docs/executor-contract.md §1 — packet field table, immutability rules, retry-findings forwarding requirement"
+        ],
+        "reasoning": "The packet is built once from the persisted job, is executor-free by construction (no executor field, no adapter-specific keys), is deeply immutable, and is verified identical across four executors plus two renderers. Adapters render but do not redefine semantics. Contract doc and wire-shape lock tests pin the shape. This satisfies 'the same complete node packet can be given to any executor without changing the node's meaning'."
+      },
+      {
+        "criterion_id": "execution-attempt-identity",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "scripts/runtime/heartbeat/state_recorder.py:201 — execution_attempt_id(job_id, attempt_index) returns '{job_id}:attempt:{attempt_index}'; insert_executor_session (line ~207-240) persists it to executor_sessions.execution_attempt_id with attempt_index",
+          "scripts/runtime/heartbeat/dispatcher.py:241 — _build_node_packet builds the same '{job_id}:attempt:{attempt_index}' id into the packet",
+          "scripts/runtime/heartbeat/runner.py:521-533 — session row (state='dispatching') with execution_attempt_id is committed BEFORE worker dispatch",
+          "scripts/init_db.py:189-207, 223, 276 — executor_sessions.execution_attempt_id TEXT NOT NULL column + backfill migration + index",
+          "scripts/runtime/heartbeat/state_recorder.py allocate_retry_attempt/allocate_plumbing_retry — new attempt gets a new attempt_index/id; prior rows remain evidence",
+          "scripts/adapters/test_executor_contract.py — wire-shape test asserts execution_attempt_id == 'job-123:attempt:2' and format is executor-free"
+        ],
+        "reasoning": "Attempt identity is a pure function of job_id + attempt_index, produced identically in the packet builder and the state recorder, persisted on executor_sessions before dispatch, and carried through retries without inventing duplicate live attempts. The format contains no executor component, so tracking is independent of the executor used. Both the definition (contract doc §2) and the persisted schema support the criterion."
+      },
+      {
+        "criterion_id": "shared-result-shape",
+        "judgment": "judged_pass",
+        "confidence": 0.75,
+        "evidence": [
+          "scripts/adapters/executor_protocol.py — DispatchResult (frozen), SessionStatus (Literal 9-state vocabulary), PatchResult (one type expressing both patch handoff and commit-ref handoff), runtime_checkable ExecutorAdapter Protocol with dispatch/status/collect/cancel",
+          "scripts/runtime/heartbeat/dispatcher.py:34-51 — ADAPTERS = {jules_api, local_subprocess, droid, factory_mission, pi_rpc}; MEDIATED_ADAPTERS = {jules: JulesActionAdapter}",
+          "scripts/adapters/test_executor_contract.py — test_shared_result_shapes_expose_one_collect_contract pins exact field tuples of PatchResult/DispatchResult/SessionStatus and both handoff modes; test_session_status_states_are_the_shared_vocabulary pins the state set",
+          "docs/executor-contract.md §3 — stage/type table, normalized states, direct vs mediated registry; engagement adapters return list[PatchResult] with the same element shape"
+        ],
+        "reasoning": "All direct lifecycle executors implement ExecutorAdapter and return through DispatchResult/SessionStatus/PatchResult; engagement adapters return lists of the same PatchResult element; field tuples and state vocabulary are locked by tests. Caveat: the mediated 'jules' GitHub-action adapter has no collect() and does not return PatchResult (it returns work via PR merge → return-router → review receipt). The node constraint 'Preserve any mediated pathway as inherited infrastructure rather than the required command bus' explicitly carves this out, and the contract doc documents it as not claimed to be a full conformer. Under the constraint's scope the criterion holds for every current/future direct executor; the strict 'every executor' reading depends on accepting that carve-out, which is why confidence is 0.75 rather than higher."
+      },
+      {
+        "criterion_id": "evidence-only-no-graph-mutation",
+        "judgment": "judged_pass",
+        "confidence": 0.7,
+        "evidence": [
+          "scripts/runtime/heartbeat/reconciler.py:854, 817, 1287-1288 — adapter.collect → PatchResult → session-state update → evaluation batch → mark_jobs_awaiting_review; no graph write anywhere in the collect/return path",
+          "scripts/adapters/executor_protocol.py — PatchResult collect docstring: 'Does NOT apply or commit'",
+          "scripts/runtime/graph_updater.py — open_evidence_pr() proposes completion via a gddp-config PR that only a human merges; update_graph_node_complete() legacy stub returns graph_mutation_disabled_use_open_evidence_pr",
+          "Foundational node return-router.yaml — merged-PR receipts move jobs to awaiting_review; 'no runtime path writes completion into project.yaml'",
+          ".gddp/decision.md — 'does not mutate gddp-config, accept the node, mark it complete, or write runtime databases'; graph blueprint still lists neutral-executor-contract as status ready",
+          "Subject diff touches only .gddp/{decision,result-summary,patch.diff}, docs/executor-contract.md, scripts/adapters/test_executor_contract.py; working tree clean"
+        ],
+        "reasoning": "Executor output terminates in reviewable evidence: session/queue state and awaiting_review, never node completion. The only graph-facing writer (graph_updater) proposes via PR and the legacy direct-mutation stub is disabled. Nuance: scripts/runtime/heartbeat/provisional_status.py can auto-write 'provisional' node status in gddp-config based on an evaluator verdict (not executor output), with 'complete' remaining human-only — this is inherited doctrine (docs/GDDP-rebuild.md two-review-modes) and is outside the executor-output path, but it sits slightly at odds with the decision.md claim 'Graph node status changes only by human action'. Within the criterion's scope (executor output), the boundary holds; flagged as a risk for human review."
+      }
+    ],
+    "overall_reasoning": "This is a definition/contract node ('Define executor-neutral node packet, execution-attempt identity, and returned-result shape'). The attempt's own diff is a durable contract doc (docs/executor-contract.md) plus wire-shape lock tests added to scripts/adapters/test_executor_contract.py, while the underlying packet/adapters/session lifecycle/registries are inherited base-commit system context — consistent with the project brief's framing that inherited implementation is system context, not retroactively claimed graph work. All four acceptance criteria are substantiated by live code plus the new contract doc and lock tests: (1) NodePacket is executor-free, deeply immutable, built identically for every adapter, and verified identical across jules/jules_api/local_subprocess/droid plus renderers; (2) execution_attempt_id = {job_id}:attempt:{attempt_index} is generated identically in the packet builder and state recorder, persisted on executor_sessions (NOT NULL column + index) before dispatch, and versioned across retries; (3) direct lifecycle executors share DispatchResult/SessionStatus/PatchResult with field tuples and state vocabulary pinned by tests, with the mediated jules path explicitly carved out per node constraint; (4) the collect/return path routes only to awaiting_review, graph_updater only proposes via PR, and the legacy mutation stub is disabled. Required artifacts (decision.md, result-summary.md, patch.diff) are present and consistent. The decision.md correctly disposes the node as 'ready for human review; not accepted or complete', honoring the constraint not to self-complete. I ran the 37 wire-shape tests locally: all pass (contextual evidence only, not part of the criteria).",
+    "risks": "1. Criterion 3's 'every executor' wording vs the mediated carve-out: the inherited Jules GitHub-action adapter returns work via PR→return-router review receipts, not PatchResult. The node constraint explicitly preserves mediated as inherited infrastructure, and the contract documents it as not a full conformer — but a human should confirm that reading of 'every executor'. 2. Criterion 4 nuance: provisional_status.py can auto-write 'provisional' node status in gddp-config from an evaluator verdict (complete stays human-only). This is outside the executor-output path and is inherited doctrine, but it conflicts with the decision.md sentence 'Graph node status changes only by human action'; the boundary claim is slightly overstated versus live code. 3. The result-summary's residual risk that MissionAdapter._packet_node 'historically dropped previous_findings' appears stale: on HEAD (unchanged from base) mission_adapter.py:544-549 already forwards previous_findings into the mission 'why'. Minor doc inaccuracy, not a criteria failure. 4. Constraint compliance beyond criteria: the execution-trio constraint (subagent fanout on xai/grok-4.6, closing oracle pass) was not met in this session — result-summary discloses the subagent tool was unavailable and review was parent-local. This does not affect the criteria verdict but should be confirmed by the human.",
+    "followup_candidates": "1. Observed: 37 wire-shape tests in scripts/adapters/test_executor_contract.py pass locally. Not listed in the node's acceptance criteria, so not counted toward the verdict. Was the test suite intended to be part of the criteria? If yes, update node criteria and rerun; otherwise this verdict stands. 2. Confirm the 'every executor' reading of shared-result-shape: is the inherited mediated jules path intentionally exempt (per the 'preserve mediated as inherited infrastructure' constraint) from returning PatchResult, or should a future adapter surface unify it into the shared shape? 3. Clarify whether provisional_status.py's auto-write of 'provisional' node status (driven by evaluator verdict, complete remaining human-only) is in or out of the evidence-only boundary asserted by this node's decision.md ('Graph node status changes only by human action'). 4. Execution-trio constraint (2026-08-13): the session disclosed that subagent fanout (xai/grok-4.6) was unavailable and review was parent-local. Confirm whether that constraint compliance gap needs a rerun or is waived for this node. 5. Result-summary residual risk about MissionAdapter dropping previous_findings appears stale (code already forwards findings on base); consider a doc-only correction.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-14T04:51:16.124Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_V5lWhYg47sjyJvEW6C1a6723",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && ls -la && echo \"---\" && git log --oneline -10 2>/dev/null && echo \"---\" && git status 2>/dev/null | head -30"
+        },
+        {
+          "ts": "2026-08-14T04:51:16.125Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_mQQPcFlXByPg7lYZ9J1s1467",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-14T04:51:16.137Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_mQQPcFlXByPg7lYZ9J1s1467",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:16.493Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_V5lWhYg47sjyJvEW6C1a6723",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:18.877Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_swK9atjsOy3Yho7CgR1K0477",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && git show --stat HEAD | head -30 && echo \"===DIFF===\" && git diff e2e5f30 49bd8ab --stat"
+        },
+        {
+          "ts": "2026-08-14T04:51:18.878Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_rweDNx518PYif78l4CIb1068",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml/.gddp/decision.md"
+        },
+        {
+          "ts": "2026-08-14T04:51:18.883Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_rweDNx518PYif78l4CIb1068",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:18.976Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_swK9atjsOy3Yho7CgR1K0477",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:20.743Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_w9YPNIykJQeKSTv4Ysnu8021",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml/.gddp/result-summary.md"
+        },
+        {
+          "ts": "2026-08-14T04:51:20.744Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_WcWgSYEEuFTzv2chjpYW4791",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml/docs/executor-contract.md"
+        },
+        {
+          "ts": "2026-08-14T04:51:20.746Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_w9YPNIykJQeKSTv4Ysnu8021",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:20.747Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_WcWgSYEEuFTzv2chjpYW4791",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:22.790Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_Xy2AmDjptWFzvZmOodn50458",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml/scripts/adapters/test_executor_contract.py"
+        },
+        {
+          "ts": "2026-08-14T04:51:22.791Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_BLryvDBkXyyLD9TAvfax5801",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && ls scripts/adapters/ && echo \"---\" && wc -l scripts/adapters/executor_protocol.py 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-14T04:51:22.795Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Xy2AmDjptWFzvZmOodn50458",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:22.818Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_BLryvDBkXyyLD9TAvfax5801",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:25.180Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_XePinmM7IX19C1UGU3el8587",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml/scripts/adapters/executor_protocol.py"
+        },
+        {
+          "ts": "2026-08-14T04:51:25.181Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_zxyQFVEvbCnbegNA7d5F1275",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && ls scripts/runtime/heartbeat/ && echo \"---\" && grep -n \"_build_node_packet\\|execution_attempt_id\\|ADAPTERS\\|MEDIATED_ADAPTERS\" scripts/runtime/heartbeat/dispatcher.py | head -40"
+        },
+        {
+          "ts": "2026-08-14T04:51:25.185Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_XePinmM7IX19C1UGU3el8587",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:25.203Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_zxyQFVEvbCnbegNA7d5F1275",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:27.841Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_a5kOmVF6FWBpAa5kN8u25579",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml/scripts/runtime/heartbeat/dispatcher.py"
+        },
+        {
+          "ts": "2026-08-14T04:51:27.842Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Ztf6U2H9MSus5lZ5vP6d1044",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -n \"execution_attempt_id\" scripts/runtime/heartbeat/state_recorder.py | head -20 && echo \"---\" && grep -n \"awaiting_review\\|graph_updater\" scripts/runtime/heartbeat/reconciler.py scripts/runtime/heartbeat/runner.py 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-14T04:51:27.845Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_a5kOmVF6FWBpAa5kN8u25579",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:27.872Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Ztf6U2H9MSus5lZ5vP6d1044",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:31.319Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_zMyrDEkDGpMOa0vZSuZH8708",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml/scripts/runtime/heartbeat/state_recorder.py"
+        },
+        {
+          "ts": "2026-08-14T04:51:31.320Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ZRpCwrrazN3zeaXHkqVs1643",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -rn \"graph_updater\" scripts/ --include=*.py | head -10 && echo \"---awaiting_review sources---\" && grep -rln \"awaiting_review\" scripts/runtime/ | head && echo \"---graph mutation search---\" && grep -rn \"update_node_status\\|mark.*complete\\|node_status\" scripts/runtime/heartbeat/*.py | grep -iv \"test\\|#\" | head -15"
+        },
+        {
+          "ts": "2026-08-14T04:51:31.323Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_zMyrDEkDGpMOa0vZSuZH8708",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:31.443Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ZRpCwrrazN3zeaXHkqVs1643",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:34.531Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_1XPAn6BbCziyYgcNGNnW2812",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml/scripts/runtime/graph_updater.py"
+        },
+        {
+          "ts": "2026-08-14T04:51:34.532Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Lu2EgfKGSbRnzOzx8UAg7808",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && sed -n '120,165p' scripts/runtime/heartbeat/provisional_status.py && echo \"---frontier---\" && sed -n '85,115p' scripts/runtime/heartbeat/frontier.py"
+        },
+        {
+          "ts": "2026-08-14T04:51:34.536Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_1XPAn6BbCziyYgcNGNnW2812",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:34.553Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Lu2EgfKGSbRnzOzx8UAg7808",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:39.863Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_YLudoFUqISj3RVEqZQTp7324",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && sed -n '1,120p' scripts/runtime/heartbeat/provisional_status.py"
+        },
+        {
+          "ts": "2026-08-14T04:51:39.863Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_xIINbGq5mNHT3NmDugD33970",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -rn \"provisional\" scripts/runtime/heartbeat/runner.py scripts/runtime/heartbeat/reconciler.py | head -10 && echo \"---\" && grep -rn \"collect(\" scripts/runtime/heartbeat/reconciler.py | head"
+        },
+        {
+          "ts": "2026-08-14T04:51:39.882Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_YLudoFUqISj3RVEqZQTp7324",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:51:39.892Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_xIINbGq5mNHT3NmDugD33970",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:52:09.994Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_5QnblzGTpeVqIxRJx7jw6636",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -n \"def collect\\|def dispatch\\|PatchResult\\|DispatchResult\\|return\" scripts/adapters/jules_action_adapter.py | head -30 && echo \"===mission===\" && grep -n \"def collect\\|PatchResult\\|list\\[PatchResult\\]\\|return\" scripts/adapters/mission_adapter.py | head -20"
+        },
+        {
+          "ts": "2026-08-14T04:52:09.995Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_uMe48KOWVMvzBeJVc9ny6431",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && sed -n '840,900p' scripts/runtime/heartbeat/reconciler.py"
+        },
+        {
+          "ts": "2026-08-14T04:52:10.015Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_uMe48KOWVMvzBeJVc9ny6431",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:52:10.029Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_5QnblzGTpeVqIxRJx7jw6636",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:52:19.462Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_x3sbx6SS70kWFHEg5Pau0050",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && env -u PYTHONPATH -u PYTHONHOME /opt/homebrew/bin/python3 -m pytest scripts/adapters/test_executor_contract.py -q 2>&1 | tail -5"
+        },
+        {
+          "ts": "2026-08-14T04:52:19.463Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_BQApNBCcRWn7d01UptOC9430",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && head -40 .gddp/patch.diff && echo \"...\" && grep -c \"^\" .gddp/patch.diff"
+        },
+        {
+          "ts": "2026-08-14T04:52:19.511Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_BQApNBCcRWn7d01UptOC9430",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:52:24.050Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_x3sbx6SS70kWFHEg5Pau0050",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:52:28.909Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_qrsC6veK1CeiTjQdNPs93906",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -n \"previous_findings\\|_packet_node\" scripts/adapters/mission_projection.py scripts/adapters/mission_adapter.py scripts/adapters/pi_rpc_adapter.py scripts/adapters/session_prompt.py | head -30"
+        },
+        {
+          "ts": "2026-08-14T04:52:28.910Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_0dNl6695SIxZT8CSzEGp1399",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -rn \"collect\" scripts/adapters/jules_action_adapter.py | head && echo \"---pi_rpc collect---\" && grep -n \"def collect\\|PatchResult\" scripts/adapters/pi_rpc_adapter.py | head"
+        },
+        {
+          "ts": "2026-08-14T04:52:28.939Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_qrsC6veK1CeiTjQdNPs93906",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:52:28.939Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_0dNl6695SIxZT8CSzEGp1399",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:52:32.080Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_JkK5jdzad9jk89AW9ySk7861",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && git show e2e5f30:scripts/adapters/mission_adapter.py | sed -n '540,575p' && echo \"===HEAD===\" && sed -n '540,580p' scripts/adapters/mission_adapter.py"
+        },
+        {
+          "ts": "2026-08-14T04:52:32.081Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_H0V8HkOGzpuBotvSHjUx6945",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && git diff e2e5f30 HEAD -- scripts/adapters/test_executor_contract.py | head -80"
+        },
+        {
+          "ts": "2026-08-14T04:52:32.138Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_H0V8HkOGzpuBotvSHjUx6945",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:52:32.145Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_JkK5jdzad9jk89AW9ySk7861",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:52:43.239Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_UwHz0CQ2r6ugfkvvILiB0274",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -rn \"execution_attempt_id\" scripts/runtime/heartbeat/*.py | grep -i \"create table\\|executor_sessions\\|schema\" | head && echo \"---schema---\" && grep -rn \"CREATE TABLE IF NOT EXISTS executor_sessions\" -A 20 scripts/runtime/ | head -30"
+        },
+        {
+          "ts": "2026-08-14T04:52:43.239Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_9kMOEdEGbQP9MaIqnhpa5182",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -rn \"execution_attempt_id\" scripts/runtime/ --include=*.py | grep -v test | grep \"INSERT\\|column\\|schema\\|CREATE\" | head && echo \"---schema file---\" && grep -rln \"CREATE TABLE\" scripts/runtime/ | head -5"
+        },
+        {
+          "ts": "2026-08-14T04:52:43.323Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_UwHz0CQ2r6ugfkvvILiB0274",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:52:43.324Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_9kMOEdEGbQP9MaIqnhpa5182",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:52:45.699Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_QtnHhoCYk3Fl8TayAyxT1298",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -rln \"executor_sessions\" scripts/runtime/ --include=*.py | grep -v test && echo \"---\" && grep -rn \"execution_attempt_id\" scripts/runtime/store.py scripts/runtime/schema.py scripts/runtime/db.py 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-14T04:52:45.761Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_QtnHhoCYk3Fl8TayAyxT1298",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:52:47.896Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ET_WwKWKlHPJA836sR8FE9Z0272",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -rn \"CREATE TABLE\\|executor_sessions\" scripts/runtime/heartbeat/runner.py | head -20 && echo \"===state_recorder top===\" && sed -n '1,60p' scripts/runtime/heartbeat/state_recorder.py | grep -n \"CREATE\\|schema\\|executor_sessions\" "
+        },
+        {
+          "ts": "2026-08-14T04:52:47.918Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ET_WwKWKlHPJA836sR8FE9Z0272",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-14T04:52:50.139Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ET_loPcTKxVhvnkfxbgkXcw4776",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -rln \"executor_sessions\" scripts/ --include=*.py | grep -v test | head && echo \"---\" && grep -rn \"executor_sessions\" scripts/runtime/heartbeat/state_recorder.py | head -5 && grep -rn \"CREATE TABLE\" scripts/runtime/heartbeat/state_recorder.py scripts/runtime/heartbeat/reconciler.py | head"
+        },
+        {
+          "ts": "2026-08-14T04:52:50.231Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ET_loPcTKxVhvnkfxbgkXcw4776",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:52:52.493Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ET_mXOldWPw2nG7wiogLTTt9586",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -n \"execution_attempt_id\" scripts/init_db.py | head && echo \"---\" && grep -n \"executor_sessions\" -A 18 scripts/init_db.py | head -40"
+        },
+        {
+          "ts": "2026-08-14T04:52:52.516Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ET_mXOldWPw2nG7wiogLTTt9586",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:52:57.144Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_lJOq6OnSsHUnJdId1z512651",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/direct-executor-round-trip.yaml"
+        },
+        {
+          "ts": "2026-08-14T04:52:57.144Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_XzweurtBou9J6W55tKad4810",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml"
+        },
+        {
+          "ts": "2026-08-14T04:52:57.147Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_XzweurtBou9J6W55tKad4810",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:52:57.147Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_lJOq6OnSsHUnJdId1z512651",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:53:13.275Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_gVBYiMgfCdSqNihw6gdi3804",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && grep -n \"insert_executor_session\\|dispatcher.dispatch\\|adapter.dispatch\\|execution_attempt_id\" scripts/runtime/heartbeat/runner.py | head -20"
+        },
+        {
+          "ts": "2026-08-14T04:53:13.275Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_tkYCLh2905uc6vYLm8Yr3087",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && git show e2e5f30 --stat | head -5 && echo \"---files unchanged in attempt---\" && git diff --name-only e2e5f30 HEAD"
+        },
+        {
+          "ts": "2026-08-14T04:53:13.301Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_gVBYiMgfCdSqNihw6gdi3804",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:53:13.364Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_tkYCLh2905uc6vYLm8Yr3087",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:53:15.376Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ET_2pifkSRc21jUfT3gNDld7421",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml && sed -n '500,545p' scripts/runtime/heartbeat/runner.py"
+        },
+        {
+          "ts": "2026-08-14T04:53:15.393Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ET_2pifkSRc21jUfT3gNDld7421",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T04:53:51.984Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_MHe0Uwx6RyCdjRQ54VGA9127",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "This is a definition/contract node ('Define executor-neutral node packet, execution-attempt identity, and returned-result shape'). The attempt's own diff is a durable contract doc (docs/executor-contract.md) plus wire-shape lock tests added to scripts/adapters/test_executor_contract.py, while the underlying packet/adapters/session lifecycle/registries are inherited base-commit system context — consistent with the project brief's framing that inherited implementation is system context, not retroactively claimed graph work. All four acceptance criteria are substantiated by live code plus the new contract doc and lock tests: (1) NodePacket is executor-free, deeply immutable, built identically for every adapter, and verified identical across jules/jules_api/local_subprocess/droid plus renderers; (2) execution_attempt_id = {job_id}:attempt:{attempt_index} is generated identically in the packet builder and state recorder, persisted on executor_sessions (NOT NULL column + index) before dispatch, and versioned across retries; (3) direct lifecycle executors share DispatchResult/SessionStatus/PatchResult with field tuples and state vocabulary pinned by tests, with the mediated jules path explicitly carved out per node constraint; (4) the collect/return path routes only to awaiting_review, graph_updater only proposes via PR, and the legacy mutation stub is disabled. Required artifacts (decision.md, result-summary.md, patch.diff) are present and consistent. The decision.md correctly disposes the node as 'ready for human review; not accepted or complete', honoring the constraint not to self-complete. I ran the 37 wire-shape tests locally: all pass (contextual evidence only, not part of the criteria).",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-14T04:56:32.954251+00:00",
+  "evaluated_tree_sha": "a8e923fcfdc9bbc50e7565aacccba526da0dd6c1",
+  "evaluated_commit_sha": "49bd8abd773d4336eb935d6af9f6b330d10a8cf4",
+  "merge_commit_sha": "49bd8abd773d4336eb935d6af9f6b330d10a8cf4",
+  "expected_base_commit_sha": "e2e5f30536e66b8ce09125b70e297fad88102823",
+  "pr_ref": null,
+  "job_id": "job_20260814T04460933529bf8213815",
+  "execution_attempt_id": "job_20260814T04460933529bf8213815:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml",
+    "neighbor:direct-executor-round-trip": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/direct-executor-round-trip.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 3,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/direct-executor-round-trip.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 3,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/direct-executor-round-trip.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-n17lvqml/README.md"
+      ]
+    },
+    "overall": "high"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-14T04:51:12.233697+00:00",
+    "finished_at": "2026-08-14T04:56:32.954011+00:00",
+    "wall_s": 320.715,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 159.556,
+      "tool_calls": 37
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 160.917,
+      "tool_calls": 24
+    }
+  }
+}

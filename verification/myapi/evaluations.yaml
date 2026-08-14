@@ -1,0 +1,134 @@
+schema_type: node_evaluations
+schema_version: '1.0'
+project_id: myapi
+generated_at: '2026-08-14T21:05:48Z'
+source: gddp-runtime db/queue.db (results + decision_results)
+evaluations:
+  mine-real-agent-query-benchmark:
+    verdict: needs-more-evidence
+    evaluated_at: '2026-07-30T08:18:05.332354+00:00'
+    executor: local_subprocess
+    job_id: job_20260730T07003320299453cd3951
+    result_id: res_ses_20260730T0720380277b7367e0dbb
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification-runtime-live/myapi/mine-real-agent-query-benchmark/job_20260730T07003320299453cd3951-attempt2.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The node''s stated purpose is to mine real agent-attempted questions from Pi/Codex
+      sessions on both Mini and Air hosts, deduplicate, categorize, and publish a versioned benchmark
+      consumable by downstream nodes (capture-live-vertex-baseline, prove-myapi-context-retrieval).
+
+
+      The work delivered:
+
+      1. scripts/mine_agent_query_bank.py — a robust, read-only extractor that scans ~/.codex/sessions
+      and ~/.pi/agent/sessions on both hosts, normalizes text, deduplicates, categorizes (knowledge/graphify_invocation/graphify_meta),
+      and fingerprints every question.
+
+      2. evals/question-bank/question-bank-manifest.json — 3244 unique questions with full provenance
+      (host, store, session_path, line_index, timestamp). No raw text leaks into tracked files.
+
+      3. evals/question-bank/benchmark-receipt.md — human-readable summary with per-store counts, categories,
+      and shape breakdown (356 benchmark, 2888 conversational).
+
+      4. tests/test_question_bank.py — 14 unit/integration tests validating normalization, categorization,
+      filters, and artifact consistency.
+
+      5. .gitignore entries ensuring questions.jsonl and _scratch/ are never tracked.
+
+
+      Every constraint is honored: read-only extraction (script only reads via filesystem/SSH cat), Pi/Codex-derived
+      benchmark, raw transcript text gitignored, and Mini sessions integrated alongside Air (the 243 prior
+      Mini questions are extended rather than discarded).
+
+
+      The manifest and receipt are directly consumable by downstream nodes as required by the ''question-bank-produced''
+      criterion. Graph integrity is clean: this node has no upstream dependencies (depends_on: []), and
+      its outputs feed capture-live-vertex-baseline and prove-myapi-context-retrieval as stated.
+
+
+      Two very minor observations (low severity): the local YAML copy lists allowed_execution_modes differently
+      from the config, and actual session counts slightly exceed the original planning numbers — both
+      are normal drift and do not threaten intent or graph integrity.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification-runtime-live/myapi/mine-real-agent-query-benchmark/job_20260730T07003320299453cd3951-attempt2.json
+      verdict: needs-more-evidence
+      criteria_confidence: 0.974
+      completeness_status: complete
+      required_next_action: Provide missing required artifacts and re-submit.
+      evaluated_tree_sha: ea54e1a18e04cb460bdf20edb5a74f8f76fb9caa
+      evaluated_commit_sha: e24a23d98934e7798f858b91bbfdb1fc2f78903c
+      merge_commit_sha: e24a23d98934e7798f858b91bbfdb1fc2f78903c
+      context_coverage:
+        criteria: high
+        integrity: high
+        overall: high
+      criteria_verdict: needs-more-evidence
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.95
+        findings:
+        - severity: low
+          summary: 'The local gddp/nodes/mine-real-agent-query-benchmark.yaml has allowed_execution_modes:
+            [vm_worker, human] while the canonical config node specifies [local_subprocess]; the script
+            (mine_agent_query_bank.py) runs locally with SSH fan-out, so local_subprocess is the accurate
+            mode. This is a minor config drift that should be reconciled but does not affect the work
+            produced.'
+          affected_node_ids:
+          - mine-real-agent-query-benchmark
+        - severity: low
+          summary: 'The acceptance criteria in the canonical config specify exact session counts (Mini:
+            183 Pi, 93 Codex; Air: 320 Pi, 554 Codex). Actual extracted counts differ slightly (Mini:
+            190 pi, 93 codex; Air: 321 pi, 579 codex). These differences are within expected range as
+            sessions accumulate over time and reflect reality rather than error.'
+          affected_node_ids:
+          - mine-real-agent-query-benchmark
+        reasoning: 'The node''s stated purpose is to mine real agent-attempted questions from Pi/Codex
+          sessions on both Mini and Air hosts, deduplicate, categorize, and publish a versioned benchmark
+          consumable by downstream nodes (capture-live-vertex-baseline, prove-myapi-context-retrieval).
+
+
+          The work delivered:
+
+          1. scripts/mine_agent_query_bank.py — a robust, read-only extractor that scans ~/.codex/sessions
+          and ~/.pi/agent/sessions on both hosts, normalizes text, deduplicates, categorizes (knowledge/graphify_invocation/graphify_meta),
+          and fingerprints every question.
+
+          2. evals/question-bank/question-bank-manifest.json — 3244 unique questions with full provenance
+          (host, store, session_path, line_index, timestamp). No raw text leaks into tracked files.
+
+          3. evals/question-bank/benchmark-receipt.md — human-readable summary with per-store counts,
+          categories, and shape breakdown (356 benchmark, 2888 conversational).
+
+          4. tests/test_question_bank.py — 14 unit/integration tests validating normalization, categorization,
+          filters, and artifact consistency.
+
+          5. .gitignore entries ensuring questions.jsonl and _scratch/ are never tracked.
+
+
+          Every constraint is honored: read-only extraction (script only reads via filesystem/SSH cat),
+          Pi/Codex-derived benchmark, raw transcript text gitignored, and Mini sessions integrated alongside
+          Air (the 243 prior Mini questions are extended rather than discarded).
+
+
+          The manifest and receipt are directly consumable by downstream nodes as required by the ''question-bank-produced''
+          criterion. Graph integrity is clean: this node has no upstream dependencies (depends_on: []),
+          and its outputs feed capture-live-vertex-baseline and prove-myapi-context-retrieval as stated.
+
+
+          Two very minor observations (low severity): the local YAML copy lists allowed_execution_modes
+          differently from the config, and actual session counts slightly exceed the original planning
+          numbers — both are normal drift and do not threaten intent or graph integrity.'
+        lane_status: completed
+        harness_error: null
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null

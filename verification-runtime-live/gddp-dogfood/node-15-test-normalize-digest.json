@@ -1,0 +1,832 @@
+{
+  "project_id": "gddp-dogfood",
+  "node_id": "node-15-test-normalize-digest",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.9,
+    "findings": [],
+    "reasoning": "Node-15's intended role — pure-function unit coverage of _normalize_digest next to its module in scripts/runtime/heartbeat/completion_discipline.py — is fully preserved. The subject diff is exactly one added test file at the required path (scripts/runtime/heartbeat/test_normalize_digest.py); no production code or other test files were modified (constraint honored); the pytest tail is quoted in the commit; work is committed on the result ref. I verified every assertion in the new test against the actual _normalize_digest source (strip/lowercase, 64-hexdigit check, exact error messages \"64 hexadecimal characters\" and \"SHA-256 digest\") — tests are accurate, not fabricated. Graph integrity is trivially preserved: node-15 has depends_on=[] and unlocks=[], it is an independent leaf with no dependents, and the only change is an additive test file, so nothing downstream can break. The lane-1 'source_path' flag on scripts/adapters/test_normalize_digest.py is a criteria artifact: the criterion explicitly permits the scripts/runtime/heartbeat/ alternative matching the target module location, which is present — the node's intent (test _normalize_digest at its module) is unambiguous. Full-suite greenness (4 failures: 3 flask + 1 claimed pre-existing rig1) is a lane-1 acceptance-criteria question and could not be independently re-run here (pytest unavailable), but the executor was transparent in the commit message and this does not affect the integrity assessment.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-11T07:39:12.627Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_BZdmePX8OyYfP3fELWF58274",
+        "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && ls -la && git log --oneline -5 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-11T07:39:12.628Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_zyD3ZbAAfgACwE5Nemmd4867",
+        "path": "/tmp/gddp-eval-wt-iz1m7h41/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-11T07:39:12.645Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_zyD3ZbAAfgACwE5Nemmd4867",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:39:12.652Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_BZdmePX8OyYfP3fELWF58274",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:39:14.385Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_qJ8VB3nDQkMdPDR4O75A8013",
+        "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && git show --stat HEAD | head -30 && echo \"=== DIFF ===\" && git show HEAD -- scripts/runtime/heartbeat/test_normalize_digest.py | head -200"
+      },
+      {
+        "ts": "2026-08-11T07:39:14.386Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ZHqYLBN8mTHGpumJwAFy6561",
+        "command": "ls /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/ 2>/dev/null | head -40"
+      },
+      {
+        "ts": "2026-08-11T07:39:14.402Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ZHqYLBN8mTHGpumJwAFy6561",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:39:14.404Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_qJ8VB3nDQkMdPDR4O75A8013",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:39:16.378Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_McQwpubR4KUn1TtFU6lX2915",
+        "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && git show d191eb5 --stat | head -20 && echo \"=== FILE LIST ===\" && git diff 450eca1..d191eb5 --stat"
+      },
+      {
+        "ts": "2026-08-11T07:39:16.378Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_EKg3d3vUMGqgTgubD0kS4272",
+        "path": "/tmp/gddp-eval-wt-iz1m7h41/scripts/runtime/heartbeat/test_normalize_digest.py"
+      },
+      {
+        "ts": "2026-08-11T07:39:16.385Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_EKg3d3vUMGqgTgubD0kS4272",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:39:16.394Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_McQwpubR4KUn1TtFU6lX2915",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:39:18.876Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_8F7QkeiFC76Oi6TCao4Y4251",
+        "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && sed -n '1,120p' scripts/runtime/heartbeat/completion_discipline.py"
+      },
+      {
+        "ts": "2026-08-11T07:39:18.876Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_gSzpc8LgE5xdXuWawlyl4068",
+        "path": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-15-test-normalize-digest.yaml"
+      },
+      {
+        "ts": "2026-08-11T07:39:18.885Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_gSzpc8LgE5xdXuWawlyl4068",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:39:18.889Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_8F7QkeiFC76Oi6TCao4Y4251",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:39:21.502Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_RJPGs8DaUoDNNu6xoYW24880",
+        "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && grep -n \"_normalize_digest\" scripts/runtime/heartbeat/completion_discipline.py | head && echo \"===\" && sed -n '/def _normalize_digest/,/^def \\|^class /p' scripts/runtime/heartbeat/completion_discipline.py | head -60"
+      },
+      {
+        "ts": "2026-08-11T07:39:21.503Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_HamG6eKC9xb5gQeI0um81128",
+        "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && git diff --stat 450eca1..HEAD && echo \"=== full diff names ===\" && git diff --name-status 450eca1..HEAD"
+      },
+      {
+        "ts": "2026-08-11T07:39:21.518Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_RJPGs8DaUoDNNu6xoYW24880",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:39:21.522Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_HamG6eKC9xb5gQeI0um81128",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:39:31.184Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_a4BUhe1p9BNu1UiN3MJa7386",
+        "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && python3 -m pytest scripts/runtime/heartbeat/test_normalize_digest.py -q 2>&1 | tail -5"
+      },
+      {
+        "ts": "2026-08-11T07:39:31.185Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_jHEz1kxNiYId2Z8pyF6y5132",
+        "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && git status --porcelain | head -20 && echo \"=== untracked ===\" && git status --porcelain | grep -v '^??' | wc -l"
+      },
+      {
+        "ts": "2026-08-11T07:39:31.212Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_jHEz1kxNiYId2Z8pyF6y5132",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:39:31.224Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_a4BUhe1p9BNu1UiN3MJa7386",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:39:37.936Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_WdsZIBJy56mp62QMwNQk5525",
+        "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && ls scripts/runtime/heartbeat/ && echo \"=== existing test files ===\" && find scripts -name \"test_*.py\" | head -20 && echo \"=== how existing tests import ===\" && grep -rh \"^from scripts\\|^import scripts\" scripts --include=\"test_*.py\" | sort -u | head"
+      },
+      {
+        "ts": "2026-08-11T07:39:37.936Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_mJjcwiPhAUfrIv3LeTPG4621",
+        "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && cat pytest.ini && echo \"=== node-14 why (same module?) ===\" && sed -n '1,25p' /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-14-test-completion-id-digest.yaml"
+      },
+      {
+        "ts": "2026-08-11T07:39:37.952Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_mJjcwiPhAUfrIv3LeTPG4621",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:39:37.955Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_WdsZIBJy56mp62QMwNQk5525",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T07:39:53.558Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_1TOXB0niHxwmKrlSnbVi8607",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "This node establishes the pattern for the sibling ready test nodes (11, 13, 16): single additive test file next to module, no production edits, pytest tail in commit. Remaining ready nodes are independent leaves; no convergence risk on any shared module since each targets a distinct function and production code stays untouched.",
+        "affected_node_ids": [
+          "node-11-test-manifest-name",
+          "node-13-test-render-item",
+          "node-16-test-select-handoff"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.8666666666666666,
+  "criteria_confidence": 0.8666666666666666,
+  "completeness": 1.0,
+  "graph_readiness": 0.8666666666666666,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "test-file-exists",
+        "criterion": "scripts/adapters/test_normalize_digest.py exists (or scripts/runtime/heartbeat/test_normalize_digest.py matching the target module location) and contains tests for _normalize_digest",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "test_normalize_digest -> line 14: 'test_normalize_digest'",
+          "test_normalize_digest -> line 14: 'test_normalize_digest'",
+          "normalize_digest -> line 1: 'normalize_digest'",
+          "scripts/adapters/test_normalize_digest.py absent"
+        ],
+        "reasoning": "Scanned source files (scripts/runtime/heartbeat/test_normalize_digest.py) for identifiers named in the criterion (test_normalize_digest, test_normalize_digest, normalize_digest). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "scripts/adapters/test_normalize_digest.py absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "behavior-covered",
+        "criterion": "the tests assert that accepts 64-char hex case-insensitively and rejects non-hex/wrong-length input",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...) for identifiers named in the criterion (case-insensitively, non-hex, wrong-length). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "suite-green",
+        "criterion": "python3 -m pytest -q passes with only the 3 known flask-import failures (ModuleNotFoundError: flask); the new test file passes",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...) for identifiers named in the criterion (flask-import, ModuleNotFoundError). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create exactly one new test file for _normalize_digest in scripts/runtime/heartbeat/completion_discipline.py next to its module",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Do not modify production code or other test files",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Run python3 -m pytest -q before finishing and quote its tail line in the commit or a short note",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "scripts/runtime/heartbeat/test_normalize_digest.py": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [
+      {
+        "criterion_id": "test-file-exists",
+        "kind": "source_path",
+        "detail": "scripts/adapters/test_normalize_digest.py absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "test-file-exists",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+      "tip": "892ae1773b617b15c9ec2b7c4edb5f81d8d69e52",
+      "files": [
+        {
+          "status": "A",
+          "path": "scripts/runtime/heartbeat/test_normalize_digest.py"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "test-file-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "scripts/runtime/heartbeat/test_normalize_digest.py exists next to target module scripts/runtime/heartbeat/completion_discipline.py",
+          "git diff 450eca1..892ae17 adds exactly this one file (55 insertions)",
+          "File contains 7 test functions all importing and exercising _normalize_digest",
+          "Criterion's alternative path (\"or scripts/runtime/heartbeat/test_normalize_digest.py matching the target module location\") matches what was delivered"
+        ],
+        "reasoning": "The deterministic scan flagged 'scripts/adapters/test_normalize_digest.py absent', but the criterion explicitly offers the alternative path at the target module location, which is exactly where the test file exists (adjacent to completion_discipline.py). The primary path is stale, not the implementation. The file contains genuine tests for _normalize_digest (7 functions), satisfying the criterion."
+      },
+      {
+        "criterion_id": "behavior-covered",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "test_normalize_digest_accepts_lowercase_hex / _uppercase_hex_case_insensitively / _mixed_case_hex_case_insensitively cover 64-char hex acceptance case-insensitively with normalization to lowercase",
+          "test_normalize_digest_rejects_wrong_length covers 3-char, 63-char, and 65-char inputs",
+          "test_normalize_digest_rejects_non_hex covers 64-char strings containing 'g', 'z'*64, and '0'*63+'!'",
+          "Test assertions traced against _normalize_digest implementation (strip->lower->len==64->all hexdigits); all consistent",
+          "First-hand run: 7/7 passed for test_normalize_digest.py"
+        ],
+        "reasoning": "Every behavior named in the criterion is asserted: 64-char hex accepted case-insensitively (lower, upper, mixed, plus whitespace-stripping) and non-hex / wrong-length input rejected with ValueError. Assertions are consistent with the implementation and pass when executed."
+      },
+      {
+        "criterion_id": "suite-green",
+        "judgment": "judged_pass",
+        "confidence": 0.7,
+        "evidence": [
+          "Executor's quoted tail in commit d191eb5: 'pytest tail: 4 failed, 629 passed in 37.34s (3 flask ModuleNotFoundError + 1 pre-existing rig1 plist assert; new test_normalize_digest.py: 7 passed)'",
+          "First-hand run in eval env (venv /tmp/gddp-pytest-venv with flask installed): '1 failed, 632 passed in 36.72s'; the sole failure is deploy/rig1-heartbeat/test_rig1_render_plist.py::test_render_heartbeat_invokes_real_runner_module (stale assert: expects '--project gddp-runtime', runtime renders 'pi-harness-execution')",
+          "scripts/runtime/heartbeat/ suite: 162 passed, including the new test file (7 passed)",
+          "Node diff contains only the new test file; no production code or other test files touched"
+        ],
+        "reasoning": "The substantive intent of the criterion is met: the suite is green except for known/pre-existing failures, no new failures were introduced by this node, and the new test file passes (verified first-hand 7/7). However, the criterion's literal baseline ('only the 3 known flask-import failures') is stale: the current suite carries one additional pre-existing, unrelated failure (deploy/rig1-heartbeat plist render assert) that appears in both the executor's run (4 failed = 3 flask + rig1) and this eval env's run (1 failed = rig1, flask installed so the 3 flask failures are absent). The node could not have fixed that failure without violating constraint 'Do not modify production code or other test files'. The mismatch is a criterion-baseline staleness issue, not a defect in this node's work, and the executor honestly quoted the real tail line as constraint #3 requires."
+      }
+    ],
+    "overall_reasoning": "Node-15's work satisfies all three acceptance criteria in substance. (1) test-file-exists: the delivered file at scripts/runtime/heartbeat/test_normalize_digest.py matches the criterion's explicit alternative path (target module location) and contains 7 tests for _normalize_digest; the 'scripts/adapters' primary path in the criterion is stale, which resolves the deterministic mismatch. (2) behavior-covered: tests assert 64-char hex acceptance case-insensitively (lower/upper/mixed + whitespace) and rejection of non-hex and wrong-length input; every assertion traces correctly against the implementation and passes 7/7 first-hand. (3) suite-green: first-hand full-suite run in the eval venv shows 1 failed / 632 passed, where the only failure is a pre-existing, unrelated deploy/rig1-heartbeat plist-render assert (stale '--project gddp-runtime' expectation); the executor's quoted tail in commit d191eb5 (4 failed = 3 flask ModuleNotFoundError + the same rig1 assert; new file 7 passed) is consistent. The criterion's 'only the 3 known flask-import failures' baseline is stale because it omits the pre-existing rig1 failure — this is a criterion-description issue, not a node-work defect, and the node was constraint-bound from touching other test files. Constraints were honored: exactly one new test file, no production/other-test modifications, pytest tail quoted in the commit, and both the test commit (d191eb5) and result-ref commit (892ae17) landed. Integrity preserved: pure-function unit coverage with no production-code changes.",
+    "risks": "Criterion suite-green's stated baseline ('only the 3 known flask-import failures') does not match the observed suite state: there is a 4th, pre-existing failure (deploy/rig1-heartbeat/test_rig1_render_plist.py::test_render_heartbeat_invokes_real_runner_module — asserts '--project gddp-runtime' while the runtime renders 'pi-harness-execution'). This node could not address it under the 'do not modify other test files' constraint, so it persists and will fail every full-suite run until a separate corrective node or criterion update handles it. Confidence on suite-green is capped at 0.7 for this reason; the other two criteria are near-certain.",
+    "followup_candidates": "1. Observed: the full suite carries a pre-existing, unrelated failure in deploy/rig1-heartbeat/test_rig1_render_plist.py (stale expectation of project name 'gddp-runtime' vs rendered 'pi-harness-execution') that the node's '3 known flask-import failures' baseline did not enumerate. The node passed in substance but the criterion baseline is stale. Human clarification: should the suite-green criterion's known-failure list be updated to include this rig1 plist assert, and/or should a separate corrective node fix the stale deploy test? 2. Observed: criterion test-file-exists names primary path scripts/adapters/test_normalize_digest.py, which is stale relative to the actual module location (scripts/runtime/heartbeat/). The alternative path in the criterion was correctly used. Human clarification: update the criterion text to point only at the heartbeat path? 3. Observed: eval env venv (/tmp/gddp-pytest-venv) has flask installed, so the 3 known flask failures do not reproduce here; the executor's env lacked flask (4 failed / 629 passed). Not part of the node's criteria; flagged for traceability only.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-11T07:36:29.206Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_1WUqCdcgEUZk1OvmxQsZ5393",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && ls -la && git log --oneline -5 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-11T07:36:29.207Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_WMDN0msFGcAlcD2y5UtG2734",
+          "path": "/tmp/gddp-eval-wt-iz1m7h41/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-11T07:36:29.222Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_WMDN0msFGcAlcD2y5UtG2734",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:36:29.229Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_1WUqCdcgEUZk1OvmxQsZ5393",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:36:30.605Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_Tt140Uv7KasFx7xuX3lo1092",
+          "path": "/tmp/gddp-eval-wt-iz1m7h41/scripts/runtime/heartbeat/test_normalize_digest.py"
+        },
+        {
+          "ts": "2026-08-11T07:36:30.606Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_OfeY3BlJ9ugcnhCZyjub9879",
+          "path": "/tmp/gddp-eval-wt-iz1m7h41/scripts/runtime/heartbeat/completion_discipline.py"
+        },
+        {
+          "ts": "2026-08-11T07:36:30.608Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Tt140Uv7KasFx7xuX3lo1092",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:36:30.609Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_OfeY3BlJ9ugcnhCZyjub9879",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:36:35.535Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_XnSVMAlIw26OKTwCziDd2881",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && cat pytest.ini && echo \"---REQUIREMENTS---\" && cat requirements.txt && echo \"---PYTHON---\" && python3 --version && python3 -c \"import flask\" 2>&1 | head -3"
+        },
+        {
+          "ts": "2026-08-11T07:36:35.535Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_s9bSWZ0GPl75JcE1bc4w7603",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && git log --format='%H%n%s%n%b%n---' -2"
+        },
+        {
+          "ts": "2026-08-11T07:36:35.556Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_s9bSWZ0GPl75JcE1bc4w7603",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:36:35.596Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_XnSVMAlIw26OKTwCziDd2881",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:36:39.642Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_0CE2cuoNb7so9qqmq0yL2895",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && python3 -m pytest --version 2>&1 | head -3 && echo \"---\" && python3 -c \"import pytest\" 2>&1 | head -3"
+        },
+        {
+          "ts": "2026-08-11T07:36:39.642Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_4aeLLPY2WJNkQDTRIUXF5226",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && find scripts -name \"test_*.py\" | sort && echo \"---\" && ls scripts/runtime/heartbeat/"
+        },
+        {
+          "ts": "2026-08-11T07:36:39.662Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_4aeLLPY2WJNkQDTRIUXF5226",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:36:39.717Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_0CE2cuoNb7so9qqmq0yL2895",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:36:43.732Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_b8lXOsUvHfBiVBHLlibv2168",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && grep -rn \"rig1\\|plist\\|plutil\" --include=\"*.py\" scripts/ docs/ | grep -iv archive | head -20"
+        },
+        {
+          "ts": "2026-08-11T07:36:43.732Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_YLxtDDO0a3EeuwhOxJgl8080",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && pip3 list 2>/dev/null | grep -i -E \"pytest|flask|pydantic|pyyaml|anthropic\" ; echo \"---venv?---\"; ls .venv venv 2>/dev/null; echo \"---pycache of completion?---\"; find . -name \"*.pyc\" -path \"*completion*\" 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-11T07:36:43.752Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_b8lXOsUvHfBiVBHLlibv2168",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:36:44.155Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_YLxtDDO0a3EeuwhOxJgl8080",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:36:47.381Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_UKdvIgYKAy99al01Z0Us4981",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && grep -rln \"rig1\\|plist\" . --include=\"*.py\" 2>/dev/null | head; echo \"---\"; grep -rln \"rig1\" . 2>/dev/null | grep -v \".git/\" | head"
+        },
+        {
+          "ts": "2026-08-11T07:36:47.382Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_2Y6V4ai4Vm9TiPjq2glF5320",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && ls .handoffs/ node_status_history/ 2>/dev/null; echo \"---\"; ls .gddp/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-11T07:36:47.403Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_2Y6V4ai4Vm9TiPjq2glF5320",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:36:47.415Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_UKdvIgYKAy99al01Z0Us4981",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:36:54.182Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_G1d64UZlPMYoP8FcQGfN2734",
+          "path": "/tmp/gddp-eval-wt-iz1m7h41/deploy/rig1-heartbeat/test_rig1_render_plist.py"
+        },
+        {
+          "ts": "2026-08-11T07:36:54.182Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_4fIMZ7sIaTy5yoDAkilo6502",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && git log --oneline -3 -- deploy/rig1-heartbeat/test_rig1_render_plist.py && echo \"---mini---\" && git log --oneline -3 -- deploy/mini-heartbeat/test_render_plist.py"
+        },
+        {
+          "ts": "2026-08-11T07:36:54.188Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_G1d64UZlPMYoP8FcQGfN2734",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:36:54.206Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_4fIMZ7sIaTy5yoDAkilo6502",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:37:01.723Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_v7QgNfyBLfwylODqipLG6096",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && grep -rln \"import flask\\|from flask\" scripts/ --include=\"*.py\" | grep -v _archive; echo \"---gddp dir---\"; ls -la .gddp/ .gddp/artifacts 2>/dev/null; echo \"---handoffs 089/090---\"; ls .handoffs/ | grep -E \"^09[0-9]\""
+        },
+        {
+          "ts": "2026-08-11T07:37:01.723Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_qicwz5DVGCmPhDyhEFJj9930",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && git show d191eb5 --stat | tail -5 && echo \"===DIFF===\" && git show d191eb5 -- scripts/runtime/heartbeat/test_normalize_digest.py | head -60"
+        },
+        {
+          "ts": "2026-08-11T07:37:01.743Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_v7QgNfyBLfwylODqipLG6096",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:37:01.745Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_qicwz5DVGCmPhDyhEFJj9930",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:37:17.690Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_nFHAzUFyWGqnR3An7Qb74972",
+          "path": "/tmp/gddp-eval-wt-iz1m7h41/.gddp/result-summary.md"
+        },
+        {
+          "ts": "2026-08-11T07:37:17.691Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_qPJG99B3MGS8rWSpqokr9845",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && grep -rln \"known fail\\|flask\" docs/ readiness-report-2026-07-18.md .handoffs/*.md 2>/dev/null | head -10"
+        },
+        {
+          "ts": "2026-08-11T07:37:17.699Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_nFHAzUFyWGqnR3An7Qb74972",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:37:17.709Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_qPJG99B3MGS8rWSpqokr9845",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:37:20.639Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_oRKSECJdX0xJQVAwGLgr8457",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && grep -rln \"ModuleNotFoundError\\|flask-import\\|import failures\\|known failing\" docs/ .handoffs/ README.md TOPOLOGY.md 2>/dev/null | head; echo \"===decision===\"; cat .gddp/decision.md 2>/dev/null | head -40"
+        },
+        {
+          "ts": "2026-08-11T07:37:20.639Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_pM9WSoxmK5ccTeIJhJ4l9650",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && pip3 download pytest --no-deps -d /tmp/piptest 2>&1 | tail -2; echo \"---find any pytest in site-packages---\"; python3 -c \"import sys; print([p for p in sys.path])\"; find / -name \"pytest\" -maxdepth 6 -type d 2>/dev/null | head -5"
+        },
+        {
+          "ts": "2026-08-11T07:37:20.667Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_oRKSECJdX0xJQVAwGLgr8457",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:37:26.145Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_pM9WSoxmK5ccTeIJhJ4l9650",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:37:28.483Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_aFnlVQfVSd6Yq1tpz1wo3748",
+          "command": "ls /tmp/gddp-pytest-venv/bin/ 2>/dev/null | head; echo \"---\"; /tmp/gddp-pytest-venv/bin/python -m pytest --version 2>&1 | head -2"
+        },
+        {
+          "ts": "2026-08-11T07:37:28.698Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_aFnlVQfVSd6Yq1tpz1wo3748",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:37:31.222Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_M3Cx8qherMTJZ8Tyui0o5281",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && /tmp/gddp-pytest-venv/bin/python -m pytest -q 2>&1 | tail -15"
+        },
+        {
+          "ts": "2026-08-11T07:38:08.622Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_M3Cx8qherMTJZ8Tyui0o5281",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:38:14.654Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_KU8QqKYIePBtH4JBmH6y5827",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && /tmp/gddp-pytest-venv/bin/python -m pytest -q scripts/runtime/heartbeat/test_normalize_digest.py scripts/runtime/heartbeat/test_completion_discipline.py 2>&1 | tail -3"
+        },
+        {
+          "ts": "2026-08-11T07:38:14.655Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_tYAeAPBH96MJKTlaVytV5655",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && /tmp/gddp-pytest-venv/bin/python -m pytest -q scripts/runtime/heartbeat/ 2>&1 | tail -2"
+        },
+        {
+          "ts": "2026-08-11T07:38:15.297Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_KU8QqKYIePBtH4JBmH6y5827",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:38:19.451Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_tYAeAPBH96MJKTlaVytV5655",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:38:41.557Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_aIAQVkzLQE0zFLZvOZgI1510",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && git show 892ae17 --stat | head -20 && echo \"===diff base..tip===\" && git diff --stat 450eca1 892ae17 | tail -5"
+        },
+        {
+          "ts": "2026-08-11T07:38:41.557Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_BGT94xeUpOBXHMMKn6Ms8358",
+          "command": "cd /tmp/gddp-eval-wt-iz1m7h41 && git status --porcelain | head; echo \"---\"; /tmp/gddp-pytest-venv/bin/python -m pytest -q -k \"flask or intake\" scripts/ 2>&1 | tail -3"
+        },
+        {
+          "ts": "2026-08-11T07:38:41.576Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_aIAQVkzLQE0zFLZvOZgI1510",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:38:43.294Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_BGT94xeUpOBXHMMKn6Ms8358",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T07:39:07.935Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_1HvRgejSiyEwMS7Vkibd0841",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node-15's work satisfies all three acceptance criteria in substance. (1) test-file-exists: the delivered file at scripts/runtime/heartbeat/test_normalize_digest.py matches the criterion's explicit alternative path (target module location) and contains 7 tests for _normalize_digest; the 'scripts/adapters' primary path in the criterion is stale, which resolves the deterministic mismatch. (2) behavior-covered: tests assert 64-char hex acceptance case-insensitively (lower/upper/mixed + whitespace) and rejection of non-hex and wrong-length input; every assertion traces correctly against the implementation and passes 7/7 first-hand. (3) suite-green: first-hand full-suite run in the eval venv shows 1 failed / 632 passed, where the only failure is a pre-existing, unrelated deploy/rig1-heartbeat plist-render assert (stale '--project gddp-runtime' expectation); the executor's quoted tail in commit d191eb5 (4 failed = 3 flask ModuleNotFoundError + the same rig1 assert; new file 7 passed) is consistent. The criterion's 'only the 3 known flask-import failures' baseline is stale because it omits the pre-existing rig1 failure — this is a criterion-description issue, not a node-work defect, and the node was constraint-bound from touching other test files. Constraints were honored: exactly one new test file, no production/other-test modifications, pytest tail quoted in the commit, and both the test commit (d191eb5) and result-ref commit (892ae17) landed. Integrity preserved: pure-function unit coverage with no production-code changes.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-11T07:39:53.621332+00:00",
+  "evaluated_tree_sha": "df490756f0e6dda87443be3eb62b315ae36eb07b",
+  "evaluated_commit_sha": "892ae1773b617b15c9ec2b7c4edb5f81d8d69e52",
+  "merge_commit_sha": "892ae1773b617b15c9ec2b7c4edb5f81d8d69e52",
+  "expected_base_commit_sha": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+  "pr_ref": null,
+  "job_id": "job_20260811T0730527691c4e844bc6a",
+  "execution_attempt_id": "job_20260811T0730527691c4e844bc6a:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-iz1m7h41/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-iz1m7h41/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-iz1m7h41/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-iz1m7h41/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-iz1m7h41/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-iz1m7h41/README.md"
+      ]
+    },
+    "overall": "medium"
+  }
+}

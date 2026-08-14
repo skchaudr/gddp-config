@@ -1,0 +1,173 @@
+schema_type: node_evaluations
+schema_version: '1.0'
+project_id: test-project
+generated_at: '2026-08-14T21:05:48Z'
+source: gddp-runtime db/queue.db (results + decision_results)
+evaluations:
+  gate-continuation-smoke-a:
+    verdict: pass
+    evaluated_at: '2026-07-31T06:37:35.502339+00:00'
+    executor: local_subprocess
+    job_id: job_20260731T06305583f34462f611b9
+    result_id: res_ses_20260731T06305583ab0dfe9bb87b
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification-runtime-live/test-project/gate-continuation-smoke-a/job_20260731T06305583f34462f611b9-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The work under review creates gate-smoke/a.txt with byte-exact content "A passed\n"
+      (verified: b''A passed\n'', 9 bytes) and changes nothing else in the target repo (diff from initial
+      commit to HEAD is a single added file; working tree clean). This precisely matches the node''s role:
+      produce the first gate marker so a passing evaluator result opens gate-continuation-smoke-b without
+      changing graph truth. Graph integrity is preserved: (1) the downstream node gate-continuation-smoke-b''s
+      inherited criterion marker-a-inherited requires gate-smoke/a.txt to exist unchanged with exactly
+      "A passed\n" — satisfied; (2) no graph configuration or runtime database modifications were made
+      (worktree gitdir points into the target repo, gddp-config files are untouched and consistent with
+      the graph JSON — depends_on [], unlocks gate-continuation-smoke-b, statuses ready/pending); (3)
+      the bounded-change constraints are honored. The lane-1 deterministic result marking criteria indeterminate
+      at 0.2 confidence stems from its scan method covering "(no files)" — an evidence-methodology gap,
+      not a work-side defect, and not this lane''s jurisdiction. Intent and graph integrity are preserved;
+      proceed.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification-runtime-live/test-project/gate-continuation-smoke-a/job_20260731T06305583f34462f611b9-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.965
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 15fbddcedc024f2fcad1adda80837c7542e8d269
+      evaluated_commit_sha: 77ba4733c3924b6aebf0cc5a2af717ad4d5c60b9
+      merge_commit_sha: 77ba4733c3924b6aebf0cc5a2af717ad4d5c60b9
+      context_coverage:
+        criteria: low
+        integrity: low
+        overall: low
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.92
+        findings: []
+        reasoning: 'The work under review creates gate-smoke/a.txt with byte-exact content "A passed\n"
+          (verified: b''A passed\n'', 9 bytes) and changes nothing else in the target repo (diff from
+          initial commit to HEAD is a single added file; working tree clean). This precisely matches the
+          node''s role: produce the first gate marker so a passing evaluator result opens gate-continuation-smoke-b
+          without changing graph truth. Graph integrity is preserved: (1) the downstream node gate-continuation-smoke-b''s
+          inherited criterion marker-a-inherited requires gate-smoke/a.txt to exist unchanged with exactly
+          "A passed\n" — satisfied; (2) no graph configuration or runtime database modifications were
+          made (worktree gitdir points into the target repo, gddp-config files are untouched and consistent
+          with the graph JSON — depends_on [], unlocks gate-continuation-smoke-b, statuses ready/pending);
+          (3) the bounded-change constraints are honored. The lane-1 deterministic result marking criteria
+          indeterminate at 0.2 confidence stems from its scan method covering "(no files)" — an evidence-methodology
+          gap, not a work-side defect, and not this lane''s jurisdiction. Intent and graph integrity are
+          preserved; proceed.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Lane-1 deterministic evaluation produced 'indeterminate' (0.2 confidence) for both
+            criteria because its keyword_scan_source method scanned '(no files)' rather than the actual
+            worktree; the artifact is directly verifiable (a.txt = 'A passed\n'). If the retry loop re-dispatches
+            this node on the basis of that indeterminate evidence, it would reflect an evaluation-evidence
+            gap, not a work defect — downstream convergence on gate-continuation-smoke-b should proceed
+            from the verified repo state.
+          affected_node_ids:
+          - gate-continuation-smoke-a
+          - gate-continuation-smoke-b
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  gate-continuation-smoke-b:
+    verdict: pass
+    evaluated_at: '2026-07-31T07:25:30.468266+00:00'
+    executor: local_subprocess
+    job_id: job_20260731T064235715749899df0e6
+    result_id: res_ses_20260731T064235712df7cd2294a7
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification-runtime-live/test-project/gate-continuation-smoke-b/job_20260731T064235715749899df0e6-attempt0-rerun1.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node gate-continuation-smoke-b ("Consume the first result and
+      produce the second marker"). The node''s intent is to prove GDDP dispatches downstream work building
+      on the passing predecessor''s result commit. The observed work (commit 345f5df in the eval worktree,
+      parented on the predecessor''s a.txt commit a796443 via a result-marker commit) adds ONLY gate-smoke/b.txt
+      with exact content "B passed\n", leaving gate-smoke/a.txt byte-identical ("A passed\n", verified
+      with od -c and via diff a796443..345f5df touching only b.txt). HEAD tree contains only README.md,
+      gate-smoke/a.txt, gate-smoke/b.txt; working tree clean. This matches the node''s why, all three
+      acceptance criteria (a.txt unchanged/exact, b.txt exact, bounded change), and all constraints (preserve
+      a.txt, no graph-config/runtime-DB modification, add only b.txt). Graph integrity is preserved: no
+      node YAML or graph config was modified (gddp-config untouched), the depends_on edge to gate-continuation-smoke-a
+      is honored, and unlocks is empty so no dependent node is at risk. Lane-1 criteria adjudication is
+      out of scope; from an intent/graph-integrity standpoint the change is faithful and bounded. Minor
+      forward-looking notes (not affecting verdict): upstream gate-continuation-smoke-a remains marked
+      provisional in deps_status while this node is ready, and the same job id appears on two commits
+      (content commit plus empty result-marker commit) — benign result-marker duplication worth watching
+      during convergence evaluation.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification-runtime-live/test-project/gate-continuation-smoke-b/job_20260731T064235715749899df0e6-attempt0-rerun1.json
+      verdict: pass
+      criteria_confidence: 0.9833333333333334
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 6904883892c3f0545dd9819b75b8fdaa0509a4f8
+      evaluated_commit_sha: 0deaab297ebdb0bbc50dd9d98e5a8520ed6b0234
+      merge_commit_sha: 0deaab297ebdb0bbc50dd9d98e5a8520ed6b0234
+      context_coverage:
+        criteria: medium
+        integrity: low
+        overall: low
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.93
+        findings: []
+        reasoning: 'Fresh-eyes review of node gate-continuation-smoke-b ("Consume the first result and
+          produce the second marker"). The node''s intent is to prove GDDP dispatches downstream work
+          building on the passing predecessor''s result commit. The observed work (commit 345f5df in the
+          eval worktree, parented on the predecessor''s a.txt commit a796443 via a result-marker commit)
+          adds ONLY gate-smoke/b.txt with exact content "B passed\n", leaving gate-smoke/a.txt byte-identical
+          ("A passed\n", verified with od -c and via diff a796443..345f5df touching only b.txt). HEAD
+          tree contains only README.md, gate-smoke/a.txt, gate-smoke/b.txt; working tree clean. This matches
+          the node''s why, all three acceptance criteria (a.txt unchanged/exact, b.txt exact, bounded
+          change), and all constraints (preserve a.txt, no graph-config/runtime-DB modification, add only
+          b.txt). Graph integrity is preserved: no node YAML or graph config was modified (gddp-config
+          untouched), the depends_on edge to gate-continuation-smoke-a is honored, and unlocks is empty
+          so no dependent node is at risk. Lane-1 criteria adjudication is out of scope; from an intent/graph-integrity
+          standpoint the change is faithful and bounded. Minor forward-looking notes (not affecting verdict):
+          upstream gate-continuation-smoke-a remains marked provisional in deps_status while this node
+          is ready, and the same job id appears on two commits (content commit plus empty result-marker
+          commit) — benign result-marker duplication worth watching during convergence evaluation.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Upstream gate-continuation-smoke-a is still flagged provisional in deps_status while
+            gate-continuation-smoke-b is ready; commit history shows the downstream job was dispatched
+            on top of a.txt, but graph metadata for the upstream node has not been flipped to a final
+            passing state. Watch during convergence/evaluation of the smoke chain.
+          affected_node_ids:
+          - gate-continuation-smoke-a
+          - gate-continuation-smoke-b
+        - severity: low
+          summary: 'Two commits carry the same job id (job_20260731T064235715749899df0e6): 345f5df adds
+            gate-smoke/b.txt and 0deaab2 is an empty result-marker commit. Benign result-marker duplication
+            with no content impact, but may confuse downstream diff-based tooling if it keys on job id
+            rather than commit content.'
+          affected_node_ids:
+          - gate-continuation-smoke-b
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null

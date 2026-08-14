@@ -1,0 +1,578 @@
+{
+  "project_id": "gddp-dogfood",
+  "node_id": "node-05-test-suite-map",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.92,
+    "findings": [],
+    "reasoning": "The work under review is a single-file report-only change: reports/gddp-dogfood/05-test-suite-map.md added between base 450eca1 and tip 63b26a7, with a clean worktree and no modifications outside the required artifact path. The report fully realizes node-05's intended role (\"Map the test suite shape and slowest tests\"): it provides a suite summary, per-file pytest-collected counts for scripts/**/test_*.py (51 collected files, 607 items, with _archive exclusion correctly attributed to pytest.ini norecursedirs), the slowest-10 durations block from python3 -m pytest -q --durations=10, the quoted tail line (4 failed, 622 passed in 36.64s), and shape/debt notes (largest files, ~20s duration outlier). I spot-checked report data against the repo (file counts on disk vs collected, per-file item counts vs def counts, pytest.ini exclusion) and found them consistent. Constraints were respected: only the report path created, read-only elsewhere, pytest tail line quoted, work committed on the result ref. Node-05 has no depends_on and no unlocks, and sibling canary nodes own distinct report paths, so nothing downstream can be broken and graph structure is preserved. Lane-1's indeterminate criteria status is a separate question (semantic confirmation of durations/slowest-10 evidence) and does not affect this integrity verdict.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-11T05:40:26.813Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_U1Y2ciC0ITtfV0j5hB7n4693",
+        "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && ls -la && echo \"---\" && git log --oneline -5 2>/dev/null || echo \"no git\""
+      },
+      {
+        "ts": "2026-08-11T05:40:26.815Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_pagAhOQG2bcjg4F2K8a42102",
+        "path": "/tmp/gddp-eval-wt-i34rsxn5/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-11T05:40:26.831Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_pagAhOQG2bcjg4F2K8a42102",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:40:26.836Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_U1Y2ciC0ITtfV0j5hB7n4693",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:40:28.890Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_azRuhZCOa6y1duxvFrsg2466",
+        "path": "/tmp/gddp-eval-wt-i34rsxn5/reports/gddp-dogfood/05-test-suite-map.md"
+      },
+      {
+        "ts": "2026-08-11T05:40:28.891Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Qucb5sdfsUyiDXmwdjqO1653",
+        "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && git show --stat HEAD | head -30 && echo \"---DIFF---\" && git show HEAD -- reports/gddp-dogfood/05-test-suite-map.md | head -120"
+      },
+      {
+        "ts": "2026-08-11T05:40:28.898Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_azRuhZCOa6y1duxvFrsg2466",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:40:28.907Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Qucb5sdfsUyiDXmwdjqO1653",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:40:31.417Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_CeK42I4pbGtyITJigbJ09609",
+        "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && git diff 450eca1..HEAD --stat && echo \"---\" && git diff 450eca1..HEAD --name-status && echo \"---untracked---\" && git status --porcelain | head -20"
+      },
+      {
+        "ts": "2026-08-11T05:40:31.418Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_llYSspvGMZZsqoiXwweW4981",
+        "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && cat pytest.ini && echo \"---\" && find scripts -name 'test_*.py' | wc -l && echo \"---archive---\" && ls scripts/_archive/ 2>/dev/null | head && echo \"---reports---\" && ls -la reports/gddp-dogfood/ && echo \"---handoffs---\" && ls .handoffs/ | tail -5"
+      },
+      {
+        "ts": "2026-08-11T05:40:31.445Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_CeK42I4pbGtyITJigbJ09609",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:40:31.447Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_llYSspvGMZZsqoiXwweW4981",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:40:38.555Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_B0OrOWMp0D00CJI2AdsI3442",
+        "command": "ls /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/ 2>/dev/null && echo \"---\" && cat /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-05-test-suite-map.yaml 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-11T05:40:38.556Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_JfcfEE8joaKuFbeUPv7H4230",
+        "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && find scripts -name 'test_*.py' | grep -v _archive | wc -l && echo \"--- spot check a few counts vs report ---\" && for f in scripts/adapters/test_executor_contract.py scripts/runtime/heartbeat/test_executor_sessions.py scripts/runtime/verification/deterministic/test_deterministic.py scripts/test_intake_server.py; do n=$(grep -c '^def test_\\|^    def test_' $f); echo \"$f: def-count=$n\"; done"
+      },
+      {
+        "ts": "2026-08-11T05:40:38.567Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_B0OrOWMp0D00CJI2AdsI3442",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:40:38.579Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_JfcfEE8joaKuFbeUPv7H4230",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:40:42.778Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_UmI75hvtNBJhLABclb4d2621",
+        "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && cat requirements.txt && echo \"---pytest cache?---\" && ls -la .pytest_cache 2>/dev/null || echo \"no pytest cache (clean)\" && echo \"---handoff 092?---\" && ls .handoffs/ | grep -i 09 || echo \"no 09x handoff found\""
+      },
+      {
+        "ts": "2026-08-11T05:40:42.779Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_6GzpolLyGNWp0o7Q7hbj7073",
+        "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && git show HEAD --format='%B' -s HEAD && echo \"---second commit---\" && git show 6bc7808 --format='%B' -s && git show 6bc7808 --stat | head -10"
+      },
+      {
+        "ts": "2026-08-11T05:40:42.795Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_UmI75hvtNBJhLABclb4d2621",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:40:42.803Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_6GzpolLyGNWp0o7Q7hbj7073",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:40:50.373Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_0su9LusgO4r2KXcnSRDn9803",
+        "path": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+      },
+      {
+        "ts": "2026-08-11T05:40:50.373Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_DiPyK03weu0Fi5G7M6485188",
+        "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && git status --porcelain --ignored=no | wc -l && echo \"---check no stray files in other report dirs---\" && ls reports/ && ls reports/gddp-dogfood/"
+      },
+      {
+        "ts": "2026-08-11T05:40:50.381Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_0su9LusgO4r2KXcnSRDn9803",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:40:50.394Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_DiPyK03weu0Fi5G7M6485188",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:41:03.264Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_HS6ZMeKWkCEJRf8O6aij4318",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "Report documents 4 failing tests; intake failures stem from ModuleNotFoundError: No module named 'flask' even though requirements.txt lists flask>=3.0. This environment/dependency drift may surface again for nodes 06-10 (which also run pytest per their constraints) and may warrant a corrective node or environment reinstall before substantive work resumes.",
+        "affected_node_ids": [
+          "node-05-test-suite-map",
+          "node-06-deploy-topology",
+          "node-07-hook-surface",
+          "node-08-verification-module-map",
+          "node-09-heartbeat-module-map",
+          "node-10-agents-md-drift-report"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.93,
+  "criteria_confidence": 0.93,
+  "completeness": 1.0,
+  "graph_readiness": 0.93,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "report-exists",
+        "criterion": "reports/gddp-dogfood/05-test-suite-map.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "test\\-suite\\-map -> line 1: 'test-suite-map'"
+        ],
+        "reasoning": "Scanned source files (reports/gddp-dogfood/05-test-suite-map.md) for identifiers named in the criterion (gddp-dogfood, test-suite-map, non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "counts",
+        "criterion": "report contains per-file test counts for scripts/**/test_*.py",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "test_ -> line 10: 'test_'"
+        ],
+        "reasoning": "Scanned source files (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...) for identifiers named in the criterion (per-file, test_). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "durations",
+        "criterion": "report lists the slowest 10 tests from python3 -m pytest -q --durations=10",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create only reports/gddp-dogfood/05-test-suite-map.md",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Read-only outside that report path",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Run python3 -m pytest -q before finishing and quote its tail line in the report",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/gddp-dogfood/05-test-suite-map.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+      "tip": "63b26a7a5ca688373d60011c455d046e38c26d10",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/gddp-dogfood/05-test-suite-map.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.99,
+        "evidence": [
+          "reports/gddp-dogfood/05-test-suite-map.md exists (131 lines, ~8.5KB) with full markdown content",
+          "git diff 450eca1..63b26a7 shows exactly one added file: 'A reports/gddp-dogfood/05-test-suite-map.md'"
+        ],
+        "reasoning": "The required report file exists at the exact path and is clearly non-empty, containing suite summary, per-file counts, slowest-tests section, and shape notes. The criterion is satisfied."
+      },
+      {
+        "criterion_id": "counts",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "Report 'Per-file test counts' table has 51 rows summing to 607, matching the report's stated --collect-only total",
+          "On-disk scan finds exactly 51 scripts/**/test_*.py files outside scripts/_archive/, all present in the table (0 missing, 0 extra)",
+          "AST spot checks: test_executor_sessions.py=52, test_deterministic.py=45, test_intake_server.py=9, test_gate_tokens.py=16 all match reported values; test_executor_contract.py 23 defs vs 34 reported consistent with parametrization",
+          "pytest.ini norecursedirs includes scripts/_archive, corroborating the report's exclusion note",
+          "Report's _archive table (5/4/4) matches AST def test_* counts exactly"
+        ],
+        "reasoning": "The report contains a per-file test-count table for scripts/**/test_*.py that is complete and internally consistent with the on-disk inventory and with spot-checked AST counts. The 54-row total figure (620) in my first parse included the separate _archive table (607+13=620), which is consistent, not an error."
+      },
+      {
+        "criterion_id": "durations",
+        "judgment": "judged_pass",
+        "confidence": 0.85,
+        "evidence": [
+          "Report 'Slowest 10 tests' section lists exactly 10 test entries with durations (20.18s down to 0.26s) in pytest --durations format",
+          "Report quotes command 'python3 -m pytest -q --durations=10' and tail line '4 failed, 622 passed in 36.64s'",
+          "Reported intake failures ('ModuleNotFoundError: No module named flask') corroborated: flask is not installed in this environment; pytest itself is not installed here so a re-run was not possible"
+        ],
+        "reasoning": "The report lists the slowest 10 tests from the specified command in the expected format and quotes the suite tail line as required by the node constraints. Confidence is slightly tempered only because pytest is unavailable in this eval environment, so the specific duration/item values could not be independently re-executed; the structure, count, format, and internal consistency fully satisfy the criterion."
+      }
+    ],
+    "overall_reasoning": "All three acceptance criteria for node-05-test-suite-map are satisfied by the report content. The artifact exists and is non-empty (131 lines). The per-file test-count table covers exactly the 51 collectable scripts/**/test_*.py files (pytest.ini excludes scripts/_archive via norecursedirs, corroborating the report's exclusion note), sums to the stated 607 collected items, and spot-checked AST counts match reported values. The slowest-10 section lists exactly 10 tests from the specified command and quotes the required tail line ('4 failed, 622 passed in 36.64s'); the reported flask-missing failure mode is corroborated by this environment. The diff constraint is also satisfied: base→tip changes exactly one file (A reports/gddp-dogfood/05-test-suite-map.md), so the report-only constraint holds and 'read-only outside that report path' is consistent with the observed diff. The pytest run itself could not be re-executed here (pytest not installed), so exact duration/item figures are taken on the report's internal consistency rather than independent reproduction.",
+    "risks": "1) The specific duration values and item counts could not be independently reproduced: pytest is not installed in this evaluation environment (no .venv present, /usr/bin/python3 lacks pytest). Judgment rests on format, count, and internal consistency rather than a fresh run. 2) Constraint 'Run python3 -m pytest -q before finishing' is evidenced only by the quoted tail line in the report, not by a re-runnable log; acceptable for a report-only node but not independently observable. 3) 'Read-only outside that report path' is inferred from the single-file diff; any non-git-tracked reads/writes would be invisible to this check.",
+    "followup_candidates": "Observed: the report quotes a full-suite run ('4 failed, 622 passed in 36.64s') and the durations list, but pytest could not be re-run in this eval sandbox to independently confirm the 626/607 item counts and 10 duration values. Not listed as a re-execution requirement in the node's acceptance criteria, so it does not affect this verdict. If independent reproduction of counts/durations is desired as acceptance evidence, consider adding an explicit probe or re-running the node in an environment with pytest/flask installed; otherwise this verdict stands.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-11T05:39:26.946Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_iTlNJ0umhWHuHsTX8md87966",
+          "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && ls -la && echo \"---\" && cat PROJECT-BRIEF.md 2>/dev/null | head -50"
+        },
+        {
+          "ts": "2026-08-11T05:39:26.946Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_LOIrfGjje5XBHmQ1ZwHi3179",
+          "path": "/tmp/gddp-eval-wt-i34rsxn5/README.md"
+        },
+        {
+          "ts": "2026-08-11T05:39:26.960Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_LOIrfGjje5XBHmQ1ZwHi3179",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:39:26.966Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_iTlNJ0umhWHuHsTX8md87966",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:39:28.866Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_5tCZKnWZsPCy8WEtS7i42510",
+          "path": "/tmp/gddp-eval-wt-i34rsxn5/reports/gddp-dogfood/05-test-suite-map.md"
+        },
+        {
+          "ts": "2026-08-11T05:39:28.867Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_2N8mXbT86Ro9ZpCfBuOl9164",
+          "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && find reports -type f | sort && echo \"---\" && find scripts -name 'test_*.py' -type f | sort | head -60"
+        },
+        {
+          "ts": "2026-08-11T05:39:28.874Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_5tCZKnWZsPCy8WEtS7i42510",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:39:28.880Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_2N8mXbT86Ro9ZpCfBuOl9164",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:39:43.970Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_hNTLQYSFMA9i2RW7zzSv7143",
+          "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && cat pytest.ini && echo \"---GIT LOG---\" && git log --oneline -5 2>/dev/null && echo \"---GIT STATUS---\" && git status --short 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-11T05:39:43.971Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_CZtnaORnMPpBRjirWgBG9392",
+          "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && ls .venv/bin/ 2>/dev/null | head -5; python3 --version; echo \"---\"; ls scripts/_archive/ 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-11T05:39:43.995Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_CZtnaORnMPpBRjirWgBG9392",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:39:44.026Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_hNTLQYSFMA9i2RW7zzSv7143",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:39:52.877Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_wHK2EYRx0D6BlGpycSSh4784",
+          "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && python3 - <<'EOF'\nimport re, os\n\nreport = open('reports/gddp-dogfood/05-test-suite-map.md').read()\n# Extract the per-file count table rows: | N | `path` |\nrows = re.findall(r'\\|\\s*(\\d+)\\s*\\|\\s*`(scripts/[^`]+\\.py)`\\s*\\|', report)\nprint(\"table rows:\", len(rows))\ntotal = sum(int(n) for n, p in rows)\nprint(\"table sum:\", total)\nfiles = [p for n, p in rows]\nprint(\"unique files:\", len(set(files)))\n\n# On-disk scripts/**/test_*.py excluding _archive\nondisk = []\nfor root, dirs, fnames in os.walk('scripts'):\n    if '_archive' in root:\n        continue\n    for f in fnames:\n        if f.startswith('test_') and f.endswith('.py'):\n            ondisk.append(os.path.join(root, f))\nondisk = sorted(ondisk)\nprint(\"on-disk collected test files:\", len(ondisk))\nmissing = [f for f in ondisk if f not in set(files)]\nextra = [f for f in files if f not in set(ondisk)]\nprint(\"on-disk files missing from table:\", missing)\nprint(\"table files not on disk:\", extra)\n\n# AST count of def test_* per file (plausibility only; pytest counts parametrizations)\ndef count_defs(path):\n    import ast\n    src = open(path).read()\n    tree = ast.parse(src)\n    n = sum(1 for node in ast.walk(tree) if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name.startswith('test_'))\n    return n\n\nimport collections\nprint(\"\\nPlausibility: reported vs raw def count for a sample:\")\nsample = ['scripts/adapters/test_executor_contract.py','scripts/runtime/heartbeat/test_executor_sessions.py','scripts/runtime/verification/deterministic/test_deterministic.py','scripts/test_intake_server.py','scripts/runtime/test_gate_tokens.py']\nd = dict(rows)\nfor s in sample:\n    print(f\"  {s}: reported={d.get(s)}, def_test_*={count_defs(s)}\")\nEOF"
+        },
+        {
+          "ts": "2026-08-11T05:39:52.877Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_eci7nozqfV7wYKMVT9lD6964",
+          "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && python3 - <<'EOF'\nimport re\nreport = open('reports/gddp-dogfood/05-test-suite-map.md').read()\n# count slowest-10 entries\nsec = report.split('Slowest 10 tests')[1]\nslow = re.findall(r'^\\d+\\.\\d+s call\\s+(\\S+)', sec, re.M)\nprint(\"slowest entries:\", len(slow))\nfor s in slow: print(\" \", s)\nprint(\"contains command quote:\", 'python3 -m pytest -q --durations=10' in report)\nprint(\"contains tail line:\", '4 failed, 622 passed in 36.64s' in report)\nEOF"
+        },
+        {
+          "ts": "2026-08-11T05:39:52.920Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_eci7nozqfV7wYKMVT9lD6964",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:39:52.987Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_wHK2EYRx0D6BlGpycSSh4784",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:39:57.967Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_9NpwnPOhjiELG9DlW4wx3794",
+          "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && python3 - <<'EOF'\nimport re\nreport = open('reports/gddp-dogfood/05-test-suite-map.md').read()\n# Main per-file table: between '## Per-file test counts' and '### On-disk but not collected'\nmain = report.split('## Per-file test counts')[1].split('### On-disk but not collected')[0]\nrows = re.findall(r'\\|\\s*(\\d+)\\s*\\|\\s*`(scripts/[^`]+\\.py)`\\s*\\|', main)\nprint(\"main table rows:\", len(rows))\nprint(\"main table sum:\", sum(int(n) for n,p in rows))\nprint(\"rows w/ _archive:\", [p for n,p in rows if '_archive' in p])\n# verify no archive files in main table\nEOF"
+        },
+        {
+          "ts": "2026-08-11T05:39:57.968Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_R82pAOrEKcMh46mMBkio7847",
+          "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && git diff 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61 63b26a7a5ca688373d60011c455d046e38c26d10 --stat 2>/dev/null; echo \"---files changed---\"; git diff --name-status 450eca1 63b26a7 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-11T05:39:57.986Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_R82pAOrEKcMh46mMBkio7847",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:39:58.013Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_9NpwnPOhjiELG9DlW4wx3794",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:40:03.654Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_t9M5DgsN8UtL0uRhAMjH2377",
+          "command": "cd /tmp/gddp-eval-wt-i34rsxn5 && python3 -c \"import flask\" 2>&1 | tail -1; python3 -m pytest --version 2>&1 | head -2; grep -n \"flask\" requirements.txt 2>/dev/null; echo \"---\"; ls scripts/_archive/test_jules_cli_adapter.py scripts/_archive/test_mission_push_guard.py scripts/_archive/test_replay.py 2>/dev/null && python3 -c \"\nimport ast\nfor p in ['scripts/_archive/test_jules_cli_adapter.py','scripts/_archive/test_mission_push_guard.py','scripts/_archive/test_replay.py']:\n    tree = ast.parse(open(p).read())\n    n = sum(1 for node in ast.walk(tree) if isinstance(node, ast.FunctionDef) and node.name.startswith('test_'))\n    print(p, n)\""
+        },
+        {
+          "ts": "2026-08-11T05:40:03.778Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_t9M5DgsN8UtL0uRhAMjH2377",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:40:22.862Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_5LAVDSvM9P6tZnJqxOjM1393",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All three acceptance criteria for node-05-test-suite-map are satisfied by the report content. The artifact exists and is non-empty (131 lines). The per-file test-count table covers exactly the 51 collectable scripts/**/test_*.py files (pytest.ini excludes scripts/_archive via norecursedirs, corroborating the report's exclusion note), sums to the stated 607 collected items, and spot-checked AST counts match reported values. The slowest-10 section lists exactly 10 tests from the specified command and quotes the required tail line ('4 failed, 622 passed in 36.64s'); the reported flask-missing failure mode is corroborated by this environment. The diff constraint is also satisfied: base→tip changes exactly one file (A reports/gddp-dogfood/05-test-suite-map.md), so the report-only constraint holds and 'read-only outside that report path' is consistent with the observed diff. The pytest run itself could not be re-executed here (pytest not installed), so exact duration/item figures are taken on the report's internal consistency rather than independent reproduction.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-11T05:41:03.308194+00:00",
+  "evaluated_tree_sha": "6ac8d2d17088ff074b82e70767cc59a33999b505",
+  "evaluated_commit_sha": "63b26a7a5ca688373d60011c455d046e38c26d10",
+  "merge_commit_sha": "63b26a7a5ca688373d60011c455d046e38c26d10",
+  "expected_base_commit_sha": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+  "pr_ref": null,
+  "job_id": "job_20260811T05341491389952e0eb35",
+  "execution_attempt_id": "job_20260811T05341491389952e0eb35:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-i34rsxn5/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-i34rsxn5/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-i34rsxn5/README.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-i34rsxn5/PROJECT-BRIEF.md"
+      ]
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-i34rsxn5/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/tmp/gddp-eval-wt-i34rsxn5/README.md"
+      ]
+    },
+    "overall": "medium"
+  }
+}

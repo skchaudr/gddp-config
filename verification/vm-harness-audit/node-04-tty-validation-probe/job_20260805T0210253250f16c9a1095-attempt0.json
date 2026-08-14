@@ -1,0 +1,585 @@
+{
+  "project_id": "vm-harness-audit",
+  "node_id": "node-04-tty-validation-probe",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.85,
+    "findings": [],
+    "reasoning": "Fresh-eyes review of node-04-tty-validation-probe. The node's why is to prove droid can drive real terminal sessions and capture transcript evidence, with the PTY session doubling as an end-to-end smoke of the VM's gddp deployment. The delivered work is exactly that: (1) reports/04-tty/transcript.txt is a genuine script(1) PTY capture (tty /dev/pts/11, Script started/done headers, ~2s wall time, explicit scripted exit — bounded per constraint); (2) it runs only read-only inspection (gddp --help, gddp project/jobs --help) plus the mini-heartbeat deployment smoke with full command + output + exit codes, satisfying the smoke-evidence intent; (3) reports/04-tty/summary.md states what ran, the exit status (smoke=1, script session=1, artifact capture=0), and every anomaly transparently (webhook secret FAIL, intake :5050 warn, launchd plist warns on Linux VM, gddp status absent, smoke's built-in reconcile observe tick). The smoke failure is a deployment-config gap the node was meant to observe and record, not fix — transparent documentation of it fulfills the role. Graph integrity is preserved: the subject diff adds only the two required artifacts under reports/04-tty/ (working tree clean, no writes outside reports/, no graph mutation, no dispatch in the PTY). Dependency alignment holds: paths match node-01's baseline (/home/sab-mini/bin/gddp, gddp-runtime/deploy/mini-heartbeat), node-03 (provisional upstream) report is present and non-conflicting, and node-05's citation inputs (reports/04-tty/summary.md + transcript.txt) are in place. The lone lane-1 indeterminate (smoke.sh 'absent' in repo checkout) is a harness scan artifact: the path deploy/mini-heartbeat/bin/smoke.sh lives on the VM at /home/sab-mini/gddp-runtime/..., which the transcript itself proves exists (ls -la) and executes — the semantic question is resolved by the evidence and is lane-1's adjudication, not an integrity concern. No findings affecting this verdict.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-05T02:17:03.741Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_IwLW1EqaRXMvVqpKGFzr4099",
+        "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-03-subagents-chains-audit.yaml"
+      },
+      {
+        "ts": "2026-08-05T02:17:03.741Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_KFofrbXw4lm83VuNojcP9287",
+        "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-05-separation-proposal.yaml"
+      },
+      {
+        "ts": "2026-08-05T02:17:03.741Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_QmO8uFr7FggvNS168jYU7120",
+        "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml"
+      },
+      {
+        "ts": "2026-08-05T02:17:03.747Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_IwLW1EqaRXMvVqpKGFzr4099",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T02:17:03.748Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_QmO8uFr7FggvNS168jYU7120",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T02:17:03.748Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_KFofrbXw4lm83VuNojcP9287",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T02:17:05.746Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_4qKTlm5DxL34uInBL9OQ5179",
+        "command": "cd /tmp/gddp-eval-wt-9_2d5q7m && ls -la && echo \"---REPORTS---\" && ls -la reports/ 2>/dev/null && echo \"---04-TTY---\" && ls -la reports/04-tty/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-05T02:17:05.747Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_LSuUEhluuiNCapZhbiAr3155",
+        "command": "cd /tmp/gddp-eval-wt-9_2d5q7m && git log --oneline -10 2>/dev/null; echo \"---STATUS---\"; git status 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-05T02:17:05.768Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_4qKTlm5DxL34uInBL9OQ5179",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T02:17:05.770Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_LSuUEhluuiNCapZhbiAr3155",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T02:17:07.521Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_XuPVrCLkn5Jjquj4UG2p0451",
+        "path": "/tmp/gddp-eval-wt-9_2d5q7m/reports/04-tty/transcript.txt"
+      },
+      {
+        "ts": "2026-08-05T02:17:07.521Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_p1TuDR200iJQ98XgNG0F5446",
+        "path": "/tmp/gddp-eval-wt-9_2d5q7m/reports/04-tty/summary.md"
+      },
+      {
+        "ts": "2026-08-05T02:17:07.523Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_p1TuDR200iJQ98XgNG0F5446",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T02:17:07.523Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_XuPVrCLkn5Jjquj4UG2p0451",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T02:17:24.992Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_IsigRhyoMagkr6Nurcub8727",
+        "command": "cd /tmp/gddp-eval-wt-9_2d5q7m && git show --stat b95b4a2 2>/dev/null | head -20; echo \"=== SUBJECT DIFF (b95b4a2..2bca4e5) ===\"; git diff --stat b95b4a2..2bca4e5 2>/dev/null; echo \"=== FILES IN SUBJECT ===\"; git diff --name-status b95b4a2..2bca4e5 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-05T02:17:24.993Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_01_LjZk8oFgpVoA6e9dTDpT9492",
+        "reason": "command matched blocked pattern",
+        "command": "cd /tmp/gddp-eval-wt-9_2d5q7m && echo \"=== forbidden pattern scan in 04-tty artifacts ===\"; grep -nE \"gddp (jobs )?set|dispatch|--dispatch|arm|disarm|git push|git commit|rm -rf|install-dormant\" reports/04-tty/* 2>/dev/null || echo \"no forbidden mutation patterns found\"; echo \"=== mutation-ish verbs in transcript ===\"; grep -nE \"mutat|write|dispatch\" reports/04-tty/transcript.txt reports/04-tty/summary.md 2>/dev/null || echo \"none\"",
+        "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+      },
+      {
+        "ts": "2026-08-05T02:17:24.993Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_LjZk8oFgpVoA6e9dTDpT9492",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-05T02:17:25.013Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_IsigRhyoMagkr6Nurcub8727",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T02:17:28.056Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_BakEbBtxIjzmXFWcGvOH9662",
+        "command": "cd /tmp/gddp-eval-wt-9_2d5q7m && grep -nEi \"jobs set|dispatch|disarm|rm -rf|mutat|graph writ\" reports/04-tty/* 2>/dev/null || echo \"no mutation/dispatch patterns found in 04-tty artifacts\""
+      },
+      {
+        "ts": "2026-08-05T02:17:28.057Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_gwiud0gKtiLIRw9YmcuC0302",
+        "path": "/tmp/gddp-eval-wt-9_2d5q7m/reports/01-entrypoints.md"
+      },
+      {
+        "ts": "2026-08-05T02:17:28.064Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_gwiud0gKtiLIRw9YmcuC0302",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T02:17:28.067Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_BakEbBtxIjzmXFWcGvOH9662",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T02:17:50.603Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_mwl8QxXNdAGlqlotOyKa6743",
+        "command": "cd /tmp/gddp-eval-wt-9_2d5q7m && head -30 reports/03-subagents-chains.md; echo \"=== wc ===\"; wc -c reports/01-entrypoints.md reports/02-extensions.md reports/03-subagents-chains.md reports/04-tty/transcript.txt reports/04-tty/summary.md"
+      },
+      {
+        "ts": "2026-08-05T02:17:50.603Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_DwgQtmHIKP3fSkOfW4B82314",
+        "command": "cd /tmp/gddp-eval-wt-9_2d5q7m && echo \"=== gddp-runtime path consistency across reports ===\"; grep -rn \"gddp-runtime/deploy/mini-heartbeat\" reports/ | head -10; echo \"=== gddp binary path in node-01 vs node-04 ===\"; grep -n \"bin/gddp\" reports/01-entrypoints.md reports/04-tty/transcript.txt | head"
+      },
+      {
+        "ts": "2026-08-05T02:17:50.614Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_mwl8QxXNdAGlqlotOyKa6743",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T02:17:50.618Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_DwgQtmHIKP3fSkOfW4B82314",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T02:18:06.589Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_eYUSwiAIxYLBcu6jiZR27882",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "node-05's findings-cited criterion must cite reports/04-tty/summary.md and reports/04-tty/transcript.txt by path; unlike nodes 01-03 (single flat files), node-04's artifacts live in a subdirectory, so node-05 should cite both paths explicitly to avoid a path-mismatch.",
+        "affected_node_ids": [
+          "node-05-separation-proposal"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The smoke FAIL (webhook secret unresolved, intake :5050 not listening, launchd plists absent) is a real deployment-config gap on the Linux VM. node-05's separation proposal should carry this (mini-heartbeat arming / Linux-vs-macOS kit divergence) into its open-questions section so the follow-up execution graph accounts for it.",
+        "affected_node_ids": [
+          "node-05-separation-proposal"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9666666666666667,
+  "criteria_confidence": 0.9666666666666667,
+  "completeness": 1.0,
+  "graph_readiness": 0.9666666666666667,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "transcript-exists",
+        "criterion": "reports/04-tty/transcript.txt exists and is non-empty, captured from a real PTY session (script(1), tmux capture-pane, or equivalent)",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "PTY -> line 1: 'PTY'"
+        ],
+        "reasoning": "Scanned source files (reports/04-tty/transcript.txt) for identifiers named in the criterion (non-empty, PTY, capture-pane). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "smoke-markers-present",
+        "criterion": "transcript contains the output of a gddp deployment smoke check run inside the PTY (gddp status, deploy/mini-heartbeat/bin/smoke.sh, or equivalent) showing the command and its output",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "path_mentioned_missing",
+        "evidence": [
+          "deploy/mini-heartbeat/bin/smoke.sh absent"
+        ],
+        "reasoning": "The criterion names source path(s) that are not present in the checkout. The harness did not scan unrelated files as substitutes.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "deploy/mini-heartbeat/bin/smoke.sh absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "summary-exists",
+        "criterion": "reports/04-tty/summary.md exists and states what was run, the exit status observed, and any anomalies seen in the terminal output",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Read-only commands inside the PTY: status/smoke/inspection only; no dispatch, no mutation, no graph writes",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "The PTY session must be bounded (explicit timeout or scripted exit); no interactive sessions left running",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/04-tty/transcript.txt": true,
+      "reports/04-tty/summary.md": true
+    },
+    "deps_status": {
+      "node-03-subagents-chains-audit": "provisional"
+    },
+    "criteria_mismatches": [
+      {
+        "criterion_id": "smoke-markers-present",
+        "kind": "source_path",
+        "detail": "deploy/mini-heartbeat/bin/smoke.sh absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "smoke-markers-present",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "b95b4a22b354bc98284b34df3bc9427e2375637b",
+      "tip": "2bca4e56306f9e71f1b7571ee4f756aaae1f29f3",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/04-tty/summary.md"
+        },
+        {
+          "status": "A",
+          "path": "reports/04-tty/transcript.txt"
+        }
+      ],
+      "truncated": false,
+      "file_count": 2,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "transcript-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "reports/04-tty/transcript.txt exists, 4018 bytes (non-empty)",
+          "Line 1: 'Script started on 2026-08-05 02:11:15+00:00 [COMMAND=...]' — script(1) capture header",
+          "Line 5: 'tty: /dev/pts/11' — real PTY device",
+          "Last line: 'Script done on 2026-08-05 02:11:17+00:00 [COMMAND_EXIT_CODE=\"1\"]' — script(1) footer",
+          "Transcript's heartbeat reconcile output names this exact job session (job_20260805T0210253250f16c9a1095-node-04-...-attempt-0-bd113185...), matching git commit 2bca4e5 — authentic capture"
+        ],
+        "reasoning": "The file exists, is non-empty, and bears the canonical script(1) start/done headers with a /dev/pts TTY, satisfying 'captured from a real PTY session (script(1), tmux capture-pane, or equivalent)'. Internal consistency with this job's actual session ID corroborates genuineness."
+      },
+      {
+        "criterion_id": "smoke-markers-present",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "Transcript shows command: 'bash /home/sab-mini/gddp-runtime/deploy/mini-heartbeat/bin/smoke.sh' (line ~34 '=== mini-heartbeat smoke.sh ===')",
+          "Transcript line 13: 'ls -la ...' confirms the smoke script exists on the VM: '-rwxrwxr-x 1 sab-mini sab-mini 6251 Aug 4 18:09 /home/sab-mini/gddp-runtime/deploy/mini-heartbeat/bin/smoke.sh'",
+          "Full smoke output in transcript: '=== mini-heartbeat smoke ===' with [ok] runtime scripts/project.yaml/DeepSeek key/gh auth/pi on PATH, [FAIL] webhook secret, warns, heartbeat tick, '=== smoke: FAIL ==='",
+          "Transcript line 56: 'smoke_exit=1' — exit status shown",
+          "summary.md Section 1 documents that 'gddp status' does not exist on this host and smoke.sh is the deployment smoke (criterion's 'or equivalent' path)"
+        ],
+        "reasoning": "The deterministic source_path mismatch flagged deploy/mini-heartbeat/bin/smoke.sh as absent from the audit repo; that path is deployment-relative on the VM (verified present by ls inside the transcript) and the criterion explicitly allows 'or equivalent'. The transcript shows both the smoke command and its complete output, including the smoke's exit status. The criterion requires the smoke command+output to appear, not a passing result; a FAIL-exit smoke with documented cause still satisfies it. Additionally the gddp CLI inspection surface (gddp --help) is shown."
+      },
+      {
+        "criterion_id": "summary-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "reports/04-tty/summary.md exists, 5244 bytes",
+          "Section 1 'What was run' lists the script(1) invocation and a 5-step command table",
+          "Section 2 'Exit status observed' records smoke.sh exit 1, PTY/script exit 1 (COMMAND_EXIT_CODE=\"1\"), artifact write 0",
+          "Section 4 'Anomalies and interpretation' details six anomalies (webhook secret FAIL, intake :5050 not listening, launchd plist warns on Linux, no gddp status verb, heartbeat seeing own session, no interactive hang)"
+        ],
+        "reasoning": "The summary states what was run, the observed exit statuses, and the anomalies seen in the terminal output, satisfying every element of the criterion."
+      }
+    ],
+    "overall_reasoning": "All three acceptance criteria for node-04-tty-validation-probe are satisfied by the two committed artifacts. transcript.txt is a genuine, non-empty script(1) PTY capture (4018 bytes, /dev/pts/11, start/done headers, bounded 2s session ending in an explicit exit), whose content is internally consistent with this exact job attempt. The smoke marker criterion is met: the PTY ran the mini-heartbeat deployment smoke (bash /home/sab-mini/gddp-runtime/deploy/mini-heartbeat/bin/smoke.sh — the criterion's deploy/mini-heartbeat/bin/smoke.sh is a VM deployment-relative path, resolved via the 'or equivalent' clause) and the transcript shows both the command and its full output including smoke_exit=1; the failing exit (webhook secret) is thoroughly documented and the criterion does not require a passing smoke. summary.md states what was run, exit statuses, and anomalies. Constraints are honored: only help/smoke/inspection commands inside the PTY (no dispatch, no mutation, no graph writes; 'arm'/'install-dormant' appear only as advisory text emitted by smoke.sh) and the session was bounded with a scripted exit. The deterministic ambiguities (path-absent smoke.sh, no probe for summary) are resolved by direct reading of the artifacts. Caveat outside this node's criteria: upstream node-03 remains provisional, and the smoke check itself failed (exit 1) — both worth a human confirmation, but neither affects the binary criteria as written.",
+    "risks": "1) Upstream dependency node-03-subagents-chains-audit is still 'provisional' (human acceptance pending); per frontier_auto_advance this node proceeded, but a human should confirm chain sequencing before treating the graph as accepted. 2) The smoke check exited 1 (webhook secret resolver FAIL); the criterion only requires the command and output to appear, so this is judged pass, but if a passing smoke was intended as evidence the criterion should be amended and rerun. 3) PTY genuineness is inferred from script(1) header/footer format, tty device, and internal job-ID consistency; no independent out-of-band verification exists. 4) The relative path deploy/mini-heartbeat/bin/smoke.sh does not exist inside the audit repo — resolved here via the 'or equivalent' clause and the absolute VM path, but if the criterion author intended the smoke.sh to live in-repo, the criterion text is ambiguous.",
+    "followup_candidates": "1) Human clarification: \"The smoke check exited 1 (webhook secret FAIL, documented in summary.md §4). The criterion only requires the transcript to show the smoke command and output, so this is counted as PASS. Was a passing smoke intended as evidence? If yes, update the criterion and rerun.\" 2) Human clarification: \"The criterion path deploy/mini-heartbeat/bin/smoke.sh does not exist in the audit repo; the transcript runs it from the VM deployment (/home/sab-mini/gddp-runtime/deploy/mini-heartbeat/bin/smoke.sh) via the 'or equivalent' clause. Confirm the criterion intended a deployment-relative path.\" 3) Human confirmation: \"Upstream node-03 is still provisional; node-04's evidence is unaffected, but confirm human-gate sequencing before accepting the chain.\"",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-05T02:16:00.572Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_vpvPtxs1AY3rRKyvBebN3780",
+          "command": "cd /tmp/gddp-eval-wt-9_2d5q7m && ls -la && echo \"---\" && find . -type f -not -path './.git/*' | head -50"
+        },
+        {
+          "ts": "2026-08-05T02:16:00.573Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_9n4w4meWwPnKCSsSJ6aN6696",
+          "path": "/tmp/gddp-eval-wt-9_2d5q7m/reports/04-tty/transcript.txt"
+        },
+        {
+          "ts": "2026-08-05T02:16:00.573Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_03ICHslImf6AzifIqs7Y1081",
+          "path": "/tmp/gddp-eval-wt-9_2d5q7m/reports/04-tty/summary.md"
+        },
+        {
+          "ts": "2026-08-05T02:16:00.587Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_9n4w4meWwPnKCSsSJ6aN6696",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T02:16:00.587Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_03ICHslImf6AzifIqs7Y1081",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T02:16:00.592Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_vpvPtxs1AY3rRKyvBebN3780",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T02:16:10.027Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_7krrVcSRk6QOwtr5auBx6580",
+          "command": "cd /tmp/gddp-eval-wt-9_2d5q7m && wc -c reports/04-tty/transcript.txt reports/04-tty/summary.md && echo \"---\" && head -3 reports/04-tty/transcript.txt && echo \"---\" && tail -3 reports/04-tty/transcript.txt && echo \"---grep smoke markers---\" && grep -n \"smoke.sh\\|smoke_exit\\|mini-heartbeat smoke\\|smoke: FAIL\\|Script started\\|/dev/pts\" reports/04-tty/transcript.txt"
+        },
+        {
+          "ts": "2026-08-05T02:16:10.027Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_P2vFr4KalM1n43zQgTyx1477",
+          "command": "cd /tmp/gddp-eval-wt-9_2d5q7m && git log --oneline -10 2>/dev/null; echo \"---\"; git status --short 2>/dev/null; echo \"---\"; ls -la reports/04-tty/"
+        },
+        {
+          "ts": "2026-08-05T02:16:10.027Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_vhojRvVx60wFetwkq1xc4664",
+          "command": "cat /home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-04-tty-validation-probe.yaml 2>/dev/null || ls /home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/ 2>/dev/null || echo \"node config dir not readable\""
+        },
+        {
+          "ts": "2026-08-05T02:16:10.045Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_7krrVcSRk6QOwtr5auBx6580",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T02:16:10.048Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_vhojRvVx60wFetwkq1xc4664",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T02:16:10.053Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_P2vFr4KalM1n43zQgTyx1477",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T02:16:25.799Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_0OeeO7bl483chqNrRYVI7774",
+          "reason": "command matched blocked pattern",
+          "command": "cd /tmp/gddp-eval-wt-9_2d5q7m && echo \"--- mutation/dispatch scan of transcript ---\" && grep -niE \"dispatch|jobs set|node --|git push|git commit|rm |curl -X|POST|write|mutation|graph write|arm|disarm\" reports/04-tty/transcript.txt || echo \"none found\" && echo \"--- command lines actually executed (excluding help echoes) ---\" && grep -nE \"^(gddp|bash |ls |command -v|echo \\\"===)\" reports/04-tty/transcript.txt | head -20",
+          "pattern": "\\b(?:curl|wget|ssh|scp|sftp|rsync|nc|netcat|telnet|ftp|pip|npm|pnpm|yarn|brew)\\b"
+        },
+        {
+          "ts": "2026-08-05T02:16:25.800Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_0OeeO7bl483chqNrRYVI7774",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-05T02:16:25.800Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_fSv6HRv7E6lb5ndqFHuX8038",
+          "command": "head -30 /home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-03-subagents-chains-audit.yaml 2>/dev/null; echo \"=== node-05 ===\"; head -20 /home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-05-separation-proposal.yaml 2>/dev/null; echo \"=== foundational ===\"; head -15 /home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-05T02:16:25.814Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_fSv6HRv7E6lb5ndqFHuX8038",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T02:16:28.756Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_3rzjuaJto9zz1cL3njLC1976",
+          "reason": "command matched blocked pattern",
+          "command": "cd /tmp/gddp-eval-wt-9_2d5q7m && echo \"--- executed command lines in transcript ---\" && grep -nE \"^(gddp|bash |ls |command -v |echo \\\"=== )\" reports/04-tty/transcript.txt && echo \"--- dispatch/mutation scan ---\" && grep -niE \"dispatch|jobs set|git push|git commit|graph write|disarm|install-dormant|arm\" reports/04-tty/transcript.txt || echo \"no dispatch/mutation/arm verbs found\"",
+          "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+        },
+        {
+          "ts": "2026-08-05T02:16:28.756Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_3rzjuaJto9zz1cL3njLC1976",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-05T02:16:31.396Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_VjXGE23vkwWDV0M62MLY8056",
+          "command": "cd /tmp/gddp-eval-wt-9_2d5q7m && grep -nE \"^(gddp|bash |ls |command -v |echo \\\"=== )\" reports/04-tty/transcript.txt; echo \"--- verbs scan ---\"; grep -niE \"dispatch|disarm|install-dormant|arm |jobs set|write\" reports/04-tty/transcript.txt || echo \"none\""
+        },
+        {
+          "ts": "2026-08-05T02:16:31.408Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_VjXGE23vkwWDV0M62MLY8056",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T02:16:59.414Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_IcTKLTweFofzcNbcyfIf1598",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All three acceptance criteria for node-04-tty-validation-probe are satisfied by the two committed artifacts. transcript.txt is a genuine, non-empty script(1) PTY capture (4018 bytes, /dev/pts/11, start/done headers, bounded 2s session ending in an explicit exit), whose content is internally consistent with this exact job attempt. The smoke marker criterion is met: the PTY ran the mini-heartbeat deployment smoke (bash /home/sab-mini/gddp-runtime/deploy/mini-heartbeat/bin/smoke.sh — the criterion's deploy/mini-heartbeat/bin/smoke.sh is a VM deployment-relative path, resolved via the 'or equivalent' clause) and the transcript shows both the command and its full output including smoke_exit=1; the failing exit (webhook secret) is thoroughly documented and the criterion does not require a passing smoke. summary.md states what was run, exit statuses, and anomalies. Constraints are honored: only help/smoke/inspection commands inside the PTY (no dispatch, no mutation, no graph writes; 'arm'/'install-dormant' appear only as advisory text emitted by smoke.sh) and the session was bounded with a scripted exit. The deterministic ambiguities (path-absent smoke.sh, no probe for summary) are resolved by direct reading of the artifacts. Caveat outside this node's criteria: upstream node-03 remains provisional, and the smoke check itself failed (exit 1) — both worth a human confirmation, but neither affects the binary criteria as written.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-05T02:18:06.643848+00:00",
+  "evaluated_tree_sha": "2bff284907c46eae5f8485861f6d4abf05cb9a4e",
+  "evaluated_commit_sha": "2bca4e56306f9e71f1b7571ee4f756aaae1f29f3",
+  "merge_commit_sha": "2bca4e56306f9e71f1b7571ee4f756aaae1f29f3",
+  "expected_base_commit_sha": "b95b4a22b354bc98284b34df3bc9427e2375637b",
+  "pr_ref": null,
+  "job_id": "job_20260805T0210253250f16c9a1095",
+  "canonical_context": {
+    "readme": "UNAVAILABLE: /tmp/gddp-eval-wt-9_2d5q7m/README.md does not exist",
+    "project_brief": "UNAVAILABLE: /tmp/gddp-eval-wt-9_2d5q7m/PROJECT-BRIEF.md does not exist",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml",
+    "neighbor:node-03-subagents-chains-audit": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-03-subagents-chains-audit.yaml",
+    "neighbor:node-05-separation-proposal": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-05-separation-proposal.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "none",
+      "offered": 3,
+      "content_accessed": 0,
+      "not_observed": 3,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml",
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-03-subagents-chains-audit.yaml",
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-05-separation-proposal.yaml"
+      ]
+    },
+    "integrity": {
+      "rating": "low",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml",
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-03-subagents-chains-audit.yaml",
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-05-separation-proposal.yaml"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "none"
+  }
+}

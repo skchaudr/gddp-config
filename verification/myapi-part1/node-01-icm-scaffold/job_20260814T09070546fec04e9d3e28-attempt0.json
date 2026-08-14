@@ -1,0 +1,1485 @@
+{
+  "project_id": "myapi-part1",
+  "node_id": "node-01-icm-scaffold",
+  "verdict": "needs-human-review",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "block",
+    "intent_preserved": false,
+    "graph_integrity_preserved": false,
+    "required_human_review": true,
+    "confidence": 0.9,
+    "findings": [
+      {
+        "severity": "high",
+        "summary": "Systematic artifact-path divergence: the 14 task contracts name output paths that differ from the downstream graph nodes' required_artifacts and acceptance criteria on 13 of 14 nodes (node-02: decision-schema.md vs decision-schema.json; node-03: sources.md vs sources-inventory.md; node-04: decisions-raw.jsonl vs decisions-raw.json; node-05: decisions-canonical.jsonl vs decisions-normalized.json; node-07: corpus/ vs corpus-snapshot/; node-08: repro-report.md vs repro-check.json; node-10: ingest-report.md vs ingest-receipt.md; node-11: retrieval-check.md vs retrieval-smoke.md; node-15: part1-summary.md vs part1-package/). With artifact_gate_enforced=true, the gate checks the graph paths, so agents following the contracts will produce artifacts the gate rejects — the slice stalls at node-02 and every downstream node. The gddp-config node YAMLs predate the result commit, so the contracts were expected to align with them and did not.",
+        "affected_node_ids": [
+          "node-02-decision-schema",
+          "node-03-inventory-sources",
+          "node-04-extract-decisions",
+          "node-05-normalize-decisions",
+          "node-07-build-corpus",
+          "node-08-corpus-repro-check",
+          "node-10-khoj-ingest",
+          "node-11-verify-retrieval",
+          "node-15-preserve-results"
+        ]
+      },
+      {
+        "severity": "high",
+        "summary": "Direct contradiction on the evaluation nodes: graph nodes 12-14 require pre-written query files 04-evaluation/queries/q1.txt..q5.txt (acceptance criterion: queries 'written before asking, not adapted after seeing answers') and per-query result files (q1-factual.md, q2-rationale.md, q3-supersession.md, q4-relationship.md, q5-negative-control.md), while the eval contracts direct agents to choose queries at execution and include stop conditions forbidding pre-written query strings in a query-canon file, and emit combined single-file results (eval-factual-rationale.md etc.). An agent following the contracts violates the graph's required artifacts and its scientific-integrity requirement for the negative control.",
+        "affected_node_ids": [
+          "node-12-eval-factual-rationale",
+          "node-13-eval-supersession-relationship",
+          "node-14-eval-negative-control"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "Room-boundary divergence for node-09 (khoj-transform): the graph requires the transform at 03-ingestion/output/khoj-corpus/ plus 03-ingestion/output/transform-notes.md, but the contract writes 02-corpus/output/khoj-ready/ and never produces transform-notes.md. The node-10 contract then consumes the 02-corpus path, compounding the divergence from the graph's stage definition (corpus room produces snapshot; ingestion room receives the transform).",
+        "affected_node_ids": [
+          "node-09-khoj-transform",
+          "node-10-khoj-ingest"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "AGENTS.md was fully overwritten (146 lines of pre-existing MyAPI/MyAPI-rebuild operating notes replaced by an 82-line Part 1 routing map). This was inherent to the acceptance criteria (AGENTS.md must BE the routing map) and old content survives in git history/README/CLAUDE.md, but it is the one modification of an existing file against the 'no changes to existing files' constraint.",
+        "affected_node_ids": [
+          "node-01-icm-scaffold"
+        ]
+      }
+    ],
+    "reasoning": "The scaffold work itself is well-crafted: four rooms with CONTEXT maps (all under 60 lines), 14 task contracts covering all 14 downstream nodes 1:1, internal cross-references that resolve, all referenced repo paths (docs/01-taxonomy.md, deploy_to_khoj.sh, scripts/reindex_khoj_safe.py, project-docs/corpus-work-2026-08/CORPUS-TARGET-SHAPE.md, etc.) verified to exist, verification commands that are machine-checkable, and faithful adherence to the 'no pre-answering' constraint (contracts explicitly decline to prescribe schema fields, source lists, or eval queries). As a standalone scaffold it reads as intent-faithful.\n\nHowever, the node's intended role is precisely to 'write the instructions every later agent reads' so 'the graph stays a thin scheduler' — and the instructions it wrote systematically contradict the graph's own source of truth. The gddp-config node YAMLs (committed before the result) fix concrete required_artifacts and acceptance paths for every later node; the contracts name different paths for 13 of 14 nodes, put node-09's output in the wrong room, and — worst — the eval contracts actively forbid the pre-written query files that nodes 12-14 require as gate-checked artifacts. With artifact_gate_enforced=true, downstream execution fails at the first gate (node-02 expects decision-schema.md; contract says decision-schema.json). This is not a subtle veer (drift) nor merely unverifiable (insufficient): it is a verifiable, systematic misalignment that actively prevents the slice from executing as designed, so the correct verdict is block with human review before node-02 fires. Lane-1 indeterminate criteria (e.g., 'CONTEXT.md absent' probe artifact) are out of scope here; this verdict rests solely on the contract-vs-graph artifact contradiction.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-14T09:24:30.257Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_0bAMxE6JPhGMi6ZIHiRi5396",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-icm-scaffold.yaml"
+      },
+      {
+        "ts": "2026-08-14T09:24:30.258Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_vIWy1ADnTo9rOOc7CmXN5904",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:30.259Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_EbSMCJ1Yy4HpzMknBSL13150",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/README.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:30.264Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_0bAMxE6JPhGMi6ZIHiRi5396",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:30.265Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_EbSMCJ1Yy4HpzMknBSL13150",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:30.265Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_vIWy1ADnTo9rOOc7CmXN5904",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:32.697Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_GluPKXgojys6A0RzEh2C6361",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git log --oneline -15 2>/dev/null | head -30; echo \"---STATUS---\"; git status --short 2>/dev/null | head -40"
+      },
+      {
+        "ts": "2026-08-14T09:24:32.699Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_kGY6m9dw3gDXhtxRGmed2575",
+        "command": "cd /Users/sab-mini/repos/MyAPI && ls -la; echo \"---\"; find . -maxdepth 3 -type d -name \"0[1-4]-*\" 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T09:24:32.773Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_kGY6m9dw3gDXhtxRGmed2575",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:32.944Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_GluPKXgojys6A0RzEh2C6361",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:37.021Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_TOGIYT2U9KPzl2Ju9ihs8316",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git cat-file -t 18df5ca58fd3b20c45efddf3067167a00cda3618 2>&1; echo \"---\"; git log --all --oneline | grep -i \"18df5ca\" ; echo \"---BRANCHES---\"; git branch -a 2>/dev/null; echo \"---WORKTREES---\"; git worktree list 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T09:24:37.021Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_KBxOITRGEZWN1SdZzLkn7920",
+        "command": "cd /Users/sab-mini/repos/MyAPI && ls -la docs/ 2>/dev/null; echo \"---\"; find . -maxdepth 2 -name \"CONTEXT.md\" 2>/dev/null; echo \"---\"; find . -maxdepth 2 -type d -name \"0[1-4]-*\" 2>/dev/null; echo \"---AGENTS---\"; head -5 AGENTS.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:37.083Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_KBxOITRGEZWN1SdZzLkn7920",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:37.175Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_TOGIYT2U9KPzl2Ju9ihs8316",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:42.190Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_URkBRyTKnIh5YuDgD58g3799",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git diff --stat 6671b45de85f98689a5a15851facea88e00e480f 18df5ca58fd3b20c45efddf3067167a00cda3618 2>&1 | tail -40"
+      },
+      {
+        "ts": "2026-08-14T09:24:42.190Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Ncsd73EAC8DIpwht8pAR5231",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx && ls -la; echo \"---ROOMS---\"; find . -maxdepth 3 -type d | grep -E \"0[1-4]|docs\" | head -20"
+      },
+      {
+        "ts": "2026-08-14T09:24:42.243Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Ncsd73EAC8DIpwht8pAR5231",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:42.257Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_URkBRyTKnIh5YuDgD58g3799",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:50.017Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_yf3DMfw2TCWV1jx5Y5Dp2010",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/AGENTS.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:50.018Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_J8HiG16pYVpeiPLJ3ugW3078",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/docs/CONTEXT.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:50.020Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_yf3DMfw2TCWV1jx5Y5Dp2010",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:50.020Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_J8HiG16pYVpeiPLJ3ugW3078",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:52.658Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_HncVRpitlQHgPiCgZWoB0360",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/01-decisions/CONTEXT.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:52.658Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_Puk2l0vA9dTXEGudBAay7904",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/02-corpus/CONTEXT.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:52.658Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_UZ27Qyo7KAhzBvfpATUt4804",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/03-ingestion/CONTEXT.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:52.659Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_PL3OCSk4MuEQuWxECtLW7975",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/04-evaluation/CONTEXT.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:52.661Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_HncVRpitlQHgPiCgZWoB0360",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:52.661Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Puk2l0vA9dTXEGudBAay7904",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:52.661Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_UZ27Qyo7KAhzBvfpATUt4804",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:52.662Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_PL3OCSk4MuEQuWxECtLW7975",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:56.198Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_3glAQ125SyqZCaVIXNQJ8809",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/01-decisions/tasks/decision-schema.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:56.199Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_8fvRBNmonEV39qNnVBTZ9307",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/01-decisions/tasks/inventory-sources.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:56.199Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_4yWzfNlbCy7NLVzbcUQy0902",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/01-decisions/tasks/extract-decisions.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:56.199Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_HgvkG7UQsdOARcOgEGH86122",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/01-decisions/tasks/normalize-decisions.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:56.199Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_04_m5xPBRRD1bzfp3BXyKxI1552",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/01-decisions/tasks/validate-decision-set.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:56.202Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_3glAQ125SyqZCaVIXNQJ8809",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:56.202Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_8fvRBNmonEV39qNnVBTZ9307",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:56.202Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_4yWzfNlbCy7NLVzbcUQy0902",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:56.202Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_HgvkG7UQsdOARcOgEGH86122",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:56.203Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_04_m5xPBRRD1bzfp3BXyKxI1552",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:58.876Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_0uwYsfuZOZKdDpA3mvKg7052",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/02-corpus/tasks/build-corpus.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:58.877Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_4ued6bqH8Z5wHMQXYhJf5596",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/02-corpus/tasks/corpus-repro-check.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:58.877Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_ovIBFWRyUA0zxbC4MiU13579",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/02-corpus/tasks/khoj-transform.md"
+      },
+      {
+        "ts": "2026-08-14T09:24:58.879Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_0uwYsfuZOZKdDpA3mvKg7052",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:58.879Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_ovIBFWRyUA0zxbC4MiU13579",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:24:58.879Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_4ued6bqH8Z5wHMQXYhJf5596",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:25:06.422Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_caQNbMJWrY7zgHARxobm5206",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/03-ingestion/tasks/khoj-ingest.md"
+      },
+      {
+        "ts": "2026-08-14T09:25:06.423Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_zYUWkV2nOZVhCSSTn09e4878",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/03-ingestion/tasks/verify-retrieval.md"
+      },
+      {
+        "ts": "2026-08-14T09:25:06.423Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_p7A0qg0rv6MJIIxHMfLx1592",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/04-evaluation/tasks/eval-factual-rationale.md"
+      },
+      {
+        "ts": "2026-08-14T09:25:06.423Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_ej9BbfTDeuV0khxhonIB0476",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/04-evaluation/tasks/eval-supersession-relationship.md"
+      },
+      {
+        "ts": "2026-08-14T09:25:06.425Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_zYUWkV2nOZVhCSSTn09e4878",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:25:06.426Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_caQNbMJWrY7zgHARxobm5206",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:25:06.426Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_p7A0qg0rv6MJIIxHMfLx1592",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:25:06.426Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_ej9BbfTDeuV0khxhonIB0476",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:25:13.475Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_lQXgiHiqt2A3me8S4Cdr7078",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/04-evaluation/tasks/eval-negative-control.md"
+      },
+      {
+        "ts": "2026-08-14T09:25:13.476Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_ksJGZ0C1oqHxsUkMa7Lc5880",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/04-evaluation/tasks/preserve-results.md"
+      },
+      {
+        "ts": "2026-08-14T09:25:13.477Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_AEMfiQGF2OxcBAKOP4nV1450",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git diff 6671b45de85f98689a5a15851facea88e00e480f 18df5ca58fd3b20c45efddf3067167a00cda3618 -- AGENTS.md | head -80"
+      },
+      {
+        "ts": "2026-08-14T09:25:13.480Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_lQXgiHiqt2A3me8S4Cdr7078",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:25:13.481Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ksJGZ0C1oqHxsUkMa7Lc5880",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:25:13.524Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_AEMfiQGF2OxcBAKOP4nV1450",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:25:28.047Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_0iCqF535dBhxa3w0YUOx8858",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx && for p in \"docs/02-target-output.md\" \"docs/01-taxonomy.md\" \"deploy_to_khoj.sh\" \"scripts/reindex_khoj_safe.py\" \"scripts/khoj_reindex_resume_index.py\" \"scripts/khoj_index_diff.py\" \"project-docs/source-of-truth-anchors\" \"project-docs/corpus-work-2026-08/CORPUS-TARGET-SHAPE.md\"; do if [ -e \"$p\" ]; then echo \"OK   $p\"; else echo \"MISS $p\"; fi; done"
+      },
+      {
+        "ts": "2026-08-14T09:25:28.048Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_UQC1IhXOwGJAjVzOBhqN4144",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx && wc -l AGENTS.md docs/CONTEXT.md 01-decisions/CONTEXT.md 02-corpus/CONTEXT.md 03-ingestion/CONTEXT.md 04-evaluation/CONTEXT.md; echo \"---task files---\"; ls 01-decisions/tasks/ 02-corpus/tasks/ 03-ingestion/tasks/ 04-evaluation/tasks/"
+      },
+      {
+        "ts": "2026-08-14T09:25:28.055Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_0iCqF535dBhxa3w0YUOx8858",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:25:28.066Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_UQC1IhXOwGJAjVzOBhqN4144",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:25:34.286Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_zrhZIkEucz7OP1cecl0l3991",
+        "command": "cd /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes && ls; echo \"---NODE02---\"; cat node-02-decision-schema.yaml 2>/dev/null | head -40"
+      },
+      {
+        "ts": "2026-08-14T09:25:34.286Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_SDG4JhWlE2IugVO9h4Cu4441",
+        "command": "cd /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes && echo \"---NODE10---\"; cat node-10-khoj-ingest.yaml 2>/dev/null | head -30; echo \"---NODE15---\"; cat node-15-preserve-results.yaml 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-14T09:25:34.311Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_zrhZIkEucz7OP1cecl0l3991",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:25:34.316Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_SDG4JhWlE2IugVO9h4Cu4441",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:25:46.145Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_38xkiCEIImnFlpq13fYd0086",
+        "command": "cd /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes && for f in node-0[2-9]*.yaml node-1[0-5]*.yaml; do echo \"=== $f ===\"; grep -E \"required_artifacts|^- |criterion:\" \"$f\" | grep -E \"output/|results/|tasks/|CONTEXT|\\.md|\\.json|/queries\" | head -8; done 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T09:25:46.320Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_38xkiCEIImnFlpq13fYd0086",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:26:20.211Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ll3q9vfH9ptljtVS0awz6958",
+        "command": "cd /Users/sab-mini/repos/gddp-config && git log --oneline -8 -- graphs/myapi-part1/ 2>/dev/null; echo \"---\"; git log -1 --format=\"%H %ad %s\" --date=iso 2>/dev/null; echo \"---diff node-02 required artifact---\"; grep -A3 \"required_artifacts\" graphs/myapi-part1/nodes/node-12-eval-factual-rationale.yaml graphs/myapi-part1/nodes/node-09-khoj-transform.yaml"
+      },
+      {
+        "ts": "2026-08-14T09:26:20.211Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_k3gx48RgMcPadfLSOhHa7112",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git log --oneline 18df5ca -1 --format=\"%H%n%ad%n%s\" --date=iso; echo \"---commit parents---\"; git log --format=\"%H %P\" -1 18df5ca; echo \"---what the wrapper commit contains---\"; git show --stat 18df5ca --format=\"%s\" | head -35"
+      },
+      {
+        "ts": "2026-08-14T09:26:20.334Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_k3gx48RgMcPadfLSOhHa7112",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:26:20.336Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ll3q9vfH9ptljtVS0awz6958",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T09:27:01.646Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_p5rKJbMGwf1ekaEf0Vw97383",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "high",
+        "summary": "Before node-02 fires, the artifact-path contract between gddp-config node YAMLs and the room task contracts must be reconciled in one pass (14 nodes converge on a linear chain: 01-decisions/output -> 02-corpus/output -> 03-ingestion/output -> 04-evaluation/results). Either the node YAMLs' required_artifacts/acceptance paths are updated to the contracts' paths, or the contracts are rewritten to the YAMLs' paths; leaving both as-is guarantees sequential gate failures through the whole slice.",
+        "affected_node_ids": [
+          "node-02-decision-schema",
+          "node-03-inventory-sources",
+          "node-04-extract-decisions",
+          "node-05-normalize-decisions",
+          "node-06-validate-decision-set",
+          "node-07-build-corpus",
+          "node-08-corpus-repro-check",
+          "node-09-khoj-transform",
+          "node-10-khoj-ingest",
+          "node-11-verify-retrieval",
+          "node-12-eval-factual-rationale",
+          "node-13-eval-supersession-relationship",
+          "node-14-eval-negative-control",
+          "node-15-preserve-results"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "The 'queries chosen at execution' (contracts) vs 'queries pre-written to 04-evaluation/queries/ before asking' (graph nodes 12-14) question is a scientific-integrity decision that must be resolved once by the operator before node-12 fires; the negative control's validity depends on queries not being adapted after seeing answers. Node-12/13/14 then run concurrently and converge on 04-evaluation/results + part1-summary.",
+        "affected_node_ids": [
+          "node-12-eval-factual-rationale",
+          "node-13-eval-supersession-relationship",
+          "node-14-eval-negative-control"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Minor internal inconsistency in node-01's constraint text ('Draft the 13 task contracts') vs the criterion and graph, which require 14 (one per downstream node); the delivered 14 match the graph, so only the constraint wording is stale.",
+        "affected_node_ids": [
+          "node-01-icm-scaffold"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.955,
+  "criteria_confidence": 0.955,
+  "completeness": 1.0,
+  "graph_readiness": 0.955,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "rooms-exist",
+        "criterion": "MyAPI/ contains AGENTS.md (routing map), docs/CONTEXT.md, and the four stage rooms 01-decisions/, 02-corpus/, 03-ingestion/, 04-evaluation/ each with CONTEXT.md, inputs/ or queries/ as shown in the Part 1 memo tree",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "MyAPI -> line 3: 'MyAPI'",
+          "AGENTS -> line 1: 'AGENTS'",
+          "CONTEXT -> line 8: 'CONTEXT'",
+          "CONTEXT -> line 8: 'CONTEXT'",
+          "CONTEXT.md absent"
+        ],
+        "reasoning": "Scanned source files (AGENTS.md, docs/CONTEXT.md) for identifiers named in the criterion (MyAPI, AGENTS, CONTEXT, CONTEXT). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "CONTEXT.md absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "task-contracts-exist",
+        "criterion": "Every later node in this graph has a tasks/<task>.md contract in its room: 01-decisions/tasks/{decision-schema,inventory-sources,extract-decisions,normalize-decisions,validate-decision-set}.md; 02-corpus/tasks/{build-corpus,corpus-repro-check,khoj-transform}.md; 03-ingestion/tasks/{khoj-ingest,verify-retrieval}.md; 04-evaluation/tasks/{eval-factual-rationale,eval-supersession-relationship,eval-negative-control,preserve-results}.md",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...) for identifiers named in the criterion (decision-schema, inventory-sources, extract-decisions, normalize-decisions, validate-decision-set, build-corpus, corpus-repro-check, khoj-transform, khoj-ingest, verify-retrieval, eval-factual-rationale, eval-supersession-relationship, eval-negative-control, preserve-results). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "contracts-complete",
+        "criterion": "Each task contract names its inputs (paths), its exact output artifact path and shape, and a verification command or check",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "map-routes",
+        "criterion": "AGENTS.md routes a fresh agent: given a node id, the map plus one hop reaches the right room",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "AGENTS -> line 1: 'AGENTS'"
+        ],
+        "reasoning": "Scanned source files (AGENTS.md) for identifiers named in the criterion (AGENTS). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Work only in the MyAPI worktree; create directories and markdown only - no changes to existing files",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "The governing memo is at /Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md - read it first; the stage sequence is decisions -> corpus -> ingestion -> evaluation; keep each room's CONTEXT.md under 60 lines",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Pure scaffolding: task contracts specify inputs, exact output artifact paths and shapes, verification checks, and point at authoritative sources; they must NOT pre-answer stage questions - no draft schema fields, no pre-listed sources, no pre-written evaluation queries beyond the memo's five fixed intents",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Draft the 13 task contracts with your grok-4.6 subagents: parallelize by room (one subagent per room drafts its contracts), reconcile voice and cross-references yourself, then run the closing oracle/reviewer pass",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model xai/grok-4.6 via the subagent tool's model parameter; close with one oracle or reviewer pass before returning",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "AGENTS.md": true,
+      "docs/CONTEXT.md": true,
+      "01-decisions/CONTEXT.md": true,
+      "02-corpus/CONTEXT.md": true,
+      "03-ingestion/CONTEXT.md": true,
+      "04-evaluation/CONTEXT.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [
+      {
+        "criterion_id": "rooms-exist",
+        "kind": "source_path",
+        "detail": "CONTEXT.md absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "rooms-exist",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "6671b45de85f98689a5a15851facea88e00e480f",
+      "tip": "18df5ca58fd3b20c45efddf3067167a00cda3618",
+      "files": [
+        {
+          "status": "A",
+          "path": "01-decisions/CONTEXT.md"
+        },
+        {
+          "status": "A",
+          "path": "01-decisions/inputs/.gitkeep"
+        },
+        {
+          "status": "A",
+          "path": "01-decisions/output/.gitkeep"
+        },
+        {
+          "status": "A",
+          "path": "01-decisions/tasks/decision-schema.md"
+        },
+        {
+          "status": "A",
+          "path": "01-decisions/tasks/extract-decisions.md"
+        },
+        {
+          "status": "A",
+          "path": "01-decisions/tasks/inventory-sources.md"
+        },
+        {
+          "status": "A",
+          "path": "01-decisions/tasks/normalize-decisions.md"
+        },
+        {
+          "status": "A",
+          "path": "01-decisions/tasks/validate-decision-set.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/CONTEXT.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/inputs/.gitkeep"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/.gitkeep"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/tasks/build-corpus.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/tasks/corpus-repro-check.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/tasks/khoj-transform.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/CONTEXT.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/output/.gitkeep"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/tasks/khoj-ingest.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/tasks/verify-retrieval.md"
+        },
+        {
+          "status": "A",
+          "path": "04-evaluation/CONTEXT.md"
+        },
+        {
+          "status": "A",
+          "path": "04-evaluation/queries/.gitkeep"
+        },
+        {
+          "status": "A",
+          "path": "04-evaluation/results/.gitkeep"
+        },
+        {
+          "status": "A",
+          "path": "04-evaluation/tasks/eval-factual-rationale.md"
+        },
+        {
+          "status": "A",
+          "path": "04-evaluation/tasks/eval-negative-control.md"
+        },
+        {
+          "status": "A",
+          "path": "04-evaluation/tasks/eval-supersession-relationship.md"
+        },
+        {
+          "status": "A",
+          "path": "04-evaluation/tasks/preserve-results.md"
+        },
+        {
+          "status": "M",
+          "path": "AGENTS.md"
+        },
+        {
+          "status": "A",
+          "path": "docs/CONTEXT.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 27,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "rooms-exist",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "AGENTS.md (82 lines, titled 'AGENTS.md — Part 1 ICM Routing Map')",
+          "docs/CONTEXT.md (41 lines)",
+          "01-decisions/: CONTEXT.md + inputs/ + output/",
+          "02-corpus/: CONTEXT.md + inputs/ + output/",
+          "03-ingestion/: CONTEXT.md + output/ (no inputs/ — matches memo tree exactly)",
+          "04-evaluation/: CONTEXT.md + queries/ + results/",
+          "Memo tree at '/Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md' section 'Minimal ICM scaffold'",
+          "Deterministic artifacts_present: all six required artifacts True"
+        ],
+        "reasoning": "Every element of the memo's Part 1 tree is present and the layout matches the memo exactly, including 03-ingestion having output/ (not inputs/) as the memo shows. The deterministic 'CONTEXT.md absent' mismatch is a scanner false positive: the keyword scan looked in scripts/*.py for the literal string 'CONTEXT.md' and found none, while artifacts_present confirms all six CONTEXT.md files exist. The criterion's 'inputs/ or queries/' phrasing is a loose paraphrase of the memo tree; the binding reference is 'as shown in the Part 1 memo tree', which is reproduced exactly. All six required_artifacts for this node are present."
+      },
+      {
+        "criterion_id": "task-contracts-exist",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "01-decisions/tasks/{decision-schema,inventory-sources,extract-decisions,normalize-decisions,validate-decision-set}.md — all 5 present",
+          "02-corpus/tasks/{build-corpus,corpus-repro-check,khoj-transform}.md — all 3 present",
+          "03-ingestion/tasks/{khoj-ingest,verify-retrieval}.md — both present",
+          "04-evaluation/tasks/{eval-factual-rationale,eval-supersession-relationship,eval-negative-control,preserve-results}.md — all 4 present",
+          "subject_diff file list (27 files) confirms all 14 contract files added at exact paths"
+        ],
+        "reasoning": "All 14 task slugs enumerated in the criterion map to existing files at the exact paths. Note the criterion enumerates 14 contracts while a constraint says 'Draft the 13 task contracts' — the criterion (the binding acceptance statement) lists 14 and all 14 exist; the graph also has 14 later nodes (node-02..node-15), so 14 is the coherent count and '13' in the constraint appears stale. This does not affect criterion satisfaction."
+      },
+      {
+        "criterion_id": "contracts-complete",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "All 14 contracts verified to contain '## Inputs', '## Output', and '## Verification' headings (grep across all tasks/*.md)",
+          "decision-schema.md: inputs as paths, output 01-decisions/output/decision-schema.json + JSON shape, verification test -s + python json load",
+          "build-corpus.md: output 02-corpus/output/corpus-snapshot/ with explicit tree (BUILD.json, manifest.json, documents/) and verification commands",
+          "corpus-repro-check.md: output repro-check.json with field-level shape and python assertion verification",
+          "khoj-ingest.md: output ingest-receipt.md with 6 mandated sections and grep-based verification",
+          "eval-factual-rationale.md / eval-supersession-relationship.md / eval-negative-control.md: output result files with mandated section headings and grep verification",
+          "preserve-results.md: output part1-package/ with manifest.md + copies + run-metadata.md and verification"
+        ],
+        "reasoning": "Every one of the 14 contracts names its inputs as exact paths, its output as an exact artifact path plus shape (often field-by-field), and a concrete verification command or check. Contracts also go beyond the minimum with authoritative sources, dependency edges, and stop conditions. They comply with the pure-scaffolding constraint: schema fields are explicitly 'not prescribed', sources are explicitly 'not pre-listed', and evaluation query text is deferred to execution ('Choose one query per intent at execution... not in this contract'). This criterion is satisfied."
+      },
+      {
+        "criterion_id": "map-routes",
+        "judgment": "judged_pass",
+        "confidence": 0.92,
+        "evidence": [
+          "AGENTS.md load order: this file -> docs/CONTEXT.md -> room CONTEXT.md -> tasks/<task>.md",
+          "AGENTS.md: 'Match the GDDP node_id / task slug against the table. One hop from this map reaches the room; the room CONTEXT names the contract file.'",
+          "AGENTS.md four room tables map all 14 slugs to exact contract paths and room CONTEXT pointers",
+          "Each room CONTEXT.md contains a 'Task contracts (GDDP node → file)' table",
+          "Graph node ids (node-02-decision-schema ... node-15-preserve-results) embed the slugs the map matches on"
+        ],
+        "reasoning": "Given any node id node-02..node-15, the trailing slug matches a row in the AGENTS.md table, which names the room (one hop) and its CONTEXT.md; that room map names the exact contract file. The map is internally consistent and every slug it routes exists. Confidence is slightly below 0.95 because the graph's own node-09 yaml points at '03-ingestion/tasks/khoj-transform.md' (a nonexistent path) while AGENTS.md routes khoj-transform to 02-corpus — a graph-config inconsistency, but the criterion pins khoj-transform to 02-corpus, so AGENTS.md itself routes correctly per the criterion being evaluated; the conflict is flagged as a risk."
+      }
+    ],
+    "overall_reasoning": "All four acceptance criteria for node-01-icm-scaffold are satisfied by the submitted work. The Part 1 ICM scaffold matches the governing memo's tree exactly: AGENTS.md is a routing map, docs/CONTEXT.md plus four room CONTEXT.md files exist (all under the 60-line limit), every room has the memo's directories (including 03-ingestion with output/ only, per the memo), and all 14 task contracts named in the criterion exist at their exact paths. Every contract names inputs as paths, an exact output artifact path with shape, and a concrete verification command/check, and the contracts deliberately refrain from pre-answering stage questions (no schema fields, no source lists, eval queries deferred to execution), honoring the pure-scaffolding constraint. The deterministic 'CONTEXT.md absent' mismatch is a false positive (scanner searched scripts/*.py for the literal string; all six CONTEXT.md files are present per artifacts_present). The main integrity concern is outside the criteria: downstream graph node yamls (node-02, node-09, node-15) reference rooms and output paths that conflict with the contracts authored here (e.g., node-09 expects 03-ingestion/tasks/khoj-transform.md and 03-ingestion/output/khoj-corpus/ while the contract lives in 02-corpus/tasks/ and outputs 02-corpus/output/khoj-ready/), which will surface as friction when those nodes execute; node-01 was constrained from modifying graph truth, so this likely needs a separate graph-config reconciliation. A secondary observation: AGENTS.md was replaced wholesale (146 -> 82 lines), displacing the pre-existing general MyAPI/MyAPI-rebuild agent guidance, which touches the 'no changes to existing files' constraint even though AGENTS.md was a required artifact of this node.",
+    "risks": "1) Graph-config/contract drift: node-02's acceptance criterion expects 01-decisions/output/decision-schema.md but the contract outputs decision-schema.json; node-09 yaml says 'Follow 03-ingestion/tasks/khoj-transform.md' (file does not exist; contract is 02-corpus/tasks/khoj-transform.md) and requires artifacts 03-ingestion/output/khoj-corpus/ + transform-notes.md vs contract outputs 02-corpus/output/khoj-ready/; node-15 expects 04-evaluation/results/part1-summary.md vs contract's part1-package/. These will collide at later-node execution unless the graph config or contracts are reconciled. Node-01 was barred from touching graph truth, so this is a cross-slice issue, not a node-01 criteria failure. 2) AGENTS.md was overwritten (146 -> 82 lines): the pre-existing general MyAPI/MyAPI-rebuild agent guidance (REBUILD-CONTEXT-ANCHOR, ARCHITECTURE, command location rules, MCP naming locks) was replaced by the Part 1 routing map. The node required AGENTS.md as a deliverable, but a wholesale replacement (vs. appending a Part 1 section) removes guidance later rebuild agents relied on; whether this violates 'no changes to existing files' and whether the old content needs preservation elsewhere is a human judgment call. 3) Constraint text says '13 task contracts' while the criterion enumerates 14 (all 14 exist); the count discrepancy should be resolved to avoid confusion in later audits. 4) Deterministic human_review_question 'Is the criterion path stale, or has the implementation not landed yet?' is resolved: the implementation has landed; the scanner's 'CONTEXT.md absent' was a keyword-scan artifact, not a real gap.",
+    "followup_candidates": "1) Observed: downstream node yamls (node-02, node-07/08/09, node-15) reference rooms/output paths that differ from the task contracts authored in this node (e.g., node-09 -> '03-ingestion/tasks/khoj-transform.md' and '03-ingestion/output/khoj-corpus/' vs actual '02-corpus/tasks/khoj-transform.md' and '02-corpus/output/khoj-ready/'; node-02 -> 'decision-schema.md' vs contract 'decision-schema.json'; node-15 -> 'part1-summary.md' vs contract 'part1-package/'). These are outside node-01's criteria and node-01 was constrained from editing graph truth. Was reconciling the graph node acceptance criteria with the authored contracts intended as part of this slice, or is a separate graph-config revision planned before node-02+ execute? 2) Observed: AGENTS.md was fully replaced (146 -> 82 lines), removing pre-existing MyAPI/MyAPI-rebuild agent guidance (rebuild anchor, architecture pointers, command-location rules) despite the 'no changes to existing files' constraint. Was wholesale replacement intended, or should the displaced guidance be preserved (e.g., under project-docs/ or appended to the routing map)? 3) Observed: the graph constraint says 'Draft the 13 task contracts' but the criterion and graph enumerate 14 later nodes and 14 contracts were created. Which count is canonical — should the constraint text be corrected to 14? 4) Observed: no test suite or mechanical check was listed in this node's acceptance criteria; none was counted toward the verdict. If a verification pass (e.g., an oracle/reviewer script) was intended as part of the acceptance evidence, update the node criteria and rerun; otherwise this verdict stands on the stated criteria.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-14T09:22:15.503Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ObRfflMYdDYlf9QvazQB5095",
+          "command": "pwd && ls -la"
+        },
+        {
+          "ts": "2026-08-14T09:22:15.504Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_I6E8y2Jz8T3hyDKgQUy83614",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/README.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:15.505Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_JV9jkZOxxL9MUUYyc9sn4750",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:15.516Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_I6E8y2Jz8T3hyDKgQUy83614",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:15.516Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_JV9jkZOxxL9MUUYyc9sn4750",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:15.535Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ObRfflMYdDYlf9QvazQB5095",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:18.253Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_lOhmOGmPjFfNRExbYTwi0105",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/AGENTS.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:18.254Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_3P3M4mDGWPRroX7viAWi5325",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx && find 01-decisions 02-corpus 03-ingestion 04-evaluation docs -type f | sort"
+        },
+        {
+          "ts": "2026-08-14T09:22:18.258Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_lOhmOGmPjFfNRExbYTwi0105",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:18.272Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_3P3M4mDGWPRroX7viAWi5325",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:30.038Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_CSqnHA23lX41cflfxqM40705",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/docs/CONTEXT.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:30.039Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_pZUvNPipPkc3TRyGPv5a1980",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/01-decisions/CONTEXT.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:30.039Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_4gib9rhLWslsqagCyclT3109",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/02-corpus/CONTEXT.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:30.040Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_03_Eqj69RpgLoAW0jS84w2o3899",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/03-ingestion/CONTEXT.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:30.040Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_04_vLltMESYwosNuqko6Sml1451",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/04-evaluation/CONTEXT.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:30.040Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_05_Duwc10D4kZtZRjkOtKIn6429",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx && wc -l AGENTS.md docs/CONTEXT.md 01-decisions/CONTEXT.md 02-corpus/CONTEXT.md 03-ingestion/CONTEXT.md 04-evaluation/CONTEXT.md && ls -la /Users/sab-mini/repos/ 2>/dev/null | head -20; ls \"/Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md\" 2>/dev/null && echo MEMO_AVAILABLE || echo MEMO_NOT_FOUND"
+        },
+        {
+          "ts": "2026-08-14T09:22:30.046Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_CSqnHA23lX41cflfxqM40705",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:30.046Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_pZUvNPipPkc3TRyGPv5a1980",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:30.046Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_4gib9rhLWslsqagCyclT3109",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:30.047Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_Eqj69RpgLoAW0jS84w2o3899",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:30.047Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_04_vLltMESYwosNuqko6Sml1451",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:30.079Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_05_Duwc10D4kZtZRjkOtKIn6429",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:33.501Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_PCKDYyULr9MYIW4vXKMw1626",
+          "path": "/Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:33.501Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Q88aCheHxzpXKUzVF8586547",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx && cat .git && echo \"---\" && git log --oneline -5 2>/dev/null && echo \"---\" && git remote -v 2>/dev/null && echo \"---\" && git diff --stat HEAD~1 HEAD 2>/dev/null | tail -5"
+        },
+        {
+          "ts": "2026-08-14T09:22:33.506Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_PCKDYyULr9MYIW4vXKMw1626",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:34.004Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Q88aCheHxzpXKUzVF8586547",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:44.336Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_OI3lwFmPlTtzX13cpinM8316",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/01-decisions/tasks/decision-schema.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:44.336Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_3x6kF99XQOdMPISjQY4z5747",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/01-decisions/tasks/inventory-sources.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:44.337Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_cf3MRNIp8sHYc9xStInw3128",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/01-decisions/tasks/extract-decisions.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:44.337Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_03_EB09fTNe0kwEs6bItAIv2258",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/01-decisions/tasks/normalize-decisions.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:44.337Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_04_K7EM83J1EnFYheRYOpW55549",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/01-decisions/tasks/validate-decision-set.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:44.340Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_OI3lwFmPlTtzX13cpinM8316",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:44.340Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_3x6kF99XQOdMPISjQY4z5747",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:44.340Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_cf3MRNIp8sHYc9xStInw3128",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:44.340Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_04_K7EM83J1EnFYheRYOpW55549",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:44.341Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_EB09fTNe0kwEs6bItAIv2258",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:47.652Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_yquHWwLXCcHBkjdshqa88516",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/02-corpus/tasks/build-corpus.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:47.653Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_ykNxGezOSagElDfoRLiJ1452",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/02-corpus/tasks/corpus-repro-check.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:47.653Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_BRLD1U9G3ikQcUcc7pik6060",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/02-corpus/tasks/khoj-transform.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:47.654Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_03_jPrpWbIVYoiMYQCAwsEI8573",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/03-ingestion/tasks/khoj-ingest.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:47.654Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_04_8KQl4tZ9PgqFfwaGeq4o6313",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/03-ingestion/tasks/verify-retrieval.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:47.656Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_yquHWwLXCcHBkjdshqa88516",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:47.656Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ykNxGezOSagElDfoRLiJ1452",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:47.656Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_BRLD1U9G3ikQcUcc7pik6060",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:47.656Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_jPrpWbIVYoiMYQCAwsEI8573",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:47.657Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_04_8KQl4tZ9PgqFfwaGeq4o6313",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:50.532Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_GG9WP3NkpQY9lAsgTYdY3626",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/04-evaluation/tasks/eval-factual-rationale.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:50.533Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_27m29IcNnS5nuDgFGgvs2187",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/04-evaluation/tasks/eval-supersession-relationship.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:50.533Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_PqqypuCoQnsHbE8mHC1x4116",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/04-evaluation/tasks/eval-negative-control.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:50.533Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_03_OdjISmvOmoFv9Ve9bALw7237",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/04-evaluation/tasks/preserve-results.md"
+        },
+        {
+          "ts": "2026-08-14T09:22:50.535Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_GG9WP3NkpQY9lAsgTYdY3626",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:50.535Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_27m29IcNnS5nuDgFGgvs2187",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:50.536Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_PqqypuCoQnsHbE8mHC1x4116",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:22:50.536Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_OdjISmvOmoFv9Ve9bALw7237",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:23:08.663Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_9akZgu3MWC0kSlk4LbCK2727",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx && echo \"=== git status (short) ===\" && git status --short | head -40 && echo \"=== AGENTS.md before (first 40 lines of 6671b45:AGENTS.md) ===\" && git show 6671b45:AGENTS.md 2>/dev/null | head -40 && echo \"=== diff stat of AGENTS.md change ===\" && git diff 6671b45 18df5ca -- AGENTS.md | head -30"
+        },
+        {
+          "ts": "2026-08-14T09:23:08.664Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_IVVzGrnTajL3MgVDmGFO4355",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx && echo \"=== docs/01-taxonomy.md head ===\" && head -15 docs/01-taxonomy.md && echo \"=== docs/02-target-output.md head ===\" && head -15 docs/02-target-output.md && echo \"=== node yaml (foundational) ===\" && ls -la /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-14T09:23:08.693Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_IVVzGrnTajL3MgVDmGFO4355",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:23:09.241Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_9akZgu3MWC0kSlk4LbCK2727",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:23:18.558Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_xVPioDfjq8QMdJLtyMxi3262",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-icm-scaffold.yaml"
+        },
+        {
+          "ts": "2026-08-14T09:23:18.559Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_dnk1OVG02ZNzTMneob6s8314",
+          "command": "cd /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes && grep -H \"task:\" node-02*.yaml node-03*.yaml node-04*.yaml node-05*.yaml node-06*.yaml node-07*.yaml node-08*.yaml node-09*.yaml node-10*.yaml node-11*.yaml node-12*.yaml node-13*.yaml node-14*.yaml node-15*.yaml"
+        },
+        {
+          "ts": "2026-08-14T09:23:18.563Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_xVPioDfjq8QMdJLtyMxi3262",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:23:18.578Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_dnk1OVG02ZNzTMneob6s8314",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-14T09:23:20.818Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Catw2L58YNRWrv9NdejH6428",
+          "command": "cd /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes && echo \"=== node-02 ===\" && cat node-02-decision-schema.yaml && echo \"=== node-09 ===\" && cat node-09-khoj-transform.yaml && echo \"=== node-15 ===\" && cat node-15-preserve-results.yaml"
+        },
+        {
+          "ts": "2026-08-14T09:23:20.869Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Catw2L58YNRWrv9NdejH6428",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:23:47.182Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_uHYbV27LTd0N2Btb7dKO8034",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx && echo \"=== grep for pre-answered schema fields in contracts ===\" && grep -rn -iE \"field name|property:|required: \\[\" 01-decisions/tasks/ | head -10; echo \"---\"; echo \"=== grep for pre-written queries in eval contracts ===\" && grep -rn -iE \"query text|queries/.*\\.md|what was the decision|why did myapi\" 04-evaluation/tasks/ | head -10; echo \"---\"; echo \"=== any .md files in queries/ besides .gitkeep? ===\" && find 04-evaluation/queries -type f; echo \"---\"; echo \"=== tree summary ===\" && find 01-decisions 02-corpus 03-ingestion 04-evaluation -type d | sort && echo \"---\" && find . -name \"*.py\" -newer .git 2>/dev/null | head; echo \"=== contract headings per file ===\" && for f in $(find . -path ./node_modules -prune -o -name \"*.md\" -path \"*/tasks/*\" -print); do echo \"$f: $(grep -c '^## ' $f) headings, has Inputs=$(grep -q '^## Inputs' $f && echo Y || echo N), Output=$(grep -q '^## Output' $f && echo Y || echo N), Verification=$(grep -q '^## Verification' $f && echo Y || echo N)\"; done"
+        },
+        {
+          "ts": "2026-08-14T09:23:47.644Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_uHYbV27LTd0N2Btb7dKO8034",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T09:24:24.136Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ZHNJKXYVHVPhJX3KqiGF2925",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All four acceptance criteria for node-01-icm-scaffold are satisfied by the submitted work. The Part 1 ICM scaffold matches the governing memo's tree exactly: AGENTS.md is a routing map, docs/CONTEXT.md plus four room CONTEXT.md files exist (all under the 60-line limit), every room has the memo's directories (including 03-ingestion with output/ only, per the memo), and all 14 task contracts named in the criterion exist at their exact paths. Every contract names inputs as paths, an exact output artifact path with shape, and a concrete verification command/check, and the contracts deliberately refrain from pre-answering stage questions (no schema fields, no source lists, eval queries deferred to execution), honoring the pure-scaffolding constraint. The deterministic 'CONTEXT.md absent' mismatch is a false positive (scanner searched scripts/*.py for the literal string; all six CONTEXT.md files are present per artifacts_present). The main integrity concern is outside the criteria: downstream graph node yamls (node-02, node-09, node-15) reference rooms and output paths that conflict with the contracts authored here (e.g., node-09 expects 03-ingestion/tasks/khoj-transform.md and 03-ingestion/output/khoj-corpus/ while the contract lives in 02-corpus/tasks/ and outputs 02-corpus/output/khoj-ready/), which will surface as friction when those nodes execute; node-01 was constrained from modifying graph truth, so this likely needs a separate graph-config reconciliation. A secondary observation: AGENTS.md was replaced wholesale (146 -> 82 lines), displacing the pre-existing general MyAPI/MyAPI-rebuild agent guidance, which touches the 'no changes to existing files' constraint even though AGENTS.md was a required artifact of this node.",
+  "required_next_action": "Integrity verdict 'block' halts progression (criteria verdict was 'pass'). Human review required; no dependent node may dispatch on this node.",
+  "generated_at": "2026-08-14T09:27:01.726377+00:00",
+  "evaluated_tree_sha": "e02ce6f19cb56635bfed9e3f6f526e22732c5529",
+  "evaluated_commit_sha": "18df5ca58fd3b20c45efddf3067167a00cda3618",
+  "merge_commit_sha": "18df5ca58fd3b20c45efddf3067167a00cda3618",
+  "expected_base_commit_sha": "6671b45de85f98689a5a15851facea88e00e480f",
+  "pr_ref": null,
+  "job_id": "job_20260814T09070546fec04e9d3e28",
+  "execution_attempt_id": "job_20260814T09070546fec04e9d3e28:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-icm-scaffold.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-icm-scaffold.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-icm-scaffold.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ni8tk7qx/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "high"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-14T09:22:09.888287+00:00",
+    "finished_at": "2026-08-14T09:27:01.726153+00:00",
+    "wall_s": 291.833,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 134.369,
+      "tool_calls": 33
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 157.37,
+      "tool_calls": 37
+    }
+  }
+}

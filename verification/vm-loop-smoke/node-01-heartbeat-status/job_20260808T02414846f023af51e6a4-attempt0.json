@@ -1,0 +1,532 @@
+{
+  "project_id": "vm-loop-smoke",
+  "node_id": "node-01-heartbeat-status",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.85,
+    "findings": [],
+    "reasoning": "The work under review is a single added artifact, reports/vm-loop-smoke/01-heartbeat-status.md (155 lines), committed on the node result ref (fb1f10d) with a clean working tree. This is exactly the durable heartbeat deployment evidence the node's why/title promise: real systemctl --user status/list-timers output for gddp-heartbeat, recent journalctl lines, and queue.db presence with a table listing (read-only Python equivalent, allowed by the criterion's \"or equivalent\" clause). Scope matches the constraints exactly — only the report path was created; nothing else in the tree changed; gddp-config graph truth is untouched (evidence-only, per the receipt-based return flow doctrine). The node is the root (depends_on: []) so there are no upstream assumptions to violate. Downstream node-02-mission-readiness depends on node-01 as a completed prerequisite and performs its own independent host checks (droid/docker/resources/auth/timers) quoting its own output; the report neither pre-empts nor conflicts with any of those, and its list-timers output (only gddp-heartbeat.timer present) is consistent with node-02's auto-shutdown-timers-disabled expectation. Report internals are coherent (timestamps at ~300s cadence, PID chain, job ID matching the result commit message, executor session path), consistent with genuine capture; the residual question of whether the quoted output is live vs. stale is a lane-1 criteria-evidence matter for human review, not a graph-integrity defect. Intent preserved; graph integrity preserved.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-08T02:48:12.234Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_HpQLiAyE9sEO2QO3dzKO4998",
+        "path": "/home/sab-mini/gddp-config/graphs/vm-loop-smoke/nodes/node-01-heartbeat-status.yaml"
+      },
+      {
+        "ts": "2026-08-08T02:48:12.234Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_ebal7H69gLqNIhOwpxzd6755",
+        "path": "/home/sab-mini/gddp-config/graphs/vm-loop-smoke/nodes/node-02-mission-readiness.yaml"
+      },
+      {
+        "ts": "2026-08-08T02:48:12.235Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_pgIkH0Wq5LcXmYdygbLq3212",
+        "path": "/tmp/gddp-eval-wt-0y5v2mf9/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-08T02:48:12.235Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_ayZITgOCUPNb5wmoqxEA6472",
+        "path": "/tmp/gddp-eval-wt-0y5v2mf9/README.md"
+      },
+      {
+        "ts": "2026-08-08T02:48:12.239Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_HpQLiAyE9sEO2QO3dzKO4998",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-08T02:48:12.239Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ebal7H69gLqNIhOwpxzd6755",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-08T02:48:12.240Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_pgIkH0Wq5LcXmYdygbLq3212",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-08T02:48:12.240Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_ayZITgOCUPNb5wmoqxEA6472",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-08T02:48:14.540Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_FrqbaGXTaSCPxNeoqT6E4527",
+        "command": "cd /tmp/gddp-eval-wt-0y5v2mf9 && ls -la && echo \"---\" && find . -type f -not -path './.git/*' | head -50 && echo \"---git log---\" && git log --oneline -10 2>/dev/null && echo \"---status---\" && git status 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-08T02:48:14.540Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_eoxt0MVlpnXNxJ7MqWz99321",
+        "path": "/tmp/gddp-eval-wt-0y5v2mf9/reports/vm-loop-smoke/01-heartbeat-status.md"
+      },
+      {
+        "ts": "2026-08-08T02:48:14.550Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_eoxt0MVlpnXNxJ7MqWz99321",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-08T02:48:14.564Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_FrqbaGXTaSCPxNeoqT6E4527",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-08T02:48:17.485Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_bO4COA6aGg4cXrzkmBo72339",
+        "command": "cd /tmp/gddp-eval-wt-0y5v2mf9 && echo \"===DIFF STAT base..tip===\" && git diff --stat 8ef0464 fb1f10d && echo \"===FILES CHANGED===\" && git diff --name-status 8ef0464 fb1f10d && echo \"===FULL DIFF (first 100 lines)===\" && git diff 8ef0464 fb1f10d | head -100"
+      },
+      {
+        "ts": "2026-08-08T02:48:17.485Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_wbfSn8MA2wzcl0Q3bgeh2843",
+        "command": "cd /tmp/gddp-eval-wt-0y5v2mf9 && ls -la .gddp/ 2>/dev/null && echo \"---\" && find .gddp -type f 2>/dev/null | head -20 && echo \"---reports tree---\" && find reports -type f && echo \"---mission dir---\" && ls -la missions/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-08T02:48:17.503Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_bO4COA6aGg4cXrzkmBo72339",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-08T02:48:17.505Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_wbfSn8MA2wzcl0Q3bgeh2843",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-08T02:48:36.634Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_JmRd4iXmjzJJ21B2zOGr5345",
+        "path": "/tmp/gddp-eval-wt-0y5v2mf9/.gddp/result-summary.md"
+      },
+      {
+        "ts": "2026-08-08T02:48:36.635Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_QzldSxwGKy4MFnS6shWF3752",
+        "path": "/tmp/gddp-eval-wt-0y5v2mf9/.gddp/decision.md"
+      },
+      {
+        "ts": "2026-08-08T02:48:36.635Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_YCmYixCke3zLz5h2Zf3Y8126",
+        "command": "cd /tmp/gddp-eval-wt-0y5v2mf9 && echo \"===commits touching reports===\" && git log --oneline --all -- reports/ | head -5 && echo \"===untracked files===\" && git status --porcelain && echo \"(empty = clean)\" && echo \"===verify report only file in result commit===\" && git show --stat --format=\"%H %s\" fb1f10d | head -10"
+      },
+      {
+        "ts": "2026-08-08T02:48:36.643Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_JmRd4iXmjzJJ21B2zOGr5345",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-08T02:48:36.643Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_QzldSxwGKy4MFnS6shWF3752",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-08T02:48:36.663Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_YCmYixCke3zLz5h2Zf3Y8126",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-08T02:48:59.410Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_AHFYoBhsbM2n8C6xOAvt9608",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "node-02-mission-readiness re-runs all of its own host checks (droid --version, docker, free/df, auth matrix, list-timers) and quotes its own output, so node-01's report is a completion prerequisite, not a data dependency; no coupling risk at the frontier. With frontier_auto_advance true, node-02 will dispatch on human acceptance of node-01.",
+        "affected_node_ids": [
+          "node-02-mission-readiness"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The report documents that the local_subprocess executor session legitimately outlives the gddp-heartbeat unit stop (residual cgroup children) — this is the expected mechanism for the one-shot dispatch pattern and will recur when node-02 runs the same way; not a defect, but worth keeping in mind when reading node-02's service/journal output.",
+        "affected_node_ids": [
+          "node-01-heartbeat-status",
+          "node-02-mission-readiness"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.92,
+  "criteria_confidence": 0.92,
+  "completeness": 1.0,
+  "graph_readiness": 0.92,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "report-exists",
+        "criterion": "reports/vm-loop-smoke/01-heartbeat-status.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "vm\\-loop\\-smoke -> line 19: 'vm-loop-smoke'",
+          "heartbeat\\-status -> line 5: 'heartbeat-status'",
+          "non\\-empty -> line 152: 'non-empty'"
+        ],
+        "reasoning": "Scanned source files (reports/vm-loop-smoke/01-heartbeat-status.md) for identifiers named in the criterion (vm-loop-smoke, heartbeat-status, non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "units-documented",
+        "criterion": "report quotes real output from systemctl --user status/list-timers for gddp-heartbeat",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/adapters/__init__.py, scripts/adapters/executor_protocol.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_api_adapter.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/adapters/__init__.py, scripts/adapters/executor_protocol.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_api_adapter.py...) for identifiers named in the criterion (list-timers, gddp-heartbeat). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "log-lines",
+        "criterion": "report includes recent gddp-heartbeat journal or log lines",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/adapters/__init__.py, scripts/adapters/executor_protocol.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_api_adapter.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/adapters/__init__.py, scripts/adapters/executor_protocol.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_api_adapter.py...) for identifiers named in the criterion (gddp-heartbeat). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "queue-db",
+        "criterion": "report documents that queue.db exists and lists its tables (sqlite3 .tables or equivalent)",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create only reports/vm-loop-smoke/01-heartbeat-status.md",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Read-only outside that report path",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Run the inventory commands yourself and quote real output",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/vm-loop-smoke/01-heartbeat-status.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "8ef04646f71887c3ea96146c7a835c2ef70b3e8e",
+      "tip": "fb1f10ddb06d60d2f800369dd8725fdb72e7ecce",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/vm-loop-smoke/01-heartbeat-status.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "read: reports/vm-loop-smoke/01-heartbeat-status.md (155 lines, 8869 bytes)",
+          "bash: wc -c reports/vm-loop-smoke/01-heartbeat-status.md -> 8869"
+        ],
+        "reasoning": "The file exists at the exact required path and is clearly non-empty (8869 bytes, 155 lines of structured content). The deterministic flag was only 'indeterminate' because the keyword scanner was pointed at scripts/adapters/*.py instead of the report path; the artifact itself is present per artifacts_present and confirmed by direct read."
+      },
+      {
+        "criterion_id": "units-documented",
+        "judgment": "judged_pass",
+        "confidence": 0.88,
+        "evidence": [
+          "read: report sections '## systemctl --user status gddp-heartbeat.service', '## systemctl --user status gddp-heartbeat.timer', '## systemctl --user list-timers'",
+          "read: report line 'TriggeredBy: ● gddp-heartbeat.timer' and timer output showing Active: active (waiting), enabled, interval mirroring launchd 300s"
+        ],
+        "reasoning": "The report quotes full systemctl --user status output for both gddp-heartbeat.service and gddp-heartbeat.timer, plus systemctl --user list-timers output (NEXT/LEFT/LAST/PASSED/UNIT/ACTIVATES columns), all for gddp-heartbeat. Output is internally consistent (service last run 02:41:48 UTC '9s ago', next trigger 02:46:48 '4min 50s left', capture time 02:42:26Z) and formatted as genuine systemctl text. Residual risk: host-side authenticity of the quoted output cannot be re-verified from the repo alone, but the content satisfies the criterion as stated. The deterministic scan missed this because it searched scripts/adapters/*.py rather than the report."
+      },
+      {
+        "criterion_id": "log-lines",
+        "judgment": "judged_pass",
+        "confidence": 0.92,
+        "evidence": [
+          "read: report section '## Recent journal lines (`gddp-heartbeat.service`)' quoting `journalctl --user -u gddp-heartbeat.service -n 30 --no-pager` output",
+          "read: report 'Timer journal (boot continuity):' block with Aug 07 22:22:55 systemd[1471] Started gddp-heartbeat.timer"
+        ],
+        "reasoning": "The report includes a recent-journal block for gddp-heartbeat.service spanning 02:08:48 through 02:41:48 UTC with realistic systemd/bash journal lines, plus a timer journal continuity line. Timestamps align with the systemctl status sections (02:41:48 run, Heartbeat complete, Finished unit), supporting coherence. The deterministic scan found no hit only because it scanned scripts/adapters instead of the report."
+      },
+      {
+        "criterion_id": "queue-db",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "read: report '## `queue.db`' section with `ls -la /home/sab-mini/gddp-runtime/db/queue.db` output (131072 bytes)",
+          "read: report table list: artifact_verifications, decision_results, events, executor_sessions, jobs, queue_records, results (via read-only Python sqlite3 query; sqlite3 CLI noted as not installed)"
+        ],
+        "reasoning": "The report documents that queue.db exists (ls -la shows 131072 bytes) and lists all 7 tables. The criterion explicitly allows 'sqlite3 .tables or equivalent'; the report used a read-only Python sqlite3 query because the CLI is absent, which is the sanctioned equivalent, and it also presents the tables in markdown table form. Fully satisfied."
+      }
+    ],
+    "overall_reasoning": "All four acceptance criteria are satisfied by reports/vm-loop-smoke/01-heartbeat-status.md, which exists (8869 bytes, non-empty) and contains: (1) quoted systemctl --user status output for both gddp-heartbeat.service and gddp-heartbeat.timer plus systemctl --user list-timers output; (2) recent journalctl lines for gddp-heartbeat.service plus a timer journal line; (3) documentation that db/queue.db exists (131072 bytes) with all 7 tables listed via the permitted read-only Python equivalent of sqlite3 .tables. The report's own acceptance checklist maps each criterion to 'yes'. The deterministic 'indeterminate' flags were a tooling artifact: the keyword scan searched scripts/adapters/*.py and other lib sources rather than the report file itself, and the queue-db criterion had no registered probe. Constraints also hold: the base→tip diff adds exactly one file (reports/vm-loop-smoke/01-heartbeat-status.md) on a result commit (fb1f10d 'result(job=..., attempt=...)') per the executor contract, working tree clean — so nothing outside the report path was created. The report serves the node's intent (durable heartbeat deployment evidence) and supplies the inventory that node-02-mission-readiness (depends_on node-01) builds on. The only unverifiable-from-repo aspect is host-side authenticity of the quoted command output; the content is internally consistent (timestamps, PIDs, units, journal lines all agree).",
+    "risks": "1) Host output authenticity: the quoted systemctl/journalctl/sqlite outputs cannot be independently re-verified from the repo alone (no host access from the evaluator); confidence in 'real output' rests on internal consistency of timestamps/units/journal lines. 2) The deterministic keyword scan targeted scripts/adapters/*.py rather than the report path, which produced low-confidence indeterminate flags for criteria 2 and 3 despite the report satisfying them; if the scanner is intended to evaluate report content it should be pointed at the artifact path.",
+    "followup_candidates": "Observed: the deterministic scanner searched scripts/adapters/*.py (lib source) for 'gddp-heartbeat'/'list-timers' and reported no hit, while the report at reports/vm-loop-smoke/01-heartbeat-status.md clearly quotes that output. Not a criteria deficiency — was the scan meant to inspect the report artifact path instead? If yes, update the probe configuration and rerun; otherwise this verdict stands. Also: quoted host command output is internally consistent but not host-verified from the repo; if independent host-side confirmation of the systemctl/journalctl/queue.db output is required for this node, that would need a separate verification step.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-08T02:47:23.656Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_vbpXytKGU0w1DDCRvS0Y4997",
+          "path": "/tmp/gddp-eval-wt-0y5v2mf9/reports/vm-loop-smoke/01-heartbeat-status.md"
+        },
+        {
+          "ts": "2026-08-08T02:47:23.656Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_GfG2LlwfJSEVWfnCdBjT0375",
+          "path": "/home/sab-mini/gddp-config/graphs/vm-loop-smoke/nodes/node-01-heartbeat-status.yaml"
+        },
+        {
+          "ts": "2026-08-08T02:47:23.656Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_4vkzIi3WWXE4HxVxyt821581",
+          "path": "/tmp/gddp-eval-wt-0y5v2mf9/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-08T02:47:23.657Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_03_CYf6QgBFp3pNIe7jlT5l4281",
+          "path": "/tmp/gddp-eval-wt-0y5v2mf9/README.md"
+        },
+        {
+          "ts": "2026-08-08T02:47:23.661Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_vbpXytKGU0w1DDCRvS0Y4997",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-08T02:47:23.662Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_CYf6QgBFp3pNIe7jlT5l4281",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-08T02:47:23.662Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_GfG2LlwfJSEVWfnCdBjT0375",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-08T02:47:23.662Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_4vkzIi3WWXE4HxVxyt821581",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-08T02:47:32.866Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_lW5lmLIY3D1VfKG19ebq4262",
+          "command": "cd /tmp/gddp-eval-wt-0y5v2mf9 && git log --oneline -5 && echo '---' && git status --short && echo '---' && git diff --stat 8ef04646f71887c3ea96146c7a835c2ef70b3e8e..HEAD && echo '---' && ls -la reports/vm-loop-smoke/ && echo '---' && wc -c reports/vm-loop-smoke/01-heartbeat-status.md"
+        },
+        {
+          "ts": "2026-08-08T02:47:32.867Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_aEP7vWzWwyPfjdMHMJxa6040",
+          "path": "/home/sab-mini/gddp-config/graphs/vm-loop-smoke/nodes/node-02-mission-readiness.yaml"
+        },
+        {
+          "ts": "2026-08-08T02:47:32.876Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_aEP7vWzWwyPfjdMHMJxa6040",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-08T02:47:32.908Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_lW5lmLIY3D1VfKG19ebq4262",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-08T02:47:48.023Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_1T9IHX9OV2KfH5965Tqz7387",
+          "command": "cd /tmp/gddp-eval-wt-0y5v2mf9 && git show --stat HEAD | head -20 && echo '---' && git diff --name-status 8ef04646f71887c3ea96146c7a835c2ef70b3e8e..HEAD"
+        },
+        {
+          "ts": "2026-08-08T02:47:48.037Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_1T9IHX9OV2KfH5965Tqz7387",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-08T02:48:08.840Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_azZ7PFmK5MpTz9uX2N1k9942",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All four acceptance criteria are satisfied by reports/vm-loop-smoke/01-heartbeat-status.md, which exists (8869 bytes, non-empty) and contains: (1) quoted systemctl --user status output for both gddp-heartbeat.service and gddp-heartbeat.timer plus systemctl --user list-timers output; (2) recent journalctl lines for gddp-heartbeat.service plus a timer journal line; (3) documentation that db/queue.db exists (131072 bytes) with all 7 tables listed via the permitted read-only Python equivalent of sqlite3 .tables. The report's own acceptance checklist maps each criterion to 'yes'. The deterministic 'indeterminate' flags were a tooling artifact: the keyword scan searched scripts/adapters/*.py and other lib sources rather than the report file itself, and the queue-db criterion had no registered probe. Constraints also hold: the base→tip diff adds exactly one file (reports/vm-loop-smoke/01-heartbeat-status.md) on a result commit (fb1f10d 'result(job=..., attempt=...)') per the executor contract, working tree clean — so nothing outside the report path was created. The report serves the node's intent (durable heartbeat deployment evidence) and supplies the inventory that node-02-mission-readiness (depends_on node-01) builds on. The only unverifiable-from-repo aspect is host-side authenticity of the quoted command output; the content is internally consistent (timestamps, PIDs, units, journal lines all agree).",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-08T02:48:59.438902+00:00",
+  "evaluated_tree_sha": "86bc3c2fe9167a93c64ae38a612ea971762f4eda",
+  "evaluated_commit_sha": "fb1f10ddb06d60d2f800369dd8725fdb72e7ecce",
+  "merge_commit_sha": "fb1f10ddb06d60d2f800369dd8725fdb72e7ecce",
+  "expected_base_commit_sha": "8ef04646f71887c3ea96146c7a835c2ef70b3e8e",
+  "pr_ref": null,
+  "job_id": "job_20260808T02414846f023af51e6a4",
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-0y5v2mf9/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-0y5v2mf9/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/vm-loop-smoke/nodes/node-01-heartbeat-status.yaml",
+    "neighbor:node-02-mission-readiness": "/home/sab-mini/gddp-config/graphs/vm-loop-smoke/nodes/node-02-mission-readiness.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 4,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/home/sab-mini/gddp-config/graphs/vm-loop-smoke/nodes/node-01-heartbeat-status.yaml",
+        "/home/sab-mini/gddp-config/graphs/vm-loop-smoke/nodes/node-02-mission-readiness.yaml",
+        "/tmp/gddp-eval-wt-0y5v2mf9/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-0y5v2mf9/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 4,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/home/sab-mini/gddp-config/graphs/vm-loop-smoke/nodes/node-01-heartbeat-status.yaml",
+        "/home/sab-mini/gddp-config/graphs/vm-loop-smoke/nodes/node-02-mission-readiness.yaml",
+        "/tmp/gddp-eval-wt-0y5v2mf9/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-0y5v2mf9/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "high"
+  }
+}

@@ -1,0 +1,532 @@
+schema_type: node_evaluations
+schema_version: '1.0'
+project_id: myapi-part1
+generated_at: '2026-08-14T21:05:48Z'
+source: gddp-runtime db/queue.db (results + decision_results)
+evaluations:
+  node-01-icm-scaffold:
+    verdict: needs-human-review
+    evaluated_at: '2026-08-14T09:27:01.958686+00:00'
+    executor: pi_rpc
+    job_id: job_20260814T09070546fec04e9d3e28
+    result_id: res_ses_20260814T0907054696dcede7b649
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-01-icm-scaffold/job_20260814T09070546fec04e9d3e28-attempt0.json
+    intent_preserved: false
+    graph_integrity_preserved: false
+    evaluator_note: 'The scaffold work itself is well-crafted: four rooms with CONTEXT maps (all under
+      60 lines), 14 task contracts covering all 14 downstream nodes 1:1, internal cross-references that
+      resolve, all referenced repo paths (docs/01-taxonomy.md, deploy_to_khoj.sh, scripts/reindex_khoj_safe.py,
+      project-docs/corpus-work-2026-08/CORPUS-TARGET-SHAPE.md, etc.) verified to exist, verification commands
+      that are machine-checkable, and faithful adherence to the ''no pre-answering'' constraint (contracts
+      explicitly decline to prescribe schema fields, source lists, or eval queries). As a standalone scaffold
+      it reads as intent-faithful.
+
+
+      However, the node''s intended role is precisely to ''write the instructions every later agent reads''
+      so ''the graph stays a thin scheduler'' — and the instructions it wrote systematically contradict
+      the graph''s own source of truth. The gddp-config node YAMLs (committed before the result) fix concrete
+      required_artifacts and acceptance paths for every later node; the contracts name different paths
+      for 13 of 14 nodes, put node-09''s output in the wrong room, and — worst — the eval contracts actively
+      forbid the pre-written query files that nodes 12-14 require as gate-checked artifacts. With artifact_gate_enforced=true,
+      downstream execution fails at the first gate (node-02 expects decision-schema.md; contract says
+      decision-schema.json). This is not a subtle veer (drift) nor merely unverifiable (insufficient):
+      it is a verifiable, systematic misalignment that actively prevents the slice from executing as designed,
+      so the correct verdict is block with human review before node-02 fires. Lane-1 indeterminate criteria
+      (e.g., ''CONTEXT.md absent'' probe artifact) are out of scope here; this verdict rests solely on
+      the contract-vs-graph artifact contradiction.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-01-icm-scaffold/job_20260814T09070546fec04e9d3e28-attempt0.json
+      verdict: needs-human-review
+      criteria_confidence: 0.955
+      completeness_status: complete
+      required_next_action: Integrity verdict 'block' halts progression (criteria verdict was 'pass').
+        Human review required; no dependent node may dispatch on this node.
+      evaluated_tree_sha: e02ce6f19cb56635bfed9e3f6f526e22732c5529
+      evaluated_commit_sha: 18df5ca58fd3b20c45efddf3067167a00cda3618
+      merge_commit_sha: 18df5ca58fd3b20c45efddf3067167a00cda3618
+      execution_attempt_id: job_20260814T09070546fec04e9d3e28:attempt:0
+      context_coverage:
+        criteria: high
+        integrity: high
+        overall: high
+      criteria_verdict: pass
+      integrity:
+        verdict: block
+        intent_preserved: false
+        graph_integrity_preserved: false
+        required_human_review: true
+        confidence: 0.9
+        findings:
+        - severity: high
+          summary: 'Systematic artifact-path divergence: the 14 task contracts name output paths that
+            differ from the downstream graph nodes'' required_artifacts and acceptance criteria on 13
+            of 14 nodes (node-02: decision-schema.md vs decision-schema.json; node-03: sources.md vs sources-inventory.md;
+            node-04: decisions-raw.jsonl vs decisions-raw.json; node-05: decisions-canonical.jsonl vs
+            decisions-normalized.json; node-07: corpus/ vs corpus-snapshot/; node-08: repro-report.md
+            vs repro-check.json; node-10: ingest-report.md vs ingest-receipt.md; node-11: retrieval-check.md
+            vs retrieval-smoke.md; node-15: part1-summary.md vs part1-package/). With artifact_gate_enforced=true,
+            the gate checks the graph paths, so agents following the contracts will produce artifacts
+            the gate rejects — the slice stalls at node-02 and every downstream node. The gddp-config
+            node YAMLs predate the result commit, so the contracts were expected to align with them and
+            did not.'
+          affected_node_ids:
+          - node-02-decision-schema
+          - node-03-inventory-sources
+          - node-04-extract-decisions
+          - node-05-normalize-decisions
+          - node-07-build-corpus
+          - node-08-corpus-repro-check
+          - node-10-khoj-ingest
+          - node-11-verify-retrieval
+          - node-15-preserve-results
+        - severity: high
+          summary: 'Direct contradiction on the evaluation nodes: graph nodes 12-14 require pre-written
+            query files 04-evaluation/queries/q1.txt..q5.txt (acceptance criterion: queries ''written
+            before asking, not adapted after seeing answers'') and per-query result files (q1-factual.md,
+            q2-rationale.md, q3-supersession.md, q4-relationship.md, q5-negative-control.md), while the
+            eval contracts direct agents to choose queries at execution and include stop conditions forbidding
+            pre-written query strings in a query-canon file, and emit combined single-file results (eval-factual-rationale.md
+            etc.). An agent following the contracts violates the graph''s required artifacts and its scientific-integrity
+            requirement for the negative control.'
+          affected_node_ids:
+          - node-12-eval-factual-rationale
+          - node-13-eval-supersession-relationship
+          - node-14-eval-negative-control
+        - severity: medium
+          summary: 'Room-boundary divergence for node-09 (khoj-transform): the graph requires the transform
+            at 03-ingestion/output/khoj-corpus/ plus 03-ingestion/output/transform-notes.md, but the contract
+            writes 02-corpus/output/khoj-ready/ and never produces transform-notes.md. The node-10 contract
+            then consumes the 02-corpus path, compounding the divergence from the graph''s stage definition
+            (corpus room produces snapshot; ingestion room receives the transform).'
+          affected_node_ids:
+          - node-09-khoj-transform
+          - node-10-khoj-ingest
+        - severity: low
+          summary: AGENTS.md was fully overwritten (146 lines of pre-existing MyAPI/MyAPI-rebuild operating
+            notes replaced by an 82-line Part 1 routing map). This was inherent to the acceptance criteria
+            (AGENTS.md must BE the routing map) and old content survives in git history/README/CLAUDE.md,
+            but it is the one modification of an existing file against the 'no changes to existing files'
+            constraint.
+          affected_node_ids:
+          - node-01-icm-scaffold
+        reasoning: 'The scaffold work itself is well-crafted: four rooms with CONTEXT maps (all under
+          60 lines), 14 task contracts covering all 14 downstream nodes 1:1, internal cross-references
+          that resolve, all referenced repo paths (docs/01-taxonomy.md, deploy_to_khoj.sh, scripts/reindex_khoj_safe.py,
+          project-docs/corpus-work-2026-08/CORPUS-TARGET-SHAPE.md, etc.) verified to exist, verification
+          commands that are machine-checkable, and faithful adherence to the ''no pre-answering'' constraint
+          (contracts explicitly decline to prescribe schema fields, source lists, or eval queries). As
+          a standalone scaffold it reads as intent-faithful.
+
+
+          However, the node''s intended role is precisely to ''write the instructions every later agent
+          reads'' so ''the graph stays a thin scheduler'' — and the instructions it wrote systematically
+          contradict the graph''s own source of truth. The gddp-config node YAMLs (committed before the
+          result) fix concrete required_artifacts and acceptance paths for every later node; the contracts
+          name different paths for 13 of 14 nodes, put node-09''s output in the wrong room, and — worst
+          — the eval contracts actively forbid the pre-written query files that nodes 12-14 require as
+          gate-checked artifacts. With artifact_gate_enforced=true, downstream execution fails at the
+          first gate (node-02 expects decision-schema.md; contract says decision-schema.json). This is
+          not a subtle veer (drift) nor merely unverifiable (insufficient): it is a verifiable, systematic
+          misalignment that actively prevents the slice from executing as designed, so the correct verdict
+          is block with human review before node-02 fires. Lane-1 indeterminate criteria (e.g., ''CONTEXT.md
+          absent'' probe artifact) are out of scope here; this verdict rests solely on the contract-vs-graph
+          artifact contradiction.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: high
+          summary: 'Before node-02 fires, the artifact-path contract between gddp-config node YAMLs and
+            the room task contracts must be reconciled in one pass (14 nodes converge on a linear chain:
+            01-decisions/output -> 02-corpus/output -> 03-ingestion/output -> 04-evaluation/results).
+            Either the node YAMLs'' required_artifacts/acceptance paths are updated to the contracts''
+            paths, or the contracts are rewritten to the YAMLs'' paths; leaving both as-is guarantees
+            sequential gate failures through the whole slice.'
+          affected_node_ids:
+          - node-02-decision-schema
+          - node-03-inventory-sources
+          - node-04-extract-decisions
+          - node-05-normalize-decisions
+          - node-06-validate-decision-set
+          - node-07-build-corpus
+          - node-08-corpus-repro-check
+          - node-09-khoj-transform
+          - node-10-khoj-ingest
+          - node-11-verify-retrieval
+          - node-12-eval-factual-rationale
+          - node-13-eval-supersession-relationship
+          - node-14-eval-negative-control
+          - node-15-preserve-results
+        - severity: medium
+          summary: The 'queries chosen at execution' (contracts) vs 'queries pre-written to 04-evaluation/queries/
+            before asking' (graph nodes 12-14) question is a scientific-integrity decision that must be
+            resolved once by the operator before node-12 fires; the negative control's validity depends
+            on queries not being adapted after seeing answers. Node-12/13/14 then run concurrently and
+            converge on 04-evaluation/results + part1-summary.
+          affected_node_ids:
+          - node-12-eval-factual-rationale
+          - node-13-eval-supersession-relationship
+          - node-14-eval-negative-control
+        - severity: low
+          summary: Minor internal inconsistency in node-01's constraint text ('Draft the 13 task contracts')
+            vs the criterion and graph, which require 14 (one per downstream node); the delivered 14 match
+            the graph, so only the constraint wording is stale.
+          affected_node_ids:
+          - node-01-icm-scaffold
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      evaluation_timing:
+        started_at: '2026-08-14T09:22:09.888287+00:00'
+        finished_at: '2026-08-14T09:27:01.726153+00:00'
+        wall_s: 291.833
+        criteria:
+          status: completed
+          elapsed_s: 134.369
+          tool_calls: 33
+        integrity:
+          status: completed
+          elapsed_s: 157.37
+          tool_calls: 37
+  node-01-decision-schema:
+    verdict: pass
+    evaluated_at: '2026-08-14T10:33:08.494919+00:00'
+    executor: pi_rpc
+    job_id: job_20260814T1022089881847580aa5a
+    result_id: res_ses_20260814T10220898d6b2e8ae39b5
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-01-decision-schema/job_20260814T1022089881847580aa5a-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node-01-decision-schema work (commit 6b33245 on base 6671b45).
+      The node''s intended role — "define the canonical shape every later stage consumes, plus the minimal
+      scaffold (rooms + short CONTEXT stubs, AGENTS.md append-only), nothing more" — is fully preserved.
+      (1) Scope: diff touches exactly 6 files: 4 room CONTEXT.md stubs (21/20/18/23 lines, all ≤30, each
+      stating purpose and consumes/produces), the decision-schema.md, and a 14-line append to AGENTS.md
+      with existing content byte-identical. No task contracts, no scripts, no later-stage content, no
+      stray/untracked files (git tree clean). The schema''s own "Non-goals" section defers extraction,
+      task contracts, Khoj chunk rules, and query text — consistent with the ''nothing else'' constraint.
+      (2) Grounding: the schema''s filled examples are drawn from real content — Example 1 (D15 Graphify
+      structural/Khoj semantic) and the JSON sketch (D02 job disposal) match the actual project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md
+      and DECISIONS-REVIEW-SHEET.md (D15 marked Y; D02 marked Y), and the MCP supersession pair matches
+      REBUILD-CONTEXT-ANCHOR''s locked naming. The schema correctly reflects the accepted set (D01–D10,
+      D12–D18; D11 dropped). (3) Graph integrity: downstream nodes consume exactly what this schema provides
+      — node-04 normalizes ''conforming to decision-schema.md (required fields present, supersession links
+      resolved)'', which the schema''s minimal required set and replaces/replaced_by invariant directly
+      support; node-05 validates ''schema conformance, unique ids, dangling supersession links'', again
+      directly supported; node-02''s source inventory names the same real files the schema cites; eval
+      nodes 11/12/13 (queries 1–5: factual, rationale, supersession, relationship, negative control) match
+      the schema''s evaluation coverage table and 04-evaluation/CONTEXT.md''s fixed set, consistent with
+      the memo''s fixed evaluation set and the blueprint''s three-way eval split. (4) Constraints honored:
+      memo read path exists; directories + markdown only; AGENTS.md appended, never overwritten. Lane-1''s
+      ''CONTEXT.md absent'' mismatch detail is contradicted by artifacts_present (all four CONTEXT.md
+      present) — a lane-1 scan artifact, not an integrity problem. No drift, no harm to dependents; proceeding
+      is safe.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-01-decision-schema/job_20260814T1022089881847580aa5a-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9766666666666666
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: e5d5956d666e3e60f76b1f9aac2d23b17b12e0cf
+      evaluated_commit_sha: 6b3324550789b0f5e7607faa45fa2fc14e9d794d
+      merge_commit_sha: 6b3324550789b0f5e7607faa45fa2fc14e9d794d
+      execution_attempt_id: job_20260814T1022089881847580aa5a:attempt:0
+      context_coverage:
+        criteria: high
+        integrity: high
+        overall: high
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'Fresh-eyes review of node-01-decision-schema work (commit 6b33245 on base 6671b45).
+          The node''s intended role — "define the canonical shape every later stage consumes, plus the
+          minimal scaffold (rooms + short CONTEXT stubs, AGENTS.md append-only), nothing more" — is fully
+          preserved. (1) Scope: diff touches exactly 6 files: 4 room CONTEXT.md stubs (21/20/18/23 lines,
+          all ≤30, each stating purpose and consumes/produces), the decision-schema.md, and a 14-line
+          append to AGENTS.md with existing content byte-identical. No task contracts, no scripts, no
+          later-stage content, no stray/untracked files (git tree clean). The schema''s own "Non-goals"
+          section defers extraction, task contracts, Khoj chunk rules, and query text — consistent with
+          the ''nothing else'' constraint. (2) Grounding: the schema''s filled examples are drawn from
+          real content — Example 1 (D15 Graphify structural/Khoj semantic) and the JSON sketch (D02 job
+          disposal) match the actual project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md and
+          DECISIONS-REVIEW-SHEET.md (D15 marked Y; D02 marked Y), and the MCP supersession pair matches
+          REBUILD-CONTEXT-ANCHOR''s locked naming. The schema correctly reflects the accepted set (D01–D10,
+          D12–D18; D11 dropped). (3) Graph integrity: downstream nodes consume exactly what this schema
+          provides — node-04 normalizes ''conforming to decision-schema.md (required fields present, supersession
+          links resolved)'', which the schema''s minimal required set and replaces/replaced_by invariant
+          directly support; node-05 validates ''schema conformance, unique ids, dangling supersession
+          links'', again directly supported; node-02''s source inventory names the same real files the
+          schema cites; eval nodes 11/12/13 (queries 1–5: factual, rationale, supersession, relationship,
+          negative control) match the schema''s evaluation coverage table and 04-evaluation/CONTEXT.md''s
+          fixed set, consistent with the memo''s fixed evaluation set and the blueprint''s three-way eval
+          split. (4) Constraints honored: memo read path exists; directories + markdown only; AGENTS.md
+          appended, never overwritten. Lane-1''s ''CONTEXT.md absent'' mismatch detail is contradicted
+          by artifacts_present (all four CONTEXT.md present) — a lane-1 scan artifact, not an integrity
+          problem. No drift, no harm to dependents; proceeding is safe.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: 01-decisions/CONTEXT.md prose says 'accepted review sheets (D01–D18 set)' but D11 was
+            dropped (17 accepted). The schema itself correctly says 'Sab-accepted D01–D10, D12–D18'. Node-02/03
+            (inventory/extraction) should enumerate sources against the accepted set, not blindly D01–D18.
+          affected_node_ids:
+          - node-02-inventory-sources
+          - node-03-extract-decisions
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      evaluation_timing:
+        started_at: '2026-08-14T10:30:40.629092+00:00'
+        finished_at: '2026-08-14T10:33:08.315926+00:00'
+        wall_s: 147.686
+        criteria:
+          status: completed
+          elapsed_s: 75.531
+          tool_calls: 19
+        integrity:
+          status: completed
+          elapsed_s: 72.04
+          tool_calls: 21
+  node-02-inventory-sources:
+    verdict: pass
+    evaluated_at: '2026-08-14T12:23:22.653886+00:00'
+    executor: pi_rpc
+    job_id: job_20260814T120550563ae66b57f2d2
+    result_id: res_ses_20260814T12055056e81da068b1e2
+    attempts: 2
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-02-inventory-sources/job_20260814T120550563ae66b57f2d2-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The delivered artifact (01-decisions/output/sources.md) squarely fulfills node-02''s
+      intended role: a declared, inspectable source list for Stage B extraction with "no silent scope."
+      It enumerates decision-truth sources (review sheet, repo-local normalized note, Corpus v1.0 parity
+      witness) with one-line authority rationales, supporting sources, a deliberate-exclusions table with
+      reasons, an authority order that protects the review sheet''s final inclusion authority, and a Stage
+      B use rule that prevents silent scope widening. Graph integrity is preserved: the diff is a single
+      added file under 01-decisions/, satisfying the "write only under 01-decisions/" constraint and leaving
+      the 02/03/04 stage rooms and AGENTS.md untouched. All factual claims in the artifact were verified
+      against the repo: the review sheet shows 17 Y / 1 N (D11) matching the manifest''s D01–D18 description;
+      the two normalized keeper copies are byte-identical with the stated SHA-256; every cited/excluded
+      path exists (including scratch/corpus-hot in the real repo). The artifact correctly anchors to node-01''s
+      outputs (decision-schema.md, 01-decisions/CONTEXT.md), both present. Node-02 executing while node-01
+      is provisional is consistent with the accepted D12 flow-on-provisional doctrine and D08 reject-revoke
+      protection, so it is not a graph violation. Lane-1 indeterminacy on the acceptance criteria is outside
+      this review''s scope; substantively the artifact addresses both criterion topics. No intent drift,
+      no harm to dependents.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-02-inventory-sources/job_20260814T120550563ae66b57f2d2-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.94
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 1798828f2f844f9041fc301cf9c1dd5e8d66ad84
+      evaluated_commit_sha: 989a62b0f48796c6b247018472d6f0ca8f096218
+      merge_commit_sha: 989a62b0f48796c6b247018472d6f0ca8f096218
+      execution_attempt_id: job_20260814T120550563ae66b57f2d2:attempt:0
+      context_coverage:
+        criteria: high
+        integrity: high
+        overall: high
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'The delivered artifact (01-decisions/output/sources.md) squarely fulfills node-02''s
+          intended role: a declared, inspectable source list for Stage B extraction with "no silent scope."
+          It enumerates decision-truth sources (review sheet, repo-local normalized note, Corpus v1.0
+          parity witness) with one-line authority rationales, supporting sources, a deliberate-exclusions
+          table with reasons, an authority order that protects the review sheet''s final inclusion authority,
+          and a Stage B use rule that prevents silent scope widening. Graph integrity is preserved: the
+          diff is a single added file under 01-decisions/, satisfying the "write only under 01-decisions/"
+          constraint and leaving the 02/03/04 stage rooms and AGENTS.md untouched. All factual claims
+          in the artifact were verified against the repo: the review sheet shows 17 Y / 1 N (D11) matching
+          the manifest''s D01–D18 description; the two normalized keeper copies are byte-identical with
+          the stated SHA-256; every cited/excluded path exists (including scratch/corpus-hot in the real
+          repo). The artifact correctly anchors to node-01''s outputs (decision-schema.md, 01-decisions/CONTEXT.md),
+          both present. Node-02 executing while node-01 is provisional is consistent with the accepted
+          D12 flow-on-provisional doctrine and D08 reject-revoke protection, so it is not a graph violation.
+          Lane-1 indeterminacy on the acceptance criteria is outside this review''s scope; substantively
+          the artifact addresses both criterion topics. No intent drift, no harm to dependents.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Node-01-decision-schema is still provisional while node-02 has already produced output.
+            Per accepted D08 (reject revokes dependent admission), a rejection of node-01 would revoke
+            node-02's admission; the doc/CONTEXT.md required artifact from node-01 was not found in the
+            worktree (docs/ contains only 01-taxonomy.md and 02-target-output.md). Recommend settling
+            node-01's acceptance before node-03 (extract-decisions) fires so the source manifest's cited
+            schema contract is non-provisional.
+          affected_node_ids:
+          - node-01-decision-schema
+          - node-02-inventory-sources
+          - node-03-extract-decisions
+        - severity: low
+          summary: 'Node-02 declares unlocks: [] while the blueprint chains decisions -> corpus -> ingestion
+            -> evaluation via implicit frontier sequencing. The source manifest is deliberately closed
+            to D01-D18; downstream node-03 must honor the Stage B use rule (cite review sheet + normalized
+            note, parity witness as provenance) to keep the chain consistent.'
+          affected_node_ids:
+          - node-02-inventory-sources
+          - node-03-extract-decisions
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      evaluation_timing:
+        started_at: '2026-08-14T12:20:54.371934+00:00'
+        finished_at: '2026-08-14T12:23:22.436801+00:00'
+        wall_s: 148.062
+        criteria:
+          status: completed
+          elapsed_s: 81.893
+          tool_calls: 12
+        integrity:
+          status: completed
+          elapsed_s: 66.088
+          tool_calls: 16
+    human_decision: 'manual_status_change: attempt-0 died on expired openai-codex token (infra, pre-reauth);
+      clearing for retry'
+  node-03-extract-decisions:
+    verdict: pass
+    evaluated_at: '2026-08-14T12:47:44.595648+00:00'
+    executor: pi_rpc
+    job_id: job_20260814T122823299bbc0d0b374d
+    result_id: res_ses_20260814T12282329c45c81573796
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-03-extract-decisions/job_20260814T122823299bbc0d0b374d-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The work under review (tip 3a9d426 on top of node-02''s result commit 989a62b) adds
+      exactly the one required artifact, 01-decisions/output/decisions-raw.jsonl, and nothing else — correct
+      scope containment for node-03 (Stage B, raw extraction only). Content matches the node''s role:
+      (1) completeness — the JSONL holds exactly the 17 accepted decisions of the closed set declared
+      in node-02''s sources.md (D01–D10, D12–D18), with D11 correctly omitted as rejection evidence per
+      the review sheet''s N mark and the sources.md exclusion rule; (2) raw fidelity — statements and
+      titles are verbatim from the memo and review sheet (spot-verified), every object cites the review
+      sheet + repo-local memo + Corpus v1.0 keeper with a sha256 that verifies against the on-disk file,
+      so no invention or silent scope-widening; (3) no premature normalization — objects carry only the
+      schema''s minimal required set plus review_mark/extraction_context and deliberately omit replaces/replaced_by/relationship
+      fields that the schema reserves for node-04''s canonical output. Graph integrity holds: node-03
+      chains directly off node-02''s sources.md (the diff base IS node-02''s result commit) and honors
+      its Stage B use rule; node-04 depends on node-01+node-03 and consumes this exact artifact shape
+      (one object per raw object, source paths traceable); the artifact is durably committed on a gddp/result
+      branch per the D10 no-merge-to-main doctrine. node-02 being provisional is consistent with the graph''s
+      own flow-on-provisional doctrine (D12). The lane-1 probe''s ''decisions-raw.js absent / sources.md
+      absent'' evidence is contradicted by the actual tree (the file is decisions-raw.jsonl and sources.md
+      exists at both base and tip) — a probe-quality issue, not a work-integrity issue. Verdict: pass.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-03-extract-decisions/job_20260814T122823299bbc0d0b374d-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.95
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 6d0a13657c7076a94a15044b2a0c489a8def4a9b
+      evaluated_commit_sha: 3a9d426c9b414c70a3a250e24a78d13c4a31c325
+      merge_commit_sha: 3a9d426c9b414c70a3a250e24a78d13c4a31c325
+      execution_attempt_id: job_20260814T122823299bbc0d0b374d:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: high
+        overall: medium
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.85
+        findings: []
+        reasoning: 'The work under review (tip 3a9d426 on top of node-02''s result commit 989a62b) adds
+          exactly the one required artifact, 01-decisions/output/decisions-raw.jsonl, and nothing else
+          — correct scope containment for node-03 (Stage B, raw extraction only). Content matches the
+          node''s role: (1) completeness — the JSONL holds exactly the 17 accepted decisions of the closed
+          set declared in node-02''s sources.md (D01–D10, D12–D18), with D11 correctly omitted as rejection
+          evidence per the review sheet''s N mark and the sources.md exclusion rule; (2) raw fidelity
+          — statements and titles are verbatim from the memo and review sheet (spot-verified), every object
+          cites the review sheet + repo-local memo + Corpus v1.0 keeper with a sha256 that verifies against
+          the on-disk file, so no invention or silent scope-widening; (3) no premature normalization —
+          objects carry only the schema''s minimal required set plus review_mark/extraction_context and
+          deliberately omit replaces/replaced_by/relationship fields that the schema reserves for node-04''s
+          canonical output. Graph integrity holds: node-03 chains directly off node-02''s sources.md (the
+          diff base IS node-02''s result commit) and honors its Stage B use rule; node-04 depends on node-01+node-03
+          and consumes this exact artifact shape (one object per raw object, source paths traceable);
+          the artifact is durably committed on a gddp/result branch per the D10 no-merge-to-main doctrine.
+          node-02 being provisional is consistent with the graph''s own flow-on-provisional doctrine (D12).
+          The lane-1 probe''s ''decisions-raw.js absent / sources.md absent'' evidence is contradicted
+          by the actual tree (the file is decisions-raw.jsonl and sources.md exists at both base and tip)
+          — a probe-quality issue, not a work-integrity issue. Verdict: pass.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: medium
+          summary: The Corpus v1.0 parity witness (Corpus v1.0/40-decisions-and-trajectories/2026-08-08-last2w-decisions.md)
+            is gitignored/untracked. It exists on disk today with the sha256 cited in every raw object
+            (4124f800...), but it will be absent from fresh clones or worktrees built from result commits;
+            downstream nodes (node-05 validation, node-06 corpus) that rely on byte-identical parity checks
+            must read the on-disk path or the check will fail spuriously.
+          affected_node_ids:
+          - node-03-extract-decisions
+          - node-05-validate-decision-set
+          - node-06-build-corpus
+        - severity: medium
+          summary: All 01-decisions/ artifacts (schema, sources.md, raw jsonl) live only on gddp/result-*
+            branches, not on the checked-out branch (per D10 no-merge-to-main doctrine). Downstream nodes
+            must chain their worktrees from the node-03 result commit or the 01-decisions/ directory will
+            be missing from their working tree.
+          affected_node_ids:
+          - node-04-normalize-decisions
+          - node-05-validate-decision-set
+          - node-06-build-corpus
+        - severity: low
+          summary: The lane-1 deterministic probe for 'extraction-complete' searched for 'decisions-raw.js'
+            and reported 'sources.md absent' — both identifiers are wrong (artifact is decisions-raw.jsonl;
+            sources.md exists at base and tip commits). If this probe pattern is reused on later nodes
+            it will keep producing false indeterminate results and may mask real gaps or fabricate doubt.
+          affected_node_ids:
+          - node-03-extract-decisions
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      evaluation_timing:
+        started_at: '2026-08-14T12:43:27.334958+00:00'
+        finished_at: '2026-08-14T12:47:44.344754+00:00'
+        wall_s: 257.006
+        criteria:
+          status: completed
+          elapsed_s: 114.813
+          tool_calls: 18
+        integrity:
+          status: completed
+          elapsed_s: 142.096
+          tool_calls: 22

@@ -1,0 +1,691 @@
+{
+  "project_id": "gddp-dogfood",
+  "node_id": "node-10-agents-md-drift-report",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.95,
+    "findings": [],
+    "reasoning": "The node's role is a T1 report-only canary: produce reports/gddp-dogfood/10-agents-md-drift-report.md documenting AGENTS.md statements that contradict current code, without editing anything else. The delivered report fulfills exactly that role. Diff base 450eca1 -> tip d168c13 contains only the new report file (275 lines); the working tree is clean, so the read-only constraint ('Create only the report', 'Read-only outside that report path') is preserved at the diff level. Every AGENTS.md line citation I checked (L15, 17-19, 65, 72-73, 79-80, 83-87, 88-91, 109-110) matches the source verbatim, and every spot-checked code file:line citation (state_recorder.py 56-71/85-88/188-191, return_router.py 95-98/246-263, rollback.py:66, jobs_status.py:10/394-412, provisional_status.py:144-151, frontier.py:101-106, reconciler.py:1290-1299, requirements.txt, schemas.py:7, graph_reader.py:17, intake_server.py:24, executor_protocol.py:65, retry_budget.py:23-28, mission_adapter.py:546-549, session_prompt.py:44-74) is accurate. Negative claims are corroborated: no proposals-ledger code exists under scripts/, and flask is genuinely not importable in this environment, consistent with the quoted pytest tail '4 failed, 622 passed in 35.15s'. The report is balanced (includes a 'not drifted' table, notes where AGENTS.md aligns with code, and marks suggested doc fixes explicitly out of scope), which matches the node's why: a drift report keeps the contract honest without editing. Commit structure honors the executor contract (co-authored work commit be8bade plus result-ref wrapper d168c13). The node has no depends_on and no unlocks, so no dependent node is affected; the change is purely additive and does not touch graph config, canon, or runtime state. Intent preserved; graph integrity preserved. No human review required for the integrity lane; acceptance-criteria adjudication remains lane 1's call.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-11T06:37:04.225Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_GX97cerK57vd533391h74124",
+        "command": "ls -la /tmp/gddp-eval-wt-cdo5dmje/ && echo \"---\" && ls -la /tmp/gddp-eval-wt-cdo5dmje/reports/gddp-dogfood/ 2>/dev/null && echo \"---\" && ls /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-11T06:37:04.226Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_k6egX7Pi5LS9LsifeXgN3346",
+        "path": "/tmp/gddp-eval-wt-cdo5dmje/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-11T06:37:04.250Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_k6egX7Pi5LS9LsifeXgN3346",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:37:04.255Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_GX97cerK57vd533391h74124",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:37:05.958Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_tQ9vBuMd2PKhr2Na7TDI5023",
+        "path": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-10-agents-md-drift-report.yaml"
+      },
+      {
+        "ts": "2026-08-11T06:37:05.958Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_Z5yipAx4zAe7EjAe6FV27374",
+        "path": "/tmp/gddp-eval-wt-cdo5dmje/reports/gddp-dogfood/10-agents-md-drift-report.md"
+      },
+      {
+        "ts": "2026-08-11T06:37:05.961Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_tQ9vBuMd2PKhr2Na7TDI5023",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:37:05.961Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Z5yipAx4zAe7EjAe6FV27374",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:37:10.606Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_dttFg8bWH8XeY2liyhZD9065",
+        "command": "cd /tmp/gddp-eval-wt-cdo5dmje && git log --oneline -5 2>/dev/null; echo \"---STATUS---\"; git status --short 2>/dev/null | head -30; echo \"---DIFF STAT---\"; git diff --stat 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61 d168c137e7b5077c0c611913ed49b75309707074 2>/dev/null; echo \"---BRANCHES---\"; git branch -a 2>/dev/null | head; echo \"---REFS---\"; git for-each-ref 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-11T06:37:10.606Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_hDjDHzESE0CTGoVUgkrd7983",
+        "path": "/tmp/gddp-eval-wt-cdo5dmje/AGENTS.md"
+      },
+      {
+        "ts": "2026-08-11T06:37:10.614Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_hDjDHzESE0CTGoVUgkrd7983",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:37:10.649Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_dttFg8bWH8XeY2liyhZD9065",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:37:20.939Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_hMSNjyh0hVPmdwiyNYvN0198",
+        "command": "cd /tmp/gddp-eval-wt-cdo5dmje && echo \"=== be8bade commit ===\"; git show --stat be8bade 2>/dev/null | head -15; echo \"=== d168c13 commit ===\"; git show --stat d168c13 2>/dev/null | head -15; echo \"=== parents ===\"; git log --format='%h %p %s' -3 d168c13; echo \"=== AGENTS.md line count ===\"; wc -l AGENTS.md"
+      },
+      {
+        "ts": "2026-08-11T06:37:20.939Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_A5TVk9144OxiCqBLYe4u5799",
+        "command": "cd /tmp/gddp-eval-wt-cdo5dmje && echo \"=== AGENTS.md L15 ===\"; sed -n '15p' AGENTS.md; echo \"=== L17-19 ===\"; sed -n '17,19p' AGENTS.md; echo \"=== L65 ===\"; sed -n '65p' AGENTS.md; echo \"=== L72-73 ===\"; sed -n '72,73p' AGENTS.md; echo \"=== L79-80 ===\"; sed -n '79,80p' AGENTS.md; echo \"=== L83-87 ===\"; sed -n '83,87p' AGENTS.md; echo \"=== L88-91 ===\"; sed -n '88,91p' AGENTS.md; echo \"=== L109-110 ===\"; sed -n '109,110p' AGENTS.md"
+      },
+      {
+        "ts": "2026-08-11T06:37:20.963Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_hMSNjyh0hVPmdwiyNYvN0198",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:37:20.972Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_A5TVk9144OxiCqBLYe4u5799",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:37:25.627Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_wMXbEP2SMs65vHZGcWCm2535",
+        "command": "cd /tmp/gddp-eval-wt-cdo5dmje && echo \"=== state_recorder.py 56-71 ===\"; sed -n '56,71p' scripts/runtime/heartbeat/state_recorder.py; echo \"=== state_recorder.py 85-88 ===\"; sed -n '85,88p' scripts/runtime/heartbeat/state_recorder.py; echo \"=== state_recorder.py 188-191 ===\"; sed -n '188,191p' scripts/runtime/heartbeat/state_recorder.py"
+      },
+      {
+        "ts": "2026-08-11T06:37:25.627Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ogKkAxuNv55B9wK5LriQ2673",
+        "command": "cd /tmp/gddp-eval-wt-cdo5dmje && echo \"=== return_router.py 95-98 ===\"; sed -n '95,98p' scripts/runtime/return_router.py; echo \"=== rollback.py 66 ===\"; sed -n '66p' scripts/rollback.py; echo \"=== jobs_status.py 10 ===\"; sed -n '10p' scripts/jobs_status.py; echo \"=== jobs_status.py 394-412 ===\"; sed -n '394,412p' scripts/jobs_status.py"
+      },
+      {
+        "ts": "2026-08-11T06:37:25.643Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_wMXbEP2SMs65vHZGcWCm2535",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:37:25.648Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ogKkAxuNv55B9wK5LriQ2673",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:37:29.075Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Sz6gcfns2nq4Zdb4Gk7M1604",
+        "command": "cd /tmp/gddp-eval-wt-cdo5dmje && echo \"=== provisional_status.py 144-151 ===\"; sed -n '144,151p' scripts/runtime/heartbeat/provisional_status.py; echo \"=== frontier.py 101-106 ===\"; sed -n '101,106p' scripts/runtime/heartbeat/frontier.py; echo \"=== reconciler.py 1290-1299 ===\"; sed -n '1290,1299p' scripts/runtime/heartbeat/reconciler.py"
+      },
+      {
+        "ts": "2026-08-11T06:37:29.075Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Xun9peImpESDqf2GzNQZ0047",
+        "command": "cd /tmp/gddp-eval-wt-cdo5dmje && echo \"=== requirements.txt ===\"; cat requirements.txt; echo \"=== schemas.py 7 ===\"; sed -n '7p' scripts/runtime/verification/schemas.py; echo \"=== graph_reader.py 17 ===\"; sed -n '17p' scripts/runtime/heartbeat/graph_reader.py; echo \"=== intake_server.py 24 ===\"; sed -n '24p' scripts/intake_server.py; echo \"=== executor_protocol.py 65 ===\"; sed -n '65p' scripts/adapters/executor_protocol.py; echo \"=== retry_budget.py 23-28 ===\"; sed -n '23,28p' scripts/runtime/verification/retry_budget.py; echo \"=== mission_adapter.py 546-549 ===\"; sed -n '546,549p' scripts/adapters/mission_adapter.py; echo \"=== proposals grep ===\"; grep -rn \"proposals\" scripts/ 2>/dev/null | head -5; echo \"exit: $?\""
+      },
+      {
+        "ts": "2026-08-11T06:37:29.088Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Sz6gcfns2nq4Zdb4Gk7M1604",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:37:29.106Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Xun9peImpESDqf2GzNQZ0047",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:37:43.795Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_XnH4lANFrsH8aVyuEo7k0749",
+        "command": "cd /tmp/gddp-eval-wt-cdo5dmje && echo \"=== session_prompt.py 44-74 ===\"; sed -n '44,74p' scripts/adapters/session_prompt.py | head -32; echo \"=== return_router.py 246-263 ===\"; sed -n '246,263p' scripts/runtime/return_router.py; echo \"=== flask installed? ===\"; python3 -c \"import flask; print('flask present', flask.__version__)\" 2>&1 | head -2; echo \"=== pytest cache dirs ===\"; ls -d .pytest_cache 2>/dev/null; find . -maxdepth 2 -name \".pytest_cache\" 2>/dev/null; echo \"=== git status porcelain ===\"; git status --porcelain | head -5; echo \"done\""
+      },
+      {
+        "ts": "2026-08-11T06:37:43.865Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_XnH4lANFrsH8aVyuEo7k0749",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:38:00.897Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_4QQD5yTkDHRRHA4PF3Uw4362",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "D1-D6 drift findings (multi-writer job backend, runtime auto-writing provisional/ready graph status, install-surface mismatch, unimplemented proposals ledger, AGENTS internal contradiction on node authoring, accept_node semantics) identify concrete AGENTS.md doc work; any future doc-cleanup/corrective node that edits AGENTS.md should be human-gated since AGENTS.md is executor canon, and D2's 'only the human changes graph truth' tension is material to the canon model that downstream integrity lanes will keep re-checking.",
+        "affected_node_ids": [
+          "node-10-agents-md-drift-report"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.96,
+  "criteria_confidence": 0.96,
+  "completeness": 1.0,
+  "graph_readiness": 0.96,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "report-exists",
+        "criterion": "reports/gddp-dogfood/10-agents-md-drift-report.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "gddp\\-dogfood -> line 272: 'gddp-dogfood'",
+          "agents\\-md\\-drift\\-report -> line 3: 'agents-md-drift-report'"
+        ],
+        "reasoning": "Scanned source files (reports/gddp-dogfood/10-agents-md-drift-report.md) for identifiers named in the criterion (gddp-dogfood, agents-md-drift-report, non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "quoted-drift",
+        "criterion": "each drift claim quotes the AGENTS.md line and the contradicting code at file:line",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "AGENTS -> line 1: 'AGENTS'"
+        ],
+        "reasoning": "Scanned source files (AGENTS.md) for identifiers named in the criterion (AGENTS). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "read-only",
+        "criterion": "the node changes no files outside the report",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create only reports/gddp-dogfood/10-agents-md-drift-report.md",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Read-only outside that report path",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Run python3 -m pytest -q before finishing and quote its tail line in the report",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/gddp-dogfood/10-agents-md-drift-report.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+      "tip": "d168c137e7b5077c0c611913ed49b75309707074",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/gddp-dogfood/10-agents-md-drift-report.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "reports/gddp-dogfood/10-agents-md-drift-report.md exists (275 lines, ~7KB, non-empty)",
+          "git diff --numstat 450eca1..d168c13 shows 275 insertions for this file",
+          "git show d168c13:reports/gddp-dogfood/10-agents-md-drift-report.md is byte-identical to the working-tree file"
+        ],
+        "reasoning": "The required artifact exists at the required path, is non-empty (275 lines of substantive content including six drift findings, a non-drifted-claims table, summary, and artifact/constraint checklist), and is committed at the node tip commit d168c13. The criterion is directly satisfied."
+      },
+      {
+        "criterion_id": "quoted-drift",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "D1 quotes AGENTS.md:17-19 (grep: line 17 'gddp is the single operator-facing control plane', 18 'writes route through scripts/jobs_status.py', 19 'job/queue state but must never update graph/node status') and code: state_recorder.py:56-71 (INSERT INTO jobs), 85-88 (UPDATE jobs SET status='running'), 188-191 (graph->job reconcile UPDATE jobs), return_router.py:95-98 (UPDATE jobs SET status='awaiting_review'), rollback.py:66 (UPDATE jobs SET status='failed'), jobs_status.py:10 ('This module owns runtime job state only...') — all verified by sed",
+          "D2 quotes AGENTS.md:65 (grep: 'or abandon a node; only the human changes graph truth') and :15 ('Evaluator produces evidence...only a human moves a node to complete'); code: provisional_status.py:4-5 (doctrine 'complete is human-only...never writes it') and :144-151 (replace_node_status + _atomic_write of node/project YAML), frontier.py:4-10 and :101-106 (writes 'ready' via _atomic_write), reconciler.py:1290-1299 (maybe_mark_provisional call) — all verified",
+          "D3 quotes AGENTS.md:109-110 (grep confirms 'Language: Python 3.11+ (stdlib + Flask)' at 109, 'pip install flask' at 110); code: requirements.txt:1-4 (flask, pyyaml, pydantic, anthropic), schemas.py:7 (from pydantic import ...), graph_reader.py:17 (import yaml), intake_server.py:24 (from flask import ...) — all verified",
+          "D4 quotes AGENTS.md:83-87 (grep: 84 'injected as the fix-list', 86 'proposals ledger', 87 'Agents never author nodes'); code: executor_protocol.py:65 (previous_findings field), return_router.py:246-263 (builds previous_findings, allocate_retry_attempt), session_prompt.py:44-74 (findings rendered into prompt), mission_adapter.py:546-549 (renders previous findings into mission why), retry_budget.py:23-28 (has_evidence_references docstring) — all verified; absence claim ('no *proposal* module under scripts/') corroborated by my own grep",
+          "D5 quotes AGENTS.md:79-80 and :87 (grep confirms both); absence claim (no node-authoring writer under scripts/) corroborated by file listing",
+          "D6 quotes AGENTS.md:15/72-73; code: jobs_status.py:394-399 (UPDATE jobs SET queue_state/status) and :408-412 (action='accept_node', INSERT INTO decision_results) — verified by sed"
+        ],
+        "reasoning": "All six drift findings (D1-D6) quote the relevant AGENTS.md line(s) with line numbers, and every AGENTS.md citation matches grep-verified line content. Every code citation is an accurate file:line pointing at content that substantiates the claimed contradiction (multi-writer job updates, runtime graph-status writes of provisional/ready, dependency list vs stdlib+Flask, retry/previous_findings machinery present while proposals ledger is absent, jobs_status accept_node touching only job/queue rows). Citations for D4/D5's 'no implementation' halves are necessarily absence claims rather than file:line quotes, which is a reasonable reading of the criterion for nonexistent code; the positive halves of those claims are fully file:line-cited."
+      },
+      {
+        "criterion_id": "read-only",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "git diff --name-status 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61..d168c137e7b5077c0c611913ed49b75309707074 returns exactly: A reports/gddp-dogfood/10-agents-md-drift-report.md (1 file, 275 insertions, 0 deletions)",
+          "git status --short is empty (clean working tree; no untracked or leftover files)",
+          "report itself states 'Only file created/modified: reports/gddp-dogfood/10-agents-md-drift-report.md'",
+          "base commit 450eca1 in the report header matches the subject diff base"
+        ],
+        "reasoning": "The complete base..tip diff contains exactly one added file — the required report — and zero modifications or deletions to any other file. The working tree is clean (no untracked leftovers), and the committed report is identical to the working-tree file. Only git-visible changes can be verified from this vantage point; transient ignored writes (e.g., pytest cache) during execution cannot be fully excluded, but no residue remains in the tree and no source file was altered."
+      }
+    ],
+    "overall_reasoning": "All three acceptance criteria for node-10-agents-md-drift-report are satisfied. (1) The report exists at reports/gddp-dogfood/10-agents-md-drift-report.md, is non-empty (275 lines), and is committed at the node tip d168c13 identical to the working tree. (2) Each of the six drift findings quotes its AGENTS.md line(s) with verified-correct line numbers (15, 17-19, 65, 72-73, 79-80, 83-87, 88-91, 109-110) and quotes contradicting code at file:line; I independently verified every one of the ~25 cited file:line references against the live tree — all point at content that substantiates the claimed drift, and the two absence-based halves (no proposals-ledger module, no node-authoring writer) were corroborated by my own grep/file scans. (3) The node is read-only outside the report: the base..tip diff contains exactly one added file (the report, 275 insertions, 0 deletions) and the working tree is clean. The report's own artifact checklist (only-file-created, quotes present, pytest tail quoted, no graph/DB mutation) is consistent with observed evidence. The pytest tail line ('4 failed, 622 passed in 35.15s') is quoted per the constraint but was not independently reproduced here; it is a constraint item, not an acceptance criterion, and the two reported failure classes (missing flask in env, rig1 plist test) are plausible environment-dependent outcomes consistent with the repo state. The report's substance — a genuine drift audit of AGENTS.md against live code — matches the node's stated purpose ('a drift report (no edits) keeps the contract honest') and preserves the project's canon model (evidence produced, no graph truth changed, no canonical document edited).",
+    "risks": "1. Read-only is verified at the git level (base..tip diff = 1 file added, clean tree); transient ignored/untracked writes during execution (e.g., pytest cache, __pycache__) cannot be fully ruled out from this vantage point, though none remain in the tree. 2. The quoted pytest tail line was not independently reproduced; running the suite here could mutate the tree and was therefore not attempted. The two reported failure classes are consistent with the environment and repo state. 3. The quoted-drift criterion is read literally as 'quotes AGENTS.md line AND contradicting code at file:line'; for D4/D5 the 'no implementation exists' halves are absence claims without a file:line (there is no code to quote), which I judged a reasonable and faithful treatment of nonexistent code; a stricter reader might want those halves phrased differently. 4. Drift findings are the executor's analytical judgments; I verified citations and internal consistency, not the absolute truth of every semantic conclusion (e.g., whether the proposals-ledger workflow is 'doctrine-ahead-of-code' vs deleted), which is a human review matter per the canon model.",
+    "followup_candidates": "Observed: the report quotes the pytest tail line '4 failed, 622 passed in 35.15s' (constraint 'run python3 -m pytest -q and quote its tail line'). This constraint was marked 'clear' by the deterministic forbidden-pattern scan and the quote is present, but I did not rerun the suite to independently confirm the numbers (rerunning could write cache/temp artifacts). Was independent reproduction of the pytest tail line intended as part of this node's evidence? If yes, update the node criteria/constraints and rerun; otherwise the verdict stands on the stated criteria. Also note the two absence-based drift claims (D4 proposals-ledger has no code; D5 no node-authoring writer exists) rest on negative evidence; a human may want to confirm the intended interpretation of 'contradicting code at file:line' for claims about code that does not exist.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-11T06:35:28.087Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_cXjfKSWye0yv5yB1Osix0911",
+          "command": "cd /tmp/gddp-eval-wt-cdo5dmje && ls -la && git log --oneline -5 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-11T06:35:28.088Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_jrBtsfurxGMPFvartKS06244",
+          "path": "/tmp/gddp-eval-wt-cdo5dmje/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-11T06:35:28.103Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_jrBtsfurxGMPFvartKS06244",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:35:28.110Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_cXjfKSWye0yv5yB1Osix0911",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:35:30.419Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_mmHxuyYWwn8cgKN08Xsw5945",
+          "path": "/tmp/gddp-eval-wt-cdo5dmje/reports/gddp-dogfood/10-agents-md-drift-report.md"
+        },
+        {
+          "ts": "2026-08-11T06:35:30.420Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_a4KH3VZWP5wgcRg0wpOF3101",
+          "command": "cd /tmp/gddp-eval-wt-cdo5dmje && git status --short && echo \"---DIFF STAT vs base---\" && git diff --stat 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61 d168c137e7b5077c0c611913ed49b75309707074 2>/dev/null; echo \"---files changed in subject diff---\"; git diff --name-status 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61 d168c137e7b5077c0c611913ed49b75309707074 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-11T06:35:30.428Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_mmHxuyYWwn8cgKN08Xsw5945",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:35:30.476Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_a4KH3VZWP5wgcRg0wpOF3101",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:35:34.049Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ykT7rQUhffpjNrkx33rg1104",
+          "command": "cd /tmp/gddp-eval-wt-cdo5dmje && sed -n '10,25p' AGENTS.md && echo \"=====LINES 60-95=====\" && sed -n '60,95p' AGENTS.md && echo \"=====LINES 100-115=====\" && sed -n '100,115p' AGENTS.md"
+        },
+        {
+          "ts": "2026-08-11T06:35:34.049Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_rHRSefHEjPZRKIVAABqb3733",
+          "command": "cd /tmp/gddp-eval-wt-cdo5dmje && wc -l AGENTS.md scripts/jobs_status.py scripts/runtime/heartbeat/state_recorder.py scripts/runtime/return_router.py scripts/rollback.py scripts/runtime/heartbeat/provisional_status.py scripts/runtime/heartbeat/frontier.py scripts/runtime/heartbeat/reconciler.py requirements.txt 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-11T06:35:34.065Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ykT7rQUhffpjNrkx33rg1104",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:35:34.065Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_rHRSefHEjPZRKIVAABqb3733",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:35:38.124Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_uwrkonngHL0gZ9ETVlAc2035",
+          "reason": "command matched blocked pattern",
+          "command": "cd /tmp/gddp-eval-wt-cdo5dmje && grep -n \"jobs_status\" AGENTS.md && echo \"---\" && grep -n \"only the human changes graph truth\" AGENTS.md && echo \"---\" && grep -n \"only a human moves a node to complete\" AGENTS.md && echo \"---\" && grep -n \"stdlib + Flask\" AGENTS.md && echo \"---\" && grep -n \"pip install flask\" AGENTS.md && echo \"---\" && grep -n \"proposals ledger\\|Agents never author nodes\\|fix-list\\|Create a new dependency\" AGENTS.md && echo \"---\" && grep -n \"accept\" AGENTS.md | head -20",
+          "pattern": "\\b(?:curl|wget|ssh|scp|sftp|rsync|nc|netcat|telnet|ftp|pip|npm|pnpm|yarn|brew)\\b"
+        },
+        {
+          "ts": "2026-08-11T06:35:38.125Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_uwrkonngHL0gZ9ETVlAc2035",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T06:35:38.125Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_S1gVgUPZwfbpLqqA4n2F4149",
+          "command": "cd /tmp/gddp-eval-wt-cdo5dmje && cat requirements.txt && echo \"=== schemas.py:7 ===\" && sed -n '1,12p' scripts/runtime/verification/schemas.py && echo \"=== graph_reader.py:17 ===\" && sed -n '14,20p' scripts/runtime/heartbeat/graph_reader.py && echo \"=== intake_server.py:24 ===\" && sed -n '20,28p' scripts/intake_server.py"
+        },
+        {
+          "ts": "2026-08-11T06:35:38.142Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_S1gVgUPZwfbpLqqA4n2F4149",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:35:41.507Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_rnebJcpUgnvzaqI4sfR66163",
+          "command": "cd /tmp/gddp-eval-wt-cdo5dmje && grep -n \"jobs_status\" AGENTS.md; echo \"---\"; grep -n \"only the human changes graph truth\" AGENTS.md; echo \"---\"; grep -n \"only a human moves a node to complete\" AGENTS.md; echo \"---\"; grep -n \"stdlib\" AGENTS.md; echo \"---\"; grep -n \"proposals ledger\" AGENTS.md; echo \"---\"; grep -n \"Agents never author nodes\" AGENTS.md; echo \"---\"; grep -n \"Create a new dependency\" AGENTS.md; echo \"---\"; grep -n \"fix-list\" AGENTS.md; echo \"---\"; grep -n \"accept_node\\|accepts a node\\|human accepts\" AGENTS.md"
+        },
+        {
+          "ts": "2026-08-11T06:35:41.507Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_XbTWq6lCT5QOAuoQktsD2544",
+          "command": "cd /tmp/gddp-eval-wt-cdo5dmje && grep -rn \"proposals_ledger\\|proposals ledger\\|continuation proposal\" --include=\"*.py\" scripts/ | head; echo \"---rg proposals modules---\"; ls scripts/ | grep -i proposal; echo \"(none if empty)\"; grep -rn \"install flask\\|flask\" AGENTS.md | head"
+        },
+        {
+          "ts": "2026-08-11T06:35:41.531Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_XbTWq6lCT5QOAuoQktsD2544",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:35:41.535Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_rnebJcpUgnvzaqI4sfR66163",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:35:51.915Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_URuIcWSaPstBqUPyUeL85010",
+          "command": "cd /tmp/gddp-eval-wt-cdo5dmje && echo \"=== state_recorder 50-95 ===\" && sed -n '50,95p' scripts/runtime/heartbeat/state_recorder.py && echo \"=== state_recorder 183-195 ===\" && sed -n '183,195p' scripts/runtime/heartbeat/state_recorder.py"
+        },
+        {
+          "ts": "2026-08-11T06:35:51.916Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_8wS5Ib2MiEuHYbDf5vpg8018",
+          "command": "cd /tmp/gddp-eval-wt-cdo5dmje && echo \"=== return_router 90-100 ===\" && sed -n '90,100p' scripts/runtime/return_router.py && echo \"=== rollback 60-70 ===\" && sed -n '60,70p' scripts/rollback.py && echo \"=== jobs_status 1-15 ===\" && sed -n '1,15p' scripts/jobs_status.py"
+        },
+        {
+          "ts": "2026-08-11T06:35:51.929Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_URuIcWSaPstBqUPyUeL85010",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:35:51.935Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_8wS5Ib2MiEuHYbDf5vpg8018",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:35:59.775Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_zTw2HjYWNgtPRPJeJ9Bj7891",
+          "command": "cd /tmp/gddp-eval-wt-cdo5dmje && echo \"=== provisional_status 1-10 ===\" && sed -n '1,10p' scripts/runtime/heartbeat/provisional_status.py && echo \"=== provisional_status 140-155 ===\" && sed -n '140,155p' scripts/runtime/heartbeat/provisional_status.py && echo \"=== frontier 1-12 ===\" && sed -n '1,12p' scripts/runtime/heartbeat/frontier.py && echo \"=== frontier 98-110 ===\" && sed -n '98,110p' scripts/runtime/heartbeat/frontier.py"
+        },
+        {
+          "ts": "2026-08-11T06:35:59.775Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_2EO0mIYt0FHdqoEHKtMW4950",
+          "command": "cd /tmp/gddp-eval-wt-cdo5dmje && echo \"=== reconciler 1285-1305 ===\" && sed -n '1285,1305p' scripts/runtime/heartbeat/reconciler.py && echo \"=== jobs_status 390-415 ===\" && sed -n '390,415p' scripts/jobs_status.py"
+        },
+        {
+          "ts": "2026-08-11T06:35:59.791Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_zTw2HjYWNgtPRPJeJ9Bj7891",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:35:59.791Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_2EO0mIYt0FHdqoEHKtMW4950",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:36:11.094Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_J0W8zD5Lip8KHrM1onkQ6793",
+          "command": "cd /tmp/gddp-eval-wt-cdo5dmje && echo \"=== executor_protocol.py:60-70 ===\" && sed -n '60,70p' scripts/adapters/executor_protocol.py && echo \"=== return_router 244-265 ===\" && sed -n '244,265p' scripts/runtime/return_router.py && echo \"=== retry_budget 20-32 ===\" && sed -n '20,32p' scripts/runtime/verification/retry_budget.py"
+        },
+        {
+          "ts": "2026-08-11T06:36:11.094Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ecqJO2AqC2tJucDlFKs79659",
+          "command": "cd /tmp/gddp-eval-wt-cdo5dmje && echo \"=== session_prompt 42-76 ===\" && sed -n '42,76p' scripts/adapters/session_prompt.py && echo \"=== mission_adapter 544-552 ===\" && sed -n '544,552p' scripts/adapters/mission_adapter.py && echo \"=== non-drifted checks ===\" && grep -n \"worse of the two\\|integrity\" scripts/runtime/verification/integrity_combiner.py 2>/dev/null | head -5; sed -n '1,20p' scripts/runtime/verification/integrity_combiner.py; grep -n \"mini-heartbeat\" deploy/mini-heartbeat/bin/arm.sh deploy/mini-heartbeat/bin/smoke.sh 2>/dev/null | head -4; sed -n '1,6p' .gitignore"
+        },
+        {
+          "ts": "2026-08-11T06:36:11.108Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_J0W8zD5Lip8KHrM1onkQ6793",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:36:11.118Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ecqJO2AqC2tJucDlFKs79659",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:36:20.550Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Udl9XPwr1TeR2hK0JNB09524",
+          "command": "cd /tmp/gddp-eval-wt-cdo5dmje && sed -n '83,92p' AGENTS.md && echo \"=== full diff base..tip (names + stats) ===\" && git diff --name-status 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61 d168c137e7b5077c0c611913ed49b75309707074 && echo \"=== diff numstat ===\" && git diff --numstat 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61 d168c137e7b5077c0c611913ed49b75309707074 && echo \"=== show tip commit ===\" && git show --stat d168c137e7b5077c0c611913ed49b75309707074 | head -25"
+        },
+        {
+          "ts": "2026-08-11T06:36:20.571Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Udl9XPwr1TeR2hK0JNB09524",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:36:37.915Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_5yGQ8wOiuRuVMB8Nec4C0293",
+          "command": "cd /tmp/gddp-eval-wt-cdo5dmje && git show d168c137e7b5077c0c611913ed49b75309707074:reports/gddp-dogfood/10-agents-md-drift-report.md | diff - reports/gddp-dogfood/10-agents-md-drift-report.md && echo \"IDENTICAL to committed tip\" ; echo \"=== ignored/untracked check ===\"; git status --short --ignored 2>/dev/null | head -10"
+        },
+        {
+          "ts": "2026-08-11T06:36:37.935Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_5yGQ8wOiuRuVMB8Nec4C0293",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:36:59.834Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_DuTpcmZzo3ZUId15ImsO7622",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All three acceptance criteria for node-10-agents-md-drift-report are satisfied. (1) The report exists at reports/gddp-dogfood/10-agents-md-drift-report.md, is non-empty (275 lines), and is committed at the node tip d168c13 identical to the working tree. (2) Each of the six drift findings quotes its AGENTS.md line(s) with verified-correct line numbers (15, 17-19, 65, 72-73, 79-80, 83-87, 88-91, 109-110) and quotes contradicting code at file:line; I independently verified every one of the ~25 cited file:line references against the live tree — all point at content that substantiates the claimed drift, and the two absence-based halves (no proposals-ledger module, no node-authoring writer) were corroborated by my own grep/file scans. (3) The node is read-only outside the report: the base..tip diff contains exactly one added file (the report, 275 insertions, 0 deletions) and the working tree is clean. The report's own artifact checklist (only-file-created, quotes present, pytest tail quoted, no graph/DB mutation) is consistent with observed evidence. The pytest tail line ('4 failed, 622 passed in 35.15s') is quoted per the constraint but was not independently reproduced here; it is a constraint item, not an acceptance criterion, and the two reported failure classes (missing flask in env, rig1 plist test) are plausible environment-dependent outcomes consistent with the repo state. The report's substance — a genuine drift audit of AGENTS.md against live code — matches the node's stated purpose ('a drift report (no edits) keeps the contract honest') and preserves the project's canon model (evidence produced, no graph truth changed, no canonical document edited).",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-11T06:38:00.950815+00:00",
+  "evaluated_tree_sha": "ff05d275e16210a246ea6ba73c62c23b0872fb3e",
+  "evaluated_commit_sha": "d168c137e7b5077c0c611913ed49b75309707074",
+  "merge_commit_sha": "d168c137e7b5077c0c611913ed49b75309707074",
+  "expected_base_commit_sha": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+  "pr_ref": null,
+  "job_id": "job_20260811T06295274be8c4e4dddaa",
+  "execution_attempt_id": "job_20260811T06295274be8c4e4dddaa:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-cdo5dmje/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-cdo5dmje/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-cdo5dmje/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-cdo5dmje/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-cdo5dmje/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-cdo5dmje/README.md"
+      ]
+    },
+    "overall": "medium"
+  }
+}

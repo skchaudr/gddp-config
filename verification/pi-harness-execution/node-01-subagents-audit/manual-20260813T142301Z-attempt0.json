@@ -1,0 +1,673 @@
+{
+  "project_id": "pi-harness-execution",
+  "node_id": "node-01-subagents-audit",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.92,
+    "findings": [],
+    "reasoning": "The node's role is to produce a read-only, evidence-cited audit of the pi-subagents dispatch surface that (a) verifies the six seed findings and goes beyond them, and (b) hands node-02-subagents-execute an actionable execution plan. The delivered report does exactly that. I spot-checked the report's claims against the live repo and found them accurate: 10 agents/19 chains exist but are undiscoverable (F1), the 5 undefined chain-agent names are genuinely absent (F2), config.json carries maxSubagentDepth:2 and the cited concurrency values (S5), code-scout-gemini.md's turnBudget/model pins match S4/F9 verbatim, apply-patches.sh has the early exit-0 gate and BSD-only sed at the cited lines (S1), and subagent-workflow.md's doc-drift claims (0.35.1, depth:1, defaultModel GPT-5.6 Luna) all reproduce. The read-only constraint holds: commit b6684c7 changed a single file (the report, +834 lines), sits directly on the stated base SHA df4642e, and carries the correct GDDP-Node-Id trailer; the working tree is clean. The report's graded acceptance-criteria structure (Must/Should/Nice-to-have plus execution-contract AC-20..22) maps cleanly onto node-02's why and constraints (skip speculative proposals, only implement audit-sourced items, disposition each item), so the handoff is coherent and no dependent is at risk of being fed stale or fabricated findings. No drift from the node's intended role and no harm to graph structure.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-13T14:24:49.780Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_Vuq27HmZWmXBcFljmqxn3474",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-execution/nodes/node-01-subagents-audit.yaml"
+      },
+      {
+        "ts": "2026-08-13T14:24:49.780Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_09C9tqlhwkLprl75J7Jk7013",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml"
+      },
+      {
+        "ts": "2026-08-13T14:24:49.780Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_L7XO8AIAuUp7VtbBXlwj8705",
+        "path": "/Users/sab-mini/repos/Pi-Coding-Agent/reports/pi-harness-execution/subagents-audit.md"
+      },
+      {
+        "ts": "2026-08-13T14:24:49.780Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_4S1yvNBNPP6azuWyhhZE9925",
+        "path": "/Users/sab-mini/repos/Pi-Coding-Agent/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-13T14:24:49.784Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_4S1yvNBNPP6azuWyhhZE9925",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T14:24:49.785Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_L7XO8AIAuUp7VtbBXlwj8705",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T14:24:49.785Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_09C9tqlhwkLprl75J7Jk7013",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T14:24:49.785Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Vuq27HmZWmXBcFljmqxn3474",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T14:24:58.297Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_LUG4rrV38ThD2ttZnhRc3289",
+        "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && git status --short 2>&1 | head -50; echo \"---BRANCH---\"; git branch --show-current 2>&1; echo \"---LOG---\"; git log --oneline -10 2>&1"
+      },
+      {
+        "ts": "2026-08-13T14:24:58.298Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_bLg8YL0Lcy4pbsZSEEhT7263",
+        "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && ls -la reports/pi-harness-execution/ 2>&1; echo \"---\"; git log --oneline --all -- reports/pi-harness-execution/subagents-audit.md 2>&1 | head -20"
+      },
+      {
+        "ts": "2026-08-13T14:24:58.342Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_bLg8YL0Lcy4pbsZSEEhT7263",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T14:24:58.355Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_LUG4rrV38ThD2ttZnhRc3289",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T14:25:04.124Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_00_oFQ5510xF3cAJVlTwtQ73857",
+        "reason": "command matched blocked pattern",
+        "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && git show --stat b6684c7 2>&1 | head -60; echo \"===FULL MSG===\"; git log -1 --format='%H%n%an <%ae>%n%B' b6684c7 2>&1",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-13T14:25:04.125Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_oFQ5510xF3cAJVlTwtQ73857",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-13T14:25:04.125Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_FTD42uUCsZhuuzhU2Ph34829",
+        "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && git show --stat 02ed684 2>&1 | head -80"
+      },
+      {
+        "ts": "2026-08-13T14:25:04.157Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_FTD42uUCsZhuuzhU2Ph34829",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T14:25:09.169Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Aroq4Df1pJ7v8Tk2OOGy8092",
+        "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && git show --stat b6684c7 | head -60"
+      },
+      {
+        "ts": "2026-08-13T14:25:09.170Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_01_66yM6rOnz5cOtNXwNauA4217",
+        "reason": "command matched blocked pattern",
+        "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && git log -1 --format='%H%n%an <%ae>%n%B' b6684c7",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-13T14:25:09.170Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_66yM6rOnz5cOtNXwNauA4217",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-13T14:25:09.191Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Aroq4Df1pJ7v8Tk2OOGy8092",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T14:25:17.138Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_0mAEnUfZvGcuvH4oEkQM2874",
+        "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && git log --format='%H %P %s' -1 b6684c7"
+      },
+      {
+        "ts": "2026-08-13T14:25:17.138Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_43Jvrjd77EIu7ZqLFU567965",
+        "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && git cat-file -t df4642ec1e4661a333b660fa05643792f43799d6; git branch --contains b6684c7"
+      },
+      {
+        "ts": "2026-08-13T14:25:17.161Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_0mAEnUfZvGcuvH4oEkQM2874",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T14:25:17.173Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_43Jvrjd77EIu7ZqLFU567965",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T14:25:26.455Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_F2UJNglIunsJLxhD4O3B2890",
+        "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && echo \"agents:\"; ls agent/agents/ 2>/dev/null | wc -l; ls agent/agents/ 2>/dev/null; echo \"chains:\"; ls agent/chains/ 2>/dev/null | wc -l; echo \"patches:\"; ls agent/patches/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-13T14:25:26.456Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_2eXQB3phgYLCOWOSVSuK3396",
+        "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && echo \"=== config.json ===\"; cat agent/extensions/subagent/config.json 2>/dev/null; echo \"=== code-scout-gemini.md head ===\"; sed -n '1,30p' agent/agents/code-scout-gemini.md 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-13T14:25:26.485Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_2eXQB3phgYLCOWOSVSuK3396",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T14:25:26.503Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_F2UJNglIunsJLxhD4O3B2890",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T14:25:32.136Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_UGWuzIJBQ6pdTMpsw7d91513",
+        "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && echo \"=== apply-patches.sh (1-45) ===\"; sed -n '1,45p' agent/patches/apply-patches.sh"
+      },
+      {
+        "ts": "2026-08-13T14:25:32.136Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_jMOglDm4CS8wXtoPEMbi3813",
+        "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && echo \"=== workflow doc exists? ===\"; ls -la agent/reference/subagent-workflow.md agent/reference/subagent-playbook.md agent/SUBAGENTS-MODEL-DISPATCH.md 2>&1; echo \"=== chains referencing agents ===\"; grep -ho '\"agent\": *\"[^\"]*\"' agent/chains/*.chain.json 2>/dev/null | sort -u"
+      },
+      {
+        "ts": "2026-08-13T14:25:32.159Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_UGWuzIJBQ6pdTMpsw7d91513",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T14:25:32.173Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_jMOglDm4CS8wXtoPEMbi3813",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T14:26:07.020Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_tjgZmY92YqJloFLLpUEF0128",
+        "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && git log --format='%h %s' -1 df4642ec1e4661a333b660fa05643792f43799d6"
+      },
+      {
+        "ts": "2026-08-13T14:26:07.022Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_XgbZSmXY02rirvmVBfAw1635",
+        "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && echo \"=== subagent-workflow.md key lines ===\"; grep -n '0.35.1\\|maxSubagentDepth\\|defaultModel\\|GPT-5.6 Luna' agent/reference/subagent-workflow.md | head -20"
+      },
+      {
+        "ts": "2026-08-13T14:26:07.040Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_XgbZSmXY02rirvmVBfAw1635",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T14:26:07.040Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_tjgZmY92YqJloFLLpUEF0128",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T14:26:37.194Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_8YM4QhWtqoZeZFqkvNJi6860",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "Graph edge asymmetry: node-01-subagents-audit.yaml declares unlocks: [] while node-02-subagents-execute.yaml declares depends_on: [node-01-subagents-audit]. The forward edge is not mirrored in the audit node's unlocks list, and the graph config lists node-02 as 'ready' while its dependency node-01 is 'provisional'. This does not affect the current node's work (the report is correct and complete), but a human should confirm the frontier correctly unlocks/sequences node-02 when node-01 lands.",
+        "affected_node_ids": [
+          "node-01-subagents-audit",
+          "node-02-subagents-execute"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "F1 (agents/chains undiscoverable — no deployment path) is the keystone finding: S4, the vision row of F2, and F9 have no live effect until it is fixed, and part of F8 resolves once a deployment step exists. The report already records this sequencing dependency, but node-02 will be touching host-deployment surfaces (~/.pi/agent/agents, ~/.local/bin/pi wrapper, symlink write-through) rather than just repo files; worth confirming the executor's allowed-repos/read-only posture accommodates those host paths before node-02 fires.",
+        "affected_node_ids": [
+          "node-02-subagents-execute"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9666666666666667,
+  "criteria_confidence": 0.9666666666666667,
+  "completeness": 1.0,
+  "graph_readiness": 0.9666666666666667,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "report-exists",
+        "criterion": "reports/pi-harness-execution/subagents-audit.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "subagents\\-audit -> line 5: 'subagents-audit'"
+        ],
+        "reasoning": "Scanned source files (reports/pi-harness-execution/subagents-audit.md) for identifiers named in the criterion (pi-harness-execution, subagents-audit, non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "evidence-cited",
+        "criterion": "every finding cites a file:line or command output from the live harness",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "acceptance-criteria-included",
+        "criterion": "report concludes with actionable acceptance criteria for node-02-subagents-execute",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (node-02-subagents-execute). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Read-only: do not modify the harness; the only new file is the report under reports/pi-harness-execution/",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Verify every claim against the live checkout before writing it",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node's result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/pi-harness-execution/subagents-audit.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": null
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 1.0,
+        "evidence": [
+          "reports/pi-harness-execution/subagents-audit.md exists, 834 lines / 44,353 bytes (wc -l and ls -la)",
+          "Section 5 'Acceptance criteria for node-02-subagents-execute' at line 677",
+          "Contains sections 1-5 with seed verification (S1-S6), beyond-seed findings (F1-F11), risk summary, and acceptance criteria"
+        ],
+        "reasoning": "The required artifact exists and is substantially non-empty (834 lines of detailed audit). The deterministic keyword scan was indeterminate only because of the simple string-match method; direct read confirms the file is present and populated."
+      },
+      {
+        "criterion_id": "evidence-cited",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "Report states method: 'file reads with file:line anchoring, plus non-mutating live commands (ls, grep, jq, diff, find, node <read-only assertion script>)' and 'Every finding below is either anchored to a path and line, or to quoted command output captured during this audit'",
+          "Each of S1-S6 and F1-F11 carries file:line anchors and/or quoted command output blocks (e.g. S1 cites agent/patches/apply-patches.sh:7-11, :38-42 and completion-guard.ts:66-81; S3 cites async-execution.ts:1345; F1 cites agents.ts:1647-1648; F6 cites types.ts:1713-1717)",
+          "Spot-checks of in-repo citations all matched: apply-patches.sh has set -euo pipefail at line 5, the @viniraioli early exit 0 at ~lines 8-10, sed -i '' at line 14, pi-subagents patch invocation at ~lines 38-42; config.json:10 = maxSubagentDepth 2; code-scout-gemini.md:22 = turnBudget 20; SUBAGENTS-MODEL-DISPATCH.md:9-13 resolution list and :32-33 guidance; subagent-workflow.md:42/44/45/53-64/67/154/158-161 all match F8/S5/S2",
+          "F2 chain-agent cross-reference reproduced: budget-worker/code-worker/heavy-worker/medium-worker/worker-phases referenced by chains but absent from agent/agents (10 files) and builtins; herdr-room/index.ts:10 and herdr-boss/index.ts:12 both value-import StringEnum from @mariozechner/pi-ai (F10); exactly 3 of 10 repo agents carry turnBudget (S4)"
+        ],
+        "reasoning": "Every finding in the report is anchored to a concrete file:line and/or a quoted live-command output, satisfying the criterion. In-repo citations were independently spot-checked and were accurate. The live-host command outputs (against ~/.pi on the Linux host) cannot be re-executed from this evaluation checkout, but the criterion requires findings to cite such evidence, which they do, and the report documents a non-mutating read-only method consistent with the node constraints."
+      },
+      {
+        "criterion_id": "acceptance-criteria-included",
+        "judgment": "judged_pass",
+        "confidence": 1.0,
+        "evidence": [
+          "Line 677: '## 5. Acceptance criteria for `node-02-subagents-execute`'",
+          "Contains AC-1 through AC-22, each as a checkbox with a concrete, independently checkable proof command (e.g. AC-1 grep -c 'REMOTE_OR_GIT_MUTATION_EVIDENCE' ... returns 1 and run-completion-guard-test.mjs exits 0; AC-5 ls ~/.pi/agent/agents/*.md | wc -l returns 10; AC-21 specifies commit trailer GDDP-Node-Id: node-02-subagents-execute)",
+          "Grouped into Must fix (AC-1..AC-5), Should fix (AC-6..AC-12), Nice to have (AC-13..AC-19), and Execution-contract (AC-20..AC-22), matching node-02's why/constraints"
+        ],
+        "reasoning": "The report concludes with a dedicated, actionable acceptance-criteria section for node-02-subagents-execute, where each item is a checkable checkbox tied to a specific proof command. This directly satisfies node-02's dependency constraint that this report's 'findings and final acceptance-criteria section are the authoritative execution plan.'"
+      }
+    ],
+    "overall_reasoning": "The node requires three things: (1) a non-empty report at reports/pi-harness-execution/subagents-audit.md, (2) every finding cited to file:line or live command output, and (3) a concluding actionable acceptance-criteria section for node-02-subagents-execute. Direct read shows the report is 834 lines and covers seed verification (S1-S6) plus 11 beyond-seed findings (F1-F11), each anchored to file:line references and/or quoted live-command output. I independently spot-checked the in-repo citations against the actual checkout (apply-patches.sh line numbers, config.json:10 maxSubagentDepth, code-scout-gemini.md:22 turnBudget, SUBAGENTS-MODEL-DISPATCH.md resolution list, subagent-workflow.md line numbers in F8/S5/S2, the chain-agent cross-reference in F2, the herdr value imports in F10, and the turnBudget count in S4) and all matched. Section 5 (line 677) provides AC-1..AC-22 as checkable, actionable acceptance criteria for the paired execute node, grouped by priority. All three acceptance criteria are satisfied. The deterministic keyword-scan indeterminacy for report-exists is resolved by direct inspection. The only residual uncertainty is that live-host command outputs (paths under ~/.pi on the Linux host) cannot be re-executed from this evaluation checkout, but the criterion asks that findings cite such evidence, which they do, and the in-repo anchors were verified accurate.",
+    "risks": "Live-host command outputs quoted in the report reference the Linux host (~/.pi, /data/repos worktree, pi-subagents@0.40.0) and cannot be independently re-run from this /Users/sab-mini checkout; they were judged on internal consistency plus verification of the in-repo file:line anchors. The report's declared BASE SHA (df4642ec) differs from the current checkout HEAD (0c86e8097a 'Adjust clinepass'), which is expected since node-02 must re-verify against current main, but means some host-specific claims may have drifted since the audit. The reports/pi-harness-execution/ directory also contains sibling audit reports from other nodes (extensions/tui/instructions/portfolio/session-addenda), which is expected under the multi-node graph and not a violation of this node's 'only new file' constraint.",
+    "followup_candidates": "Observed: node-02 (downstream) depends on node-01 and treats this report's section 5 as its authoritative plan; the report's BASE SHA (df4642ec) predates current HEAD (0c86e8097a). node-02's own criteria already require re-verifying each proposal against current main, so this is handled, but a human may want to confirm the audit is not stale. Also: the deterministic pass left report-exists 'indeterminate' due to a keyword-scan method; this semantic investigation resolves it to pass — no action needed unless the human wants the deterministic probe improved. Was independent re-execution of the live-host command outputs intended as part of the evidence bar for 'evidence-cited'? If yes, the criteria should say so and a live-host run should be scheduled; otherwise this verdict stands on the report's citations.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-13T14:23:07.030Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_pzAfiJPC5NU3dXtMBs0k3604",
+          "path": "/Users/sab-mini/repos/Pi-Coding-Agent/reports/pi-harness-execution/subagents-audit.md"
+        },
+        {
+          "ts": "2026-08-13T14:23:07.031Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_R9VF6QH4UIq0g2kcpsgd1669",
+          "path": "/Users/sab-mini/repos/Pi-Coding-Agent/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-13T14:23:07.031Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_tfPQ5BrBA1AWvsVO5IcE4104",
+          "path": "/Users/sab-mini/repos/Pi-Coding-Agent/README.md"
+        },
+        {
+          "ts": "2026-08-13T14:23:07.031Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_03_GMxNdUwyrAjwsdMSIhll5475",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml"
+        },
+        {
+          "ts": "2026-08-13T14:23:07.037Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_pzAfiJPC5NU3dXtMBs0k3604",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T14:23:07.037Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_tfPQ5BrBA1AWvsVO5IcE4104",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T14:23:07.037Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_R9VF6QH4UIq0g2kcpsgd1669",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T14:23:07.037Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_GMxNdUwyrAjwsdMSIhll5475",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T14:23:30.177Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_qROm1qydUMpj1kifSzKf6441",
+          "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && echo \"=== agents count ===\" && ls agent/agents/*.md 2>/dev/null | wc -l && echo \"=== chains count ===\" && ls agent/chains/*.chain.json 2>/dev/null | wc -l && echo \"=== agent/agents listing ===\" && ls agent/agents/ && echo \"=== config.json lines 1-16 ===\" && sed -n '1,16p' agent/extensions/subagent/config.json"
+        },
+        {
+          "ts": "2026-08-13T14:23:30.178Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_NElRrNF67nnEfor9Q0a87686",
+          "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && echo \"=== apply-patches.sh ===\" && sed -n '1,45p' agent/patches/apply-patches.sh && echo \"=== patches README 1-20 ===\" && sed -n '1,20p' agent/patches/README.md"
+        },
+        {
+          "ts": "2026-08-13T14:23:30.179Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_9n5MPQ2tHsxp8S6T4puT7063",
+          "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && echo \"=== code-scout-gemini.md 1-30 ===\" && sed -n '1,30p' agent/agents/code-scout-gemini.md && echo \"=== SUBAGENTS-MODEL-DISPATCH 1-40 ===\" && sed -n '1,40p' agent/SUBAGENTS-MODEL-DISPATCH.md"
+        },
+        {
+          "ts": "2026-08-13T14:23:30.179Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_03_yT9dHTC3HMvuLHGNwgiV6497",
+          "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && echo \"=== subagent-workflow.md lines 40-70 ===\" && sed -n '40,70p' agent/reference/subagent-workflow.md && echo \"=== 145-165 ===\" && sed -n '145,165p' agent/reference/subagent-workflow.md && echo \"=== playbook 1-15 ===\" && sed -n '1,15p' agent/reference/subagent-playbook.md"
+        },
+        {
+          "ts": "2026-08-13T14:23:30.207Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_NElRrNF67nnEfor9Q0a87686",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T14:23:30.207Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_9n5MPQ2tHsxp8S6T4puT7063",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T14:23:30.215Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_yT9dHTC3HMvuLHGNwgiV6497",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T14:23:30.217Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_qROm1qydUMpj1kifSzKf6441",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T14:23:50.547Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_meyqqlsruzqOGaFxHCRb5542",
+          "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && echo \"=== turnBudget in agents ===\" && grep -l 'turnBudget' agent/agents/*.md && echo \"=== agents with model field line 4 ===\" && for f in agent/agents/*.md; do echo \"$f: $(sed -n '4p' \"$f\")\"; done"
+        },
+        {
+          "ts": "2026-08-13T14:23:50.550Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_JogekAhkXB3J31mWtZ6P8318",
+          "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && echo \"=== herdr-room index.ts 1-20 ===\" && sed -n '1,20p' agent/extensions/herdr-room/index.ts && echo \"=== herdr-boss index.ts 1-20 ===\" && sed -n '1,20p' agent/extensions/herdr-boss/index.ts"
+        },
+        {
+          "ts": "2026-08-13T14:23:50.550Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_mZZQQY2u8SOitH2c6TtL8399",
+          "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && echo \"=== chains referencing missing agents ===\" && for c in budget-implement code-implement dual-heavy heavy-implement medium-implement live-feature-slice vision-ui-review; do echo \"--- $c ---\"; grep -o '\"agent\"[^,}]*' agent/chains/$c.chain.json 2>/dev/null | sort -u; done"
+        },
+        {
+          "ts": "2026-08-13T14:23:50.550Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_03_ovHujKpbJm0zdqvdEWms9532",
+          "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && echo \"=== git log -1 ===\" && git log -1 --format='%H %s' && echo \"=== git status short (head) ===\" && git status --short | head -20 && echo \"=== branch ===\" && git branch --show-current"
+        },
+        {
+          "ts": "2026-08-13T14:23:50.656Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_JogekAhkXB3J31mWtZ6P8318",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T14:23:50.681Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_ovHujKpbJm0zdqvdEWms9532",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T14:23:50.700Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_mZZQQY2u8SOitH2c6TtL8399",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T14:23:50.727Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_meyqqlsruzqOGaFxHCRb5542",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T14:24:09.310Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_iyNbrSSjuudq1eOGOQjk8232",
+          "command": "cd /Users/sab-mini/repos/Pi-Coding-Agent && echo \"=== reports/pi-harness-execution/ ===\" && ls -la reports/pi-harness-execution/ && echo \"=== report size ===\" && wc -l reports/pi-harness-execution/subagents-audit.md && echo \"=== section 5 present ===\" && grep -n 'Acceptance criteria for' reports/pi-harness-execution/subagents-audit.md && echo \"=== AC count ===\" && grep -c 'AC-' reports/pi-harness-execution/subagents-audit.md"
+        },
+        {
+          "ts": "2026-08-13T14:24:09.353Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_iyNbrSSjuudq1eOGOQjk8232",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T14:24:40.770Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_v2RADmPeH3m8xKdNXkHn4234",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "The node requires three things: (1) a non-empty report at reports/pi-harness-execution/subagents-audit.md, (2) every finding cited to file:line or live command output, and (3) a concluding actionable acceptance-criteria section for node-02-subagents-execute. Direct read shows the report is 834 lines and covers seed verification (S1-S6) plus 11 beyond-seed findings (F1-F11), each anchored to file:line references and/or quoted live-command output. I independently spot-checked the in-repo citations against the actual checkout (apply-patches.sh line numbers, config.json:10 maxSubagentDepth, code-scout-gemini.md:22 turnBudget, SUBAGENTS-MODEL-DISPATCH.md resolution list, subagent-workflow.md line numbers in F8/S5/S2, the chain-agent cross-reference in F2, the herdr value imports in F10, and the turnBudget count in S4) and all matched. Section 5 (line 677) provides AC-1..AC-22 as checkable, actionable acceptance criteria for the paired execute node, grouped by priority. All three acceptance criteria are satisfied. The deterministic keyword-scan indeterminacy for report-exists is resolved by direct inspection. The only residual uncertainty is that live-host command outputs (paths under ~/.pi on the Linux host) cannot be re-executed from this evaluation checkout, but the criterion asks that findings cite such evidence, which they do, and the in-repo anchors were verified accurate.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-13T14:26:37.223527+00:00",
+  "evaluated_tree_sha": "0540ce46abb44439c0024f0612a724f79c86763a",
+  "evaluated_commit_sha": "0c86e8097a040f5efe7c9037811d38a56dd36117",
+  "merge_commit_sha": null,
+  "expected_base_commit_sha": null,
+  "pr_ref": null,
+  "job_id": "manual-20260813T142301Z",
+  "execution_attempt_id": null,
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/Users/sab-mini/repos/Pi-Coding-Agent/README.md",
+    "project_brief": "/Users/sab-mini/repos/Pi-Coding-Agent/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/Pi-Coding-Agent/PROJECT-BRIEF.md",
+        "/Users/sab-mini/repos/Pi-Coding-Agent/README.md",
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/Pi-Coding-Agent/PROJECT-BRIEF.md",
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-harness-execution/nodes/node-02-subagents-execute.yaml"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/Pi-Coding-Agent/README.md"
+      ]
+    },
+    "overall": "high"
+  }
+}

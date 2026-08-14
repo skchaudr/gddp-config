@@ -1,0 +1,482 @@
+schema_type: node_evaluations
+schema_version: '1.0'
+project_id: vm-harness-audit
+generated_at: '2026-08-08T00:36:00Z'
+source: gddp-runtime db/queue.db (results + decision_results)
+evaluations:
+  node-01-entrypoints-audit:
+    verdict: pass
+    evaluated_at: '2026-08-05T00:56:23.066893+00:00'
+    executor: local_subprocess
+    job_id: job_20260805T0041205689e1ea55d405
+    result_id: res_ses_20260805T004120564ad2ec1b7bf1
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/vm-harness-audit/node-01-entrypoints-audit/job_20260805T0041205689e1ea55d405-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node-01-entrypoints-audit''s work (reports/01-entrypoints.md,
+      the sole diff over base c80abae). The change preserves the node''s intended role exactly: it baselines
+      the VM launcher surface (pi-lite/pi-full/pi-studio documented as absent, correctly cross-referenced
+      against node-05''s future-split doctrine), deployment checkouts (gddp-runtime/gddp-config paths
+      + HEAD hashes + stale-checkout warnings), the exact heartbeat env wiring (gddp.env var set including
+      GDDP_DROID_SUBPROCESS_ARGV with full argv breakdown), the droid custom model config and proxy endpoint
+      (settings.local.json custom:Grok-4.5-sub-(Hermes)-0 -> 127.0.0.1:8645), and a bounded reachability
+      probe (curl --max-time 5, within the 10s constraint, no model generations). I verified the factual
+      grounding live on khoj-38: droid binary (152553600 bytes, --version 0.186.0), hermes proxy pid 17690
+      listening on 127.0.0.1:8645 with --provider xai, gddp.env present with the documented GDDP_* variables
+      and model id, settings.local.json containing grok-4.5/displayName/provider/maxOutputTokens/8645
+      references, and node-05 YAML confirming the pi-lite/pi-full/pi-studio framing. The recorded checkout
+      HEADs (a3dc805, 7a6f533) were the true HEADs at audit time (00:42:54Z); both repos advanced ~10
+      min later with the harness''s own YAML-quoting/verifier fix commits (185e6fe, e68ed45), so the snapshot
+      is honest and point-in-time, not fabricated. Graph integrity: depends_on=[] respected; nothing outside
+      reports/ modified; the artifact is committed on main (origin/main = 325c7f1 carries a byte-identical
+      tree to the reviewed commit), so node-02-extensions-audit''s dependency is satisfiable; the report''s
+      references to the 5-node renumber and node-05 match actual config history; no graph truth or runtime
+      state touched. The detached-HEAD ''result'' wrapper commit (4345bd8) is the harness''s expected
+      wrapper pattern and adds no content. Verdict: pass; no human review required.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/vm-harness-audit/node-01-entrypoints-audit/job_20260805T0041205689e1ea55d405-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9342857142857143
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 29c1f7c7f0a237a4fc94636fa11b348bce0ed619
+      evaluated_commit_sha: 4345bd80cdbafcaedc9738a35586f1ca2e368abe
+      merge_commit_sha: 4345bd80cdbafcaedc9738a35586f1ca2e368abe
+      context_coverage:
+        criteria: low
+        integrity: low
+        overall: low
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.95
+        findings: []
+        reasoning: 'Fresh-eyes review of node-01-entrypoints-audit''s work (reports/01-entrypoints.md,
+          the sole diff over base c80abae). The change preserves the node''s intended role exactly: it
+          baselines the VM launcher surface (pi-lite/pi-full/pi-studio documented as absent, correctly
+          cross-referenced against node-05''s future-split doctrine), deployment checkouts (gddp-runtime/gddp-config
+          paths + HEAD hashes + stale-checkout warnings), the exact heartbeat env wiring (gddp.env var
+          set including GDDP_DROID_SUBPROCESS_ARGV with full argv breakdown), the droid custom model config
+          and proxy endpoint (settings.local.json custom:Grok-4.5-sub-(Hermes)-0 -> 127.0.0.1:8645), and
+          a bounded reachability probe (curl --max-time 5, within the 10s constraint, no model generations).
+          I verified the factual grounding live on khoj-38: droid binary (152553600 bytes, --version 0.186.0),
+          hermes proxy pid 17690 listening on 127.0.0.1:8645 with --provider xai, gddp.env present with
+          the documented GDDP_* variables and model id, settings.local.json containing grok-4.5/displayName/provider/maxOutputTokens/8645
+          references, and node-05 YAML confirming the pi-lite/pi-full/pi-studio framing. The recorded
+          checkout HEADs (a3dc805, 7a6f533) were the true HEADs at audit time (00:42:54Z); both repos
+          advanced ~10 min later with the harness''s own YAML-quoting/verifier fix commits (185e6fe, e68ed45),
+          so the snapshot is honest and point-in-time, not fabricated. Graph integrity: depends_on=[]
+          respected; nothing outside reports/ modified; the artifact is committed on main (origin/main
+          = 325c7f1 carries a byte-identical tree to the reviewed commit), so node-02-extensions-audit''s
+          dependency is satisfiable; the report''s references to the 5-node renumber and node-05 match
+          actual config history; no graph truth or runtime state touched. The detached-HEAD ''result''
+          wrapper commit (4345bd8) is the harness''s expected wrapper pattern and adds no content. Verdict:
+          pass; no human review required.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: The gddp-runtime and gddp-config checkouts advanced ~10 minutes after node-01's audit
+            snapshot (harness's own fix commits 185e6fe 'tolerate non-string YAML criteria/constraints'
+            and e68ed45 'quote Read-only constraint scalars'). Node-01's recorded HEAD hashes are correct
+            for the audit moment but are already stale; downstream nodes (esp. node-02 and node-05) should
+            re-read current checkout state rather than trusting the recorded hashes, since the config
+            repo is actively edited during the run.
+          affected_node_ids:
+          - node-02-extensions-audit
+          - node-05-separation-proposal
+        - severity: low
+          summary: Node-05's why explicitly consumes node-01's report as authoring input for the pi-lite/pi-full/pi-studio
+            repo split. The report's launcher-gap finding (all three absent; live surface = /usr/bin/pi
+            0.83.0 plus helpers) is exactly the evidence node-05 needs — good downstream convergence,
+            no risk.
+          affected_node_ids:
+          - node-05-separation-proposal
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-02-extensions-audit:
+    verdict: pass
+    evaluated_at: '2026-08-05T01:22:35.286169+00:00'
+    executor: local_subprocess
+    job_id: job_20260805T0113351919fea6b6ef8a
+    result_id: res_ses_20260805T01133519c40ec9c264ff
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/vm-harness-audit/node-02-extensions-audit/job_20260805T0113351919fea6b6ef8a-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node-02-extensions-audit work (reports/02-extensions.md, commit
+      ee7d22b, single-file addition, clean worktree in skchaudr/pi-harness-audit). Intent preserved: the
+      node''s why is a known-good inventory of the VM''s pi extension surface with the xAI/Grok OAuth
+      freeze as the standing precedent; the report delivers exactly that — agent extensions dir (33 .ts
+      + 5 dirs), 7 npm/config-enabled packages, built-ins, each with enabled/disabled state where discoverable;
+      §5.1 flags the xAI/Grok device-code OAuth suspect in depth (endpoints, scopes, live auth.json credential,
+      default model path), §5.2 flags the 3 missing loadable entrypoints, §6 notes droid/factory/executor
+      integration points including the important finding that GDDP local pi argv (from node-01) does not
+      pass --no-extensions so headless jobs inherit the full auto-load surface. Constraints honored: read-only
+      inspection documented; only pi --version/--help/list run; no extension code loaded or executed.
+      Graph integrity preserved: facts in §6.2 are consistent with node-01''s report (droid custom:Grok-4.5-sub-(Hermes)-0
+      via Hermes 127.0.0.1:8645; local pi zai/glm-5.2; restricted tools), no contradictions; downstream
+      node-03 (subagents/chains audit) receives the exact surface it needs — pi-subagents spawn/dispatch
+      + agentOverrides pinning to xai/grok-4.5, legacy subagent/ dir, advisor-mode oracle dispatch — with
+      an honest boundary note that legacy subagent/ config consumption by pi-subagents was not verified
+      by execution, which node-03 can resolve. No interference with other artifacts or graph state. Lane
+      1''s indeterminate keyword scans are its own acceptance-domain concern and do not change the integrity
+      verdict; the required semantic content is visibly present in the file. Verdict: pass.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/vm-harness-audit/node-02-extensions-audit/job_20260805T0113351919fea6b6ef8a-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9724999999999999
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: c9928b9481408cd87d148e7045aee72fd6557e5d
+      evaluated_commit_sha: ee7d22b064ccb5bb6f696ffed4aec7de6e9be200
+      merge_commit_sha: ee7d22b064ccb5bb6f696ffed4aec7de6e9be200
+      context_coverage:
+        criteria: low
+        integrity: low
+        overall: low
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'Fresh-eyes review of node-02-extensions-audit work (reports/02-extensions.md, commit
+          ee7d22b, single-file addition, clean worktree in skchaudr/pi-harness-audit). Intent preserved:
+          the node''s why is a known-good inventory of the VM''s pi extension surface with the xAI/Grok
+          OAuth freeze as the standing precedent; the report delivers exactly that — agent extensions
+          dir (33 .ts + 5 dirs), 7 npm/config-enabled packages, built-ins, each with enabled/disabled
+          state where discoverable; §5.1 flags the xAI/Grok device-code OAuth suspect in depth (endpoints,
+          scopes, live auth.json credential, default model path), §5.2 flags the 3 missing loadable entrypoints,
+          §6 notes droid/factory/executor integration points including the important finding that GDDP
+          local pi argv (from node-01) does not pass --no-extensions so headless jobs inherit the full
+          auto-load surface. Constraints honored: read-only inspection documented; only pi --version/--help/list
+          run; no extension code loaded or executed. Graph integrity preserved: facts in §6.2 are consistent
+          with node-01''s report (droid custom:Grok-4.5-sub-(Hermes)-0 via Hermes 127.0.0.1:8645; local
+          pi zai/glm-5.2; restricted tools), no contradictions; downstream node-03 (subagents/chains audit)
+          receives the exact surface it needs — pi-subagents spawn/dispatch + agentOverrides pinning to
+          xai/grok-4.5, legacy subagent/ dir, advisor-mode oracle dispatch — with an honest boundary note
+          that legacy subagent/ config consumption by pi-subagents was not verified by execution, which
+          node-03 can resolve. No interference with other artifacts or graph state. Lane 1''s indeterminate
+          keyword scans are its own acceptance-domain concern and do not change the integrity verdict;
+          the required semantic content is visibly present in the file. Verdict: pass.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: 'Node-03 (subagents-chains-audit) should resolve the boundary question node-02 left
+            open: whether npm:pi-subagents reads the legacy ~/.pi/agent/extensions/subagent/config.json
+            and whether ~/.pi/agent/chains/ exists, since node-02''s report only notes the legacy dir
+            is ''not loaded as extension'' without executing to verify. This is the natural convergence
+            point between node-02''s surface inventory and node-03''s chain inventory.'
+          affected_node_ids:
+          - node-03-subagents-chains-audit
+        - severity: low
+          summary: 'Node-02 surfaces a cross-cutting risk for the remaining linear chain: GDDP local pi
+            jobs inherit the full 33+ auto-load extension surface (no --no-extensions in node-01''s argv),
+            and interactive/subagent pi paths default to the flagged xAI OAuth stack. Nodes 04-05 (PTY
+            probe, separation spec) should account for this when exercising the VM, per the node-01 ''Notes
+            for downstream nodes'' convention.'
+          affected_node_ids:
+          - node-04-tty-validation-probe
+          - node-05-separation-proposal
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-03-subagents-chains-audit:
+    verdict: pass
+    evaluated_at: '2026-08-05T01:39:16.280950+00:00'
+    executor: local_subprocess
+    job_id: job_20260805T01300746615f74899b34
+    result_id: res_ses_20260805T01300746403ee17f8c8c
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/vm-harness-audit/node-03-subagents-chains-audit/job_20260805T01300746615f74899b34-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Node-03''s role is to audit live subagent/chain routing against the tiering doctrine
+      and propose a corrected chain set. The report (reports/03-subagents-chains.md, 394 lines, sole file
+      added in the tip commit) does exactly this: inventories the live surface (chains/ and agents/ dirs
+      absent, package builtins, settings agentOverrides, runtime subagent config, upstream 19-chain catalog,
+      OMP chains, fleet profiles), evaluates every entry against doctrine clauses (a)-(d) plus long-context
+      preference with conform/violate verdicts and one-line reasons, and proposes a corrected chain set
+      naming concrete models per tier drawn strictly from enabledModels. I independently verified the
+      report''s grounding against the live host: settings.json agentOverrides (all six roles pin xai/grok-4.5),
+      defaultProvider/defaultModel (xai/grok-4.5), the 13 enabledModels, subagent config.json knobs, absent
+      chains/ and agents/ dirs, 19 upstream chains (names match), 10 upstream agents, and 5 OMP chains
+      all match the report exactly. The read-only constraint is honored (git diff shows only the report
+      added; the corrected set is explicitly ''report only; not performed''). Graph integrity holds: the
+      report correctly cross-references node-02''s findings (subagent ext dir not loadable) and node-01''s
+      executor wiring, honoring depends_on, and its output (tier table, corrected chains) feeds node-04''s
+      smoke context and node-05''s separation spec without conflict. No drift, no harm to dependents.
+      Lane-1 criteria statuses are indeterminate, but from an integrity standpoint the work is grounded,
+      scoped, and faithful to the node''s why.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/vm-harness-audit/node-03-subagents-chains-audit/job_20260805T01300746615f74899b34-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.925
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 5ed2c379a05105a1a93a2e5bff8318a95461f23b
+      evaluated_commit_sha: b95b4a22b354bc98284b34df3bc9427e2375637b
+      merge_commit_sha: b95b4a22b354bc98284b34df3bc9427e2375637b
+      context_coverage:
+        criteria: low
+        integrity: low
+        overall: low
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'Node-03''s role is to audit live subagent/chain routing against the tiering doctrine
+          and propose a corrected chain set. The report (reports/03-subagents-chains.md, 394 lines, sole
+          file added in the tip commit) does exactly this: inventories the live surface (chains/ and agents/
+          dirs absent, package builtins, settings agentOverrides, runtime subagent config, upstream 19-chain
+          catalog, OMP chains, fleet profiles), evaluates every entry against doctrine clauses (a)-(d)
+          plus long-context preference with conform/violate verdicts and one-line reasons, and proposes
+          a corrected chain set naming concrete models per tier drawn strictly from enabledModels. I independently
+          verified the report''s grounding against the live host: settings.json agentOverrides (all six
+          roles pin xai/grok-4.5), defaultProvider/defaultModel (xai/grok-4.5), the 13 enabledModels,
+          subagent config.json knobs, absent chains/ and agents/ dirs, 19 upstream chains (names match),
+          10 upstream agents, and 5 OMP chains all match the report exactly. The read-only constraint
+          is honored (git diff shows only the report added; the corrected set is explicitly ''report only;
+          not performed''). Graph integrity holds: the report correctly cross-references node-02''s findings
+          (subagent ext dir not loadable) and node-01''s executor wiring, honoring depends_on, and its
+          output (tier table, corrected chains) feeds node-04''s smoke context and node-05''s separation
+          spec without conflict. No drift, no harm to dependents. Lane-1 criteria statuses are indeterminate,
+          but from an integrity standpoint the work is grounded, scoped, and faithful to the node''s why.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: 'node-02-extensions-audit is still ''provisional'' while node-03 already ran (execution_policy
+            sets frontier_auto_advance: true). Node-03''s report anchors several claims on node-02 findings
+            (e.g., subagent extension dir is not a loadable entrypoint). Human acceptance of node-02 should
+            confirm those anchors before node-04 fires, since a node-02 revision could ripple into node-03''s
+            cited evidence.'
+          affected_node_ids:
+          - node-02-extensions-audit
+          - node-03-subagents-chains-audit
+          - node-04-tty-validation-probe
+        - severity: low
+          summary: Node-03 proposes but does not install the corrected chain set (consistent with its
+            read-only constraint). Node-04 (PTY smoke) and node-05 (separation spec) do not depend on
+            those installs, so no conflict; node-05 can consume node-03's tier table directly when synthesizing
+            the follow-up execution graph.
+          affected_node_ids:
+          - node-03-subagents-chains-audit
+          - node-04-tty-validation-probe
+          - node-05-separation-proposal
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-04-tty-validation-probe:
+    verdict: pass
+    evaluated_at: '2026-08-05T02:18:06.703782+00:00'
+    executor: droid
+    job_id: job_20260805T0210253250f16c9a1095
+    result_id: res_ses_20260805T021025326614824965a5
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/vm-harness-audit/node-04-tty-validation-probe/job_20260805T0210253250f16c9a1095-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node-04-tty-validation-probe. The node''s why is to prove droid
+      can drive real terminal sessions and capture transcript evidence, with the PTY session doubling
+      as an end-to-end smoke of the VM''s gddp deployment. The delivered work is exactly that: (1) reports/04-tty/transcript.txt
+      is a genuine script(1) PTY capture (tty /dev/pts/11, Script started/done headers, ~2s wall time,
+      explicit scripted exit — bounded per constraint); (2) it runs only read-only inspection (gddp --help,
+      gddp project/jobs --help) plus the mini-heartbeat deployment smoke with full command + output +
+      exit codes, satisfying the smoke-evidence intent; (3) reports/04-tty/summary.md states what ran,
+      the exit status (smoke=1, script session=1, artifact capture=0), and every anomaly transparently
+      (webhook secret FAIL, intake :5050 warn, launchd plist warns on Linux VM, gddp status absent, smoke''s
+      built-in reconcile observe tick). The smoke failure is a deployment-config gap the node was meant
+      to observe and record, not fix — transparent documentation of it fulfills the role. Graph integrity
+      is preserved: the subject diff adds only the two required artifacts under reports/04-tty/ (working
+      tree clean, no writes outside reports/, no graph mutation, no dispatch in the PTY). Dependency alignment
+      holds: paths match node-01''s baseline (/home/sab-mini/bin/gddp, gddp-runtime/deploy/mini-heartbeat),
+      node-03 (provisional upstream) report is present and non-conflicting, and node-05''s citation inputs
+      (reports/04-tty/summary.md + transcript.txt) are in place. The lone lane-1 indeterminate (smoke.sh
+      ''absent'' in repo checkout) is a harness scan artifact: the path deploy/mini-heartbeat/bin/smoke.sh
+      lives on the VM at /home/sab-mini/gddp-runtime/..., which the transcript itself proves exists (ls
+      -la) and executes — the semantic question is resolved by the evidence and is lane-1''s adjudication,
+      not an integrity concern. No findings affecting this verdict.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/vm-harness-audit/node-04-tty-validation-probe/job_20260805T0210253250f16c9a1095-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9666666666666667
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 2bff284907c46eae5f8485861f6d4abf05cb9a4e
+      evaluated_commit_sha: 2bca4e56306f9e71f1b7571ee4f756aaae1f29f3
+      merge_commit_sha: 2bca4e56306f9e71f1b7571ee4f756aaae1f29f3
+      context_coverage:
+        criteria: none
+        integrity: low
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.85
+        findings: []
+        reasoning: 'Fresh-eyes review of node-04-tty-validation-probe. The node''s why is to prove droid
+          can drive real terminal sessions and capture transcript evidence, with the PTY session doubling
+          as an end-to-end smoke of the VM''s gddp deployment. The delivered work is exactly that: (1)
+          reports/04-tty/transcript.txt is a genuine script(1) PTY capture (tty /dev/pts/11, Script started/done
+          headers, ~2s wall time, explicit scripted exit — bounded per constraint); (2) it runs only read-only
+          inspection (gddp --help, gddp project/jobs --help) plus the mini-heartbeat deployment smoke
+          with full command + output + exit codes, satisfying the smoke-evidence intent; (3) reports/04-tty/summary.md
+          states what ran, the exit status (smoke=1, script session=1, artifact capture=0), and every
+          anomaly transparently (webhook secret FAIL, intake :5050 warn, launchd plist warns on Linux
+          VM, gddp status absent, smoke''s built-in reconcile observe tick). The smoke failure is a deployment-config
+          gap the node was meant to observe and record, not fix — transparent documentation of it fulfills
+          the role. Graph integrity is preserved: the subject diff adds only the two required artifacts
+          under reports/04-tty/ (working tree clean, no writes outside reports/, no graph mutation, no
+          dispatch in the PTY). Dependency alignment holds: paths match node-01''s baseline (/home/sab-mini/bin/gddp,
+          gddp-runtime/deploy/mini-heartbeat), node-03 (provisional upstream) report is present and non-conflicting,
+          and node-05''s citation inputs (reports/04-tty/summary.md + transcript.txt) are in place. The
+          lone lane-1 indeterminate (smoke.sh ''absent'' in repo checkout) is a harness scan artifact:
+          the path deploy/mini-heartbeat/bin/smoke.sh lives on the VM at /home/sab-mini/gddp-runtime/...,
+          which the transcript itself proves exists (ls -la) and executes — the semantic question is resolved
+          by the evidence and is lane-1''s adjudication, not an integrity concern. No findings affecting
+          this verdict.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: node-05's findings-cited criterion must cite reports/04-tty/summary.md and reports/04-tty/transcript.txt
+            by path; unlike nodes 01-03 (single flat files), node-04's artifacts live in a subdirectory,
+            so node-05 should cite both paths explicitly to avoid a path-mismatch.
+          affected_node_ids:
+          - node-05-separation-proposal
+        - severity: low
+          summary: The smoke FAIL (webhook secret unresolved, intake :5050 not listening, launchd plists
+            absent) is a real deployment-config gap on the Linux VM. node-05's separation proposal should
+            carry this (mini-heartbeat arming / Linux-vs-macOS kit divergence) into its open-questions
+            section so the follow-up execution graph accounts for it.
+          affected_node_ids:
+          - node-05-separation-proposal
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-05-separation-proposal:
+    verdict: pass
+    evaluated_at: '2026-08-05T02:28:22.321529+00:00'
+    executor: droid
+    job_id: job_20260805T02212531b99e0fbc77ca
+    result_id: res_ses_20260805T022125316e2723876856
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/vm-harness-audit/node-05-separation-proposal/job_20260805T02212531b99e0fbc77ca-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Node-05''s intended role is to convert audit evidence (nodes 01–04) into the authoring
+      input for a follow-up pi-harness separation execution graph. The report does exactly this and nothing
+      else. (1) Findings summary (§1) cites reports 01–05 by path; every cited path exists (reports/01-entrypoints.md,
+      02-extensions.md, 03-subagents-chains.md, 04-tty/summary.md, 04-tty/transcript.txt, 05-separation-proposal.md)
+      and the substantive claims about each were spot-checked against the source reports and match (launchers
+      absent, /usr/bin/pi 0.83.0, droid 0.186.0, gddp-runtime/gddp-config checkouts, dual executor zai/glm-5.2
+      vs droid→Hermes 127.0.0.1:8645, ~35 loadable extensions + 7 npm packages, xAI/Grok OAuth freeze
+      suspect, headless argv not passing --no-extensions, live chains/agents absent with flat grok-4.5
+      overrides = systemic doctrine violate, webhook secret FAIL as sole hard fail, no `gddp status` verb).
+      The report is a genuine synthesis, not fabrication. (2) Split proposal (§2) defines pi-lite/pi-full/pi-studio
+      charters, packaging shape, and detailed ''what moves where'' tables. (3) Execution-graph draft (§5)
+      is a concrete node list with IDs, titles, dependencies, and binary acceptance criteria, and explicitly
+      states it is ''not importable graph truth'' and a proposal for human authoring — honoring the constraint.
+      (4) Open questions (§6) list OQ-1..OQ-10 reserved for human decision. Constraint compliance: git
+      diff shows exactly one added file (reports/05-separation-proposal.md, 405 lines), no environment
+      mutation, no executor sourcing, no graph import. Graph integrity: the report is the terminal milestone
+      (unlocks: []) and its content feeds the future human-authored pi-harness-separation project without
+      mutating any graph config. No intent or integrity harm found.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/vm-harness-audit/node-05-separation-proposal/job_20260805T02212531b99e0fbc77ca-attempt0.json
+      verdict: pass
+      criteria_confidence: 1.0
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: ff6c6fb0359034bb120fd83d646f0b31fb6cc0cf
+      evaluated_commit_sha: 679389c547bbe3b9dc4bf687a82db7eb34bc52a8
+      merge_commit_sha: 679389c547bbe3b9dc4bf687a82db7eb34bc52a8
+      context_coverage:
+        criteria: none
+        integrity: low
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'Node-05''s intended role is to convert audit evidence (nodes 01–04) into the authoring
+          input for a follow-up pi-harness separation execution graph. The report does exactly this and
+          nothing else. (1) Findings summary (§1) cites reports 01–05 by path; every cited path exists
+          (reports/01-entrypoints.md, 02-extensions.md, 03-subagents-chains.md, 04-tty/summary.md, 04-tty/transcript.txt,
+          05-separation-proposal.md) and the substantive claims about each were spot-checked against the
+          source reports and match (launchers absent, /usr/bin/pi 0.83.0, droid 0.186.0, gddp-runtime/gddp-config
+          checkouts, dual executor zai/glm-5.2 vs droid→Hermes 127.0.0.1:8645, ~35 loadable extensions
+          + 7 npm packages, xAI/Grok OAuth freeze suspect, headless argv not passing --no-extensions,
+          live chains/agents absent with flat grok-4.5 overrides = systemic doctrine violate, webhook
+          secret FAIL as sole hard fail, no `gddp status` verb). The report is a genuine synthesis, not
+          fabrication. (2) Split proposal (§2) defines pi-lite/pi-full/pi-studio charters, packaging shape,
+          and detailed ''what moves where'' tables. (3) Execution-graph draft (§5) is a concrete node
+          list with IDs, titles, dependencies, and binary acceptance criteria, and explicitly states it
+          is ''not importable graph truth'' and a proposal for human authoring — honoring the constraint.
+          (4) Open questions (§6) list OQ-1..OQ-10 reserved for human decision. Constraint compliance:
+          git diff shows exactly one added file (reports/05-separation-proposal.md, 405 lines), no environment
+          mutation, no executor sourcing, no graph import. Graph integrity: the report is the terminal
+          milestone (unlocks: []) and its content feeds the future human-authored pi-harness-separation
+          project without mutating any graph config. No intent or integrity harm found.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: 'Node-05 (status: ready) fired and was evaluated while its sole dependency node-04-tty-validation-probe
+            is still provisional in the graph config, despite the blueprint''s ''human-gated acceptance
+            between nodes'' note (execution_policy sets frontier_auto_advance: true). The report correctly
+            uses real node-04 artifacts, so this does not harm the current work, but the human-gate vs
+            auto-advance tension should be reconciled before the follow-up pi-harness-separation graph
+            inherits the same policy, since it will gate cutover nodes.'
+          affected_node_ids:
+          - node-04-tty-validation-probe
+          - node-05-separation-proposal
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null

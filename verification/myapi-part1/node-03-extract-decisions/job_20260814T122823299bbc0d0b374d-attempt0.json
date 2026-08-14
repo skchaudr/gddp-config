@@ -1,0 +1,832 @@
+{
+  "project_id": "myapi-part1",
+  "node_id": "node-03-extract-decisions",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.85,
+    "findings": [],
+    "reasoning": "The work under review (tip 3a9d426 on top of node-02's result commit 989a62b) adds exactly the one required artifact, 01-decisions/output/decisions-raw.jsonl, and nothing else — correct scope containment for node-03 (Stage B, raw extraction only). Content matches the node's role: (1) completeness — the JSONL holds exactly the 17 accepted decisions of the closed set declared in node-02's sources.md (D01–D10, D12–D18), with D11 correctly omitted as rejection evidence per the review sheet's N mark and the sources.md exclusion rule; (2) raw fidelity — statements and titles are verbatim from the memo and review sheet (spot-verified), every object cites the review sheet + repo-local memo + Corpus v1.0 keeper with a sha256 that verifies against the on-disk file, so no invention or silent scope-widening; (3) no premature normalization — objects carry only the schema's minimal required set plus review_mark/extraction_context and deliberately omit replaces/replaced_by/relationship fields that the schema reserves for node-04's canonical output. Graph integrity holds: node-03 chains directly off node-02's sources.md (the diff base IS node-02's result commit) and honors its Stage B use rule; node-04 depends on node-01+node-03 and consumes this exact artifact shape (one object per raw object, source paths traceable); the artifact is durably committed on a gddp/result branch per the D10 no-merge-to-main doctrine. node-02 being provisional is consistent with the graph's own flow-on-provisional doctrine (D12). The lane-1 probe's 'decisions-raw.js absent / sources.md absent' evidence is contradicted by the actual tree (the file is decisions-raw.jsonl and sources.md exists at both base and tip) — a probe-quality issue, not a work-integrity issue. Verdict: pass.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-14T12:45:31.491Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_DlfI79H2v6wn06qZfj9X7301",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml"
+      },
+      {
+        "ts": "2026-08-14T12:45:31.492Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_mx11LUttiDGhWtsvKdAY9001",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-02-inventory-sources.yaml"
+      },
+      {
+        "ts": "2026-08-14T12:45:31.492Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_VoL3PdUF1eHkdlrbHyrx2200",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-14T12:45:31.492Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_Sdqh9Ij9ar3Rf5PhJGox8516",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq/README.md"
+      },
+      {
+        "ts": "2026-08-14T12:45:31.497Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_DlfI79H2v6wn06qZfj9X7301",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:45:31.497Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_mx11LUttiDGhWtsvKdAY9001",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:45:31.497Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_VoL3PdUF1eHkdlrbHyrx2200",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:45:31.498Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_Sdqh9Ij9ar3Rf5PhJGox8516",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:45:35.163Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_DFi3QAbFqrs287VtA2lN9606",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git log --oneline -15 2>/dev/null; echo \"---STATUS---\"; git status --short 2>/dev/null | head -40; echo \"---BRANCH---\"; git branch --show-current 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T12:45:35.165Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_p4xRArAz6dRlTl9F403q3583",
+        "command": "cd /Users/sab-mini/repos/MyAPI && find 01-decisions -type f 2>/dev/null | sort; echo \"---\"; ls -la 01-decisions/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T12:45:35.200Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_p4xRArAz6dRlTl9F403q3583",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-14T12:45:35.407Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_DFi3QAbFqrs287VtA2lN9606",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:45:39.362Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_iN29lu55Vdf4hdlvwi5e2088",
+        "command": "cd /Users/sab-mini/repos/MyAPI && ls -la | head -40; echo \"---GIT LOG ALL---\"; git log --all --oneline | head -20; echo \"---COMMITS---\"; git cat-file -t 989a62b0f48796c6b247018472d6f0ca8f096218 2>&1; git cat-file -t 3a9d426c9b414c70a3a250e24a78d13c4a31c325 2>&1"
+      },
+      {
+        "ts": "2026-08-14T12:45:39.362Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_xXnMNXzT2R5yyWiROxWO0124",
+        "command": "cd /Users/sab-mini/repos/MyAPI && find . -path ./.git -prune -o -name 'decisions-raw*' -print 2>/dev/null; echo \"---sources---\"; find . -path ./.git -prune -o -name 'sources.md' -print 2>/dev/null; echo \"---schema---\"; find . -path ./.git -prune -o -name 'decision-schema.md' -print 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T12:45:39.476Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_iN29lu55Vdf4hdlvwi5e2088",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:45:40.951Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_xXnMNXzT2R5yyWiROxWO0124",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:45:44.837Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_1qcPYMhU4kmtRttORvwZ6606",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"---DIFF 989a62b..3a9d426---\"; git diff --stat 989a62b0f48796c6b247018472d6f0ca8f096218 3a9d426c9b414c70a3a250e24a78d13c4a31c325; echo \"---FILES IN TIP---\"; git ls-tree -r --name-only 3a9d426c9b414c70a3a250e24a78d13c4a31c325 | head -50"
+      },
+      {
+        "ts": "2026-08-14T12:45:44.838Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_u1c1y6iEHSZP6vlMpmbx9924",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"---SHOW TIP COMMIT---\"; git show --stat 3a9d426c9b414c70a3a250e24a78d13c4a31c325 | head -30; echo \"---SHOW BASE COMMIT---\"; git show --stat 989a62b0f48796c6b247018472d6f0ca8f096218 | head -30"
+      },
+      {
+        "ts": "2026-08-14T12:45:44.915Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_1qcPYMhU4kmtRttORvwZ6606",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:45:44.919Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_u1c1y6iEHSZP6vlMpmbx9924",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:45:53.450Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_5yXPFVFIyzzlXBfK3X1k9093",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git show 3a9d426c9b414c70a3a250e24a78d13c4a31c325:01-decisions/output/decisions-raw.jsonl"
+      },
+      {
+        "ts": "2026-08-14T12:45:53.450Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_7apGFyn7ac9OTc5Q2oSb7651",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git show 3a9d426c9b414c70a3a250e24a78d13c4a31c325:01-decisions/output/sources.md"
+      },
+      {
+        "ts": "2026-08-14T12:45:53.494Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_5yXPFVFIyzzlXBfK3X1k9093",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:45:53.498Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_7apGFyn7ac9OTc5Q2oSb7651",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:46:20.217Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_MIJXnpkJ4HxxKX3nPX1V0030",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"---branches containing tip---\"; git branch -a --contains 3a9d426c9b414c70a3a250e24a78d13c4a31c325 2>/dev/null; echo \"---branches containing base---\"; git branch -a --contains 989a62b0f48796c6b247018472d6f0ca8f096218 2>/dev/null; echo \"---node-04 yaml---\"; ls /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T12:46:20.218Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_01_DLkGuwukNJOEQ2GUyERL8846",
+        "reason": "command matched blocked pattern",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git show 3a9d426c9b414c70a3a250e24a78d13c4a31c325:01-decisions/output/decisions-raw.jsonl | python3 -c \"\nimport sys, json\nlines = [l for l in sys.stdin.read().splitlines() if l.strip()]\nprint('num lines:', len(lines))\nids = []\nfor i, l in enumerate(lines):\n    try:\n        obj = json.loads(l)\n    except Exception as e:\n        print('INVALID JSON line', i+1, e); continue\n    ids.append(obj.get('id'))\n    assert 'sources' in obj and len(obj['sources']) >= 3, (obj.get('id'), 'sources')\n    refs = [s.get('ref') for s in obj['sources']]\nprint('ids:', ids)\nprint('count:', len(ids), 'unique:', len(set(ids)))\n\"",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-14T12:46:20.218Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_DLkGuwukNJOEQ2GUyERL8846",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-14T12:46:20.311Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_MIJXnpkJ4HxxKX3nPX1V0030",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:46:34.637Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_00_GtVx9boxTZaOPR1PQux97923",
+        "reason": "command matched blocked pattern",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git show 3a9d426c9b414c70a3a250e24a78d13c4a31c325:01-decisions/output/decisions-raw.jsonl | python3 -c 'import sys,json; lines=[l for l in sys.stdin if l.strip()]; objs=[json.loads(l) for l in lines]; ids=[o[\"id\"] for o in objs]; print(\"count\",len(objs)); print(\"ids\",ids); print(\"unique\",len(set(ids))); print(\"all have sources\", all(\"sources\" in o for o in objs)); print(\"all have refs\", all(len(o[\"sources\"])>=3 for o in objs))'",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-14T12:46:34.637Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_GtVx9boxTZaOPR1PQux97923",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-14T12:46:34.638Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_pWFWlk7Vdr945IOk2kqm4702",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git show 3a9d426c9b414c70a3a250e24a78d13c4a31c325:01-decisions/output/decisions-raw.jsonl | python3 -c 'import sys,json; lines=[l for l in sys.stdin if l.strip()]; objs=[json.loads(l) for l in lines]; refs=set(); \n[refs.update(s.get(\"ref\",\"\") for s in o.get(\"sources\",[])) for o in objs];\n[print(r) for r in sorted(refs)]'"
+      },
+      {
+        "ts": "2026-08-14T12:46:34.638Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_AkHUYttSzhBtp3PbSyIQ8139",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-04-normalize-decisions.yaml"
+      },
+      {
+        "ts": "2026-08-14T12:46:34.643Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_AkHUYttSzhBtp3PbSyIQ8139",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:46:34.894Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_pWFWlk7Vdr945IOk2kqm4702",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:46:42.923Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_3Wecj32QM1nCyAni4zxh4953",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git show 3a9d426c9b414c70a3a250e24a78d13c4a31c325:01-decisions/output/decisions-raw.jsonl | python3 -c 'import sys,json; lines=[l for l in sys.stdin if l.strip()]; objs=[json.loads(l) for l in lines]; print(\"count\",len(objs)); print(\"ids\",[o[\"id\"] for o in objs]); print(\"keys ok\", all(set([\"id\",\"statement\",\"sources\"])<=set(o) for o in objs)); print(\"src count min\", min(len(o[\"sources\"]) for o in objs))'"
+      },
+      {
+        "ts": "2026-08-14T12:46:42.924Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_jWWdkK7NfMOSXKarps4H6612",
+        "command": "cd /Users/sab-mini/repos/MyAPI && for f in \"project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md\" \"project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md\" \"Corpus v1.0/40-decisions-and-trajectories/2026-08-08-last2w-decisions.md\" \"project-docs/corpus-work-2026-08/CORPUS-TARGET-SHAPE.md\" \"project-docs/REBUILD-CONTEXT-ANCHOR.md\" \"project-docs/ARCHITECTURE.md\" \".handoffs/030-corpus-vm-semantic-graphify.md\"; do git cat-file -e \"3a9d426c9b414c70a3a250e24a78d13c4a31c325:$f\" 2>/dev/null && echo \"EXISTS: $f\" || echo \"MISSING: $f\"; done"
+      },
+      {
+        "ts": "2026-08-14T12:46:43.032Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_3Wecj32QM1nCyAni4zxh4953",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:46:43.169Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_jWWdkK7NfMOSXKarps4H6612",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:46:51.627Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_zLHxNDSqs5qf3yEQpJoY0217",
+        "command": "cd /Users/sab-mini/repos/MyAPI && ls -la \"Corpus v1.0/40-decisions-and-trajectories/\" 2>/dev/null | head; echo \"---tracked?---\"; git ls-files | grep -c \"Corpus v1.0\" ; echo \"---gitignore corpus---\"; grep -n \"Corpus\" .gitignore 2>/dev/null; echo \"---sha256---\"; shasum -a 256 \"Corpus v1.0/40-decisions-and-trajectories/2026-08-08-last2w-decisions.md\" 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T12:46:51.627Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_3EshezT7bBKOogqjknSP7219",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git show 3a9d426c9b414c70a3a250e24a78d13c4a31c325:project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md | grep -E \"D01|D11\" | head -8; echo \"---memo D01---\"; git show 3a9d426c9b414c70a3a250e24a78d13c4a31c325:project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md | grep -n \"GDDP constrains\" | head -3"
+      },
+      {
+        "ts": "2026-08-14T12:46:51.700Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_3EshezT7bBKOogqjknSP7219",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:46:51.716Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_zLHxNDSqs5qf3yEQpJoY0217",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:47:23.226Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_7ZCezNNO4vgzajdrkm5l6300",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git show 3a9d426c9b414c70a3a250e24a78d13c4a31c325:01-decisions/output/decision-schema.md | grep -nE \"supersed|replaces|relationship|required|at least\" | head -15; echo \"---tip tree 01-decisions---\"; git ls-tree -r --name-only 3a9d426c9b414c70a3a250e24a78d13c4a31c325 | grep \"^01-decisions\""
+      },
+      {
+        "ts": "2026-08-14T12:47:23.296Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_7ZCezNNO4vgzajdrkm5l6300",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T12:47:44.246Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_FjXfKvUA2ceB7ekM6ZLu8156",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "The Corpus v1.0 parity witness (Corpus v1.0/40-decisions-and-trajectories/2026-08-08-last2w-decisions.md) is gitignored/untracked. It exists on disk today with the sha256 cited in every raw object (4124f800...), but it will be absent from fresh clones or worktrees built from result commits; downstream nodes (node-05 validation, node-06 corpus) that rely on byte-identical parity checks must read the on-disk path or the check will fail spuriously.",
+        "affected_node_ids": [
+          "node-03-extract-decisions",
+          "node-05-validate-decision-set",
+          "node-06-build-corpus"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "All 01-decisions/ artifacts (schema, sources.md, raw jsonl) live only on gddp/result-* branches, not on the checked-out branch (per D10 no-merge-to-main doctrine). Downstream nodes must chain their worktrees from the node-03 result commit or the 01-decisions/ directory will be missing from their working tree.",
+        "affected_node_ids": [
+          "node-04-normalize-decisions",
+          "node-05-validate-decision-set",
+          "node-06-build-corpus"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The lane-1 deterministic probe for 'extraction-complete' searched for 'decisions-raw.js' and reported 'sources.md absent' — both identifiers are wrong (artifact is decisions-raw.jsonl; sources.md exists at base and tip commits). If this probe pattern is reused on later nodes it will keep producing false indeterminate results and may mask real gaps or fabricate doubt.",
+        "affected_node_ids": [
+          "node-03-extract-decisions"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.95,
+  "criteria_confidence": 0.95,
+  "completeness": 1.0,
+  "graph_readiness": 0.95,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "extraction-complete",
+        "criterion": "01-decisions/output/decisions-raw.jsonl contains one JSON object per decision found, each citing its source path, covering every source in sources.md",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "01-decisions/output/decisions-raw.js absent",
+          "sources.md absent"
+        ],
+        "reasoning": "Scanned source files (01-decisions/output/decisions-raw.jsonl) for identifiers named in the criterion (decisions-raw, JSON). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "01-decisions/output/decisions-raw.js absent, sources.md absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "no-invention",
+        "criterion": "Every raw object quotes or closely paraphrases source text; an object without a source citation fails this criterion",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md - read it first.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Do not normalize yet - raw fidelity is the point",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model xai/grok-4.6 via the subagent tool's model parameter; close with one oracle or reviewer pass before returning",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "01-decisions/output/decisions-raw.jsonl": true
+    },
+    "deps_status": {
+      "node-02-inventory-sources": "provisional"
+    },
+    "criteria_mismatches": [
+      {
+        "criterion_id": "extraction-complete",
+        "kind": "source_path",
+        "detail": "01-decisions/output/decisions-raw.js absent, sources.md absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "extraction-complete",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "989a62b0f48796c6b247018472d6f0ca8f096218",
+      "tip": "3a9d426c9b414c70a3a250e24a78d13c4a31c325",
+      "files": [
+        {
+          "status": "A",
+          "path": "01-decisions/output/decisions-raw.jsonl"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "extraction-complete",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "01-decisions/output/decisions-raw.jsonl exists (17 valid JSON lines, all parse)",
+          "IDs are exactly D01–D10, D12–D18 (17 objects, unique IDs) — matches sources.md closed review: 17 accepted, D11 explicitly dropped",
+          "Every object has sources[] with 3 refs: review sheet + repo-local normalized note + Corpus v1.0 parity keeper (D14: 7, D15: 5, adding supporting sources)",
+          "All 11 unique refs used across sources[]/extraction_context[] exist on disk and are listed in sources.md (no out-of-set/excluded sources cited)",
+          "git show 3a9d426: single-file diff adding 01-decisions/output/decisions-raw.jsonl (17 lines)",
+          "Deterministic probe's 'decisions-raw.js absent / sources.md absent' are path/extension artifacts — sources.md is at 01-decisions/output/sources.md"
+        ],
+        "reasoning": "One JSON object per accepted decision found: the closed set is D01–D18 with D11 rejected, so 17 objects is the correct count and D11's absence is mandated by sources.md ('Preserve D11 as rejection evidence, not as an accepted decision'). Every object cites its source path (all three decision-truth sources from sources.md per object), and every decision-truth source in sources.md is covered by every object; supporting sources are cited exactly where they substantiate a field (D14/D15) per the Stage B use rule. All cited paths resolve to real files listed in sources.md. The deterministic 'absent' findings are probe artifacts (wrong extension and root-path scan), not missing implementation."
+      },
+      {
+        "criterion_id": "no-invention",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "All 17 objects have sources[] with quotes (3–7 per object); zero quote mismatches against cited files after markdown normalization (bold markers, code fences, line breaks)",
+          "statements/titles/rationales of all 17 objects are verbatim in project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md (17/17 containment)",
+          "summaries are verbatim review-sheet one-liners (17/17, DECISIONS-REVIEW-SHEET.md)",
+          "Corpus v1.0 keeper sha256 = 4124f800...5558, matching sources.md claim; repo-local copy byte-identical to it",
+          "extraction_context quotes verified against governing memo, CONTEXT.md, decision-schema.md, sources.md (modulo markdown)"
+        ],
+        "reasoning": "Every raw object both quotes its sources and has a source citation; no object lacks a citation. The core decision fields (statement, title, rationale) are copied verbatim from the repo-local normalized note, summaries verbatim from the review sheet, and supporting-field quotes appear in the cited supporting files (e.g., REBUILD-CONTEXT-ANCHOR.md lines 76/86 for D14/D15) — the only apparent mismatches were markdown formatting (bold/bullet/code-fence) artifacts, not invented text. Raw fidelity is preserved: no normalization was applied to statements."
+      }
+    ],
+    "overall_reasoning": "Node-03 (extract raw decision objects) satisfies both acceptance criteria. The required artifact 01-decisions/output/decisions-raw.jsonl contains exactly one JSON object per accepted decision (D01–D10, D12–D18 = 17 objects; D11 is rejected by Sab's review mark and correctly excluded per sources.md), each object cites its source paths (all three decision-truth sources from sources.md plus relevant supporting sources), and the citation set covers sources.md without importing any excluded source. Every field (statement/title/rationale/summary) and every quote traces verbatim to the cited files (review sheet, repo-local normalized note, byte-identical Corpus v1.0 keeper with matching sha256, and the supporting anchors/docs), so nothing is invented. The deterministic indeterminate flags were artifacts of a root-level scan looking for 'decisions-raw.js' and a missing-path 'sources.md'; both files exist under 01-decisions/output/. Process constraints (execution trio) are not verifiable from repo contents and are not acceptance criteria; the repo state shows only the expected single-file artifact addition in this job's commit.",
+    "risks": "1) The literal phrasing 'covering every source in sources.md' could be read as 'cite every listed source including supporting/excluded ones'; the implementation follows sources.md's own Stage B use rule (cite review sheet + normalized note + parity keeper per object; supporting sources only where they substantiate a field; never promote excluded sources). If the human intended literal citation of all listed sources, that would be a criteria clarification, not a code defect. 2) D11 is absent from the jsonl by design (rejection evidence only, per sources.md); if the human intended a rejected-status object to appear in the raw set, the criteria/source contract would need updating. 3) The execution-trio constraint (gpt-5.6-sol main, grok-4.6 subagents, oracle/review pass) cannot be verified from repo contents; no in-repo trace of the process was produced. 4) The deterministic probe's 'absent' flags (decisions-raw.js, sources.md) were path/extension scan artifacts; if future probes reuse that scanner, they will keep reporting false absences for correctly-located artifacts.",
+    "followup_candidates": "Human clarification 1: Criterion 'extraction-complete' says 'covering every source in sources.md'. The implementation covers all three decision-truth sources per object and cites supporting sources only where they substantiate fields, per sources.md's own Stage B rule. Was the intent decision-truth coverage (as implemented) or literal citation of every listed source including exclusions? If literal, update the criterion and rerun; otherwise this verdict stands. Human clarification 2: D11 (Sab-marked N) is preserved as rejection evidence in sources.md but does not appear as an object in decisions-raw.jsonl, matching sources.md's instruction that it 'must not enter the accepted decision set'. Was a rejected-status object for D11 intended in the raw output? If yes, update the source contract; if no, current behavior is correct. Human clarification 3: The deterministic scanner reported '01-decisions/output/decisions-raw.js absent, sources.md absent' because it scanned for a .js path and did not look under 01-decisions/output/. The criterion path is NOT stale — 01-decisions/output/decisions-raw.jsonl and 01-decisions/output/sources.md both exist. Recommend fixing the probe's path/extension handling so future runs resolve this criterion automatically. Human clarification 4 (contextual, not criteria): The execution-trio constraint (gpt-5.6-sol main / grok-4.6 subagents / oracle pass) is a process requirement with no in-repo evidence trail. It is not part of the acceptance criteria, so it did not affect the verdict; if process compliance is to be gateable, a run-log artifact should be required.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-14T12:43:33.210Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_G31PxgupsSx677g1kubU4572",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq && ls -la && echo \"---GIT---\" && git status 2>&1 | head -20 && echo \"---LOG---\" && git log --oneline -10 2>&1"
+        },
+        {
+          "ts": "2026-08-14T12:43:33.211Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_OcMO3JEzHd5aXq7Vw0Sc2811",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq/README.md"
+        },
+        {
+          "ts": "2026-08-14T12:43:33.220Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_OcMO3JEzHd5aXq7Vw0Sc2811",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:43:33.542Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_G31PxgupsSx677g1kubU4572",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:43:36.856Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_27o23ZoKOWumv1sm6HBP1634",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq && find 01-decisions -type f | head -50 && echo \"---\" && find . -iname \"*sources*\" -not -path \"./.git/*\" | head -20 && echo \"---HANDOFFS---\" && ls -la .handoffs/ 2>/dev/null | head -30"
+        },
+        {
+          "ts": "2026-08-14T12:43:36.857Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_XKmWWaTTaxE9vmtFTd7l3128",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-14T12:43:36.862Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_XKmWWaTTaxE9vmtFTd7l3128",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:43:36.914Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_27o23ZoKOWumv1sm6HBP1634",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:43:40.859Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_aUYeRawAVYW56gVB556F9530",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq/01-decisions/output/sources.md"
+        },
+        {
+          "ts": "2026-08-14T12:43:40.859Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_nSVgLGkq8wO0GZBmcOUg6421",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq && wc -l 01-decisions/output/decisions-raw.jsonl 01-decisions/output/sources.md 01-decisions/output/decision-schema.md && echo \"---\" && head -c 2000 01-decisions/output/decisions-raw.jsonl"
+        },
+        {
+          "ts": "2026-08-14T12:43:40.866Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_aUYeRawAVYW56gVB556F9530",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:43:40.883Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_nSVgLGkq8wO0GZBmcOUg6421",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:43:48.584Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Mcii1bzmTrEV6d7b2bis0099",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq && python3 -c \"\nimport json\nobjs=[]\nwith open('01-decisions/output/decisions-raw.jsonl') as f:\n    for i,line in enumerate(f,1):\n        try:\n            o=json.loads(line)\n            objs.append(o)\n        except Exception as e:\n            print('LINE',i,'PARSE ERROR:',e)\nprint('total objects:',len(objs))\nids=[o.get('id') for o in objs]\nprint('ids:',ids)\nprint('unique ids:',len(set(ids)))\nfrom collections import Counter\nprint('statuses:',Counter(o.get('status') for o in objs))\nprint('review_marks:',Counter(o.get('review_mark') for o in objs))\nfor o in objs:\n    srcs=o.get('sources',[])\n    kinds=[s.get('kind') for s in srcs]\n    has_quote=all('quote' in s for s in srcs)\n    print(o.get('id'), '| sources:',len(srcs),'| kinds:',kinds,'| all have quote:',has_quote,'| status:',o.get('status'))\n\""
+        },
+        {
+          "ts": "2026-08-14T12:43:48.584Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_9Ril8jACDQyQT8obNQgX9633",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq && ls -la \"project-docs/corpus-work-2026-08/\" 2>/dev/null && echo \"---Corpus v1.0 path---\" && ls -la \"/Users/sab-mini/repos/MyAPI/Corpus v1.0/40-decisions-and-trajectories/\" 2>/dev/null || echo \"Corpus v1.0 not accessible\" && echo \"---memo---\" && ls -la \"/Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md\" 2>/dev/null || echo \"memo not accessible\""
+        },
+        {
+          "ts": "2026-08-14T12:43:48.629Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_9Ril8jACDQyQT8obNQgX9633",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:43:48.745Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Mcii1bzmTrEV6d7b2bis0099",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:43:54.569Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_UmVhw1bOZd4wc2oa3vkO5042",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq/project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md"
+        },
+        {
+          "ts": "2026-08-14T12:43:54.570Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_mqNGejEAvX9I3vq7XPiO7810",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq/project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md"
+        },
+        {
+          "ts": "2026-08-14T12:43:54.572Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_mqNGejEAvX9I3vq7XPiO7810",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:43:54.572Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_UmVhw1bOZd4wc2oa3vkO5042",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:44:01.725Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_VSHzJfq4f2J65AdOhoUN6267",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq && python3 - <<'EOF'\nimport json, re, os\n\ndef norm(s):\n    return re.sub(r'\\s+', ' ', s).strip()\n\nreview = open('project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md').read()\nmemo = open('project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md').read()\ncorpus10 = open('/Users/sab-mini/repos/MyAPI/Corpus v1.0/40-decisions-and-trajectories/2026-08-08-last2w-decisions.md').read()\nprint('corpus v1.0 byte-identical to repo-local:', corpus10 == memo)\n\nobjs=[json.loads(l) for l in open('01-decisions/output/decisions-raw.jsonl') if l.strip()]\n\nrefs_by_kind = {'review_sheet': review, 'memo': memo, 'other': corpus10}\nfiletext = {r: open(r).read() for r in [r'project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md', r'project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md']}\nfiletext['/Users/sab-mini/repos/MyAPI/Corpus v1.0/40-decisions-and-trajectories/2026-08-08-last2w-decisions.md'] = corpus10\n\nmissing_refs = []\nquote_fails = []\nfor o in objs:\n    did = o['id']\n    for s in o.get('sources', []):\n        ref = s.get('ref','')\n        if ref not in filetext:\n            missing_refs.append((did, ref))\n        else:\n            q = s.get('quote','')\n            if q and norm(q) not in norm(filetext[ref]):\n                quote_fails.append((did, s.get('kind'), ref, q[:80]))\n\nprint('\\nmissing refs:', missing_refs if missing_refs else 'NONE')\nprint('\\nquote fails (decision-truth sources):')\nfor f in quote_fails:\n    print(' ', f)\nprint('count:', len(quote_fails))\n\n# check statement vs memo \"Decision:\" lines\nprint('\\nstatement check vs memo Decision lines:')\nfor o in objs:\n    m = re.search(r'## D' + o['id'] + r' .*?Decision:\\*\\* (.*?)\\n', memo, re.S)\n    if m:\n        dec = norm(m.group(1))\n        st = norm(o.get('statement',''))\n        print(o['id'], '| statement in memo (verbatim):', st == dec or st in memo.replace('\\n',' '))\n    else:\n        print(o['id'], '| NO MATCH in memo')\nEOF"
+        },
+        {
+          "ts": "2026-08-14T12:44:01.837Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_VSHzJfq4f2J65AdOhoUN6267",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:44:11.200Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_n4sarjldyYWCgmVGWdpL2673",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq && python3 - <<'EOF'\nimport json, re, os\n\ndef norm(s): return re.sub(r'\\s+', ' ', s).strip()\n\nmemo = open('project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md').read()\nmemo_norm = norm(memo)\nreview = open('project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md').read()\nreview_norm = norm(review)\ncorpus10 = open('/Users/sab-mini/repos/MyAPI/Corpus v1.0/40-decisions-and-trajectories/2026-08-08-last2w-decisions.md').read()\ncorpus10_norm = norm(corpus10)\n\nobjs=[json.loads(l) for l in open('01-decisions/output/decisions-raw.jsonl') if l.strip()]\n\n# simpler: is statement substring of memo (normalized)?\nprint('== statement containment in memo (repo-local normalized note) ==')\nfor o in objs:\n    st = norm(o.get('statement',''))\n    print(o['id'], 'in memo:', st in memo_norm)\n\n# check extraction_context quote containment too\nprint('\\n== extraction_context quote containment ==')\nctx_files = {\n '/Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md': open('/Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md').read(),\n '01-decisions/CONTEXT.md': open('01-decisions/CONTEXT.md').read(),\n '01-decisions/output/decision-schema.md': open('01-decisions/output/decision-schema.md').read(),\n}\nfor o in objs:\n    for ec in o.get('extraction_context', []):\n        ref = ec.get('ref','')\n        q = norm(ec.get('quote',''))\n        if ref in ctx_files:\n            ok = q in norm(ctx_files[ref])\n            if not ok:\n                print(o['id'], 'CTX QUOTE FAIL', ref, ec.get('quote','')[:70])\nprint('ctx quote check done (only failures printed)')\n\n# supporting-source quotes for D14/D15\nsup_files = {\n 'project-docs/corpus-work-2026-08/CORPUS-TARGET-SHAPE.md': open('project-docs/corpus-work-2026-08/CORPUS-TARGET-SHAPE.md').read(),\n 'project-docs/REBUILD-CONTEXT-ANCHOR.md': open('project-docs/REBUILD-CONTEXT-ANCHOR.md').read(),\n 'project-docs/ARCHITECTURE.md': open('project-docs/ARCHITECTURE.md').read(),\n '.handoffs/030-corpus-vm-semantic-graphify.md': open('.handoffs/030-corpus-vm-semantic-graphify.md').read(),\n}\nprint('\\n== supporting source quote containment ==')\nfor o in objs:\n    for s in o.get('sources', []):\n        ref = s.get('ref','')\n        if ref in sup_files:\n            q = norm(s.get('quote',''))\n            ok = q in norm(sup_files[ref])\n            print(o['id'], s.get('kind'), os.path.basename(ref), 'OK' if ok else 'FAIL: '+s.get('quote','')[:80])\n\n# review sheet quote containment\nprint('\\n== review sheet quote containment ==')\nfor o in objs:\n    for s in o.get('sources', []):\n        if s.get('kind')=='review_sheet':\n            q = norm(s.get('quote',''))\n            print(o['id'], 'OK' if q in review_norm else 'FAIL: '+q[:90])\n\n# also confirm D11 is absent (per sources.md, rejected; not an accepted decision)\nprint('\\nD11 present in jsonl:', any(o['id']=='D11' for o in objs))\nEOF"
+        },
+        {
+          "ts": "2026-08-14T12:44:11.320Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_n4sarjldyYWCgmVGWdpL2673",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:44:20.967Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_76b5tam7FQBOOANyxULt4202",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq && python3 - <<'EOF'\nimport json\nobjs=[json.loads(l) for l in open('01-decisions/output/decisions-raw.jsonl') if l.strip()]\nfor o in objs:\n    if o['id'] in ('D14','D15','D01'):\n        print('='*100)\n        print(json.dumps(o, indent=1))\nEOF"
+        },
+        {
+          "ts": "2026-08-14T12:44:20.968Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_CbG2G36yhwwV2KC53DQn4196",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq && grep -n -i \"shape, not more data\\|presentable narrative\\|structure map\\|git history as a graph\\|shape is\\|not more data\" project-docs/REBUILD-CONTEXT-ANCHOR.md | head -20 && echo \"===schema===\" && grep -n \"Every accepted object must carry\\|must carry at least\" 01-decisions/output/decision-schema.md | head"
+        },
+        {
+          "ts": "2026-08-14T12:44:21.001Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_CbG2G36yhwwV2KC53DQn4196",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:44:21.057Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_76b5tam7FQBOOANyxULt4202",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:44:30.177Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_BPQSt8PBXtr2tc2t25AE2679",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq && sed -n '100,116p' 01-decisions/output/decision-schema.md && echo \"===ANCHOR lines 70-90===\" && sed -n '70,90p' project-docs/REBUILD-CONTEXT-ANCHOR.md"
+        },
+        {
+          "ts": "2026-08-14T12:44:30.178Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_IGj0Sj8qEiPReMMrXIHz4153",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq && python3 - <<'EOF'\nimport json, re\n\ndef strip_md(s):\n    s = re.sub(r'\\*\\*', '', s)\n    s = re.sub(r'^[-*] ', '', s)\n    s = re.sub(r'`', '', s)\n    return re.sub(r'\\s+', ' ', s).strip()\n\ndef norm(s):\n    return re.sub(r'\\s+', ' ', s).strip()\n\nobjs=[json.loads(l) for l in open('01-decisions/output/decisions-raw.jsonl') if l.strip()]\n\nfiles = {\n 'project-docs/REBUILD-CONTEXT-ANCHOR.md': open('project-docs/REBUILD-CONTEXT-ANCHOR.md').read(),\n 'project-docs/corpus-work-2026-08/CORPUS-TARGET-SHAPE.md': open('project-docs/corpus-work-2026-08/CORPUS-TARGET-SHAPE.md').read(),\n 'project-docs/ARCHITECTURE.md': open('project-docs/ARCHITECTURE.md').read(),\n '.handoffs/030-corpus-vm-semantic-graphify.md': open('.handoffs/030-corpus-vm-semantic-graphify.md').read(),\n '01-decisions/output/decision-schema.md': open('01-decisions/output/decision-schema.md').read(),\n '01-decisions/CONTEXT.md': open('01-decisions/CONTEXT.md').read(),\n '/Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md': open('/Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md').read(),\n}\nfiles_norm = {k: strip_md(v) for k,v in files.items()}\n\nfails = []\nfor o in objs:\n    for key, q in ([(s.get('ref',''), s.get('quote','')) for s in o.get('sources',[])] +\n                   [(ec.get('ref',''), ec.get('quote','')) for ec in o.get('extraction_context',[])]):\n        if key in files_norm:\n            if norm(q) not in files_norm[key]:\n                fails.append((o['id'], key, q[:90]))\n\nprint('quote fails after markdown normalization:', len(fails))\nfor f in fails: print(' ', f)\n\n# Also verify sha256 of parity keeper matches sources.md claim\nimport hashlib\ndata = open('/Users/sab-mini/repos/MyAPI/Corpus v1.0/40-decisions-and-trajectories/2026-08-08-last2w-decisions.md','rb').read()\nprint('\\nsha256 of Corpus v1.0 keeper:', hashlib.sha256(data).hexdigest())\ndata2 = open('project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md','rb').read()\nprint('sha256 of repo-local note:    ', hashlib.sha256(data2).hexdigest())\nprint('sources.md claims sha256 4124f8001b656d913e0ac7f4ba0c3737ba7199af94d94e462c481e20e41a5558')\nEOF"
+        },
+        {
+          "ts": "2026-08-14T12:44:30.211Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_BPQSt8PBXtr2tc2t25AE2679",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:44:30.281Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_IGj0Sj8qEiPReMMrXIHz4153",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:44:47.992Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_XQlYkYpASpNjiA6H8beW1244",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq && python3 - <<'EOF'\nimport json, re, os\n\ndef norm(s): return re.sub(r'\\s+', ' ', s).strip()\n\nmemo = open('project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md').read()\nmemo_n = norm(memo)\nreview = open('project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md').read()\nreview_n = norm(review)\n\nobjs=[json.loads(l) for l in open('01-decisions/output/decisions-raw.jsonl') if l.strip()]\n\nprint('== title containment in memo (## Dxx — title) ==')\nfor o in objs:\n    m = re.search(r'## ' + o['id'] + r'\\s+[—-]\\s+([^\\n]+)', memo)\n    t = m.group(1).strip() if m else None\n    print(o['id'], '| json title:', repr(o.get('title')), '| memo title:', repr(t), '| match:', o.get('title')==t)\n\nprint('\\n== rationale containment in memo (Why it matters) ==')\nfor o in objs:\n    r = norm(o.get('rationale',''))\n    print(o['id'], 'OK' if r in memo_n else 'FAIL: '+r[:80])\n\nprint('\\n== summary containment in review sheet one-liners ==')\nfor o in objs:\n    s = norm(o.get('summary',''))\n    print(o['id'], 'OK' if s in review_n else 'FAIL: '+s[:80])\n\nprint('\\n== all unique refs used in sources[]/extraction_context[], and do files exist ==')\nrefs = set()\nfor o in objs:\n    for s in o.get('sources',[]): refs.add(s['ref'])\n    for ec in o.get('extraction_context',[]): refs.add(ec['ref'])\nfor r in sorted(refs):\n    print(('EXISTS ' if os.path.exists(r) else 'MISSING ')+r)\n\nprint('\\n== decided_on / schema_version / status / review_mark distribution ==')\nprint('decided_on:', set(o.get('decided_on') for o in objs))\nprint('schema_version:', set(o.get('schema_version') for o in objs))\nprint('status:', set(o.get('status') for o in objs))\nprint('review_mark:', set(o.get('review_mark') for o in objs))\nprint('has replaces/replaced_by/related:', [o['id'] for o in objs if 'replaces' in o or 'related_decisions' in o])\n\n# schema_version value vs decision-schema.md\nschema = open('01-decisions/output/decision-schema.md').read()\nm = re.search(r'schema_version', schema)\nprint('\\nschema file mentions schema_version:', m is not None)\nprint('schema file first 40 lines:')\nprint('\\n'.join(schema.splitlines()[:40]))\nEOF"
+        },
+        {
+          "ts": "2026-08-14T12:44:48.092Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_XQlYkYpASpNjiA6H8beW1244",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:44:59.921Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_jlbFspaWHdbE9YRvHiSB5226",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq && cat 01-decisions/CONTEXT.md && echo \"===DIFF of job commit===\" && git show --stat 3a9d426 | head -15 && echo \"===any other decisions-raw files?===\" && find . -iname \"*decisions-raw*\" -not -path \"./.git/*\""
+        },
+        {
+          "ts": "2026-08-14T12:44:59.993Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_jlbFspaWHdbE9YRvHiSB5226",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T12:45:22.096Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_IMRpvYH3xhzfnOYkotpm1776",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node-03 (extract raw decision objects) satisfies both acceptance criteria. The required artifact 01-decisions/output/decisions-raw.jsonl contains exactly one JSON object per accepted decision (D01–D10, D12–D18 = 17 objects; D11 is rejected by Sab's review mark and correctly excluded per sources.md), each object cites its source paths (all three decision-truth sources from sources.md plus relevant supporting sources), and the citation set covers sources.md without importing any excluded source. Every field (statement/title/rationale/summary) and every quote traces verbatim to the cited files (review sheet, repo-local normalized note, byte-identical Corpus v1.0 keeper with matching sha256, and the supporting anchors/docs), so nothing is invented. The deterministic indeterminate flags were artifacts of a root-level scan looking for 'decisions-raw.js' and a missing-path 'sources.md'; both files exist under 01-decisions/output/. Process constraints (execution trio) are not verifiable from repo contents and are not acceptance criteria; the repo state shows only the expected single-file artifact addition in this job's commit.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-14T12:47:44.344927+00:00",
+  "evaluated_tree_sha": "6d0a13657c7076a94a15044b2a0c489a8def4a9b",
+  "evaluated_commit_sha": "3a9d426c9b414c70a3a250e24a78d13c4a31c325",
+  "merge_commit_sha": "3a9d426c9b414c70a3a250e24a78d13c4a31c325",
+  "expected_base_commit_sha": "989a62b0f48796c6b247018472d6f0ca8f096218",
+  "pr_ref": null,
+  "job_id": "job_20260814T122823299bbc0d0b374d",
+  "execution_attempt_id": "job_20260814T122823299bbc0d0b374d:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+    "neighbor:node-02-inventory-sources": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-02-inventory-sources.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 4,
+      "content_accessed": 2,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq/README.md"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-02-inventory-sources.yaml"
+      ]
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 4,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-02-inventory-sources.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-hre8p7vq/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "medium"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-14T12:43:27.334958+00:00",
+    "finished_at": "2026-08-14T12:47:44.344754+00:00",
+    "wall_s": 257.006,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 114.813,
+      "tool_calls": 18
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 142.096,
+      "tool_calls": 22
+    }
+  }
+}

@@ -1,0 +1,2139 @@
+schema_type: node_evaluations
+schema_version: '1.0'
+project_id: gddp-dogfood
+generated_at: '2026-08-14T21:05:48Z'
+source: gddp-runtime db/queue.db (results + decision_results)
+evaluations:
+  node-01-env-var-registry:
+    verdict: pass
+    evaluated_at: '2026-08-11T04:54:30.763780+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T0430093101088246d28d
+    result_id: res_ses_20260811T0446227473bb31df7216
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-01-env-var-registry/job_20260811T0430093101088246d28d-attempt1.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The work preserves node-01''s intended role (evidence-gathering env-var registry)
+      and the graph''s integrity. The node''s why is a reviewable inventory of GDDP_* reads; the delivered
+      report is exactly that: 46 distinct active variables with per-row file:line citations that I spot-verified
+      as accurate against the source tree (init_db.py:17, dispatcher.py:63, local_subprocess_adapter.py:23/282/361,
+      intake_server.py:41, repo_resolver.py:57, graph_updater.py:152, bridge.py:45, pi_rpc_adapter.py:38-42/612,
+      mission_adapter.py:60-85, mini-heartbeat common.sh:17 — all real reads). The report is transparent
+      about method, scope exclusions (test-file writes, archive-only), and discloses a pre-existing pytest
+      failure rather than masking it. Graph integrity: the node has depends_on:[] and unlocks:[] (no dependents),
+      the base→tip diff is exactly one added file at the required artifact path (constraint ''Create only
+      reports/gddp-dogfood/01-env-var-registry.md'' satisfied), nothing outside that path was modified
+      (read-only constraint satisfied), work is committed on the node result ref (content commit + result
+      wrapper), and the repo matches the allowed repo. No forbidden patterns, no stray/junk files in the
+      diff. Intent and graph integrity are both preserved; nothing warrants human review before dependents
+      fire (there are none).'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-01-env-var-registry/job_20260811T0430093101088246d28d-attempt1.json
+      verdict: pass
+      criteria_confidence: 0.9833333333333334
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 5c42f42a12af4f0966e8e47cf4731f9a141c1e5d
+      evaluated_commit_sha: 1f067996fec8ee2d4952adac17686cbde5ab47ca
+      merge_commit_sha: 1f067996fec8ee2d4952adac17686cbde5ab47ca
+      execution_attempt_id: job_20260811T0430093101088246d28d:attempt:1
+      context_coverage:
+        criteria: high
+        integrity: high
+        overall: high
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.92
+        findings: []
+        reasoning: 'The work preserves node-01''s intended role (evidence-gathering env-var registry)
+          and the graph''s integrity. The node''s why is a reviewable inventory of GDDP_* reads; the delivered
+          report is exactly that: 46 distinct active variables with per-row file:line citations that I
+          spot-verified as accurate against the source tree (init_db.py:17, dispatcher.py:63, local_subprocess_adapter.py:23/282/361,
+          intake_server.py:41, repo_resolver.py:57, graph_updater.py:152, bridge.py:45, pi_rpc_adapter.py:38-42/612,
+          mission_adapter.py:60-85, mini-heartbeat common.sh:17 — all real reads). The report is transparent
+          about method, scope exclusions (test-file writes, archive-only), and discloses a pre-existing
+          pytest failure rather than masking it. Graph integrity: the node has depends_on:[] and unlocks:[]
+          (no dependents), the base→tip diff is exactly one added file at the required artifact path (constraint
+          ''Create only reports/gddp-dogfood/01-env-var-registry.md'' satisfied), nothing outside that
+          path was modified (read-only constraint satisfied), work is committed on the node result ref
+          (content commit + result wrapper), and the repo matches the allowed repo. No forbidden patterns,
+          no stray/junk files in the diff. Intent and graph integrity are both preserved; nothing warrants
+          human review before dependents fire (there are none).'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: T1 canaries 01/02/03 are independent report-only nodes; node-01's 'Archive-only' section
+            overlaps slightly with node-02's archived-code-surface scope. Review the three canary reports
+            together so report conventions (citation style, scope declarations) stay consistent for any
+            downstream consumer.
+          affected_node_ids:
+          - node-01-env-var-registry
+          - node-02-archive-inventory
+          - node-03-docs-inventory
+        - severity: low
+          summary: The report discloses a pre-existing rig1 test failure (test_rig1_render_plist.py expects
+            '--project gddp-runtime', observed 'pi-harness-execution'). Worth a human look before any
+            T4 docs/cleanup node touches deploy/rig1-heartbeat, since that failure could surface as a
+            blocking surprise later.
+          affected_node_ids:
+          - node-01-env-var-registry
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-02-archive-inventory:
+    verdict: pass
+    evaluated_at: '2026-08-11T05:04:31.479234+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T04565361e5157546e8c3
+    result_id: res_ses_20260811T04565361e5c4c5dcaa1b
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-02-archive-inventory/job_20260811T04565361e5157546e8c3-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node-02-archive-inventory against its intended role and graph
+      position. Intent: the node exists to keep the archived code surfaces (push guard, jules adapter,
+      canaries, replay, dead-topology deploy artifacts) reviewable without archaeology, via a report-only
+      inventory. The delivered report fully serves that role: I verified all 13 entries (4 deploy/_archive
+      + 9 scripts/_archive) against the actual files — every exact path is correct, every stated purpose
+      matches the real module docstring/header/archive README, and the report honestly flags weak evidence
+      (no archive-level README in scripts/_archive; test_mission_push_guard has no separate docstring)
+      and notes the living stand-up path. Counts match `find scripts/_archive deploy/_archive -type f`
+      exactly. Graph integrity: node has depends_on:[] and unlocks:[] in both the provided YAML and /home/sab-mini/gddp-config/graphs/gddp-dogfood/
+      (project.yaml and node-03-docs-inventory confirm sibling independence; nothing downstream consumes
+      this report). The base->tip diff is exactly one added file (64 lines) — satisfying ''Create only
+      reports/gddp-dogfood/02-archive-inventory.md'' and read-only-outside; commits land on the result
+      ref per the executor contract. No modification of canon or runtime files. The only unverifiable
+      element is the quoted pytest tail (no pytest on the review host), which is a lane-1 criteria/constraint
+      evidence matter, not an intent or graph-integrity concern; the claim is plausible and self-consistent.
+      Verdict: pass.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-02-archive-inventory/job_20260811T04565361e5157546e8c3-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9833333333333334
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: f17a3f6a9aeb9667d7bc781c836750549001ecd5
+      evaluated_commit_sha: 452344be55de10f483e64248a314fe7855a271ea
+      merge_commit_sha: 452344be55de10f483e64248a314fe7855a271ea
+      execution_attempt_id: job_20260811T04565361e5157546e8c3:attempt:0
+      context_coverage:
+        criteria: none
+        integrity: high
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.88
+        findings:
+        - severity: low
+          summary: 'The quoted pytest tail line (''4 failed, 622 passed in 36.32s'') could not be independently
+            reproduced on the review host: /usr/bin/python3 (3.13.5) has no pytest module and the worktree
+            has no venv. The claim is plausible and internally consistent (607 live test defs + parametrization
+            ≈ 626 collected; pytest.ini norecursedirs excludes scripts/_archive; flask in requirements.txt
+            but absent on host explains 4 failures), so this is a lane-1 evidence-verification matter
+            rather than an intent/graph-integrity problem. Recommend lane 1/human treat the tail as self-reported
+            evidence.'
+          affected_node_ids:
+          - node-02-archive-inventory
+        reasoning: 'Fresh-eyes review of node-02-archive-inventory against its intended role and graph
+          position. Intent: the node exists to keep the archived code surfaces (push guard, jules adapter,
+          canaries, replay, dead-topology deploy artifacts) reviewable without archaeology, via a report-only
+          inventory. The delivered report fully serves that role: I verified all 13 entries (4 deploy/_archive
+          + 9 scripts/_archive) against the actual files — every exact path is correct, every stated purpose
+          matches the real module docstring/header/archive README, and the report honestly flags weak
+          evidence (no archive-level README in scripts/_archive; test_mission_push_guard has no separate
+          docstring) and notes the living stand-up path. Counts match `find scripts/_archive deploy/_archive
+          -type f` exactly. Graph integrity: node has depends_on:[] and unlocks:[] in both the provided
+          YAML and /home/sab-mini/gddp-config/graphs/gddp-dogfood/ (project.yaml and node-03-docs-inventory
+          confirm sibling independence; nothing downstream consumes this report). The base->tip diff is
+          exactly one added file (64 lines) — satisfying ''Create only reports/gddp-dogfood/02-archive-inventory.md''
+          and read-only-outside; commits land on the result ref per the executor contract. No modification
+          of canon or runtime files. The only unverifiable element is the quoted pytest tail (no pytest
+          on the review host), which is a lane-1 criteria/constraint evidence matter, not an intent or
+          graph-integrity concern; the claim is plausible and self-consistent. Verdict: pass.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: The pytest suite is red on this base (quoted '4 failed, 622 passed') for environmental
+            reasons (flask absent on host PATH). Subsequent T1/T2 report-only canaries (node-03-docs-inventory
+            and any T2 nodes) that must quote a pytest tail will hit the same baseline failures; consider
+            recording the baseline environment in the project graph or node constraints so red-tail quotes
+            are not mistaken for regression.
+          affected_node_ids:
+          - node-03-docs-inventory
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-03-docs-inventory:
+    verdict: pass
+    evaluated_at: '2026-08-11T05:14:48.048593+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T050749687060a7379f96
+    result_id: res_ses_20260811T05074968409584e24e95
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-03-docs-inventory/job_20260811T050749687060a7379f96-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node-03-docs-inventory. The node''s intended role — inventory
+      docs/ and flag references to removed machinery so the doc surface stays honest — is fully preserved.
+      I independently walked docs/ (115 files) and cross-checked the report''s inventory: exact bidirectional
+      match, every file listed with a one-line summary, no omissions, no fabricated paths. The drift-flag
+      list is present and accurate: mission_push_guard genuinely appears at docs/mission-mode-research/06-post-mission-code-review.md:43
+      (and the module is verifiably archived in scripts/_archive/, absent from scripts/adapters/), while
+      verify_planned_feature_ids and _feature_drift_reason have zero matches in docs/ and are correctly
+      listed as empty. Graph integrity is preserved: git diff base..tip shows exactly one file added (reports/gddp-dogfood/03-docs-inventory.md,
+      178 lines), nothing outside the required report path was touched, the work is committed on the result
+      ref per the executor contract, and the working tree is clean. The node has depends_on: [] and unlocks:
+      [] in both the blueprint and node YAML, and sibling nodes (node-01, node-02) are independent report-only
+      canaries with no coupling to this output, so no downstream consumer depends on this report''s shape.
+      The pytest tail line is quoted with a transparent note about the Flask-absent host limitation (4
+      failed, 622 passed). Only cosmetic blemish is a duplicated ''## Validation'' heading, which does
+      not affect intent or graph integrity.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-03-docs-inventory/job_20260811T050749687060a7379f96-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9766666666666666
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: d8eaa3fa79a0c5816fccaa1fb4ed7d90401120dd
+      evaluated_commit_sha: adae636b9a533aa3537838ca0b7e4de83f1609dd
+      merge_commit_sha: adae636b9a533aa3537838ca0b7e4de83f1609dd
+      execution_attempt_id: job_20260811T050749687060a7379f96:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: none
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.95
+        findings: []
+        reasoning: 'Fresh-eyes review of node-03-docs-inventory. The node''s intended role — inventory
+          docs/ and flag references to removed machinery so the doc surface stays honest — is fully preserved.
+          I independently walked docs/ (115 files) and cross-checked the report''s inventory: exact bidirectional
+          match, every file listed with a one-line summary, no omissions, no fabricated paths. The drift-flag
+          list is present and accurate: mission_push_guard genuinely appears at docs/mission-mode-research/06-post-mission-code-review.md:43
+          (and the module is verifiably archived in scripts/_archive/, absent from scripts/adapters/),
+          while verify_planned_feature_ids and _feature_drift_reason have zero matches in docs/ and are
+          correctly listed as empty. Graph integrity is preserved: git diff base..tip shows exactly one
+          file added (reports/gddp-dogfood/03-docs-inventory.md, 178 lines), nothing outside the required
+          report path was touched, the work is committed on the result ref per the executor contract,
+          and the working tree is clean. The node has depends_on: [] and unlocks: [] in both the blueprint
+          and node YAML, and sibling nodes (node-01, node-02) are independent report-only canaries with
+          no coupling to this output, so no downstream consumer depends on this report''s shape. The pytest
+          tail line is quoted with a transparent note about the Flask-absent host limitation (4 failed,
+          622 passed). Only cosmetic blemish is a duplicated ''## Validation'' heading, which does not
+          affect intent or graph integrity.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Sibling canaries node-01 and node-02 (provisional) share the same report-only pattern
+            and the same 'run pytest and quote tail' constraint; on this host pytest will likely reproduce
+            the same 4-failed baseline (Flask absent), which should be treated as an environment artifact,
+            not node-caused failure, when those nodes are evaluated.
+          affected_node_ids:
+          - node-01-env-var-registry
+          - node-02-archive-inventory
+        - severity: low
+          summary: The drift flag on docs/mission-mode-research/06-post-mission-code-review.md (describes
+            mission_push_guard as live/acceptable) is a candidate target for a future T4 docs-cleanup
+            node once tranche gating allows edits; the flag list in this report gives the cleanup node
+            a concrete, verifiable starting point.
+          affected_node_ids:
+          - node-03-docs-inventory
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-04-scripts-entrypoint-surface:
+    verdict: pass
+    evaluated_at: '2026-08-11T05:31:05.117525+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T0523385827866e1faae8
+    result_id: res_ses_20260811T05233858b73392c57a51
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-04-scripts-entrypoint-surface/job_20260811T0523385827866e1faae8-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node-04-scripts-entrypoint-surface (T1 report-only canary).
+      Intent: map the scripts/ CLI entrypoint surface so the CLI layer is reviewable, producing exactly
+      one report artifact. The work delivers precisely that: a single added file (reports/gddp-dogfood/04-scripts-entrypoint-surface.md)
+      covering all 9 non-test top-level scripts/*.py in a table, the jobs_status.py subcommand surface,
+      real --help/invocation quotes for 6+ entrypoints, and the required pytest tail line. I spot-checked
+      rollback.py --help, jobs_status.py --help, and echo.py against the live repo — the quoted output
+      matches verbatim, so the report is genuine evidence, not fabrication (a fabricated report would
+      have undermined the node''s purpose of making the CLI layer reliably reviewable). Graph integrity:
+      the diff base->tip contains exactly one file (A reports/gddp-dogfood/04-scripts-entrypoint-surface.md),
+      the working tree is clean with no untracked junk, no file outside the report path was modified (read-only
+      constraint honored), commit sits on the node result ref per the executor contract, and gddp-config
+      graph truth is untouched. depends_on: [] and unlocks: [] mean no upstream obligations and no downstream
+      consumer can be broken. The report does not touch sibling canary report paths (01/02/03 exist on
+      other result refs, not in this lineage) or any source/runtime files. The only minor note — the report
+      quotes a Flask-import traceback from a different session worktree path and a pytest tail of ''4
+      failed, 622 passed'' vs README''s ''633 passing'' — is environmental (Flask absent on host), transparently
+      disclosed in the report, and is acceptance-criteria evidence for lane 1, not an intent/graph-integrity
+      defect. Intent preserved; graph integrity preserved.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-04-scripts-entrypoint-surface/job_20260811T0523385827866e1faae8-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9766666666666666
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 8e4ff962dface537d9b85a7ccb2bfd2491f93eba
+      evaluated_commit_sha: 51de49a6f4102c5fbe3762d2bda630be5116befc
+      merge_commit_sha: 51de49a6f4102c5fbe3762d2bda630be5116befc
+      execution_attempt_id: job_20260811T0523385827866e1faae8:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: medium
+        overall: medium
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'Fresh-eyes review of node-04-scripts-entrypoint-surface (T1 report-only canary). Intent:
+          map the scripts/ CLI entrypoint surface so the CLI layer is reviewable, producing exactly one
+          report artifact. The work delivers precisely that: a single added file (reports/gddp-dogfood/04-scripts-entrypoint-surface.md)
+          covering all 9 non-test top-level scripts/*.py in a table, the jobs_status.py subcommand surface,
+          real --help/invocation quotes for 6+ entrypoints, and the required pytest tail line. I spot-checked
+          rollback.py --help, jobs_status.py --help, and echo.py against the live repo — the quoted output
+          matches verbatim, so the report is genuine evidence, not fabrication (a fabricated report would
+          have undermined the node''s purpose of making the CLI layer reliably reviewable). Graph integrity:
+          the diff base->tip contains exactly one file (A reports/gddp-dogfood/04-scripts-entrypoint-surface.md),
+          the working tree is clean with no untracked junk, no file outside the report path was modified
+          (read-only constraint honored), commit sits on the node result ref per the executor contract,
+          and gddp-config graph truth is untouched. depends_on: [] and unlocks: [] mean no upstream obligations
+          and no downstream consumer can be broken. The report does not touch sibling canary report paths
+          (01/02/03 exist on other result refs, not in this lineage) or any source/runtime files. The
+          only minor note — the report quotes a Flask-import traceback from a different session worktree
+          path and a pytest tail of ''4 failed, 622 passed'' vs README''s ''633 passing'' — is environmental
+          (Flask absent on host), transparently disclosed in the report, and is acceptance-criteria evidence
+          for lane 1, not an intent/graph-integrity defect. Intent preserved; graph integrity preserved.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Sibling T1 canary reports (01-env-var-registry, 02-archive-inventory, 03-docs-inventory)
+            exist on separate result refs but are not in this worktree's lineage at base 450eca1. When
+            those nodes are human-accepted, their report files must land in the canonical branch; until
+            then the reports/ dir shows only node-04's artifact. No conflict with this node, but keep
+            an eye on how per-ref canary artifacts converge into graph truth.
+          affected_node_ids:
+          - node-01-env-var-registry
+          - node-02-archive-inventory
+          - node-03-docs-inventory
+          - node-04-scripts-entrypoint-surface
+        - severity: low
+          summary: The report's pytest run shows '4 failed, 622 passed' attributable to Flask being absent
+            on the host (intake_server/rig1 tests import flask). node-05-test-suite-map will re-measure
+            the suite; it should account for environment-dependent failures (missing deps) when characterizing
+            test shape and slowest tests, and the evaluator should not treat those failures as node-04's
+            defect.
+          affected_node_ids:
+          - node-04-scripts-entrypoint-surface
+          - node-05-test-suite-map
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-05-test-suite-map:
+    verdict: pass
+    evaluated_at: '2026-08-11T05:41:03.377417+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T05341491389952e0eb35
+    result_id: res_ses_20260811T05341491fadf4267dbec
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-05-test-suite-map/job_20260811T05341491389952e0eb35-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The work under review is a single-file report-only change: reports/gddp-dogfood/05-test-suite-map.md
+      added between base 450eca1 and tip 63b26a7, with a clean worktree and no modifications outside the
+      required artifact path. The report fully realizes node-05''s intended role ("Map the test suite
+      shape and slowest tests"): it provides a suite summary, per-file pytest-collected counts for scripts/**/test_*.py
+      (51 collected files, 607 items, with _archive exclusion correctly attributed to pytest.ini norecursedirs),
+      the slowest-10 durations block from python3 -m pytest -q --durations=10, the quoted tail line (4
+      failed, 622 passed in 36.64s), and shape/debt notes (largest files, ~20s duration outlier). I spot-checked
+      report data against the repo (file counts on disk vs collected, per-file item counts vs def counts,
+      pytest.ini exclusion) and found them consistent. Constraints were respected: only the report path
+      created, read-only elsewhere, pytest tail line quoted, work committed on the result ref. Node-05
+      has no depends_on and no unlocks, and sibling canary nodes own distinct report paths, so nothing
+      downstream can be broken and graph structure is preserved. Lane-1''s indeterminate criteria status
+      is a separate question (semantic confirmation of durations/slowest-10 evidence) and does not affect
+      this integrity verdict.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-05-test-suite-map/job_20260811T05341491389952e0eb35-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.93
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 6ac8d2d17088ff074b82e70767cc59a33999b505
+      evaluated_commit_sha: 63b26a7a5ca688373d60011c455d046e38c26d10
+      merge_commit_sha: 63b26a7a5ca688373d60011c455d046e38c26d10
+      execution_attempt_id: job_20260811T05341491389952e0eb35:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: high
+        overall: medium
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.92
+        findings: []
+        reasoning: 'The work under review is a single-file report-only change: reports/gddp-dogfood/05-test-suite-map.md
+          added between base 450eca1 and tip 63b26a7, with a clean worktree and no modifications outside
+          the required artifact path. The report fully realizes node-05''s intended role ("Map the test
+          suite shape and slowest tests"): it provides a suite summary, per-file pytest-collected counts
+          for scripts/**/test_*.py (51 collected files, 607 items, with _archive exclusion correctly attributed
+          to pytest.ini norecursedirs), the slowest-10 durations block from python3 -m pytest -q --durations=10,
+          the quoted tail line (4 failed, 622 passed in 36.64s), and shape/debt notes (largest files,
+          ~20s duration outlier). I spot-checked report data against the repo (file counts on disk vs
+          collected, per-file item counts vs def counts, pytest.ini exclusion) and found them consistent.
+          Constraints were respected: only the report path created, read-only elsewhere, pytest tail line
+          quoted, work committed on the result ref. Node-05 has no depends_on and no unlocks, and sibling
+          canary nodes own distinct report paths, so nothing downstream can be broken and graph structure
+          is preserved. Lane-1''s indeterminate criteria status is a separate question (semantic confirmation
+          of durations/slowest-10 evidence) and does not affect this integrity verdict.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: 'Report documents 4 failing tests; intake failures stem from ModuleNotFoundError: No
+            module named ''flask'' even though requirements.txt lists flask>=3.0. This environment/dependency
+            drift may surface again for nodes 06-10 (which also run pytest per their constraints) and
+            may warrant a corrective node or environment reinstall before substantive work resumes.'
+          affected_node_ids:
+          - node-05-test-suite-map
+          - node-06-deploy-topology
+          - node-07-hook-surface
+          - node-08-verification-module-map
+          - node-09-heartbeat-module-map
+          - node-10-agents-md-drift-report
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-06-deploy-topology:
+    verdict: pass
+    evaluated_at: '2026-08-11T05:57:56.059493+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T05444069d1a5de1df2ee
+    result_id: res_ses_20260811T054440691eb0646491a6
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-06-deploy-topology/job_20260811T05444069d1a5de1df2ee-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The work preserves node-06-deploy-topology''s intended role and the graph''s integrity.
+      Intent: the node is a T1 report-only canary (''Document the deploy/mini-heartbeat tree — one-line-per-file
+      map keeps host setup reviewable''). The report at reports/gddp-dogfood/06-deploy-topology.md is
+      non-empty (145 lines), lists every file under deploy/mini-heartbeat/ with a one-line purpose (verified
+      programmatically: all 24 kit files covered, plus the 3 gitignored pycache files explicitly documented
+      as ephemeral), and quotes real paths from the live tree (the Live tree quote block matches on-disk
+      find output exactly). Spot-checks of one-line purposes against actual file contents confirmed accuracy.
+      Graph integrity: node-06 has depends_on: [] and unlocks: [] — no upstream assumptions and no downstream
+      dependents; the diff base->tip contains exactly one added file (the report), honoring ''create only
+      the report'' and ''read-only outside that path''; work is committed on the result ref per the executor
+      contract. No gddp-config or runtime graph mutation occurred. The only deviation found — the pytest
+      tail line (4 failed vs reproducible 1 failed, same total 626, same rig1 failure) — is evidence-fidelity
+      territory for lane 1, plausibly caused by sandbox environment differences (flask availability at
+      reload), and does not threaten intent or graph integrity.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-06-deploy-topology/job_20260811T05444069d1a5de1df2ee-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9533333333333333
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: b1a462679ad604becd308bd7774e25e121c3b81f
+      evaluated_commit_sha: 8f045b66d80ef20fd905029334f857843ab536c2
+      merge_commit_sha: 8f045b66d80ef20fd905029334f857843ab536c2
+      execution_attempt_id: job_20260811T05444069d1a5de1df2ee:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: medium
+        overall: medium
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings:
+        - severity: low
+          summary: The report quotes pytest tail line '4 failed, 622 passed in 36.77s', but both available
+            pytest venvs (gddp-runtime/.venv and /tmp/gddp-pytest-venv, both Python 3.13.5 + pytest 9.1.1
+            matching the report's pycache filenames) reproduce '1 failed, 625 passed' — same total (626)
+            and the same rig1 failure with identical assertion detail. The 3 extra intake failures are
+            plausibly environment-specific (reload_intake_server re-imports intake_server with real flask,
+            which fails in a sandbox python lacking flask). This is an evidence-fidelity question for
+            lane 1's criteria/constraint adjudication, not an intent or graph-integrity defect.
+          affected_node_ids:
+          - node-06-deploy-topology
+        reasoning: 'The work preserves node-06-deploy-topology''s intended role and the graph''s integrity.
+          Intent: the node is a T1 report-only canary (''Document the deploy/mini-heartbeat tree — one-line-per-file
+          map keeps host setup reviewable''). The report at reports/gddp-dogfood/06-deploy-topology.md
+          is non-empty (145 lines), lists every file under deploy/mini-heartbeat/ with a one-line purpose
+          (verified programmatically: all 24 kit files covered, plus the 3 gitignored pycache files explicitly
+          documented as ephemeral), and quotes real paths from the live tree (the Live tree quote block
+          matches on-disk find output exactly). Spot-checks of one-line purposes against actual file contents
+          confirmed accuracy. Graph integrity: node-06 has depends_on: [] and unlocks: [] — no upstream
+          assumptions and no downstream dependents; the diff base->tip contains exactly one added file
+          (the report), honoring ''create only the report'' and ''read-only outside that path''; work
+          is committed on the result ref per the executor contract. No gddp-config or runtime graph mutation
+          occurred. The only deviation found — the pytest tail line (4 failed vs reproducible 1 failed,
+          same total 626, same rig1 failure) — is evidence-fidelity territory for lane 1, plausibly caused
+          by sandbox environment differences (flask availability at reload), and does not threaten intent
+          or graph integrity.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: 'T1/T2 sibling canaries (node-07 through node-10, same report-only shape, all ready)
+            will face the same evidence-fidelity question: pytest tail lines quoted from a sandbox may
+            not reproduce in the review environment (as seen with node-06''s 3 intake failures). Consider
+            having lane-1 evidence collectors or future canaries record the pytest environment (python
+            version, flask presence, env vars) alongside the tail line to reduce ambiguity.'
+          affected_node_ids:
+          - node-07-hook-surface
+          - node-08-verification-module-map
+          - node-09-heartbeat-module-map
+          - node-10-agents-md-drift-report
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-07-hook-surface:
+    verdict: pass
+    evaluated_at: '2026-08-11T06:06:07.727574+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T055756457be8b25accfc
+    result_id: res_ses_20260811T05575645fa7e902ff5e7
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-07-hook-surface/job_20260811T055756457be8b25accfc-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes integrity review of node-07-hook-surface (T1 report-only canary, "Inventory
+      what fires on git commit/push", depends_on=[] unlocks=[]). The subject diff (450eca1..5803d34) contains
+      exactly one added file, reports/gddp-dogfood/07-hook-surface.md, and both result wrapper commits
+      contain only that file — the "Create only reports/gddp-dogfood/07-hook-surface.md" constraint is
+      honored and nothing outside the report path was written. The report delivers precisely what the
+      node''s title/why promise: a complete inventory of every hook surface (.agents/ Antigravity lifecycle
+      hooks, .git/hooks samples, graphify) with what triggers each, and the config/install lines quoted
+      (hooks.json JSON matches the file verbatim; git hooks = none installed with core.hooksPath unset
+      at all scopes; graphify = absent with gitignore evidence quoted; archived mission pre-push installer
+      quoted). I verified the report''s factual claims against the live worktree: .agents/hooks.json content,
+      the 13 .git/hooks samples, core.hooksPath unset, graphify config/graphify-out/AGENTS.md absence,
+      .gitignore graphify lines, scripts/_archive/mission_push_guard.py present with live path gone, and
+      .github/workflows/jules.yml (issues/labeled, not push). The pytest constraint is satisfied on its
+      face (tail line quoted with failure-class explanation; lane 1 owns criterion adjudication). Because
+      the node has no dependents/unlocks and the diff alters no source, config, or test files, nothing
+      downstream can break; graph structure is untouched. The report''s scope slightly exceeds the named
+      surfaces (adjacent surfaces section), but this is within the node''s why (making side effects visible
+      — explicitly disambiguating what does NOT fire on commit/push) and is not drift. Verdict: pass with
+      high confidence.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-07-hook-surface/job_20260811T055756457be8b25accfc-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9733333333333333
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 0fc9a6e70805c77eda078a08fd6522de05de2efd
+      evaluated_commit_sha: 5803d340be850b5bf3f17a85d3e140228871959d
+      merge_commit_sha: 5803d340be850b5bf3f17a85d3e140228871959d
+      execution_attempt_id: job_20260811T055756457be8b25accfc:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: high
+        overall: medium
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.93
+        findings: []
+        reasoning: 'Fresh-eyes integrity review of node-07-hook-surface (T1 report-only canary, "Inventory
+          what fires on git commit/push", depends_on=[] unlocks=[]). The subject diff (450eca1..5803d34)
+          contains exactly one added file, reports/gddp-dogfood/07-hook-surface.md, and both result wrapper
+          commits contain only that file — the "Create only reports/gddp-dogfood/07-hook-surface.md" constraint
+          is honored and nothing outside the report path was written. The report delivers precisely what
+          the node''s title/why promise: a complete inventory of every hook surface (.agents/ Antigravity
+          lifecycle hooks, .git/hooks samples, graphify) with what triggers each, and the config/install
+          lines quoted (hooks.json JSON matches the file verbatim; git hooks = none installed with core.hooksPath
+          unset at all scopes; graphify = absent with gitignore evidence quoted; archived mission pre-push
+          installer quoted). I verified the report''s factual claims against the live worktree: .agents/hooks.json
+          content, the 13 .git/hooks samples, core.hooksPath unset, graphify config/graphify-out/AGENTS.md
+          absence, .gitignore graphify lines, scripts/_archive/mission_push_guard.py present with live
+          path gone, and .github/workflows/jules.yml (issues/labeled, not push). The pytest constraint
+          is satisfied on its face (tail line quoted with failure-class explanation; lane 1 owns criterion
+          adjudication). Because the node has no dependents/unlocks and the diff alters no source, config,
+          or test files, nothing downstream can break; graph structure is untouched. The report''s scope
+          slightly exceeds the named surfaces (adjacent surfaces section), but this is within the node''s
+          why (making side effects visible — explicitly disambiguating what does NOT fire on commit/push)
+          and is not drift. Verdict: pass with high confidence.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: This report establishes that NO hooks fire on git commit/push in gddp-runtime today
+            (no graphify post-commit, no pre-commit/pre-push, core.hooksPath unset). The project's own
+            operating loop therefore relies entirely on explicit dispatch/evaluation rather than any commit-time
+            side effect — future nodes that assume a post-commit graph rebuild or hook-driven automation
+            must trigger it explicitly.
+          affected_node_ids:
+          - node-07-hook-surface
+          - node-08-verification-module-map
+          - node-09-heartbeat-module-map
+          - node-10-agents-md-drift-report
+        - severity: low
+          summary: Report notes README still lists scripts/adapters/mission_push_guard.py as live while
+            the file was archived (204148e) — documentation drift that the upcoming node-10 (AGENTS.md
+            drift report) family of work may want to sweep up; not a problem for this node.
+          affected_node_ids:
+          - node-07-hook-surface
+          - node-10-agents-md-drift-report
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-08-verification-module-map:
+    verdict: pass
+    evaluated_at: '2026-08-11T06:16:04.783272+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T06082275a3b5ff60607b
+    result_id: res_ses_20260811T06082275e1bdcfe86884
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-08-verification-module-map/job_20260811T06082275a3b5ff60607b-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node-08-verification-module-map. Intent: the node''s why is
+      that the two-lane evaluator is the trust core and a module map makes its shape reviewable at a glance;
+      the produced report is precisely that — a complete inventory of all 48 non-cache files under scripts/runtime/verification/
+      with one-line purposes, plus a deterministic+semantic lane-flow section explaining where verdicts
+      combine (integrity_combiner.combine). I spot-checked the report''s architectural claims against
+      the code and they hold: orchestrator.verify is the single entry with _should_run_semantic gating
+      and integrity_harness wiring; decision_engine.MATRIX has exactly 12 rows; _INTEGRITY_FLOOR and the
+      severity order match the report''s tables verbatim; bridge.verify_job_return, retry_budget.should_retry,
+      receipt_sink.write_receipt exist; PiHarnessRunner (gddp_verifier.ts) and IntegrityHarnessRunner
+      (gddp_integrity.ts) exist; inventory counts sum to the find total of 48. The quoted pytest tail
+      (4 failed, 622 passed) is plausible — the four cited failing tests exist and flask is genuinely
+      missing, matching the cited ModuleNotFoundError. Graph integrity: depends_on and unlocks are both
+      empty, so no edges are at risk; the subject diff is exactly one added file (223 insertions, no other
+      changes, clean worktree, no pycache/junk committed), honoring the ''create only the report / read-only
+      elsewhere'' constraints. No writes to graph truth or canon. Nothing floors to human review; lane-1
+      criteria adjudication is out of my scope, but from an integrity standpoint the change preserves
+      the node''s role and the graph''s structure fully.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-08-verification-module-map/job_20260811T06082275a3b5ff60607b-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9666666666666667
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: a44328029eb4eeadb35ec9274c073fc1fb8c681b
+      evaluated_commit_sha: 637f1c57565459e16fdd7e39e5a9735ff68ca2db
+      merge_commit_sha: 637f1c57565459e16fdd7e39e5a9735ff68ca2db
+      execution_attempt_id: job_20260811T06082275a3b5ff60607b:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: none
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.92
+        findings: []
+        reasoning: 'Fresh-eyes review of node-08-verification-module-map. Intent: the node''s why is that
+          the two-lane evaluator is the trust core and a module map makes its shape reviewable at a glance;
+          the produced report is precisely that — a complete inventory of all 48 non-cache files under
+          scripts/runtime/verification/ with one-line purposes, plus a deterministic+semantic lane-flow
+          section explaining where verdicts combine (integrity_combiner.combine). I spot-checked the report''s
+          architectural claims against the code and they hold: orchestrator.verify is the single entry
+          with _should_run_semantic gating and integrity_harness wiring; decision_engine.MATRIX has exactly
+          12 rows; _INTEGRITY_FLOOR and the severity order match the report''s tables verbatim; bridge.verify_job_return,
+          retry_budget.should_retry, receipt_sink.write_receipt exist; PiHarnessRunner (gddp_verifier.ts)
+          and IntegrityHarnessRunner (gddp_integrity.ts) exist; inventory counts sum to the find total
+          of 48. The quoted pytest tail (4 failed, 622 passed) is plausible — the four cited failing tests
+          exist and flask is genuinely missing, matching the cited ModuleNotFoundError. Graph integrity:
+          depends_on and unlocks are both empty, so no edges are at risk; the subject diff is exactly
+          one added file (223 insertions, no other changes, clean worktree, no pycache/junk committed),
+          honoring the ''create only the report / read-only elsewhere'' constraints. No writes to graph
+          truth or canon. Nothing floors to human review; lane-1 criteria adjudication is out of my scope,
+          but from an integrity standpoint the change preserves the node''s role and the graph''s structure
+          fully.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: 'Nodes 09 and 10 are ready report-only siblings with identical constraints and will
+            each re-run and quote the same pytest tail (''4 failed, 622 passed'' while flask is missing).
+            Expect the same four failures to appear in their reports; treat as consistent tranche evidence,
+            not per-node drift. Sequential dispatch (max_concurrent_jobs: 1) means no overlap risk.'
+          affected_node_ids:
+          - node-09-heartbeat-module-map
+          - node-10-agents-md-drift-report
+        - severity: low
+          summary: This report pins exact internals (12-row matrix, combiner floors) that will drift as
+            the runtime evolves. That is inherent to a point-in-time module map and matches T1's report-only
+            canary purpose; node-10's AGENTS.md drift report is the designated mechanism for catching
+            doctrine drift going forward.
+          affected_node_ids:
+          - node-08-verification-module-map
+          - node-10-agents-md-drift-report
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-09-heartbeat-module-map:
+    verdict: pass
+    evaluated_at: '2026-08-11T06:27:02.700343+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T06185867300807387d68
+    result_id: res_ses_20260811T0618586761ef8c505f2c
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-09-heartbeat-module-map/job_20260811T06185867300807387d68-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The node''s role is a T1 report-only canary: produce a one-line-per-module map of
+      scripts/runtime/heartbeat/ that keeps the operating surface legible. The delivered report (the only
+      file in the diff, base 450eca1 → tip 0bd1602) fully realizes that role: it inventories all 25 modules
+      (12 production + 13 test) under the target directory with one-line purposes that I spot-verified
+      against actual module docstrings (AST-parsed) — all consistent, none fabricated. It describes the
+      tick flow (events → dispatch → reconcile → evaluate) with a phase diagram and ownership table, and
+      quotes the required pytest tail line (''4 failed, 622 passed in 36.88s'') naming 4 failing test
+      files that all exist in the repo, so the claim is plausible and consistent with the cited node-05
+      baseline. Constraints are honored: only the report file was created, nothing else modified, work
+      committed on the result ref (diff is exactly 1 added file). Graph integrity is preserved: the node
+      has depends_on: [] and unlocks: [], nothing downstream consumes its output, and the change touches
+      nothing outside the report path. No intent or graph drift detected; the map is accurate enough that
+      downstream human consumers get a legible, correct surface.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-09-heartbeat-module-map/job_20260811T06185867300807387d68-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9733333333333333
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 45fed8099ef142a42e550b3e1fc9bcdc85aefac8
+      evaluated_commit_sha: 0bd1602ea782f5324c794215a3dba6838a7edad0
+      merge_commit_sha: 0bd1602ea782f5324c794215a3dba6838a7edad0
+      execution_attempt_id: job_20260811T06185867300807387d68:attempt:0
+      context_coverage:
+        criteria: none
+        integrity: none
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'The node''s role is a T1 report-only canary: produce a one-line-per-module map of
+          scripts/runtime/heartbeat/ that keeps the operating surface legible. The delivered report (the
+          only file in the diff, base 450eca1 → tip 0bd1602) fully realizes that role: it inventories
+          all 25 modules (12 production + 13 test) under the target directory with one-line purposes that
+          I spot-verified against actual module docstrings (AST-parsed) — all consistent, none fabricated.
+          It describes the tick flow (events → dispatch → reconcile → evaluate) with a phase diagram and
+          ownership table, and quotes the required pytest tail line (''4 failed, 622 passed in 36.88s'')
+          naming 4 failing test files that all exist in the repo, so the claim is plausible and consistent
+          with the cited node-05 baseline. Constraints are honored: only the report file was created,
+          nothing else modified, work committed on the result ref (diff is exactly 1 added file). Graph
+          integrity is preserved: the node has depends_on: [] and unlocks: [], nothing downstream consumes
+          its output, and the change touches nothing outside the report path. No intent or graph drift
+          detected; the map is accurate enough that downstream human consumers get a legible, correct
+          surface.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Sibling canaries node-08 (provisional), node-09 (ready), node-10 (ready) are independent
+            with no unlocks; sequential max_concurrent_jobs=1 execution means no convergence risk. The
+            reports/ tree currently holds only 09; earlier canary reports (01-08) live elsewhere or are
+            pending — expected for the tranche-gated frontier, not a defect.
+          affected_node_ids:
+          - node-08-verification-module-map
+          - node-09-heartbeat-module-map
+          - node-10-agents-md-drift-report
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-10-agents-md-drift-report:
+    verdict: pass
+    evaluated_at: '2026-08-11T06:38:01.023133+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T06295274be8c4e4dddaa
+    result_id: res_ses_20260811T0629527450098c96d475
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-10-agents-md-drift-report/job_20260811T06295274be8c4e4dddaa-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The node''s role is a T1 report-only canary: produce reports/gddp-dogfood/10-agents-md-drift-report.md
+      documenting AGENTS.md statements that contradict current code, without editing anything else. The
+      delivered report fulfills exactly that role. Diff base 450eca1 -> tip d168c13 contains only the
+      new report file (275 lines); the working tree is clean, so the read-only constraint (''Create only
+      the report'', ''Read-only outside that report path'') is preserved at the diff level. Every AGENTS.md
+      line citation I checked (L15, 17-19, 65, 72-73, 79-80, 83-87, 88-91, 109-110) matches the source
+      verbatim, and every spot-checked code file:line citation (state_recorder.py 56-71/85-88/188-191,
+      return_router.py 95-98/246-263, rollback.py:66, jobs_status.py:10/394-412, provisional_status.py:144-151,
+      frontier.py:101-106, reconciler.py:1290-1299, requirements.txt, schemas.py:7, graph_reader.py:17,
+      intake_server.py:24, executor_protocol.py:65, retry_budget.py:23-28, mission_adapter.py:546-549,
+      session_prompt.py:44-74) is accurate. Negative claims are corroborated: no proposals-ledger code
+      exists under scripts/, and flask is genuinely not importable in this environment, consistent with
+      the quoted pytest tail ''4 failed, 622 passed in 35.15s''. The report is balanced (includes a ''not
+      drifted'' table, notes where AGENTS.md aligns with code, and marks suggested doc fixes explicitly
+      out of scope), which matches the node''s why: a drift report keeps the contract honest without editing.
+      Commit structure honors the executor contract (co-authored work commit be8bade plus result-ref wrapper
+      d168c13). The node has no depends_on and no unlocks, so no dependent node is affected; the change
+      is purely additive and does not touch graph config, canon, or runtime state. Intent preserved; graph
+      integrity preserved. No human review required for the integrity lane; acceptance-criteria adjudication
+      remains lane 1''s call.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-10-agents-md-drift-report/job_20260811T06295274be8c4e4dddaa-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.96
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: ff05d275e16210a246ea6ba73c62c23b0872fb3e
+      evaluated_commit_sha: d168c137e7b5077c0c611913ed49b75309707074
+      merge_commit_sha: d168c137e7b5077c0c611913ed49b75309707074
+      execution_attempt_id: job_20260811T06295274be8c4e4dddaa:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: medium
+        overall: medium
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.95
+        findings: []
+        reasoning: 'The node''s role is a T1 report-only canary: produce reports/gddp-dogfood/10-agents-md-drift-report.md
+          documenting AGENTS.md statements that contradict current code, without editing anything else.
+          The delivered report fulfills exactly that role. Diff base 450eca1 -> tip d168c13 contains only
+          the new report file (275 lines); the working tree is clean, so the read-only constraint (''Create
+          only the report'', ''Read-only outside that report path'') is preserved at the diff level. Every
+          AGENTS.md line citation I checked (L15, 17-19, 65, 72-73, 79-80, 83-87, 88-91, 109-110) matches
+          the source verbatim, and every spot-checked code file:line citation (state_recorder.py 56-71/85-88/188-191,
+          return_router.py 95-98/246-263, rollback.py:66, jobs_status.py:10/394-412, provisional_status.py:144-151,
+          frontier.py:101-106, reconciler.py:1290-1299, requirements.txt, schemas.py:7, graph_reader.py:17,
+          intake_server.py:24, executor_protocol.py:65, retry_budget.py:23-28, mission_adapter.py:546-549,
+          session_prompt.py:44-74) is accurate. Negative claims are corroborated: no proposals-ledger
+          code exists under scripts/, and flask is genuinely not importable in this environment, consistent
+          with the quoted pytest tail ''4 failed, 622 passed in 35.15s''. The report is balanced (includes
+          a ''not drifted'' table, notes where AGENTS.md aligns with code, and marks suggested doc fixes
+          explicitly out of scope), which matches the node''s why: a drift report keeps the contract honest
+          without editing. Commit structure honors the executor contract (co-authored work commit be8bade
+          plus result-ref wrapper d168c13). The node has no depends_on and no unlocks, so no dependent
+          node is affected; the change is purely additive and does not touch graph config, canon, or runtime
+          state. Intent preserved; graph integrity preserved. No human review required for the integrity
+          lane; acceptance-criteria adjudication remains lane 1''s call.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: D1-D6 drift findings (multi-writer job backend, runtime auto-writing provisional/ready
+            graph status, install-surface mismatch, unimplemented proposals ledger, AGENTS internal contradiction
+            on node authoring, accept_node semantics) identify concrete AGENTS.md doc work; any future
+            doc-cleanup/corrective node that edits AGENTS.md should be human-gated since AGENTS.md is
+            executor canon, and D2's 'only the human changes graph truth' tension is material to the canon
+            model that downstream integrity lanes will keep re-checking.
+          affected_node_ids:
+          - node-10-agents-md-drift-report
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-11-test-manifest-name:
+    verdict: needs-human-review
+    evaluated_at: '2026-08-11T06:59:04.409974+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T06462276d87387f5952d
+    result_id: res_ses_20260811T06462276c45e2041b11e
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-11-test-manifest-name/job_20260811T06462276d87387f5952d-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The node''s intended role is pure-function unit coverage of _manifest_name in scripts/adapters/mission_evidence.py:
+      small, independent, mechanically verifiable. The delivered change is exactly one new file (scripts/adapters/test_manifest_name.py,
+      59 lines) placed next to its module and following sibling test-file conventions; git diff base..tip
+      shows no production-code or other-test-file modifications. I manually traced all four tests against
+      the live _manifest_name implementation (safe stem keeps alnum/dash/underscore, unsafe chars become
+      ''-'', edge dashes stripped, sha256[:12] digest appended, deterministic, ''feature'' fallback when
+      fully stripped) and every assertion is consistent with actual behavior. The evaluator''s source_path
+      mismatch (heartbeat alternative absent) is a non-issue: _manifest_name exists only in scripts/adapters/,
+      and the primary criterion path is present. Graph integrity is preserved: the node has no depends_on/unlocks,
+      so no edges are added or broken and no downstream node can be affected; the T3 frontier siblings
+      (nodes 12-16) remain independent. Only caveat: the pytest-tail-quote constraint shows no evidence
+      of being met in the commit or a note — flagged low for lane 1''s constraint review; it does not
+      change the integrity verdict. Confidence is high on intent and graph preservation; the sole unverifiable
+      element (live pytest suite-green) belongs to lane 1.'
+    evidence_refs:
+    - 'Commit 7f25085 body: ''test(adapters): unit-cover _manifest_name sanitization and digest / Add
+      scripts/adapters/test_manifest_name.py for safe stem, 12-hex digest, determinism, and fully-stripped
+      fallback. Co-Authored-By: Pi + composer-2'' — no pytest tail line'
+    - 'Result commit 689c6b6 body: ''result(job=job_20260811T06462276d87387f5952d, attempt=...:attempt:0)''
+      — no pytest tail line'
+    - No note file added in diff; .gddp/result-summary.md and .gddp/patch.diff are stale July artifacts
+      from neutral-executor-contract (pre-existing at base)
+    - 'Independent reproduction shows the suite state the criterion expects (630 passed with flask; exactly
+      3 ModuleNotFoundError: flask failures without; new test passes in both)'
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-11-test-manifest-name/job_20260811T06462276d87387f5952d-attempt0.json
+      verdict: needs-human-review
+      criteria_confidence: 0.4
+      completeness_status: complete
+      required_next_action: Human review required for unresolved semantic judgments.
+      evaluated_tree_sha: 2fc2258ee92d2012ab259f6f17fdc8a2bc786abc
+      evaluated_commit_sha: 689c6b6df049f5933d20badac12cc5cf5461e989
+      merge_commit_sha: 689c6b6df049f5933d20badac12cc5cf5461e989
+      execution_attempt_id: job_20260811T06462276d87387f5952d:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: medium
+        overall: medium
+      criteria_verdict: needs-human-review
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings:
+        - severity: low
+          summary: 'Constraint ''Run python3 -m pytest -q before finishing and quote its tail line in
+            the commit or a short note'' does not appear satisfied: commit 7f25085 body quotes no pytest
+            output and no accompanying short note quoting a tail line was found in the repo. This is a
+            constraint-evidence gap for lane 1, not an intent or graph-integrity failure. Sandbox lacks
+            pytest so the suite run could not be independently re-executed here; the presence of test_manifest_name.cpython-313.pyc
+            (post-commit timestamp) confirms the file imports cleanly under Python 3.13.'
+          affected_node_ids:
+          - node-11-test-manifest-name
+        reasoning: 'The node''s intended role is pure-function unit coverage of _manifest_name in scripts/adapters/mission_evidence.py:
+          small, independent, mechanically verifiable. The delivered change is exactly one new file (scripts/adapters/test_manifest_name.py,
+          59 lines) placed next to its module and following sibling test-file conventions; git diff base..tip
+          shows no production-code or other-test-file modifications. I manually traced all four tests
+          against the live _manifest_name implementation (safe stem keeps alnum/dash/underscore, unsafe
+          chars become ''-'', edge dashes stripped, sha256[:12] digest appended, deterministic, ''feature''
+          fallback when fully stripped) and every assertion is consistent with actual behavior. The evaluator''s
+          source_path mismatch (heartbeat alternative absent) is a non-issue: _manifest_name exists only
+          in scripts/adapters/, and the primary criterion path is present. Graph integrity is preserved:
+          the node has no depends_on/unlocks, so no edges are added or broken and no downstream node can
+          be affected; the T3 frontier siblings (nodes 12-16) remain independent. Only caveat: the pytest-tail-quote
+          constraint shows no evidence of being met in the commit or a note — flagged low for lane 1''s
+          constraint review; it does not change the integrity verdict. Confidence is high on intent and
+          graph preservation; the sole unverifiable element (live pytest suite-green) belongs to lane
+          1.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Frontier has 6 independent ready test nodes (node-11..node-16) in the same T3 tranche
+            with max_concurrent_jobs=1; they serialize by policy, not by graph dependency. Each adds one
+            test file next to its module in scripts/adapters/ — consistent with this node's shape, so
+            subsequent nodes should follow the same one-file, no-production-change pattern. No convergence
+            risk observed.
+          affected_node_ids:
+          - node-12-test-topological-order
+          - node-13-test-render-item
+          - node-14-test-completion-id-digest
+          - node-15-test-normalize-digest
+          - node-16-test-select-handoff
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      criteria_findings:
+      - criterion_id: constraint-pytest-tail-line-quoted
+        judgment: indeterminate
+        evidence:
+        - 'Commit 7f25085 body: ''test(adapters): unit-cover _manifest_name sanitization and digest /
+          Add scripts/adapters/test_manifest_name.py for safe stem, 12-hex digest, determinism, and fully-stripped
+          fallback. Co-Authored-By: Pi + composer-2'' — no pytest tail line'
+        - 'Result commit 689c6b6 body: ''result(job=job_20260811T06462276d87387f5952d, attempt=...:attempt:0)''
+          — no pytest tail line'
+        - No note file added in diff; .gddp/result-summary.md and .gddp/patch.diff are stale July artifacts
+          from neutral-executor-contract (pre-existing at base)
+        - 'Independent reproduction shows the suite state the criterion expects (630 passed with flask;
+          exactly 3 ModuleNotFoundError: flask failures without; new test passes in both)'
+        reasoning: The constraint required running pytest and quoting its tail line in the commit or a
+          short note. Neither commit quotes a tail line and no note was added, so the required evidence
+          artifact is absent. The underlying run outcome described by criterion suite-green is, however,
+          reproducible exactly, suggesting the run plausibly occurred. This is a process-evidence gap
+          (completeness concern), not a failure of the acceptance criteria themselves; flagged for human
+          confirmation.
+  node-12-test-topological-order:
+    verdict: pass
+    evaluated_at: '2026-08-11T07:09:40.574380+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T065904859cd8c8fced60
+    result_id: res_ses_20260811T06590485d16c3fbd0fb6
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-12-test-topological-order/job_20260811T065904859cd8c8fced60-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The work preserves node-12''s intended role exactly: pure-function unit coverage
+      for _topological_nodes in scripts/adapters/mission_projection.py. The diff is a single additive
+      file (scripts/adapters/test_topological_nodes.py) placed next to its module, with no production
+      code or other test files modified — matching all four constraints (one new file, no production/test
+      edits, pytest tail quoted in the commit 5250bd4, work committed on the result ref). The tests genuinely
+      assert the criterion behaviors (depends_on ordering respected; independent nodes keep stable input
+      order, including interleaved with a dependent chain) plus error cases (duplicates, cycles) and external-dep
+      ignoring; I executed the module logic directly and all six test scenarios pass with the module importing
+      cleanly (no flask in the import chain). The evaluator''s flagged ''scripts/runtime/heartbeat/test_topological_nodes.py
+      absent'' mismatch is a false alarm: the criterion''s OR branch is a defensive alternative, and the
+      actual target module lives in scripts/adapters, where the test file was correctly placed. Graph
+      integrity is preserved: node-12 is an independent leaf (depends_on [], unlocks []), so nothing downstream
+      depends on it; the added file collides with no other node''s required artifact; the working tree
+      is clean and the diff is verifiably isolated. Verdict: pass — the change preserves the node''s promised
+      role and the project graph''s structure with high confidence.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-12-test-topological-order/job_20260811T065904859cd8c8fced60-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.8799999999999999
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 0c3a5a336e4c5400fe7cb15ea35a1a6a567f5e3e
+      evaluated_commit_sha: 2d2e9265379c8cf24bd5a8dbdd24a2d35c313a0f
+      merge_commit_sha: 2d2e9265379c8cf24bd5a8dbdd24a2d35c313a0f
+      execution_attempt_id: job_20260811T065904859cd8c8fced60:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: medium
+        overall: medium
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.85
+        findings:
+        - severity: low
+          summary: 'Quoted pytest tail reports 4 failures while the suite-green criterion names ''3 known
+            flask-import failures''. Evidence-count discrepancy is lane 1''s domain; the new file itself
+            reports 6 passed and the 4 failures are pre-existing ModuleNotFoundError: flask in unrelated
+            files (test_intake_server.py, test_runtime_root_config.py). Does not affect node intent or
+            graph integrity.'
+          affected_node_ids:
+          - node-12-test-topological-order
+        reasoning: 'The work preserves node-12''s intended role exactly: pure-function unit coverage for
+          _topological_nodes in scripts/adapters/mission_projection.py. The diff is a single additive
+          file (scripts/adapters/test_topological_nodes.py) placed next to its module, with no production
+          code or other test files modified — matching all four constraints (one new file, no production/test
+          edits, pytest tail quoted in the commit 5250bd4, work committed on the result ref). The tests
+          genuinely assert the criterion behaviors (depends_on ordering respected; independent nodes keep
+          stable input order, including interleaved with a dependent chain) plus error cases (duplicates,
+          cycles) and external-dep ignoring; I executed the module logic directly and all six test scenarios
+          pass with the module importing cleanly (no flask in the import chain). The evaluator''s flagged
+          ''scripts/runtime/heartbeat/test_topological_nodes.py absent'' mismatch is a false alarm: the
+          criterion''s OR branch is a defensive alternative, and the actual target module lives in scripts/adapters,
+          where the test file was correctly placed. Graph integrity is preserved: node-12 is an independent
+          leaf (depends_on [], unlocks []), so nothing downstream depends on it; the added file collides
+          with no other node''s required artifact; the working tree is clean and the diff is verifiably
+          isolated. Verdict: pass — the change preserves the node''s promised role and the project graph''s
+          structure with high confidence.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Sibling nodes 11-16 each re-run the full pytest suite; the shared suite-green criterion's
+            known-failure baseline ('3 known flask-import failures') should be pinned against the observed
+            4 so downstream nodes don't produce inconsistent evidence.
+          affected_node_ids:
+          - node-11-test-manifest-name
+          - node-12-test-topological-order
+          - node-13-test-render-item
+          - node-14-test-completion-id-digest
+          - node-15-test-normalize-digest
+          - node-16-test-select-handoff
+        - severity: low
+          summary: node-13 (test-render-item) targets the same module mission_projection.py; its upcoming
+            test file will be a sibling of test_topological_nodes.py. No overlap today, but the tranche
+            should keep each node's artifact file distinct and additive to avoid cross-node test-file
+            edits.
+          affected_node_ids:
+          - node-12-test-topological-order
+          - node-13-test-render-item
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-13-test-render-item:
+    verdict: needs-human-review
+    evaluated_at: '2026-08-11T07:18:46.809545+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T070941000a46b1ffe59d
+    result_id: res_ses_20260811T07094100c31181724bac
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-13-test-render-item/job_20260811T070941000a46b1ffe59d-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The work exactly matches node-13''s intended role: pure-function unit coverage for
+      _render_item in scripts/adapters/mission_projection.py. Verified: (1) the base..tip diff adds exactly
+      one file, scripts/adapters/test_render_item.py, next to its module — no production code or other
+      test files modified, honoring the two core constraints; (2) the file imports the real _render_item/_freeze_json
+      and asserts that nested frozen mappings (MappingProxyType + tuples) render as readable, round-trippable
+      JSON text without crashing — the node''s stated why; (3) all four test functions pass when executed
+      directly, and the import chain has no flask dependency so the file collects cleanly; (4) the commit
+      quotes the pytest tail per constraint and transparently discloses the 4th failure (rig1-render-plist)
+      as pre-existing — confirmed byte-identical between base and tip, so it is unrelated to this node.
+      Graph integrity is preserved: node-13 has depends_on=[] and unlocks=[] (independent leaf), so no
+      downstream edge exists to break; the change is purely additive to tests. The evaluator''s source_path
+      mismatch on the heartbeat path is a false positive on the criterion''s ''or'' branch (the adapters
+      path applies and exists). The suite-green criterion''s premise of exactly 3 known failures is stale
+      (there is a pre-existing 4th), but that is criterion-authoring/lane-1 territory, not a drift of
+      this node''s role. Verdict: pass.'
+    evidence_refs:
+    - 'executor commit 4c78741 quotes pytest tail: ''4 failed, 626 passed in 36.57s (3 flask ModuleNotFoundError
+      + pre-existing rig1-render-plist assert; new file: 4 passed)'''
+    - 'my sandbox run of full suite: ''1 failed, 629 passed in 36.56s'' — only deploy/rig1-heartbeat/test_rig1_render_plist.py::test_render_heartbeat_invokes_real_runner_module
+      fails (assert ''pi-harness-execution'' != ''gddp-runtime''); flask 3.1.3 installed in sandbox venv
+      so the 3 flask failures do not reproduce here'
+    - 'git diff 450eca1..15ac38b --stat: only scripts/adapters/test_render_item.py added -> rig1 failure
+      is pre-existing by construction (test and its inputs untouched)'
+    - 'new test file passes in sandbox: 4 passed in 0.09s'
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-13-test-render-item/job_20260811T070941000a46b1ffe59d-attempt0.json
+      verdict: needs-human-review
+      criteria_confidence: 0.5
+      completeness_status: complete
+      required_next_action: Human review required for unresolved semantic judgments.
+      evaluated_tree_sha: ba71898528178cd606f64202f7f41ed8747d7599
+      evaluated_commit_sha: 15ac38b1a1f0d60f8534a878a517fea3d3e0bc17
+      merge_commit_sha: 15ac38b1a1f0d60f8534a878a517fea3d3e0bc17
+      execution_attempt_id: job_20260811T070941000a46b1ffe59d:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: medium
+        overall: medium
+      criteria_verdict: needs-human-review
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'The work exactly matches node-13''s intended role: pure-function unit coverage for
+          _render_item in scripts/adapters/mission_projection.py. Verified: (1) the base..tip diff adds
+          exactly one file, scripts/adapters/test_render_item.py, next to its module — no production code
+          or other test files modified, honoring the two core constraints; (2) the file imports the real
+          _render_item/_freeze_json and asserts that nested frozen mappings (MappingProxyType + tuples)
+          render as readable, round-trippable JSON text without crashing — the node''s stated why; (3)
+          all four test functions pass when executed directly, and the import chain has no flask dependency
+          so the file collects cleanly; (4) the commit quotes the pytest tail per constraint and transparently
+          discloses the 4th failure (rig1-render-plist) as pre-existing — confirmed byte-identical between
+          base and tip, so it is unrelated to this node. Graph integrity is preserved: node-13 has depends_on=[]
+          and unlocks=[] (independent leaf), so no downstream edge exists to break; the change is purely
+          additive to tests. The evaluator''s source_path mismatch on the heartbeat path is a false positive
+          on the criterion''s ''or'' branch (the adapters path applies and exists). The suite-green criterion''s
+          premise of exactly 3 known failures is stale (there is a pre-existing 4th), but that is criterion-authoring/lane-1
+          territory, not a drift of this node''s role. Verdict: pass.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: 'suite-green criterion premise is stale for the whole T3 tranche: the run has 4 pre-existing
+            failures (3 flask ModuleNotFoundError + rig1-render-plist assert), not the ''only 3 known
+            flask-import failures'' the criterion assumes. Every T3 test node (node-11/12/14/15/16, all
+            ready with the same shape) will hit the same indeterminate/partial suite-green evaluation
+            until the criterion is updated to acknowledge the pre-existing rig1 failure.'
+          affected_node_ids:
+          - node-13-test-render-item
+          - node-11-test-manifest-name
+          - node-12-test-topological-order
+          - node-14-test-completion-id-digest
+          - node-15-test-normalize-digest
+          - node-16-test-select-handoff
+        - severity: low
+          summary: The test-file-exists criterion's 'or scripts/runtime/heartbeat/test_render_item.py
+            matching the target module location' branch will keep producing source_path mismatches for
+            T3 nodes because the target module lives in scripts/adapters/, so the adapters path is always
+            the correct branch. Consider tightening the criterion to avoid recurring evaluator false positives.
+          affected_node_ids:
+          - node-13-test-render-item
+          - node-11-test-manifest-name
+          - node-12-test-topological-order
+          - node-14-test-completion-id-digest
+          - node-15-test-normalize-digest
+          - node-16-test-select-handoff
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      criteria_findings:
+      - criterion_id: suite-green
+        judgment: indeterminate
+        evidence:
+        - 'executor commit 4c78741 quotes pytest tail: ''4 failed, 626 passed in 36.57s (3 flask ModuleNotFoundError
+          + pre-existing rig1-render-plist assert; new file: 4 passed)'''
+        - 'my sandbox run of full suite: ''1 failed, 629 passed in 36.56s'' — only deploy/rig1-heartbeat/test_rig1_render_plist.py::test_render_heartbeat_invokes_real_runner_module
+          fails (assert ''pi-harness-execution'' != ''gddp-runtime''); flask 3.1.3 installed in sandbox
+          venv so the 3 flask failures do not reproduce here'
+        - 'git diff 450eca1..15ac38b --stat: only scripts/adapters/test_render_item.py added -> rig1 failure
+          is pre-existing by construction (test and its inputs untouched)'
+        - 'new test file passes in sandbox: 4 passed in 0.09s'
+        reasoning: 'The new test file passes (verified). However, the literal criterion — ''passes with
+          only the 3 known flask-import failures'' — is not met in either observed environment: the executor''s
+          own quoted tail shows 4 failures (3 flask + a pre-existing rig1-render-plist AssertionError),
+          and this sandbox shows 1 failure (rig1, with 0 flask failures since flask is installed here).
+          The extra failure is provably pre-existing (the diff adds only the new test file), unrelated
+          to this node''s work, and was disclosed honestly in the quoted tail. Whether the criterion''s
+          ''only 3'' bound is an exhaustive acceptance gate (node fails) or a baseline calibration where
+          disclosed pre-existing unrelated failures are acceptable (node passes) is a human call; the
+          environment-dependence (flask presence) also means the criterion''s premise does not reproduce
+          identically across machines. Hence indeterminate pending human clarification.'
+  node-14-test-completion-id-digest:
+    verdict: pass
+    evaluated_at: '2026-08-11T07:29:23.161591+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T07202281df380b475524
+    result_id: res_ses_20260811T072022811f88e76877f4
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-14-test-completion-id-digest/job_20260811T07202281df380b475524-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node-14-test-completion-id-digest against its stated role and
+      graph integrity. Intent: node''s why is pure-function unit coverage for _completion_id in scripts/adapters/mission_evidence.py,
+      small/independent/mechanically verifiable. The work under review is a single added file, scripts/adapters/test_completion_identity.py
+      (59 lines), which: (1) asserts _completion_id produces ''mission:feature:worker'' format and returns
+      None when mission/worker is missing — matching the actual module signature (mission_evidence.py:722);
+      (2) asserts _completion_digest is stable across dict ordering (receipt_a vs receipt_b with different
+      key insertion order) and is a 64-char sha256 hex — matching the module''s sort_keys=True json.dumps
+      hashing (mission_evidence.py:734). I executed the file: 3 passed in 0.03s. Constraints verified:
+      exactly one new test file next to its module (yes, in scripts/adapters/), no production code or
+      other test files modified (git diff base 450eca1 -> tip 42ce55e shows exactly one ''A'' entry),
+      pytest tail quoted in the commit message (''4 failed, 625 passed in 37.04s''), and work committed
+      on the result ref (wrapper commit present). The full suite at tip reports 1 failed / 628 passed:
+      the sole failure is deploy/rig1-heartbeat/test_rig1_render_plist.py, a pre-existing failure in a
+      file untouched by this change (and the flask-count difference vs the executor''s env is an environment
+      artifact, a lane-1 acceptance matter, not an integrity issue). Graph integrity: node-14 is an independent
+      leaf (depends_on: [], unlocks: []); the change is purely additive with no shared-code modification,
+      so no dependent can be affected. The deterministic evaluator''s ''source_path'' mismatch (scripts/runtime/heartbeat/test_completion_identity.py
+      absent) is a scanner artifact: the criterion''s first-listed valid path is scripts/adapters/ (the
+      node constraint explicitly pins the file next to its module there), and the file exists (artifacts_present=True).
+      No overlap with the pre-existing test_mission_evidence.py, which covers higher-level evidence-join
+      behavior rather than these two helpers. Verdict: pass — intent preserved, graph integrity preserved.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-14-test-completion-id-digest/job_20260811T07202281df380b475524-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.84
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 6b2d8e4faeedaf0fc5f29e67b27d90e05c383fd7
+      evaluated_commit_sha: 42ce55eb31ec0eda4fa394a605a16d888dc70faa
+      merge_commit_sha: 42ce55eb31ec0eda4fa394a605a16d888dc70faa
+      execution_attempt_id: job_20260811T07202281df380b475524:attempt:0
+      context_coverage:
+        criteria: none
+        integrity: none
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'Fresh-eyes review of node-14-test-completion-id-digest against its stated role and
+          graph integrity. Intent: node''s why is pure-function unit coverage for _completion_id in scripts/adapters/mission_evidence.py,
+          small/independent/mechanically verifiable. The work under review is a single added file, scripts/adapters/test_completion_identity.py
+          (59 lines), which: (1) asserts _completion_id produces ''mission:feature:worker'' format and
+          returns None when mission/worker is missing — matching the actual module signature (mission_evidence.py:722);
+          (2) asserts _completion_digest is stable across dict ordering (receipt_a vs receipt_b with different
+          key insertion order) and is a 64-char sha256 hex — matching the module''s sort_keys=True json.dumps
+          hashing (mission_evidence.py:734). I executed the file: 3 passed in 0.03s. Constraints verified:
+          exactly one new test file next to its module (yes, in scripts/adapters/), no production code
+          or other test files modified (git diff base 450eca1 -> tip 42ce55e shows exactly one ''A'' entry),
+          pytest tail quoted in the commit message (''4 failed, 625 passed in 37.04s''), and work committed
+          on the result ref (wrapper commit present). The full suite at tip reports 1 failed / 628 passed:
+          the sole failure is deploy/rig1-heartbeat/test_rig1_render_plist.py, a pre-existing failure
+          in a file untouched by this change (and the flask-count difference vs the executor''s env is
+          an environment artifact, a lane-1 acceptance matter, not an integrity issue). Graph integrity:
+          node-14 is an independent leaf (depends_on: [], unlocks: []); the change is purely additive
+          with no shared-code modification, so no dependent can be affected. The deterministic evaluator''s
+          ''source_path'' mismatch (scripts/runtime/heartbeat/test_completion_identity.py absent) is a
+          scanner artifact: the criterion''s first-listed valid path is scripts/adapters/ (the node constraint
+          explicitly pins the file next to its module there), and the file exists (artifacts_present=True).
+          No overlap with the pre-existing test_mission_evidence.py, which covers higher-level evidence-join
+          behavior rather than these two helpers. Verdict: pass — intent preserved, graph integrity preserved.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Sibling nodes node-11 (_manifest_name), node-16 (_select_handoff), and node-13 (_render_item)
+            are the same independent-leaf pure-function test pattern targeting scripts/adapters/ modules,
+            several of which already have a broader test_mission_evidence.py. As these land, consider
+            later consolidation of per-helper test files into test_mission_evidence.py to avoid test-file
+            fragmentation in scripts/adapters/.
+          affected_node_ids:
+          - node-11-test-manifest-name
+          - node-13-test-render-item
+          - node-14-test-completion-id-digest
+          - node-16-test-select-handoff
+        - severity: low
+          summary: 'Suite-state discrepancy between executor env (4 failed incl. 3 flask ModuleNotFoundError)
+            and this review env (1 failed: pre-existing rig1-render-plist assert, flask importable) means
+            the ''suite-green'' criterion''s exact failure count is environment-dependent. The rig1 failure
+            is verified pre-existing and unrelated to this change; flagging for lane 1 so the acceptance
+            adjudication accounts for environment variance rather than treating the quoted tail as a regression.'
+          affected_node_ids:
+          - node-14-test-completion-id-digest
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-15-test-normalize-digest:
+    verdict: pass
+    evaluated_at: '2026-08-11T07:39:53.698294+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T0730527691c4e844bc6a
+    result_id: res_ses_20260811T0730527604cc5c8ee27e
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-15-test-normalize-digest/job_20260811T0730527691c4e844bc6a-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Node-15''s intended role — pure-function unit coverage of _normalize_digest next
+      to its module in scripts/runtime/heartbeat/completion_discipline.py — is fully preserved. The subject
+      diff is exactly one added test file at the required path (scripts/runtime/heartbeat/test_normalize_digest.py);
+      no production code or other test files were modified (constraint honored); the pytest tail is quoted
+      in the commit; work is committed on the result ref. I verified every assertion in the new test against
+      the actual _normalize_digest source (strip/lowercase, 64-hexdigit check, exact error messages "64
+      hexadecimal characters" and "SHA-256 digest") — tests are accurate, not fabricated. Graph integrity
+      is trivially preserved: node-15 has depends_on=[] and unlocks=[], it is an independent leaf with
+      no dependents, and the only change is an additive test file, so nothing downstream can break. The
+      lane-1 ''source_path'' flag on scripts/adapters/test_normalize_digest.py is a criteria artifact:
+      the criterion explicitly permits the scripts/runtime/heartbeat/ alternative matching the target
+      module location, which is present — the node''s intent (test _normalize_digest at its module) is
+      unambiguous. Full-suite greenness (4 failures: 3 flask + 1 claimed pre-existing rig1) is a lane-1
+      acceptance-criteria question and could not be independently re-run here (pytest unavailable), but
+      the executor was transparent in the commit message and this does not affect the integrity assessment.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-15-test-normalize-digest/job_20260811T0730527691c4e844bc6a-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.8666666666666666
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: df490756f0e6dda87443be3eb62b315ae36eb07b
+      evaluated_commit_sha: 892ae1773b617b15c9ec2b7c4edb5f81d8d69e52
+      merge_commit_sha: 892ae1773b617b15c9ec2b7c4edb5f81d8d69e52
+      execution_attempt_id: job_20260811T0730527691c4e844bc6a:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: medium
+        overall: medium
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'Node-15''s intended role — pure-function unit coverage of _normalize_digest next to
+          its module in scripts/runtime/heartbeat/completion_discipline.py — is fully preserved. The subject
+          diff is exactly one added test file at the required path (scripts/runtime/heartbeat/test_normalize_digest.py);
+          no production code or other test files were modified (constraint honored); the pytest tail is
+          quoted in the commit; work is committed on the result ref. I verified every assertion in the
+          new test against the actual _normalize_digest source (strip/lowercase, 64-hexdigit check, exact
+          error messages "64 hexadecimal characters" and "SHA-256 digest") — tests are accurate, not fabricated.
+          Graph integrity is trivially preserved: node-15 has depends_on=[] and unlocks=[], it is an independent
+          leaf with no dependents, and the only change is an additive test file, so nothing downstream
+          can break. The lane-1 ''source_path'' flag on scripts/adapters/test_normalize_digest.py is a
+          criteria artifact: the criterion explicitly permits the scripts/runtime/heartbeat/ alternative
+          matching the target module location, which is present — the node''s intent (test _normalize_digest
+          at its module) is unambiguous. Full-suite greenness (4 failures: 3 flask + 1 claimed pre-existing
+          rig1) is a lane-1 acceptance-criteria question and could not be independently re-run here (pytest
+          unavailable), but the executor was transparent in the commit message and this does not affect
+          the integrity assessment.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: 'This node establishes the pattern for the sibling ready test nodes (11, 13, 16): single
+            additive test file next to module, no production edits, pytest tail in commit. Remaining ready
+            nodes are independent leaves; no convergence risk on any shared module since each targets
+            a distinct function and production code stays untouched.'
+          affected_node_ids:
+          - node-11-test-manifest-name
+          - node-13-test-render-item
+          - node-16-test-select-handoff
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-16-test-select-handoff:
+    verdict: fail
+    evaluated_at: '2026-08-11T07:49:34.420112+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T074122770d605a639517
+    result_id: res_ses_20260811T07412277e0bb5ebec722
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-16-test-select-handoff/job_20260811T074122770d605a639517-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The node''s role — pure-function unit coverage for _select_handoff in scripts/adapters/mission_evidence.py,
+      latest-wins by default and worker-session pinning — is preserved exactly. The single added file
+      scripts/adapters/test_select_handoff.py sits next to its module (the criterion''s alternative scripts/runtime/heartbeat/
+      path is the ''or'' branch for a different module location and is irrelevant here; the primary path
+      is satisfied). All 5 tests were replayed against the real production _select_handoff via direct
+      import and every assertion holds, including is-identity semantics, so the tests genuinely cover
+      the promised behavior and are not vacuous. Constraints hold: exactly one new test file (diff is
+      a single A-status file), no production code or other test files touched, pytest tail line quoted
+      in the commit (dcdd1f8: ''4 failed, 627 passed … new test_select_handoff.py: 5 passed''), and work
+      committed per the executor contract (dcdd1f8 + wrapper result commit c11c83f; working tree clean).
+      Graph integrity is unaffected: node-16 is a terminal leaf (depends_on: [], unlocks: []) per config
+      YAML, so nothing downstream depends on it and nothing upstream changed. I could not run pytest in
+      this environment (module not installed), which caps confidence slightly, but the direct-module verification
+      plus the surgical one-file diff make the intent and graph verdict unambiguous.'
+    evidence_refs:
+    - 'commit dcdd1f8 message quotes the required pytest tail: ''4 failed, 627 passed in 37.15s'' with
+      breakdown ''(3 flask ModuleNotFoundError + 1 pre-existing rig1 plist project-name assert; new test_select_handoff.py:
+      5 passed)'''
+    - 'criterion text: ''python3 -m pytest -q passes with only the 3 known flask-import failures (ModuleNotFoundError:
+      flask); the new test file passes'''
+    - deploy/rig1-heartbeat/test_rig1_render_plist.py asserts pinned ProgramArguments ['--project', 'gddp-runtime',
+      '--repo'] and WorkingDirectory '/tmp/gddp-runtime' — the source of the 4th (non-flask) failure
+    - 'git diff 450eca1..c11c83f: exactly one file added (scripts/adapters/test_select_handoff.py); no
+      production code or other tests modified, so the rig1 failure is provably pre-existing and not caused
+      by this node'
+    - pytest not installed in the eval environment (no network), so the full suite could not be independently
+      re-run; direct execution of the new test file's 5 tests passes
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-16-test-select-handoff/job_20260811T074122770d605a639517-attempt0.json
+      verdict: fail
+      criteria_confidence: 0.4
+      completeness_status: complete
+      required_next_action: Address semantic failures and re-submit.
+      evaluated_tree_sha: 2cf52a52afe0cbc8017588552cc7aeea4919e356
+      evaluated_commit_sha: c11c83fc0730cddda3b32fa8928a23d8aa5dddcc
+      merge_commit_sha: c11c83fc0730cddda3b32fa8928a23d8aa5dddcc
+      execution_attempt_id: job_20260811T074122770d605a639517:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: medium
+        overall: medium
+      criteria_verdict: fail
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.88
+        findings: []
+        reasoning: 'The node''s role — pure-function unit coverage for _select_handoff in scripts/adapters/mission_evidence.py,
+          latest-wins by default and worker-session pinning — is preserved exactly. The single added file
+          scripts/adapters/test_select_handoff.py sits next to its module (the criterion''s alternative
+          scripts/runtime/heartbeat/ path is the ''or'' branch for a different module location and is
+          irrelevant here; the primary path is satisfied). All 5 tests were replayed against the real
+          production _select_handoff via direct import and every assertion holds, including is-identity
+          semantics, so the tests genuinely cover the promised behavior and are not vacuous. Constraints
+          hold: exactly one new test file (diff is a single A-status file), no production code or other
+          test files touched, pytest tail line quoted in the commit (dcdd1f8: ''4 failed, 627 passed …
+          new test_select_handoff.py: 5 passed''), and work committed per the executor contract (dcdd1f8
+          + wrapper result commit c11c83f; working tree clean). Graph integrity is unaffected: node-16
+          is a terminal leaf (depends_on: [], unlocks: []) per config YAML, so nothing downstream depends
+          on it and nothing upstream changed. I could not run pytest in this environment (module not installed),
+          which caps confidence slightly, but the direct-module verification plus the surgical one-file
+          diff make the intent and graph verdict unambiguous.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Executor's quoted suite tail reports 4 failures (3 flask ModuleNotFoundError + 1 'pre-existing
+            rig1 plist project-name assert') while the suite-green criterion expects only the 3 known
+            flask failures — the known-failure baseline appears to have drifted. The extra failure is
+            claimed pre-existing and is provably outside this node's diff (zero changes to other files),
+            so it does not threaten node-16's role, but the identical suite-green criterion is shared
+            by sibling nodes 11-15 and their executors/humans should carry this updated baseline context.
+          affected_node_ids:
+          - node-11-test-manifest-name
+          - node-12-test-topological-order
+          - node-13-test-render-item
+          - node-14-test-completion-id-digest
+          - node-15-test-normalize-digest
+          - node-16-test-select-handoff
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      criteria_findings:
+      - criterion_id: suite-green
+        judgment: judged_fail
+        evidence:
+        - 'commit dcdd1f8 message quotes the required pytest tail: ''4 failed, 627 passed in 37.15s''
+          with breakdown ''(3 flask ModuleNotFoundError + 1 pre-existing rig1 plist project-name assert;
+          new test_select_handoff.py: 5 passed)'''
+        - 'criterion text: ''python3 -m pytest -q passes with only the 3 known flask-import failures (ModuleNotFoundError:
+          flask); the new test file passes'''
+        - deploy/rig1-heartbeat/test_rig1_render_plist.py asserts pinned ProgramArguments ['--project',
+          'gddp-runtime', '--repo'] and WorkingDirectory '/tmp/gddp-runtime' — the source of the 4th (non-flask)
+          failure
+        - 'git diff 450eca1..c11c83f: exactly one file added (scripts/adapters/test_select_handoff.py);
+          no production code or other tests modified, so the rig1 failure is provably pre-existing and
+          not caused by this node'
+        - pytest not installed in the eval environment (no network), so the full suite could not be independently
+          re-run; direct execution of the new test file's 5 tests passes
+        reasoning: 'The criterion permits only the 3 known flask-import failures. The executor''s own
+          quoted tail line — the artifact the criterion requires — reports 4 failures, one more than allowed:
+          a rig1 plist project-name assertion in deploy/rig1-heartbeat/ that is unrelated to this node''s
+          diff (the diff adds only the test file). The ''new test file passes'' sub-part is satisfied
+          (verified 5/5 here). Judging the criterion as written, the reported suite state does not match
+          ''only the 3 known flask-import failures''. Confidence is capped because the suite could not
+          be re-run in this environment and because the extra failure is demonstrably pre-existing, which
+          may indicate a criterion-authoring gap (baseline documented as 3 failures while the environment
+          has 4) rather than an implementation defect.'
+  node-17-doc-local-executor:
+    verdict: pass
+    evaluated_at: '2026-08-11T08:07:32.638119+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T07572277dfee453fab45
+    result_id: res_ses_20260811T0757227757ece209c88b
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-17-doc-local-executor/job_20260811T07572277dfee453fab45-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The node is a T4 one-file documentation node whose stated role is to make the post-demolition
+      local one-shot executor contract legible to the next session. The delivered docs/local-subprocess-executor.md
+      is exactly the required artifact: non-empty, comprehensive, and — critically for this node''s intent
+      — demonstrably faithful to real code. I verified every substantive claim (env contract, worktree→agent→persist_result→handoff
+      flow, spool layout, session-id format, droid variant, cross-referenced files) against scripts/local_agent_executor.py,
+      scripts/adapters/local_subprocess_adapter.py, deploy/mini-heartbeat/env/gddp.env.example, and AGENTS.md;
+      the doc''s quotes match the code verbatim (ValueError message, AGENTS.md heartbeat warning, env.example
+      ARGV comment, commit message shape result(job=..., attempt=...)). The node''s own evidence wrapper
+      commit follows the very contract the doc describes, a strong self-consistency signal. Graph integrity
+      is preserved: the base→tip diff touches exactly one file at the required path, the working tree
+      is clean, constraints (create/modify only that path; read-only elsewhere; commit per executor contract)
+      were respected, and node-17 is a leaf with no dependents or unlocks, so nothing downstream can be
+      broken. The pytest tail quote in the commit message (''4 failed, 622 passed'') is consistent with
+      observed host state (626 cached test ids, rig1 plist failure present). The only issues found do
+      not undermine the verdict: a cosmetic env-argv error-message conflation, and a lane-1 scanning false-negative
+      (''local_agent_executor.py absent'') that will surface a human question but is contradicted by the
+      actual checkout. Intent and graph integrity are preserved; proceed.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-17-doc-local-executor/job_20260811T07572277dfee453fab45-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.8933333333333332
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 7ab0d51e7f1cf51fed2d508ccb0d86009a1577b7
+      evaluated_commit_sha: ad60c856d730e333d2b3e735fd191d65a8493330
+      merge_commit_sha: ad60c856d730e333d2b3e735fd191d65a8493330
+      execution_attempt_id: job_20260811T07572277dfee453fab45:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: medium
+        overall: medium
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.92
+        findings:
+        - severity: low
+          summary: 'Minor doc imprecision: the doc states ''Missing or empty argv fails adapter construction:
+            ValueError: local subprocess argv is required (GDDP_LOCAL_SUBPROCESS_ARGV)''. In code, a missing
+            var with no default raises that exact message, but an explicitly empty argv raises ''local
+            subprocess argv cannot be empty'' instead. The quoted message is real for the primary case;
+            the conflation is cosmetic and does not mislead a next-session operator meaningfully.'
+          affected_node_ids:
+          - node-17-doc-local-executor
+        reasoning: 'The node is a T4 one-file documentation node whose stated role is to make the post-demolition
+          local one-shot executor contract legible to the next session. The delivered docs/local-subprocess-executor.md
+          is exactly the required artifact: non-empty, comprehensive, and — critically for this node''s
+          intent — demonstrably faithful to real code. I verified every substantive claim (env contract,
+          worktree→agent→persist_result→handoff flow, spool layout, session-id format, droid variant,
+          cross-referenced files) against scripts/local_agent_executor.py, scripts/adapters/local_subprocess_adapter.py,
+          deploy/mini-heartbeat/env/gddp.env.example, and AGENTS.md; the doc''s quotes match the code
+          verbatim (ValueError message, AGENTS.md heartbeat warning, env.example ARGV comment, commit
+          message shape result(job=..., attempt=...)). The node''s own evidence wrapper commit follows
+          the very contract the doc describes, a strong self-consistency signal. Graph integrity is preserved:
+          the base→tip diff touches exactly one file at the required path, the working tree is clean,
+          constraints (create/modify only that path; read-only elsewhere; commit per executor contract)
+          were respected, and node-17 is a leaf with no dependents or unlocks, so nothing downstream can
+          be broken. The pytest tail quote in the commit message (''4 failed, 622 passed'') is consistent
+          with observed host state (626 cached test ids, rig1 plist failure present). The only issues
+          found do not undermine the verdict: a cosmetic env-argv error-message conflation, and a lane-1
+          scanning false-negative (''local_agent_executor.py absent'') that will surface a human question
+          but is contradicted by the actual checkout. Intent and graph integrity are preserved; proceed.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: The deterministic lane flagged criterion 'covers' as source_path_missing ('local_agent_executor.py
+            absent'), but the file exists in the checkout at both base and tip (it is not part of the
+            node diff). This is a scanner false-negative that will generate a spurious human question
+            for this node and may do the same for sibling doc nodes (node-18-doc-evaluator-cli, node-22-doc-executor-contract)
+            whose criteria also name source paths. Consider having the deterministic lane verify path
+            presence against the checkout root rather than a narrower scan set.
+          affected_node_ids:
+          - node-17-doc-local-executor
+          - node-18-doc-evaluator-cli
+          - node-22-doc-executor-contract
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-18-doc-evaluator-cli:
+    verdict: pass
+    evaluated_at: '2026-08-11T08:16:36.652585+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T08080545ebf95a1e4a20
+    result_id: res_ses_20260811T080805459b6dae74753d
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-18-doc-evaluator-cli/job_20260811T08080545ebf95a1e4a20-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Node-18-doc-evaluator-cli is a standalone T4 one-file documentation node (depends_on:
+      [], unlocks: []). The delivered work is a single added file, docs/evaluator-cli.md (296 lines),
+      matching the constraint ''Create or modify only docs/evaluator-cli.md'' and ''read-only elsewhere''
+      — the base→tip subject diff contains exactly one file (status A). The doc fulfills the node''s why
+      (''one-file documentation/cleanup so the post-demolition runtime is legible to the next session''):
+      it is an accurate operator reference for scripts/runtime/verification/cli.py. I spot-verified its
+      factual claims against the source: the quoted argparse help block matches build_parser() flag names,
+      choices, defaults, and help strings; _resolve_harness confirms auto→runner; _pi_provider confirms
+      deepseek/chatgpt/glm/auto mapping and error strings; LIVE_PROVIDER_CONFIG matches the DEEPSEEK_API_KEY/GLM_API_KEY
+      table; receipt_sink.py confirms the receipt path shapes and -rerunN exclusive-create collision logic;
+      bridge.py confirms DEFAULT_SEMANTIC_ARGS fallback, receipt_dir=config_root/verification, GDDP_INTEGRITY_MODE,
+      and GDDP_DEEPSEEK_KEY_CMD=pass show api/deepseek; main() confirms exit 0 and the stdout JSON summary
+      fields. Both commits satisfy the executor contract (doc commit quoting the pytest tail line ''4
+      failed, 622 passed (flask-import + rig1 plist; unchanged on host)'', plus an empty result-ref wrapper).
+      One caveat: pydantic is absent in this host so I could not re-run --help byte-for-byte, but every
+      element of the quoted block matches the parser source, and that criterion is lane 1''s domain. No
+      downstream node depends on this file''s content (unlocks empty), so graph integrity is preserved.
+      Verdict: pass.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-18-doc-evaluator-cli/job_20260811T08080545ebf95a1e4a20-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.8433333333333333
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: a88c04c1b201ea93ce8db380195a5ffa9aceb861
+      evaluated_commit_sha: 0042e8957e6de5e60e49820799b959aadef97a68
+      merge_commit_sha: 0042e8957e6de5e60e49820799b959aadef97a68
+      execution_attempt_id: job_20260811T08080545ebf95a1e4a20:attempt:0
+      context_coverage:
+        criteria: none
+        integrity: none
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'Node-18-doc-evaluator-cli is a standalone T4 one-file documentation node (depends_on:
+          [], unlocks: []). The delivered work is a single added file, docs/evaluator-cli.md (296 lines),
+          matching the constraint ''Create or modify only docs/evaluator-cli.md'' and ''read-only elsewhere''
+          — the base→tip subject diff contains exactly one file (status A). The doc fulfills the node''s
+          why (''one-file documentation/cleanup so the post-demolition runtime is legible to the next
+          session''): it is an accurate operator reference for scripts/runtime/verification/cli.py. I
+          spot-verified its factual claims against the source: the quoted argparse help block matches
+          build_parser() flag names, choices, defaults, and help strings; _resolve_harness confirms auto→runner;
+          _pi_provider confirms deepseek/chatgpt/glm/auto mapping and error strings; LIVE_PROVIDER_CONFIG
+          matches the DEEPSEEK_API_KEY/GLM_API_KEY table; receipt_sink.py confirms the receipt path shapes
+          and -rerunN exclusive-create collision logic; bridge.py confirms DEFAULT_SEMANTIC_ARGS fallback,
+          receipt_dir=config_root/verification, GDDP_INTEGRITY_MODE, and GDDP_DEEPSEEK_KEY_CMD=pass show
+          api/deepseek; main() confirms exit 0 and the stdout JSON summary fields. Both commits satisfy
+          the executor contract (doc commit quoting the pytest tail line ''4 failed, 622 passed (flask-import
+          + rig1 plist; unchanged on host)'', plus an empty result-ref wrapper). One caveat: pydantic
+          is absent in this host so I could not re-run --help byte-for-byte, but every element of the
+          quoted block matches the parser source, and that criterion is lane 1''s domain. No downstream
+          node depends on this file''s content (unlocks empty), so graph integrity is preserved. Verdict:
+          pass.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: 'T4 doc-node convergence: node-17-doc-local-executor and node-22-doc-executor-contract
+            both document machinery that the evaluator CLI (documented here) consumes/co-produces (executor
+            contract, NodePacket/PatchResult). These upcoming nodes overlap on the bridge/executor surface;
+            consider serializing or cross-referencing to avoid contradictory contract docs.'
+          affected_node_ids:
+          - node-17-doc-local-executor
+          - node-22-doc-executor-contract
+        - severity: low
+          summary: node-20-register-annotations will edit the existing docs/blocking-mechanisms-register.md,
+            a shared file; with max_concurrent_jobs=1 and frontier auto-advance, ensure no other ready
+            node targets that file concurrently to avoid write contention.
+          affected_node_ids:
+          - node-20-register-annotations
+        - severity: low
+          summary: docs/evaluator-cli.md is a snapshot of a live argparse parser; any future flag change
+            to scripts/runtime/verification/cli.py will stale this doc. The doc hedges ('Re-run --help
+            after pulling'), but a follow-up refresh node or a note in the changelog would keep the reference
+            honest.
+          affected_node_ids:
+          - node-18-doc-evaluator-cli
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-19-handoff-index:
+    verdict: pass
+    evaluated_at: '2026-08-11T08:28:05.493083+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T081835665d823e981ddd
+    result_id: res_ses_20260811T08183566727be2c13161
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-19-handoff-index/job_20260811T081835665d823e981ddd-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node-19-handoff-index ("Build the .handoffs index"; why: one-file
+      docs so the post-demolition runtime is legible next session; T4 one-file docs node; depends_on/unlocks
+      both empty, so no graph neighbors).
+
+
+      INTENT: Preserved. The delivered .handoffs/INDEX.md is exactly the promised artifact — a one-line
+      map of the handoff corpus. I verified: (1) file exists at the exact required path .handoffs/INDEX.md
+      and is non-empty (11,792 bytes / 91 lines); (2) it covers 87/87 .handoffs/*.md files — the 87 files
+      on disk and the 87 index entries match in both directions with zero gaps; (3) entries are in numeric
+      filename order (prefixes 000→090 monotonic, duplicate-prefix files adjacent); (4) each entry is
+      a one-line title; (5) INDEX.md does not reference itself. The commit message quotes the pytest tail
+      line ("4 failed, 622 passed in 37.24s (host baseline: flask-import + rig1 plist asserts)"), consistent
+      with the suite-unchanged criterion''s recording requirement.
+
+
+      GRAPH INTEGRITY: Preserved. The subject diff (450eca1..4e00b8a) is exactly one added file, .handoffs/INDEX.md
+      (git diff --name-status confirms ''A .handoffs/INDEX.md''; working tree clean). This strictly honors
+      all three constraints: create/modify only .handoffs/INDEX.md, read-only outside that path, commit
+      all work on the node result ref. No existing code, tests, docs, or config files were touched, so
+      no dependent or future node can be broken by this change; the node has no upstream assumptions and
+      no downstream consumers (no other node YAML references INDEX.md).
+
+
+      CONTEXT (does not affect verdict): the deterministic evaluator marked criteria indeterminate partly
+      because its artifact-exists scan looked for ''handoffs/INDEX.md'' (missing leading dot) while the
+      artifact actually sits at ''.handoffs/INDEX.md'' (artifacts_present correctly shows the dot-path
+      as present). This is an evaluator path-handling artifact, not an implementation gap — lane 1 will
+      adjudicate; from the integrity standpoint the required artifact is present at the node-specified
+      path and the work''s substance is verifiable.
+
+
+      Verdict: pass — intent preserved, graph integrity preserved, no human review required for this node''s
+      integrity posture.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-19-handoff-index/job_20260811T081835665d823e981ddd-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9233333333333333
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 1c271e48ad974bbf57f3c8333df9427076a83983
+      evaluated_commit_sha: 4e00b8a8569eb4b1e7ce7a29e64819c66b854436
+      merge_commit_sha: 4e00b8a8569eb4b1e7ce7a29e64819c66b854436
+      execution_attempt_id: job_20260811T081835665d823e981ddd:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: none
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.92
+        findings: []
+        reasoning: 'Fresh-eyes review of node-19-handoff-index ("Build the .handoffs index"; why: one-file
+          docs so the post-demolition runtime is legible next session; T4 one-file docs node; depends_on/unlocks
+          both empty, so no graph neighbors).
+
+
+          INTENT: Preserved. The delivered .handoffs/INDEX.md is exactly the promised artifact — a one-line
+          map of the handoff corpus. I verified: (1) file exists at the exact required path .handoffs/INDEX.md
+          and is non-empty (11,792 bytes / 91 lines); (2) it covers 87/87 .handoffs/*.md files — the 87
+          files on disk and the 87 index entries match in both directions with zero gaps; (3) entries
+          are in numeric filename order (prefixes 000→090 monotonic, duplicate-prefix files adjacent);
+          (4) each entry is a one-line title; (5) INDEX.md does not reference itself. The commit message
+          quotes the pytest tail line ("4 failed, 622 passed in 37.24s (host baseline: flask-import +
+          rig1 plist asserts)"), consistent with the suite-unchanged criterion''s recording requirement.
+
+
+          GRAPH INTEGRITY: Preserved. The subject diff (450eca1..4e00b8a) is exactly one added file, .handoffs/INDEX.md
+          (git diff --name-status confirms ''A .handoffs/INDEX.md''; working tree clean). This strictly
+          honors all three constraints: create/modify only .handoffs/INDEX.md, read-only outside that
+          path, commit all work on the node result ref. No existing code, tests, docs, or config files
+          were touched, so no dependent or future node can be broken by this change; the node has no upstream
+          assumptions and no downstream consumers (no other node YAML references INDEX.md).
+
+
+          CONTEXT (does not affect verdict): the deterministic evaluator marked criteria indeterminate
+          partly because its artifact-exists scan looked for ''handoffs/INDEX.md'' (missing leading dot)
+          while the artifact actually sits at ''.handoffs/INDEX.md'' (artifacts_present correctly shows
+          the dot-path as present). This is an evaluator path-handling artifact, not an implementation
+          gap — lane 1 will adjudicate; from the integrity standpoint the required artifact is present
+          at the node-specified path and the work''s substance is verifiable.
+
+
+          Verdict: pass — intent preserved, graph integrity preserved, no human review required for this
+          node''s integrity posture.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Future nodes or tooling that glob .handoffs/*.md will now encounter INDEX.md itself;
+            any node that iterates or rebuilds the handoff corpus should exclude INDEX.md to avoid self-inclusion
+            (e.g., future index-rebuild or coverage nodes).
+          affected_node_ids:
+          - node-19-handoff-index
+        - severity: low
+          summary: The evaluator's artifact scan used 'handoffs/INDEX.md' (no leading dot) and reported
+            the dot-prefixed required artifact absent; if this path-normalization behavior persists, future
+            nodes whose required artifacts live in dot-directories may get spurious 'indeterminate' artifact-exists
+            checks — worth a fix in the evidence-collector path handling before later tranches rely on
+            it.
+          affected_node_ids:
+          - node-19-handoff-index
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-20-register-annotations:
+    verdict: pass
+    evaluated_at: '2026-08-11T08:36:31.319082+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T08290904a878f274d2e3
+    result_id: res_ses_20260811T08290904e4a088f77799
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-20-register-annotations/job_20260811T08290904a878f274d2e3-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The node''s stated role is a one-file documentation/cleanup: annotate docs/blocking-mechanisms-register.md
+      with demolition outcomes so the post-demolition runtime is legible to the next session. The work
+      adds exactly that — a header note recording that Stages 1–3 (commits 204148e, 9ef3250, 450eca1,
+      all confirmed on main) executed BM-019, BM-020, and BM-030 through BM-036, with a per-stage breakdown.
+      The note''s content is verified accurate against the demolition work order (.handoffs/089), the
+      keep/strip map (.handoffs/090), the actual commit messages, and the register''s existing BM-019/020/030–036
+      rows. The change is purely additive: git diff between base 450eca1 and tip 7b87262 shows exactly
+      one file modified (docs/blocking-mechanisms-register.md), no existing register content changed,
+      working tree clean, and the result-ref commit/branch exist per the executor contract. Graph integrity
+      is preserved: the node declares depends_on: [] and unlocks: [], no other node YAML references node-20
+      or the register, and no shared artifact rows were removed or reworded — nothing a dependent could
+      rely on was disturbed. Intent and graph integrity are both preserved; no human review needed.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-20-register-annotations/job_20260811T08290904a878f274d2e3-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9199999999999999
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 5de18f3c1524b01e364f3829d3832968f16b28a8
+      evaluated_commit_sha: 7b872625b5484c55aeb7db53be8ae7e732e17516
+      merge_commit_sha: 7b872625b5484c55aeb7db53be8ae7e732e17516
+      execution_attempt_id: job_20260811T08290904a878f274d2e3:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: none
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.95
+        findings: []
+        reasoning: 'The node''s stated role is a one-file documentation/cleanup: annotate docs/blocking-mechanisms-register.md
+          with demolition outcomes so the post-demolition runtime is legible to the next session. The
+          work adds exactly that — a header note recording that Stages 1–3 (commits 204148e, 9ef3250,
+          450eca1, all confirmed on main) executed BM-019, BM-020, and BM-030 through BM-036, with a per-stage
+          breakdown. The note''s content is verified accurate against the demolition work order (.handoffs/089),
+          the keep/strip map (.handoffs/090), the actual commit messages, and the register''s existing
+          BM-019/020/030–036 rows. The change is purely additive: git diff between base 450eca1 and tip
+          7b87262 shows exactly one file modified (docs/blocking-mechanisms-register.md), no existing
+          register content changed, working tree clean, and the result-ref commit/branch exist per the
+          executor contract. Graph integrity is preserved: the node declares depends_on: [] and unlocks:
+          [], no other node YAML references node-20 or the register, and no shared artifact rows were
+          removed or reworded — nothing a dependent could rely on was disturbed. Intent and graph integrity
+          are both preserved; no human review needed.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: The register now records executed demolition outcomes via a header note, but the underlying
+            BM-019/020/030–036 rows still carry their pre-execution judgment columns (e.g., BM-020 'REMOVE',
+            BM-019 'SOFTEN') with no per-row execution marker. Deliberately out of scope for this T4 node
+            ('no other content changed'), but a future doc/cleanup node may want to mark these rows as
+            executed so the register does not read as stale to the next session.
+          affected_node_ids:
+          - node-20-register-annotations
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-21-worktree-convention-doc:
+    verdict: pass
+    evaluated_at: '2026-08-11T08:47:16.861375+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T0839452169c36d964123
+    result_id: res_ses_20260811T08394521e6503a3896a3
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-21-worktree-convention-doc/job_20260811T0839452169c36d964123-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node-21-worktree-convention-doc (T4 one-file docs node). Intent:
+      document the worktree working convention so the post-demolition runtime is legible to the next session.
+      The delivered docs/worktree-convention.md (166 lines, the only file in base→tip diff) fully covers
+      the node''s intended role: the rule (stage work in git worktrees, never the shared checkout), the
+      .worktrees/ pattern with create/remove commands and per-surface role table, and the parallel-session
+      collision lesson with five concrete failure modes and the one-writer-per-tree fix. Content is factually
+      grounded: BM-020 REMOVE row in docs/blocking-mechanisms-register.md matches the doc''s citation;
+      every .worktrees/ example path (capability-spine, config-registration, mission-projection, evaluator-integration,
+      crash-handling) is confirmed in real handoffs 048–077; .gitignore lists .worktrees/; AGENTS.md (pull
+      --ff-only, files change only via git) is consistent with the doc''s shared-checkout rule. Graph
+      integrity: depends_on=[] and unlocks=[] mean no neighbor depends on this file; the diff touches
+      exactly docs/worktree-convention.md (constraint honored, read-only elsewhere); work is committed
+      on the node result ref per the executor contract (content commit e518d2e + result wrapper fe59508).
+      No code/test/canon changes, so no mechanism for new test failures or dependent breakage. Non-adjudicated
+      lane-1 note: the content commit message does not quote a pytest tail line (suite-unchanged formality),
+      and pytest is unavailable in this sandbox; this is acceptance-criteria scope, not integrity scope,
+      and a docs-only change cannot introduce failures. No findings affecting the verdict.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-21-worktree-convention-doc/job_20260811T0839452169c36d964123-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9166666666666666
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 931672839fd885d1668e271ebdc63d86a75ea09b
+      evaluated_commit_sha: fe59508416623e909458441d89ee8d496da6d017
+      merge_commit_sha: fe59508416623e909458441d89ee8d496da6d017
+      execution_attempt_id: job_20260811T0839452169c36d964123:attempt:0
+      context_coverage:
+        criteria: none
+        integrity: medium
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'Fresh-eyes review of node-21-worktree-convention-doc (T4 one-file docs node). Intent:
+          document the worktree working convention so the post-demolition runtime is legible to the next
+          session. The delivered docs/worktree-convention.md (166 lines, the only file in base→tip diff)
+          fully covers the node''s intended role: the rule (stage work in git worktrees, never the shared
+          checkout), the .worktrees/ pattern with create/remove commands and per-surface role table, and
+          the parallel-session collision lesson with five concrete failure modes and the one-writer-per-tree
+          fix. Content is factually grounded: BM-020 REMOVE row in docs/blocking-mechanisms-register.md
+          matches the doc''s citation; every .worktrees/ example path (capability-spine, config-registration,
+          mission-projection, evaluator-integration, crash-handling) is confirmed in real handoffs 048–077;
+          .gitignore lists .worktrees/; AGENTS.md (pull --ff-only, files change only via git) is consistent
+          with the doc''s shared-checkout rule. Graph integrity: depends_on=[] and unlocks=[] mean no
+          neighbor depends on this file; the diff touches exactly docs/worktree-convention.md (constraint
+          honored, read-only elsewhere); work is committed on the node result ref per the executor contract
+          (content commit e518d2e + result wrapper fe59508). No code/test/canon changes, so no mechanism
+          for new test failures or dependent breakage. Non-adjudicated lane-1 note: the content commit
+          message does not quote a pytest tail line (suite-unchanged formality), and pytest is unavailable
+          in this sandbox; this is acceptance-criteria scope, not integrity scope, and a docs-only change
+          cannot introduce failures. No findings affecting the verdict.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: docs/worktree-convention.md references docs/local-subprocess-executor.md 'when present
+            on the branch'; that file is the artifact of provisional sibling node-17-doc-local-executor.
+            If node-17 never lands, the pointer stays dangling — harmless (conditional phrasing), but
+            worth resolving when node-17's status advances.
+          affected_node_ids:
+          - node-21-worktree-convention-doc
+          - node-17-doc-local-executor
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-22-doc-executor-contract:
+    verdict: pass
+    evaluated_at: '2026-08-11T08:57:39.613036+00:00'
+    executor: local_subprocess
+    job_id: job_20260811T085021766bbe6f720ae9
+    result_id: res_ses_20260811T085021779f371ac19e27
+    attempts: 1
+    receipt_ref: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-22-doc-executor-contract/job_20260811T085021766bbe6f720ae9-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The node''s intended role — "Document the NodePacket / PatchResult contract" as a
+      one-file T4 docs/cleanup node so the post-demolition runtime is legible to the next session — is
+      fully preserved. docs/executor-contract.md is a single, accurate field reference for scripts/adapters/executor_protocol.py:
+      I verified every NodePacket field (12/12) and every PatchResult field (14/14) against the code —
+      all present in code order with exact types and defaults; the transport-helper docstrings (to_json_value,
+      to_json) are quoted verbatim; the FrozenJSON alias and the related-types section (SessionRef, SessionStatus,
+      DispatchResult, EngagementDispatchResult, ExecutorAdapter) all match the module. The doc''s stated
+      source-of-truth path is correct and the file exists at both base and tip. Graph integrity is intact:
+      diff base→tip is exactly one added file (docs/executor-contract.md), satisfying the create-only/read-only-elsewhere
+      constraints; no code changed so the test suite cannot regress from this node; depends_on and unlocks
+      are both empty so there are no upstream assumptions violated and no downstream consumers affected;
+      node YAML in gddp-config matches the spec. Commit discipline holds (one docs commit + one result-ref
+      wrapper commit, clean tree). No drift, no scope creep.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /home/sab-mini/gddp-config/verification/gddp-dogfood/node-22-doc-executor-contract/job_20260811T085021766bbe6f720ae9-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9133333333333334
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 87efe80efcac7ce2b09616ba809be31c03f3d05a
+      evaluated_commit_sha: 619bda9e7cf266c079d4492c303d5138c104eafd
+      merge_commit_sha: 619bda9e7cf266c079d4492c303d5138c104eafd
+      execution_attempt_id: job_20260811T085021766bbe6f720ae9:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: medium
+        overall: medium
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.92
+        findings: []
+        reasoning: 'The node''s intended role — "Document the NodePacket / PatchResult contract" as a
+          one-file T4 docs/cleanup node so the post-demolition runtime is legible to the next session
+          — is fully preserved. docs/executor-contract.md is a single, accurate field reference for scripts/adapters/executor_protocol.py:
+          I verified every NodePacket field (12/12) and every PatchResult field (14/14) against the code
+          — all present in code order with exact types and defaults; the transport-helper docstrings (to_json_value,
+          to_json) are quoted verbatim; the FrozenJSON alias and the related-types section (SessionRef,
+          SessionStatus, DispatchResult, EngagementDispatchResult, ExecutorAdapter) all match the module.
+          The doc''s stated source-of-truth path is correct and the file exists at both base and tip.
+          Graph integrity is intact: diff base→tip is exactly one added file (docs/executor-contract.md),
+          satisfying the create-only/read-only-elsewhere constraints; no code changed so the test suite
+          cannot regress from this node; depends_on and unlocks are both empty so there are no upstream
+          assumptions violated and no downstream consumers affected; node YAML in gddp-config matches
+          the spec. Commit discipline holds (one docs commit + one result-ref wrapper commit, clean tree).
+          No drift, no scope creep.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Evaluator 'covers' check reported 'executor_protocol.py absent' via path_mentioned_missing,
+            but the file exists at scripts/adapters/executor_protocol.py in the checkout (base and tip).
+            The criterion's source-path scan appears to resolve paths relative to a different root than
+            the repo checkout; this is an evaluation-harness artifact, not a defect in the work. It will
+            likely surface as a lane-1 human question and may re-adjudicate as satisfied. Future nodes
+            whose criteria reference repo-relative source paths should expect the same scan gap until
+            the harness path resolution is fixed.
+          affected_node_ids:
+          - node-22-doc-executor-contract
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null

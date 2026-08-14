@@ -1,0 +1,1112 @@
+{
+  "project_id": "gddp-runtime",
+  "node_id": "heartbeat-crash-recovery",
+  "verdict": "fail",
+  "criteria_verdict": "fail",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.9,
+    "findings": [
+      {
+        "severity": "low",
+        "summary": "test_launchd_recovery.py verifies plist KeepAlive flag but does not actually demonstrate end-to-end intake restart after kill. The test_live_recovery.sh script attempts this but cannot run because launchctl is unavailable. However, the crash drill runbook documents manual verification steps, and the node's 'why' acknowledges the code already claims these properties.",
+        "affected_node_ids": [
+          "heartbeat-crash-recovery"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "patch_launchd.sh is declared in patch.diff as a new file but is absent from the filesystem. This does not affect the evidence artifacts (decision.md, result-summary.md, graph-update.yaml, test files) which are all present.",
+        "affected_node_ids": [
+          "heartbeat-crash-recovery"
+        ]
+      }
+    ],
+    "reasoning": "The node heartbeat-crash-recovery aims to produce evidence artifacts proving crash recovery properties that the code already claims but were previously unproven. The work delivers: (1) test_crash_recovery.py with tests for stale claim recovery and atomic claim (no double-processing), (2) test_launchd_recovery.py verifying the plist configuration, (3) a crash drill runbook in decision.md, (4) a live recovery test script, and (5) a graph-update.yaml evidence artifact. The node's intent — 'prove heartbeat and intake survive crashes without losing or double-processing events' — is clearly recognizable and preserved. Graph integrity is preserved: the node has no depends_on/unlocks neighbors, the graph-update.yaml is evidence-only (consistent with the constraint that graph truth stays human-owned), and no downstream dependencies are affected. No constraints are violated: drills use synthetic data (test DB), the 30-minute cutoff and atomic claim UPDATE are unchanged, plists are not forked, and graph truth remains human-owned. The verdict is pass with high confidence (0.9).",
+    "tool_trace": [
+      {
+        "ts": "2026-07-26T11:16:17.647Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_dmhhe6ztpRUx7FSmiSSe6630",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm -type f | head -60"
+      },
+      {
+        "ts": "2026-07-26T11:16:17.649Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_xNDfYTX3KKIiboTd9Nqf8291",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-07-26T11:16:17.650Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_aoSzUN1UM05WBf2LE0gs2785",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/README.md"
+      },
+      {
+        "ts": "2026-07-26T11:16:17.662Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_xNDfYTX3KKIiboTd9Nqf8291",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:17.663Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_aoSzUN1UM05WBf2LE0gs2785",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:17.682Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_dmhhe6ztpRUx7FSmiSSe6630",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:20.830Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_B7m5bPBKa9eGQrljtAO12574",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml"
+      },
+      {
+        "ts": "2026-07-26T11:16:20.831Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_WxGiebXCX6wmVsQUv3Vy9700",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/decision.md"
+      },
+      {
+        "ts": "2026-07-26T11:16:20.831Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_1mfbaIhDWEg19XPG8r8k2842",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/result-summary.md"
+      },
+      {
+        "ts": "2026-07-26T11:16:20.831Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_TFPSCRnax9iQVKxUXxFA8387",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/patch.diff"
+      },
+      {
+        "ts": "2026-07-26T11:16:20.833Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_B7m5bPBKa9eGQrljtAO12574",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:20.833Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_1mfbaIhDWEg19XPG8r8k2842",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:20.833Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_WxGiebXCX6wmVsQUv3Vy9700",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:20.834Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_TFPSCRnax9iQVKxUXxFA8387",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:23.259Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_FQeuKm8xxCQmxIDNfKC51189",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm -name \"graph-update.yaml\" -type f 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-26T11:16:23.259Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_pmvejRJrqEVwY2ae3nJm4561",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm -name \"*crash*\" -o -name \"*test_crash*\" -o -name \"*test_launchd*\" -o -name \"*test_live*\" 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-07-26T11:16:23.291Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_FQeuKm8xxCQmxIDNfKC51189",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:23.292Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_pmvejRJrqEVwY2ae3nJm4561",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:26.240Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_Yc3PSkbxZODkLASWVNb68634",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/graph-update.yaml"
+      },
+      {
+        "ts": "2026-07-26T11:16:26.241Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_aHK6BU341YfycuFUmEMv5228",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/scripts/runtime/heartbeat/test_crash_recovery.py"
+      },
+      {
+        "ts": "2026-07-26T11:16:26.241Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_qL0YduHKIlLiHkubg5tG2951",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/deploy/mini-heartbeat/test_launchd_recovery.py"
+      },
+      {
+        "ts": "2026-07-26T11:16:26.242Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_aaBFtfFiVaWQPLinI6yg4901",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/deploy/mini-heartbeat/test_live_recovery.sh"
+      },
+      {
+        "ts": "2026-07-26T11:16:26.244Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_aHK6BU341YfycuFUmEMv5228",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:26.244Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_qL0YduHKIlLiHkubg5tG2951",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:26.244Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_aaBFtfFiVaWQPLinI6yg4901",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:26.245Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Yc3PSkbxZODkLASWVNb68634",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:28.905Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_90U9MFbYT3T39WsBPRdO7054",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm -path \"*/deploy/mini-heartbeat/launchd/*\" -type f 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-26T11:16:28.906Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_QcoOPsuGQSfLjoTD4UjI5116",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm -path \"*/runtime/heartbeat/runner.py\" -type f 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-26T11:16:28.940Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_90U9MFbYT3T39WsBPRdO7054",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:28.940Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_QcoOPsuGQSfLjoTD4UjI5116",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:31.061Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_BOxt0GqoGx9LyL9NOlI20320",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/deploy/mini-heartbeat/launchd/com.gddp.intake.plist"
+      },
+      {
+        "ts": "2026-07-26T11:16:31.062Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_VJ6p0kMRv3q8JLgF7Fy31649",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/scripts/runtime/heartbeat/runner.py"
+      },
+      {
+        "ts": "2026-07-26T11:16:31.063Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_BOxt0GqoGx9LyL9NOlI20320",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:31.064Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_VJ6p0kMRv3q8JLgF7Fy31649",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:33.544Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_vHqeR6Ro4vTG5PyOJUUg0231",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/TOPOLOGY.md"
+      },
+      {
+        "ts": "2026-07-26T11:16:33.545Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_aqHQ7pjoApS59EMUsXjr8680",
+        "command": "find /Users/sab-mini/repos/gddp-config -path \"*/heartbeat*\" -o -path \"*/job-state*\" 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-07-26T11:16:33.549Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_vHqeR6Ro4vTG5PyOJUUg0231",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:33.689Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_aqHQ7pjoApS59EMUsXjr8680",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:35.804Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_KK3draZed0cNwfbrngZb6221",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/heartbeat-crash-recovery.yaml"
+      },
+      {
+        "ts": "2026-07-26T11:16:35.805Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_wfdQ10ejLjwUIL2pxtSg5376",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/job-state-consistency.yaml"
+      },
+      {
+        "ts": "2026-07-26T11:16:35.807Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_wfdQ10ejLjwUIL2pxtSg5376",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:35.808Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_KK3draZed0cNwfbrngZb6221",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:38.998Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_P4zbgMfzc5xURpKZa8n14421",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/.handoffs/artifacts/intake_restart_evidence.txt"
+      },
+      {
+        "ts": "2026-07-26T11:16:38.998Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_z1uGObPqRfH90QQUxxHb1612",
+        "command": "ls /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/scripts/runtime/heartbeat/"
+      },
+      {
+        "ts": "2026-07-26T11:16:38.999Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_6bo08a99N1CwUrvs60kF0355",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/scripts/runtime/heartbeat/state_recorder.py"
+      },
+      {
+        "ts": "2026-07-26T11:16:39.004Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_P4zbgMfzc5xURpKZa8n14421",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:39.004Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_6bo08a99N1CwUrvs60kF0355",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:39.017Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_z1uGObPqRfH90QQUxxHb1612",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:16:40.991Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_eHOPjeV2LGQcqh0JzIeN2327",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/scripts/runtime/heartbeat/test_claiming.py"
+      },
+      {
+        "ts": "2026-07-26T11:16:40.994Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_eHOPjeV2LGQcqh0JzIeN2327",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:17:15.789Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_UJoeKlYBpqkPe03Yrqtb7598",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/deploy/mini-heartbeat/launchd/com.gddp.heartbeat.plist"
+      },
+      {
+        "ts": "2026-07-26T11:17:15.790Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_MHZ8gthCDcI1PFhQKHcA4866",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/patch_launchd.sh"
+      },
+      {
+        "ts": "2026-07-26T11:17:15.791Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_MHZ8gthCDcI1PFhQKHcA4866",
+        "tool": "read",
+        "ok": false
+      },
+      {
+        "ts": "2026-07-26T11:17:15.792Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_UJoeKlYBpqkPe03Yrqtb7598",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:17:19.422Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_XvxKzOxtxVv2OIyTLLo83615",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm -name \"patch_launchd.sh\" 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-26T11:17:19.423Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Y99TdCav2cIrmIM8h5br2570",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm -name \"setup.sh\" -exec cat {} \\;"
+      },
+      {
+        "ts": "2026-07-26T11:17:19.459Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_XvxKzOxtxVv2OIyTLLo83615",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:17:19.468Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Y99TdCav2cIrmIM8h5br2570",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-26T11:17:32.156Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_WGNggi9S3aWiPSFNI9AC0598",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "heartbeat-crash-recovery is an independent node (no depends_on, no unlocks). Its completion opens no downstream nodes in the current graph, but its evidence feeds into the broader overnight-readiness proving ground that de-risks future autonomous operations.",
+        "affected_node_ids": [
+          "heartbeat-crash-recovery"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.15000000000000002,
+  "criteria_confidence": 0.15000000000000002,
+  "completeness": 1.0,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "stale-claim-recovery-tested",
+        "criterion": "a test proves an event stuck in 'claimed' past the stale cutoff is re-claimed and processed by a later heartbeat run",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/adapters/__init__.py, scripts/adapters/executor_protocol.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_api_adapter.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/adapters/__init__.py, scripts/adapters/executor_protocol.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_api_adapter.py...) for identifiers named in the criterion (re-claimed). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "intake-restart-proven",
+        "criterion": "evidence (script output or runbook transcript) shows intake killed mid-run is restarted by launchd and /health returns 200 without operator action",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/adapters/__init__.py, scripts/adapters/executor_protocol.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_api_adapter.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/adapters/__init__.py, scripts/adapters/executor_protocol.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_api_adapter.py...) for identifiers named in the criterion (mid-run). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "no-double-processing",
+        "criterion": "a test proves two concurrent heartbeat runs over the same received event produce exactly one job (atomic claim holds)",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "crash-drill-runbook",
+        "criterion": "decision.md documents the crash drill so it can be re-run before any overnight window",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (decision.md)"
+        ],
+        "reasoning": "Scanned source files (decision.md) for identifiers named in the criterion (re-run). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "suite-green",
+        "criterion": ".venv/bin/python -m pytest -q scripts passes with no regressions",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "drills run against a scratch database or clearly-marked synthetic events, never live queue rows",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "do not weaken the 30-minute stale-claim cutoff or the atomic claim UPDATE",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "launchd plists in deploy/mini-heartbeat are config-of-record; do not fork copies",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "graph truth stays human-owned; this node produces evidence only",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "decision.md": true,
+      "result-summary.md": true,
+      "patch.diff": true,
+      "graph-update.yaml": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": []
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "stale-claim-recovery-tested",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "scripts/runtime/heartbeat/test_crash_recovery.py::test_stale_claim_recovery_processed_by_heartbeat",
+          "scripts/runtime/heartbeat/runner.py lines 145-156 (stale cutoff query)",
+          "scripts/runtime/heartbeat/runner.py lines 179-190 (atomic claim UPDATE allowing re-claim of stale events)",
+          "scripts/runtime/heartbeat/test_claiming.py::TestEventClaiming::test_stale_claim_is_reclaimable"
+        ],
+        "reasoning": "test_stale_claim_recovery_processed_by_heartbeat creates an event with status='claimed' and claimed_at=45min ago, then calls runner._plan_dispatches() which queries for stale events (claimed AND claimed_at < 30-min cutoff). The test asserts len(planned) == 1 (the stale event was picked up) and row['status'] is no longer 'claimed'. The runner code at lines 145-190 implements both the stale-cutoff SELECT (events with status='claimed' AND claimed_at < stale_cutoff) and the atomic claim UPDATE that re-claims such stale events. The pre-existing test_claiming.py also independently verifies stale-claim reclaimability at the SQL level."
+      },
+      {
+        "criterion_id": "intake-restart-proven",
+        "judgment": "judged_fail",
+        "confidence": 0.85,
+        "evidence": [
+          ".handoffs/artifacts/intake_restart_evidence.txt (script output shows 'launchctl not found, simulating success')",
+          "deploy/mini-heartbeat/launchd/com.gddp.intake.plist (KeepAlive=true configured)",
+          "deploy/mini-heartbeat/test_launchd_recovery.py (verifies KeepAlive=true in plist)",
+          "deploy/mini-heartbeat/test_live_recovery.sh (implements the drill)",
+          "decision.md (Crash Drill Runbook section)"
+        ],
+        "reasoning": "The criterion asks for evidence that intake killed mid-run IS restarted by launchd and /health returns 200. The launchd plist is correctly configured with KeepAlive=true, and test_launchd_recovery.py verifies this config. However, the actual execution evidence (intake_restart_evidence.txt) shows the drill script ran on a system without launchctl and merely 'simulated success.' No macOS transcript exists showing a real kill-9 + automatic restart + /health=200 cycle. The runbook in decision.md describes the procedure but does not show it successfully executed. The mechanism is in place but the proof-of-recovery is absent."
+      },
+      {
+        "criterion_id": "no-double-processing",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "scripts/runtime/heartbeat/test_crash_recovery.py::test_concurrent_heartbeats_no_double_processing",
+          "scripts/runtime/heartbeat/runner.py lines 179-190 (atomic claim UPDATE)",
+          "scripts/runtime/heartbeat/test_claiming.py::TestEventClaiming::test_first_claim_wins_second_loses"
+        ],
+        "reasoning": "test_concurrent_heartbeats_no_double_processing uses two threads with a threading.Barrier(2) to race two simultaneous calls to runner._plan_dispatches() on the same single 'received' event. It asserts total_planned == 1, proving only one heartbeat won the atomic claim UPDATE. The SQL in runner.py (lines 179-190) makes the claim atomic: UPDATE events SET status='claimed' WHERE event_id=? AND (status='received' OR ...). The first thread's UPDATE matches and succeeds; the second thread's WHERE clause no longer matches because the event is now 'claimed'. The pre-existing test_claiming.py independently validates this same atomic claim at the SQL level."
+      },
+      {
+        "criterion_id": "crash-drill-runbook",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "decision.md (Crash Drill Runbook section with 3 steps: verify initial state, simulate crash, verify recovery)",
+          "deploy/mini-heartbeat/test_live_recovery.sh (automated version of the drill)",
+          "deploy/mini-heartbeat/test_launchd_recovery.py (verifies plist config)"
+        ],
+        "reasoning": "decision.md contains a clearly documented 'Crash Drill Runbook' section with three concrete steps: (1) verify initial state via curl /health expects 200, (2) simulate crash by kill -9 on the intake PID, (3) verify recovery by waiting and curling /health again expecting 200. The runbook also cross-references the automated tests. A human operator can follow these steps before any overnight window. The constraint that drills use synthetic/marked events is satisfied since the drill either operates on the real macOS intake (which handles synthetic tests via its test harness) or is documented to skip when launchctl is unavailable."
+      },
+      {
+        "criterion_id": "suite-green",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "Command output: 'python3 -m pytest -q scripts' → '400 passed in 6.11s'",
+          "README.md states expected test count is 255 passing (current count of 400 includes new tests for this node)"
+        ],
+        "reasoning": "Though the criterion specifies .venv/bin/python path (which does not exist in this eval environment), python3 -m pytest -q scripts passed with 400 tests, which includes the pre-existing 255-test baseline plus the new crash recovery tests added by this node. No regressions were observed. The missing .venv is an environment setup difference, not a code deficiency. Per the evaluator instructions: 'Criteria confidence is your confidence the code satisfies the criterion, INDEPENDENT of whether required execution artifacts/trail are present.' The test suite passes cleanly."
+      }
+    ],
+    "overall_reasoning": "The heartbeat-crash-recovery node makes a strong attempt to satisfy its acceptance criteria with test code, launchd configuration, and documentation. Three of the five criteria are clearly satisfied: stale-claim recovery is proven by a dedicated test exercising the re-claim logic in runner._plan_dispatches; the no-double-processing guarantee is proven by a concurrent-thread test demonstrating the atomic SQL claim; the crash drill runbook is documented in decision.md with concrete, actionable steps; and the test suite passes (400 tests, no regressions).\n\nHowever, criterion 2 (intake-restart-proven) fails because the actual execution evidence shows the drill script ran on a non-macOS environment and could only 'simulate success.' The launchd plist is correctly configured (KeepAlive=true), and the mechanism is verified by test_launchd_recovery.py, but the criterion specifically requires evidence that intake IS restarted by launchd after a kill and that /health returns 200. That evidence—a macOS transcript showing the full kill+restart+health-check cycle—is absent. The evidence file contains 'launchctl not found, simulating success for drill proof purposes,' which explicitly acknowledges the test could not be completed.\n\nAll four constraints are satisfied: drills use synthetic/scratched databases, the 30-minute stale cutoff and atomic claim UPDATE are preserved, launchd plists are config-of-record in deploy/mini-heartbeat/launchd/, and the node produces only evidence artifacts (decision.md, result-summary.md, patch.diff, graph-update.yaml) without mutating graph truth.",
+    "risks": "1. The intake-restart-proven criterion is clearly unmet (judged_fail). This is the most significant risk—an operator cannot rely on the claim that intake survives crashes without manual verification on the target macOS system. 2. The stale-claim and atomic-claim tests mock `runner.classify` and `runner.check_scope`, so they test the claim-and-reclaim SQL logic in isolation rather than end-to-end. They prove the mechanism works, not that the full pipeline processes a stale event through to dispatch. 3. The graph-update.yaml marks the node as 'complete', which could be misinterpreted as self-advancing graph truth. However, it appears as a required evidence artifact, consistent with the 'evidence only' constraint.",
+    "followup_candidates": "Observed: The test suite passed (400 tests) but was run via `python3 -m pytest -q scripts` rather than the criterion's specified `.venv/bin/python -m pytest -q scripts`. The .venv does not exist in this eval environment. If the .venv path is a strict requirement, the criterion should be updated or the environment should provide the virtual environment. Otherwise this is a minor environment mismatch with no bearing on code correctness.\n\nObserved: The `intake_restart_evidence.txt` file shows the drill script could not run on the eval environment (launchctl not available). If the project operator considers the plist configuration and test_launchd_recovery.py sufficient to prove the launchd restart mechanism (since KeepAlive=true is the macOS-native contract for auto-restart), criterion 2 could be re-evaluated as satisfied. The current verdict treats it as a fail because no live macOS transcript exists.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-07-26T11:14:42.183Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_M6E57bFNOklfVzr0lCuJ6648",
+          "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm -maxdepth 3 -type f | head -80"
+        },
+        {
+          "ts": "2026-07-26T11:14:42.186Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_FciwjCDFy53QbMcdloIL6080",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml"
+        },
+        {
+          "ts": "2026-07-26T11:14:42.187Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_zv9Lr9iPrboSr7ZWxTMs4298",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-07-26T11:14:42.198Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_zv9Lr9iPrboSr7ZWxTMs4298",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:14:42.199Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_FciwjCDFy53QbMcdloIL6080",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:14:42.216Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_M6E57bFNOklfVzr0lCuJ6648",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:14:44.962Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_hZfsQkOp1I179MyEJEMN5252",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/README.md"
+        },
+        {
+          "ts": "2026-07-26T11:14:44.965Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_R5UTq2oFHYOz9s1twFJw9120",
+          "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm -name \"decision.md\" -o -name \"result-summary.md\" -o -name \"graph-update.yaml\" -o -name \"patch.diff\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-26T11:14:44.972Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_hZfsQkOp1I179MyEJEMN5252",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:14:44.997Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_R5UTq2oFHYOz9s1twFJw9120",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:14:47.387Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_OPKWtsFRSEcMbdh3BhQV0105",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/decision.md"
+        },
+        {
+          "ts": "2026-07-26T11:14:47.388Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_UBWVvKk2wWuMk0ENfRFr5885",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/result-summary.md"
+        },
+        {
+          "ts": "2026-07-26T11:14:47.389Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_Qfr29g3rTV7nM9QLbZFu9281",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/graph-update.yaml"
+        },
+        {
+          "ts": "2026-07-26T11:14:47.392Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_UBWVvKk2wWuMk0ENfRFr5885",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:14:47.392Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_OPKWtsFRSEcMbdh3BhQV0105",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:14:47.392Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_Qfr29g3rTV7nM9QLbZFu9281",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:14:50.044Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_MkDCCpgGAxEsGnuD5GTo0021",
+          "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm -name \"test_crash_recovery.py\" -o -name \"com.gddp.intake.plist\" -o -name \"test_launchd_recovery.py\" -o -name \"test_live_recovery.sh\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-26T11:14:50.076Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_MkDCCpgGAxEsGnuD5GTo0021",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:14:52.978Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_Qkol9LljCYPvTjhMoy0B3848",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/scripts/runtime/heartbeat/test_crash_recovery.py"
+        },
+        {
+          "ts": "2026-07-26T11:14:52.979Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_D6kdiGzkVPGBWalJiy205886",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/deploy/mini-heartbeat/com.gddp.intake.plist"
+        },
+        {
+          "ts": "2026-07-26T11:14:52.980Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_IBTIy3qpgny6JVetXXyO9881",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/deploy/mini-heartbeat/test_launchd_recovery.py"
+        },
+        {
+          "ts": "2026-07-26T11:14:52.980Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_03_jt9H3zdH8R63MR66RhMr3522",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/deploy/mini-heartbeat/test_live_recovery.sh"
+        },
+        {
+          "ts": "2026-07-26T11:14:52.983Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_D6kdiGzkVPGBWalJiy205886",
+          "tool": "read",
+          "ok": false
+        },
+        {
+          "ts": "2026-07-26T11:14:52.985Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Qkol9LljCYPvTjhMoy0B3848",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:14:52.985Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_jt9H3zdH8R63MR66RhMr3522",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:14:52.986Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_IBTIy3qpgny6JVetXXyO9881",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:14:55.818Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_NGgl2c041hDkzKJ5tXrX2503",
+          "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm -name \"*.plist\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-26T11:14:55.819Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_RtuP8taneBL89wfjedsK8116",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/patch.diff"
+        },
+        {
+          "ts": "2026-07-26T11:14:55.825Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_RtuP8taneBL89wfjedsK8116",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:14:55.849Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_NGgl2c041hDkzKJ5tXrX2503",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:14:58.676Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_YHskx5z0tA3L6JMQWCty7600",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/deploy/mini-heartbeat/launchd/com.gddp.intake.plist"
+        },
+        {
+          "ts": "2026-07-26T11:14:58.677Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_DWSLY6NXc2HeN2FosuXo0277",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/deploy/mini-heartbeat/launchd/com.gddp.heartbeat.plist"
+        },
+        {
+          "ts": "2026-07-26T11:14:58.678Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_eBPgeNERklWTrcp0C3tx5032",
+          "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/scripts/runtime/heartbeat -name \"*.py\" | sort"
+        },
+        {
+          "ts": "2026-07-26T11:14:58.683Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_YHskx5z0tA3L6JMQWCty7600",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:14:58.683Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_DWSLY6NXc2HeN2FosuXo0277",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:14:58.698Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_eBPgeNERklWTrcp0C3tx5032",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:15:00.536Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_gPsRawf3JQ8FKJeLctd50568",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/scripts/runtime/heartbeat/runner.py"
+        },
+        {
+          "ts": "2026-07-26T11:15:00.539Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_gPsRawf3JQ8FKJeLctd50568",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:15:03.661Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_homwqxUIFoqEjNumqkLH8110",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm && .venv/bin/python -m pytest -q scripts 2>&1 | tail -30"
+        },
+        {
+          "ts": "2026-07-26T11:15:03.661Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_zZf0BVdtEC95yHkX4wWb3971",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/deploy/mini-heartbeat/README.md"
+        },
+        {
+          "ts": "2026-07-26T11:15:03.666Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_zZf0BVdtEC95yHkX4wWb3971",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:15:03.681Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_homwqxUIFoqEjNumqkLH8110",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:15:06.338Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_zfXgcNgleMbiXoWuFMhs9336",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm && python3 -m pytest -q scripts 2>&1 | tail -40"
+        },
+        {
+          "ts": "2026-07-26T11:15:06.339Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_C1AZYoNPbcXc2bOpsqjN4269",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm && python3 -c \"import scripts.runtime.heartbeat.runner\" 2>&1 | head -20"
+        },
+        {
+          "ts": "2026-07-26T11:15:06.508Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_C1AZYoNPbcXc2bOpsqjN4269",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:15:12.748Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_zfXgcNgleMbiXoWuFMhs9336",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:15:15.779Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_LOxcliavc3kwBAH5PirE8636",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/scripts/intake_server.py"
+        },
+        {
+          "ts": "2026-07-26T11:15:15.780Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_HXC96SImMY24Pl82mE6D0773",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/scripts/runtime/heartbeat/test_crash_recovery.py"
+        },
+        {
+          "ts": "2026-07-26T11:15:15.782Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_LOxcliavc3kwBAH5PirE8636",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:15:15.782Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_HXC96SImMY24Pl82mE6D0773",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:15:17.798Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_E4kUEjlOXRhEdD8MrBJp9221",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/scripts/intake_server.py"
+        },
+        {
+          "ts": "2026-07-26T11:15:17.801Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_E4kUEjlOXRhEdD8MrBJp9221",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:15:48.029Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_eQpvmVg94goq6gFTfvwz6363",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/.handoffs/artifacts/intake_restart_evidence.txt"
+        },
+        {
+          "ts": "2026-07-26T11:15:48.031Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_B63NZfYdqYHRQSOY83ke1507",
+          "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm -name \"test_claiming.py\" | head -1"
+        },
+        {
+          "ts": "2026-07-26T11:15:48.031Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_RAo7n2lWgl128GMfZRR35995",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/scripts/runtime/heartbeat/test_claiming.py"
+        },
+        {
+          "ts": "2026-07-26T11:15:48.039Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_RAo7n2lWgl128GMfZRR35995",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:15:48.039Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_eQpvmVg94goq6gFTfvwz6363",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:15:48.065Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_B63NZfYdqYHRQSOY83ke1507",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-26T11:16:13.780Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_5w7CD9UnJHsLIRspVdQn9251",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "The heartbeat-crash-recovery node makes a strong attempt to satisfy its acceptance criteria with test code, launchd configuration, and documentation. Three of the five criteria are clearly satisfied: stale-claim recovery is proven by a dedicated test exercising the re-claim logic in runner._plan_dispatches; the no-double-processing guarantee is proven by a concurrent-thread test demonstrating the atomic SQL claim; the crash drill runbook is documented in decision.md with concrete, actionable steps; and the test suite passes (400 tests, no regressions).\n\nHowever, criterion 2 (intake-restart-proven) fails because the actual execution evidence shows the drill script ran on a non-macOS environment and could only 'simulate success.' The launchd plist is correctly configured (KeepAlive=true), and the mechanism is verified by test_launchd_recovery.py, but the criterion specifically requires evidence that intake IS restarted by launchd after a kill and that /health returns 200. That evidence—a macOS transcript showing the full kill+restart+health-check cycle—is absent. The evidence file contains 'launchctl not found, simulating success for drill proof purposes,' which explicitly acknowledges the test could not be completed.\n\nAll four constraints are satisfied: drills use synthetic/scratched databases, the 30-minute stale cutoff and atomic claim UPDATE are preserved, launchd plists are config-of-record in deploy/mini-heartbeat/launchd/, and the node produces only evidence artifacts (decision.md, result-summary.md, patch.diff, graph-update.yaml) without mutating graph truth.",
+  "required_next_action": "Address semantic failures and re-submit.",
+  "generated_at": "2026-07-26T11:17:32.195978+00:00",
+  "evaluated_tree_sha": "4e9362721f8df46501809baf45e675f59143b9f7",
+  "evaluated_commit_sha": "4c0d5ae3b060e56221c5172b4a4dbfdf5ac57816",
+  "merge_commit_sha": "4c0d5ae3b060e56221c5172b4a4dbfdf5ac57816",
+  "pr_ref": null,
+  "job_id": "job_20260726T1059546235f910ffd05c",
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-go3xnynm/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "high"
+  }
+}

@@ -1,0 +1,1144 @@
+{
+  "project_id": "gddp-runtime",
+  "node_id": "job-state-consistency",
+  "verdict": "fail",
+  "criteria_verdict": "fail",
+  "integrity": {
+    "verdict": "contradicted",
+    "intent_preserved": false,
+    "graph_integrity_preserved": false,
+    "required_human_review": true,
+    "confidence": 1.0,
+    "findings": [
+      {
+        "severity": "high",
+        "summary": "Work implements echo utility (canary-retry-proof) instead of fixing jobs.status/jobs.queue_state alignment (job-state-consistency). None of the 5 acceptance criteria are addressed.",
+        "affected_node_ids": [
+          "job-state-consistency"
+        ]
+      },
+      {
+        "severity": "high",
+        "summary": "decision.md describes echo function implementation with docs/echo-usage.md, not root cause of job_20260711T16542651's status=failed/queue_state=running divergence",
+        "affected_node_ids": [
+          "job-state-consistency"
+        ]
+      },
+      {
+        "severity": "high",
+        "summary": "Required artifact graph-update.yaml is absent; no SQL reconciliation step for the inconsistent row exists",
+        "affected_node_ids": [
+          "job-state-consistency"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "No changes to engine.py or any write path that updates jobs.status without queue_state",
+        "affected_node_ids": [
+          "job-state-consistency"
+        ]
+      }
+    ],
+    "reasoning": "The checkout's patch.diff, decision.md, and result-summary.md all describe implementing an echo utility (scripts/echo.py, docs/echo-usage.md) — the exact work specified by the canary-retry-proof node. However, the evaluation context assigns this work to the job-state-consistency node, which has a completely different purpose: fixing alignment between jobs.status and jobs.queue_state on every write path. \n\nNone of the job-state-consistency acceptance criteria are touched:\n1. No root cause documented for job_20260711T16542651 (status=failed, queue_state=running)\n2. No write paths updated to set both status and queue_state (engine.py expiry untouched)\n3. No consistency check created\n4. No SQL reconciliation step for the stale row\n5. No pytest run or test preservation\n\nThe required artifact graph-update.yaml is also missing. The evidence (decision.md, patch.diff, result-summary.md) directly contradicts the stated node intent. The work appears to be a misrouting of the canary-retry-proof output into the job-state-consistency evaluation context.",
+    "tool_trace": [
+      {
+        "ts": "2026-07-24T01:11:40.316Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_WOyEeW2lii4DNSSBy6ii4806",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/README.md"
+      },
+      {
+        "ts": "2026-07-24T01:11:40.318Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_5hr3sG9R01Zm8g2Nnrk84330",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-07-24T01:11:40.320Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_yGyyTWotROZucfo8IXvM1473",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns -maxdepth 3 -type f | head -80"
+      },
+      {
+        "ts": "2026-07-24T01:11:40.331Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_WOyEeW2lii4DNSSBy6ii4806",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:11:40.332Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_5hr3sG9R01Zm8g2Nnrk84330",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:11:40.337Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_yGyyTWotROZucfo8IXvM1473",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:11:43.450Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_UALh8Vo0EBzUehbKmXU63640",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/decision.md"
+      },
+      {
+        "ts": "2026-07-24T01:11:43.451Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_JneMvoWbVms78aQP5VFw7290",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/patch.diff"
+      },
+      {
+        "ts": "2026-07-24T01:11:43.451Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_s91fwl2EcpdLXOlIuIX93276",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/result-summary.md"
+      },
+      {
+        "ts": "2026-07-24T01:11:43.453Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_JneMvoWbVms78aQP5VFw7290",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:11:43.453Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_UALh8Vo0EBzUehbKmXU63640",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:11:43.453Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_s91fwl2EcpdLXOlIuIX93276",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:11:51.841Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_4demjnMqOZiGmBBWJRID8398",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts -type f -name \"*.py\" | head -50"
+      },
+      {
+        "ts": "2026-07-24T01:11:51.842Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_yTVGxZYntNflor5qeEhw8718",
+        "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/"
+      },
+      {
+        "ts": "2026-07-24T01:11:51.842Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_V1kPqhxv9bx0RKltVSyd4877",
+        "command": "grep -rl \"queue_state\\|queue\\.db\\|jobs\\.status\\|engine\\.py\\|baseline\\.sh\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/ 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-07-24T01:11:51.864Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_4demjnMqOZiGmBBWJRID8398",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:11:51.865Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_yTVGxZYntNflor5qeEhw8718",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:11:51.890Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_V1kPqhxv9bx0RKltVSyd4877",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:11:56.002Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_XcIqhKra6QMZ4CP4PI1w6890",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/echo.py"
+      },
+      {
+        "ts": "2026-07-24T01:11:56.003Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_qbHGajGra9vqWFFTnE7S2912",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/runtime/decision_loop/engine.py"
+      },
+      {
+        "ts": "2026-07-24T01:11:56.003Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_LKW1ELaYrtVppwvCH2DR5482",
+        "command": "ls /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/baseline.sh 2>/dev/null; cat /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/baseline.sh 2>/dev/null || echo \"baseline.sh not found at root\""
+      },
+      {
+        "ts": "2026-07-24T01:11:56.004Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_03_3egSpca9Z1sTgg7jU6Mo7032",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns -name \"baseline*\" -type f 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-24T01:11:56.016Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_XcIqhKra6QMZ4CP4PI1w6890",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:11:56.017Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_qbHGajGra9vqWFFTnE7S2912",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:11:56.027Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_LKW1ELaYrtVppwvCH2DR5482",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:11:56.028Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_3egSpca9Z1sTgg7jU6Mo7032",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:11:59.892Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_WrBq4JmhVEfpdKr7nacD9247",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml"
+      },
+      {
+        "ts": "2026-07-24T01:11:59.893Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_EJeZl8unrAIO6vbrjpCo5966",
+        "command": "ls /Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-24T01:11:59.896Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_WrBq4JmhVEfpdKr7nacD9247",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:11:59.908Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_EJeZl8unrAIO6vbrjpCo5966",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:12:01.962Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_qZD13z0igTj3Utf560PP8404",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/canary-retry-proof.yaml"
+      },
+      {
+        "ts": "2026-07-24T01:12:01.962Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_3mbPGvWOJxDjQtUr4V8J4727",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/job-state-consistency.yaml"
+      },
+      {
+        "ts": "2026-07-24T01:12:01.964Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_3mbPGvWOJxDjQtUr4V8J4727",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:12:01.964Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_qZD13z0igTj3Utf560PP8404",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:12:11.773Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_XdhnlLC5dHLmxkHKsdx15382",
+        "command": "grep -rn \"queue_state\\|jobs.status\\|status.*queue\\|job_20260711\\|16542651\\|engine.py.*expir\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/decision.md /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/patch.diff /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/result-summary.md 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-24T01:12:11.774Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_5tbTyBCL4nKFVmyYVWGn6719",
+        "command": "grep -rn \"queue_state\\|jobs.status\\|job_20260711\\|16542651\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/ --include=\"*.md\" --include=\"*.py\" --include=\"*.sh\" --include=\"*.yaml\" --include=\"*.json\" 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-07-24T01:12:11.795Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_XdhnlLC5dHLmxkHKsdx15382",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-07-24T01:12:11.904Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_5tbTyBCL4nKFVmyYVWGn6719",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:12:17.872Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_W0fVeWqcge2vOMA2U1lN6724",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/readiness-report-2026-07-18.md"
+      },
+      {
+        "ts": "2026-07-24T01:12:17.874Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_W0fVeWqcge2vOMA2U1lN6724",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T01:12:25.484Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_88UZhuajc81KYSlfmGki4764",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "The echo utility work in this checkout correctly implements the canary-retry-proof node. The canary-retry-proof node may need its own evaluation/dispatch.",
+        "affected_node_ids": [
+          "canary-retry-proof"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.0,
+  "criteria_confidence": 0.0,
+  "completeness": 0.5,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "root-cause-documented",
+        "criterion": "decision.md names the write path (or manual action) that produced status=failed/queue_state=running for job_20260711T16542651, with evidence",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (decision.md)"
+        ],
+        "reasoning": "Scanned source files (decision.md) for identifiers named in the criterion (queue_state, job_20260711T16542651). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "all-writers-set-both",
+        "criterion": "every UPDATE to jobs.status in scripts/ also sets queue_state to the matching value (engine.py expiry included), or the redundancy is collapsed with a documented rationale",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "path_mentioned_missing",
+        "evidence": [
+          "engine.py absent"
+        ],
+        "reasoning": "The criterion names source path(s) that are not present in the checkout. The harness did not scan unrelated files as substitutes.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "engine.py absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "consistency-check-exists",
+        "criterion": "a check exists (test or baseline.sh probe) that fails when any jobs row has mismatched status/queue_state",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "queue_state -> line 220: 'queue_state'"
+        ],
+        "reasoning": "Scanned source files (scripts/adapters/__init__.py, scripts/adapters/executor_protocol.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_cli_adapter.py...) for identifiers named in the criterion (queue_state). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "stale-row-reconciled",
+        "criterion": "the existing inconsistent row is corrected via a documented, reversible step (SQL in decision.md), not silent mutation",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (decision.md)"
+        ],
+        "reasoning": "Scanned source files (decision.md) for identifiers named in the criterion (SQL). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "suite-green",
+        "criterion": ".venv/bin/python -m pytest -q scripts passes with no regressions",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "do not change receipt semantics or the human review gate",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "schema changes to queue.db are out of scope; column semantics only",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "graph truth stays human-owned; this node produces evidence only",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "decision.md": true,
+      "result-summary.md": true,
+      "patch.diff": true,
+      "graph-update.yaml": false
+    },
+    "deps_status": {},
+    "criteria_mismatches": [
+      {
+        "criterion_id": "all-writers-set-both",
+        "kind": "source_path",
+        "detail": "engine.py absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "all-writers-set-both",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ]
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "root-cause-documented",
+        "judgment": "judged_fail",
+        "confidence": 1.0,
+        "evidence": [
+          "decision.md (root) discusses canary-retry-proof echo utility only",
+          ".gddp/decision.md discusses neutral-executor-contract only",
+          "No mention of job_20260711T16542651 or the write path that caused the inconsistent row"
+        ],
+        "reasoning": "Neither the root decision.md nor .gddp/decision.md identifies the write path or manual action that produced status=failed/queue_state=running for job_20260711T16542651. Both documents discuss unrelated nodes (canary-retry-proof and neutral-executor-contract). The inconsistent row is documented elsewhere as deliberately left untouched (handoff 051)."
+      },
+      {
+        "criterion_id": "all-writers-set-both",
+        "judgment": "judged_fail",
+        "confidence": 1.0,
+        "evidence": [
+          "engine.py:59: UPDATE jobs SET status = 'expired' (no queue_state set)",
+          "engine.py is the exact path named in the node's 'why' section as the known-problematic write path",
+          "Most other state_recorder.py functions (mark_job_running, mark_job_failed, mark_job_cancelled) set both columns correctly"
+        ],
+        "reasoning": "The engine.py _clean_stale_state function at line 59 sets `status = 'expired'` without setting `queue_state` to a matching value. This is the precise bug identified in the node's 'why' section ('decision_loop/engine.py expiry sets status=\"expired\" only'). No code fix has been applied. While most other write paths in state_recorder.py set both columns, the criterion explicitly includes 'engine.py expiry included' — and that path remains broken."
+      },
+      {
+        "criterion_id": "consistency-check-exists",
+        "judgment": "judged_fail",
+        "confidence": 1.0,
+        "evidence": [
+          "baseline.sh reports grouped queue_state counts but does not cross-check for mismatched status/queue_state",
+          "No SQL query, test, or probe exists that would fail when a jobs row has status != queue_state",
+          "grep for mismatch-checking patterns across all .py files returned no relevant results"
+        ],
+        "reasoning": "No test, baseline.sh probe, or other check exists that would fail when any jobs row has mismatched status and queue_state. The baseline.sh groups jobs by queue_state for informational display but does not compare status against queue_state within rows. No SQL query, Python assertion, or test validates column consistency."
+      },
+      {
+        "criterion_id": "stale-row-reconciled",
+        "judgment": "judged_fail",
+        "confidence": 1.0,
+        "evidence": [
+          "Handoff 051 explicitly states the inconsistent row is 'deliberately left untouched as live evidence for the future job-state-consistency node'",
+          "No decision.md contains SQL or any documented step to correct job_20260711T16542651",
+          ".gddp/decision.md and root decision.md both discuss unrelated nodes"
+        ],
+        "reasoning": "The existing inconsistent row (job_20260711T16542651, status=failed, queue_state=running) is documented as deliberately left untouched. No SQL or reversible corrective step appears in any decision.md. The project's own documentation confirms this row was preserved as evidence for this node, which means the node's work has not been done."
+      },
+      {
+        "criterion_id": "suite-green",
+        "judgment": "indeterminate",
+        "confidence": 0.2,
+        "evidence": [
+          ".venv/bin/python not found in checkout",
+          "system python3 does not have pytest installed",
+          "Handoff documents claim 325-373 tests pass on deployable branches",
+          "No code was changed for job-state-consistency specifically (changes are for neutral-executor-contract and canary-retry-proof)"
+        ],
+        "reasoning": "The test environment (venv with pytest) is not available in this checkout, so the test suite cannot be executed to verify it passes with no regressions. Handoff documents and readiness reports claim 325-373 passing tests, but those refer to branches before or after the neutral-executor-contract merge, not the current checkout. Since I cannot run the tests, this criterion is indeterminate."
+      }
+    ],
+    "overall_reasoning": "The job-state-consistency node's work has not been implemented in this repo checkout. The artifacts present (decision.md, result-summary.md, patch.diff) are for unrelated nodes: the root-level artifacts are for canary-retry-proof (echo utility), and the .gddp/ artifacts are for neutral-executor-contract. None of the five acceptance criteria are satisfied. The core bug (engine.py _clean_stale_state setting status='expired' without queue_state) remains unfixed. The inconsistent row (job_20260711T16542651) was deliberately left untouched as evidence. No consistency-check probe exists. No root cause is documented. The test suite cannot be run to verify non-regression. Four criteria judged_fail at high confidence; one criterion indeterminate due to unavailable test environment. The repo's content does not address the job-state-consistency node at all — it contains work for a different node in the project graph.",
+    "risks": "The primary risk is misattribution: the checkout appears to contain implementation work for neutral-executor-contract and canary-retry-proof, not job-state-consistency. A reviewer could mistakenly think the job-state-consistency node was addressed because artifacts exist, but those artifacts are for different nodes. The known-inconsistent row (job_20260711T16542651) continues to exist as documented live evidence, meaning the dashboard still lies if it reads only one column.",
+    "followup_candidates": "1. Confirm whether this checkout was intended for job-state-consistency or for a different node (neutral-executor-contract). The artifacts present match neutral-executor-contract, not job-state-consistency. 2. If job-state-consistency is the target, the implementation requires: (a) fix engine.py _clean_stale_state to also set queue_state='expired', (b) add a test/probe that fails on status/queue_state mismatch, (c) document the root cause of job_20260711T16542651's inconsistency in decision.md, (d) provide reversible SQL to correct the stale row. 3. If neutral-executor-contract was the actual implemented node, verify its artifacts against its own acceptance criteria instead.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-07-24T01:10:02.685Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_M0ISCbYXZk3pWiSDTWkp0523",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-07-24T01:10:02.686Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_a4tOFVYHg4AJLOIRifSm3465",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/README.md"
+        },
+        {
+          "ts": "2026-07-24T01:10:02.686Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_SLe6N30KXLc5otURoT3o1277",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/decision.md"
+        },
+        {
+          "ts": "2026-07-24T01:10:02.687Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_03_mPc6BZEtGoG7uq0OwxiX0132",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/result-summary.md"
+        },
+        {
+          "ts": "2026-07-24T01:10:02.687Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_04_YW3yIISiqCGR1gSsT56M2638",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/patch.diff"
+        },
+        {
+          "ts": "2026-07-24T01:10:02.694Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_M0ISCbYXZk3pWiSDTWkp0523",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:02.697Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_SLe6N30KXLc5otURoT3o1277",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:02.698Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_a4tOFVYHg4AJLOIRifSm3465",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:02.698Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_mPc6BZEtGoG7uq0OwxiX0132",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:02.699Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_04_YW3yIISiqCGR1gSsT56M2638",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:06.338Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_vjfAVrVCyjrSB6z0KQrS7100",
+          "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns -type f | head -100"
+        },
+        {
+          "ts": "2026-07-24T01:10:06.340Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_b5dDcWWXQLgz9hp6tb0k0234",
+          "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns -type f -name \"*.py\" -o -name \"*.md\" -o -name \"*.yaml\" -o -name \"*.yml\" -o -name \"*.sh\" -o -name \"*.sql\" -o -name \"*.diff\" | sort"
+        },
+        {
+          "ts": "2026-07-24T01:10:06.373Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_vjfAVrVCyjrSB6z0KQrS7100",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:06.373Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_b5dDcWWXQLgz9hp6tb0k0234",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:12.249Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_5rLtLIQ9E7vhecWajvBl6373",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/.gddp/decision.md"
+        },
+        {
+          "ts": "2026-07-24T01:10:12.249Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_3cccPL0rlS11J1fdv2Aj8224",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/.gddp/result-summary.md"
+        },
+        {
+          "ts": "2026-07-24T01:10:12.249Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_HHrzEufX39uREEEKnfct2611",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/.gddp/patch.diff"
+        },
+        {
+          "ts": "2026-07-24T01:10:12.250Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_03_vavl1pBxsY0PEKVh2I9v7049",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/runtime/heartbeat/state_recorder.py"
+        },
+        {
+          "ts": "2026-07-24T01:10:12.250Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_04_WuNJGoMDcq1DsSTzHWjV9300",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/runtime/decision_loop/engine.py"
+        },
+        {
+          "ts": "2026-07-24T01:10:12.251Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_vavl1pBxsY0PEKVh2I9v7049",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:12.252Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_04_WuNJGoMDcq1DsSTzHWjV9300",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:12.253Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_3cccPL0rlS11J1fdv2Aj8224",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:12.253Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_5rLtLIQ9E7vhecWajvBl6373",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:12.256Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_HHrzEufX39uREEEKnfct2611",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:21.236Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_ypAKZgnzl5z1nfxXCawD6663",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/runtime/heartbeat/job_factory.py"
+        },
+        {
+          "ts": "2026-07-24T01:10:21.236Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_daeZjOUvISWiI4ebfaSP4493",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/runtime/heartbeat/dispatcher.py"
+        },
+        {
+          "ts": "2026-07-24T01:10:21.236Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_NqRYwO5ZVT3NInCGWpHO2911",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/runtime/heartbeat/reconciler.py"
+        },
+        {
+          "ts": "2026-07-24T01:10:21.236Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_03_2rFjdQDwtGMtpXwVGwnK6372",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/heartbeat.py"
+        },
+        {
+          "ts": "2026-07-24T01:10:21.238Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ypAKZgnzl5z1nfxXCawD6663",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:21.239Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_NqRYwO5ZVT3NInCGWpHO2911",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:21.239Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_daeZjOUvISWiI4ebfaSP4493",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:21.240Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_2rFjdQDwtGMtpXwVGwnK6372",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:30.685Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_nUitxqkqDeVkLht4YqcV6918",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/runtime/return_router.py"
+        },
+        {
+          "ts": "2026-07-24T01:10:30.686Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_ETZyi6pTqEEGeADfXOAG0743",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/deploy/mini-heartbeat/bin/baseline.sh"
+        },
+        {
+          "ts": "2026-07-24T01:10:30.686Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_SUIvkzVGSUohEd2xzmVQ6060",
+          "command": "grep -rn \"status.*=.*'expired'\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns --include=\"*.py\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T01:10:30.686Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_03_HTTirNJRs6oOxcIa2lhd8289",
+          "command": "grep -rn \"UPDATE jobs SET status\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns --include=\"*.py\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T01:10:30.699Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_nUitxqkqDeVkLht4YqcV6918",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:30.700Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ETZyi6pTqEEGeADfXOAG0743",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:30.723Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_HTTirNJRs6oOxcIa2lhd8289",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:30.725Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_SUIvkzVGSUohEd2xzmVQ6060",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:35.042Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_IBh5GACK7blF4ykNnHZO7149",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/node_status.py"
+        },
+        {
+          "ts": "2026-07-24T01:10:35.043Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_NUyt48n5DWVaEwfUaGHY8497",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/rollback.py"
+        },
+        {
+          "ts": "2026-07-24T01:10:35.046Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_SOuu8aSPwJfs6mwaiPyt8684",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/dry_run.py"
+        },
+        {
+          "ts": "2026-07-24T01:10:35.047Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_03_PqqDOBw73pvBPMgSLC6n8266",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml"
+        },
+        {
+          "ts": "2026-07-24T01:10:35.049Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_IBh5GACK7blF4ykNnHZO7149",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:35.049Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_NUyt48n5DWVaEwfUaGHY8497",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:35.049Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_SOuu8aSPwJfs6mwaiPyt8684",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:35.050Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_PqqDOBw73pvBPMgSLC6n8266",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:44.597Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_Hv2KJTULNCboUAGYKk9j0960",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/node_status.py"
+        },
+        {
+          "ts": "2026-07-24T01:10:44.597Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_LKD2Vl8sRMhmRXNL6STT3953",
+          "command": "grep -rn \"queue_state\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts --include=\"*.py\" -l 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T01:10:44.598Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_rDQhXe8jZLvaNJUxZ8ue4626",
+          "command": "grep -rn \"status.*!=.*queue_state\\|mismatch.*status\\|status.*mismatch\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts --include=\"*.py\" -l 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T01:10:44.598Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_03_wRPIsc723vaxGBd2iPyp8674",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns && ls .venv/bin/python 2>/dev/null && .venv/bin/python -m pytest -q scripts 2>&1 | tail -20"
+        },
+        {
+          "ts": "2026-07-24T01:10:44.603Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Hv2KJTULNCboUAGYKk9j0960",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:44.616Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_wRPIsc723vaxGBd2iPyp8674",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-07-24T01:10:44.626Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_LKD2Vl8sRMhmRXNL6STT3953",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:44.640Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_rDQhXe8jZLvaNJUxZ8ue4626",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:49.521Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_xdCkjbTvtGQ4gtPTaBpN8732",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns && find . -name \"python*\" -path \"*/venv/*\" -o -name \"python*\" -path \"*/.venv/*\" 2>/dev/null | head -5 && which python3 2>/dev/null && python3 -m pytest -q scripts 2>&1 | tail -20"
+        },
+        {
+          "ts": "2026-07-24T01:10:49.522Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_MnApyP8pyGv41bIxJBfJ0193",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/runtime/verification/bridge.py"
+        },
+        {
+          "ts": "2026-07-24T01:10:49.522Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_33Snp8kSRHkpn5Z2k0627708",
+          "command": "grep -rn \"job_20260711T16542651\\|20260711\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns --include=\"*.md\" --include=\"*.py\" --include=\"*.sh\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T01:10:49.531Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_MnApyP8pyGv41bIxJBfJ0193",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:49.602Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_33Snp8kSRHkpn5Z2k0627708",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:49.758Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_xdCkjbTvtGQ4gtPTaBpN8732",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:55.240Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_E1wO2UMeWQmNphIPESHs0310",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/readiness-report-2026-07-18.md"
+        },
+        {
+          "ts": "2026-07-24T01:10:55.241Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_jPQxOVE3UbiBDsEoKCLJ4046",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/.handoffs/051-capability-spine-merge-node2-stabilization-plan.md"
+        },
+        {
+          "ts": "2026-07-24T01:10:55.242Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_E1wO2UMeWQmNphIPESHs0310",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:10:55.242Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_jPQxOVE3UbiBDsEoKCLJ4046",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:11:08.138Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_tA68cI2YWHXw1ZLK7SO33464",
+          "command": "grep -rn \"job-state-consistency\\|job_state_consistency\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns --include=\"*.py\" --include=\"*.md\" --include=\"*.yaml\" --include=\"*.yml\" --include=\"*.sh\" --include=\"*.diff\" 2>/dev/null | head -30"
+        },
+        {
+          "ts": "2026-07-24T01:11:08.138Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_fVKRO8IZ2vzYOdVRvUNM4558",
+          "command": "grep -rn \"expired.*queue_state\\|queue_state.*expired\\|SET queue_state.*expired\\|queue_state.*=.*expired\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns --include=\"*.py\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T01:11:08.139Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_loy53RIqWNxDA5YF7uYJ4591",
+          "command": "grep -rn \"status.*expired\\|queue_state.*expired\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/runtime/decision_loop/engine.py 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T01:11:08.165Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_loy53RIqWNxDA5YF7uYJ4591",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:11:08.205Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_fVKRO8IZ2vzYOdVRvUNM4558",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-07-24T01:11:08.218Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_tA68cI2YWHXw1ZLK7SO33464",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:11:10.633Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_XNu2eDFutQgkaop67jgI2826",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/.handoffs/052-node2-stabilization-loop-evidence.md"
+        },
+        {
+          "ts": "2026-07-24T01:11:10.634Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_XNu2eDFutQgkaop67jgI2826",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:11:22.207Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_xfyfd2sZE7egcL8UECKz6248",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/scripts/runtime/decision_loop/engine.py"
+        },
+        {
+          "ts": "2026-07-24T01:11:22.208Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_01_m1jFyNfa05hcGM2aWJM00620",
+          "reason": "command matched blocked pattern",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns && git stash list 2>/dev/null; git branch -a 2>/dev/null",
+          "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+        },
+        {
+          "ts": "2026-07-24T01:11:22.208Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_m1jFyNfa05hcGM2aWJM00620",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-07-24T01:11:22.209Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_xfyfd2sZE7egcL8UECKz6248",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T01:11:36.967Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_eUsF0yBBiibkkCWeQ3M34836",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "The job-state-consistency node's work has not been implemented in this repo checkout. The artifacts present (decision.md, result-summary.md, patch.diff) are for unrelated nodes: the root-level artifacts are for canary-retry-proof (echo utility), and the .gddp/ artifacts are for neutral-executor-contract. None of the five acceptance criteria are satisfied. The core bug (engine.py _clean_stale_state setting status='expired' without queue_state) remains unfixed. The inconsistent row (job_20260711T16542651) was deliberately left untouched as evidence. No consistency-check probe exists. No root cause is documented. The test suite cannot be run to verify non-regression. Four criteria judged_fail at high confidence; one criterion indeterminate due to unavailable test environment. The repo's content does not address the job-state-consistency node at all — it contains work for a different node in the project graph.",
+  "required_next_action": "Address semantic failures and re-submit.",
+  "generated_at": "2026-07-24T01:12:25.563435+00:00",
+  "evaluated_tree_sha": "a8f87f9ad066568e5425b3c7726aba20b1968387",
+  "evaluated_commit_sha": "cd7bc2daa902c2d87e511984301f39956cf0dfa0",
+  "merge_commit_sha": "cd7bc2daa902c2d87e511984301f39956cf0dfa0",
+  "pr_ref": null,
+  "job_id": "job_20260724T010811130dd14802e579",
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-lcb0_0ns/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "high"
+  }
+}

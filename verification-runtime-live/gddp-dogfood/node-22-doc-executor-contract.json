@@ -1,0 +1,658 @@
+{
+  "project_id": "gddp-dogfood",
+  "node_id": "node-22-doc-executor-contract",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.92,
+    "findings": [],
+    "reasoning": "The node's intended role — \"Document the NodePacket / PatchResult contract\" as a one-file T4 docs/cleanup node so the post-demolition runtime is legible to the next session — is fully preserved. docs/executor-contract.md is a single, accurate field reference for scripts/adapters/executor_protocol.py: I verified every NodePacket field (12/12) and every PatchResult field (14/14) against the code — all present in code order with exact types and defaults; the transport-helper docstrings (to_json_value, to_json) are quoted verbatim; the FrozenJSON alias and the related-types section (SessionRef, SessionStatus, DispatchResult, EngagementDispatchResult, ExecutorAdapter) all match the module. The doc's stated source-of-truth path is correct and the file exists at both base and tip. Graph integrity is intact: diff base→tip is exactly one added file (docs/executor-contract.md), satisfying the create-only/read-only-elsewhere constraints; no code changed so the test suite cannot regress from this node; depends_on and unlocks are both empty so there are no upstream assumptions violated and no downstream consumers affected; node YAML in gddp-config matches the spec. Commit discipline holds (one docs commit + one result-ref wrapper commit, clean tree). No drift, no scope creep.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-11T08:56:57.734Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_i5fqwIw6N63X9SQDrtBj0174",
+        "path": "/tmp/gddp-eval-wt-_7m_7ijo/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-11T08:56:57.734Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_SiB9LBnmN3qkd2nW911E2790",
+        "path": "/tmp/gddp-eval-wt-_7m_7ijo/README.md"
+      },
+      {
+        "ts": "2026-08-11T08:56:57.736Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_y0VZZiJDh9q9bK95WzZH4182",
+        "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && ls -la && echo \"---GIT LOG---\" && git log --oneline -10 2>/dev/null && echo \"---GIT STATUS---\" && git status 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-11T08:56:57.749Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_SiB9LBnmN3qkd2nW911E2790",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:56:57.749Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_i5fqwIw6N63X9SQDrtBj0174",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:56:57.764Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_y0VZZiJDh9q9bK95WzZH4182",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:57:00.769Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_J0d6TuZfE5CoaOcT5iic5543",
+        "path": "/tmp/gddp-eval-wt-_7m_7ijo/docs/executor-contract.md"
+      },
+      {
+        "ts": "2026-08-11T08:57:00.770Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_01_QI1TJbYA0RQLbti0sImk3898",
+        "reason": "command matched blocked pattern",
+        "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && echo \"---DIFF base->tip---\" && git diff 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61..619bda9e7cf266c079d4492c303d5138c104eafd --stat && echo \"---SHOW COMMIT---\" && git show --stat 619bda9 | head -20 && echo \"---FIND executor_protocol---\" && find . -name '*executor*protocol*' -o -name 'executor_protocol.py' 2>/dev/null; find /home/sab-mini/gddp-config -name 'executor_protocol.py' 2>/dev/null; echo \"---SEARCH NodePacket/PatchResult in repo---\" && grep -rl \"NodePacket\\|PatchResult\" --include=\"*.py\" . 2>/dev/null | head -20",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-11T08:57:00.771Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_QI1TJbYA0RQLbti0sImk3898",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-11T08:57:00.772Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_J0d6TuZfE5CoaOcT5iic5543",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:57:05.607Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_f8tA4D0U8P7Y6tqbiptI6856",
+        "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && git diff --stat 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61 619bda9e7cf266c079d4492c303d5138c104eafd && echo \"---COMMIT 619bda9---\" && git show --stat 619bda9 | head -30"
+      },
+      {
+        "ts": "2026-08-11T08:57:05.607Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_iqNRioFvw52eXEHmQwt95078",
+        "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && find . -name 'executor_protocol.py' ; echo \"---config repo---\" ; find /home/sab-mini/gddp-config -name 'executor_protocol.py' ; echo \"---NodePacket grep---\" ; grep -rl \"NodePacket\" --include=\"*.py\" . | head -20"
+      },
+      {
+        "ts": "2026-08-11T08:57:05.622Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_f8tA4D0U8P7Y6tqbiptI6856",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:57:05.649Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_iqNRioFvw52eXEHmQwt95078",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:57:09.294Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_MqzDR3sZuLAqCu39FxxG3020",
+        "path": "/tmp/gddp-eval-wt-_7m_7ijo/scripts/adapters/executor_protocol.py"
+      },
+      {
+        "ts": "2026-08-11T08:57:09.294Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_kpDPCJONKIRrhktNZISG9605",
+        "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && git show 450eca1:scripts/adapters/executor_protocol.py | head -5 && echo \"---exists at base?---\" && git cat-file -e 450eca1:scripts/adapters/executor_protocol.py && echo \"YES exists at base\""
+      },
+      {
+        "ts": "2026-08-11T08:57:09.300Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_MqzDR3sZuLAqCu39FxxG3020",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:57:09.307Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_kpDPCJONKIRrhktNZISG9605",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:57:23.169Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_jqXmUj7O79m6YXJuPRTv0883",
+        "path": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-22-doc-executor-contract.yaml"
+      },
+      {
+        "ts": "2026-08-11T08:57:23.170Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_v8XgzxbWEkydC2cFlk5d2623",
+        "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && git diff --name-status 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61 619bda9e7cf266c079d4492c303d5138c104eafd && echo \"---full tree check: any other recent modifications?---\" && git log --oneline -3 --all | cat && echo \"---handoffs index mention---\" && ls .handoffs | head"
+      },
+      {
+        "ts": "2026-08-11T08:57:23.177Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_jqXmUj7O79m6YXJuPRTv0883",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:57:23.195Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_v8XgzxbWEkydC2cFlk5d2623",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:57:39.507Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_2TewvO81qAK7d7J50uq84210",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "Evaluator 'covers' check reported 'executor_protocol.py absent' via path_mentioned_missing, but the file exists at scripts/adapters/executor_protocol.py in the checkout (base and tip). The criterion's source-path scan appears to resolve paths relative to a different root than the repo checkout; this is an evaluation-harness artifact, not a defect in the work. It will likely surface as a lane-1 human question and may re-adjudicate as satisfied. Future nodes whose criteria reference repo-relative source paths should expect the same scan gap until the harness path resolution is fixed.",
+        "affected_node_ids": [
+          "node-22-doc-executor-contract"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9133333333333334,
+  "criteria_confidence": 0.9133333333333334,
+  "completeness": 1.0,
+  "graph_readiness": 0.9133333333333334,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "artifact-exists",
+        "criterion": "docs/executor-contract.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (docs/executor-contract.md)"
+        ],
+        "reasoning": "Scanned source files (docs/executor-contract.md) for identifiers named in the criterion (executor-contract, non-empty). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "covers",
+        "criterion": "the file covers the executor_protocol.py field reference: every NodePacket and PatchResult field with type and one-line meaning, quoted from code",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "path_mentioned_missing",
+        "evidence": [
+          "executor_protocol.py absent"
+        ],
+        "reasoning": "The criterion names source path(s) that are not present in the checkout. The harness did not scan unrelated files as substitutes.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "executor_protocol.py absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "suite-unchanged",
+        "criterion": "python3 -m pytest -q shows no new failures beyond those already present on this host before the node (flask-import and rig1 plist asserts); quote the tail line in the commit message",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...) for identifiers named in the criterion (flask-import). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create or modify only docs/executor-contract.md",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Read-only outside that path",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "docs/executor-contract.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [
+      {
+        "criterion_id": "covers",
+        "kind": "source_path",
+        "detail": "executor_protocol.py absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "covers",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+      "tip": "619bda9e7cf266c079d4492c303d5138c104eafd",
+      "files": [
+        {
+          "status": "A",
+          "path": "docs/executor-contract.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "artifact-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.99,
+        "evidence": [
+          "docs/executor-contract.md exists, 4109 bytes, 76 lines, non-empty",
+          "subject_diff: A docs/executor-contract.md (only file in 450eca1..619bda9)",
+          "git log: c8a9ba0 'docs: NodePacket / PatchResult executor contract (node-22)' adds the file (+76)"
+        ],
+        "reasoning": "Directly verified the artifact exists and is non-empty by reading the file; the deterministic scan's 'no hit' was a keyword-scan artifact, not an absence. The subject diff confirms the file was added by the node commit."
+      },
+      {
+        "criterion_id": "covers",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "docs/executor-contract.md names scripts/adapters/executor_protocol.py as source of truth",
+          "All 12 NodePacket fields listed with types matching source exactly (job_id: str ... expected_base_commit_sha: str | None)",
+          "All 14 PatchResult fields listed with types matching source exactly (success: bool, review_required: bool, rest str | None)",
+          "Verbatim quotes verified: class docstring 'Two success shapes' (patch handoff / commit-ref handoff), to_json_value() 'Return the exact transport shape for this packet.', to_json() 'Serialize the transport shape deterministically.', FrozenJSON alias",
+          "One-line meanings align with code inline comments (e.g. patch_text <- '# unified diff text', result_ref <- '# durable per-attempt ref name')",
+          "deterministic scan's 'executor_protocol.py absent' was a path artifact: file lives at scripts/adapters/executor_protocol.py"
+        ],
+        "reasoning": "Line-by-line comparison of docs/executor-contract.md against scripts/adapters/executor_protocol.py shows all 12 NodePacket and 14 PatchResult fields with exact types and accurate one-line meanings; every docstring and the FrozenJSON alias are quoted verbatim. The deterministic check failed only because it probed a top-level path for executor_protocol.py; the referenced source exists at scripts/adapters/. Minor nuance: fields without inline comments carry inferred-but-accurate meanings, since verbatim quoting is impossible for them."
+      },
+      {
+        "criterion_id": "suite-unchanged",
+        "judgment": "judged_pass",
+        "confidence": 0.8,
+        "evidence": [
+          "commit c8a9ba0 message quotes pytest tail: 'Suite unchanged: 4 failed, 622 passed (flask-import + rig1 plist asserts pre-existing on this host).'",
+          "node diff is docs-only (docs/executor-contract.md); no tests reference executor-contract.md or executor_protocol.py, so no test can newly fail",
+          "plausible pre-existing failures exist in repo: flask imports in scripts/test_intake_server.py/test_runtime_root_config.py (flask>=3.0 in requirements.txt), rig1 plist asserts in deploy/rig1-heartbeat/test_rig1_render_plist.py and test_rig1_arm_refuse.py (not excluded by pytest.ini)",
+          "criterion itself names flask-import and rig1 plist asserts as the pre-existing baseline, matching the commit message attribution"
+        ],
+        "reasoning": "The criterion requires (a) no new failures beyond the pre-existing flask-import and rig1 plist asserts and (b) the pytest tail line quoted in the commit message. Both are evidenced: the commit message quotes '4 failed, 622 passed' and attributes failures to exactly the baseline the criterion names; the node's docs-only diff structurally cannot introduce new failures (no test references the new doc). pytest could not be rerun in this eval environment (not installed), so the numeric figure rests on the commit message plus structural argument rather than an independent rerun, capping confidence at 0.8."
+      }
+    ],
+    "overall_reasoning": "All three acceptance criteria are satisfied. (1) docs/executor-contract.md exists and is non-empty (4109 bytes). (2) The doc covers every NodePacket (12) and PatchResult (14) field with the exact type from scripts/adapters/executor_protocol.py and a one-line meaning; the docstrings and type alias are quoted verbatim from the code, and field meanings track the code's inline comments. The deterministic scanner's 'executor_protocol.py absent' and 'no hit' results were path/keyword artifacts, not real gaps: the source lives at scripts/adapters/executor_protocol.py, and the artifact file is present. (3) The commit message quotes the pytest tail line ('4 failed, 622 passed') and attributes failures to flask-import + rig1 plist asserts, matching both the criterion's stated baseline and the repo's actual test surfaces (flask imports in scripts tests; rig1 plist-assert tests under deploy/rig1-heartbeat). The node's diff is strictly docs-only, so it cannot introduce new test failures. Constraints were respected: tracked diff contains only docs/executor-contract.md, and the work is committed on node result refs (c8a9ba0 + result(job=...) wrapper 619bda9). The suite could not be re-executed in the eval environment (pytest not installed in /usr/bin/python3), so the numeric tail-line claim rests on the commit message plus structural argument rather than an independent rerun.",
+    "risks": "I could not independently rerun `python3 -m pytest -q` because pytest is not installed in this evaluation environment (/usr/bin/python3: No module named pytest; no venv present). The '4 failed, 622 passed' figure is attested only by the commit message, though it is consistent with the criterion's stated baseline and with the repo's real test surfaces, and the docs-only diff structurally precludes new failures. Minor wording nuance: the criterion says meanings are 'quoted from code'; fields without inline comments (e.g., success, completion_id, error) necessarily carry inferred one-line meanings, though all types and the quoted docstrings/comments are exact.",
+    "followup_candidates": "Observed: the suite could not be rerun in this evaluation environment (no pytest installed). The commit message quotes the tail line, which is what the criterion requires; the numeric claim was not independently reproduced here. If direct re-verification of '4 failed, 622 passed' on the executor host is desired, rerun the suite there and compare. Observed: the deterministic scanner reported 'executor_protocol.py absent' because it probed a top-level path; the file exists at scripts/adapters/executor_protocol.py and the doc references the correct path — no criteria change needed.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-11T08:55:28.587Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_0JjbaWgjRg3LbMgwjOQX4844",
+          "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && ls -la && git log --oneline -5 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-11T08:55:28.588Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_j9G7pd5W2CgP7aKIm0gz3160",
+          "path": "/tmp/gddp-eval-wt-_7m_7ijo/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-11T08:55:28.602Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_j9G7pd5W2CgP7aKIm0gz3160",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:55:28.609Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_0JjbaWgjRg3LbMgwjOQX4844",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:55:31.317Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_fMbruJ2aiAZMKfONGkZI9999",
+          "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && find . -name 'executor_protocol.py' -not -path './.git/*' 2>/dev/null; echo \"---\"; ls docs/; echo \"---\"; wc -c docs/executor-contract.md"
+        },
+        {
+          "ts": "2026-08-11T08:55:31.318Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_FrS8yyBe9garmkRR4QSr7801",
+          "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && git show --stat c8a9ba0 | head -30; echo \"===\"; git show --stat 619bda9 | head -30"
+        },
+        {
+          "ts": "2026-08-11T08:55:31.336Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_fMbruJ2aiAZMKfONGkZI9999",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:55:31.339Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_FrS8yyBe9garmkRR4QSr7801",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:55:34.340Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_wXwF0C5OvGzIwYlfHzXy9226",
+          "path": "/tmp/gddp-eval-wt-_7m_7ijo/docs/executor-contract.md"
+        },
+        {
+          "ts": "2026-08-11T08:55:34.341Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_LwOQWy3khDakroro8N0t3076",
+          "path": "/tmp/gddp-eval-wt-_7m_7ijo/scripts/adapters/executor_protocol.py"
+        },
+        {
+          "ts": "2026-08-11T08:55:34.342Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_wXwF0C5OvGzIwYlfHzXy9226",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:55:34.343Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_LwOQWy3khDakroro8N0t3076",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:55:51.501Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_xKaiiSkc2hILwX7RzbS96680",
+          "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && export PYTHONDONTWRITEBYTECODE=1 && timeout 600 python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -15"
+        },
+        {
+          "ts": "2026-08-11T08:55:51.501Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ABCG1WDz4SJrdiwCNQzZ4951",
+          "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && git diff --stat 450eca1..619bda9; echo \"===\"; git diff --name-status 450eca1..c8a9ba0; echo \"===\"; git show c8a9ba0 --format=full --no-patch | head -12; echo \"===\"; git show 619bda9 --format=full --stat --no-patch | head -15"
+        },
+        {
+          "ts": "2026-08-11T08:55:51.529Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ABCG1WDz4SJrdiwCNQzZ4951",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:55:51.532Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_xKaiiSkc2hILwX7RzbS96680",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:55:55.467Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_IejVfSeAg4Kn6tIJli331575",
+          "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && ls -d .venv venv env 2>/dev/null; which -a python3 python 2>/dev/null; ls /tmp/gddp-eval-wt-_7m_7ijo/.gddp 2>/dev/null; find . -maxdepth 3 -name 'activate' -not -path './.git/*' 2>/dev/null | head; cat pytest.ini"
+        },
+        {
+          "ts": "2026-08-11T08:55:55.467Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_qswHtZPq7WYmCtSdV6Kj9936",
+          "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && ls .handoffs/ | head; echo \"===\"; find .handoffs -maxdepth 2 -iname '*node-22*' -o -maxdepth 2 -iname '*executor-contract*' 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-11T08:55:55.484Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_qswHtZPq7WYmCtSdV6Kj9936",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:55:55.486Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_IejVfSeAg4Kn6tIJli331575",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:56:00.479Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_02oSZpd3qvN0kI5VLour9438",
+          "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && cat .gddp/result-summary.md 2>/dev/null; echo \"===DECISION===\"; cat .gddp/decision.md 2>/dev/null | head -40; echo \"===PATCH===\"; head -20 .gddp/patch.diff 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-11T08:56:00.480Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_bDdn6NljvRARDesTbDkN6148",
+          "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && grep -rn \"622\\|flask\" .gddp/ scripts/ docs/ --include='*.md' -l 2>/dev/null | head; echo \"===\"; grep -rn \"4 failed\" . --include='*.md' --include='*.txt' -l 2>/dev/null | grep -v '.git/' | head"
+        },
+        {
+          "ts": "2026-08-11T08:56:00.495Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_02oSZpd3qvN0kI5VLour9438",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:56:00.507Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_bDdn6NljvRARDesTbDkN6148",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:56:06.108Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_qhir0KtMdCow4cz7Hup10937",
+          "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && grep -rln \"import flask\\|flask\" tests/ scripts/ 2>/dev/null | grep -v _archive | head; echo \"=== rig1/plist ===\"; grep -rln \"rig1\\|plist\" tests/ scripts/ 2>/dev/null | grep -v _archive | head; echo \"=== tests dir ===\"; ls tests/ 2>/dev/null | head; find . -name 'test_*.py' -not -path './.git/*' | head -5"
+        },
+        {
+          "ts": "2026-08-11T08:56:06.108Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_gc1WbqfYS1EeaJfKdmo31164",
+          "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && git log --oneline -3 450eca1; echo \"===\"; git show 450eca1 --stat --format='%s' | head -8; echo \"=== check docs referenced in tests ===\"; grep -rln \"executor-contract\\|executor_protocol\" tests/ 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-11T08:56:06.138Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_gc1WbqfYS1EeaJfKdmo31164",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:56:06.145Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_qhir0KtMdCow4cz7Hup10937",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:56:21.346Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_eibL1eM2MjwdAgts9cs28527",
+          "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && grep -rln \"job_20260811T085021\\|622 passed\" .handoffs/ node_status_history/ .gddp/ 2>/dev/null | grep -v '.git/' | head; echo \"=== node_status_history ===\"; ls node_status_history/ 2>/dev/null; find node_status_history -iname '*node-22*' 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-11T08:56:21.346Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_khhon6hwggPVRMgptfEE8305",
+          "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && git diff --name-status 450eca1..619bda9; echo \"=== untracked in worktree vs tip ===\"; git status --porcelain | head -20; echo \"=== any reference to executor-contract in pytest collection config ===\"; grep -rn \"pytest\" scripts/ tests/ 2>/dev/null | grep -iv archive | grep -i \"collect\\|docs\" | head"
+        },
+        {
+          "ts": "2026-08-11T08:56:21.366Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_eibL1eM2MjwdAgts9cs28527",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:56:21.415Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_khhon6hwggPVRMgptfEE8305",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:56:24.265Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_lmLZ8SKOgBylkUgrqd347859",
+          "command": "cd /tmp/gddp-eval-wt-_7m_7ijo && cat requirements.txt; echo \"===\"; grep -rln \"rig1\" . --include='*.py' 2>/dev/null | grep -v '.git/' | head; echo \"=== plist ===\"; grep -rln \"plist\" . --include='*.py' 2>/dev/null | grep -v '.git/' | head"
+        },
+        {
+          "ts": "2026-08-11T08:56:24.292Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_lmLZ8SKOgBylkUgrqd347859",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:56:45.015Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_B4Ivjb1HeJxRtHeJ8RPO3957",
+          "tool": "submit_verdict",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T08:56:53.398Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_eqOgn76Z7jwLRp45vbQw5236",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All three acceptance criteria are satisfied. (1) docs/executor-contract.md exists and is non-empty (4109 bytes). (2) The doc covers every NodePacket (12) and PatchResult (14) field with the exact type from scripts/adapters/executor_protocol.py and a one-line meaning; the docstrings and type alias are quoted verbatim from the code, and field meanings track the code's inline comments. The deterministic scanner's 'executor_protocol.py absent' and 'no hit' results were path/keyword artifacts, not real gaps: the source lives at scripts/adapters/executor_protocol.py, and the artifact file is present. (3) The commit message quotes the pytest tail line ('4 failed, 622 passed') and attributes failures to flask-import + rig1 plist asserts, matching both the criterion's stated baseline and the repo's actual test surfaces (flask imports in scripts tests; rig1 plist-assert tests under deploy/rig1-heartbeat). The node's diff is strictly docs-only, so it cannot introduce new test failures. Constraints were respected: tracked diff contains only docs/executor-contract.md, and the work is committed on node result refs (c8a9ba0 + result(job=...) wrapper 619bda9). The suite could not be re-executed in the eval environment (pytest not installed in /usr/bin/python3), so the numeric tail-line claim rests on the commit message plus structural argument rather than an independent rerun.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-11T08:57:39.554233+00:00",
+  "evaluated_tree_sha": "87efe80efcac7ce2b09616ba809be31c03f3d05a",
+  "evaluated_commit_sha": "619bda9e7cf266c079d4492c303d5138c104eafd",
+  "merge_commit_sha": "619bda9e7cf266c079d4492c303d5138c104eafd",
+  "expected_base_commit_sha": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+  "pr_ref": null,
+  "job_id": "job_20260811T085021766bbe6f720ae9",
+  "execution_attempt_id": "job_20260811T085021766bbe6f720ae9:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-_7m_7ijo/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-_7m_7ijo/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-_7m_7ijo/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-_7m_7ijo/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-_7m_7ijo/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-_7m_7ijo/README.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+      ]
+    },
+    "overall": "medium"
+  }
+}

@@ -1,0 +1,1181 @@
+{
+  "project_id": "pi-hub-projection",
+  "node_id": "node-04-receipts-ingestion",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.85,
+    "findings": [
+      {
+        "severity": "low",
+        "summary": "Live-run evidence (run 1/run 2 counts, 0 missing receipt_path) is self-reported in the report and could not be independently re-executed in this read-only review (harness restricts bash to inspection). Code paths and self-check fixture logic are internally consistent with the claims, but final count arithmetic (412 gate_results vs 434+11 write-actions) rests on same-run upserts of shared envelope families and was not executed. This is lane-1 verification territory, not an integrity defect.",
+        "affected_node_ids": [
+          "node-04-receipts-ingestion"
+        ]
+      }
+    ],
+    "reasoning": "The work preserves node-04's intended role precisely: it extends node-01's projection artifact (not a parallel pipeline) with envelopes/gate_results/receipt_source_files tables in the same WAL pi-hub.db, ingests the GDDP verification receipts currently under ~/repos/gddp-config/verification/ with per-project counts and explicit skip inventory, enforces receipt_path NOT NULL per gate_results row, and demonstrates incremental rerun behavior via content-hash short-circuiting. The report documents source inventory, skips, counts, schema DDL, and acceptance mapping. Graph integrity holds: the change is additive at schema and report levels, so node-02 (read-only cursor API over sessions/events/transitions) is unaffected; node-04 depends only on node-01; the envelope/gate tables land in the same DB node-03's visualizer can read, fulfilling the why's promise ('node-03's visualizer renders verdicts alongside sessions'). All constraints verified by code inspection: 2-file diff only, stdlib-only imports, no subprocess/network, queue.db opened with mode=ro URI, self-check fixtures confined to tempfile, no writes to guarded repos, committed on the result ref with no junk in the diff. Only caveats are low-severity: lane 1's acceptance evidence is indeterminate and the live counts are self-reported (not re-executable in this review), and node-01's provisional status predates this node's work.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-06T19:44:32.538Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_RXqOTVpsQb2WorLD462M5553",
+        "command": "pwd && ls -la"
+      },
+      {
+        "ts": "2026-08-06T19:44:32.539Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_vYv2poVEPArGoeBZw8Mm2940",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-06T19:44:32.553Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_vYv2poVEPArGoeBZw8Mm2940",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:32.567Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_RXqOTVpsQb2WorLD462M5553",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:34.332Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_oI7koVm88gZpbpIADjRn4914",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-01-sqlite-projection.yaml"
+      },
+      {
+        "ts": "2026-08-06T19:44:34.334Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_xXyrsGmqkZHrjJiaMtSJ9735",
+        "command": "ls -la /Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/ 2>/dev/null; echo \"---\"; ls -la /Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-06T19:44:34.340Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_oI7koVm88gZpbpIADjRn4914",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:34.367Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_xXyrsGmqkZHrjJiaMtSJ9735",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:36.089Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_ET_HHENkkCigeUT318sKJGz7687",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-04-receipts-ingestion.yaml"
+      },
+      {
+        "ts": "2026-08-06T19:44:36.090Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_ET_N9I25IBxCTOrQWUibVpq7215",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-03-visualizer-fork.yaml"
+      },
+      {
+        "ts": "2026-08-06T19:44:36.090Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_ET_WuX0HfMFFwjtscMFbaiu9108",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/project.yaml"
+      },
+      {
+        "ts": "2026-08-06T19:44:36.093Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ET_HHENkkCigeUT318sKJGz7687",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:36.094Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ET_N9I25IBxCTOrQWUibVpq7215",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:36.094Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_ET_WuX0HfMFFwjtscMFbaiu9108",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:39.575Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_8hz8Fi9LjMNWjRIHTWzJ8029",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && git log --oneline -8 2>/dev/null; echo \"---STATUS---\"; git status --short 2>/dev/null | head -40; echo \"---DIFF STAT---\"; git diff --stat HEAD 2>/dev/null | tail -10"
+      },
+      {
+        "ts": "2026-08-06T19:44:39.576Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_nTuGUr2Wmm8JDJkcW8rw6072",
+        "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4/agent/observability/ 2>/dev/null; echo \"---REPORTS---\"; find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4/reports -type f 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-06T19:44:39.607Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_nTuGUr2Wmm8JDJkcW8rw6072",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:39.722Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_8hz8Fi9LjMNWjRIHTWzJ8029",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:42.697Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_QiA8qKR8vT0P9QIh10sG0748",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && git diff --stat 3d3ae4c b88bebc; echo \"---FULL DIFF FILES---\"; git diff --name-status 3d3ae4c b88bebc"
+      },
+      {
+        "ts": "2026-08-06T19:44:42.698Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_6vym7zjIBru8pluMkF157674",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && git show --stat e78a34b | head -30; echo \"===\"; git show --stat b88bebc | head -30"
+      },
+      {
+        "ts": "2026-08-06T19:44:42.765Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_QiA8qKR8vT0P9QIh10sG0748",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:42.765Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_6vym7zjIBru8pluMkF157674",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:47.942Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_ogwRNwrFp9qAU5z6H0Dw0589",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4/reports/pi-hub-projection/node-04-receipts-ingestion.md"
+      },
+      {
+        "ts": "2026-08-06T19:44:47.945Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ogwRNwrFp9qAU5z6H0Dw0589",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:50.722Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_g1WjRLffTGcRgD1vjNT56970",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && git diff 3d3ae4c b88bebc -- agent/observability/project.py | head -200"
+      },
+      {
+        "ts": "2026-08-06T19:44:50.774Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_g1WjRLffTGcRgD1vjNT56970",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:54.018Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ArpsAhQW5Le3qtcXCQdt7526",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '1,30p' agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:44:54.019Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_GliIobIpZLqeBue4dyU07550",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && grep -n \"import \" agent/observability/project.py | head -40; echo \"---SUBPROCESS---\"; grep -n \"subprocess\\|os.system\\|os.popen\\|Popen\\|shell=True\\|urllib\\|requests\\|http\" agent/observability/project.py | head -30"
+      },
+      {
+        "ts": "2026-08-06T19:44:54.042Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ArpsAhQW5Le3qtcXCQdt7526",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:54.064Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_GliIobIpZLqeBue4dyU07550",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:57.466Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_jukNTXh2C1WXpSlidpI49601",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && grep -n \"def main\\|def project\\|def ingest\\|def walk\\|def scan\\|--skip-receipts\\|--verification-dir\\|--queue-db\\|--myapi-adw-dir\\|--self-check\\|--json\" agent/observability/project.py | head -30"
+      },
+      {
+        "ts": "2026-08-06T19:44:57.467Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_RHvcoJBT6u6ZR29VQZCk6343",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && grep -n \"open(\\|write_text\\|write_bytes\\|\\.write(\" agent/observability/project.py | grep -v \"open(db\" | head -40"
+      },
+      {
+        "ts": "2026-08-06T19:44:57.498Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_RHvcoJBT6u6ZR29VQZCk6343",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:57.509Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_jukNTXh2C1WXpSlidpI49601",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:44:59.786Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_2gj0OMbfVeGBUUW8PkuQ4466",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '2317,2420p' agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:44:59.801Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_2gj0OMbfVeGBUUW8PkuQ4466",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:45:02.038Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_xpw01m21R2V64iVvGIJI4461",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '2420,2560p' agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:45:02.053Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_xpw01m21R2V64iVvGIJI4461",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:45:04.499Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_zVIaQxXzxwrBkoGygkMN1854",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '2175,2317p' agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:45:04.520Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_zVIaQxXzxwrBkoGygkMN1854",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:45:07.238Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_b9jlAeQgFKa3DcPyvp4j5092",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '1980,2175p' agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:45:07.246Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_b9jlAeQgFKa3DcPyvp4j5092",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:45:09.454Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_xvxVokQB5HV2bokQAnqK4450",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '1650,1780p' agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:45:09.476Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_xvxVokQB5HV2bokQAnqK4450",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:45:12.854Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_2sRQp0TszOFN8xEioNBl3230",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '2950,3100p' agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:45:12.877Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_2sRQp0TszOFN8xEioNBl3230",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:45:16.383Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Uz1OC6hRbUOxN5xJphuo5697",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && grep -n \"def run_self_check\\|def connect\\|def discover_gddp_receipt_files\\|def is_gddp_receipt_payload\\|def discover_myapi_adw_files\\|def iter_gates_from_receipt\" agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:45:16.384Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_CERssqtJE8Vh37uI5p1C4532",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '2850,2950p' agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:45:16.399Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_CERssqtJE8Vh37uI5p1C4532",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:45:16.412Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Uz1OC6hRbUOxN5xJphuo5697",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:45:21.729Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_NJ8OvUUR1ItTcfttul911287",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '523,560p' agent/observability/project.py; echo \"===DISCOVER===\"; sed -n '1151,1244p' agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:45:21.730Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_zIWsS14AQIlGoyX5Q9Rn7169",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '2790,2830p' agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:45:21.751Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_zIWsS14AQIlGoyX5Q9Rn7169",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:45:21.758Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_NJ8OvUUR1ItTcfttul911287",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:45:34.563Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_cvyKeiPyBzlKaeyZzAqm3106",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && git diff 3d3ae4c b88bebc -- agent/observability/project.py | grep -E \"^-[^-]\" | head -30"
+      },
+      {
+        "ts": "2026-08-06T19:45:34.564Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_2lHs04EUcXpNudkLNeSy5525",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-02-localhost-api.yaml"
+      },
+      {
+        "ts": "2026-08-06T19:45:34.570Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_2lHs04EUcXpNudkLNeSy5525",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:45:34.616Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_cvyKeiPyBzlKaeyZzAqm3106",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:46:00.407Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_tkX9NlNGpQiEQdRLAzpw2727",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && grep -n \"sssf\\|_reference\\|de313748\" agent/observability/project.py | head; echo \"---GITIGNORE---\"; grep -n \"pi-hub\\|observability\" .gitignore | head; echo \"---AST---\"; python3 -c \"import ast; ast.parse(open('agent/observability/project.py').read()); print('syntax OK')\""
+      },
+      {
+        "ts": "2026-08-06T19:46:00.408Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_kGvYsxQFYttuu8S05iCY8239",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && git show 3d3ae4c:agent/observability/project.py | grep -n \"CREATE TABLE\" | head -20; echo \"===CURRENT===\"; grep -n \"CREATE TABLE\" agent/observability/project.py | head -20"
+      },
+      {
+        "ts": "2026-08-06T19:46:00.447Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_kGvYsxQFYttuu8S05iCY8239",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:46:00.519Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_tkX9NlNGpQiEQdRLAzpw2727",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:46:05.751Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_HWSbRAawayGZ4aElcsJ20312",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && grep -n \"def write_fixture_dir\\|def write_receipt_fixture\\|def write_adw_fixture\\|def mutate_fixture_for_transition\\|write_fixture_dir(\\|write_receipt_fixture(\\|write_adw_fixture(\\|mutate_fixture_for_transition(\" agent/observability/project.py"
+      },
+      {
+        "ts": "2026-08-06T19:46:05.752Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_01_7AEEPKL7kTyjA9r17S4t5772",
+        "reason": "command matched blocked pattern",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && git diff 3d3ae4c b88bebc -- agent/observability/project.py | grep -cE \"^\\+\" ; git diff 3d3ae4c b88bebc -- agent/observability/project.py | grep -E \"^\\+\" | grep -iE \"repos/gddp-config|repos/gddp-runtime|MyAPI|git add|git commit|rm |shutil.rmtree|unlink|remove\\(\" | grep -v \"^\\+\\+\\+\" | head -20",
+        "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+      },
+      {
+        "ts": "2026-08-06T19:46:05.753Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_7AEEPKL7kTyjA9r17S4t5772",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-06T19:46:05.784Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_HWSbRAawayGZ4aElcsJ20312",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:46:08.903Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_TPQwPi2VryMad8uArYxx3167",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && grep -nE \"gddp-config|gddp-runtime|MyAPI|rmtree|\\.unlink\\(|os\\.remove\" agent/observability/project.py | head -30"
+      },
+      {
+        "ts": "2026-08-06T19:46:08.932Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_TPQwPi2VryMad8uArYxx3167",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-06T19:46:33.478Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_6SFZqUfhM3FEnvMus1NS4787",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "node-02 and node-04 now both touch the same pi-hub.db (node-02 reads, project.py writes). WAL mode supports concurrent readers, but node-02's API must open the db read-only with busy_timeout (its constraints already require read-only); worth confirming when node-02 executes.",
+        "affected_node_ids": [
+          "node-02-localhost-api",
+          "node-04-receipts-ingestion"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "node-03's visualizer will consume envelopes/gate_results which carry project_id, node_id, verdict, and receipt_path — matching the operator target surface (job ID, phase, cost/status, logs, pass/fail receipt path). Trajectory is good; recommend node-03 read via node-02's cursor API or a read-only WAL connection to avoid writer lock contention.",
+        "affected_node_ids": [
+          "node-03-visualizer-fork",
+          "node-04-receipts-ingestion"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9259999999999999,
+  "criteria_confidence": 0.9259999999999999,
+  "completeness": 1.0,
+  "graph_readiness": 0.9259999999999999,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "tables-exist",
+        "criterion": "pi-hub.db gains envelopes and gate_results tables (names may adapt to node-01's schema; the report maps them to upstream's concepts)",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (pi-hub, gate_results, node-01). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "gddp-receipts-ingested",
+        "criterion": "at least the receipts currently under ~/repos/gddp-config/verification/ are projected; report shows counts per project",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (gddp-config). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "receipt-path-preserved",
+        "criterion": "every gate_results row carries the source receipt file path (the pass/fail receipt path from the operator note)",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (gate_results). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "incremental",
+        "criterion": "re-running ingestion adds only new receipts; report shows rerun evidence",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (re-running). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "report-exists",
+        "criterion": "reports/pi-hub-projection/node-04-receipts-ingestion.md exists with source inventory (what was found, what was skipped and why) and count evidence",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "pi\\-hub\\-projection -> line 173: 'pi-hub-projection'",
+          "node\\-04\\-receipts\\-ingestion -> line 1: 'node-04-receipts-ingestion'"
+        ],
+        "reasoning": "Scanned source files (reports/pi-hub-projection/node-04-receipts-ingestion.md) for identifiers named in the criterion (pi-hub-projection, node-04-receipts-ingestion). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create and modify files only under agent/observability/ and reports/pi-hub-projection/",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Read receipt sources in place; never write into ~/repos/gddp-config, ~/repos/gddp-runtime, or MyAPI directories",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "python3 stdlib only; extend node-01's projection rather than building a parallel pipeline",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Never run git add -A; stage only files this node created or changed",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node's result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/pi-hub-projection/node-04-receipts-ingestion.md": true
+    },
+    "deps_status": {
+      "node-01-sqlite-projection": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "3d3ae4c163032db51e4f73a067917f86046fc583",
+      "tip": "b88bebc28e945d1e6777153b865ee1e9afaf89bb",
+      "files": [
+        {
+          "status": "M",
+          "path": "agent/observability/project.py"
+        },
+        {
+          "status": "A",
+          "path": "reports/pi-hub-projection/node-04-receipts-ingestion.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 2,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "tables-exist",
+        "judgment": "judged_pass",
+        "confidence": 0.93,
+        "evidence": [
+          "agent/observability/project.py lines 336-410: CREATE TABLE IF NOT EXISTS envelopes / gate_results / receipt_source_files; SCHEMA_VERSION=2",
+          "agent/observability/project.py line 34: receipt sources constants; gate_results.receipt_path TEXT NOT NULL (line 385)",
+          "fixture run: python3 agent/observability/project.py --self-check → exit 0, tables_present includes envelopes, gate_results, receipt_source_files, journal_mode=wal",
+          "reports/pi-hub-projection/node-04-receipts-ingestion.md: 'Upstream mapping (SSSF → pi-hub)' table + Evidence 1 table list"
+        ],
+        "reasoning": "The DDL adds envelopes and gate_results to pi-hub.db within the same project() connection as node-01 (schema_version 1→2), and the report maps both to upstream SSSF concepts (same nouns, plus added GDDP denorm columns). The fixture self-check creates a fresh DB and confirms both tables exist. The live DB itself is host-local (gitignored) and absent from the sandbox, but code + fixture + report are consistent."
+      },
+      {
+        "criterion_id": "gddp-receipts-ingested",
+        "judgment": "judged_pass",
+        "confidence": 0.85,
+        "evidence": [
+          "agent/observability/project.py: DEFAULT_GDDP_VERIFICATION = ~/repos/gddp-config/verification; discover_gddp_receipt_files() rglob walk; project_receipts() wiring into project()",
+          "reports/pi-hub-projection/node-04-receipts-ingestion.md: source inventory section A (39 JSON receipts projected, 5 evaluations.yaml + 1 .md skipped with reasons), per-project table (gddp-runtime 17, myapi 1, pi-harness-hygiene 2, pi-hub-projection 1, skc-portfolio-migration 8, test-project 9, vault-doctor 1 = 39)",
+          "fixture self-check receipt_ingest_ok=true"
+        ],
+        "reasoning": "Code defaults to and walks ~/repos/gddp-config/verification, projecting receipts with per-project counts reported. Report counts are internally consistent (39 files = sum of per-project; 45 touched = 39 + 5 skipped yaml + 1 md). Live-host receipt state is not present in the sandbox, so the specific '39 files' claim rests on the report's self-reported evidence plus the verified ingestion mechanism; that is the evidentiary trail the criterion asks for (report shows counts per project)."
+      },
+      {
+        "criterion_id": "receipt-path-preserved",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "agent/observability/project.py: gate_results.receipt_path TEXT NOT NULL (DDL); upsert_gate_result() always binds receipt_path; project_one_gddp_receipt uses str(path.resolve()); queue synthetic rows use queue://results/{result_id}",
+          "fixture self-check receipt_path_ok=true (0 rows with NULL/empty receipt_path)",
+          "reports/pi-hub-projection/node-04-receipts-ingestion.md Evidence 3: SELECT COUNT(*) WHERE receipt_path IS NULL OR '' → 0, with sample rows"
+        ],
+        "reasoning": "The NOT NULL constraint plus the always-bound receipt_path argument (filesystem path for verification receipts; stable non-null queue:// pointer for synthetic queue envelopes) guarantees the criterion. Fixture proves 0 missing; report shows the live query result."
+      },
+      {
+        "criterion_id": "incremental",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "agent/observability/project.py: receipt_source_files table with content_sha256; short-circuit in project_one_gddp_receipt (identical bytes → action='unchanged'), project_one_adw_file, project_queue_db_results",
+          "fixture self-check receipt_incremental_ok=true (rerun 0 writes/unchanged≥1; new receipt file +1)",
+          "reports/pi-hub-projection/node-04-receipts-ingestion.md section 4: run 2 write=0, unchanged=39, gates 0"
+        ],
+        "reasoning": "Idempotency is enforced at the content-hash level, so re-runs add nothing for identical bytes and only new/changed receipts write. Fixture proves the rerun behavior; report documents the live rerun evidence."
+      },
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "reports/pi-hub-projection/node-04-receipts-ingestion.md exists at exact required path (read in full; 329 lines added in diff)",
+          "Contains source inventory A/B/C (found + skipped with reasons: aggregate_index_not_receipt, non_json_suffix:.md, adw_dir_missing, no_myapi_adw_dirs_present_on_host)",
+          "Contains count evidence: run 1 totals, per-project envelopes table, rerun (run 2) table, DB table counts (envelopes 47, gate_results 412, receipt_source_files 50), acceptance mapping"
+        ],
+        "reasoning": "The required artifact is present, committed (diff shows 'A'), and contains the inventory (what was found, what was skipped and why) plus count evidence — matching the criterion's content requirements."
+      }
+    ],
+    "overall_reasoning": "node-04-receipts-ingestion satisfies all five acceptance criteria in code and evidence. The implementation extends node-01's project() additively (SCHEMA_VERSION 1→2; node-01 core handlers untouched; +1723/−9 lines) rather than building a parallel pipeline — honoring the extend-don't-fork constraint. Envelopes/gate_results/receipt_source_files DDL lands in pi-hub.db (WAL), the verification walk defaults to ~/repos/gddp-config/verification with explicit skip reasons, gate_results.receipt_path is NOT NULL and always bound, and content-hash short-circuiting makes reruns add only new receipts. The fixture self-check (stdlib-only, temp dirs) exits 0 and confirms receipt tables, ingestion, incremental rerun, and zero missing receipt paths. The required report exists with inventory, skip reasons, per-project counts, and rerun evidence, internally consistent with the code (39 files = sum of per-project; 45 touched = 39+5+1). Only two files changed in the diff, both within the allowlist, committed on the result ref. Live-host counts (39 receipts, 22 queue rows, DB totals) are self-reported and not independently reproducible from the sandbox since the sources are host-local; the mechanism is verified via the fixture and the report's internal arithmetic.",
+    "risks": "1) Live-host evidence (39 receipts under ~/repos/gddp-config/verification, 22 queue.db rows, envelopes=47/gate_results=412 in pi-hub.db) is self-reported in the report; the sandbox lacks ~/repos/gddp-config, ~/repos/gddp-runtime, and the gitignored pi-hub.db, so those counts cannot be independently re-run here. 2) deps_status shows node-01-sqlite-projection is still 'provisional' while node-04 modifies its project.py (schema v1→v2); finalizing node-04 implicitly depends on node-01's schema/core being accepted as-is. 3) 11 of 47 envelopes (queue synthetic rows) carry a queue://results/... pointer rather than a filesystem receipt path as receipt_path — still non-null and criterion-compliant, but a weaker form of 'source receipt file path' for those rows. 4) Fixture self-check passed, but tests are not listed in the node's acceptance criteria and were treated as contextual evidence only.",
+    "followup_candidates": "Human clarification 1: Live-host counts in the report (39 verification receipts, 22 queue.db rows, 47 envelopes / 412 gate_results) cannot be reproduced from the eval sandbox because the receipt sources and pi-hub.db are host-local. Should a fresh `python3 agent/observability/project.py` run on sab-mini (or its `--json` report) be captured as additional evidence, or is the committed report's self-reported inventory sufficient? Human clarification 2: node-01-sqlite-projection is marked 'provisional' while node-04 extends its project.py (schema v1→v2). Confirm node-01 has been accepted so the schema-v2 contract node-04 builds on is settled; otherwise node-04's evidence may need re-verification after node-01 finalization. Human clarification 3 (context only): the fixture self-check (`--self-check`, exit 0) passed but is not listed in the node's acceptance criteria; it was used as corroborating evidence, not as proof of the criteria. Was it intended to be part of the criteria? If yes, update the node criteria and rerun.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-06T19:42:51.284Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_N6AuraVKRQteeJO4qvSI5242",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-06T19:42:51.286Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_xFX2aSSywWFneIsPWLNl6439",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4/README.md"
+        },
+        {
+          "ts": "2026-08-06T19:42:51.288Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_ZZ01QLC5bZVT9nHFV8ur5004",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && ls -la && find . -type f -not -path './.git/*' | head -100"
+        },
+        {
+          "ts": "2026-08-06T19:42:51.301Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_xFX2aSSywWFneIsPWLNl6439",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:42:51.301Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_N6AuraVKRQteeJO4qvSI5242",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:42:51.337Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_ZZ01QLC5bZVT9nHFV8ur5004",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:42:54.071Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_IU1MBVQsZ28UxneamnTb1322",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4/reports/pi-hub-projection/node-04-receipts-ingestion.md"
+        },
+        {
+          "ts": "2026-08-06T19:42:54.074Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_KA37lVhYYyzg9PUQbZ8n6598",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && ls -la agent/observability/ 2>/dev/null && git log --oneline -10 2>/dev/null && git status 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-06T19:42:54.081Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_IU1MBVQsZ28UxneamnTb1322",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:42:54.391Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_KA37lVhYYyzg9PUQbZ8n6598",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:42:57.478Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_jH6SvB0pjXNFQrvhgKta7048",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && git diff 3d3ae4c b88bebc --stat && echo \"----DIFF SIZE----\" && git diff 3d3ae4c b88bebc -- agent/observability/project.py | wc -l"
+        },
+        {
+          "ts": "2026-08-06T19:42:57.479Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_msdWAosd6mZoGH9ZxJkG9271",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && grep -n \"receipt\\|envelope\\|gate_result\\|def project\\|self-check\\|self_check\" agent/observability/project.py | head -80"
+        },
+        {
+          "ts": "2026-08-06T19:42:57.511Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_msdWAosd6mZoGH9ZxJkG9271",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:42:57.547Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_jH6SvB0pjXNFQrvhgKta7048",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:01.025Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_KGoF8BMFH8mwmirqfJTx5351",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '1070,1250p' agent/observability/project.py"
+        },
+        {
+          "ts": "2026-08-06T19:43:01.046Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_KGoF8BMFH8mwmirqfJTx5351",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:04.253Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_b7MkPxGMDw2N1o4MXOLW1198",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && grep -n \"def project\\|def ingest\\|def run_\\|def main\\|def self_check\\|def _self_check\\|def project_receipts\\|--skip-receipts\\|--self-check\\|--verification-dir\\|--queue-db\\|--myapi-adw-dir\\|receipt_source_files\\|content_sha256\\|def upsert_receipt_source\\|short-circuit\\|unchanged\" agent/observability/project.py | head -60"
+        },
+        {
+          "ts": "2026-08-06T19:43:04.302Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_b7MkPxGMDw2N1o4MXOLW1198",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:07.023Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_OHX0AV5NX2WANm8W8Dvv1390",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && grep -n \"def main\\|def run\\|if __name__\\|def project\\b\\|def project(\" agent/observability/project.py && sed -n '2235,2320p' agent/observability/project.py"
+        },
+        {
+          "ts": "2026-08-06T19:43:07.062Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_OHX0AV5NX2WANm8W8Dvv1390",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:08.640Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ET_3SuTfELdjJ7oHspbgb881597",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '2317,2430p' agent/observability/project.py"
+        },
+        {
+          "ts": "2026-08-06T19:43:08.663Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ET_3SuTfELdjJ7oHspbgb881597",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:11.165Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_uSd1ZVRH8h9s6ClkehdV1066",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '2430,2510p' agent/observability/project.py"
+        },
+        {
+          "ts": "2026-08-06T19:43:11.167Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_TSjAi4M0BoBiDFH0NNpZ7418",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '2790,3010p' agent/observability/project.py"
+        },
+        {
+          "ts": "2026-08-06T19:43:11.190Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_uSd1ZVRH8h9s6ClkehdV1066",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:11.191Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_TSjAi4M0BoBiDFH0NNpZ7418",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:14.876Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ibtasS1FC1dDlJciEyMY3015",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '1,80p' agent/observability/project.py"
+        },
+        {
+          "ts": "2026-08-06T19:43:14.876Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_1xirvnDqa65a2gvTQotJ8101",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '1533,1650p' agent/observability/project.py"
+        },
+        {
+          "ts": "2026-08-06T19:43:14.899Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ibtasS1FC1dDlJciEyMY3015",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:14.899Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_1xirvnDqa65a2gvTQotJ8101",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:19.529Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Q7gOX2pQ7Amyl8F2ctUo0543",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && python3 -c \"import ast; ast.parse(open('agent/observability/project.py').read()); print('syntax OK')\" && python3 -c \"import sqlite3, sys; print('stdlib sqlite3 OK')\" && ls -la ~/repos/gddp-config/verification 2>/dev/null | head -5 || echo \"verification dir not present in sandbox (host-local)\""
+        },
+        {
+          "ts": "2026-08-06T19:43:19.530Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_MrHYZud4f8CPej0tbal39600",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '1650,1780p' agent/observability/project.py"
+        },
+        {
+          "ts": "2026-08-06T19:43:19.554Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_MrHYZud4f8CPej0tbal39600",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:19.697Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Q7gOX2pQ7Amyl8F2ctUo0543",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:23.746Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_gYxn8Ikq1UtCsArgwbPi7168",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && timeout 120 python3 agent/observability/project.py --self-check --json 2>&1 | tail -40"
+        },
+        {
+          "ts": "2026-08-06T19:43:23.747Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_hE8wiMxSAjTFQaVwkY3r9627",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && sed -n '1980,2170p' agent/observability/project.py"
+        },
+        {
+          "ts": "2026-08-06T19:43:23.767Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_gYxn8Ikq1UtCsArgwbPi7168",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:23.768Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_hE8wiMxSAjTFQaVwkY3r9627",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:25.914Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_cRTMjNHhJC3PTGUdI4KK6700",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && python3 agent/observability/project.py --self-check --json 2>&1 | python3 -c \"import json,sys; d=json.load(sys.stdin); print(json.dumps({k:d[k] for k in ['journal_mode','idempotent_ok','transition_ok','counts_match_run1','receipt_tables_ok','receipt_ingest_ok','receipt_incremental_ok','receipt_path_ok','db_counts','tables_present']}, indent=1))\""
+        },
+        {
+          "ts": "2026-08-06T19:43:26.127Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_cRTMjNHhJC3PTGUdI4KK6700",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:31.505Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_QM1zTyR15fkPZ7E24ich4724",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && git show 3d3ae4c:agent/observability/project.py | grep -n \"SCHEMA_VERSION\\|def project\\|CREATE TABLE\\|sessions\\|state_transitions\\|journal_mode\" | head -30"
+        },
+        {
+          "ts": "2026-08-06T19:43:31.506Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Ei0JhvqX8CLKFyGlXUgK5085",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && git diff 3d3ae4c b88bebc -- agent/observability/project.py | grep -E \"^[-+].*(def project|SCHEMA_VERSION|journal_mode|CREATE TABLE|INSERT INTO sessions)\" | head -30"
+        },
+        {
+          "ts": "2026-08-06T19:43:31.562Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_QM1zTyR15fkPZ7E24ich4724",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:31.568Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Ei0JhvqX8CLKFyGlXUgK5085",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:35.996Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_q9EcT9kbG8TI4mW2oeWd0262",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && git diff 3d3ae4c b88bebc -- agent/observability/project.py | grep -E \"^-\" | grep -v \"^---\" | head -20"
+        },
+        {
+          "ts": "2026-08-06T19:43:35.997Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_01_ph5EEBgHOh4rvYLPwdMb2165",
+          "reason": "command matched blocked pattern",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && grep -n \"def upsert_session\\|def upsert_subagent\\|def upsert_tool\\|def upsert_artifact\\|def upsert_instance\\|def upsert_hook\\|def record_transition\\|UPSERT_HANDLERS\" agent/observability/project.py | head && grep -rn \"git add\" reports/pi-hub-projection/node-04-receipts-ingestion.md agent/observability/project.py 2>/dev/null | head -3; echo \"---\"; git show b88bebc --stat --format=\"%h %s\" | head -8",
+          "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+        },
+        {
+          "ts": "2026-08-06T19:43:35.997Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ph5EEBgHOh4rvYLPwdMb2165",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-06T19:43:36.049Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_q9EcT9kbG8TI4mW2oeWd0262",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:56.381Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_fI63jpI0ywDK3zlKrmP19797",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && python3 agent/observability/project.py --self-check >/dev/null 2>&1; echo \"self-check exit code: $?\""
+        },
+        {
+          "ts": "2026-08-06T19:43:56.382Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Gv3JZkjX9Q9wIA2SxFVl7703",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4 && git diff 3d3ae4c b88bebc --name-only && echo \"---intermediate---\" && git diff e78a34b b88bebc --stat | tail -3"
+        },
+        {
+          "ts": "2026-08-06T19:43:56.445Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Gv3JZkjX9Q9wIA2SxFVl7703",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:43:56.527Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_fI63jpI0ywDK3zlKrmP19797",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-06T19:44:29.059Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Daes8qtzm1lpUn3awdlK7889",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "node-04-receipts-ingestion satisfies all five acceptance criteria in code and evidence. The implementation extends node-01's project() additively (SCHEMA_VERSION 1→2; node-01 core handlers untouched; +1723/−9 lines) rather than building a parallel pipeline — honoring the extend-don't-fork constraint. Envelopes/gate_results/receipt_source_files DDL lands in pi-hub.db (WAL), the verification walk defaults to ~/repos/gddp-config/verification with explicit skip reasons, gate_results.receipt_path is NOT NULL and always bound, and content-hash short-circuiting makes reruns add only new receipts. The fixture self-check (stdlib-only, temp dirs) exits 0 and confirms receipt tables, ingestion, incremental rerun, and zero missing receipt paths. The required report exists with inventory, skip reasons, per-project counts, and rerun evidence, internally consistent with the code (39 files = sum of per-project; 45 touched = 39+5+1). Only two files changed in the diff, both within the allowlist, committed on the result ref. Live-host counts (39 receipts, 22 queue rows, DB totals) are self-reported and not independently reproducible from the sandbox since the sources are host-local; the mechanism is verified via the fixture and the report's internal arithmetic.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-06T19:46:33.593478+00:00",
+  "evaluated_tree_sha": "e4116dc738f0624b66f5dc6e4c792ae4bb292576",
+  "evaluated_commit_sha": "b88bebc28e945d1e6777153b865ee1e9afaf89bb",
+  "merge_commit_sha": "b88bebc28e945d1e6777153b865ee1e9afaf89bb",
+  "expected_base_commit_sha": "3d3ae4c163032db51e4f73a067917f86046fc583",
+  "pr_ref": null,
+  "job_id": "job_20260806T1924304078da023a6802",
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-01-sqlite-projection.yaml",
+    "neighbor:node-01-sqlite-projection": "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-01-sqlite-projection.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4/README.md"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-01-sqlite-projection.yaml"
+      ]
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/pi-hub-projection/nodes/node-01-sqlite-projection.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-z_gul7q4/README.md"
+      ]
+    },
+    "overall": "medium"
+  }
+}

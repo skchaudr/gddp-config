@@ -1,0 +1,1521 @@
+{
+  "project_id": "gddp-runtime",
+  "node_id": "job-state-consistency",
+  "verdict": "fail",
+  "criteria_verdict": "fail",
+  "integrity": {
+    "verdict": "contradicted",
+    "intent_preserved": false,
+    "graph_integrity_preserved": false,
+    "required_human_review": true,
+    "confidence": 1.0,
+    "findings": [
+      {
+        "severity": "high",
+        "summary": "The work delivered is for the `canary-retry-proof` node (echo utility in scripts/echo.py and docs/echo-usage.md), not for the `job-state-consistency` node. The patch.diff modifies only scripts/echo.py and docs/echo-usage.md — neither file relates to jobs.status, queue_state, or database consistency. The decision.md documents an echo utility implementation, not the root cause of the inconsistent job row. No changes were made to engine.py (which has `UPDATE jobs SET status = 'expired'` without updating queue_state — the exact problem the node exists to fix). The required artifact `graph-update.yaml` is also missing. The `.gddp/` directory contains unrelated work for `neutral-executor-contract`. This is a complete node mismatch.",
+        "affected_node_ids": [
+          "job-state-consistency",
+          "canary-retry-proof",
+          "neutral-executor-contract"
+        ]
+      }
+    ],
+    "reasoning": "The node `job-state-consistency` has the stated intent: \\\"Make jobs.status and jobs.queue_state agree on every write path.\\\" Its acceptance criteria require: (1) decision.md naming the write path that produced the inconsistent row job_20260711T16542651, (2) fixing every UPDATE to jobs.status in scripts/ (especially engine.py expiry) to also set queue_state, (3) creating a consistency check, (4) reconciling the stale row with documented SQL, (5) passing test suite. None of this work has been done. Instead, the root workspace contains a patch.diff that only modifies scripts/echo.py (adding embedded tests) and creates docs/echo-usage.md — this is the work for the `canary-retry-proof` node (echo utility). The decision.md describes an echo utility implementation. The `.gddp/` directory contains entirely separate work for the `neutral-executor-contract` node. The actual problematic code in scripts/runtime/decision_loop/engine.py (which does `UPDATE jobs SET status = 'expired'` without queue_state) remains untouched. No graph-update.yaml is present. This is a complete node mismatch — the wrong node's work was delivered under the wrong label. Both intent and graph integrity are fundamentally violated.",
+    "tool_trace": [
+      {
+        "ts": "2026-07-24T00:50:39.320Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_50PfcRaUGWJOBJouWoRt3586",
+        "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/"
+      },
+      {
+        "ts": "2026-07-24T00:50:39.321Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_h697QPUG7FMewBYH0leR0483",
+        "command": "ls -laR /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/ 2>/dev/null | head -100"
+      },
+      {
+        "ts": "2026-07-24T00:50:39.332Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_50PfcRaUGWJOBJouWoRt3586",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:50:39.338Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_h697QPUG7FMewBYH0leR0483",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:50:41.806Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_QQGxkgKlM7YruDZdGv1M7172",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/decision.md"
+      },
+      {
+        "ts": "2026-07-24T00:50:41.807Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_GIhOSN4Max2yZjQllVx67555",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/result-summary.md"
+      },
+      {
+        "ts": "2026-07-24T00:50:41.807Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_ZqQ29Ecy8OTEjSqJcp3r4490",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/patch.diff"
+      },
+      {
+        "ts": "2026-07-24T00:50:41.809Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_GIhOSN4Max2yZjQllVx67555",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:50:41.809Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_ZqQ29Ecy8OTEjSqJcp3r4490",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:50:41.809Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_QQGxkgKlM7YruDZdGv1M7172",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:50:46.637Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_r469pBL5SRRPYWkrbPLL2039",
+        "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/scripts/"
+      },
+      {
+        "ts": "2026-07-24T00:50:46.637Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_a39r9jckrjoe4XLvgGp21180",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/scripts/echo.py"
+      },
+      {
+        "ts": "2026-07-24T00:50:46.638Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_DdHuKgVfZ9AmBIF93alG5839",
+        "command": "cat /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/.git"
+      },
+      {
+        "ts": "2026-07-24T00:50:46.640Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_a39r9jckrjoe4XLvgGp21180",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:50:46.644Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_DdHuKgVfZ9AmBIF93alG5839",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:50:46.646Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_r469pBL5SRRPYWkrbPLL2039",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:50:48.836Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_EobhXqS6HSMLB79Qmgmr2241",
+        "command": "ls /Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/"
+      },
+      {
+        "ts": "2026-07-24T00:50:48.843Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_EobhXqS6HSMLB79Qmgmr2241",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:50:50.375Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_ET_RtpU8lNzyEv3YbceqnyR2736",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/job-state-consistency.yaml"
+      },
+      {
+        "ts": "2026-07-24T00:50:50.376Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_ET_11el9aOgKhvq4ucBWwp83774",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/canary-retry-proof.yaml"
+      },
+      {
+        "ts": "2026-07-24T00:50:50.377Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ET_RtpU8lNzyEv3YbceqnyR2736",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:50:50.377Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ET_11el9aOgKhvq4ucBWwp83774",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:50:56.018Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_u6emMGmM0ym0NGhdY8k99340",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/.gddp/decision.md"
+      },
+      {
+        "ts": "2026-07-24T00:50:56.019Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_5kiknuTEWW7W7GYVviXN0330",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/.gddp/result-summary.md"
+      },
+      {
+        "ts": "2026-07-24T00:50:56.019Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_aoC2mDfwYj2vQ31Qn0UE3279",
+        "command": "head -100 /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/.gddp/patch.diff"
+      },
+      {
+        "ts": "2026-07-24T00:50:56.021Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_5kiknuTEWW7W7GYVviXN0330",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:50:56.021Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_u6emMGmM0ym0NGhdY8k99340",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:50:56.025Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_aoC2mDfwYj2vQ31Qn0UE3279",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:51:01.749Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_pOTNpCVBngk0nZyAMSCJ1574",
+        "command": "grep -rl \"queue_state\\|job_state\\|jobs\\.status\\|job_20260711T16542651\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/ --include=\"*.py\" --include=\"*.md\" --include=\"*.yaml\" --include=\"*.yml\" --include=\"*.sh\" --include=\"*.txt\" 2>/dev/null | grep -v __pycache__ | grep -v site-packages | grep -v .git"
+      },
+      {
+        "ts": "2026-07-24T00:51:01.749Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_LcQ5CcMp1YYbXsvaE8cE0370",
+        "command": "ls /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/scripts/runtime/"
+      },
+      {
+        "ts": "2026-07-24T00:51:01.750Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_RKP9Wb9l2tw5kJmVrM2x4631",
+        "command": "grep -rl \"engine\\.py\\|queue_state\\|queue\\.db\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/scripts/ --include=\"*.py\" 2>/dev/null | grep -v __pycache__"
+      },
+      {
+        "ts": "2026-07-24T00:51:01.757Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_LcQ5CcMp1YYbXsvaE8cE0370",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:51:01.779Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_RKP9Wb9l2tw5kJmVrM2x4631",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:51:01.822Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_pOTNpCVBngk0nZyAMSCJ1574",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:51:04.071Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_zuYRhFYm9pagNvljoXEy2565",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/scripts/runtime/decision_loop/engine.py"
+      },
+      {
+        "ts": "2026-07-24T00:51:04.072Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_5Uq8OaSOg52p5DRi9GzR3294",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/scripts/node_status.py"
+      },
+      {
+        "ts": "2026-07-24T00:51:04.075Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_zuYRhFYm9pagNvljoXEy2565",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:51:04.076Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_5Uq8OaSOg52p5DRi9GzR3294",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:51:15.486Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_jooeO0fNoR9RVTvdHfuZ3507",
+        "command": "grep -n \"queue_state\\|expired\\|UPDATE.*jobs\\|SET status\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/scripts/runtime/decision_loop/engine.py"
+      },
+      {
+        "ts": "2026-07-24T00:51:15.487Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_SX7EpiuYIKTuKyFpwhjs5404",
+        "command": "grep -rn \"queue_state\\|job_20260711\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/patch.diff 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-24T00:51:15.487Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_LVzVPmeqYAzQH31mzJLr8874",
+        "command": "grep -rn \"queue_state\\|job_20260711\\|status.*failed\\|stale.*row\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/decision.md 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-24T00:51:15.496Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_SX7EpiuYIKTuKyFpwhjs5404",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-07-24T00:51:15.496Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_LVzVPmeqYAzQH31mzJLr8874",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-07-24T00:51:15.496Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_jooeO0fNoR9RVTvdHfuZ3507",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:51:19.816Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ShzE8Qp2mLRKSAVYCXuV7334",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/ -name \"graph-update.yaml\" 2>/dev/null"
+      },
+      {
+        "ts": "2026-07-24T00:51:19.816Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_9ILuWncTrXhHG8elCjNz6355",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/.gddp/result-summary.md"
+      },
+      {
+        "ts": "2026-07-24T00:51:19.819Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_9ILuWncTrXhHG8elCjNz6355",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:51:19.827Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ShzE8Qp2mLRKSAVYCXuV7334",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-07-24T00:51:29.539Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_dwQpWIVhHElOEgoB4i1P3915",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": null,
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.010000000000000009,
+  "criteria_confidence": 0.010000000000000009,
+  "completeness": 0.5,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "root-cause-documented",
+        "criterion": "decision.md names the write path (or manual action) that produced status=failed/queue_state=running for job_20260711T16542651, with evidence",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (decision.md)"
+        ],
+        "reasoning": "Scanned source files (decision.md) for identifiers named in the criterion (queue_state, job_20260711T16542651). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "all-writers-set-both",
+        "criterion": "every UPDATE to jobs.status in scripts/ also sets queue_state to the matching value (engine.py expiry included), or the redundancy is collapsed with a documented rationale",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "path_mentioned_missing",
+        "evidence": [
+          "engine.py absent"
+        ],
+        "reasoning": "The criterion names source path(s) that are not present in the checkout. The harness did not scan unrelated files as substitutes.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "engine.py absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "consistency-check-exists",
+        "criterion": "a check exists (test or baseline.sh probe) that fails when any jobs row has mismatched status/queue_state",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "queue_state -> line 220: 'queue_state'"
+        ],
+        "reasoning": "Scanned source files (scripts/adapters/__init__.py, scripts/adapters/executor_protocol.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_cli_adapter.py...) for identifiers named in the criterion (queue_state). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "stale-row-reconciled",
+        "criterion": "the existing inconsistent row is corrected via a documented, reversible step (SQL in decision.md), not silent mutation",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (decision.md)"
+        ],
+        "reasoning": "Scanned source files (decision.md) for identifiers named in the criterion (SQL). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "suite-green",
+        "criterion": ".venv/bin/python -m pytest -q scripts passes with no regressions",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "do not change receipt semantics or the human review gate",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "schema changes to queue.db are out of scope; column semantics only",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "graph truth stays human-owned; this node produces evidence only",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "decision.md": true,
+      "result-summary.md": true,
+      "patch.diff": true,
+      "graph-update.yaml": false
+    },
+    "deps_status": {},
+    "criteria_mismatches": [
+      {
+        "criterion_id": "all-writers-set-both",
+        "kind": "source_path",
+        "detail": "engine.py absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "all-writers-set-both",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ]
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "root-cause-documented",
+        "judgment": "judged_fail",
+        "confidence": 1.0,
+        "evidence": [
+          "decision.md contains echo-utility implementation rationale, not root-cause analysis"
+        ],
+        "reasoning": "decision.md names an echo utility echo()/echo_loud() implementation at scripts/echo.py. It does not mention job_20260711T16542651, queue_state, the status=failed/queue_state=running inconsistency, or any write path or manual action that produced the inconsistent row. The document is about a completely different node's work (canary-retry-proof)."
+      },
+      {
+        "criterion_id": "all-writers-set-both",
+        "judgment": "judged_fail",
+        "confidence": 0.95,
+        "evidence": [
+          "scripts/runtime/decision_loop/engine.py:59: UPDATE jobs SET status = 'expired' — queue_state omitted",
+          "state_recorder.py: mark_job_running/failed/cancelled all correctly set both status and queue_state",
+          "reconciler.py:575, return_router.py:96, rollback.py:66 all set both",
+          "git history shows fix was on a different branch (23c5f80) not merged to HEAD"
+        ],
+        "reasoning": "engine.py's _clean_stale_state() expires stale jobs with 'UPDATE jobs SET status = 'expired'' but does NOT set queue_state. This is the exact write path identified as problematic in the node's why text. All other UPDATE paths correctly set both status and queue_state (state_recorder.py, reconciler.py, return_router.py, rollback.py). A fix existed on a divergent branch (commit 23c5f80) but was never merged into HEAD. No documented rationale for the redundancy exists."
+      },
+      {
+        "criterion_id": "consistency-check-exists",
+        "judgment": "judged_fail",
+        "confidence": 1.0,
+        "evidence": [
+          "No test queries for mismatched status vs queue_state",
+          "baseline.sh (deploy/mini-heartbeat/bin/baseline.sh) only shows aggregate queue_state counts, no cross-column consistency check",
+          "All test assertions check status and queue_state individually, never asserting they must be equal"
+        ],
+        "reasoning": "No test, probe, or baseline.sh check exists that would fail when any jobs row has mismatched status/queue_state. The existing tests select both columns but only assert individual values, not the invariant that they must match. No consistency-checking mechanism was introduced."
+      },
+      {
+        "criterion_id": "stale-row-reconciled",
+        "judgment": "judged_fail",
+        "confidence": 1.0,
+        "evidence": [
+          "decision.md does not contain SQL or any reference to the inconsistent row",
+          "No SQL statements in decision.md",
+          "No corrective action documented for job_20260711T16542651"
+        ],
+        "reasoning": "The criterion requires the existing inconsistent row (job_20260711T16542651, status=failed/queue_state=running) to be corrected via a documented, reversible SQL step in decision.md. decision.md contains no SQL at all and does not reference any database correction. The inconsistent row remains unaddressed."
+      },
+      {
+        "criterion_id": "suite-green",
+        "judgment": "judged_fail",
+        "confidence": 1.0,
+        "evidence": [
+          "python3 -m pytest -q scripts: 4 failed, 360 passed"
+        ],
+        "reasoning": "4 tests fail: test_dispatch_returns_common_receipt_and_passes_same_node_packet[jules-JulesActionAdapter] (AssertionError), test_dispatch_returns_common_receipt_and_passes_same_node_packet[jules_cli-JulesCliAdapter] (AssertionError), test_dispatcher_selects_jules_cli_adapter (AssertionError), test_dispatcher_selects_jules_action_adapter (AssertionError). The suite does not pass with no regressions."
+      }
+    ],
+    "overall_reasoning": "The job-state-consistency node's work has not been done. The artifacts present (decision.md, result-summary.md, patch.diff) are from a different node entirely (canary-retry-proof, which was about an echo utility). They contain no content related to the stated goal of making jobs.status and jobs.queue_state agree on every write path.\n\nSpecifically: (1) decision.md is about echo.py, not the root cause of the inconsistent row. (2) engine.py's _clean_stale_state() still has the known bug: 'UPDATE jobs SET status = 'expired'' without queue_state. A fix existed on a divergent branch but was never merged. (3) No consistency-check test or probe exists. (4) No SQL for reconciling the stale row is documented. (5) 4 tests fail in the suite.\n\nAll five acceptance criteria are clearly failed. The constraints appear unviolated, but the node's core work was not addressed.",
+    "risks": "1. The inconsistent row (job_20260711T16542651, status=failed/queue_state=running) remains uncorrected, causing dashboard counts to be unreliable. 2. engine.py's stale expiry path will continue creating new inconsistent rows when jobs are expired. 3. The 4 failing test suite suggests the codebase has regressions since prior baseline (was 325 passing). 4. A harmonization fix existed on a separate branch (commit f01d5ba/23c5f80) but was never merged to HEAD — this represents lost work.",
+    "followup_candidates": "1. Observed: a harmonization fix (commit f01d5ba/23c5f80 on a divergent branch) correctly set both status and queue_state='expired'/'failed' in engine.py and documented the root cause in decision.md — but this branch was never merged to HEAD. Was this work intended for this node, and should it be merged or reapplied? 2. Observed: 4 tests fail in the suite. Some may be pre-existing failures unrelated to this node; if so, the criterion 'no regressions' should be clarified as relative to a specific baseline commit. 3. The artifacts present (decision.md, result-summary.md, patch.diff) describe echo utility work from the canary-retry-proof node. If the executor for this job was dispatched to the wrong node, that should be investigated. 4. graph-update.yaml is a required artifact but absent — confirm whether it was needed for this node given the constraint 'graph truth stays human-owned; this node produces evidence only'.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-07-24T00:48:41.638Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_NdhKBl5z7lH5Zz2uha8Q2281",
+          "command": "find . -maxdepth 3 -type f | head -80"
+        },
+        {
+          "ts": "2026-07-24T00:48:41.639Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_AhRLmCKBVV0FW2I9ncqq5915",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/README.md"
+        },
+        {
+          "ts": "2026-07-24T00:48:41.639Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_yt5ulnj74UZMUt4rvdW77276",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-07-24T00:48:41.643Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_AhRLmCKBVV0FW2I9ncqq5915",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:48:41.644Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_yt5ulnj74UZMUt4rvdW77276",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:48:41.650Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_NdhKBl5z7lH5Zz2uha8Q2281",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:48:44.128Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_lIcSajMopCR49Yn3Omsb6835",
+          "command": "ls -la decision.md result-summary.md patch.diff graph-update.yaml 2>&1"
+        },
+        {
+          "ts": "2026-07-24T00:48:44.128Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_NmXd5I5vqyfwwNC0KrDV9446",
+          "command": "ls -la scripts/ 2>&1"
+        },
+        {
+          "ts": "2026-07-24T00:48:44.137Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_lIcSajMopCR49Yn3Omsb6835",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-07-24T00:48:44.137Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_NmXd5I5vqyfwwNC0KrDV9446",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:48:45.665Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_klRMCLvSPhe38NbB5E3p9277",
+          "path": "decision.md"
+        },
+        {
+          "ts": "2026-07-24T00:48:45.666Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_wtMf1cE0Q2RRi7ao4KIr1467",
+          "path": "result-summary.md"
+        },
+        {
+          "ts": "2026-07-24T00:48:45.666Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_MJNt4mT8JIkfwPXjCgnd8499",
+          "path": "patch.diff"
+        },
+        {
+          "ts": "2026-07-24T00:48:45.666Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_klRMCLvSPhe38NbB5E3p9277",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:48:45.667Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_MJNt4mT8JIkfwPXjCgnd8499",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:48:45.667Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_wtMf1cE0Q2RRi7ao4KIr1467",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:48:49.330Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_3CHz9jkIZtvHfcCEuiHc8904",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml"
+        },
+        {
+          "ts": "2026-07-24T00:48:49.330Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_9qAB9f6Qc5Nno8Q7M4QV4706",
+          "command": "find . -name \"*.py\" -path \"*/scripts/*\" | head -40"
+        },
+        {
+          "ts": "2026-07-24T00:48:49.331Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_3CHz9jkIZtvHfcCEuiHc8904",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:48:49.339Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_9qAB9f6Qc5Nno8Q7M4QV4706",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:48:52.271Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ZDmWuQsOVRzqur5tucyW6313",
+          "command": "find . -name \"engine.py\" -type f 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T00:48:52.271Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_HRC2m1yhtNgX8KhT8Ge55968",
+          "command": "grep -rn \"queue_state\\|jobs.status\\|status.*queue_state\" scripts/ --include=\"*.py\" | head -40"
+        },
+        {
+          "ts": "2026-07-24T00:48:52.271Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_BDheB7FoAIlnWcFtUhax2199",
+          "command": "grep -rn \"queue_state\\|queue.*state\" . --include=\"*.md\" --include=\"*.yaml\" --include=\"*.yml\" --include=\"*.py\" | head -30"
+        },
+        {
+          "ts": "2026-07-24T00:48:52.282Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ZDmWuQsOVRzqur5tucyW6313",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:48:52.304Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_HRC2m1yhtNgX8KhT8Ge55968",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:48:52.330Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_BDheB7FoAIlnWcFtUhax2199",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:48:54.359Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_66FoE4I5DNFtnU1XWM4v3176",
+          "path": "scripts/runtime/decision_loop/engine.py"
+        },
+        {
+          "ts": "2026-07-24T00:48:54.360Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_VCN8bLkuQ0zuyjayPRUz9944",
+          "path": "scripts/runtime/heartbeat/state_recorder.py"
+        },
+        {
+          "ts": "2026-07-24T00:48:54.361Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_VCN8bLkuQ0zuyjayPRUz9944",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:48:54.362Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_66FoE4I5DNFtnU1XWM4v3176",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:48:58.208Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Dumu3BIzOIneHoLkvG8j6222",
+          "command": "grep -n \"UPDATE.*jobs.*SET.*status\" scripts/runtime/decision_loop/engine.py"
+        },
+        {
+          "ts": "2026-07-24T00:48:58.210Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ZDw5asJ99V24T2Y0qY1J5544",
+          "command": "find . -name \"*.py\" -newer ./decision.md 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-07-24T00:48:58.210Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_Q1g5pUAhZQn701eK1mJd9574",
+          "path": "scripts/runtime/heartbeat/reconciler.py"
+        },
+        {
+          "ts": "2026-07-24T00:48:58.212Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_Q1g5pUAhZQn701eK1mJd9574",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:48:58.216Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Dumu3BIzOIneHoLkvG8j6222",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:48:58.220Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ZDw5asJ99V24T2Y0qY1J5544",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:00.421Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_6X2Q3VTMVwpjulA1heNO3373",
+          "command": "grep -n \"UPDATE.*jobs\" scripts/runtime/heartbeat/reconciler.py"
+        },
+        {
+          "ts": "2026-07-24T00:49:00.422Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_a3odSzD7IESxxjyBcVRv6531",
+          "command": "grep -n \"UPDATE.*jobs.*SET\" scripts/rollback.py"
+        },
+        {
+          "ts": "2026-07-24T00:49:00.422Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_RrwqmaV6PhOEvL8YsV2R7787",
+          "command": "grep -rn \"SET status\" scripts/ --include=\"*.py\" | grep -v test | grep -v __pycache__"
+        },
+        {
+          "ts": "2026-07-24T00:49:00.430Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_a3odSzD7IESxxjyBcVRv6531",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:00.430Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_6X2Q3VTMVwpjulA1heNO3373",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:00.439Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_RrwqmaV6PhOEvL8YsV2R7787",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:02.837Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_g9Ix90pwrUKdwFIh8KTT1046",
+          "path": "scripts/runtime/decision_loop/engine.py"
+        },
+        {
+          "ts": "2026-07-24T00:49:02.838Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_xE0ZVIAWCU9YVDiKBwgh5115",
+          "path": "scripts/runtime/return_router.py"
+        },
+        {
+          "ts": "2026-07-24T00:49:02.838Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_HTWjjwrNepqn5GqixQ4P7481",
+          "command": "grep -n \"queue_state\\|status.*=\" scripts/node_status.py | head -20"
+        },
+        {
+          "ts": "2026-07-24T00:49:02.841Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_xE0ZVIAWCU9YVDiKBwgh5115",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:02.841Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_g9Ix90pwrUKdwFIh8KTT1046",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:02.846Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_HTWjjwrNepqn5GqixQ4P7481",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:04.808Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_YZD7quLlzzjI4PhkbsoE5307",
+          "path": "scripts/node_status.py"
+        },
+        {
+          "ts": "2026-07-24T00:49:04.808Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_OMVD43uCMsC5TRgWmgpB9524",
+          "path": "scripts/echo.py"
+        },
+        {
+          "ts": "2026-07-24T00:49:04.810Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_YZD7quLlzzjI4PhkbsoE5307",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:04.811Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_OMVD43uCMsC5TRgWmgpB9524",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:14.114Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_NqL4YOLT8Fi0fr3PaH5r9618",
+          "command": "grep -rn \"status.*queue\\|queue.*status\\|mismatch\\|consistent\" scripts/ --include=\"*.py\" | grep -v __pycache__ | head -30"
+        },
+        {
+          "ts": "2026-07-24T00:49:14.115Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_QSR7zGbSsKH0wNGPLkIU9260",
+          "command": "ls -la .venv/bin/python 2>/dev/null || which python3"
+        },
+        {
+          "ts": "2026-07-24T00:49:14.124Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_QSR7zGbSsKH0wNGPLkIU9260",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:14.152Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_NqL4YOLT8Fi0fr3PaH5r9618",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:16.180Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_yWcadZqnxz9TnPW4Q52k6919",
+          "command": "ls -la .venv/bin/python 2>/dev/null; python3 -m pytest --version 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T00:49:16.181Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_2afKAbYUR5jWUAsi03XG2060",
+          "command": "find . -name \"*.py\" -path \"*/test*\" | head -30"
+        },
+        {
+          "ts": "2026-07-24T00:49:16.190Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_2afKAbYUR5jWUAsi03XG2060",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:16.329Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_yWcadZqnxz9TnPW4Q52k6919",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:18.128Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_rnAAPehmvseO7ASsGetq2039",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk && python3 -m pytest -q scripts/ 2>&1 | tail -40"
+        },
+        {
+          "ts": "2026-07-24T00:49:25.185Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_rnAAPehmvseO7ASsGetq2039",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:30.463Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_FLVF90VtKeEIKAFMQtwY7282",
+          "command": "git log --oneline -5 2>/dev/null || echo \"Not a git repo or no git history\""
+        },
+        {
+          "ts": "2026-07-24T00:49:30.463Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_LLnX3JUsFWRfBlvPOqUm8526",
+          "command": "git diff HEAD~1 --stat 2>/dev/null || echo \"No git diff available\""
+        },
+        {
+          "ts": "2026-07-24T00:49:30.474Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_FLVF90VtKeEIKAFMQtwY7282",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:30.505Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_LLnX3JUsFWRfBlvPOqUm8526",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:32.145Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_k3LzObVhr1Rq3AmeUx6w7987",
+          "command": "git log --oneline -20"
+        },
+        {
+          "ts": "2026-07-24T00:49:32.145Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_gbUricRbyIKRhJkePJnn0704",
+          "command": "git show --stat HEAD 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T00:49:32.157Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_gbUricRbyIKRhJkePJnn0704",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:32.157Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_k3LzObVhr1Rq3AmeUx6w7987",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:36.008Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_3oqsIEDZnkQzzfGiYf5g6156",
+          "path": "docs/canary-stabilization-marker.md"
+        },
+        {
+          "ts": "2026-07-24T00:49:36.009Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_hajux4LGzobCSjRD6ODQ0838",
+          "command": "git show HEAD~1:decision.md 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-07-24T00:49:36.009Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_xpf1fNt7eN16yuM6aT2o3552",
+          "command": "git show HEAD~1:scripts/echo.py 2>/dev/null | head -10"
+        },
+        {
+          "ts": "2026-07-24T00:49:36.011Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_3oqsIEDZnkQzzfGiYf5g6156",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:36.021Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_xpf1fNt7eN16yuM6aT2o3552",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:36.021Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_hajux4LGzobCSjRD6ODQ0838",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:39.845Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_1i4Wqq3Dwfop9pgo9e4s9591",
+          "command": "git show HEAD:decision.md | head -20"
+        },
+        {
+          "ts": "2026-07-24T00:49:39.846Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Qkt9cTOqqUYOV94N46I83192",
+          "command": "git diff HEAD~2..HEAD~1 -- decision.md 2>/dev/null | head -30"
+        },
+        {
+          "ts": "2026-07-24T00:49:39.846Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_oiy3tk4Qd1mIwy8egipC2717",
+          "command": "git log --oneline --all -- decision.md 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T00:49:39.858Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_1i4Wqq3Dwfop9pgo9e4s9591",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:39.858Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Qkt9cTOqqUYOV94N46I83192",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:39.893Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_oiy3tk4Qd1mIwy8egipC2717",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:43.761Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_JqEfw7QviDp68fWQfF6D2148",
+          "command": "git show f01d5ba --stat 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T00:49:43.761Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_fmuPxbv08B8dyGNsVmfB0741",
+          "command": "git show 5e58b80 --stat 2>/dev/null || echo \"commit not found or error\""
+        },
+        {
+          "ts": "2026-07-24T00:49:43.762Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_wBkYjyOY1GoJgcNj4oIu8961",
+          "command": "git log --oneline f01d5ba..HEAD 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-07-24T00:49:43.779Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_wBkYjyOY1GoJgcNj4oIu8961",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:43.780Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_JqEfw7QviDp68fWQfF6D2148",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:43.780Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_fmuPxbv08B8dyGNsVmfB0741",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:47.145Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_el0NIqY1nypExAi2RtvO6841",
+          "reason": "command matched blocked pattern",
+          "command": "git merge-base --is-ancestor f01d5ba HEAD && echo \"f01d5ba IS an ancestor of HEAD\" || echo \"f01d5ba is NOT an ancestor of HEAD\"",
+          "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+        },
+        {
+          "ts": "2026-07-24T00:49:47.145Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_el0NIqY1nypExAi2RtvO6841",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-07-24T00:49:47.145Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_XV9kA744NjACj0ubcpVz0241",
+          "command": "git show f01d5ba:scripts/runtime/decision_loop/engine.py 2>/dev/null | grep -A5 \"UPDATE jobs SET status\""
+        },
+        {
+          "ts": "2026-07-24T00:49:47.145Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_IzavCr9vYpuvtLosMEKh5373",
+          "command": "git show HEAD:scripts/runtime/decision_loop/engine.py 2>/dev/null | grep -A5 \"UPDATE jobs SET status\""
+        },
+        {
+          "ts": "2026-07-24T00:49:47.158Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_XV9kA744NjACj0ubcpVz0241",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:47.158Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_IzavCr9vYpuvtLosMEKh5373",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:51.213Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_cHs9yGLoQsVZcVZnMD780696",
+          "command": "git log --oneline --all -- scripts/runtime/decision_loop/engine.py 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-07-24T00:49:51.213Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Gv29n4MpqKoxV5qhanAg4036",
+          "command": "for commit in $(git log --oneline --all --format=\"%H\" -- scripts/runtime/decision_loop/engine.py 2>/dev/null | head -10); do echo \"=== $commit ===\"; git show $commit:scripts/runtime/decision_loop/engine.py 2>/dev/null | grep -n \"UPDATE jobs SET status\" | head -3; done"
+        },
+        {
+          "ts": "2026-07-24T00:49:51.267Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_cHs9yGLoQsVZcVZnMD780696",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:51.348Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Gv29n4MpqKoxV5qhanAg4036",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:54.846Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_94GJM5qVAE0iDuHAbv5s2085",
+          "command": "git log --oneline HEAD -- scripts/runtime/decision_loop/engine.py 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T00:49:54.846Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_BdYXGEFCz1IMS2pfdH2L3820",
+          "command": "git diff 23c5f80 HEAD -- scripts/runtime/decision_loop/engine.py 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T00:49:54.859Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_BdYXGEFCz1IMS2pfdH2L3820",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:54.868Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_94GJM5qVAE0iDuHAbv5s2085",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:59.084Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_0ZawNmdLUdPwIU9dMIdE2643",
+          "command": "git log --oneline HEAD 2>/dev/null | head -30"
+        },
+        {
+          "ts": "2026-07-24T00:49:59.084Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_1iurBSJq4SZ4dehJz3566660",
+          "command": "git log --oneline 23c5f80 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-07-24T00:49:59.099Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_0ZawNmdLUdPwIU9dMIdE2643",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:49:59.101Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_1iurBSJq4SZ4dehJz3566660",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:50:02.063Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_GSqG42ZkqsVZBrphqwbC4398",
+          "reason": "command matched blocked pattern",
+          "command": "git merge-base 23c5f80 HEAD 2>/dev/null",
+          "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+        },
+        {
+          "ts": "2026-07-24T00:50:02.063Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_GSqG42ZkqsVZBrphqwbC4398",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-07-24T00:50:02.063Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_eboDM43GgKyNIBDohqOU3196",
+          "command": "git log --oneline 66b4af0..23c5f80 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T00:50:02.074Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_eboDM43GgKyNIBDohqOU3196",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:50:05.974Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_6v8Yu7FJhTaIUKsZwqwV9998",
+          "command": "grep -rn \"consistency\\|mismatch.*status.*queue\\|queue_state.*!=.*status\\|status.*!=.*queue\" scripts/ --include=\"*.py\" | grep -v __pycache__ | head -20"
+        },
+        {
+          "ts": "2026-07-24T00:50:05.975Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Thnp9nGaXqwooVmiTSwe2996",
+          "command": "grep -rn \"SELECT.*status.*queue_state\\|SELECT.*queue_state.*status\" scripts/ --include=\"*.py\" | grep -v __pycache__ | head -20"
+        },
+        {
+          "ts": "2026-07-24T00:50:06.005Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Thnp9nGaXqwooVmiTSwe2996",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:50:06.015Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_6v8Yu7FJhTaIUKsZwqwV9998",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:50:08.410Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_wXL9FrRjXJGiGIMLunL97456",
+          "command": "find . -name \"baseline*\" -o -name \"probe*\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T00:50:08.411Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_z7nK0i1QsIV6aUkZmtP91071",
+          "command": "grep -rn \"SELECT.*status.*FROM jobs\\|SELECT.*queue_state.*FROM jobs\" scripts/ --include=\"*.py\" | grep -v __pycache__ | head -20"
+        },
+        {
+          "ts": "2026-07-24T00:50:08.421Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_wXL9FrRjXJGiGIMLunL97456",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:50:08.436Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_z7nK0i1QsIV6aUkZmtP91071",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:50:10.782Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_Et2mZrH0XZ1XC7mD76J42180",
+          "path": "deploy/mini-heartbeat/bin/baseline.sh"
+        },
+        {
+          "ts": "2026-07-24T00:50:10.784Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Et2mZrH0XZ1XC7mD76J42180",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:50:13.955Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Xt0khO4GQu6dzxrVnZvZ0149",
+          "command": "grep -rn \"assert.*queue_state\\|assert.*status\" scripts/runtime/heartbeat/test_executor_sessions.py | head -20"
+        },
+        {
+          "ts": "2026-07-24T00:50:13.956Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ZSikMppti7LMIpzTJIj00822",
+          "command": "grep -rn \"assert.*queue_state.*status\\|assert.*status.*queue_state\" scripts/ --include=\"*.py\" | head -20"
+        },
+        {
+          "ts": "2026-07-24T00:50:13.964Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Xt0khO4GQu6dzxrVnZvZ0149",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:50:13.985Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ZSikMppti7LMIpzTJIj00822",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:50:20.016Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_5tPHs0lZlFB7OCPQncZG0980",
+          "command": "find . -name \"test_node_status*\" -o -name \"test_node*\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-07-24T00:50:20.016Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_SDpoL6kqS3hFPHSA9Lx01553",
+          "path": "readiness-report-2026-07-18.md"
+        },
+        {
+          "ts": "2026-07-24T00:50:20.018Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_SDpoL6kqS3hFPHSA9Lx01553",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:50:20.026Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_5tPHs0lZlFB7OCPQncZG0980",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-07-24T00:50:35.613Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_i1QvnCRkEHp2EiviPNE64805",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "The job-state-consistency node's work has not been done. The artifacts present (decision.md, result-summary.md, patch.diff) are from a different node entirely (canary-retry-proof, which was about an echo utility). They contain no content related to the stated goal of making jobs.status and jobs.queue_state agree on every write path.\n\nSpecifically: (1) decision.md is about echo.py, not the root cause of the inconsistent row. (2) engine.py's _clean_stale_state() still has the known bug: 'UPDATE jobs SET status = 'expired'' without queue_state. A fix existed on a divergent branch but was never merged. (3) No consistency-check test or probe exists. (4) No SQL for reconciling the stale row is documented. (5) 4 tests fail in the suite.\n\nAll five acceptance criteria are clearly failed. The constraints appear unviolated, but the node's core work was not addressed.",
+  "required_next_action": "Address semantic failures and re-submit.",
+  "generated_at": "2026-07-24T00:51:29.582564+00:00",
+  "evaluated_tree_sha": "5ebbf3a951bd9f071417fca38fc550554c88be27",
+  "evaluated_commit_sha": "7a6f8c1036ccb5ef6013b7defbe4e3e41b5577ab",
+  "merge_commit_sha": "7a6f8c1036ccb5ef6013b7defbe4e3e41b5577ab",
+  "pr_ref": null,
+  "job_id": "job_20260724T00482330fe215ca1e7a7",
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "none",
+      "offered": 3,
+      "content_accessed": 0,
+      "not_observed": 3,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5l2eg_tk/README.md"
+      ]
+    },
+    "overall": "none"
+  }
+}

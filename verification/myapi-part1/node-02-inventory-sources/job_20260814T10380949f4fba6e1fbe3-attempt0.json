@@ -1,0 +1,688 @@
+{
+  "project_id": "myapi-part1",
+  "node_id": "node-02-inventory-sources",
+  "verdict": "fail",
+  "criteria_verdict": "fail",
+  "integrity": {
+    "verdict": "block",
+    "intent_preserved": false,
+    "graph_integrity_preserved": false,
+    "required_human_review": true,
+    "confidence": 0.9,
+    "findings": [
+      {
+        "severity": "high",
+        "summary": "Required artifact 01-decisions/output/sources.md was never produced: the subject diff (base 6b33245 -> tip 4e6d066) is empty (0 files changed), the working tree is clean, and the file is absent from git history entirely. The node's whole purpose — a declared, inspectable source list ('no silent scope') — is undelivered, and both acceptance criteria are indeterminate for exactly this reason. The node must be re-run or the artifact must land before the frontier advances.",
+        "affected_node_ids": [
+          "node-02-inventory-sources"
+        ]
+      },
+      {
+        "severity": "high",
+        "summary": "Downstream node-03-extract-decisions contracts directly on sources.md ('covering every source in sources.md'). With frontier_auto_advance: true, closing node-02 without the artifact lets extraction fire with no declared scope, defeating the exact guard node-02 exists to provide and making node-03's acceptance criterion unsatisfiable as written.",
+        "affected_node_ids": [
+          "node-03-extract-decisions"
+        ]
+      }
+    ],
+    "reasoning": "Fresh-eyes integrity review of node-02-inventory-sources. The node's intended role (per its why and the graph blueprint): produce 01-decisions/output/sources.md enumerating every authoritative decision source with a one-line authority rationale, plus a named exclusions list, so Stage B extraction has a declared, inspectable scope. The evidence shows the work under review delivered nothing: the subject diff between the prior result commit (6b33245, which contains node-01's landed artifacts) and this node's result commit (4e6d066) is empty — 0 files, no untracked leftovers; sources.md exists nowhere in the tree or history; lane 1 reports both criteria indeterminate with artifact_present=False. Sources that should have been inventoried demonstrably exist (project-docs/corpus-work-2026-08/ is present, and node-01's own 01-decisions/CONTEXT.md names the authoritative set: corpus-work-2026-08, anchors, handoffs, D01–D18 review sheets), so there was no legitimate 'nothing to inventory' outcome. Because node-03-extract-decisions depends on node-02 and its criterion requires covering every source in sources.md, letting the graph proceed in this state breaks the dependency contract and reinstates the silent-scope risk the node was designed to eliminate. This is not a subtle drift and not an evidence gap — it is a complete non-delivery, so the verdict is block: a human must look before any dependent fires. Secondary observation (does not change the verdict): node-02 executed while its upstream node-01-decision-schema is still provisional, so the re-run should wait on node-01 validation for clean frontier hygiene.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-14T10:44:37.147Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_YVOf7qa7IZ8i1AVxHdwx7595",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml"
+      },
+      {
+        "ts": "2026-08-14T10:44:37.148Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_FB5AqnkATgBSiH8NrCaT8675",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-14T10:44:37.148Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_56VSCrXmuvmPm7bgdHV54660",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0/README.md"
+      },
+      {
+        "ts": "2026-08-14T10:44:37.154Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_YVOf7qa7IZ8i1AVxHdwx7595",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T10:44:37.155Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_FB5AqnkATgBSiH8NrCaT8675",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T10:44:37.155Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_56VSCrXmuvmPm7bgdHV54660",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T10:44:39.585Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_yBT7otf1nT29ni4eEQeI7152",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && pwd && ls -la && echo \"---\" && git status 2>&1 | head -30 && echo \"---\" && git log --oneline -15 2>&1"
+      },
+      {
+        "ts": "2026-08-14T10:44:39.587Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_mtcNs4taPQDI4OzQPg0r4466",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && find . -path ./.git -prune -o -type f -print 2>/dev/null | head -100"
+      },
+      {
+        "ts": "2026-08-14T10:44:39.622Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_mtcNs4taPQDI4OzQPg0r4466",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T10:44:39.831Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_yBT7otf1nT29ni4eEQeI7152",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T10:44:47.122Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ncq8fV1Nerat70YqIGg24670",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && find 01-decisions 02-corpus 03-ingestion 04-evaluation -type f | sort && echo \"---CONTEXT---\" && cat 01-decisions/CONTEXT.md && echo \"---OUTPUT DIR---\" && ls -la 01-decisions/output/"
+      },
+      {
+        "ts": "2026-08-14T10:44:47.123Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_n4bkkbmmfA9afeuRpohp4284",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && git diff --stat 6b3324550789b0f5e7607faa45fa2fc14e9d794d 4e6d0662be9cc226616145fd2de8e6e5729c6e38 && echo \"---SHOW TIP---\" && git show --stat 4e6d0662be9cc226616145fd2de8e6e5729c6e38 | head -30 && echo \"---SHOW BASE---\" && git show --stat 6b3324550789b0f5e7607faa45fa2fc14e9d794d | head -30"
+      },
+      {
+        "ts": "2026-08-14T10:44:47.159Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ncq8fV1Nerat70YqIGg24670",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T10:44:47.259Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_n4bkkbmmfA9afeuRpohp4284",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T10:45:03.211Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_uJd1xqKizomCcXCyEi783553",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && find . -path ./.git -prune -o -name \"*.md\" -print | xargs grep -l -i \"authority rationale\\|sources.*inventory\\|source list\" 2>/dev/null | head -20; echo \"---\"; find . -name \"sources.md\" -not -path \"./.git/*\" 2>/dev/null; echo \"---git ls-files under 01-decisions---\"; git ls-files 01-decisions/"
+      },
+      {
+        "ts": "2026-08-14T10:45:03.212Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_hPFalSjxnITLzbesmEc38073",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && git log --all --oneline -- 01-decisions/output/sources.md 2>&1 | head; echo \"---project-docs corpus-work---\"; ls -la project-docs/ 2>/dev/null | head -40; echo \"---\"; find . -path ./.git -prune -o -type d -name \"*corpus-work*\" -print 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T10:45:03.300Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_hPFalSjxnITLzbesmEc38073",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T10:45:03.455Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_uJd1xqKizomCcXCyEi783553",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T10:45:10.350Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_9gwlRymooZMHqQ1MGdOj3357",
+        "command": "ls /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/ 2>/dev/null && echo \"---node-03---\" && cat /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-03-extract-decisions.yaml 2>/dev/null | head -40"
+      },
+      {
+        "ts": "2026-08-14T10:45:10.350Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_rzzBiDw9sC1vyA4NRhvc6888",
+        "command": "ls /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/ 2>/dev/null && echo \"---node-02 yaml---\" && cat /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-02-inventory-sources.yaml 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T10:45:10.374Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_rzzBiDw9sC1vyA4NRhvc6888",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T10:45:10.374Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_9gwlRymooZMHqQ1MGdOj3357",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T10:45:40.610Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_2obZERSs3tyLupAISZJl5283",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "node-02 executed while its dependency node-01-decision-schema is still provisional (unvalidated). Frontier hygiene: validate node-01 before re-running node-02 so the decision-schema contract is settled before sources are inventoried against it.",
+        "affected_node_ids": [
+          "node-01-decision-schema",
+          "node-02-inventory-sources"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.07500000000000001,
+  "criteria_confidence": 0.07500000000000001,
+  "completeness": 0.5,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "sources-listed",
+        "criterion": "01-decisions/output/sources.md enumerates every source used (repo paths, docs, prior decision artifacts such as Corpus v1.0/40-decisions-and-trajectories and project-docs/corpus-work-2026-08) with a one-line authority rationale each",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "path_mentioned_missing",
+        "evidence": [
+          "01-decisions/output/sources.md absent"
+        ],
+        "reasoning": "The criterion names source path(s) that are not present in the checkout. The harness did not scan unrelated files as substitutes.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "01-decisions/output/sources.md absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "exclusions-named",
+        "criterion": "Sources deliberately excluded are listed with reasons",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md - read it first.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Write only under 01-decisions/",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model xai/grok-4.6 via the subagent tool's model parameter; close with one oracle or reviewer pass before returning",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "01-decisions/output/sources.md": false
+    },
+    "deps_status": {
+      "node-01-decision-schema": "provisional"
+    },
+    "criteria_mismatches": [
+      {
+        "criterion_id": "sources-listed",
+        "kind": "source_path",
+        "detail": "01-decisions/output/sources.md absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "sources-listed",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "6b3324550789b0f5e7607faa45fa2fc14e9d794d",
+      "tip": "4e6d0662be9cc226616145fd2de8e6e5729c6e38",
+      "files": [],
+      "truncated": false,
+      "file_count": 0,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "sources-listed",
+        "judgment": "judged_fail",
+        "confidence": 0.95,
+        "evidence": [
+          "01-decisions/output/sources.md absent from eval worktree (find 01-decisions -type f yields only CONTEXT.md and output/decision-schema.md)",
+          "git diff 6b33245..4e6d066 --stat is empty (0 files); tip commit 4e6d066 'result(job=job_20260814T10380949...)' is an empty commit",
+          "git status: 'nothing to commit, working tree clean' — no untracked leftovers despite harness note that junk would be visible",
+          "Criterion source paths verified real: project-docs/corpus-work-2026-08/ present in checkout; Corpus v1.0/40-decisions-and-trajectories present in /Users/sab-mini/repos/MyAPI (allowed repo) — criterion path is NOT stale",
+          "No *sources* file anywhere in checkout; only SOURCES.md hits are pre-existing 2026-07-29 hot-corpus manifests under /Users/sab-mini/repos/MyAPI/scratch/ (dated before node ran, wrong location, not a decision-source inventory)"
+        ],
+        "reasoning": "The deterministic check was indeterminate because it could not tell whether the criterion path was stale. I resolved that: the criterion's referenced source locations are real and available, so the path is not stale — the required artifact simply never landed. The node-02 job commit is empty (0 file changes vs base), the working tree is clean, and no substitute enumeration of sources with one-line authority rationales exists anywhere in the checkout. The criterion is a pure artifact requirement (write 01-decisions/output/sources.md) and the artifact is absent with no substitute, so the criterion fails. Confidence is high but not 1.0 only because I cannot fully rule out executor work in a location the harness cannot see; evidence (empty wrapper commit, clean tree, no 01-decisions/ anywhere in the allowed repo's main worktree) strongly rules that out."
+      },
+      {
+        "criterion_id": "exclusions-named",
+        "judgment": "judged_fail",
+        "confidence": 0.9,
+        "evidence": [
+          "No sources.md exists (its natural home for an exclusions section), so no exclusions listing exists",
+          "Repo-wide grep for 'excluded'/'source list' finds only unrelated pre-existing project docs (IMPLEMENTATION-PLAN.md, QUERY-GROUNDING-PASS1.md, STATUS_AND_NEXT_STEPS.md, etc.) — none are a node-02 exclusion inventory",
+          "Node-02 job produced 0 file changes (empty commit 4e6d066; git diff 6b33245..4e6d066 empty; working tree clean)"
+        ],
+        "reasoning": "The criterion requires deliberately excluded sources to be listed with reasons. Whatever form that takes, it must be part of the node-02 deliverable, and the node produced nothing: its job commit is empty and the working tree is clean. No document listing deliberate exclusions with reasons was produced anywhere in the checkout. Fail. Confidence slightly lower than criterion 1 only because the criterion does not pin an exact file path, so I rely on the total absence of any node-02 output plus the absence of any exclusion listing repo-wide."
+      }
+    ],
+    "overall_reasoning": "Node-02-inventory-sources delivered nothing. The executor's result commit (4e6d066) is empty — zero file changes relative to the node-01 result base (6b33245), and the working tree is clean with no untracked leftovers. The required artifact 01-decisions/output/sources.md does not exist anywhere in the checkout, and no alternate file enumerating sources with one-line authority rationales (or listing deliberate exclusions with reasons) was produced. I resolved the deterministic check's central uncertainty: the criterion paths are not stale — project-docs/corpus-work-2026-08/ exists in the checkout and Corpus v1.0/40-decisions-and-trajectories exists in the allowed repo — so the referenced sources were available and the artifact simply never landed. Both acceptance criteria fail. Constraints were not violated (trivially: nothing was written anywhere, and the forbidden-pattern scans of referenced files were clean), but that does not offset an empty deliverable. This looks like an execution failure (job produced nothing) rather than a criteria-vs-implementation mismatch.",
+    "risks": "1) Residual risk that executor work landed in a location invisible to the harness: mitigated by the empty wrapper commit (harness note says untracked leftovers are deliberately visible via git add -A), clean working tree, and absence of any 01-decisions/ directory in the allowed repo's main worktree. 2) The main repo contains pre-existing scratch/corpus-hot-v1/*/SOURCES.md manifests (2026-07-29) that a naive source search could confuse with the required artifact; they are dated ~2 weeks before the node ran, live under scratch/, and enumerate hot-corpus pipeline paths, not Part 1 decision sources with authority rationales — excluded from evidence. 3) Criterion 2 (exclusions-named) has no pinned path, so failure is established by total absence of any node-02 deliverable rather than by a missing named file.",
+    "followup_candidates": "Human clarification: the node-02 job (job_20260814T10380949f4fba6e1fbe3) committed zero files and left the working tree clean — no trace of execution. Was this an executor failure/abort (e.g., the pi_rpc session never ran or errored before writing), and should node-02 be re-run rather than judged as a criteria mismatch? Also confirm the governing memo (/Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md) was actually read, since no output reflects it. If the executor did produce sources.md outside the eval worktree, that location is out of harness scope and should be copied into 01-decisions/output/ before re-evaluation.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-14T10:43:17.000Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_4YuiRlgXvCy4TUFU9LXG8344",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && ls -la && echo \"---\" && find . -maxdepth 3 -type d | head -50"
+        },
+        {
+          "ts": "2026-08-14T10:43:17.001Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_7GIBpUFgZK9XFEnEw7BB2359",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-14T10:43:17.002Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_1PySk9ss5mgp5piqBuEt8742",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0/README.md"
+        },
+        {
+          "ts": "2026-08-14T10:43:17.017Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_1PySk9ss5mgp5piqBuEt8742",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:17.019Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_7GIBpUFgZK9XFEnEw7BB2359",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:17.042Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_4YuiRlgXvCy4TUFU9LXG8344",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:20.215Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_S5yRr53HehiWTqKS5qb07449",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && find 01-decisions -type f | sort && echo \"=== 02-corpus ===\" && find 02-corpus -type f | sort && echo \"=== git status ===\" && git status 2>&1 | head -40"
+        },
+        {
+          "ts": "2026-08-14T10:43:20.216Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_wfKSHwGBLF9p4yDOJaAx4761",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && cat .git 2>/dev/null | head -5 && echo \"---\" && git log --oneline -15 2>&1"
+        },
+        {
+          "ts": "2026-08-14T10:43:20.459Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_wfKSHwGBLF9p4yDOJaAx4761",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:20.911Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_S5yRr53HehiWTqKS5qb07449",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:24.555Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_RBWXdwoyZ1yNAf2Cpi7C6871",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && git show --stat 4e6d066 2>&1 | head -30 && echo \"=====\" && git show --stat 6b33245 2>&1 | head -30 && echo \"===== diff base..tip =====\" && git diff 6b33245..4e6d066 --stat 2>&1 | head -30"
+        },
+        {
+          "ts": "2026-08-14T10:43:24.556Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_Uw8GM59MLFKqg8NtCPcS3071",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0/01-decisions/CONTEXT.md"
+        },
+        {
+          "ts": "2026-08-14T10:43:24.556Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_3ck6dIq3t2AFzfWN0yl15688",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0/01-decisions/output/decision-schema.md"
+        },
+        {
+          "ts": "2026-08-14T10:43:24.561Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Uw8GM59MLFKqg8NtCPcS3071",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:24.561Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_3ck6dIq3t2AFzfWN0yl15688",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:24.695Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_RBWXdwoyZ1yNAf2Cpi7C6871",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:29.611Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_LGt8ojwJRuuh4SHbv7Ok6834",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && echo \"=== any sources.md anywhere ===\" && find . -iname \"*sources*\" -not -path \"./.git/*\" 2>/dev/null && echo \"=== .handoffs ===\" && ls -la .handoffs/ && echo \"=== gddp ===\" && find gddp -type f | head -20 && echo \"=== 01-decisions full ===\" && find 01-decisions -type f"
+        },
+        {
+          "ts": "2026-08-14T10:43:29.612Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_YPQ6HdqeANpLuWUaaAp26471",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && git show 4e6d066 --stat 2>&1 | head -20 && echo \"=== show content of 4e6d066 ===\" && git show 4e6d066 2>&1 | head -40"
+        },
+        {
+          "ts": "2026-08-14T10:43:29.685Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_LGt8ojwJRuuh4SHbv7Ok6834",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:29.700Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_YPQ6HdqeANpLuWUaaAp26471",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:34.820Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_eOnaj5cSV3QrVqwIoKfW4395",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml"
+        },
+        {
+          "ts": "2026-08-14T10:43:34.821Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_yHX7xpFUW5gIHsV37E3g7606",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && echo \"=== 02-corpus/CONTEXT.md ===\" && cat 02-corpus/CONTEXT.md && echo \"=== 03-ingestion/CONTEXT.md ===\" && cat 03-ingestion/CONTEXT.md && echo \"=== 04-evaluation/CONTEXT.md ===\" && cat 04-evaluation/CONTEXT.md"
+        },
+        {
+          "ts": "2026-08-14T10:43:34.821Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_WRd1QqvtfLB2kddnawbf8969",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && ls -la \"project-docs/corpus-work-2026-08\" && echo \"=== grep for 'sources.md' or 'source list' or 'excluded' ===\" && grep -ril \"excluded\\|source list\\|sources\\.md\" --include=\"*.md\" . 2>/dev/null | grep -v \".git/\" | head -20"
+        },
+        {
+          "ts": "2026-08-14T10:43:34.831Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_eOnaj5cSV3QrVqwIoKfW4395",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:34.853Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_yHX7xpFUW5gIHsV37E3g7606",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:34.921Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_WRd1QqvtfLB2kddnawbf8969",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:40.885Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_fL5LYaR4HkeUcXZZ4O4x1251",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && echo \"=== Corpus v1.0 search ===\" && find . -maxdepth 3 -iname \"*corpus*\" -not -path \"./.git/*\" 2>/dev/null | head -20 && echo \"=== 40-decisions search ===\" && find . -iname \"*40-decision*\" -not -path \"./.git/*\" 2>/dev/null && echo \"=== grep 40-decisions ===\" && grep -rl \"40-decisions\\|Corpus v1\" --include=\"*.md\" . 2>/dev/null | grep -v \".git/\" | head"
+        },
+        {
+          "ts": "2026-08-14T10:43:40.885Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_PLBsK08k79Pdzz4kEB1n6328",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && echo \"=== git log --all --oneline | head ===\" && git log --all --oneline 2>&1 | head -25 && echo \"=== worktrees ===\" && git worktree list 2>&1 && echo \"=== reflog ===\" && git reflog -10 2>&1"
+        },
+        {
+          "ts": "2026-08-14T10:43:40.970Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_fL5LYaR4HkeUcXZZ4O4x1251",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:41.008Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_PLBsK08k79Pdzz4kEB1n6328",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:50.426Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_WXnorY8DaOgva4gv4Euy2423",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0 && echo \"=== .jules ===\" && find .jules -type f 2>/dev/null && echo \"=== files modified in last 2 days (excluding .git) ===\" && find . -newermt \"2026-08-13\" -type f -not -path \"./.git/*\" 2>/dev/null | head -20 && echo \"=== untracked ===\" && git status --porcelain 2>&1 && echo \"=== node-02 yaml in config? ===\" && find /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes -name \"node-02*\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-14T10:43:50.503Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_WXnorY8DaOgva4gv4Euy2423",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:55.768Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_55oOYCrY0NBySv0AsHtN5425",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-02-inventory-sources.yaml"
+        },
+        {
+          "ts": "2026-08-14T10:43:55.769Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_gCCoUkr1sZGJuqdwDnov5648",
+          "command": "ls \"/Users/sab-mini/repos/MyAPI/Corpus v1.0\" 2>/dev/null | head; echo \"---\"; find \"/Users/sab-mini/repos/MyAPI\" -maxdepth 2 -iname \"*40-decision*\" -not -path \"*/.git/*\" 2>/dev/null | head; echo \"--- git -C /Users/sab-mini/repos/MyAPI status --porcelain | head\"; git -C /Users/sab-mini/repos/MyAPI status --porcelain 2>&1 | head -10"
+        },
+        {
+          "ts": "2026-08-14T10:43:55.773Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_55oOYCrY0NBySv0AsHtN5425",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:43:55.836Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_gCCoUkr1sZGJuqdwDnov5648",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:44:04.237Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Z8e61GL42Ir4hR02uhmR9399",
+          "command": "ls -la \"/Users/sab-mini/repos/MyAPI/01-decisions\" 2>/dev/null; echo \"---find sources.md in main repo---\"; find \"/Users/sab-mini/repos/MyAPI\" -iname \"*sources*\" -not -path \"*/.git/*\" -not -path \"*/Corpus v1.0/*\" -not -path \"*/node_modules/*\" 2>/dev/null | head -10; echo \"--- 01-decisions in main repo (tracked) ---\"; git -C /Users/sab-mini/repos/MyAPI ls-files | grep -i \"01-decisions\" | head; echo \"--- corpus-work-2026-08 in main repo ---\"; ls \"/Users/sab-mini/repos/MyAPI/project-docs/corpus-work-2026-08\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-14T10:44:05.035Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Z8e61GL42Ir4hR02uhmR9399",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:44:09.182Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_fi5qOz85PzPuNOHEi1i08719",
+          "command": "head -30 \"/Users/sab-mini/repos/MyAPI/scratch/corpus-hot-v1/gddp/SOURCES.md\" 2>/dev/null; echo \"=== timestamps ===\"; stat -f \"%Sm %N\" -t \"%Y-%m-%d %H:%M\" \"/Users/sab-mini/repos/MyAPI/scratch/corpus-hot-v1/gddp/SOURCES.md\" 2>/dev/null; stat -f \"%Sm %N\" -t \"%Y-%m-%d %H:%M\" \"/Users/sab-mini/repos/MyAPI/Corpus v1.0/40-decisions-and-trajectories\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-14T10:44:09.211Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_fi5qOz85PzPuNOHEi1i08719",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T10:44:31.172Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_eKFu17zTGi3eF4VMCBvL1717",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node-02-inventory-sources delivered nothing. The executor's result commit (4e6d066) is empty — zero file changes relative to the node-01 result base (6b33245), and the working tree is clean with no untracked leftovers. The required artifact 01-decisions/output/sources.md does not exist anywhere in the checkout, and no alternate file enumerating sources with one-line authority rationales (or listing deliberate exclusions with reasons) was produced. I resolved the deterministic check's central uncertainty: the criterion paths are not stale — project-docs/corpus-work-2026-08/ exists in the checkout and Corpus v1.0/40-decisions-and-trajectories exists in the allowed repo — so the referenced sources were available and the artifact simply never landed. Both acceptance criteria fail. Constraints were not violated (trivially: nothing was written anywhere, and the forbidden-pattern scans of referenced files were clean), but that does not offset an empty deliverable. This looks like an execution failure (job produced nothing) rather than a criteria-vs-implementation mismatch.",
+  "required_next_action": "Address semantic failures and re-submit.",
+  "generated_at": "2026-08-14T10:45:40.735078+00:00",
+  "evaluated_tree_sha": "e5d5956d666e3e60f76b1f9aac2d23b17b12e0cf",
+  "evaluated_commit_sha": "4e6d0662be9cc226616145fd2de8e6e5729c6e38",
+  "merge_commit_sha": "4e6d0662be9cc226616145fd2de8e6e5729c6e38",
+  "expected_base_commit_sha": "6b3324550789b0f5e7607faa45fa2fc14e9d794d",
+  "pr_ref": null,
+  "job_id": "job_20260814T10380949f4fba6e1fbe3",
+  "execution_attempt_id": "job_20260814T10380949f4fba6e1fbe3:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+    "neighbor:node-01-decision-schema": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-tpcd3fi0/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "high"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-14T10:43:12.304547+00:00",
+    "finished_at": "2026-08-14T10:45:40.734889+00:00",
+    "wall_s": 148.429,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 78.85,
+      "tool_calls": 20
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 69.525,
+      "tool_calls": 11
+    }
+  }
+}

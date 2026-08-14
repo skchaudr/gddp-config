@@ -1,0 +1,204 @@
+{
+  "project_id": "gddp-runtime",
+  "node_id": "job-state-consistency",
+  "verdict": "needs-human-review",
+  "criteria_verdict": "needs-more-evidence",
+  "integrity": {
+    "verdict": "unknown",
+    "intent_preserved": false,
+    "graph_integrity_preserved": false,
+    "required_human_review": true,
+    "confidence": 0.0,
+    "findings": [],
+    "reasoning": "pi exited with code 1: 401: {\"message\":\"Authentication Fails, Your api key: ****alid is invalid\",\"type\":\"authentication_error\",\"param\":null,\"code\":\"invalid_request_error\"}\n",
+    "tool_trace": [],
+    "graph_observations": null,
+    "lane_status": "crashed",
+    "harness_error": "pi exited with code 1: 401: {\"message\":\"Authentication Fails, Your api key: ****alid is invalid\",\"type\":\"authentication_error\",\"param\":null,\"code\":\"invalid_request_error\"}\n (preserved logs: stdout=/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-integrity-stdout-6k4_ngdk stderr=/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-integrity-stderr-8wfo19tm)"
+  },
+  "confidence": 0.24,
+  "criteria_confidence": 0.24,
+  "completeness": 0.5,
+  "graph_readiness": 0.0,
+  "completeness_status": "partial",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "root-cause-documented",
+        "criterion": "decision.md names the write path (or manual action) that produced status=failed/queue_state=running for job_20260711T16542651, with evidence",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (decision.md)"
+        ],
+        "reasoning": "Scanned source files (decision.md) for identifiers named in the criterion (queue_state, job_20260711T16542651). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "all-writers-set-both",
+        "criterion": "every UPDATE to jobs.status in scripts/ also sets queue_state to the matching value (engine.py expiry included), or the redundancy is collapsed with a documented rationale",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "path_mentioned_missing",
+        "evidence": [
+          "engine.py absent"
+        ],
+        "reasoning": "The criterion names source path(s) that are not present in the checkout. The harness did not scan unrelated files as substitutes.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "engine.py absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "consistency-check-exists",
+        "criterion": "a check exists (test or baseline.sh probe) that fails when any jobs row has mismatched status/queue_state",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "queue_state -> line 220: 'queue_state'"
+        ],
+        "reasoning": "Scanned source files (scripts/adapters/__init__.py, scripts/adapters/executor_protocol.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_cli_adapter.py...) for identifiers named in the criterion (queue_state). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "stale-row-reconciled",
+        "criterion": "the existing inconsistent row is corrected via a documented, reversible step (SQL in decision.md), not silent mutation",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (decision.md)"
+        ],
+        "reasoning": "Scanned source files (decision.md) for identifiers named in the criterion (SQL). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "suite-green",
+        "criterion": ".venv/bin/python -m pytest -q scripts passes with no regressions",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "do not change receipt semantics or the human review gate",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "schema changes to queue.db are out of scope; column semantics only",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "graph truth stays human-owned; this node produces evidence only",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "decision.md": true,
+      "result-summary.md": true,
+      "patch.diff": true,
+      "graph-update.yaml": false
+    },
+    "deps_status": {},
+    "criteria_mismatches": [
+      {
+        "criterion_id": "all-writers-set-both",
+        "kind": "source_path",
+        "detail": "engine.py absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "all-writers-set-both",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ]
+  },
+  "semantic": {
+    "judgments": [],
+    "overall_reasoning": "pi exited with code 1: 401: {\"message\":\"Authentication Fails, Your api key: ****alid is invalid\",\"type\":\"authentication_error\",\"param\":null,\"code\":\"invalid_request_error\"}\n",
+    "risks": null,
+    "followup_candidates": null,
+    "budget_exhausted": true,
+    "budget_trace": null,
+    "lane_status": "crashed",
+    "harness_error": "pi exited with code 1: 401: {\"message\":\"Authentication Fails, Your api key: ****alid is invalid\",\"type\":\"authentication_error\",\"param\":null,\"code\":\"invalid_request_error\"}\n (preserved logs: stdout=/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-pi-stdout-pnufktwa stderr=/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-pi-stderr-y65glc8a)"
+  },
+  "decision_reasoning": "pi exited with code 1: 401: {\"message\":\"Authentication Fails, Your api key: ****alid is invalid\",\"type\":\"authentication_error\",\"param\":null,\"code\":\"invalid_request_error\"}\n",
+  "required_next_action": "Integrity verdict 'unknown' halts progression (criteria verdict was 'needs-more-evidence'). Human review required; no dependent node may dispatch on this node.",
+  "generated_at": "2026-07-23T23:35:26.766043+00:00",
+  "evaluated_tree_sha": "effdbb4800a8e64df48f70ce945322b0a618a21b",
+  "evaluated_commit_sha": "d2e3ca9188da263beb220ea01cd9759019fa056d",
+  "merge_commit_sha": "d2e3ca9188da263beb220ea01cd9759019fa056d",
+  "pr_ref": null,
+  "job_id": "job_20260723T23351108f27eaa769baa",
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1s2wojlt/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1s2wojlt/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "none",
+      "offered": 3,
+      "content_accessed": 0,
+      "not_observed": 3,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1s2wojlt/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1s2wojlt/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "none",
+      "offered": 3,
+      "content_accessed": 0,
+      "not_observed": 3,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1s2wojlt/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1s2wojlt/README.md"
+      ]
+    },
+    "overall": "none"
+  }
+}

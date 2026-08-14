@@ -1,0 +1,477 @@
+{
+  "project_id": "vm-harness-audit",
+  "node_id": "node-02-extensions-audit",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.9,
+    "findings": [],
+    "reasoning": "Fresh-eyes review of node-02-extensions-audit work (reports/02-extensions.md, commit ee7d22b, single-file addition, clean worktree in skchaudr/pi-harness-audit). Intent preserved: the node's why is a known-good inventory of the VM's pi extension surface with the xAI/Grok OAuth freeze as the standing precedent; the report delivers exactly that — agent extensions dir (33 .ts + 5 dirs), 7 npm/config-enabled packages, built-ins, each with enabled/disabled state where discoverable; §5.1 flags the xAI/Grok device-code OAuth suspect in depth (endpoints, scopes, live auth.json credential, default model path), §5.2 flags the 3 missing loadable entrypoints, §6 notes droid/factory/executor integration points including the important finding that GDDP local pi argv (from node-01) does not pass --no-extensions so headless jobs inherit the full auto-load surface. Constraints honored: read-only inspection documented; only pi --version/--help/list run; no extension code loaded or executed. Graph integrity preserved: facts in §6.2 are consistent with node-01's report (droid custom:Grok-4.5-sub-(Hermes)-0 via Hermes 127.0.0.1:8645; local pi zai/glm-5.2; restricted tools), no contradictions; downstream node-03 (subagents/chains audit) receives the exact surface it needs — pi-subagents spawn/dispatch + agentOverrides pinning to xai/grok-4.5, legacy subagent/ dir, advisor-mode oracle dispatch — with an honest boundary note that legacy subagent/ config consumption by pi-subagents was not verified by execution, which node-03 can resolve. No interference with other artifacts or graph state. Lane 1's indeterminate keyword scans are its own acceptance-domain concern and do not change the integrity verdict; the required semantic content is visibly present in the file. Verdict: pass.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-05T01:21:59.042Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_wvB2VEV5JKVQPar3Eiux6200",
+        "command": "find /tmp/gddp-eval-wt-td0rau4r -type f | head -50; echo \"---\"; ls -la /tmp/gddp-eval-wt-td0rau4r"
+      },
+      {
+        "ts": "2026-08-05T01:21:59.043Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_FfKn5NGsmooiOPBAZXf17896",
+        "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml"
+      },
+      {
+        "ts": "2026-08-05T01:21:59.043Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_nfR5yHuwQJoXcv7kJ45o8353",
+        "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-03-subagents-chains-audit.yaml"
+      },
+      {
+        "ts": "2026-08-05T01:21:59.058Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_FfKn5NGsmooiOPBAZXf17896",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:21:59.058Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_nfR5yHuwQJoXcv7kJ45o8353",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:21:59.063Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_wvB2VEV5JKVQPar3Eiux6200",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:22:01.064Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_OgipciwKt7aphWiPWBqe6244",
+        "path": "/tmp/gddp-eval-wt-td0rau4r/reports/02-extensions.md"
+      },
+      {
+        "ts": "2026-08-05T01:22:01.065Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_mEFbrPImxDUifDu4G2Ri4072",
+        "path": "/tmp/gddp-eval-wt-td0rau4r/reports/01-entrypoints.md"
+      },
+      {
+        "ts": "2026-08-05T01:22:01.066Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_OgipciwKt7aphWiPWBqe6244",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:22:01.067Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_mEFbrPImxDUifDu4G2Ri4072",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:22:03.862Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ouy3e8OAKXzPzxvpy9f22005",
+        "command": "cd /tmp/gddp-eval-wt-td0rau4r && cat .git; echo \"---\"; git log --oneline -10 2>&1 | head; echo \"---\"; git show --stat HEAD 2>&1 | head -20; echo \"---\"; git status 2>&1 | head -10"
+      },
+      {
+        "ts": "2026-08-05T01:22:03.862Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_JK64LQtrfS8uVAMd3CPy7315",
+        "command": "ls /home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/ 2>&1; echo \"---\"; cat /home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-02-extensions-audit.yaml 2>&1"
+      },
+      {
+        "ts": "2026-08-05T01:22:03.879Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_JK64LQtrfS8uVAMd3CPy7315",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:22:03.884Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ouy3e8OAKXzPzxvpy9f22005",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-05T01:22:35.203Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_A2begS4WvRXzXMo9Ov6Z7882",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "Node-03 (subagents-chains-audit) should resolve the boundary question node-02 left open: whether npm:pi-subagents reads the legacy ~/.pi/agent/extensions/subagent/config.json and whether ~/.pi/agent/chains/ exists, since node-02's report only notes the legacy dir is 'not loaded as extension' without executing to verify. This is the natural convergence point between node-02's surface inventory and node-03's chain inventory.",
+        "affected_node_ids": [
+          "node-03-subagents-chains-audit"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Node-02 surfaces a cross-cutting risk for the remaining linear chain: GDDP local pi jobs inherit the full 33+ auto-load extension surface (no --no-extensions in node-01's argv), and interactive/subagent pi paths default to the flagged xAI OAuth stack. Nodes 04-05 (PTY probe, separation spec) should account for this when exercising the VM, per the node-01 'Notes for downstream nodes' convention.",
+        "affected_node_ids": [
+          "node-04-tty-validation-probe",
+          "node-05-separation-proposal"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9724999999999999,
+  "criteria_confidence": 0.9724999999999999,
+  "completeness": 1.0,
+  "graph_readiness": 0.9724999999999999,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "report-exists",
+        "criterion": "reports/02-extensions.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "non\\-empty -> line 272: 'non-empty'"
+        ],
+        "reasoning": "Scanned source files (reports/02-extensions.md) for identifiers named in the criterion (non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "extensions-enumerated",
+        "criterion": "report enumerates installed pi extensions (agent extensions directory, npm-installed extensions, and config-enabled entries) with enabled/disabled state where discoverable",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (npm-installed, config-enabled). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "suspects-flagged",
+        "criterion": "report explicitly flags known-bug suspect extensions (grok/xAI OAuth flow) and any extension missing a loadable entrypoint",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (known-bug, xAI, OAuth). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "integration-points-noted",
+        "criterion": "report notes droid-adjacent integration points (extensions or config that touch droid, factory, or executor dispatch)",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (no files)"
+        ],
+        "reasoning": "Scanned source files (none) for identifiers named in the criterion (droid-adjacent). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Read-only: inspect and report only",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Do not load or execute extension code beyond reading manifests and config",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/02-extensions.md": true
+    },
+    "deps_status": {
+      "node-01-entrypoints-audit": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "4345bd80cdbafcaedc9738a35586f1ca2e368abe",
+      "tip": "ee7d22b064ccb5bb6f696ffed4aec7de6e9be200",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/02-extensions.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.99,
+        "evidence": [
+          "reports/02-extensions.md exists (295 lines, non-empty)",
+          "git show --stat HEAD: 'reports/02-extensions.md | 295 +++++++... 1 file changed, 295 insertions(+)'",
+          "Report §8 acceptance checklist self-lists report-exists as PASS"
+        ],
+        "reasoning": "The required artifact exists in the repo (added in tip commit ee7d22b) and is non-empty (295 lines). Deterministic scan was indeterminate only because it keyword-matched 'non-empty' in prose; the file's presence and size are directly verifiable. Criterion satisfied."
+      },
+      {
+        "criterion_id": "extensions-enumerated",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "Report §3: 7 config-enabled packages table (settings entry, installed version, manifest pi.extensions entrypoint, on-disk, enabled state); verified 7 table rows",
+          "Report §4.1: 33 auto-discovered file extensions with name/kind/purpose/enabled state; verified 33 table rows matching the claimed 33 .ts files",
+          "Report §4.2: 5 directory entries with loadable-entrypoint verdict and enabled/disabled state",
+          "Report §7: npm tree declaration matching settings.packages 1:1"
+        ],
+        "reasoning": "The report enumerates all three required surfaces — agent extensions directory (§4), npm-installed extensions (§3/§7), and config-enabled entries (§3) — and gives enabled/disabled state where discoverable ('enabled (auto)', 'not loaded (skipped directory)', 'disabled since 2026-06-29', 'enabled' for pi list-confirmed packages). Counts are internally consistent (33 files + 5 dirs = 38 entries). Criterion satisfied."
+      },
+      {
+        "criterion_id": "suspects-flagged",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "Report §5.1: 'KNOWN-BUG SUSPECT — xAI / Grok OAuth flow. Status: FLAGGED' with implementation path (pi-ai dist/auth/oauth/xai.js), endpoints, client id, host default model path xai/grok-4.5, live auth.json xAI OAuth credential",
+          "Report §5.2: missing loadable entrypoints table for herdr/, pi-tool-display/, subagent/ with issue + impact; verified 3 rows matching the claimed 3",
+          "Report §5.2: 'No broken symlinks were found under extensions/'; all seven config-enabled packages have existing entrypoint files"
+        ],
+        "reasoning": "The grok/xAI OAuth flow is explicitly flagged as the known-bug suspect with full supporting detail, and every extension lacking a loadable entrypoint is enumerated with impact assessment. Criterion satisfied."
+      },
+      {
+        "criterion_id": "integration-points-noted",
+        "judgment": "judged_pass",
+        "confidence": 0.96,
+        "evidence": [
+          "Report §6.1: 'No direct droid or Factory extension package' — searched extensions, settings.json, npm/package.json",
+          "Report §6.2: production executor wiring — GDDP_LOCAL_SUBPROCESS_ARGV (pi) and GDDP_DROID_SUBPROCESS_ARGV (droid exec + Hermes proxy)",
+          "Report §6.3: 9 extensions touching executor/dispatch (session-tagger dispatcher→executor correlation, capability-cascade executor registration, needle-active/shadow executor path, pi-subagents spawn/dispatch, advisor-mode oracle dispatch, pi-intercom, herdr-*)",
+          "Report §6.4: model path coupling table (pi xai/grok-4.5 vs droid Hermes proxy vs local pi zai/glm-5.2)"
+        ],
+        "reasoning": "The report explicitly covers droid/factory/executor-dispatch integration points: it confirms absence of a direct droid/factory extension package, documents the GDDP executor wiring, and catalogs the extensions and config that touch executor/dispatch semantics plus the model-path coupling. Criterion satisfied."
+      }
+    ],
+    "overall_reasoning": "All four acceptance criteria for node-02-extensions-audit are satisfied by reports/02-extensions.md. The report is a 295-line artifact (the only file added in the node's commit ee7d22b) that addresses each criterion in a dedicated section: §3/§4/§7 enumerate config-enabled npm packages (7), agent extensions directory entries (33 files + 5 dirs), and lockfile deps with enabled/disabled state where discoverable; §5.1 explicitly flags the grok/xAI OAuth flow as the known-bug suspect and §5.2 lists the 3 directories missing loadable entrypoints with impact; §6 documents droid/factory/executor integration points (no direct droid package, GDDP executor argv wiring, 9 executor/dispatch-touching extensions, model-path coupling). Internal counts are consistent (33+5=38; 7 packages; 3 missing entrypoints). Constraints appear honored: the report's §10 method claims read-only inspection (manifests, loader discovery rules, pi --version/--help/list only, no extension code execution, no secrets logged), the deterministic forbidden-pattern scan found no violations, and the subject diff contains only the report file. The deterministic 'indeterminate' statuses resulted from keyword-scan limitations (scanning for the criterion words rather than the artifact), which the semantic review resolves. The four criteria were judged pass at high confidence; the only residual uncertainty is that the report's factual claims about the live VM (host khoj-38 inventory) cannot be independently re-verified from within this repo, though the criteria are content-presence criteria and the content is present, specific, and self-consistent.",
+    "risks": "1) Ground truth of the VM inventory (paths, versions, counts under /home/sab-mini/.pi/agent on host khoj-38) cannot be re-verified from this repo; the artifact is the report itself. Criteria are content-presence criteria, which the report satisfies, but a human spot-check of the live VM would confirm factual accuracy. 2) The report states it ran 'pi list' (a CLI listing command). This is consistent with reading manifests/config and does not execute extension code, but a strict literal reading of 'Do not load or execute extension code beyond reading manifests and config' could be questioned; the report explicitly disclaims running extension factories, OAuth, or model generations. 3) Depends_on node-01 is 'provisional' — node-02's §6.2 references node-01's GDDP argv findings; if node-01 is later revised, those specific claims may shift, though they are contextual rather than load-bearing for this node's criteria.",
+    "followup_candidates": "1) Human clarification: is running 'pi list' / 'pi --version' / 'pi --help' within the intended reading of 'Do not load or execute extension code beyond reading manifests and config'? The report treats it as acceptable (listing installed packages, not executing extension code); if the constraint was meant to forbid all CLI invocation, the node criteria should be updated and rerun. 2) Optional human spot-check: verify a sample of the report's VM facts (e.g., 33 .ts entries under ~/.pi/agent/extensions, 7 settings.packages entries, presence of herdr/, pi-tool-display/, subagent/ without entrypoints) against host khoj-38, since these are not verifiable from the repo alone. 3) Node-01 status is 'provisional'; node-02's §6.2 leans on node-01's GDDP_LOCAL_SUBPROCESS_ARGV / GDDP_DROID_SUBPROCESS_ARGV findings — confirm node-01 acceptance before treating node-02's executor-wiring section as fully grounded.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-05T01:20:59.907Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_53I8tLhOjXgN3ReDAaTS0578",
+          "command": "cd /tmp/gddp-eval-wt-td0rau4r && ls -la && git log --oneline -10 2>/dev/null; echo \"---\"; git status 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-05T01:20:59.908Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_GTzsQQIzZtuvDtEdL4Qd7427",
+          "path": "/tmp/gddp-eval-wt-td0rau4r/reports/02-extensions.md"
+        },
+        {
+          "ts": "2026-08-05T01:20:59.921Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_GTzsQQIzZtuvDtEdL4Qd7427",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T01:20:59.932Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_53I8tLhOjXgN3ReDAaTS0578",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T01:21:11.563Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_pnRT7tw13VIX8IoPchPQ3246",
+          "command": "cd /tmp/gddp-eval-wt-td0rau4r && git show --stat HEAD | head -20; echo \"---\"; wc -l reports/02-extensions.md; echo \"---\"; git show --stat HEAD~1 | head -10"
+        },
+        {
+          "ts": "2026-08-05T01:21:11.564Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_px7O539VQkNHOFu20O8t7204",
+          "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml"
+        },
+        {
+          "ts": "2026-08-05T01:21:11.564Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_tc6kkmjarzYXNvH7Fsbs8497",
+          "path": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-03-subagents-chains-audit.yaml"
+        },
+        {
+          "ts": "2026-08-05T01:21:11.571Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_px7O539VQkNHOFu20O8t7204",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T01:21:11.571Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_tc6kkmjarzYXNvH7Fsbs8497",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T01:21:11.582Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_pnRT7tw13VIX8IoPchPQ3246",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T01:21:13.496Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_NPqlIwtaBprTxlw5zhEr2485",
+          "command": "ls /home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/ 2>/dev/null; echo \"---\"; cat /home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-02-extensions-audit.yaml 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-05T01:21:13.508Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_NPqlIwtaBprTxlw5zhEr2485",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T01:21:25.352Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_MqXiVC9FLqm5tlnIZQtE3021",
+          "reason": "command matched blocked pattern",
+          "command": "cd /tmp/gddp-eval-wt-td0rau4r && awk '/^### 4.1/,/^### 4.2/' reports/02-extensions.md | grep -c '^| `' ; echo \"---npm table rows---\"; awk '/^## 3\\./,/^## 4\\./' reports/02-extensions.md | grep -c '^| `npm:'; echo \"---missing entrypoints rows---\"; awk '/^### 5.2/,/^### 5.3/' reports/02-extensions.md | grep -c '^| `extensions/'; echo \"---integration executor rows---\"; awk '/^### 6.3/,/^### 6.4/' reports/02-extensions.md | grep -c '^| `'",
+          "pattern": "\\b(?:curl|wget|ssh|scp|sftp|rsync|nc|netcat|telnet|ftp|pip|npm|pnpm|yarn|brew)\\b"
+        },
+        {
+          "ts": "2026-08-05T01:21:25.353Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_MqXiVC9FLqm5tlnIZQtE3021",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-05T01:21:28.014Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_r2TaiqODBvk7YjnVtp9c0695",
+          "command": "cd /tmp/gddp-eval-wt-td0rau4r && awk '/^### 4.1/,/^### 4.2/' reports/02-extensions.md | grep -c '^| `'; echo \"---section3 table rows---\"; awk '/^## 3\\./,/^## 4\\./' reports/02-extensions.md | grep -c '^| `'; echo \"---missing entrypoints rows---\"; awk '/^### 5.2/,/^### 5.3/' reports/02-extensions.md | grep -c '^| `extensions/'; echo \"---6.3 rows---\"; awk '/^### 6.3/,/^### 6.4/' reports/02-extensions.md | grep -c '^| `'"
+        },
+        {
+          "ts": "2026-08-05T01:21:28.031Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_r2TaiqODBvk7YjnVtp9c0695",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-05T01:21:54.991Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_hK4C6oqQ5MnrYnYQqVzf4728",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All four acceptance criteria for node-02-extensions-audit are satisfied by reports/02-extensions.md. The report is a 295-line artifact (the only file added in the node's commit ee7d22b) that addresses each criterion in a dedicated section: §3/§4/§7 enumerate config-enabled npm packages (7), agent extensions directory entries (33 files + 5 dirs), and lockfile deps with enabled/disabled state where discoverable; §5.1 explicitly flags the grok/xAI OAuth flow as the known-bug suspect and §5.2 lists the 3 directories missing loadable entrypoints with impact; §6 documents droid/factory/executor integration points (no direct droid package, GDDP executor argv wiring, 9 executor/dispatch-touching extensions, model-path coupling). Internal counts are consistent (33+5=38; 7 packages; 3 missing entrypoints). Constraints appear honored: the report's §10 method claims read-only inspection (manifests, loader discovery rules, pi --version/--help/list only, no extension code execution, no secrets logged), the deterministic forbidden-pattern scan found no violations, and the subject diff contains only the report file. The deterministic 'indeterminate' statuses resulted from keyword-scan limitations (scanning for the criterion words rather than the artifact), which the semantic review resolves. The four criteria were judged pass at high confidence; the only residual uncertainty is that the report's factual claims about the live VM (host khoj-38 inventory) cannot be independently re-verified from within this repo, though the criteria are content-presence criteria and the content is present, specific, and self-consistent.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-05T01:22:35.233216+00:00",
+  "evaluated_tree_sha": "c9928b9481408cd87d148e7045aee72fd6557e5d",
+  "evaluated_commit_sha": "ee7d22b064ccb5bb6f696ffed4aec7de6e9be200",
+  "merge_commit_sha": "ee7d22b064ccb5bb6f696ffed4aec7de6e9be200",
+  "expected_base_commit_sha": "4345bd80cdbafcaedc9738a35586f1ca2e368abe",
+  "pr_ref": null,
+  "job_id": "job_20260805T0113351919fea6b6ef8a",
+  "canonical_context": {
+    "readme": "UNAVAILABLE: /tmp/gddp-eval-wt-td0rau4r/README.md does not exist",
+    "project_brief": "UNAVAILABLE: /tmp/gddp-eval-wt-td0rau4r/PROJECT-BRIEF.md does not exist",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml",
+    "neighbor:node-01-entrypoints-audit": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml",
+    "neighbor:node-03-subagents-chains-audit": "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-03-subagents-chains-audit.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "low",
+      "offered": 2,
+      "content_accessed": 2,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml",
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-03-subagents-chains-audit.yaml"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "low",
+      "offered": 2,
+      "content_accessed": 2,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-01-entrypoints-audit.yaml",
+        "/home/sab-mini/gddp-config/graphs/vm-harness-audit/nodes/node-03-subagents-chains-audit.yaml"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "low"
+  }
+}

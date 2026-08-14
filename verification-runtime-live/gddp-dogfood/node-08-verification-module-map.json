@@ -1,0 +1,705 @@
+{
+  "project_id": "gddp-dogfood",
+  "node_id": "node-08-verification-module-map",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.92,
+    "findings": [],
+    "reasoning": "Fresh-eyes review of node-08-verification-module-map. Intent: the node's why is that the two-lane evaluator is the trust core and a module map makes its shape reviewable at a glance; the produced report is precisely that — a complete inventory of all 48 non-cache files under scripts/runtime/verification/ with one-line purposes, plus a deterministic+semantic lane-flow section explaining where verdicts combine (integrity_combiner.combine). I spot-checked the report's architectural claims against the code and they hold: orchestrator.verify is the single entry with _should_run_semantic gating and integrity_harness wiring; decision_engine.MATRIX has exactly 12 rows; _INTEGRITY_FLOOR and the severity order match the report's tables verbatim; bridge.verify_job_return, retry_budget.should_retry, receipt_sink.write_receipt exist; PiHarnessRunner (gddp_verifier.ts) and IntegrityHarnessRunner (gddp_integrity.ts) exist; inventory counts sum to the find total of 48. The quoted pytest tail (4 failed, 622 passed) is plausible — the four cited failing tests exist and flask is genuinely missing, matching the cited ModuleNotFoundError. Graph integrity: depends_on and unlocks are both empty, so no edges are at risk; the subject diff is exactly one added file (223 insertions, no other changes, clean worktree, no pycache/junk committed), honoring the 'create only the report / read-only elsewhere' constraints. No writes to graph truth or canon. Nothing floors to human review; lane-1 criteria adjudication is out of my scope, but from an integrity standpoint the change preserves the node's role and the graph's structure fully.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-11T06:15:05.173Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_tLksyaAj9ESTAj11X2V20295",
+        "command": "cd /tmp/gddp-eval-wt-v1f6go_m && ls -la && echo \"---\" && cat PROJECT-BRIEF.md 2>/dev/null | head -100 && echo \"---README---\" && head -50 README.md 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-11T06:15:05.175Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_39sObu89JMYEblMgLKUO0743",
+        "command": "ls -la /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/ 2>/dev/null && echo \"---\" && ls -la /home/sab-mini/gddp-config/graphs/gddp-dogfood/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-11T06:15:05.199Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_tLksyaAj9ESTAj11X2V20295",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:15:05.200Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_39sObu89JMYEblMgLKUO0743",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:15:07.448Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_jsnF4xl0vrFV9Swhg2Kg9730",
+        "command": "cat /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-08-verification-module-map.yaml"
+      },
+      {
+        "ts": "2026-08-11T06:15:07.449Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_8qI0maBxe3IFd6kuC9G98278",
+        "command": "cat /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-09-heartbeat-module-map.yaml /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-10-agents-md-drift-report.yaml /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-07-hook-surface.yaml"
+      },
+      {
+        "ts": "2026-08-11T06:15:07.459Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_jsnF4xl0vrFV9Swhg2Kg9730",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:15:07.461Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_8qI0maBxe3IFd6kuC9G98278",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:15:09.729Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_oQi9EAZdrLsXwWefdxSi5485",
+        "command": "cd /tmp/gddp-eval-wt-v1f6go_m && ls -la reports/ reports/gddp-dogfood/ 2>/dev/null && echo \"===REPORT===\" && cat reports/gddp-dogfood/08-verification-module-map.md"
+      },
+      {
+        "ts": "2026-08-11T06:15:09.729Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_MmswPckUZ5BxBFVWZ3j58785",
+        "command": "cd /tmp/gddp-eval-wt-v1f6go_m && find scripts/runtime/verification -type f 2>/dev/null | head -50 && echo \"---\" && ls scripts/runtime/ 2>/dev/null && echo \"---git---\" && cat .git && echo \"---\" && git log --oneline -5 2>/dev/null && git status --short 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-11T06:15:09.742Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_oQi9EAZdrLsXwWefdxSi5485",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:15:09.758Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_MmswPckUZ5BxBFVWZ3j58785",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:15:29.049Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_dK37CBtlsvvHCu5Fe92O2091",
+        "command": "cd /tmp/gddp-eval-wt-v1f6go_m && cat /home/sab-mini/gddp-config/graphs/gddp-dogfood/project.yaml && echo \"===DIFF STAT===\" && git diff --stat 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61 637f1c57565459e16fdd7e39e5a9735ff68ca2db && echo \"===FULL DIFF NAME-STATUS===\" && git diff --name-status 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61 637f1c57565459e16fdd7e39e5a9735ff68ca2db"
+      },
+      {
+        "ts": "2026-08-11T06:15:29.049Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_enUHOqPdC7eNqB2Rkl5o8404",
+        "command": "cd /tmp/gddp-eval-wt-v1f6go_m && echo \"===count all files incl hidden===\" && find scripts/runtime/verification -type f | sort | wc -l && find scripts/runtime/verification -type f ! -path '*/__pycache__/*' ! -name '*.pyc' | sort | wc -l && echo \"===hidden/cache files===\" && find scripts/runtime/verification -type f \\( -path '*/__pycache__/*' -o -name '*.pyc' \\) | sort && echo \"===any other untracked/modified in worktree===\" && git status --porcelain | head -40"
+      },
+      {
+        "ts": "2026-08-11T06:15:29.068Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_dK37CBtlsvvHCu5Fe92O2091",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:15:29.081Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_enUHOqPdC7eNqB2Rkl5o8404",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:15:34.126Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_XfCwpph6qSwfZyDJ3Py97389",
+        "command": "cd /tmp/gddp-eval-wt-v1f6go_m/scripts/runtime/verification && echo \"===orchestrator head===\" && grep -n \"def verify\\|_should_run_semantic\\|integrity_harness\\|VerdictReceipt\" orchestrator.py | head -20 && echo \"===decision_engine===\" && grep -n \"MATRIX\\|def decide\" decision_engine.py | head -10 && echo \"===integrity_combiner===\" && grep -n \"_INTEGRITY_FLOOR\\|def combine\\|worse\" integrity_combiner.py | head -10 && echo \"===bridge===\" && grep -n \"def verify_job_return\\|def \\w\" bridge.py | head -10 && echo \"===retry_budget===\" && grep -n \"def should_retry\" retry_budget.py && echo \"===receipt_sink===\" && grep -n \"def write_receipt\\|def receipt\" receipt_sink.py | head"
+      },
+      {
+        "ts": "2026-08-11T06:15:34.126Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_fYqz2QSWCWXq27oNr6be2312",
+        "command": "cd /tmp/gddp-eval-wt-v1f6go_m/scripts/runtime/verification && echo \"===pi_runner===\" && grep -n \"gddp_verifier\\|def run\\|PiHarnessRunner\\|class \" semantic/pi_runner.py | head && echo \"===integrity_runner===\" && grep -n \"gddp_integrity\\|class \\|def run\" semantic/integrity_runner.py | head && echo \"===schemas===\" && grep -n \"VerdictReceipt\\|class Verdict\\|class DeterministicResult\\|class SemanticOutput\\|class IntegrityOutput\" schemas.py | head -15 && echo \"===pytest tail sanity: failing tests exist?===\" && ls /tmp/gddp-eval-wt-v1f6go_m/deploy/rig1-heartbeat/test_rig1_render_plist.py /tmp/gddp-eval-wt-v1f6go_m/scripts/test_intake_server.py /tmp/gddp-eval-wt-v1f6go_m/scripts/test_intake_webhook_roundtrip.py 2>&1"
+      },
+      {
+        "ts": "2026-08-11T06:15:34.151Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_fYqz2QSWCWXq27oNr6be2312",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:15:34.153Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_XfCwpph6qSwfZyDJ3Py97389",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:15:40.802Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_C19p3oeowslRla9kTae50186",
+        "command": "cd /tmp/gddp-eval-wt-v1f6go_m/scripts/runtime/verification && echo \"===MATRIX rows===\" && sed -n '331,436p' decision_engine.py | grep -c \"_MatrixRow(\\|(\" && echo \"--- row headers ---\" && grep -n \"name=\\|_MatrixRow(\" decision_engine.py | sed -n '1,30p' && echo \"===FLOOR===\" && sed -n '20,40p' integrity_combiner.py"
+      },
+      {
+        "ts": "2026-08-11T06:15:40.802Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_i1M8YYaK3TJ3LYKqvWbr0151",
+        "command": "cd /tmp/gddp-eval-wt-v1f6go_m && python3 -c \"import flask\" 2>&1 | tail -1; echo \"---\"; python3 -c \"\nimport ast, pathlib\n# count _MatrixRow entries\nsrc = pathlib.Path('scripts/runtime/verification/decision_engine.py').read_text()\ntree = ast.parse(src)\nfor node in ast.walk(tree):\n    if isinstance(node, ast.Assign):\n        for t in node.targets:\n            if isinstance(t, ast.Name) and t.id == 'MATRIX':\n                if isinstance(node.value, ast.List):\n                    print('MATRIX rows:', len(node.value.elts))\n\""
+      },
+      {
+        "ts": "2026-08-11T06:15:40.819Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_C19p3oeowslRla9kTae50186",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:15:40.904Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_i1M8YYaK3TJ3LYKqvWbr0151",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T06:16:04.687Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_FhlKwi8n8nRZabjCuFPD2313",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "Nodes 09 and 10 are ready report-only siblings with identical constraints and will each re-run and quote the same pytest tail ('4 failed, 622 passed' while flask is missing). Expect the same four failures to appear in their reports; treat as consistent tranche evidence, not per-node drift. Sequential dispatch (max_concurrent_jobs: 1) means no overlap risk.",
+        "affected_node_ids": [
+          "node-09-heartbeat-module-map",
+          "node-10-agents-md-drift-report"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "This report pins exact internals (12-row matrix, combiner floors) that will drift as the runtime evolves. That is inherent to a point-in-time module map and matches T1's report-only canary purpose; node-10's AGENTS.md drift report is the designated mechanism for catching doctrine drift going forward.",
+        "affected_node_ids": [
+          "node-08-verification-module-map",
+          "node-10-agents-md-drift-report"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9666666666666667,
+  "criteria_confidence": 0.9666666666666667,
+  "completeness": 1.0,
+  "graph_readiness": 0.9666666666666667,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "report-exists",
+        "criterion": "reports/gddp-dogfood/08-verification-module-map.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "verification\\-module\\-map -> line 1: 'verification-module-map'"
+        ],
+        "reasoning": "Scanned source files (reports/gddp-dogfood/08-verification-module-map.md) for identifiers named in the criterion (gddp-dogfood, verification-module-map, non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "all-modules",
+        "criterion": "every module under scripts/runtime/verification/ is listed with a one-line purpose",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...) for identifiers named in the criterion (one-line). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "lane-flow",
+        "criterion": "report describes the deterministic + semantic lane flow and where verdicts combine",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create only reports/gddp-dogfood/08-verification-module-map.md",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Read-only outside that report path",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Run python3 -m pytest -q before finishing and quote its tail line in the report",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/gddp-dogfood/08-verification-module-map.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+      "tip": "637f1c57565459e16fdd7e39e5a9735ff68ca2db",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/gddp-dogfood/08-verification-module-map.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.98,
+        "evidence": [
+          "reports/gddp-dogfood/08-verification-module-map.md read: 223-line report with lane-flow diagram, stage tables, module inventory, validation section",
+          "subject_diff shows single added file reports/gddp-dogfood/08-verification-module-map.md (git show --stat 7d7e738: 223 insertions)"
+        ],
+        "reasoning": "The file exists and is clearly non-empty: it contains a full lane-flow description, module inventory tables, a combiner-floor table, and a validation section. No ambiguity."
+      },
+      {
+        "criterion_id": "all-modules",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "find scripts/runtime/verification -type f ! -path '*/__pycache__/*' ! -name '*.pyc' | sort → 48 files, each independently matched to a row in the report's inventory tables",
+          "Report's completeness check counts 9 package-root + 12 package-root tests + 6 deterministic + 13 semantic + 3 pi_harness TS + 3 shape_profiles + 2 fixtures = 48; verified identical to filesystem listing"
+        ],
+        "reasoning": "Every file under scripts/runtime/verification/ (48 non-cache files) appears in the report with a one-line purpose in a table row. Cross-checked file-by-file against the filesystem; no omissions, no phantom entries, counts and grouping match exactly. __pycache__/*.pyc are build artifacts, reasonably excluded and disclosed as such."
+      },
+      {
+        "criterion_id": "lane-flow",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "Report section 'Lane flow (deterministic + semantic → combined verdict)' with ASCII diagram: deterministic.assemble → semantic criteria lane (gated by _should_run_semantic) → decision_engine.decide (12-row MATRIX) → integrity_harness → integrity_combiner.combine marked '★ verdicts combine HERE' → VerdictReceipt → receipt_sink.write_receipt",
+          "Code spot-checks: def assemble (deterministic/__init__.py:72), def verify (orchestrator.py:16), def verify_job_return (bridge.py:48), def main (cli.py:300), MATRIX has exactly 12 _MatrixRow( entries (decision_engine.py:331), _should_run_semantic gate logic matches diagram verbatim (orchestrator.py:167-175), _INTEGRITY_FLOOR table matches code (integrity_combiner.py:30-38), PiHarnessRunner/IntegrityHarnessRunner exist, gddp_verifier.ts registers submit_verdict → $GDDP_VERDICT_OUT"
+        ],
+        "reasoning": "The report explicitly describes the deterministic lane, the semantic criteria lane, the gating condition for when semantic runs, the 12-row decision matrix where criteria verdict is chosen, the integrity lane, and states precisely where verdicts combine (integrity_combiner.combine, worse-of floor). Every factual claim about the code I checked is accurate, so the map is truthful and reviewable at a glance, matching the node's stated why."
+      }
+    ],
+    "overall_reasoning": "All three acceptance criteria are satisfied with high confidence. The report exists and is substantial (223 lines). Its module inventory was verified file-by-file against the filesystem: all 48 non-cache files under scripts/runtime/verification/ are listed with one-line purposes, and the report's grouping counts (9+12+6+13+3+3+2) reconcile exactly with the actual tree. The lane-flow description is accurate to the code: deterministic.assemble → semantic lane gated by _should_run_semantic → 12-row decision_engine.MATRIX → integrity harness → integrity_combiner.combine (marked as the point where verdicts combine) → VerdictReceipt; all entry points (orchestrator.verify, bridge.verify_job_return, cli.main), the _INTEGRITY_FLOOR table, and the pi-harness TS extensions were confirmed against source. Constraints also appear honored: the subject diff contains only the report file, work is committed on the node result ref (GDDP-Node-Id trailer + result wrapper commit), and the report quotes a pytest tail line consistent with the observed environment (flask genuinely absent, matching the 4 cited failures) — though the exact pytest numbers could not be re-run in this sandbox because pytest's interpreter is broken here, which is a constraint-completeness note, not an acceptance-criterion issue.",
+    "risks": "The pytest tail line '4 failed, 622 passed in 36.86s' could not be independently reproduced: the eval sandbox has no working pytest interpreter (/usr/bin/python3 lacks _pytest; system python3 lacks the module). Environment evidence (flask missing; the four named test files exist) is consistent with the report's claim, but exact pass/fail counts are unverified. This concerns the 'run pytest and quote tail line' constraint, which is not among the three acceptance criteria and does not affect the criteria verdict.",
+    "followup_candidates": "Observed: the report quotes pytest tail line '4 failed, 622 passed in 36.86s' with 4 flask-related failures; the eval sandbox cannot reproduce the run (pytest interpreter broken here). This is constraint evidence, not an acceptance criterion, so it was not counted toward the verdict. If exact reproduction of the pytest run is desired as node evidence, confirm the executor's environment had flask installed per requirements.txt and rerun in a matching environment; otherwise this verdict stands on the three stated criteria.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-11T06:13:45.762Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_rCp5Cm09Ig6ACCKZLhKB0430",
+          "path": "/tmp/gddp-eval-wt-v1f6go_m/reports/gddp-dogfood/08-verification-module-map.md"
+        },
+        {
+          "ts": "2026-08-11T06:13:45.763Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_e5BIUNWciRhE5vFTvw3n4277",
+          "path": "/tmp/gddp-eval-wt-v1f6go_m/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-11T06:13:45.763Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_tSjuZbPWTqv9IiftHYkz7945",
+          "path": "/tmp/gddp-eval-wt-v1f6go_m/README.md"
+        },
+        {
+          "ts": "2026-08-11T06:13:45.770Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_rCp5Cm09Ig6ACCKZLhKB0430",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:13:45.771Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_e5BIUNWciRhE5vFTvw3n4277",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:13:45.771Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_tSjuZbPWTqv9IiftHYkz7945",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:13:49.295Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_N3ju2MvY8i0PiW1l5vMG2633",
+          "command": "cd /tmp/gddp-eval-wt-v1f6go_m && find scripts/runtime/verification -type f ! -path '*/__pycache__/*' ! -name '*.pyc' | sort"
+        },
+        {
+          "ts": "2026-08-11T06:13:49.297Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_1GKZlPICXpShQsFSBr0r5421",
+          "command": "cd /tmp/gddp-eval-wt-v1f6go_m && find scripts/runtime/verification -type f ! -path '*/__pycache__/*' ! -name '*.pyc' | wc -l && git log --oneline -5 && git status --short | head -20"
+        },
+        {
+          "ts": "2026-08-11T06:13:49.315Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_N3ju2MvY8i0PiW1l5vMG2633",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:13:49.364Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_1GKZlPICXpShQsFSBr0r5421",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:14:01.352Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_syGo1T3HxVwhOhlATcVf5528",
+          "command": "cd /tmp/gddp-eval-wt-v1f6go_m && grep -n \"def verify\" scripts/runtime/verification/orchestrator.py | head -5; grep -n \"def verify_job_return\\|verify_job_return\" scripts/runtime/verification/bridge.py | head -5; grep -n \"MATRIX\" scripts/runtime/verification/decision_engine.py | head -5"
+        },
+        {
+          "ts": "2026-08-11T06:14:01.353Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_DfQ3H1NcrjNSAvLmOBaf9373",
+          "command": "cd /tmp/gddp-eval-wt-v1f6go_m && grep -n \"_INTEGRITY_FLOOR\" scripts/runtime/verification/integrity_combiner.py | head -5; grep -n \"class IntegrityHarnessRunner\\|class PiHarnessRunner\" -r scripts/runtime/verification/semantic/*.py; grep -rn \"PiHarnessRunner\\|IntegrityHarnessRunner\" scripts/runtime/verification/orchestrator.py | head -10"
+        },
+        {
+          "ts": "2026-08-11T06:14:01.375Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_syGo1T3HxVwhOhlATcVf5528",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:14:01.376Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_DfQ3H1NcrjNSAvLmOBaf9373",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:14:04.758Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_PMUosmoF7Qgv14pIuEDe5583",
+          "command": "cd /tmp/gddp-eval-wt-v1f6go_m && sed -n '331,400p' scripts/runtime/verification/decision_engine.py | grep -c \"_MatrixRow(\" ; echo \"---floor---\"; sed -n '25,60p' scripts/runtime/verification/integrity_combiner.py"
+        },
+        {
+          "ts": "2026-08-11T06:14:04.758Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ViFTiZ7szYrSFcNbzQsd4161",
+          "command": "cd /tmp/gddp-eval-wt-v1f6go_m && grep -n \"class VerdictReceipt\\|class SemanticOutput\\|class IntegrityOutput\\|class DeterministicResult\" scripts/runtime/verification/schemas.py | head; grep -n \"def combine\\|def decide\\|def should_retry\\|def write_receipt\\|def write\" scripts/runtime/verification/integrity_combiner.py scripts/runtime/verification/decision_engine.py scripts/runtime/verification/retry_budget.py scripts/runtime/verification/receipt_sink.py | head -12"
+        },
+        {
+          "ts": "2026-08-11T06:14:04.777Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_PMUosmoF7Qgv14pIuEDe5583",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:14:04.780Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ViFTiZ7szYrSFcNbzQsd4161",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:14:08.127Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_BRS95ut99WxqgkgZHcCy3815",
+          "command": "cd /tmp/gddp-eval-wt-v1f6go_m && awk '/MATRIX: list\\[_MatrixRow\\]/,/^\\]/' scripts/runtime/verification/decision_engine.py | grep -c \"_MatrixRow(\""
+        },
+        {
+          "ts": "2026-08-11T06:14:08.127Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_YZ2nCvRqOVl6umFmCvyu3215",
+          "command": "cd /tmp/gddp-eval-wt-v1f6go_m && grep -n \"integrity_harness\\|_should_run_semantic\\|semantic_harness\" scripts/runtime/verification/orchestrator.py | head -15"
+        },
+        {
+          "ts": "2026-08-11T06:14:08.140Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_BRS95ut99WxqgkgZHcCy3815",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:14:08.143Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_YZ2nCvRqOVl6umFmCvyu3215",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:14:13.357Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Qy0ixmTRQaMskzx20kKK6862",
+          "command": "cd /tmp/gddp-eval-wt-v1f6go_m && timeout 180 python3 -m pytest -q 2>&1 | tail -5"
+        },
+        {
+          "ts": "2026-08-11T06:14:13.357Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_1iQF5uUxgFxljnG2NhtC1718",
+          "command": "cd /tmp/gddp-eval-wt-v1f6go_m && grep -n \"submit_verdict\\|GDDP_VERDICT_OUT\\|GDDP_INTEGRITY_OUT\\|GDDP_TOOL_TRACE\" scripts/runtime/verification/semantic/pi_harness/gddp_verifier.ts scripts/runtime/verification/semantic/pi_harness/gddp_integrity.ts scripts/runtime/verification/semantic/pi_harness/gddp_verifier_guard.ts | head -12"
+        },
+        {
+          "ts": "2026-08-11T06:14:13.373Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_1iQF5uUxgFxljnG2NhtC1718",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:14:13.394Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Qy0ixmTRQaMskzx20kKK6862",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:14:15.660Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_gEoemN1yaAnLtpPXj9QO2205",
+          "command": "cd /tmp/gddp-eval-wt-v1f6go_m && ls -d .venv venv 2>/dev/null; ls .venv/bin/pytest 2>/dev/null; which pytest 2>/dev/null; ls /tmp/gddp-eval-wt-v1f6go_m | head -30"
+        },
+        {
+          "ts": "2026-08-11T06:14:15.675Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_gEoemN1yaAnLtpPXj9QO2205",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:14:17.720Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_HsZYvSeUA5LgNMWi9MZt0419",
+          "command": "cd /tmp/gddp-eval-wt-v1f6go_m && timeout 240 /home/sab-mini/.local/bin/pytest -q 2>&1 | tail -8"
+        },
+        {
+          "ts": "2026-08-11T06:14:17.776Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_HsZYvSeUA5LgNMWi9MZt0419",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:14:20.104Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_6f5k3qbJFclZn71AHOii4991",
+          "reason": "command matched blocked pattern",
+          "command": "head -3 /home/sab-mini/.local/bin/pytest; echo ---; ls /home/sab-mini/.local/lib/python*/site-packages 2>/dev/null | grep -i pytest | head; echo ---; pip list 2>/dev/null | grep -i pytest; python3 --version",
+          "pattern": "\\b(?:curl|wget|ssh|scp|sftp|rsync|nc|netcat|telnet|ftp|pip|npm|pnpm|yarn|brew)\\b"
+        },
+        {
+          "ts": "2026-08-11T06:14:20.105Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_6f5k3qbJFclZn71AHOii4991",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T06:14:21.854Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_X2toOym40ZGQqqZZQL135956",
+          "command": "head -3 /home/sab-mini/.local/bin/pytest; echo ---; ls /home/sab-mini/.local/lib/ 2>/dev/null; python3 --version"
+        },
+        {
+          "ts": "2026-08-11T06:14:21.866Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_X2toOym40ZGQqqZZQL135956",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:14:29.282Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_l6rH0wmofbSa602uXFzT2709",
+          "command": "python3 -c \"import flask\" 2>&1 | tail -1; echo ---; ls scripts/test_intake_server.py scripts/test_intake_webhook_roundtrip.py deploy/rig1-heartbeat/test_rig1_render_plist.py 2>&1"
+        },
+        {
+          "ts": "2026-08-11T06:14:29.282Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_S9edK7PhZLVk3BPSJwlq7862",
+          "command": "cd /tmp/gddp-eval-wt-v1f6go_m && git show --stat 637f1c5 | head -15; echo ===; git show --stat 7d7e738 | head -20"
+        },
+        {
+          "ts": "2026-08-11T06:14:29.304Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_S9edK7PhZLVk3BPSJwlq7862",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:14:29.335Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_l6rH0wmofbSa602uXFzT2709",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:14:36.764Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_GUVxIlFyCdqK9QLcoxN01493",
+          "command": "cd /tmp/gddp-eval-wt-v1f6go_m && grep -n \"def assemble\" scripts/runtime/verification/deterministic/__init__.py; grep -n \"def main\\|def run\\|__main__\" scripts/runtime/verification/cli.py | head -5; echo ---; sed -n '160,200p' scripts/runtime/verification/orchestrator.py"
+        },
+        {
+          "ts": "2026-08-11T06:14:36.780Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_GUVxIlFyCdqK9QLcoxN01493",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T06:15:00.336Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_iyDkuEdWnjKqEKqsIJ4R3482",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All three acceptance criteria are satisfied with high confidence. The report exists and is substantial (223 lines). Its module inventory was verified file-by-file against the filesystem: all 48 non-cache files under scripts/runtime/verification/ are listed with one-line purposes, and the report's grouping counts (9+12+6+13+3+3+2) reconcile exactly with the actual tree. The lane-flow description is accurate to the code: deterministic.assemble → semantic lane gated by _should_run_semantic → 12-row decision_engine.MATRIX → integrity harness → integrity_combiner.combine (marked as the point where verdicts combine) → VerdictReceipt; all entry points (orchestrator.verify, bridge.verify_job_return, cli.main), the _INTEGRITY_FLOOR table, and the pi-harness TS extensions were confirmed against source. Constraints also appear honored: the subject diff contains only the report file, work is committed on the node result ref (GDDP-Node-Id trailer + result wrapper commit), and the report quotes a pytest tail line consistent with the observed environment (flask genuinely absent, matching the 4 cited failures) — though the exact pytest numbers could not be re-run in this sandbox because pytest's interpreter is broken here, which is a constraint-completeness note, not an acceptance-criterion issue.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-11T06:16:04.715725+00:00",
+  "evaluated_tree_sha": "a44328029eb4eeadb35ec9274c073fc1fb8c681b",
+  "evaluated_commit_sha": "637f1c57565459e16fdd7e39e5a9735ff68ca2db",
+  "merge_commit_sha": "637f1c57565459e16fdd7e39e5a9735ff68ca2db",
+  "expected_base_commit_sha": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+  "pr_ref": null,
+  "job_id": "job_20260811T06082275a3b5ff60607b",
+  "execution_attempt_id": "job_20260811T06082275a3b5ff60607b:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-v1f6go_m/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-v1f6go_m/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-v1f6go_m/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-v1f6go_m/README.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+      ]
+    },
+    "integrity": {
+      "rating": "none",
+      "offered": 3,
+      "content_accessed": 0,
+      "not_observed": 3,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-v1f6go_m/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-v1f6go_m/README.md"
+      ]
+    },
+    "overall": "none"
+  }
+}

@@ -1,0 +1,195 @@
+schema_type: node_evaluations
+schema_version: '1.0'
+project_id: pi-harness-hygiene
+generated_at: '2026-08-14T21:05:48Z'
+source: gddp-runtime db/queue.db (results + decision_results)
+evaluations:
+  node-01-extension-noise-cleanup:
+    verdict: pass
+    evaluated_at: '2026-08-06T17:55:44.285718+00:00'
+    executor: droid
+    job_id: job_20260806T17462778b39df39d3677
+    result_id: res_ses_20260806T1746277867d7ca4c72fc
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/pi-harness-hygiene/node-01-extension-noise-cleanup/job_20260806T17462778b39df39d3677-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The work under review is minimal, in-scope, and fully verified at the blob level.
+      Base commit 649aa13 contained exactly three tracked files in the three target dirs (herdr/mux.ts,
+      subagent/config.json, pi-tool-display/ARCHIVED.md); tip commit e87760f holds the identical blobs
+      at agent/archive/extensions/<dir>/<file> (R100 renames, byte-for-byte intact, sha-256 confirmed
+      against the report). The complete base→tip diff is 3 renames + 1 added report — nothing outside
+      agent/extensions/, agent/archive/extensions/, and reports/ was touched; settings.json and package
+      config are untouched (the subagent/config.json hit is the in-scope renamed file itself). The three
+      dirs are gone from agent/extensions/ while herdr-boss/ and herdr-room/ (which have index.ts entrypoints)
+      were correctly left under auto-load. The required artifact exists, lists what moved where with content
+      hashes, and embeds post-move pi --version/pi list output exiting 0 — matching the promised verification
+      evidence. The herdr-agent-state.ts criterion is stale in this snapshot (absent in base, no deletion
+      in diff; the report documents this transparently), which is a caveat for the human gate, not harm
+      from the change. Graph integrity holds: node-01 has depends_on:[]/unlocks:[] and node-02-chain-pin-repair
+      owns a disjoint subtree (agent/chains/, settings.json read) that this diff never touches; reports
+      land at distinct paths; the result commit exists on the result ref with a clean working tree. The
+      node''s intended role — archive the three entrypoint-less dirs out of auto-load into agent/archive/
+      with content recoverable, touching nothing else — is preserved exactly.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/pi-harness-hygiene/node-01-extension-noise-cleanup/job_20260806T17462778b39df39d3677-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 8bd7fab2e93b421111a049c4e4727ec87603a506
+      evaluated_commit_sha: e87760f3f15718b06545d14e649b6ed732dc2e7f
+      merge_commit_sha: e87760f3f15718b06545d14e649b6ed732dc2e7f
+      context_coverage:
+        criteria: none
+        integrity: low
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings:
+        - severity: low
+          summary: Acceptance criterion 'local-file-preserved' names agent/extensions/herdr-agent-state.ts,
+            which does not exist in the base commit, the tip commit, or the working tree; the diff contains
+            no deletion of it. The report documents this honestly (satisfied vacuously). Since the criterion's
+            'real local file' phrasing suggests it may exist untracked in the real ~/.pi checkout, the
+            human at the review gate should confirm that file's continued presence there — the eval snapshot
+            cannot see untracked files. This is a criterion/checkout mismatch, not a defect introduced
+            by the change.
+          affected_node_ids:
+          - node-01-extension-noise-cleanup
+        reasoning: 'The work under review is minimal, in-scope, and fully verified at the blob level.
+          Base commit 649aa13 contained exactly three tracked files in the three target dirs (herdr/mux.ts,
+          subagent/config.json, pi-tool-display/ARCHIVED.md); tip commit e87760f holds the identical blobs
+          at agent/archive/extensions/<dir>/<file> (R100 renames, byte-for-byte intact, sha-256 confirmed
+          against the report). The complete base→tip diff is 3 renames + 1 added report — nothing outside
+          agent/extensions/, agent/archive/extensions/, and reports/ was touched; settings.json and package
+          config are untouched (the subagent/config.json hit is the in-scope renamed file itself). The
+          three dirs are gone from agent/extensions/ while herdr-boss/ and herdr-room/ (which have index.ts
+          entrypoints) were correctly left under auto-load. The required artifact exists, lists what moved
+          where with content hashes, and embeds post-move pi --version/pi list output exiting 0 — matching
+          the promised verification evidence. The herdr-agent-state.ts criterion is stale in this snapshot
+          (absent in base, no deletion in diff; the report documents this transparently), which is a caveat
+          for the human gate, not harm from the change. Graph integrity holds: node-01 has depends_on:[]/unlocks:[]
+          and node-02-chain-pin-repair owns a disjoint subtree (agent/chains/, settings.json read) that
+          this diff never touches; reports land at distinct paths; the result commit exists on the result
+          ref with a clean working tree. The node''s intended role — archive the three entrypoint-less
+          dirs out of auto-load into agent/archive/ with content recoverable, touching nothing else —
+          is preserved exactly.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Both nodes converge at the human review gate before any sync decision; node-01's result
+            ref is fully self-contained (moves + hashes + pi verification output embedded in the report),
+            so the gate can assess node-01 independently of node-02. No shared-state risk between the
+            two concurrent nodes — node-01 touches only agent/extensions/ and agent/archive/extensions/,
+            node-02 only agent/chains/ plus a read of settings.json, which node-01's diff leaves untouched.
+          affected_node_ids:
+          - node-01-extension-noise-cleanup
+          - node-02-chain-pin-repair
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+  node-02-chain-pin-repair:
+    verdict: pass
+    evaluated_at: '2026-08-06T18:04:52.719761+00:00'
+    executor: droid
+    job_id: job_20260806T17462778ff5f449ee0fd
+    result_id: res_ses_20260806T17462778a460d15b8f80
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/pi-harness-hygiene/node-02-chain-pin-repair/job_20260806T17462778ff5f449ee0fd-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes integrity review of node-02-chain-pin-repair. The node''s intended role:
+      repair every dead model pin in agent/chains/*.chain.json to the closest doctrine-equivalent model
+      present in settings.json enabledModels, changing nothing else, and report the work. The diff (base
+      649aa13 -> tip 1fc7b6e) is exactly 5 files: 4 chain JSONs with only ''model'' value substitutions
+      (14 changed lines, all model lines, 0 structural/step/agent/order changes) plus reports/node-02-chain-pin-repair.md
+      (the required artifact). I verified against the live enabledModels at /Users/sab-mini/.pi/agent/settings.json
+      (39 entries) that all 15 pins across 19 chain files are members (0 dead), that the three replacement
+      ids (xai/grok-4.5, xai/grok-build-0.1, openai-codex/gpt-5.6-sol) appear verbatim in that set, that
+      all chain files parse as JSON, and that the report''s before->after table matches the actual diff
+      exactly (7 substitutions across 4 files, with one-line rationales). The node''s ''why'' candidate
+      list was verified rather than trusted, and one additional dead pin (grok-cli/grok-4.5 in dual-builder-implement)
+      was found and repaired — consistent with ''Repair every dead pin''. Constraints hold: no edits to
+      settings.json, agent/agents/, or any file outside the 4 chains + report; work committed on the result
+      ref via two wrapper commits with a clean tree. Graph integrity: node-02 depends_on [] and unlocks
+      [], so nothing downstream can be broken; node-01 (extension hygiene) owns agent/extensions/, a disjoint
+      subtree, and this diff touches no file in that scope, so the concurrent non-overlapping dispatch
+      design is preserved. Intent is recognizable and fully realized; verdict pass.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/pi-harness-hygiene/node-02-chain-pin-repair/job_20260806T17462778ff5f449ee0fd-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.954
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: f164c8eb54cb2ede065065ce3def81f5cec21fa6
+      evaluated_commit_sha: 1fc7b6ed35a4d2c7ac0d0ddbf985e1509d718955
+      merge_commit_sha: 1fc7b6ed35a4d2c7ac0d0ddbf985e1509d718955
+      context_coverage:
+        criteria: medium
+        integrity: none
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.93
+        findings:
+        - severity: low
+          summary: The criterion text names 'settings.json enabledModels' but agent/settings.json is absent
+            from the repo checkout; the node's report explicitly documents this and anchors verification
+            on the live ~/.pi/agent/settings.json (39 entries). I independently confirmed that file exists
+            and that all 15 chain pins (including all 3 replacement model ids, verbatim) are members of
+            its enabledModels, so the interpretation is sound and documented. Flagging only for transparency;
+            lane 1 adjudicates the path naming.
+          affected_node_ids:
+          - node-02-chain-pin-repair
+        reasoning: 'Fresh-eyes integrity review of node-02-chain-pin-repair. The node''s intended role:
+          repair every dead model pin in agent/chains/*.chain.json to the closest doctrine-equivalent
+          model present in settings.json enabledModels, changing nothing else, and report the work. The
+          diff (base 649aa13 -> tip 1fc7b6e) is exactly 5 files: 4 chain JSONs with only ''model'' value
+          substitutions (14 changed lines, all model lines, 0 structural/step/agent/order changes) plus
+          reports/node-02-chain-pin-repair.md (the required artifact). I verified against the live enabledModels
+          at /Users/sab-mini/.pi/agent/settings.json (39 entries) that all 15 pins across 19 chain files
+          are members (0 dead), that the three replacement ids (xai/grok-4.5, xai/grok-build-0.1, openai-codex/gpt-5.6-sol)
+          appear verbatim in that set, that all chain files parse as JSON, and that the report''s before->after
+          table matches the actual diff exactly (7 substitutions across 4 files, with one-line rationales).
+          The node''s ''why'' candidate list was verified rather than trusted, and one additional dead
+          pin (grok-cli/grok-4.5 in dual-builder-implement) was found and repaired — consistent with ''Repair
+          every dead pin''. Constraints hold: no edits to settings.json, agent/agents/, or any file outside
+          the 4 chains + report; work committed on the result ref via two wrapper commits with a clean
+          tree. Graph integrity: node-02 depends_on [] and unlocks [], so nothing downstream can be broken;
+          node-01 (extension hygiene) owns agent/extensions/, a disjoint subtree, and this diff touches
+          no file in that scope, so the concurrent non-overlapping dispatch design is preserved. Intent
+          is recognizable and fully realized; verdict pass.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: 'Forward note: the tracked agent/host-settings.desired.json lists only 2 enabledModels
+            while the live host settings.json lists 39; node-02 correctly anchored on the live host file
+            and documented the discrepancy. Future chain-pin nodes in this graph should make the authoritative
+            settings source explicit (repo-tracked vs live host) to avoid verification ambiguity.'
+          affected_node_ids:
+          - node-02-chain-pin-repair
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null

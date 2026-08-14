@@ -1,0 +1,610 @@
+{
+  "project_id": "gddp-dogfood",
+  "node_id": "node-20-register-annotations",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.95,
+    "findings": [],
+    "reasoning": "The node's stated role is a one-file documentation/cleanup: annotate docs/blocking-mechanisms-register.md with demolition outcomes so the post-demolition runtime is legible to the next session. The work adds exactly that — a header note recording that Stages 1–3 (commits 204148e, 9ef3250, 450eca1, all confirmed on main) executed BM-019, BM-020, and BM-030 through BM-036, with a per-stage breakdown. The note's content is verified accurate against the demolition work order (.handoffs/089), the keep/strip map (.handoffs/090), the actual commit messages, and the register's existing BM-019/020/030–036 rows. The change is purely additive: git diff between base 450eca1 and tip 7b87262 shows exactly one file modified (docs/blocking-mechanisms-register.md), no existing register content changed, working tree clean, and the result-ref commit/branch exist per the executor contract. Graph integrity is preserved: the node declares depends_on: [] and unlocks: [], no other node YAML references node-20 or the register, and no shared artifact rows were removed or reworded — nothing a dependent could rely on was disturbed. Intent and graph integrity are both preserved; no human review needed.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-11T08:35:42.592Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_U5SA9EoBdAAppyXtb3XM7454",
+        "command": "cd /tmp/gddp-eval-wt-o29p0mxh && pwd && ls -la && git log --oneline -20 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-11T08:35:42.593Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_OFcgWL9f3VibG8rDvWkJ9716",
+        "command": "ls -la /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-11T08:35:42.613Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_U5SA9EoBdAAppyXtb3XM7454",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:35:42.613Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_OFcgWL9f3VibG8rDvWkJ9716",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:35:45.963Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_klociAygMiYY9J2CRzse0378",
+        "path": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-20-register-annotations.yaml"
+      },
+      {
+        "ts": "2026-08-11T08:35:45.963Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_iaKQ83LcZYNjivUUg1n54476",
+        "command": "cd /tmp/gddp-eval-wt-o29p0mxh && git show --stat 7b87262 && echo \"=====DIFF BASE..TIP=====\" && git diff 450eca1..7b87262 -- docs/blocking-mechanisms-register.md | head -200"
+      },
+      {
+        "ts": "2026-08-11T08:35:45.972Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_klociAygMiYY9J2CRzse0378",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:35:45.981Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_iaKQ83LcZYNjivUUg1n54476",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:35:55.444Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_MyRY8M2nw1ecun6qyC0y0230",
+        "command": "cd /tmp/gddp-eval-wt-o29p0mxh && git status && echo \"=====BRANCH=====\" && git branch -a --contains 204148e && git branch -a --contains 9ef3250 && git branch -a --contains 450eca1 && echo \"=====CURRENT HEAD=====\" && git rev-parse HEAD && git log --oneline -3 7b87262"
+      },
+      {
+        "ts": "2026-08-11T08:35:55.444Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_KBEe7sRuEiCPhtyQYF2z5269",
+        "command": "cd /tmp/gddp-eval-wt-o29p0mxh && wc -l docs/blocking-mechanisms-register.md && grep -n \"BM-01[0-9]\\|BM-02[0-9]\\|BM-03[0-9]\\|BM-04[0-9]\" docs/blocking-mechanisms-register.md | head -60"
+      },
+      {
+        "ts": "2026-08-11T08:35:55.459Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_KBEe7sRuEiCPhtyQYF2z5269",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:35:55.519Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_MyRY8M2nw1ecun6qyC0y0230",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:36:08.523Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Vm6lz6Ccqa19ht4CjrFb2382",
+        "command": "cd /tmp/gddp-eval-wt-o29p0mxh && echo \"=====FILES CHANGED BASE..TIP=====\" && git diff --name-status 450eca1..7b87262 && echo \"=====2598137 (node work commit) stat=====\" && git show --stat 2598137 | head -15 && echo \"=====HANDOFF 089 mentions=====\" && ls .handoffs/ && grep -rl \"BM-019\\|BM-020\\|BM-030\\|BM-031\\|BM-032\\|BM-033\\|BM-034\\|BM-035\\|BM-036\" .handoffs/ 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-11T08:36:08.523Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_vTXM2aqfLR0MLg0NYzEz8135",
+        "command": "grep -rn \"node-20\\|blocking-mechanisms-register\" /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/ 2>/dev/null; echo \"=====project brief mention=====\"; grep -n \"register\\|node-20\\|BM-0\" /tmp/gddp-eval-wt-o29p0mxh/PROJECT-BRIEF.md | head -20; echo \"=====handoff files referencing demolition stages=====\"; grep -rln \"Stage 1\\|Stage 2\\|Stage 3\\|demolition\" /tmp/gddp-eval-wt-o29p0mxh/.handoffs/ 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-11T08:36:08.549Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_vTXM2aqfLR0MLg0NYzEz8135",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:36:08.551Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Vm6lz6Ccqa19ht4CjrFb2382",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:36:12.184Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_JAja1OGuJUJK8aozYrkZ9964",
+        "command": "cd /tmp/gddp-eval-wt-o29p0mxh && grep -n \"Stage 1\\|Stage 2\\|Stage 3\\|BM-019\\|BM-020\\|BM-03[0-6]\" .handoffs/089-OR-mission-demolition-work-order.md | head -40 && echo \"=====090=====\" && grep -n \"Stage 1\\|Stage 2\\|Stage 3\\|BM-019\\|BM-020\\|BM-03[0-6]\" .handoffs/090-stage0-keep-strip-map.md | head -40"
+      },
+      {
+        "ts": "2026-08-11T08:36:12.185Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_EFqkKCAkNQkDaMvDxamD5140",
+        "command": "cd /tmp/gddp-eval-wt-o29p0mxh && echo \"=====register head (full note)=====\" && sed -n '1,20p' docs/blocking-mechanisms-register.md && echo \"=====BM-019..BM-036 rows=====\" && sed -n '93,115p' docs/blocking-mechanisms-register.md | cut -c1-160"
+      },
+      {
+        "ts": "2026-08-11T08:36:12.199Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_JAja1OGuJUJK8aozYrkZ9964",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:36:12.202Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_EFqkKCAkNQkDaMvDxamD5140",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T08:36:31.176Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_WFi8kEimwObdSELEDmwA6030",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "The register now records executed demolition outcomes via a header note, but the underlying BM-019/020/030–036 rows still carry their pre-execution judgment columns (e.g., BM-020 'REMOVE', BM-019 'SOFTEN') with no per-row execution marker. Deliberately out of scope for this T4 node ('no other content changed'), but a future doc/cleanup node may want to mark these rows as executed so the register does not read as stale to the next session.",
+        "affected_node_ids": [
+          "node-20-register-annotations"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9199999999999999,
+  "criteria_confidence": 0.9199999999999999,
+  "completeness": 1.0,
+  "graph_readiness": 0.9199999999999999,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "artifact-exists",
+        "criterion": "docs/blocking-mechanisms-register.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (docs/blocking-mechanisms-register.md)"
+        ],
+        "reasoning": "Scanned source files (docs/blocking-mechanisms-register.md) for identifiers named in the criterion (blocking-mechanisms-register, non-empty). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "covers",
+        "criterion": "the file covers a header note recording that demolition Stages 1-3 executed BM-019, BM-020, BM-030 through BM-036 (commits on main), with no other content changed",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "BM\\-019 -> line 128: 'BM-019'",
+          "BM\\-020 -> line 149: 'BM-020'",
+          "BM\\-030 -> line 115: 'BM-030'"
+        ],
+        "reasoning": "Scanned source files (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...) for identifiers named in the criterion (BM-019, BM-020, BM-030, BM-036). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "suite-unchanged",
+        "criterion": "python3 -m pytest -q shows no new failures beyond those already present on this host before the node (flask-import and rig1 plist asserts); quote the tail line in the commit message",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...) for identifiers named in the criterion (flask-import). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create or modify only docs/blocking-mechanisms-register.md",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Read-only outside that path",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "docs/blocking-mechanisms-register.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+      "tip": "7b872625b5484c55aeb7db53be8ae7e732e17516",
+      "files": [
+        {
+          "status": "M",
+          "path": "docs/blocking-mechanisms-register.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "artifact-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.99,
+        "evidence": [
+          "docs/blocking-mechanisms-register.md read in full — exists, ~200 lines, non-empty",
+          "git show 7b87262:docs/blocking-mechanisms-register.md confirms the file at the result tip"
+        ],
+        "reasoning": "The required artifact exists at the result tip and is a substantial, non-empty document (title, demolition header note, mechanism register tables through BM-047, disposition language, and add-entry guidance)."
+      },
+      {
+        "criterion_id": "covers",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "git diff 450eca1 7b87262: exactly +6 lines, all in docs/blocking-mechanisms-register.md — the demolition header note; no other content changed (1 file, 6 insertions)",
+          "Header note states: 'Stages 1–3 executed BM-019, BM-020, and BM-030 through BM-036' with Stage 1 204148e / Stage 2 9ef3250 / Stage 3 450eca1",
+          "git log of HEAD shows 204148e, 9ef3250, 450eca1 are ancestors of tip 7b87262 (commits on main)",
+          "Stage commit subjects match the note: 'archive push guard; BM-020 REMOVE; BM-019 SOFTEN', 'git verification demoted to evidence — BM-030/031/032/033', 'evidence collector records, reconciler fans out softly — BM-034/035/036 + §4 fix'"
+        ],
+        "reasoning": "The header note records exactly the required content: demolition Stages 1–3 executed BM-019, BM-020, BM-030 through BM-036, with the three main-branch commit references (204148e/9ef3250/450eca1) whose subjects corroborate the per-stage BM coverage. The base→tip diff proves 'no other content changed' — a single 6-line insertion at the top of the file."
+      },
+      {
+        "criterion_id": "suite-unchanged",
+        "judgment": "judged_pass",
+        "confidence": 0.8,
+        "evidence": [
+          "Commit 2598137 message quotes the tail line: 'Suite: 4 failed, 622 passed in 37.32s' and adds '(flask-import + rig1 plist asserts; pre-existing on this host)'",
+          "Node change is docs-only (git diff 450eca1 7b87262: only docs/blocking-mechanisms-register.md, +6 lines) — no code path changed, so the node cannot have introduced new test failures",
+          "Pre-existing failure surfaces named in the criterion exist in the repo: scripts/intake_server.py imports flask; deploy/rig1-heartbeat/test_rig1_render_plist.py asserts on host-specific paths (e.g., /Users/sab-air)",
+          "python3 -m pytest -q not runnable in this evaluator environment (no pytest module installed on Python 3.13.5); suite state taken from the commit-message quote, which is the evidence the criterion itself prescribes"
+        ],
+        "reasoning": "The verifiable portion of the criterion — quoting the pytest tail line in the commit message — is present verbatim ('Suite: 4 failed, 622 passed in 37.32s') with an explicit attribution to the two named pre-existing failure classes (flask-import, rig1 plist asserts), which correspond to real host-dependent test surfaces in the repo. Because the node's change is confined to a markdown register header, it cannot have altered any test outcome; 'no new failures' therefore holds structurally. Residual uncertainty (confidence 0.8, not higher) is that the live 4-failed count on the execution host could not be independently reproduced here, so the pass rests on the quoted tail line plus the docs-only diff rather than a fresh run."
+      }
+    ],
+    "overall_reasoning": "Node-20 (register annotations) satisfied all three acceptance criteria. The artifact exists and is non-empty; the base→tip diff (450eca1→7b87262) adds exactly the 6-line demolition header note recording Stages 1–3 execution of BM-019, BM-020, and BM-030 through BM-036 with the three on-main commit references (204148e/9ef3250/450eca1), and nothing else changed. The node commit message quotes the pytest tail line ('Suite: 4 failed, 622 passed in 37.32s') and attributes the failures to the pre-existing flask-import and rig1 plist assert classes, consistent with the docs-only change (no code path touched, hence no new failures possible) and with real host-dependent test surfaces found in the repo. Constraints also held: only docs/blocking-mechanisms-register.md was modified, the working tree is clean, and both the node commit (2598137) and the executor-contract wrapper result commit (7b87262, empty diff vs parent) sit on the result ref. The one caveat is that pytest could not be re-run in this evaluator environment (module absent), so the suite state is attested via the commit-message quote — exactly the evidence the criterion prescribes.",
+    "risks": "The 'Suite: 4 failed, 622 passed' count is taken from the commit message rather than a fresh run because python3 -m pytest -q is not runnable in this evaluator environment (no pytest installed). The criterion is host-relative by design ('no new failures beyond those already present on this host before the node'); the docs-only diff makes a new-failure introduction structurally impossible, but if the human wants the suite state independently re-attested, that would require running pytest on the execution host. Also note the deterministic scan searched for 'flask-import' in source files while the string lives in the commit message, which is why the scan reported no hit — not a substantive gap.",
+    "followup_candidates": "Observed: python3 -m pytest -q could not be re-run in the evaluator sandbox (no pytest module). The criterion's quoted tail line and the docs-only diff support the suite-unchanged judgment, but a fresh suite run on the execution host would independently confirm the '4 failed' composition (flask-import + rig1 plist asserts). Was an independent re-run intended as part of the criterion, or is the commit-message quote the complete intended evidence? If a re-run is required, update the criterion/executor contract and re-dispatch; otherwise this verdict stands.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-11T08:34:29.581Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_NXrNFjpxOSbYTfIJaUZM5296",
+          "command": "cd /tmp/gddp-eval-wt-o29p0mxh && ls -la && git log --oneline -20 2>/dev/null | head -30"
+        },
+        {
+          "ts": "2026-08-11T08:34:29.582Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_F4yVFkVthaI2bEnYDwuC0037",
+          "path": "/tmp/gddp-eval-wt-o29p0mxh/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-11T08:34:29.582Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_JNiNZoLbXloOIwzDNH7h5815",
+          "path": "/tmp/gddp-eval-wt-o29p0mxh/README.md"
+        },
+        {
+          "ts": "2026-08-11T08:34:29.596Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_F4yVFkVthaI2bEnYDwuC0037",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:34:29.597Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_JNiNZoLbXloOIwzDNH7h5815",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:34:29.607Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_NXrNFjpxOSbYTfIJaUZM5296",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:34:32.243Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_85Y3kR5MiauTbgIhm2Uc0089",
+          "path": "/tmp/gddp-eval-wt-o29p0mxh/docs/blocking-mechanisms-register.md"
+        },
+        {
+          "ts": "2026-08-11T08:34:32.244Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_sDk4YVLnJbjunPKM7lH73234",
+          "command": "cd /tmp/gddp-eval-wt-o29p0mxh && git diff 450eca1 7b87262 --stat && echo '---' && git log --format='%H %s' 450eca1..7b87262"
+        },
+        {
+          "ts": "2026-08-11T08:34:32.251Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_85Y3kR5MiauTbgIhm2Uc0089",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:34:32.261Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_sDk4YVLnJbjunPKM7lH73234",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:34:38.132Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_IFaF11JxzP89YS7t8rEH0692",
+          "command": "cd /tmp/gddp-eval-wt-o29p0mxh && git diff 450eca1 7b87262 && echo '=== COMMIT MSG 2598137 ===' && git log -1 --format='%B' 2598137"
+        },
+        {
+          "ts": "2026-08-11T08:34:38.132Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_01_JpRNJctskakuQjcd1Ahj9480",
+          "reason": "command matched blocked pattern",
+          "command": "cd /tmp/gddp-eval-wt-o29p0mxh && git log --oneline --all --grep='BM-0' -i | head -20 && echo '---branches---' && git branch -a && echo '---stage commits on main?---' && git merge-base --is-ancestor 204148e 450eca1 && echo '204148e ancestor of 450eca1' ; git log --oneline 204148e -1 && git log --oneline 9ef3250 -1 && git log --oneline 450eca1 -1",
+          "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+        },
+        {
+          "ts": "2026-08-11T08:34:38.133Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_JpRNJctskakuQjcd1Ahj9480",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T08:34:38.147Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_IFaF11JxzP89YS7t8rEH0692",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:34:50.431Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_5ICI8UE55zFVduyOr0dq7791",
+          "command": "cd /tmp/gddp-eval-wt-o29p0mxh && git log --oneline -8 && echo '---' && grep -rn \"flask\" scripts --include='*.py' -l | head && grep -rn \"rig1\\|plist\" scripts --include='*.py' -l | head"
+        },
+        {
+          "ts": "2026-08-11T08:34:50.431Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_dqPfwydOlq10Zpvn9xVi3005",
+          "command": "cd /tmp/gddp-eval-wt-o29p0mxh && ls .venv 2>/dev/null | head -3; python3 --version; cat pytest.ini"
+        },
+        {
+          "ts": "2026-08-11T08:34:50.450Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_dqPfwydOlq10Zpvn9xVi3005",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:34:50.461Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_5ICI8UE55zFVduyOr0dq7791",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:34:52.596Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_w6x7KaW93jwSXOtq3h1f5758",
+          "command": "cd /tmp/gddp-eval-wt-o29p0mxh && grep -rln \"plist\" scripts/ | head && echo '---rig1---' && grep -rln \"rig1\" scripts/ | head && echo '---flask import test---' && grep -rn \"import flask\\|from flask\" scripts/*.py deploy/ 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-11T08:34:52.622Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_w6x7KaW93jwSXOtq3h1f5758",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:34:54.598Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_seem71vtR24BHUr2KGYb5720",
+          "command": "cd /tmp/gddp-eval-wt-o29p0mxh && grep -rln \"plist\" . --include='*.py' --include='*.sh' --include='*.md' 2>/dev/null | grep -v _archive | head && echo '---rig---' && grep -rln \"rig1\" . 2>/dev/null | grep -v _archive | head"
+        },
+        {
+          "ts": "2026-08-11T08:34:54.638Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_seem71vtR24BHUr2KGYb5720",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:34:57.014Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_LT78DSOJHZwL0vTSuCqM3087",
+          "path": "/tmp/gddp-eval-wt-o29p0mxh/deploy/rig1-heartbeat/test_rig1_render_plist.py"
+        },
+        {
+          "ts": "2026-08-11T08:34:57.015Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_mU5wQvFJ9ZePTsbAIxJu9566",
+          "command": "cd /tmp/gddp-eval-wt-o29p0mxh && grep -rn \"flask\" scripts/test_runtime_root_config.py scripts/test_intake_server.py | head && echo '---' && head -20 scripts/test_runtime_root_config.py"
+        },
+        {
+          "ts": "2026-08-11T08:34:57.021Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_LT78DSOJHZwL0vTSuCqM3087",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:34:57.025Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_mU5wQvFJ9ZePTsbAIxJu9566",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:35:01.467Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_chdypZ9166abrMfLhucW4645",
+          "command": "cd /tmp/gddp-eval-wt-o29p0mxh && timeout 120 python3 -m pytest -q 2>&1 | tail -15"
+        },
+        {
+          "ts": "2026-08-11T08:35:01.498Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_chdypZ9166abrMfLhucW4645",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:35:06.037Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Zeo8aeGN4a3IZfH7o85E7670",
+          "command": "cd /tmp/gddp-eval-wt-o29p0mxh && git diff 2598137 7b87262 --stat && echo '---show wrapper files---' && git show --stat --format='%H %s' 7b87262 | head -20 && echo '---register at tip head---' && git show 7b87262:docs/blocking-mechanisms-register.md | head -12"
+        },
+        {
+          "ts": "2026-08-11T08:35:06.058Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Zeo8aeGN4a3IZfH7o85E7670",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:35:18.441Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_DwppSawXie2aIbptv9e11013",
+          "command": "cd /tmp/gddp-eval-wt-o29p0mxh && git status --short | head -20 && echo '---diff base..tip file list---' && git diff --name-only 450eca1 7b87262 && echo '---ancestry: are stage commits in HEAD history?---' && git log --oneline 450eca1..7b87262 -- docs/ && git log --format='%h %s' -3 204148e"
+        },
+        {
+          "ts": "2026-08-11T08:35:18.499Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_DwppSawXie2aIbptv9e11013",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T08:35:37.561Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_75G9hA4A3a5kIWAw9FN55943",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node-20 (register annotations) satisfied all three acceptance criteria. The artifact exists and is non-empty; the base→tip diff (450eca1→7b87262) adds exactly the 6-line demolition header note recording Stages 1–3 execution of BM-019, BM-020, and BM-030 through BM-036 with the three on-main commit references (204148e/9ef3250/450eca1), and nothing else changed. The node commit message quotes the pytest tail line ('Suite: 4 failed, 622 passed in 37.32s') and attributes the failures to the pre-existing flask-import and rig1 plist assert classes, consistent with the docs-only change (no code path touched, hence no new failures possible) and with real host-dependent test surfaces found in the repo. Constraints also held: only docs/blocking-mechanisms-register.md was modified, the working tree is clean, and both the node commit (2598137) and the executor-contract wrapper result commit (7b87262, empty diff vs parent) sit on the result ref. The one caveat is that pytest could not be re-run in this evaluator environment (module absent), so the suite state is attested via the commit-message quote — exactly the evidence the criterion prescribes.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-11T08:36:31.241868+00:00",
+  "evaluated_tree_sha": "5de18f3c1524b01e364f3829d3832968f16b28a8",
+  "evaluated_commit_sha": "7b872625b5484c55aeb7db53be8ae7e732e17516",
+  "merge_commit_sha": "7b872625b5484c55aeb7db53be8ae7e732e17516",
+  "expected_base_commit_sha": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+  "pr_ref": null,
+  "job_id": "job_20260811T08290904a878f274d2e3",
+  "execution_attempt_id": "job_20260811T08290904a878f274d2e3:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-o29p0mxh/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-o29p0mxh/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-o29p0mxh/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-o29p0mxh/README.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+      ]
+    },
+    "integrity": {
+      "rating": "none",
+      "offered": 3,
+      "content_accessed": 0,
+      "not_observed": 3,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-o29p0mxh/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-o29p0mxh/README.md"
+      ]
+    },
+    "overall": "none"
+  }
+}

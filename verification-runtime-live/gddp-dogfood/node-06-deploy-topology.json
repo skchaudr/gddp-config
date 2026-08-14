@@ -1,0 +1,1113 @@
+{
+  "project_id": "gddp-dogfood",
+  "node_id": "node-06-deploy-topology",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.9,
+    "findings": [
+      {
+        "severity": "low",
+        "summary": "The report quotes pytest tail line '4 failed, 622 passed in 36.77s', but both available pytest venvs (gddp-runtime/.venv and /tmp/gddp-pytest-venv, both Python 3.13.5 + pytest 9.1.1 matching the report's pycache filenames) reproduce '1 failed, 625 passed' — same total (626) and the same rig1 failure with identical assertion detail. The 3 extra intake failures are plausibly environment-specific (reload_intake_server re-imports intake_server with real flask, which fails in a sandbox python lacking flask). This is an evidence-fidelity question for lane 1's criteria/constraint adjudication, not an intent or graph-integrity defect.",
+        "affected_node_ids": [
+          "node-06-deploy-topology"
+        ]
+      }
+    ],
+    "reasoning": "The work preserves node-06-deploy-topology's intended role and the graph's integrity. Intent: the node is a T1 report-only canary ('Document the deploy/mini-heartbeat tree — one-line-per-file map keeps host setup reviewable'). The report at reports/gddp-dogfood/06-deploy-topology.md is non-empty (145 lines), lists every file under deploy/mini-heartbeat/ with a one-line purpose (verified programmatically: all 24 kit files covered, plus the 3 gitignored pycache files explicitly documented as ephemeral), and quotes real paths from the live tree (the Live tree quote block matches on-disk find output exactly). Spot-checks of one-line purposes against actual file contents confirmed accuracy. Graph integrity: node-06 has depends_on: [] and unlocks: [] — no upstream assumptions and no downstream dependents; the diff base->tip contains exactly one added file (the report), honoring 'create only the report' and 'read-only outside that path'; work is committed on the result ref per the executor contract. No gddp-config or runtime graph mutation occurred. The only deviation found — the pytest tail line (4 failed vs reproducible 1 failed, same total 626, same rig1 failure) — is evidence-fidelity territory for lane 1, plausibly caused by sandbox environment differences (flask availability at reload), and does not threaten intent or graph integrity.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-11T05:51:33.192Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_OystB4DcN3vH30sNEs3D6605",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && ls -la && echo \"---\" && git log --oneline -5 2>/dev/null && echo \"---\" && git status 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-11T05:51:33.193Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_kJYlf1jmpwSFr3bLMnx20439",
+        "path": "/tmp/gddp-eval-wt-bxvq9mg_/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-11T05:51:33.194Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_GaxvoL88utnTGCn68JyQ0588",
+        "path": "/tmp/gddp-eval-wt-bxvq9mg_/README.md"
+      },
+      {
+        "ts": "2026-08-11T05:51:33.206Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_kJYlf1jmpwSFr3bLMnx20439",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:51:33.207Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_GaxvoL88utnTGCn68JyQ0588",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:51:33.219Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_OystB4DcN3vH30sNEs3D6605",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:51:36.142Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_HEW3bvgTRXftEJ6clTun0108",
+        "path": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-06-deploy-topology.yaml"
+      },
+      {
+        "ts": "2026-08-11T05:51:36.143Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_sEJHjyLuWioJkbeqiE0H9662",
+        "path": "/tmp/gddp-eval-wt-bxvq9mg_/reports/gddp-dogfood/06-deploy-topology.md"
+      },
+      {
+        "ts": "2026-08-11T05:51:36.143Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_34OvTtNIQSElc31xhtkv5006",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && find deploy/mini-heartbeat -type f | sort && echo \"---DIRS---\" && find deploy/mini-heartbeat -type d | sort"
+      },
+      {
+        "ts": "2026-08-11T05:51:36.152Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_HEW3bvgTRXftEJ6clTun0108",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:51:36.152Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_sEJHjyLuWioJkbeqiE0H9662",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:51:36.159Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_34OvTtNIQSElc31xhtkv5006",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:51:49.358Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_JTvGtvuC7YmZt5YChJWF1059",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && echo \"=== diff base..tip (name-status) ===\" && git diff --name-status 450eca1cffe1113b3af15db0b2ab65b7c0eb5b61 8f045b66d80ef20fd905029334f857843ab536c2 && echo \"=== commit c969c73 files ===\" && git show --stat --oneline c969c73 | head -20 && echo \"=== commit 8f045b6 files ===\" && git show --stat --oneline 8f045b6 | head -20 && echo \"=== .gitignore pycache? ===\" && grep -n \"pycache\\|__pycache__\" .gitignore"
+      },
+      {
+        "ts": "2026-08-11T05:51:49.358Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_oikeN6axXI3eVR9F0bAI1706",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && echo \"=== pycache on disk? ===\" && ls -la deploy/mini-heartbeat/__pycache__ 2>/dev/null || echo \"no __pycache__ dir\" && echo \"=== untracked/ignored files ===\" && git status --ignored --short | head -30"
+      },
+      {
+        "ts": "2026-08-11T05:51:49.380Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_JTvGtvuC7YmZt5YChJWF1059",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:51:49.381Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_oikeN6axXI3eVR9F0bAI1706",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:51:59.644Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_3ZB6kWsHUWiVoHxeAhwq2285",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && echo \"=== common.sh head ===\" && head -15 deploy/mini-heartbeat/bin/common.sh && echo \"=== arm.sh head ===\" && head -12 deploy/mini-heartbeat/bin/arm.sh && echo \"=== install-dormant head ===\" && head -12 deploy/mini-heartbeat/bin/install-dormant.sh && echo \"=== idle_shutdown head ===\" && head -15 deploy/mini-heartbeat/bin/idle_shutdown.py"
+      },
+      {
+        "ts": "2026-08-11T05:51:59.644Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_FYj4bXRKX8JBVlPXDsyf4067",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && echo \"=== launchd plists ===\" && head -8 deploy/mini-heartbeat/launchd/com.gddp.intake.plist && echo \"---\" && head -8 deploy/mini-heartbeat/launchd/com.gddp.heartbeat.plist && echo \"=== systemd heartbeat.service ===\" && cat deploy/mini-heartbeat/systemd/gddp-heartbeat.service && echo \"=== env example ===\" && head -12 deploy/mini-heartbeat/env/gddp.env.example && echo \"=== zellij ===\" && head -8 deploy/mini-heartbeat/zellij/config.kdl"
+      },
+      {
+        "ts": "2026-08-11T05:51:59.658Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_3ZB6kWsHUWiVoHxeAhwq2285",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:51:59.663Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_FYj4bXRKX8JBVlPXDsyf4067",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:52:07.648Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_qewRY84TecWmqNhlBjXu5391",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && ls -la .gddp/ 2>/dev/null && find .gddp .agents .handoffs -type f 2>/dev/null | head -40"
+      },
+      {
+        "ts": "2026-08-11T05:52:07.648Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_jKqiBYgiZg6WWdbO6aAg2322",
+        "command": "ls /home/sab-mini/gddp-config/graphs/gddp-dogfood/ && echo \"---\" && cat /home/sab-mini/gddp-config/graphs/gddp-dogfood/project.yaml 2>/dev/null | head -60"
+      },
+      {
+        "ts": "2026-08-11T05:52:07.662Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_qewRY84TecWmqNhlBjXu5391",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:52:07.666Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_jKqiBYgiZg6WWdbO6aAg2322",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:52:09.862Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_Y4ybwGXqkBguKQWdgXZK9076",
+        "path": "/tmp/gddp-eval-wt-bxvq9mg_/.gddp/result-summary.md"
+      },
+      {
+        "ts": "2026-08-11T05:52:09.863Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_UezaqInUbhYdEP68RcjH4109",
+        "path": "/tmp/gddp-eval-wt-bxvq9mg_/.gddp/decision.md"
+      },
+      {
+        "ts": "2026-08-11T05:52:09.865Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_UezaqInUbhYdEP68RcjH4109",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:52:09.865Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Y4ybwGXqkBguKQWdgXZK9076",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:52:20.373Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_mtOXwh6d5WJDrK8uH0td7136",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && PYTHONDONTWRITEBYTECODE=1 timeout 300 python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -15"
+      },
+      {
+        "ts": "2026-08-11T05:52:20.402Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_mtOXwh6d5WJDrK8uH0td7136",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:52:23.278Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_8T852IWpnm81CtQgjwsc5580",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && ls -la .venv/bin/python* 2>/dev/null; ls -d .venv 2>/dev/null || echo \"no .venv in worktree\"; which -a python3 pytest 2>/dev/null; ls /home/sab-mini/gddp-runtime/.venv/bin/python* 2>/dev/null || echo \"no venv at ~/gddp-runtime\""
+      },
+      {
+        "ts": "2026-08-11T05:52:23.278Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_JkfIywu9VOtwFrptogVs6079",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && cat pytest.ini && echo \"---\" && git check-ignore deploy/mini-heartbeat/__pycache__/test_arm_refuse.cpython-313-pytest-9.1.1.pyc; echo \"check-ignore exit: $?\""
+      },
+      {
+        "ts": "2026-08-11T05:52:23.296Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_JkfIywu9VOtwFrptogVs6079",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:52:23.297Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_8T852IWpnm81CtQgjwsc5580",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:52:27.183Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_U1ia95DzgfRx8a7UOrSm2214",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && PYTHONDONTWRITEBYTECODE=1 timeout 300 /home/sab-mini/gddp-runtime/.venv/bin/python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -12"
+      },
+      {
+        "ts": "2026-08-11T05:53:05.045Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_U1ia95DzgfRx8a7UOrSm2214",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:53:12.862Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_cgyZbxnJewbgURLSM8YT6040",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && PYTHONDONTWRITEBYTECODE=1 timeout 120 /home/sab-mini/gddp-runtime/.venv/bin/python3 -m pytest -q -p no:cacheprovider scripts/test_intake_server.py scripts/test_intake_webhook_roundtrip.py 2>&1 | tail -25"
+      },
+      {
+        "ts": "2026-08-11T05:53:12.862Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_01_tbilYvfg0WUNcBDdAZ3d4138",
+        "reason": "command matched blocked pattern",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && env | grep -i -E \"gddp|webhook|github|secret\" | sort; echo \"---\"; git stash list | head; echo \"--- worktree HEAD\"; git rev-parse HEAD",
+        "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+      },
+      {
+        "ts": "2026-08-11T05:53:12.862Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_tbilYvfg0WUNcBDdAZ3d4138",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-11T05:53:13.681Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_cgyZbxnJewbgURLSM8YT6040",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:53:20.750Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ltLuWn4yk7Q19AICd5FT4653",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && sed -n '1,60p' scripts/test_intake_server.py"
+      },
+      {
+        "ts": "2026-08-11T05:53:20.750Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_m1m6PoKKBtextVK052Tf9092",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && grep -n \"webhook_verification\\|secret_resolved\\|GITHUB_WEBHOOK_SECRET\\|monkeypatch\\|setenv\\|delenv\\|os.environ\" scripts/test_intake_server.py | head -30"
+      },
+      {
+        "ts": "2026-08-11T05:53:20.758Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ltLuWn4yk7Q19AICd5FT4653",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:53:20.763Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_m1m6PoKKBtextVK052Tf9092",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:53:30.008Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_97D7t9tokPHWhmuxlMFw8126",
+        "command": "head -1 /home/sab-mini/.local/bin/pytest; echo \"---\"; /home/sab-mini/.local/bin/pytest --version 2>&1; echo \"---\"; /home/sab-mini/gddp-runtime/.venv/bin/python3 -m pytest --version 2>&1; echo \"---\"; /home/sab-mini/gddp-runtime/.venv/bin/python3 --version"
+      },
+      {
+        "ts": "2026-08-11T05:53:30.009Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_88ojPuWzbKIL2tZPCL6u2591",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && PYTHONDONTWRITEBYTECODE=1 timeout 300 /home/sab-mini/.local/bin/pytest -q -p no:cacheprovider 2>&1 | tail -8"
+      },
+      {
+        "ts": "2026-08-11T05:53:30.075Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_88ojPuWzbKIL2tZPCL6u2591",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:53:30.256Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_97D7t9tokPHWhmuxlMFw8126",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:53:49.427Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_44UG1huV7LaHiK9QlIJd9187",
+        "path": "/tmp/gddp-eval-wt-bxvq9mg_/scripts/test_intake_server.py"
+      },
+      {
+        "ts": "2026-08-11T05:53:49.428Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_GEhXm0dhJAKyJoFxS3xU0578",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && sed -n '1,60p' scripts/test_intake_webhook_roundtrip.py"
+      },
+      {
+        "ts": "2026-08-11T05:53:49.435Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_44UG1huV7LaHiK9QlIJd9187",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:53:49.437Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_GEhXm0dhJAKyJoFxS3xU0578",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:54:33.550Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_GPDeVbMZxIQIMSQqxP3C1043",
+        "command": "cd /home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes && grep -l \"node-06\" *.yaml; echo \"--- depends_on/unlocks across nodes 06-10 ---\"; for f in node-06-deploy-topology.yaml node-07-hook-surface.yaml node-08-verification-module-map.yaml node-09-heartbeat-module-map.yaml node-10-agents-md-drift-report.yaml; do echo \"== $f\"; grep -E \"depends_on|unlocks|status|node_id\" \"$f\"; done"
+      },
+      {
+        "ts": "2026-08-11T05:54:33.551Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_uQ3CceJl0G8PwTOt6Yxe6823",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && echo \"=== verify report file count claim: kit files listed in report ===\" && grep -c \"^| \\`deploy/mini-heartbeat\" reports/gddp-dogfood/06-deploy-topology.md && echo \"=== actual files on disk ===\" && find deploy/mini-heartbeat -type f | wc -l && echo \"=== report live-tree-quote block vs disk ===\" && python3 - <<'EOF'\nimport re, subprocess\nrep = open('reports/gddp-dogfood/06-deploy-topology.md').read()\nblock = rep.split('```text')[1].split('```')[0]\nquoted = set(l.strip() for l in block.strip().splitlines() if l.strip())\non_disk = set(subprocess.check_output(['find','deploy/mini-heartbeat','-type','f']).decode().split())\nprint(\"quoted but not on disk:\", sorted(quoted - on_disk))\nprint(\"on disk but not quoted:\", sorted(on_disk - quoted))\nprint(\"quoted count:\", len(quoted), \"on-disk count:\", len(on_disk))\nEOF"
+      },
+      {
+        "ts": "2026-08-11T05:54:33.575Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_GPDeVbMZxIQIMSQqxP3C1043",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:54:33.609Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_uQ3CceJl0G8PwTOt6Yxe6823",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:54:50.248Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_00_BWRhgejr029IL9rrLw890282",
+        "reason": "command matched blocked pattern",
+        "command": "/home/sab-mini/gddp-runtime/.venv/bin/python3 -c \"import flask; print('flask', flask.__version__)\" 2>&1; echo \"---\"; /home/sab-mini/gddp-runtime/.venv/bin/python3 -m pip list 2>/dev/null | grep -i -E \"flask|pytest|requests|gunicorn\" ",
+        "pattern": "\\b(?:curl|wget|ssh|scp|sftp|rsync|nc|netcat|telnet|ftp|pip|npm|pnpm|yarn|brew)\\b"
+      },
+      {
+        "ts": "2026-08-11T05:54:50.248Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_BWRhgejr029IL9rrLw890282",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-11T05:54:50.248Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_nvrBKoJAt12WuUeWCDAY1033",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && git log --format='%H %s' 450eca1..HEAD && echo \"---worktree---\" && git worktree list 2>/dev/null; echo \"---\"; git status --short --ignored | head"
+      },
+      {
+        "ts": "2026-08-11T05:54:50.269Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_nvrBKoJAt12WuUeWCDAY1033",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:55:09.270Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_JGSaglzYQUY9p2feuznV9662",
+        "command": "/home/sab-mini/gddp-runtime/.venv/bin/python3 -c \"import flask; print('flask OK', flask.__version__)\" 2>&1"
+      },
+      {
+        "ts": "2026-08-11T05:55:09.270Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_5fxabD61iqAtK7NPzCSt8800",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && sed -n '1,120p' scripts/intake_server.py"
+      },
+      {
+        "ts": "2026-08-11T05:55:09.282Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_5fxabD61iqAtK7NPzCSt8800",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:55:09.531Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_JGSaglzYQUY9p2feuznV9662",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:55:30.565Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_hkgrPOnZDH1Z5J7YEjBE2630",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && OPCLAW_ROOT=/tmp/fake-opclaw PYTHONDONTWRITEBYTECODE=1 timeout 120 /home/sab-mini/gddp-runtime/.venv/bin/python3 -m pytest -q -p no:cacheprovider scripts/test_intake_server.py scripts/test_intake_webhook_roundtrip.py 2>&1 | tail -8"
+      },
+      {
+        "ts": "2026-08-11T05:55:30.565Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_0ie3EDReZC66JnUv3EH35009",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && git show c969c73 --format='%an %ae %ad' -s && echo \"---\" && git diff 450eca1 c969c73 --stat"
+      },
+      {
+        "ts": "2026-08-11T05:55:30.583Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_0ie3EDReZC66JnUv3EH35009",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:55:31.427Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_hkgrPOnZDH1Z5J7YEjBE2630",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:55:52.278Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_OyDtYu6dnIXMNG1TUn2y8387",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && grep -n \"health\\|webhook_verification\\|def health\" scripts/intake_server.py | head -20 && echo \"---\" && sed -n '/@app.route(\"\\/health\"/,/^def /p' scripts/intake_server.py | head -30"
+      },
+      {
+        "ts": "2026-08-11T05:55:52.290Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_OyDtYu6dnIXMNG1TUn2y8387",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:56:03.719Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_pWlyV72FA4J3pr01GbYZ8115",
+        "command": "/usr/bin/python3 -c \"import flask\" 2>&1; echo \"system-python flask exit: $?\"; /usr/bin/python3 --version; echo \"---\"; cd /tmp/gddp-eval-wt-bxvq9mg_ && PYTHONDONTWRITEBYTECODE=1 /home/sab-mini/gddp-runtime/.venv/bin/python3 -m pytest --collect-only -q -p no:cacheprovider 2>/dev/null | tail -3"
+      },
+      {
+        "ts": "2026-08-11T05:56:03.719Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_hZoSZX4ukmF2Y51wpnVt6573",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && PYTHONDONTWRITEBYTECODE=1 timeout 120 /home/sab-mini/gddp-runtime/.venv/bin/python3 -m pytest -q -p no:cacheprovider deploy/rig1-heartbeat/test_rig1_render_plist.py::test_render_heartbeat_invokes_real_runner_module 2>&1 | tail -6"
+      },
+      {
+        "ts": "2026-08-11T05:56:04.094Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_hZoSZX4ukmF2Y51wpnVt6573",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:56:06.471Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_pWlyV72FA4J3pr01GbYZ8115",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:56:22.840Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_pmedEpIzwfoxiKcpO5w89755",
+        "command": "ls /home/sab-mini/ 2>/dev/null; echo \"---venvs---\"; find /home/sab-mini /tmp -maxdepth 3 -name \"pytest\" -path \"*/bin/*\" 2>/dev/null | head; echo \"---other pythons---\"; ls /usr/bin/python3* 2>/dev/null; ls /opt/*/bin/python3* 2>/dev/null; command -v python3.13 python3.12 python3.11 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-11T05:56:22.841Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_u0YWPKOTOV2Vzyy96Prw1193",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && PYTHONDONTWRITEBYTECODE=1 /home/sab-mini/gddp-runtime/.venv/bin/python3 -m pytest -q -p no:cacheprovider scripts/test_intake_server.py::test_health_returns_ok_with_webhook_verification_when_secret_resolved scripts/test_intake_server.py::test_health_returns_503_when_secret_unresolved scripts/test_intake_webhook_roundtrip.py::test_signed_webhook_post_creates_event_row_and_raw_payload 2>&1 | tail -4"
+      },
+      {
+        "ts": "2026-08-11T05:56:22.909Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_pmedEpIzwfoxiKcpO5w89755",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:56:23.674Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_u0YWPKOTOV2Vzyy96Prw1193",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:56:26.121Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_4VgQVCoxa0KwQjZVctbe8928",
+        "command": "/tmp/gddp-pytest-venv/bin/python --version 2>&1; /tmp/gddp-pytest-venv/bin/python -m pytest --version 2>&1; /tmp/gddp-pytest-venv/bin/python -c \"import flask\" 2>&1; echo \"flask exit: $?\"; /tmp/gddp-pytest-venv/bin/python -c \"import sys; print(sys.executable)\""
+      },
+      {
+        "ts": "2026-08-11T05:56:26.611Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_4VgQVCoxa0KwQjZVctbe8928",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:56:29.657Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ggVPTc2ZOODPMZGmJ1nb3724",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && PYTHONDONTWRITEBYTECODE=1 timeout 300 /tmp/gddp-pytest-venv/bin/python -m pytest -q -p no:cacheprovider 2>&1 | tail -8"
+      },
+      {
+        "ts": "2026-08-11T05:57:06.891Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ggVPTc2ZOODPMZGmJ1nb3724",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:57:38.684Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_4QxxSewCv4UyRBsMIAnX3723",
+        "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && python3 - <<'EOF'\nimport re, subprocess\nrep = open('reports/gddp-dogfood/06-deploy-topology.md').read()\non_disk = set(subprocess.check_output(['find','deploy/mini-heartbeat','-type','f']).decode().split())\n# purpose rows are | `path` | ... | in the tables after \"One-line purpose per file\"\npurpose_section = rep.split('## One-line purpose per file')[1].split('## Live tree quote')[0]\nrows = re.findall(r'^\\| `(deploy/mini-heartbeat[^`]*)` \\|', purpose_section, re.M)\nrows = set(rows)\nmissing = on_disk - rows\nprint(\"kit files lacking a one-line purpose row:\", sorted(missing) if missing else \"NONE — all covered\")\nprint(\"purpose rows count:\", len(rows))\nEOF"
+      },
+      {
+        "ts": "2026-08-11T05:57:38.737Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_4QxxSewCv4UyRBsMIAnX3723",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-11T05:57:55.913Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_kSJPUzoPENGIxNBpd13B0141",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "T1/T2 sibling canaries (node-07 through node-10, same report-only shape, all ready) will face the same evidence-fidelity question: pytest tail lines quoted from a sandbox may not reproduce in the review environment (as seen with node-06's 3 intake failures). Consider having lane-1 evidence collectors or future canaries record the pytest environment (python version, flask presence, env vars) alongside the tail line to reduce ambiguity.",
+        "affected_node_ids": [
+          "node-07-hook-surface",
+          "node-08-verification-module-map",
+          "node-09-heartbeat-module-map",
+          "node-10-agents-md-drift-report"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9533333333333333,
+  "criteria_confidence": 0.9533333333333333,
+  "completeness": 1.0,
+  "graph_readiness": 0.9533333333333333,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "report-exists",
+        "criterion": "reports/gddp-dogfood/06-deploy-topology.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "deploy\\-topology -> line 5: 'deploy-topology'"
+        ],
+        "reasoning": "Scanned source files (reports/gddp-dogfood/06-deploy-topology.md) for identifiers named in the criterion (gddp-dogfood, deploy-topology, non-empty). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "all-files",
+        "criterion": "every file under deploy/mini-heartbeat/ is listed with a one-line purpose",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/_archive/canary_local_executor.py, scripts/_archive/canary_local_executor_slow.py, scripts/_archive/canary_stabilization_reset.py, scripts/_archive/jules_cli_adapter.py...) for identifiers named in the criterion (mini-heartbeat, one-line). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "quotes-paths",
+        "criterion": "report quotes real paths from the live tree",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create only reports/gddp-dogfood/06-deploy-topology.md",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Read-only outside that report path",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Run python3 -m pytest -q before finishing and quote its tail line in the report",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Commit all work on this node result ref per the executor contract",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/gddp-dogfood/06-deploy-topology.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+      "tip": "8f045b66d80ef20fd905029334f857843ab536c2",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/gddp-dogfood/06-deploy-topology.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.99,
+        "evidence": [
+          "reports/gddp-dogfood/06-deploy-topology.md read: 145 lines, substantive Markdown report (title, generated metadata, directory map, one-line-purpose tables, live tree quote, validation section)",
+          "git diff --name-status 450eca1 8f045b6 shows only 'A reports/gddp-dogfood/06-deploy-topology.md'",
+          "git ls-files reports/ lists the file as tracked; git status clean"
+        ],
+        "reasoning": "The report file exists on disk and in the committed tree, is 145 lines (non-empty), and contains full substantive content matching the node's title ('Document the deploy/mini-heartbeat tree'). The deterministic keyword scan already found the identifier string; semantic reading confirms a real, complete report."
+      },
+      {
+        "criterion_id": "all-files",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "find deploy/mini-heartbeat -type f | sort yields exactly 24 files",
+          "Python cross-check: all 24 live files appear in the 'One-line purpose per file' tables; 0 live files missing; 27 well-formed table rows (24 kit files + 3 __pycache__ files labeled ephemeral), every row has a non-empty purpose cell",
+          "Spot-checks: test_arm_refuse.py stubs arm.sh via subprocess (matches 'Asserts bin/arm.sh exits 2 without MINI_HEARTBEAT_ARM=1'); env/gddp.env.example is a gitignored env template (matches row); zellij/config.kdl is an isolated zellij profile (matches row)"
+        ],
+        "reasoning": "Every file currently under deploy/mini-heartbeat/ (24 files) is listed with a one-line purpose in the purpose tables; the report also covers the 3 pytest bytecode files it generated during validation, explicitly labeled as not kit source. Purposes are accurate against actual file contents. Criterion fully satisfied."
+      },
+      {
+        "criterion_id": "quotes-paths",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "'## Live tree quote' section contains 27 path lines; 24 of 27 exist verbatim on disk at evaluation time (byte-for-byte match with find output)",
+          "The 3 non-matching lines are deploy/mini-heartbeat/__pycache__/*.pyc, explicitly labeled in the report as 'Generated during validation (not kit source)', 'ephemeral', gitignored (confirmed .gitignore line 11 '__pycache__/')",
+          "Report states inventory source: 'find deploy/mini-heartbeat -type f | sort' in this worktree"
+        ],
+        "reasoning": "The report quotes exact paths from the live tree for all substantive files; every kit path in the quote is real and matches the current tree. The only divergence is the 3 __pycache__ bytecode paths, which are not on disk at evaluation time but are transparently disclosed as validation-generated ephemera (they plausibly existed when pytest ran during the attempt). The criterion's intent — quoting real live-tree paths — is satisfied."
+      }
+    ],
+    "overall_reasoning": "All three acceptance criteria are satisfied by the committed report reports/gddp-dogfood/06-deploy-topology.md (145 lines, added in the single result commit of this attempt). (1) The report exists and is non-empty. (2) Programmatic cross-check confirms all 24 files under deploy/mini-heartbeat/ are listed with non-empty one-line purposes, and spot-checks show purposes match actual file contents. (3) The live-tree quote reproduces the exact find output for all 24 kit paths; the only extras are 3 __pycache__ bytecode paths absent at evaluation time but explicitly labeled as validation-generated ephemeral/gitignored. Constraints also hold as observed: only the report path was created (git diff base→tip is a single file addition), no writes outside it, the pytest tail line '4 failed, 622 passed in 36.77s' is quoted in the Validation section (format-consistent with pytest; the run itself is not independently reproducible from repo artifacts), and the work is committed on the result ref (c969c73 + wrapper 8f045b6). The deterministic 'indeterminate' results are resolved: the keyword-scan ambiguity is cleared by direct semantic reading.",
+    "risks": "Low: the 'Live tree quote' block includes 3 __pycache__/*.pyc paths that are not present in the worktree at evaluation time; the report transparently labels them as ephemeral validation-run bytecode (gitignored), so this is a fidelity nuance rather than a criterion failure. Low: the pytest tail line is quoted but cannot be independently verified from repo artifacts (no pytest log committed); its format is consistent with real pytest output and the 4-failure list in the report names plausible environment-specific failures. Note the node's acceptance criteria do not themselves require the pytest run — it is a constraint, which the deterministic scan cleared and this review corroborates.",
+    "followup_candidates": "Observed: the 3 __pycache__ paths quoted in the report are absent from the current worktree (cleaned between attempt and evaluation, or not carried into the snapshot). The report already labels them as ephemeral; no action needed unless strict quote-currency is desired. Observed: pytest tail line '4 failed, 622 passed in 36.77s' is quoted per constraint but no pytest log artifact exists; if the constraint's execution evidence should be independently verifiable, consider requiring a committed log or evidence receipt in future report-only nodes.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-11T05:49:50.377Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_r6N4nfhvPKw4MdsvglGw3112",
+          "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && ls -la && git log --oneline -5 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-11T05:49:50.378Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_NppOH5Nuqgcv2QRXlhnu1138",
+          "path": "/tmp/gddp-eval-wt-bxvq9mg_/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-11T05:49:50.392Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_NppOH5Nuqgcv2QRXlhnu1138",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:49:50.400Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_r6N4nfhvPKw4MdsvglGw3112",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:49:52.414Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_b2EADi0tqM8Z3fOQ459M0851",
+          "path": "/tmp/gddp-eval-wt-bxvq9mg_/reports/gddp-dogfood/06-deploy-topology.md"
+        },
+        {
+          "ts": "2026-08-11T05:49:52.415Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_gS4PoJDOBvNgkWWnE8t08035",
+          "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && find deploy/mini-heartbeat -type f | sort && echo \"---DIRS---\" && find deploy/mini-heartbeat -type d | sort"
+        },
+        {
+          "ts": "2026-08-11T05:49:52.422Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_b2EADi0tqM8Z3fOQ459M0851",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:49:52.428Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_gS4PoJDOBvNgkWWnE8t08035",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:50:04.857Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_VrTXkiJtCmYymnqQhZcA0538",
+          "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && echo \"=== pycache check ===\" && find deploy/mini-heartbeat -name '__pycache__' -o -name '*.pyc' | head; echo \"=== git show stat for result commit ===\" && git show --stat c969c73 | head -30; echo \"=== git show --name-status c969c73 ===\" && git show --name-status c969c73 | head -20; echo \"=== diff between base and tip ===\" && git diff --name-status 450eca1 8f045b6"
+        },
+        {
+          "ts": "2026-08-11T05:50:04.858Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_01_61GYktch51O0SQWtJXgp5468",
+          "reason": "command matched blocked pattern",
+          "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && echo \"=== live files ===\" && find deploy/mini-heartbeat -type f | sort > /tmp/live_files.txt && wc -l /tmp/live_files.txt && echo \"=== report-listed paths (one-line tables + generated section) ===\" && grep -oE '`deploy/mini-heartbeat/[^`]+`' reports/gddp-dogfood/06-deploy-topology.md | sort -u > /tmp/report_paths.txt && wc -l /tmp/report_paths.txt && echo \"=== paths in report but NOT in live tree ===\" && comm -23 /tmp/report_paths.txt /tmp/live_files.txt && echo \"=== live paths NOT mentioned in report ===\" && comm -13 /tmp/report_paths.txt /tmp/live_files.txt",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-11T05:50:04.858Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_61GYktch51O0SQWtJXgp5468",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T05:50:04.881Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_VrTXkiJtCmYymnqQhZcA0538",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:50:08.000Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_YwFyIRGyQ0MrLp1QbKqU0376",
+          "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && python3 -c \"\nimport os, re\nlive = set()\nfor root, dirs, files in os.walk('deploy/mini-heartbeat'):\n    for f in files:\n        live.add(os.path.join(root, f).replace(os.sep, '/'))\ntext = open('reports/gddp-dogfood/06-deploy-topology.md').read()\nreported = set(re.findall(r'\\`(deploy/mini-heartbeat/[^\\`]+)\\`', text))\nprint('live files:', len(live))\nprint('reported paths:', len(reported))\nprint('--- in report but NOT on disk ---')\nfor p in sorted(reported - live): print(' ', p)\nprint('--- on disk but NOT in report ---')\nfor p in sorted(live - reported): print(' ', p)\nprint('--- in report (non-live) -- note: were these ever in the tree? check git ---')\n\"\n"
+        },
+        {
+          "ts": "2026-08-11T05:50:08.047Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_YwFyIRGyQ0MrLp1QbKqU0376",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:50:14.129Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_p1ELnQxiA8cmc1IlWC1x0215",
+          "reason": "command matched blocked pattern",
+          "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && grep -n '__pycache__\\|\\.pyc' .gitignore; echo \"=== purpose table rows ===\"; python3 -c \"\nimport os, re\nlive = set()\nfor root, dirs, files in os.walk('deploy/mini-heartbeat'):\n    for f in files:\n        live.add(os.path.join(root, f).replace(os.sep, '/'))\ntext = open('reports/gddp-dogfood/06-deploy-topology.md').read()\n# find the 'one-line purpose' tables section (between header and 'Live tree quote')\nm = re.search(r'## One-line purpose per file(.*?)(?=## Live tree quote)', text, re.S)\ntables = m.group(1)\ntabled = set(re.findall(r'\\`(deploy/mini-heartbeat/[^\\`]+)\\`', tables))\nprint('live files:', len(live))\nprint('files in purpose tables:', len(tabled))\nprint('--- live files missing a one-line purpose row ---')\nfor p in sorted(live - tabled): print(' ', p)\nprint('--- table rows with empty purpose? ---')\nfor row in tables.splitlines():\n    if row.startswith('|') and 'deploy/mini-heartbeat/' in row:\n        cells = [c.strip() for c in row.strip('|').split('|')]\n        if len(cells) >= 2 and cells[1] == '':\n            print('  EMPTY PURPOSE:', row)\nprint('done')\n\"\n",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-11T05:50:14.130Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_p1ELnQxiA8cmc1IlWC1x0215",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T05:50:20.677Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_i0cSyAFP0hh8N6mCQlVy7229",
+          "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && grep -n 'pycache' .gitignore"
+        },
+        {
+          "ts": "2026-08-11T05:50:20.688Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_i0cSyAFP0hh8N6mCQlVy7229",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:50:25.309Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_hTs5FTQlufS5ifnJYzxW9335",
+          "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && python3 -c \"\nimport os, re\nlive = set()\nfor root, dirs, files in os.walk('deploy/mini-heartbeat'):\n    for f in files:\n        live.add(os.path.join(root, f).replace(os.sep, '/'))\ntext = open('reports/gddp-dogfood/06-deploy-topology.md').read()\nm = re.search(r'## One-line purpose per file(.*?)(?=## Live tree quote)', text, re.S)\ntables = m.group(1)\ntabled = set(re.findall(r'\\`(deploy/mini-heartbeat/[^\\`]+)\\`', tables))\nprint('live files:', len(live))\nprint('files in purpose tables:', len(tabled))\nmissing = sorted(live - tabled)\nprint('live files missing a one-line purpose row:', len(missing))\nfor p in missing:\n    print(' ', p)\nrows = [r for r in tables.splitlines() if r.startswith('|') and 'deploy/mini-heartbeat/' in r]\nempty = [r for r in rows if len([c.strip() for c in r.strip('|').split('|')]) < 3]\nprint('rows with missing purpose cell:', len(empty))\n\"\n"
+        },
+        {
+          "ts": "2026-08-11T05:50:25.350Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_hTs5FTQlufS5ifnJYzxW9335",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:50:29.151Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ofm8HW6Aj65Uhgvx6xWT3009",
+          "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && python3 -c \"\nimport re\ntext = open('reports/gddp-dogfood/06-deploy-topology.md').read()\nm = re.search(r'## One-line purpose per file(.*?)(?=## Live tree quote)', text, re.S)\ntables = m.group(1)\nrows = [r for r in tables.splitlines() if r.startswith('|') and 'deploy/mini-heartbeat/' in r]\nbad = []\nfor r in rows:\n    cells = [c.strip() for c in r.strip('|').split('|')]\n    if len(cells) != 3 or not cells[0].startswith('\\`deploy/mini-heartbeat/') or not cells[1]:\n        bad.append(r)\nprint('purpose-table data rows:', len(rows))\nprint('malformed or empty-purpose rows:', len(bad))\nfor b in bad:\n    print(repr(b))\n\"\n"
+        },
+        {
+          "ts": "2026-08-11T05:50:29.198Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ofm8HW6Aj65Uhgvx6xWT3009",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:50:32.723Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_YvslXgjvaZl0yl9GJFt92781",
+          "reason": "command matched blocked pattern",
+          "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && python3 -c \"\nimport re\ntext = open('reports/gddp-dogfood/06-deploy-topology.md').read()\nm = re.search(r'## One-line purpose per file(.*?)(?=## Live tree quote)', text, re.S)\ntables = m.group(1)\nrows = [r for r in tables.splitlines() if r.startswith('|') and 'deploy/mini-heartbeat/' in r]\nbad = []\nfor r in rows:\n    cells = [c.strip() for c in r.strip('|').split('|')]\n    path, purpose = cells[1], cells[2]\n    if not path.startswith('\\`deploy/mini-heartbeat/') or not purpose:\n        bad.append(r)\nprint('purpose-table data rows:', len(rows))\nprint('malformed or empty-purpose rows:', len(bad))\nfor b in bad:\n    print(repr(b))\n# one-line check: purpose should be single line (already by construction) and reasonably short\nlong = [r for r in rows if len(r.strip('|').split('|')[2].strip()) > 160]\nprint('purposes longer than 160 chars:', len(long))\nfor r in long:\n    print(' ', r)\n\"\n",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-11T05:50:32.723Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_YvslXgjvaZl0yl9GJFt92781",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T05:50:37.080Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_ruTOAc8tU21wUm7UdrC27854",
+          "reason": "command matched blocked pattern",
+          "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && python3 -c \"\nimport re\ntext = open('reports/gddp-dogfood/06-deploy-topology.md').read()\nm = re.search(r'## One-line purpose per file(.*?)(?=## Live tree quote)', text, re.S)\ntables = m.group(1)\nrows = [r for r in tables.splitlines() if r.startswith('|') and 'deploy/mini-heartbeat/' in r]\nbad = []\nfor r in rows:\n    cells = [c.strip() for c in r.strip('|').split('|')]\n    path, purpose = cells[1], cells[2]\n    if not path.startswith('\\`deploy/mini-heartbeat/') or not purpose:\n        bad.append(r)\nprint('purpose-table data rows:', len(rows))\nprint('malformed or empty-purpose rows:', len(bad))\nfor b in bad:\n    print(repr(b))\nlong = [r for r in rows if len(r.strip('|').split('|')[2].strip()) - 160 == len(r.strip('|').split('|')[2].strip()) - 160 and len(r.strip('|').split('|')[2].strip()) - 161 == -1 and len(r.strip('|').split('|')[2].strip()) >= 161]\nprint('purposes longer than 160 chars:', len(long))\n\"\n",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-11T05:50:37.080Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ruTOAc8tU21wUm7UdrC27854",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T05:50:39.937Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_6DYzYzMitMWfMDbZBgTE3529",
+          "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && python3 -c \"\nimport re\ntext = open('reports/gddp-dogfood/06-deploy-topology.md').read()\nm = re.search(r'## One-line purpose per file(.*?)(?=## Live tree quote)', text, re.S)\ntables = m.group(1)\nrows = [r for r in tables.splitlines() if r.startswith('|') and 'deploy/mini-heartbeat/' in r]\nbad = []\nlens = []\nfor r in rows:\n    cells = [c.strip() for c in r.strip('|').split('|')]\n    path, purpose = cells[1], cells[2]\n    lens.append(len(purpose))\n    if not path.startswith('\\`deploy/mini-heartbeat/') or not purpose:\n        bad.append(r)\nprint('purpose-table data rows:', len(rows))\nprint('malformed or empty-purpose rows:', len(bad))\nprint('max purpose length:', max(lens), 'min:', min(lens))\nfor b in bad:\n    print(repr(b))\n\"\n"
+        },
+        {
+          "ts": "2026-08-11T05:50:39.987Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_6DYzYzMitMWfMDbZBgTE3529",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-11T05:50:44.730Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_r6hvI3ql01k1yNJgVGOr6724",
+          "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && python3 -c \"\nimport re\ntext = open('reports/gddp-dogfood/06-deploy-topology.md').read()\nm = re.search(r'## One-line purpose per file(.*?)(?=## Live tree quote)', text, re.S)\ntables = m.group(1)\nrows = [r for r in tables.splitlines() if r.startswith('|') and 'deploy/mini-heartbeat/' in r]\nprint('total matching rows:', len(rows))\nfor r in rows:\n    cells = [c.strip() for c in r.strip('|').split('|')]\n    if len(cells) != 4:\n        print('odd row len', len(cells), repr(r))\n\"\n"
+        },
+        {
+          "ts": "2026-08-11T05:50:44.772Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_r6hvI3ql01k1yNJgVGOr6724",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:51:05.197Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_RY76rytpiIgNWPglgcZx1560",
+          "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && python3 -c \"\nimport re, os\ntext = open('reports/gddp-dogfood/06-deploy-topology.md').read()\nm = re.search(r'## Live tree quote(.*?)(?=## Validation)', text, re.S)\nquote = m.group(1)\nlines = [l.strip() for l in quote.splitlines() if l.strip().startswith('deploy/mini-heartbeat/')]\nprint('quote block lines:', len(lines))\nlive = set()\nfor root, dirs, files in os.walk('deploy/mini-heartbeat'):\n    for f in files:\n        live.add(os.path.join(root, f).replace(os.sep, '/'))\nqset = set(lines)\nprint('quote paths that exist on disk now:', len(qset & live), 'of', len(qset))\nprint('quote paths NOT on disk now:', sorted(qset - live))\n\"\n"
+        },
+        {
+          "ts": "2026-08-11T05:51:05.197Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_BeMzVzRj3ptrAyqnk8h99500",
+          "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && echo '--- test_arm_refuse.py head ---' && head -12 deploy/mini-heartbeat/test_arm_refuse.py && echo '--- env example head ---' && head -8 deploy/mini-heartbeat/env/gddp.env.example && echo '--- zellij config head ---' && head -5 deploy/mini-heartbeat/zellij/config.kdl"
+        },
+        {
+          "ts": "2026-08-11T05:51:05.213Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_BeMzVzRj3ptrAyqnk8h99500",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:51:05.234Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_RY76rytpiIgNWPglgcZx1560",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:51:09.139Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_PZt2KZ02uCoHvgQkTTWb2973",
+          "command": "cd /tmp/gddp-eval-wt-bxvq9mg_ && git status --short | head && echo \"--- report tracked? ---\" && git ls-files reports/ && echo \"--- worktree vs HEAD diff ---\" && git diff --stat HEAD -- reports/ && echo \"--- report line count ---\" && wc -l reports/gddp-dogfood/06-deploy-topology.md"
+        },
+        {
+          "ts": "2026-08-11T05:51:09.201Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_PZt2KZ02uCoHvgQkTTWb2973",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-11T05:51:28.561Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_6x0GtyBi87f3cwM04NQx3475",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All three acceptance criteria are satisfied by the committed report reports/gddp-dogfood/06-deploy-topology.md (145 lines, added in the single result commit of this attempt). (1) The report exists and is non-empty. (2) Programmatic cross-check confirms all 24 files under deploy/mini-heartbeat/ are listed with non-empty one-line purposes, and spot-checks show purposes match actual file contents. (3) The live-tree quote reproduces the exact find output for all 24 kit paths; the only extras are 3 __pycache__ bytecode paths absent at evaluation time but explicitly labeled as validation-generated ephemeral/gitignored. Constraints also hold as observed: only the report path was created (git diff base→tip is a single file addition), no writes outside it, the pytest tail line '4 failed, 622 passed in 36.77s' is quoted in the Validation section (format-consistent with pytest; the run itself is not independently reproducible from repo artifacts), and the work is committed on the result ref (c969c73 + wrapper 8f045b6). The deterministic 'indeterminate' results are resolved: the keyword-scan ambiguity is cleared by direct semantic reading.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-11T05:57:55.983932+00:00",
+  "evaluated_tree_sha": "b1a462679ad604becd308bd7774e25e121c3b81f",
+  "evaluated_commit_sha": "8f045b66d80ef20fd905029334f857843ab536c2",
+  "merge_commit_sha": "8f045b66d80ef20fd905029334f857843ab536c2",
+  "expected_base_commit_sha": "450eca1cffe1113b3af15db0b2ab65b7c0eb5b61",
+  "pr_ref": null,
+  "job_id": "job_20260811T05444069d1a5de1df2ee",
+  "execution_attempt_id": "job_20260811T05444069d1a5de1df2ee:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/tmp/gddp-eval-wt-bxvq9mg_/README.md",
+    "project_brief": "/tmp/gddp-eval-wt-bxvq9mg_/PROJECT-BRIEF.md",
+    "foundational_node": "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-bxvq9mg_/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml",
+        "/tmp/gddp-eval-wt-bxvq9mg_/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/tmp/gddp-eval-wt-bxvq9mg_/PROJECT-BRIEF.md",
+        "/tmp/gddp-eval-wt-bxvq9mg_/README.md"
+      ],
+      "not_observed_paths": [
+        "/home/sab-mini/gddp-config/graphs/gddp-dogfood/nodes/node-01-env-var-registry.yaml"
+      ]
+    },
+    "overall": "medium"
+  }
+}

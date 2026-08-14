@@ -1,0 +1,585 @@
+{
+  "project_id": "loop-soak",
+  "node_id": "node-03-soak-chain",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.9,
+    "findings": [],
+    "reasoning": "Node-03-soak-chain's intended role is a dependency probe proving a dependent node can observe its parent's (node-01's) landed work. The work preserves that role: soak/chain.txt contains exactly SOAK-ALPHA-OK-CHAINED (node-01's marker with -CHAINED appended), and reports/loop-soak/node-03.md truthfully records that soak/alpha.txt was visible on the base before editing, with the actual command output. I verified this against git objects: base ec1049b (node-01's result commit) contains soak/alpha.txt with content SOAK-ALPHA-OK, and the diff base..tip adds exactly the two permitted files (soak/chain.txt + the report) with nothing else changed — satisfying the 'exactly one new file under soak/ plus the report' constraint. HEAD is the node's own result ref (18bf332 on gddp/result-...-node-03-soak-chain-attempt-0) with a clean working tree, honoring the 'commit on the node's result ref' constraint. Graph integrity is preserved: node-03's dispatch on provisional node-01 matches the blueprint's frontier_auto_advance/provisional-unblock design, its base was literally node-01's landed result (real chaining, not fabricated), and node-03 unlocks nothing, so no downstream node depends on its files beyond the intended soak/ state that node-04's manifest will list without conflict. Minor note (not a finding): chain.txt has no trailing newline, which is consistent with the criterion's 'no extra text' phrasing and is lane 1's adjudication domain anyway. Confidence 0.9 — all claims cross-checked against actual git history, config YAML, and the working tree.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-13T22:43:19.076Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_b32bgp2oRwJpaOKIGYAi3458",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1ijcwu9p && ls -la && echo \"---\" && find . -type f -not -path './.git/*' | head -50"
+      },
+      {
+        "ts": "2026-08-13T22:43:19.077Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_gvDX97bO7nmIsjWLlzXB2821",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/loop-soak/nodes/node-01-soak-alpha.yaml"
+      },
+      {
+        "ts": "2026-08-13T22:43:19.103Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_gvDX97bO7nmIsjWLlzXB2821",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T22:43:19.125Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_b32bgp2oRwJpaOKIGYAi3458",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T22:43:22.433Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_vcdEAP5gwd2VlFKU40ff8759",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1ijcwu9p/soak/chain.txt"
+      },
+      {
+        "ts": "2026-08-13T22:43:22.434Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_3cYD1M17nl60NcCenDvk2229",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1ijcwu9p/reports/loop-soak/node-03.md"
+      },
+      {
+        "ts": "2026-08-13T22:43:22.434Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_debmSjz8EcwlaVCumBH14688",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1ijcwu9p/soak/alpha.txt"
+      },
+      {
+        "ts": "2026-08-13T22:43:22.438Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_WNEY6xAsZv16ugrgy8QM5942",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1ijcwu9p/reports/loop-soak/node-01.md"
+      },
+      {
+        "ts": "2026-08-13T22:43:22.446Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_debmSjz8EcwlaVCumBH14688",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T22:43:22.446Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_3cYD1M17nl60NcCenDvk2229",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T22:43:22.448Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_WNEY6xAsZv16ugrgy8QM5942",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T22:43:22.448Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_vcdEAP5gwd2VlFKU40ff8759",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T22:43:27.849Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_K4qdv1EQv7srktAUZqsx1743",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1ijcwu9p && git log --oneline -15 2>&1 && echo \"=== STATUS ===\" && git status 2>&1 && echo \"=== BRANCH/REF ===\" && git branch -a 2>&1 && git rev-parse HEAD 2>&1"
+      },
+      {
+        "ts": "2026-08-13T22:43:27.850Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_xua5mZp7kZeslT9OBVd45529",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1ijcwu9p && echo \"=== diff base..tip ===\" && git diff ec1049b498d4414dd34a56089bad68dee590509f 18bf33285d77c2f1719ea97da805718956d7ab7a --stat 2>&1 && echo \"=== full diff ===\" && git diff ec1049b498d4414dd34a56089bad68dee590509f 18bf33285d77c2f1719ea97da805718956d7ab7a 2>&1 | head -80"
+      },
+      {
+        "ts": "2026-08-13T22:43:28.849Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_xua5mZp7kZeslT9OBVd45529",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T22:43:29.117Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_K4qdv1EQv7srktAUZqsx1743",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T22:43:40.708Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_JMVQ11UxIuZiTCyrYAtK2275",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1ijcwu9p && echo \"=== tree at base ec1049b ===\" && git ls-tree -r ec1049b --name-only 2>&1 && echo \"=== alpha.txt content at base ===\" && git show ec1049b:soak/alpha.txt 2>&1 && echo \"=== chain.txt at tip ===\" && git show 18bf332:soak/chain.txt 2>&1 && echo \"=== node-03.md at tip ===\" && git show 18bf332:reports/loop-soak/node-03.md 2>&1 | head -5"
+      },
+      {
+        "ts": "2026-08-13T22:43:40.709Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_qaov7iOH4nngHyIL0HQp0144",
+        "command": "ls -la /Users/sab-mini/repos/gddp-config/graphs/loop-soak/nodes/ 2>&1"
+      },
+      {
+        "ts": "2026-08-13T22:43:40.774Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_qaov7iOH4nngHyIL0HQp0144",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T22:43:40.917Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_JMVQ11UxIuZiTCyrYAtK2275",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T22:43:44.208Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_K5E6cqVvu9MqQprkTtid8931",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/loop-soak/nodes/node-03-soak-chain.yaml"
+      },
+      {
+        "ts": "2026-08-13T22:43:44.208Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_DcchSPqDYFxTqpHHXxnZ5897",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/loop-soak/nodes/node-04-soak-manifest.yaml"
+      },
+      {
+        "ts": "2026-08-13T22:43:44.208Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_UPkDurkBUh8KXWh22poF6799",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/loop-soak/nodes/node-02-soak-beta.yaml"
+      },
+      {
+        "ts": "2026-08-13T22:43:44.221Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_K5E6cqVvu9MqQprkTtid8931",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T22:43:44.221Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_DcchSPqDYFxTqpHHXxnZ5897",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T22:43:44.224Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_UPkDurkBUh8KXWh22poF6799",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-13T22:44:10.409Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_zfJ0bdM3XCqWBoWfiECd8921",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "Forward-looking: node-04-soak-manifest (sibling dependent of node-02) will ls the soak/ directory at execution time and its manifest will necessarily include alpha.txt and chain.txt in addition to beta.txt. Its criterion only requires the beta.txt line, so no conflict is expected — but the sibling pair (node-03/node-04) both write into soak/, so their commits must serialize cleanly on the same target repo, which the current result-ref structure supports.",
+        "affected_node_ids": [
+          "node-04-soak-manifest",
+          "node-03-soak-chain"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 1.0,
+  "criteria_confidence": 1.0,
+  "completeness": 1.0,
+  "graph_readiness": 1.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "chain-exact",
+        "criterion": "soak/chain.txt exists and its entire content is exactly SOAK-ALPHA-OK-CHAINED (the content of node-01's marker with -CHAINED appended, one line, no extra text)",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "SOAK\\-ALPHA\\-OK\\-CHAINED -> line 1: 'SOAK-ALPHA-OK-CHAINED'",
+          "CHAINED -> line 1: 'CHAINED'"
+        ],
+        "reasoning": "Scanned source files (soak/chain.txt) for identifiers named in the criterion (SOAK-ALPHA-OK-CHAINED, node-01, CHAINED). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "report-exists",
+        "criterion": "reports/loop-soak/node-03.md exists and states whether soak/alpha.txt was visible on this node's base before editing (yes/no, with the command output)",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "node\\-03 -> line 1: 'node-03'"
+        ],
+        "reasoning": "Scanned source files (reports/loop-soak/node-03.md, soak/alpha.txt) for identifiers named in the criterion (loop-soak, node-03). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create exactly one new file under soak/ plus the report; change nothing else",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Work only in the node worktree; commit on the node's result ref",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "If soak/alpha.txt is absent from the base, still write chain.txt per the criterion and record the absence plainly in the report",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "reports/loop-soak/node-03.md": true
+    },
+    "deps_status": {
+      "node-01-soak-alpha": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "ec1049b498d4414dd34a56089bad68dee590509f",
+      "tip": "18bf33285d77c2f1719ea97da805718956d7ab7a",
+      "files": [
+        {
+          "status": "A",
+          "path": "reports/loop-soak/node-03.md"
+        },
+        {
+          "status": "A",
+          "path": "soak/chain.txt"
+        }
+      ],
+      "truncated": false,
+      "file_count": 2,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "chain-exact",
+        "judgment": "judged_pass",
+        "confidence": 1.0,
+        "evidence": [
+          "soak/chain.txt exists in working tree and in tip commit 18bf332 (blob 6b6609b7ee450c3bb72919ab4f99284e5121ecc4)",
+          "python3 byte check: repr = b'SOAK-ALPHA-OK-CHAINED', len = 21, exact match True, one line",
+          "node-01 marker content verified: soak/alpha.txt blob dbac3c6b3ec28641d046c85ef28a21739bf84e35 = b'SOAK-ALPHA-OK\\n'; chain.txt = SOAK-ALPHA-OK + '-CHAINED'",
+          "git diff --name-status ec1049b 18bf332 shows only A reports/loop-soak/node-03.md and A soak/chain.txt"
+        ],
+        "reasoning": "The file exists in the committed tip tree and its entire byte content is exactly the 21-byte string SOAK-ALPHA-OK-CHAINED — the node-01 marker content (SOAK-ALPHA-OK) with -CHAINED appended, one line, no extra text. Byte-level verification confirms exact equality with the criterion string."
+      },
+      {
+        "criterion_id": "report-exists",
+        "judgment": "judged_pass",
+        "confidence": 1.0,
+        "evidence": [
+          "reports/loop-soak/node-03.md exists in working tree and tip tree (blob 274508771b94281e4cd7b46780acb96cf77d464a); added in diff ec1049b..18bf332",
+          "Full text states '## Was soak/alpha.txt visible on base before editing?' with '**yes**' and a code block: '$ ls -la soak/alpha.txt && cat soak/alpha.txt' followed by '-rw-r--r--@ 1 sab-mini staff 14 Aug 13 15:37 soak/alpha.txt' and 'SOAK-ALPHA-OK'",
+          "Truthfulness: base ec1049b (parent of tip, node-01 result ref) contains soak/alpha.txt (blob dbac3c6b = b'SOAK-ALPHA-OK\\n', 14 bytes) — matches the report's command output"
+        ],
+        "reasoning": "The report exists at the required path, explicitly states yes/no (here 'yes') as to whether soak/alpha.txt was visible on this node's base before editing, and includes the command output. The stated yes is corroborated by the base commit tree, which contains soak/alpha.txt. Both the existence and the required content of the report are satisfied."
+      }
+    ],
+    "overall_reasoning": "Both acceptance criteria are satisfied with high confidence, verified by direct inspection of the committed tip tree (18bf332, ref gddp/result-…-node-03-soak-chain-…), its parent base (ec1049b = node-01 result ref), and byte-level file contents. soak/chain.txt is byte-exact SOAK-ALPHA-OK-CHAINED (21 bytes, one line, no extra text). reports/loop-soak/node-03.md exists and states 'yes' with verbatim command output for alpha.txt visibility on base, and that claim is corroborated by the base tree. Constraints were also respected: the base→tip diff adds exactly one file under soak/ (chain.txt) plus the report and changes nothing else (alpha.txt blob identical in base and tip); the tip is committed on the node's result ref and the worktree is clean. The conditional constraint about an absent alpha.txt did not trigger because alpha.txt was present on the base; visibility was nonetheless recorded plainly in the report. Note: node-01-soak-alpha remains 'provisional' in deps_status, which is expected per the blueprint's provisional-flow design (dependent pair unblocks after evaluation) and does not bear on this node's own criteria — node-03 chained off node-01's landed result ref, which is exactly the intended base.",
+    "risks": "deps_status shows node-01-soak-alpha as 'provisional'; this is expected under the loop-soak provisional flow and does not affect this node's criteria, but final graph status depends on upstream evaluation. chain.txt has no trailing newline (21 bytes exactly); this satisfies 'one line, no extra text' at least as strictly as a newline-terminated variant — no risk to the criterion. The wrapper-commit note in the subject diff (git add -A junk visibility) is immaterial here: the base→tip diff contains only the two intended files.",
+    "followup_candidates": "Observed: node-01-soak-alpha is marked provisional in deps_status while node-03's criteria were evaluated against node-01's landed result ref (ec1049b). Not part of this node's acceptance criteria; graph-level finalization of node-01 is a separate concern. If the intent was for node-03's verdict to be gated on node-01's final (non-provisional) status, that should be confirmed by a human; otherwise this verdict stands.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-13T22:42:07.525Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_wWEYlLaIBMOfN3lpsEZD8420",
+          "command": "pwd && ls -la && find . -maxdepth 3 -type d | head -50"
+        },
+        {
+          "ts": "2026-08-13T22:42:07.528Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_lk97rJojTxc0r4Ad1n5V5519",
+          "command": "ls -la /Users/sab-mini/repos/gddp-soak-target 2>/dev/null; echo \"---\"; ls -la /Users/sab-mini/repos/gddp-config/graphs/loop-soak/nodes/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-13T22:42:07.569Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_wWEYlLaIBMOfN3lpsEZD8420",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T22:42:07.570Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_lk97rJojTxc0r4Ad1n5V5519",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T22:42:09.566Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_DkbtR4MzxBGZ13OluvO16324",
+          "command": "cat .git; echo \"===\"; ls -la soak reports/loop-soak; echo \"===\"; git -C /Users/sab-mini/repos/gddp-soak-target log --oneline -20 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-13T22:42:09.567Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_oXssATX3eYDwKiYNtJZu0335",
+          "command": "for f in soak/chain.txt soak/alpha.txt soak/beta.txt reports/loop-soak/node-03.md; do echo \"=== $f ===\"; if [ -f \"$f\" ]; then cat -A \"$f\"; echo; else echo \"MISSING\"; fi; done"
+        },
+        {
+          "ts": "2026-08-13T22:42:09.602Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_oXssATX3eYDwKiYNtJZu0335",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T22:42:09.811Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_DkbtR4MzxBGZ13OluvO16324",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T22:42:14.307Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_RVTjesLrj16TYTgGrxdU3603",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1ijcwu9p && git log --oneline -20 --all 2>/dev/null; echo \"=== worktree status ===\"; git status 2>/dev/null; echo \"=== HEAD ===\"; git rev-parse HEAD; git branch -a -vv"
+        },
+        {
+          "ts": "2026-08-13T22:42:14.308Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_d718cJBbNb9q88CTEHfL2177",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1ijcwu9p && for f in soak/chain.txt soak/alpha.txt reports/loop-soak/node-03.md reports/loop-soak/node-01.md; do echo \"=== $f ===\"; od -c \"$f\" | head -20; done"
+        },
+        {
+          "ts": "2026-08-13T22:42:14.355Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_d718cJBbNb9q88CTEHfL2177",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T22:42:14.440Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_RVTjesLrj16TYTgGrxdU3603",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T22:42:30.703Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_uLuvtxDzvwSxJtt09W7C6348",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1ijcwu9p && echo \"=== 18bf332 (node-03 tip) ===\"; git show --stat 18bf332 | head -30; echo; echo \"=== parent of 18bf332 ===\"; git rev-parse 18bf332^; echo; echo \"=== base ec1049b tree ===\"; git ls-tree -r ec1049b | grep -E \"soak|reports\"; echo; echo \"=== tip 18bf332 tree ===\"; git ls-tree -r 18bf332 | grep -E \"soak|reports\""
+        },
+        {
+          "ts": "2026-08-13T22:42:30.704Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_1ezYBFFfnGedlSXthcux2969",
+          "command": "echo \"=== diff base..tip ===\"; git -C /Users/sab-mini/repos/gddp-soak-target diff --stat ec1049b 18bf332 2>/dev/null; echo \"===\"; git -C /Users/sab-mini/repos/gddp-soak-target diff --name-status ec1049b 18bf332 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-13T22:42:30.776Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_1ezYBFFfnGedlSXthcux2969",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T22:42:30.823Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_uLuvtxDzvwSxJtt09W7C6348",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T22:42:39.023Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_PKNGY5hfb8KDvi2mof3g3697",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1ijcwu9p && echo \"=== chain.txt bytes ===\"; wc -c soak/chain.txt; python3 -c \"\ndata=open('soak/chain.txt','rb').read()\nprint('repr:', repr(data))\nprint('len:', len(data))\nexpected=b'SOAK-ALPHA-OK-CHAINED'\nprint('exact match:', data==expected)\nprint('lines:', data.splitlines())\n\""
+        },
+        {
+          "ts": "2026-08-13T22:42:39.023Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_sZ7UXPOfSKwTaRJyxOAn4817",
+          "command": "cat /Users/sab-mini/repos/gddp-config/graphs/loop-soak/nodes/node-03-soak-chain.yaml; echo \"====== node-01 ======\"; cat /Users/sab-mini/repos/gddp-config/graphs/loop-soak/nodes/node-01-soak-alpha.yaml"
+        },
+        {
+          "ts": "2026-08-13T22:42:39.048Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_sZ7UXPOfSKwTaRJyxOAn4817",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T22:42:39.146Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_PKNGY5hfb8KDvi2mof3g3697",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T22:42:48.547Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_HbZIGtxjEN2kSD6C81tW5003",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1ijcwu9p/reports/loop-soak/node-03.md"
+        },
+        {
+          "ts": "2026-08-13T22:42:48.548Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_T5OuzzjFFEdKR5EXJPZM2607",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1ijcwu9p && echo \"=== blob of node-03.md in tip ===\"; git cat-file blob 274508771b94281e4cd7b46780acb96cf77d464a; echo \"=== alpha.txt blob in base/tip ===\"; git cat-file blob dbac3c6b3ec28641d046c85ef28a21739bf84e35 | od -c; echo \"=== worktree HEAD vs result ref ===\"; git rev-parse HEAD; git rev-parse gddp/result-job_20260813T22370044d6250c099fa2-job_20260813T22370044d6250c099fa2-node-03-soak-chain-attempt-0-ac8e971fb7b8471d9ab3b713f1cf85fa"
+        },
+        {
+          "ts": "2026-08-13T22:42:48.559Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_HbZIGtxjEN2kSD6C81tW5003",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T22:42:48.660Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_T5OuzzjFFEdKR5EXJPZM2607",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-13T22:43:11.800Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_0M1Ixfr3ExFosUn4bAQh8084",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Both acceptance criteria are satisfied with high confidence, verified by direct inspection of the committed tip tree (18bf332, ref gddp/result-…-node-03-soak-chain-…), its parent base (ec1049b = node-01 result ref), and byte-level file contents. soak/chain.txt is byte-exact SOAK-ALPHA-OK-CHAINED (21 bytes, one line, no extra text). reports/loop-soak/node-03.md exists and states 'yes' with verbatim command output for alpha.txt visibility on base, and that claim is corroborated by the base tree. Constraints were also respected: the base→tip diff adds exactly one file under soak/ (chain.txt) plus the report and changes nothing else (alpha.txt blob identical in base and tip); the tip is committed on the node's result ref and the worktree is clean. The conditional constraint about an absent alpha.txt did not trigger because alpha.txt was present on the base; visibility was nonetheless recorded plainly in the report. Note: node-01-soak-alpha remains 'provisional' in deps_status, which is expected per the blueprint's provisional-flow design (dependent pair unblocks after evaluation) and does not bear on this node's own criteria — node-03 chained off node-01's landed result ref, which is exactly the intended base.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-13T22:44:10.568887+00:00",
+  "evaluated_tree_sha": "93bf032c033330e29d7b7c7b5b1c67c362f0b78d",
+  "evaluated_commit_sha": "18bf33285d77c2f1719ea97da805718956d7ab7a",
+  "merge_commit_sha": "18bf33285d77c2f1719ea97da805718956d7ab7a",
+  "expected_base_commit_sha": "ec1049b498d4414dd34a56089bad68dee590509f",
+  "pr_ref": null,
+  "job_id": "job_20260813T22370044d6250c099fa2",
+  "execution_attempt_id": "job_20260813T22370044d6250c099fa2:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "UNAVAILABLE: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1ijcwu9p/README.md does not exist",
+    "project_brief": "UNAVAILABLE: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1ijcwu9p/PROJECT-BRIEF.md does not exist",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/loop-soak/nodes/node-01-soak-alpha.yaml",
+    "neighbor:node-01-soak-alpha": "/Users/sab-mini/repos/gddp-config/graphs/loop-soak/nodes/node-01-soak-alpha.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "none",
+      "offered": 1,
+      "content_accessed": 0,
+      "not_observed": 1,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/loop-soak/nodes/node-01-soak-alpha.yaml"
+      ]
+    },
+    "integrity": {
+      "rating": "low",
+      "offered": 1,
+      "content_accessed": 1,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/loop-soak/nodes/node-01-soak-alpha.yaml"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "none"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-13T22:42:01.707749+00:00",
+    "finished_at": "2026-08-13T22:44:10.568611+00:00",
+    "wall_s": 128.859,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 70.204,
+      "tool_calls": 12
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 58.588,
+      "tool_calls": 13
+    }
+  }
+}
