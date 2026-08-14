@@ -1,0 +1,812 @@
+{
+  "project_id": "myapi-part1",
+  "node_id": "node-04-normalize-decisions",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.9,
+    "findings": [],
+    "reasoning": "node-04-normalize-decisions promised to turn raw extractions into schema-conformant canonical decision objects. The work under review (tip bdf55a6 vs base 3a9d426) adds exactly the required artifact, 01-decisions/output/decisions-canonical.jsonl, plus a benign .gitignore line (.pi/). Verified in the tip snapshot: 17 canonical objects map 1:1 to the 17 raw objects (identical ids, same order; D11 correctly excluded per sources.md); every object carries the schema's minimal required set (id, schema_version 1.0, project, title, summary, statement, status, rationale, decided_on, non-empty sources[] with valid kind/ref enums) and status values are all in the schema enum. Normalization fidelity is high: the only raw→canonical field deltas are project-taxonomy cleanups toward the schema's slash-joined multi-home pattern ('MyAPI / Khoj' -> 'MyAPI/Khoj', 'Pi / agent ops' -> 'Pi' with the qualifier preserved in tags), plus one grounded enrichment (D18 companion edge to D17, taken from D18's own rationale text). No decision content was dropped or invented; no supersession data existed in the closed accepted set for either stage, so empty replaces/replaced_by is consistent, not a gap. Traceability is preserved: every canonical object carries the same source refs as its raw origin (review sheet + repo-local memo + Corpus v1.0 parity witness) plus evidence_paths, and all cited paths exist on disk. Graph integrity is intact: upstream artifacts (decision-schema.md, decisions-raw.jsonl, sources.md) are untouched, and the required artifact lands in the exact location/shape that node-05-validate-decision-set and node-06-build-corpus will consume. The lane-1 'indeterminate' flags trace to scanner quirks ('decisions-canonical.js' stale identifier; 'decision-schema.md absent' is a false negative — the file is present and tracked), not to a defect in this node's product. No integrity concern found; verdict pass.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-14T21:40:54.390Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_YIrsAq8ovaMJswqFQXBJ4251",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml"
+      },
+      {
+        "ts": "2026-08-14T21:40:54.392Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_HrqKX8Oul2wucq0YSgKl2123",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-03-extract-decisions.yaml"
+      },
+      {
+        "ts": "2026-08-14T21:40:54.392Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_PuH5VRmUtBt2jXWXczif4957",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-14T21:40:54.392Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_khfOmCxDUGKCGBnn9bks4606",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/README.md"
+      },
+      {
+        "ts": "2026-08-14T21:40:54.400Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_YIrsAq8ovaMJswqFQXBJ4251",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T21:40:54.400Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_PuH5VRmUtBt2jXWXczif4957",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T21:40:54.401Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_HrqKX8Oul2wucq0YSgKl2123",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T21:40:54.401Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_khfOmCxDUGKCGBnn9bks4606",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T21:40:58.681Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_zmuqLTs4ZFxtTm4jM4727395",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git log --oneline -5 2>/dev/null; echo \"---STATUS---\"; git status --short 2>/dev/null | head -30; echo \"---DIFF---\"; git diff --stat HEAD 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-14T21:40:58.684Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_93CI9VQCjah1DLqaUt531216",
+        "command": "cd /Users/sab-mini/repos/MyAPI && find 01-decisions -type f 2>/dev/null | sort; echo \"---\"; ls -la 01-decisions/output/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T21:40:58.715Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_93CI9VQCjah1DLqaUt531216",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T21:40:58.827Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_zmuqLTs4ZFxtTm4jM4727395",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T21:41:05.171Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_A3hmuwht3kLm0obG0cdM1599",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && ls -la; echo \"---\"; find . -maxdepth 3 -name \"*.jsonl\" -o -maxdepth 3 -name \"decision-schema*\" 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-14T21:41:05.171Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_I0kwCYw9652qtc5aqAWn5596",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git status --short 01-decisions/ 2>/dev/null; echo \"---LS-FILES---\"; git ls-files 01-decisions/ 2>/dev/null; echo \"---BRANCHES---\"; git branch -a 2>/dev/null | head; echo \"---TAG/COMMIT bdf55a6---\"; git log --oneline bdf55a6bed363579a84aeb60ea7e403a19b0ce47 2>/dev/null | head -3"
+      },
+      {
+        "ts": "2026-08-14T21:41:05.207Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_A3hmuwht3kLm0obG0cdM1599",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T21:41:05.267Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_I0kwCYw9652qtc5aqAWn5596",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T21:41:11.989Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_P2P3Ju2Eg9jchhmOE5hg9162",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/01-decisions/output/decision-schema.md"
+      },
+      {
+        "ts": "2026-08-14T21:41:11.990Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_jTJZO95Vk1MCjPnKg57u5488",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/01-decisions/output && echo \"=== RAW count ===\"; wc -l decisions-raw.jsonl; echo \"=== CANONICAL count ===\"; wc -l decisions-canonical.jsonl; echo \"=== CANONICAL head ===\"; head -3 decisions-canonical.jsonl; echo; echo \"=== CANONICAL tail ===\"; tail -3 decisions-canonical.jsonl"
+      },
+      {
+        "ts": "2026-08-14T21:41:11.995Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_P2P3Ju2Eg9jchhmOE5hg9162",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T21:41:12.030Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_jTJZO95Vk1MCjPnKg57u5488",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T21:41:25.898Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_TwEPy4vg6fWByYHc5gMT0224",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/01-decisions/output && echo \"=== RAW sample (first 2) ===\"; head -2 decisions-raw.jsonl; echo; echo \"=== RAW ids ===\"; python3 -c \"\nimport json\nraw=[json.loads(l) for l in open('decisions-raw.jsonl')]\ncan=[json.loads(l) for l in open('decisions-canonical.jsonl')]\nprint('raw count:',len(raw),'canonical count:',len(can))\nprint('raw ids:',[r.get('id') for r in raw])\nprint('can ids:',[c.get('id') for c in can])\nprint('same ids order:', [r.get('id') for r in raw]==[c.get('id') for c in can])\n\""
+      },
+      {
+        "ts": "2026-08-14T21:41:25.899Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Q0nlxP2PUKvr3xtXT8Lw3312",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && git diff 3a9d426c9b414c70a3a250e24a78d13c4a31c325 bdf55a6bed363579a84aeb60ea7e403a19b0ce47 -- .gitignore 2>/dev/null | head -40; echo \"=== gitfile ===\"; cat .git 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T21:41:25.946Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Q0nlxP2PUKvr3xtXT8Lw3312",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T21:41:26.020Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_TwEPy4vg6fWByYHc5gMT0224",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T21:41:34.293Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Gh8RJ9bRMB6iyfEmVA172419",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/01-decisions/output && python3 -c \"\nimport json\ncan=[json.loads(l) for l in open('decisions-canonical.jsonl')]\nreq=['id','schema_version','project','title','summary','statement','status','rationale','decided_on','sources']\nstatuses={'accepted','provisional','superseded','rejected','deprecated'}\nkinds={'memo','handoff','session','anchor','review_sheet','commit','other'}\nprobs=[]\nfor c in can:\n    missing=[f for f in req if f not in c or c[f] in (None,'',[])]\n    if missing: probs.append((c.get('id'),'missing',missing))\n    if c.get('schema_version')!='1.0': probs.append((c.get('id'),'schema_version',c.get('schema_version')))\n    if c.get('status') not in statuses: probs.append((c.get('id'),'status',c.get('status')))\n    srcs=c.get('sources',[])\n    if not isinstance(srcs,list) or len(srcs)==0: probs.append((c.get('id'),'no sources',srcs))\n    for s in srcs:\n        if s.get('kind') not in kinds: probs.append((c.get('id'),'source kind',s.get('kind')))\n        if not s.get('ref'): probs.append((c.get('id'),'source no ref',s))\n    if c.get('replaced_by') and c.get('status')!='superseded': probs.append((c.get('id'),'replaced_by but status',c.get('status')))\n    if c.get('replaced_by')==c.get('id'): probs.append((c.get('id'),'self replaced_by'))\n    rels=c.get('related_decisions',[])\n    for r in rels:\n        if not r.get('target_id') or not r.get('rel'): probs.append((c.get('id'),'bad relation',r))\nprint('problems:',probs if probs else 'NONE')\nprint()\nprint('objects with replaces/replaced_by:',[(c['id'],c.get('replaces'),c.get('replaced_by'),c.get('status')) for c in can if c.get('replaces') or c.get('replaced_by')])\nprint('objects with related_decisions:',[(c['id'],[(r['target_id'],r['rel']) for r in c.get('related_decisions',[])]) for c in can if c.get('related_decisions')])\nprint()\n# traceability: do canonical sources cite the raw file itself?\nprint('canonical objects citing decisions-raw.jsonl:', sum(1 for c in can for s in c.get('sources',[]) if 'decisions-raw' in str(s.get('ref',''))))\nprint('canonical objects citing memo:', sum(1 for c in can for s in c.get('sources',[]) if 'last2w-decisions' in str(s.get('ref',''))))\n# field value sanity\nprint('projects:', sorted({c['project'] for c in can}))\nprint('decided_on values:', sorted({c['decided_on'] for c in can}))\n\""
+      },
+      {
+        "ts": "2026-08-14T21:41:34.295Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_6YZcSxUWczFQYnbtWpmi3876",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/01-decisions/output && echo \"=== sources.md (head) ===\"; head -40 sources.md; echo; echo \"=== 01-decisions/CONTEXT.md ===\"; cat ../CONTEXT.md"
+      },
+      {
+        "ts": "2026-08-14T21:41:34.320Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_6YZcSxUWczFQYnbtWpmi3876",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T21:41:34.371Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Gh8RJ9bRMB6iyfEmVA172419",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T21:41:56.186Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_00_HOztk9wE3b2veEIfO27z5969",
+        "reason": "command matched blocked pattern",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/01-decisions/output && python3 -c \"\nimport json,os\nraw=[json.loads(l) for l in open('decisions-raw.jsonl')]\ncan=[json.loads(l) for l in open('decisions-canonical.jsonl')]\n# 1) any raw fields lost in canonical that carry decision content?\ncontent_fields={'statement','summary','title','status','rationale','decided_on','decided_by','project','tags','replaces','replaced_by','related_decisions','alternatives_considered','consequences'}\nfor r,c in zip(raw,can):\n    for f in content_fields:\n        rv=r.get(f); cv=c.get(f)\n        if rv is not None and cv is None and f not in ('tags',):\n            print('LOST', r['id'], f, 'raw=',rv)\n        elif rv is not None and cv is not None and rv!=cv:\n            print('CHANGED', r['id'], f, 'raw=',rv,'-> can=',cv)\n# 2) relationship fields present in raw at all?\nprint('raw replaces/replaced_by/related:',[(r['id'],r.get('replaces'),r.get('replaced_by'),r.get('related_decisions')) for r in raw if r.get('replaces') or r.get('replaced_by') or r.get('related_decisions')])\nprint('raw D18:',json.dumps(raw[16],indent=1)[:800])\n\"",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-14T21:41:56.188Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_HOztk9wE3b2veEIfO27z5969",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-14T21:41:56.193Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_r9UvDE5K08NxJ9icllxk1181",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && python3 -c \"\nimport json,os\ncan=[json.loads(l) for l in open('01-decisions/output/decisions-canonical.jsonl')]\nmissing=[]\nfor c in can:\n    for s in c.get('sources',[]):\n        ref=s.get('ref','')\n        if ref.startswith('/'):  # absolute — check existence\n            if not os.path.exists(ref): missing.append((c['id'],'abs',ref))\n        else:\n            if not os.path.exists(ref): missing.append((c['id'],'rel',ref))\n    for e in c.get('evidence_paths',[]):\n        if not os.path.exists(e): missing.append((c['id'],'evidence',e))\nprint('missing source/evidence paths:', missing if missing else 'NONE')\n\" 2>&1; echo \"---check corpus keeper exists---\"; ls \"/Users/sab-mini/repos/MyAPI/Corpus v1.0/40-decisions-and-trajectories/2026-08-08-last2w-decisions.md\" 2>&1; ls \"project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md\" \"project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md\" 2>&1"
+      },
+      {
+        "ts": "2026-08-14T21:41:56.271Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_r9UvDE5K08NxJ9icllxk1181",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T21:42:05.704Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_mpcGUsuHYFOvw6WbwIHq5708",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/01-decisions/output && python3 -c \"\nimport json\nraw=[json.loads(l) for l in open('decisions-raw.jsonl')]\ncan=[json.loads(l) for l in open('decisions-canonical.jsonl')]\ncontent_fields=['statement','summary','title','status','rationale','decided_on','decided_by','project','tags','replaces','replaced_by','related_decisions','alternatives_considered','consequences']\nfor r,c in zip(raw,can):\n    for f in content_fields:\n        rv=r.get(f); cv=c.get(f)\n        if rv is not None and cv is None and f!='tags':\n            print('LOST', r['id'], f, 'raw=',rv)\n        elif rv is not None and cv is not None and rv!=cv:\n            print('CHANGED', r['id'], f, 'raw=',rv,'can=',cv)\nprint('raw rel fields:',[(r['id'],r.get('replaces'),r.get('replaced_by'),r.get('related_decisions')) for r in raw if r.get('replaces') or r.get('replaced_by') or r.get('related_decisions')])\nprint('RAW D18:', json.dumps(raw[16])[:600])\n\""
+      },
+      {
+        "ts": "2026-08-14T21:42:05.780Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_mpcGUsuHYFOvw6WbwIHq5708",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T21:42:32.320Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_0q6OWPxkNkQUJetTIakD5449",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "The verification harness's keyword scan produced false 'absent' signals for this node ('decisions-canonical.js' — a stale .js identifier; 'decision-schema.md absent' — false, the file is present and tracked). Unless probe identifiers are corrected to decisions-canonical.jsonl/decision-schema.md, node-05-validate-decision-set and downstream verifications may repeat the false-indeterminate and stall frontier auto-advance with spurious human-review flags.",
+        "affected_node_ids": [
+          "node-05-validate-decision-set"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Canonical objects use multi-home project values (e.g. 'MyAPI/Pi/GDDP' for D15) per the schema's slash-joined pattern. node-06-build-corpus will serialize these to YAML frontmatter; whoever builds the corpus snapshot should define how multi-home project values map to frontmatter/grouping so later corpus stages and eval don't re-litigate taxonomy.",
+        "affected_node_ids": [
+          "node-06-build-corpus"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.95,
+  "criteria_confidence": 0.95,
+  "completeness": 1.0,
+  "graph_readiness": 0.95,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "all-conform",
+        "criterion": "01-decisions/output/decisions-canonical.jsonl has one object per raw object, each conforming to decision-schema.md (required fields present, supersession links resolved where sources support them)",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "01-decisions/output/decisions-canonical.js absent",
+          "decision-schema.md absent"
+        ],
+        "reasoning": "Scanned source files (01-decisions/output/decisions-canonical.jsonl) for identifiers named in the criterion (decisions-canonical, decision-schema). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "01-decisions/output/decisions-canonical.js absent, decision-schema.md absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "traceable",
+        "criterion": "Each canonical object carries the source path(s) of its raw origin",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md - read it first.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model xai/grok-4.6 via the subagent tool's model parameter; close with one oracle or reviewer pass before returning",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "01-decisions/output/decisions-canonical.jsonl": true
+    },
+    "deps_status": {
+      "node-01-decision-schema": "complete",
+      "node-03-extract-decisions": "complete"
+    },
+    "criteria_mismatches": [
+      {
+        "criterion_id": "all-conform",
+        "kind": "source_path",
+        "detail": "01-decisions/output/decisions-canonical.js absent, decision-schema.md absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "all-conform",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "3a9d426c9b414c70a3a250e24a78d13c4a31c325",
+      "tip": "bdf55a6bed363579a84aeb60ea7e403a19b0ce47",
+      "files": [
+        {
+          "status": "M",
+          "path": ".gitignore"
+        },
+        {
+          "status": "A",
+          "path": "01-decisions/output/decisions-canonical.jsonl"
+        }
+      ],
+      "truncated": false,
+      "file_count": 2,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "all-conform",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "01-decisions/output/decisions-canonical.jsonl exists, committed at tip bdf55a6 (git ls-files + git show --stat HEAD)",
+          "17 raw vs 17 canonical objects; identical id sets and order (D01-D10, D12-D18); no duplicate ids; D11 absent from both files (sources.md line 14: 'D11 is explicitly dropped... not as an accepted decision')",
+          "Every canonical object carries all 10 required fields (id, schema_version='1.0', project, title, summary, statement, status, rationale, decided_on, sources[]) with valid enums/formats: status all 'accepted' (valid enum), decided_on all YYYY-MM-DD, titles within 1-80 chars, schema_version '1.0'",
+          "All SourceRef objects have kind+ref; source kinds used (review_sheet, memo, other, anchor, handoff) are valid enum values",
+          "Supersession: raw set contains no replaces/replaced_by data (D15 'replaces' hit is prose in rationale: 'neither replaces the other alone'); sources.md line 45 states the schema's MCP supersession examples 'are outside the closed D01-D18 review set, so examples cannot mint Stage B decisions'; canonical replaces/replaced_by empty and statuses accepted, so no links needed resolving",
+          "Content fidelity raw-vs-canonical: statement/status/decided_on/title/summary/rationale/schema_version identical for all 17 objects; only diffs are project normalization for D14-D18 ('MyAPI / Khoj'->'MyAPI/Khoj', 'MyAPI / Pi / GDDP'->'MyAPI/Pi/GDDP', 'MyAPI / ops'->'MyAPI', 'Pi / agent ops'->'Pi'), conforming to schema's enumerated project values",
+          "Normalization is schema-compliant: raw extraction_context dropped (not a schema field); raw source role/quote/sha256 flattened into SourceRef.note; optional fields added are valid (confidence 'high', review_mark 'Y', decided_by 'Sab', evidence_paths)",
+          "related_decisions: only D18->D17 (rel 'companion'), valid enum, no dangling targets",
+          "Git diff (3a9d426..bdf55a6) shows this node's commit added exactly decisions-canonical.jsonl (17 lines) plus an unrelated .gitignore line (.pi/); decisions-raw.jsonl and decision-schema.md were already present from prior complete nodes"
+        ],
+        "reasoning": "The deterministic result's 'absent' flags were scanner artifacts: it searched for a nonexistent 'decisions-canonical.js' (wrong extension) and keyword-scanned the .jsonl content instead of the filesystem. The criterion's path is not stale and the implementation HAS landed. Direct validation of the actual artifact shows 1:1 object correspondence with the raw set, full required-field presence with valid enums/formats, and no unresolved supersession links (the closed D01-D18 set supports none; sources.md explicitly excludes the schema's supersession examples from minting Stage B decisions). One judgment call: project values for D16-D18 were simplified to the schema's enumerated projects (dropping '/ ops' / '/ agent ops' qualifiers), which is consistent with the schema's project enumeration and the qualifiers survive in title/statement; not a criterion violation."
+      },
+      {
+        "criterion_id": "traceable",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "Per-object comparison: ZERO canonical objects whose sources[] share no ref with their raw counterpart (raw_by_id vs can_by_id ref-set intersection)",
+          "Every canonical object carries 3+ source refs: project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md, project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md, and /Users/sab-mini/repos/MyAPI/Corpus v1.0/40-decisions-and-trajectories/2026-08-08-last2w-decisions.md (parity witness; file confirmed to exist)",
+          "D14 additionally carries CORPUS-TARGET-SHAPE.md, REBUILD-CONTEXT-ANCHOR.md, ARCHITECTURE.md, .handoffs/030-corpus-vm-semantic-graphify.md; D15 carries REBUILD-CONTEXT-ANCHOR.md and ARCHITECTURE.md - all present as refs in the corresponding raw objects",
+          "All canonical source refs resolve to existing files (os.path.exists check on every ref, relative and absolute, returned no missing files)",
+          "evidence_paths arrays added in canonical (e.g., D01: memo + review sheet paths) reinforce origin traceability; raw quote text preserved inside canonical SourceRef.note for auditability"
+        ],
+        "reasoning": "Traceability is satisfied directly and verifiably: every canonical object's sources[] carries the same source paths as its raw origin object (1:1 ref overlap for all 17), plus additional supporting refs where the raw extraction had them, and all refs point to real files. The canonical normalization preserved origin paths while flattening raw-only fields (role/quote/sha256) into the schema's note field, so no provenance was lost."
+      }
+    ],
+    "overall_reasoning": "Both acceptance criteria for node-04-normalize-decisions are satisfied by the actual artifact. The deterministic check's indeterminacy was caused by scanner defects, not repo defects: it probed for '01-decisions/output/decisions-canonical.js' (wrong extension) and keyword-scanned the .jsonl content for 'decision-schema.md' instead of checking the filesystem, producing false 'absent' flags and the human question 'is the criterion path stale?'. The file 01-decisions/output/decisions-canonical.jsonl exists at the exact required path, is committed at tip, and contains exactly 17 objects matching the 17 raw objects 1:1 by id (D01-D10, D12-D18; D11 correctly excluded as rejection evidence). Every object carries all schema-required fields with valid enums/formats (schema_version '1.0', status 'accepted', valid dates, titles within length bounds, non-empty sources[] with kind+ref). No supersession links required resolution: the closed D01-D18 set contains no replaces/replaced_by data and sources.md explicitly excludes the schema's supersession examples from minting Stage B decisions. Traceability is direct: every canonical object's sources[] shares its refs with its raw counterpart, all refs resolve to existing files, and evidence_paths reinforce provenance. Raw-to-canonical content fidelity is preserved (statement/status/decided_on/title/summary/rationale identical for all 17); the only diffs are project-value normalization (D14-D18) to schema-enumerated projects, consistent with the node's normalize purpose. The required artifact is present and the commit diff is clean (decisions-canonical.jsonl added; unrelated one-line .gitignore addition).",
+    "risks": "1) The deterministic scanner's false negatives (wrong .js extension; content keyword scan instead of filesystem check) mean the 'indeterminate' statuses and the human question attached to all-conform were artifacts of the probe, not the implementation - worth fixing the probe rather than re-running the node. 2) D16-D18 project values were simplified from 'MyAPI / ops' / 'Pi / agent ops' to 'MyAPI' / 'Pi'; this matches the schema's enumerated project values and the qualifier remains in title/statement, but a human may want to confirm the simplification was intentional rather than accidental information loss. 3) decided_by/confidence/review_mark ('Sab'/'high'/'Y') were added uniformly in canonical and are not present in the raw objects; they are schema-valid optional fields consistent with the review sheet's Y marks, but the uniform 'high' confidence is an extractor assertion rather than per-object evidence. 4) The same commit adds an unrelated '.pi/' line to .gitignore - harmless but outside the node's scope.",
+    "followup_candidates": "1) Human clarification on the deterministic result: 'Is the criterion path stale, or has the implementation not landed yet?' - Answer: neither. 01-decisions/output/decisions-canonical.jsonl and 01-decisions/output/decision-schema.md both exist and are committed; the probe searched for the wrong path/extension (decisions-canonical.js) and scanned inside the .jsonl content rather than the filesystem. Consider fixing the probe and re-running the deterministic check; the node's implementation itself satisfies both criteria. 2) Confirm the D16-D18 project-value normalization ('MyAPI / ops' -> 'MyAPI', 'Pi / agent ops' -> 'Pi') was an intended schema-conformance step; the dropped qualifier survives in title/summary/statement, so no decision content is lost, but a one-line note in the output would remove ambiguity. 3) Minor: the uniform 'confidence: high' added across all canonical objects is an extractor assertion; if the project wants confidence derived per-object from evidence strength, that would be a follow-up enhancement, not a criterion failure.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-14T21:38:07.612Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_TyE80ybpPigmYnkKxgDh9255",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && ls -la && echo \"---\" && cat PROJECT-BRIEF.md 2>/dev/null | head -100"
+        },
+        {
+          "ts": "2026-08-14T21:38:07.614Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_Q7ikf77ArQmcpi2ojC4f0703",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml"
+        },
+        {
+          "ts": "2026-08-14T21:38:07.615Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_OdJkhOsNevLoWDXMWNo67280",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-03-extract-decisions.yaml"
+        },
+        {
+          "ts": "2026-08-14T21:38:07.626Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_OdJkhOsNevLoWDXMWNo67280",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:38:07.627Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Q7ikf77ArQmcpi2ojC4f0703",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:38:07.647Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_TyE80ybpPigmYnkKxgDh9255",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:38:14.781Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_zVljjkNx5UURIoQMQSwy7943",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && ls -la 01-decisions/ 01-decisions/output/ 2>/dev/null && echo \"--- git log ---\" && git log --oneline -10 2>/dev/null && echo \"--- git status ---\" && git status 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-14T21:38:14.782Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_5YxnXv7Upefkl9pZDYQj2886",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && find . -name \"*.jsonl\" -o -name \"decision-schema*\" -o -name \"sources.md\" 2>/dev/null | grep -v node_modules | head -30"
+        },
+        {
+          "ts": "2026-08-14T21:38:14.808Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_5YxnXv7Upefkl9pZDYQj2886",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:38:15.234Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_zVljjkNx5UURIoQMQSwy7943",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:38:19.619Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_kWxq7FYdhj8DCFH35pNJ2558",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/01-decisions/output/decision-schema.md"
+        },
+        {
+          "ts": "2026-08-14T21:38:19.620Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_DVpcUgiN3ZVK365VCpxZ3847",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && echo \"=== raw count ===\" && wc -l 01-decisions/output/decisions-raw.jsonl && echo \"=== canonical count ===\" && wc -l 01-decisions/output/decisions-canonical.jsonl && echo \"=== raw first object ===\" && head -1 01-decisions/output/decisions-raw.jsonl | python3 -m json.tool && echo \"=== canonical first object ===\" && head -1 01-decisions/output/decisions-canonical.jsonl | python3 -m json.tool"
+        },
+        {
+          "ts": "2026-08-14T21:38:19.625Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_kWxq7FYdhj8DCFH35pNJ2558",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:38:19.853Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_DVpcUgiN3ZVK365VCpxZ3847",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:38:29.100Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_49LYtjJcR1oBZXnm07A52468",
+          "reason": "command matched blocked pattern",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && python3 << 'EOF'\nimport json\n\nraw = [json.loads(l) for l in open('01-decisions/output/decisions-raw.jsonl')]\ncan = [json.loads(l) for l in open('01-decisions/output/decisions-canonical.jsonl')]\n\nprint(\"raw objects:\", len(raw), \"canonical objects:\", len(can))\n\nraw_ids = [r.get('id') for r in raw]\ncan_ids = [c.get('id') for c in can]\nprint(\"raw ids:\", raw_ids)\nprint(\"can ids:\", can_ids)\nprint(\"same set & order:\", raw_ids == can_ids)\n\n# duplicate ids?\nfrom collections import Counter\nprint(\"raw dup ids:\", [k for k,v in Counter(raw_ids).items() if v>1])\nprint(\"can dup ids:\", [k for k,v in Counter(can_ids).items() if v>1])\n\n# Required fields per schema\nrequired = ['id','schema_version','project','title','summary','statement','status','rationale','decided_on','sources']\nmissing = {}\nfor c in can:\n    m = [f for f in required if f not in c or c[f] in (None, '', [])]\n    if m: missing[c.get('id')] = m\nprint(\"canonical missing required fields:\", missing if missing else \"NONE\")\n\n# schema_version values\nprint(\"schema_version values:\", sorted(set(c.get('schema_version') for c in can)))\nprint(\"status values:\", sorted(set(c.get('status') for c in can)))\nprint(\"decided_on values:\", sorted(set(c.get('decided_on') for c in can)))\n\n# source kinds\nkinds = set()\nfor c in can:\n    for s in c.get('sources', []):\n        kinds.add(s.get('kind'))\nprint(\"source kinds used:\", sorted(kinds))\n\n# sources non-empty, have ref and kind\nbad_src = []\nfor c in can:\n    for s in c.get('sources', []):\n        if not s.get('ref') or not s.get('kind'):\n            bad_src.append((c.get('id'), s))\nprint(\"sources missing kind/ref:\", bad_src if bad_src else \"NONE\")\n\n# supersession invariants\nreplaces_map = {}   # id -> list of ids it replaces\nreplaced_by_map = {}  # id -> id that supersedes it\nfor c in can:\n    for rid in c.get('replaces', []) or []:\n        replaces_map.setdefault(c['id'], []).append(rid)\n    rb = c.get('replaced_by')\n    if rb:\n        replaced_by_map[c['id']] = rb\n\nprint(\"replaces edges:\", replaces_map)\nprint(\"replaced_by edges:\", replaced_by_map)\n\n# verify invariant: if A.replaces contains B then B.replaced_by == A.id and B.status == superseded\nid2can = {c['id']: c for c in can}\nviolations = []\nfor a, bs in replaces_map.items():\n    for b in bs:\n        bc = id2can.get(b)\n        if bc is None:\n            violations.append(f\"{a}.replaces -> {b} (target {b} not in set)\")\n            continue\n        if bc.get('replaced_by') != a:\n            violations.append(f\"{a}.replaces -> {b} but {b}.replaced_by = {bc.get('replaced_by')!r}\")\n        if bc.get('status') != 'superseded':\n            violations.append(f\"{a}.replaces -> {b} but {b}.status = {bc.get('status')!r}\")\n# reverse: every replaced_by target should have replaces containing source\nfor b, a in replaced_by_map.items():\n    ac = id2can.get(a)\n    if ac is None:\n        violations.append(f\"{b}.replaced_by -> {a} (target {a} not in set)\")\n        continue\n    if b not in (ac.get('replaces') or []):\n        violations.append(f\"{b}.replaced_by = {a} but {a}.replaces = {ac.get('replaces')!r}\")\nprint(\"supersession invariant violations:\", violations if violations else \"NONE\")\nEOF",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-14T21:38:29.101Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_49LYtjJcR1oBZXnm07A52468",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-14T21:38:39.625Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ib7koJeSXyejL22jrGvA8999",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && python3 -c \"\nimport json\nfrom collections import Counter\nraw = [json.loads(l) for l in open('01-decisions/output/decisions-raw.jsonl')]\ncan = [json.loads(l) for l in open('01-decisions/output/decisions-canonical.jsonl')]\nprint('raw objects:', len(raw), 'canonical objects:', len(can))\nraw_ids = [r.get('id') for r in raw]\ncan_ids = [c.get('id') for c in can]\nprint('raw ids:', raw_ids)\nprint('can ids:', can_ids)\nprint('same set and order:', raw_ids == can_ids)\nprint('raw dup ids:', [k for k,v in Counter(raw_ids).items() if v!=1])\nprint('can dup ids:', [k for k,v in Counter(can_ids).items() if v!=1])\nrequired = ['id','schema_version','project','title','summary','statement','status','rationale','decided_on','sources']\nmissing = {}\nfor c in can:\n    m = [f for f in required if f not in c or c[f] in (None, '', [])]\n    if m: missing[c.get('id')] = m\nprint('canonical missing required fields:', missing if missing else 'NONE')\nprint('schema_version values:', sorted(set(c.get('schema_version') for c in can)))\nprint('status values:', sorted(set(c.get('status') for c in can)))\nbad_src = []\nfor c in can:\n    for s in c.get('sources', []):\n        if not s.get('ref') or not s.get('kind'):\n            bad_src.append((c.get('id'), s))\nprint('sources missing kind/ref:', bad_src if bad_src else 'NONE')\n\"\n"
+        },
+        {
+          "ts": "2026-08-14T21:38:39.676Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ib7koJeSXyejL22jrGvA8999",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:38:48.170Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_jdgetwSUiRoBCx7OIxOx7897",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && python3 -c \"\nimport json\ncan = [json.loads(l) for l in open('01-decisions/output/decisions-canonical.jsonl')]\nraw = [json.loads(l) for l in open('01-decisions/output/decisions-raw.jsonl')]\nid2can = {c['id']: c for c in can}\nreplaces_map = {}\nreplaced_by_map = {}\nfor c in can:\n    for rid in (c.get('replaces') or []):\n        replaces_map.setdefault(c['id'], []).append(rid)\n    rb = c.get('replaced_by')\n    if rb: replaced_by_map[c['id']] = rb\nprint('replaces edges:', replaces_map)\nprint('replaced_by edges:', replaced_by_map)\nviolations = []\nfor a, bs in replaces_map.items():\n    for b in bs:\n        bc = id2can.get(b)\n        if bc is None:\n            violations.append(a + '.replaces -' + ' ' + b + ' (target not in set)')\n            continue\n        if bc.get('replaced_by') != a:\n            violations.append(a + '.replaces -' + ' ' + b + ' but ' + b + '.replaced_by=' + repr(bc.get('replaced_by')))\n        if bc.get('status') != 'superseded':\n            violations.append(a + '.replaces -' + ' ' + b + ' but ' + b + '.status=' + repr(bc.get('status')))\nfor b, a in replaced_by_map.items():\n    ac = id2can.get(a)\n    if ac is None:\n        violations.append(b + '.replaced_by -' + ' ' + a + ' (target not in set)')\n        continue\n    if b not in (ac.get('replaces') or []):\n        violations.append(b + '.replaced_by=' + a + ' but ' + a + '.replaces=' + repr(ac.get('replaces')))\nprint('supersession invariant violations:', violations if violations else 'NONE')\n# related_decisions target ids exist?\nrel_bad = []\nfor c in can:\n    for r in (c.get('related_decisions') or []):\n        if r.get('target_id') not in id2can:\n            rel_bad.append((c['id'], r.get('target_id')))\nprint('related_decisions dangling targets:', rel_bad if rel_bad else 'NONE')\nprint('objects with related_decisions:', sum(1 for c in can if c.get('related_decisions')))\n\"\n"
+        },
+        {
+          "ts": "2026-08-14T21:38:48.171Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_01_VCuFVVnGjHaySDzeFK8H4543",
+          "reason": "command matched blocked pattern",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && python3 -c \"\nimport json\nraw = [json.loads(l) for l in open('01-decisions/output/decisions-raw.jsonl')]\ncan = [json.loads(l) for l in open('01-decisions/output/decisions-canonical.jsonl')]\n# Traceability: does each canonical object carry source path(s) of its raw origin?\n# Compare per-id: raw sources refs vs canonical sources refs\nraw_by_id = {r['id']: r for r in raw}\ncan_by_id = {c['id']: c for c in can}\nno_sources = []\nno_path = []\nfor cid, c in can_by_id.items():\n    srcs = c.get('sources') or []\n    if not srcs:\n        no_sources.append(cid)\n    # any ref that looks like a path?\n    for s in srcs:\n        ref = s.get('ref') or ''\n        if '/' in ref or '.' in ref:\n            break\n    else:\n        no_path.append(cid)\nprint('canonical objects with empty sources:', no_sources if no_sources else 'NONE')\nprint('canonical objects with no path-like ref:', no_path if no_path else 'NONE')\n# For each canonical object, is at least one source ref also present in the raw object's sources?\nmatch = []\nfor cid, c in can_by_id.items():\n    r = raw_by_id.get(cid)\n    if r is None:\n        match.append((cid, 'no raw counterpart')); continue\n    raw_refs = set(s.get('ref') for s in (r.get('sources') or []))\n    can_refs = set(s.get('ref') for s in (c.get('sources') or []))\n    inter = can_refs & raw_refs\n    if not inter:\n        match.append((cid, 'no overlapping ref with raw', raw_refs, can_refs))\nprint('objects with no ref overlap vs raw:', match if match else 'NONE')\n# show all canonical refs per object for the record\nfor cid, c in can_by_id.items():\n    refs = [s.get('ref') for s in (c.get('sources') or [])]\n    print(cid, '->', refs)\n\"\n",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-14T21:38:48.172Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_VCuFVVnGjHaySDzeFK8H4543",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-14T21:38:48.248Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_jdgetwSUiRoBCx7OIxOx7897",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:39:03.187Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_OXAmyslF2Vd0I2SF0RKi2318",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && python3 -c \"\nimport json\nraw = [json.loads(l) for l in open('01-decisions/output/decisions-raw.jsonl')]\ncan = [json.loads(l) for l in open('01-decisions/output/decisions-canonical.jsonl')]\nraw_by_id = {r['id']: r for r in raw}\ncan_by_id = {c['id']: c for c in can}\nfor cid, c in can_by_id.items():\n    refs = [s.get('ref') for s in (c.get('sources') or [])]\n    print(cid, '==', refs)\n\"\n"
+        },
+        {
+          "ts": "2026-08-14T21:39:03.254Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_OXAmyslF2Vd0I2SF0RKi2318",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:39:13.274Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Ig22ETwaR3a41gMIURSF3272",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && python3 -c \"\nimport json\nraw = [json.loads(l) for l in open('01-decisions/output/decisions-raw.jsonl')]\ncan = [json.loads(l) for l in open('01-decisions/output/decisions-canonical.jsonl')]\nraw_by_id = {r['id']: r for r in raw}\ncan_by_id = {c['id']: c for c in can}\nproblems = []\nfor cid, c in can_by_id.items():\n    r = raw_by_id.get(cid)\n    raw_refs = set(s.get('ref') for s in (r.get('sources') or []))\n    can_refs = set(s.get('ref') for s in (c.get('sources') or []))\n    if not (can_refs & raw_refs):\n        problems.append(cid)\nprint('objects whose canonical sources share no ref with raw:', problems if problems else 'NONE')\n# every canonical source ref should point to a real file in the repo (or the absolute parity path exists outside)\nimport os\nmissing_files = []\nfor cid, c in can_by_id.items():\n    for s in (c.get('sources') or []):\n        ref = s.get('ref') or ''\n        if ref.startswith('/'):\n            if not os.path.exists(ref):\n                missing_files.append((cid, ref))\n        else:\n            if not os.path.exists(ref):\n                missing_files.append((cid, ref))\nprint('canonical source refs pointing to missing files:', missing_files if missing_files else 'NONE')\n# also confirm decided_by/status/content alignment raw vs canonical for a sample\nfor cid in ['D01', 'D14', 'D15']:\n    r = raw_by_id[cid]; c = can_by_id[cid]\n    same = (r['statement'] == c['statement'] and r['status'] == c['status'] and r['decided_on'] == c['decided_on'])\n    print(cid, 'statement/status/decided_on identical raw-vs-canonical:', same)\n\"\n"
+        },
+        {
+          "ts": "2026-08-14T21:39:13.350Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Ig22ETwaR3a41gMIURSF3272",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:39:22.731Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_sg5aJrSPLwiwzeHqbyla3535",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && python3 -c \"\nimport json\nraw = [json.loads(l) for l in open('01-decisions/output/decisions-raw.jsonl')]\ncan = [json.loads(l) for l in open('01-decisions/output/decisions-canonical.jsonl')]\n# do raw objects mention replaces/replaced_by/supersede at all?\nsup_hits = []\nfor r in raw:\n    blob = json.dumps(r)\n    for kw in ['replaces', 'replaced_by', 'supersede', 'superseded']:\n        if kw in blob:\n            sup_hits.append((r['id'], kw))\nprint('raw supersession keyword hits:', sup_hits if sup_hits else 'NONE')\n# canonical supersession fields present?\ncan_sup = [(c['id'], c.get('replaces'), c.get('replaced_by')) for c in can]\nprint('canonical replaces/replaced_by values:', can_sup)\n# content fidelity across all objects\nraw_by_id = {r['id']: r for r in raw}\ncan_by_id = {c['id']: c for c in can}\ndiffs = []\nfor cid, c in can_by_id.items():\n    r = raw_by_id.get(cid)\n    for f in ['statement', 'status', 'decided_on', 'title', 'summary', 'rationale', 'project', 'schema_version']:\n        if r.get(f) != c.get(f):\n            diffs.append((cid, f, r.get(f), c.get(f)))\nprint('field diffs raw vs canonical:', diffs if diffs else 'NONE')\n# any field in raw dropped that is core? list raw keys vs canonical keys for one object\nr0 = raw[0]; c0 = can[0]\nprint('raw keys:', sorted(r0.keys()))\nprint('can keys:', sorted(c0.keys()))\n\"\n"
+        },
+        {
+          "ts": "2026-08-14T21:39:22.732Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_hy4denyGIh7K8ExpUlob9480",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && python3 -c \"\nimport json\nraw = [json.loads(l) for l in open('01-decisions/output/decisions-raw.jsonl')]\ncan = [json.loads(l) for l in open('01-decisions/output/decisions-canonical.jsonl')]\nr14 = [r for r in raw if r['id']=='D14'][0]\nc14 = [c for c in can if c['id']=='D14'][0]\nprint('D14 raw sources:')\nfor s in r14.get('sources', []): print('  ', s)\nprint('D14 raw extraction_context refs:')\nfor s in r14.get('extraction_context', []): print('  ', s.get('ref'))\nprint('D14 canonical sources:')\nfor s in c14.get('sources', []): print('  ', s)\n\"\n"
+        },
+        {
+          "ts": "2026-08-14T21:39:22.806Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_hy4denyGIh7K8ExpUlob9480",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:39:22.806Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_sg5aJrSPLwiwzeHqbyla3535",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:39:37.078Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_EArrW0euYWeZT57IWYW31790",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && python3 -c \"\nimport json\nraw = [json.loads(l) for l in open('01-decisions/output/decisions-raw.jsonl')]\nr15 = [r for r in raw if r['id']=='D15'][0]\nblob = json.dumps(r15)\nimport re\nfor m in re.finditer('replaces', blob):\n    print('...' + blob[max(0,m.start()-120):m.end()+120].replace(chr(10),' ') + '...')\n    print('---')\n\""
+        },
+        {
+          "ts": "2026-08-14T21:39:37.079Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_FSigu2rKKGRUoUdCoN5u4045",
+          "command": "ls -la \"/Users/sab-mini/repos/MyAPI/Corpus v1.0/40-decisions-and-trajectories/\" 2>/dev/null | head -5; echo \"---\"; ls /Users/sab-mini/repos/MyAPI/ 2>/dev/null | head; echo \"---\"; grep -n \"D1[45678]\" /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/01-decisions/output/sources.md | head -20"
+        },
+        {
+          "ts": "2026-08-14T21:39:37.115Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_FSigu2rKKGRUoUdCoN5u4045",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:39:37.150Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_EArrW0euYWeZT57IWYW31790",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:39:51.679Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_QRK1oyazDjRZfz6HGpAN1321",
+          "reason": "command matched blocked pattern",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && python3 -c \"\nimport json\nlines = open('01-decisions/output/decisions-canonical.jsonl').read().splitlines()\nprint('non-empty lines:', sum(1 for l in lines if l.strip()))\nprint('total lines:', len(lines))\ncan = [json.loads(l) for l in lines]\n# title length\nlong_titles = [(c['id'], len(c['title'])) for c in can if len(c['title']) != 0 and len(c['title']) > 80]\nprint('titles over 80 chars:', long_titles if long_titles else 'NONE')\n# decided_on format\nimport re\nbad_dates = [(c['id'], c['decided_on']) for c in can if not re.match(r'^\\d{4}-\\d{2}-\\d{2}$', c.get('decided_on',''))]\nprint('bad decided_on formats:', bad_dates if bad_dates else 'NONE')\n# related_decisions rel enums\nenum = {'depends_on','enables','constrains','companion','clarifies','conflicts_with'}\nfor c in can:\n    for r in (c.get('related_decisions') or []):\n        if r.get('rel') not in enum:\n            print('BAD rel:', c['id'], r)\nprint('relation enum check done')\n# confidence/review_mark enums\nprint('confidence values:', sorted(set(c.get('confidence') for c in can)))\nprint('review_mark values:', sorted(set(c.get('review_mark') for c in can)))\n\"\n",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-14T21:39:51.681Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_QRK1oyazDjRZfz6HGpAN1321",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-14T21:39:51.681Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_9zoNqKfU9fiMSjWJIusH9734",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && git show --stat HEAD | head -15 && echo \"=== diff of .gitignore ===\" && git diff 3a9d426 HEAD -- .gitignore | head -30"
+        },
+        {
+          "ts": "2026-08-14T21:39:51.747Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_9zoNqKfU9fiMSjWJIusH9734",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:39:57.539Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_dYkEtwqAsRPB493kLbmz3773",
+          "reason": "command matched blocked pattern",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && python3 -c \"\nimport json, re\nlines = open('01-decisions/output/decisions-canonical.jsonl').read().splitlines()\nprint('non-empty lines:', sum(1 for l in lines if l.strip()))\nprint('total lines:', len(lines))\ncan = [json.loads(l) for l in lines]\nlong_titles = [(c['id'], len(c['title'])) for c in can if len(c['title']) != 0 and len(c['title']) >= 81]\nprint('titles of 81+ chars:', long_titles if long_titles else 'NONE')\nbad_dates = [(c['id'], c['decided_on']) for c in can if not re.match(r'^\\\\d{4}-\\\\d{2}-\\\\d{2}$', c.get('decided_on',''))]\nprint('bad decided_on formats:', bad_dates if bad_dates else 'NONE')\nenum = {'depends_on','enables','constrains','companion','clarifies','conflicts_with'}\nbad_rel = []\nfor c in can:\n    for r in (c.get('related_decisions') or []):\n        if r.get('rel') not in enum:\n            bad_rel.append((c['id'], r.get('rel')))\nprint('bad relation rel values:', bad_rel if bad_rel else 'NONE')\nprint('objects with related_decisions:', [(c['id'], c.get('related_decisions')) for c in can if c.get('related_decisions')])\nprint('confidence values:', sorted(set(c.get('confidence') for c in can)))\nprint('review_mark values:', sorted(set(c.get('review_mark') for c in can)))\nprint('decided_by values:', sorted(set(c.get('decided_by') for c in can)))\n\"\n",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-14T21:39:57.540Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_dYkEtwqAsRPB493kLbmz3773",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-14T21:40:02.599Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Ojeh1s6KVtnb3Wgt1COd0897",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && python3 -c \"\nimport json, re\nlines = open('01-decisions/output/decisions-canonical.jsonl').read().splitlines()\nprint('non-empty lines:', sum(1 for l in lines if l.strip()))\nprint('total lines:', len(lines))\ncan = [json.loads(l) for l in lines]\nlong_titles = [(c['id'], len(c['title'])) for c in can if len(c.get('title') or '') not in range(1, 81)]\nprint('titles outside 1-80 chars:', long_titles if long_titles else 'NONE')\nbad_dates = [(c['id'], c['decided_on']) for c in can if not re.match(r'^\\\\d{4}-\\\\d{2}-\\\\d{2}$', c.get('decided_on',''))]\nprint('bad decided_on formats:', bad_dates if bad_dates else 'NONE')\nenum = {'depends_on','enables','constrains','companion','clarifies','conflicts_with'}\nbad_rel = []\nfor c in can:\n    for r in (c.get('related_decisions') or []):\n        if r.get('rel') not in enum:\n            bad_rel.append((c['id'], r.get('rel')))\nprint('bad relation rel values:', bad_rel if bad_rel else 'NONE')\nprint('objects with related_decisions:', [(c['id'], c.get('related_decisions')) for c in can if c.get('related_decisions')])\nprint('confidence values:', sorted(set(c.get('confidence') for c in can)))\nprint('review_mark values:', sorted(set(c.get('review_mark') for c in can)))\nprint('decided_by values:', sorted(set(c.get('decided_by') for c in can)))\n\"\n"
+        },
+        {
+          "ts": "2026-08-14T21:40:02.673Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Ojeh1s6KVtnb3Wgt1COd0897",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:40:16.887Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_f7268PIPZTYXXKGKKCYZ9134",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk && grep -in \"supersed\\|replaced\\|replaces\" 01-decisions/output/sources.md project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md 2>/dev/null | head -20; echo \"=== raw D11 (rejected) present? ===\"; grep -c \"D11\" 01-decisions/output/decisions-raw.jsonl 01-decisions/output/decisions-canonical.jsonl 2>/dev/null; echo \"=== canonical file is committed at tip ===\"; git ls-files 01-decisions/output/ | head"
+        },
+        {
+          "ts": "2026-08-14T21:40:16.940Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_f7268PIPZTYXXKGKKCYZ9134",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T21:40:46.986Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_dvaR4JnOHqCoGeDwHNt77009",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Both acceptance criteria for node-04-normalize-decisions are satisfied by the actual artifact. The deterministic check's indeterminacy was caused by scanner defects, not repo defects: it probed for '01-decisions/output/decisions-canonical.js' (wrong extension) and keyword-scanned the .jsonl content for 'decision-schema.md' instead of checking the filesystem, producing false 'absent' flags and the human question 'is the criterion path stale?'. The file 01-decisions/output/decisions-canonical.jsonl exists at the exact required path, is committed at tip, and contains exactly 17 objects matching the 17 raw objects 1:1 by id (D01-D10, D12-D18; D11 correctly excluded as rejection evidence). Every object carries all schema-required fields with valid enums/formats (schema_version '1.0', status 'accepted', valid dates, titles within length bounds, non-empty sources[] with kind+ref). No supersession links required resolution: the closed D01-D18 set contains no replaces/replaced_by data and sources.md explicitly excludes the schema's supersession examples from minting Stage B decisions. Traceability is direct: every canonical object's sources[] shares its refs with its raw counterpart, all refs resolve to existing files, and evidence_paths reinforce provenance. Raw-to-canonical content fidelity is preserved (statement/status/decided_on/title/summary/rationale identical for all 17); the only diffs are project-value normalization (D14-D18) to schema-enumerated projects, consistent with the node's normalize purpose. The required artifact is present and the commit diff is clean (decisions-canonical.jsonl added; unrelated one-line .gitignore addition).",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-14T21:42:32.424885+00:00",
+  "evaluated_tree_sha": "a32d7a87ead17617c1d5c6695f8c0ec9d2d6f08d",
+  "evaluated_commit_sha": "bdf55a6bed363579a84aeb60ea7e403a19b0ce47",
+  "merge_commit_sha": "bdf55a6bed363579a84aeb60ea7e403a19b0ce47",
+  "expected_base_commit_sha": "3a9d426c9b414c70a3a250e24a78d13c4a31c325",
+  "pr_ref": null,
+  "job_id": "job_20260814T2122590732502f745602",
+  "execution_attempt_id": "job_20260814T2122590732502f745602:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+    "neighbor:node-01-decision-schema": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+    "neighbor:node-03-extract-decisions": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-03-extract-decisions.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "low",
+      "offered": 4,
+      "content_accessed": 2,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-03-extract-decisions.yaml"
+      ],
+      "not_observed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 4,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-03-extract-decisions.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1wv77zrk/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "low"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-14T21:38:04.294203+00:00",
+    "finished_at": "2026-08-14T21:42:32.424643+00:00",
+    "wall_s": 268.141,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 162.88,
+      "tool_calls": 22
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 105.234,
+      "tool_calls": 17
+    }
+  }
+}

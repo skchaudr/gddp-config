@@ -1,7 +1,7 @@
 schema_type: node_evaluations
 schema_version: '1.0'
 project_id: myapi-part1
-generated_at: '2026-08-14T21:05:48Z'
+generated_at: '2026-08-14T22:15:09Z'
 source: gddp-runtime db/queue.db (results + decision_results)
 evaluations:
   node-01-icm-scaffold:
@@ -530,3 +530,114 @@ evaluations:
           status: completed
           elapsed_s: 142.096
           tool_calls: 22
+  node-04-normalize-decisions:
+    verdict: pass
+    evaluated_at: '2026-08-14T21:42:32.534344+00:00'
+    executor: pi_rpc
+    job_id: job_20260814T2122590732502f745602
+    result_id: res_ses_20260814T2122590772a082731b3a
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-04-normalize-decisions/job_20260814T2122590732502f745602-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'node-04-normalize-decisions promised to turn raw extractions into schema-conformant
+      canonical decision objects. The work under review (tip bdf55a6 vs base 3a9d426) adds exactly the
+      required artifact, 01-decisions/output/decisions-canonical.jsonl, plus a benign .gitignore line
+      (.pi/). Verified in the tip snapshot: 17 canonical objects map 1:1 to the 17 raw objects (identical
+      ids, same order; D11 correctly excluded per sources.md); every object carries the schema''s minimal
+      required set (id, schema_version 1.0, project, title, summary, statement, status, rationale, decided_on,
+      non-empty sources[] with valid kind/ref enums) and status values are all in the schema enum. Normalization
+      fidelity is high: the only raw→canonical field deltas are project-taxonomy cleanups toward the schema''s
+      slash-joined multi-home pattern (''MyAPI / Khoj'' -> ''MyAPI/Khoj'', ''Pi / agent ops'' -> ''Pi''
+      with the qualifier preserved in tags), plus one grounded enrichment (D18 companion edge to D17,
+      taken from D18''s own rationale text). No decision content was dropped or invented; no supersession
+      data existed in the closed accepted set for either stage, so empty replaces/replaced_by is consistent,
+      not a gap. Traceability is preserved: every canonical object carries the same source refs as its
+      raw origin (review sheet + repo-local memo + Corpus v1.0 parity witness) plus evidence_paths, and
+      all cited paths exist on disk. Graph integrity is intact: upstream artifacts (decision-schema.md,
+      decisions-raw.jsonl, sources.md) are untouched, and the required artifact lands in the exact location/shape
+      that node-05-validate-decision-set and node-06-build-corpus will consume. The lane-1 ''indeterminate''
+      flags trace to scanner quirks (''decisions-canonical.js'' stale identifier; ''decision-schema.md
+      absent'' is a false negative — the file is present and tracked), not to a defect in this node''s
+      product. No integrity concern found; verdict pass.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-04-normalize-decisions/job_20260814T2122590732502f745602-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.95
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: a32d7a87ead17617c1d5c6695f8c0ec9d2d6f08d
+      evaluated_commit_sha: bdf55a6bed363579a84aeb60ea7e403a19b0ce47
+      merge_commit_sha: bdf55a6bed363579a84aeb60ea7e403a19b0ce47
+      execution_attempt_id: job_20260814T2122590732502f745602:attempt:0
+      context_coverage:
+        criteria: low
+        integrity: high
+        overall: low
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'node-04-normalize-decisions promised to turn raw extractions into schema-conformant
+          canonical decision objects. The work under review (tip bdf55a6 vs base 3a9d426) adds exactly
+          the required artifact, 01-decisions/output/decisions-canonical.jsonl, plus a benign .gitignore
+          line (.pi/). Verified in the tip snapshot: 17 canonical objects map 1:1 to the 17 raw objects
+          (identical ids, same order; D11 correctly excluded per sources.md); every object carries the
+          schema''s minimal required set (id, schema_version 1.0, project, title, summary, statement,
+          status, rationale, decided_on, non-empty sources[] with valid kind/ref enums) and status values
+          are all in the schema enum. Normalization fidelity is high: the only raw→canonical field deltas
+          are project-taxonomy cleanups toward the schema''s slash-joined multi-home pattern (''MyAPI
+          / Khoj'' -> ''MyAPI/Khoj'', ''Pi / agent ops'' -> ''Pi'' with the qualifier preserved in tags),
+          plus one grounded enrichment (D18 companion edge to D17, taken from D18''s own rationale text).
+          No decision content was dropped or invented; no supersession data existed in the closed accepted
+          set for either stage, so empty replaces/replaced_by is consistent, not a gap. Traceability is
+          preserved: every canonical object carries the same source refs as its raw origin (review sheet
+          + repo-local memo + Corpus v1.0 parity witness) plus evidence_paths, and all cited paths exist
+          on disk. Graph integrity is intact: upstream artifacts (decision-schema.md, decisions-raw.jsonl,
+          sources.md) are untouched, and the required artifact lands in the exact location/shape that
+          node-05-validate-decision-set and node-06-build-corpus will consume. The lane-1 ''indeterminate''
+          flags trace to scanner quirks (''decisions-canonical.js'' stale identifier; ''decision-schema.md
+          absent'' is a false negative — the file is present and tracked), not to a defect in this node''s
+          product. No integrity concern found; verdict pass.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: medium
+          summary: The verification harness's keyword scan produced false 'absent' signals for this node
+            ('decisions-canonical.js' — a stale .js identifier; 'decision-schema.md absent' — false, the
+            file is present and tracked). Unless probe identifiers are corrected to decisions-canonical.jsonl/decision-schema.md,
+            node-05-validate-decision-set and downstream verifications may repeat the false-indeterminate
+            and stall frontier auto-advance with spurious human-review flags.
+          affected_node_ids:
+          - node-05-validate-decision-set
+        - severity: low
+          summary: Canonical objects use multi-home project values (e.g. 'MyAPI/Pi/GDDP' for D15) per
+            the schema's slash-joined pattern. node-06-build-corpus will serialize these to YAML frontmatter;
+            whoever builds the corpus snapshot should define how multi-home project values map to frontmatter/grouping
+            so later corpus stages and eval don't re-litigate taxonomy.
+          affected_node_ids:
+          - node-06-build-corpus
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      evaluation_timing:
+        started_at: '2026-08-14T21:38:04.294203+00:00'
+        finished_at: '2026-08-14T21:42:32.424643+00:00'
+        wall_s: 268.141
+        criteria:
+          status: completed
+          elapsed_s: 162.88
+          tool_calls: 22
+        integrity:
+          status: completed
+          elapsed_s: 105.234
+          tool_calls: 17
