@@ -1,0 +1,834 @@
+{
+  "project_id": "myapi-part1",
+  "node_id": "node-06-build-corpus",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.92,
+    "findings": [
+      {
+        "severity": "low",
+        "summary": "02-corpus/CONTEXT.md 'Local layout' lists an inputs/ directory (pinned decision-set inputs) that does not exist; the builder reads directly from 01-decisions/output/decisions-canonical.jsonl. Cosmetic doc drift only — no impact on reproducibility or downstream consumers.",
+        "affected_node_ids": [
+          "node-06-build-corpus"
+        ]
+      }
+    ],
+    "reasoning": "The node's intended role is Stage D: a corpus generated from VALIDATED decisions by a repeatable process — not hand-assembled. That intent is preserved and independently verified. (1) The corpus is genuinely generated: re-running build_corpus.py's render logic against the checked-in decisions-canonical.jsonl (17 accepted records, sha 09c15aeb…) reproduces all 18 files (17 D-docs + index.md) byte-for-byte; the builder is stdlib-only and deterministic (sorted ids, fixed UTF-8/\\\\n writes, atomic temp-dir swap). (2) It consumed the validated upstream set: node-05's validation-report.md passes with D11 explicitly dispositioned as rejected, and the corpus correctly contains no D11 and no dangling references. (3) The verbatim-taxonomy constraint is honored: every D-file frontmatter project value matches the canonical JSONL verbatim (incl. MyAPI/Khoj, MyAPI/Pi/GDDP), homes derive only via project.split(\\\"/\\\"), and the rule is recorded in CONTEXT.md for downstream stages. (4) The repro-report.md is honest and its claims (builder exit 0, 18 files both sides, diff -qr exit 0, SHA-256 manifest equality) are reproducible from the repo state. (5) Graph integrity: the work is contained to 02-corpus/ (21 files), touches no graph config, and preserves the downstream contract — 03-ingestion consumes 02-corpus/output/, and node-07 onward transform this same snapshot. The lane-1 'decisions-canonical.jsonl absent' mismatch is stale (the file exists at 01-decisions/output/) and does not reflect a real defect in this work. Verdict: pass.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-14T22:41:14.136Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_2vEhJkUiWVLmJnr9vbqB4827",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-06-build-corpus.yaml"
+      },
+      {
+        "ts": "2026-08-14T22:41:14.137Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_SbRjeVutYD1E1WHsSdz02344",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-05-validate-decision-set.yaml"
+      },
+      {
+        "ts": "2026-08-14T22:41:14.138Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_fHqLaXZpK3w9mf8GOlEH4475",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-14T22:41:14.138Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_aK7s7zx29sAJvL7DtXhG9066",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m/README.md"
+      },
+      {
+        "ts": "2026-08-14T22:41:14.144Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_SbRjeVutYD1E1WHsSdz02344",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:41:14.145Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_fHqLaXZpK3w9mf8GOlEH4475",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:41:14.145Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_2vEhJkUiWVLmJnr9vbqB4827",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:41:14.145Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_aK7s7zx29sAJvL7DtXhG9066",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:41:17.808Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_J5gXcORlqLMD8aTMVbjT2503",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m && ls -la && echo \"---\" && ls -la 02-corpus/ 2>/dev/null && echo \"---\" && ls -la 02-corpus/output/ 2>/dev/null && echo \"---\" && ls -la 02-corpus/output/corpus/ 2>/dev/null && echo \"---\" && ls -la 01-decisions/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T22:41:17.810Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Z1oxcPwlAiuJTCPSxvJU0369",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m && find . -maxdepth 2 -type d | head -50 && echo \"---GIT---\" && git log --oneline -15 2>/dev/null; git status 2>/dev/null | head -40"
+      },
+      {
+        "ts": "2026-08-14T22:41:17.860Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_J5gXcORlqLMD8aTMVbjT2503",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:41:17.943Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Z1oxcPwlAiuJTCPSxvJU0369",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:41:21.211Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_ELf1gJ2bJJi1r4m644U51538",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m/02-corpus/build_corpus.py"
+      },
+      {
+        "ts": "2026-08-14T22:41:21.213Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_qbPTEHKEVeX9EXKRZJqf6826",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m/02-corpus/CONTEXT.md"
+      },
+      {
+        "ts": "2026-08-14T22:41:21.213Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_cxeqRJCUAHUEJ2eY5Ltm3821",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m/02-corpus/output/repro-report.md"
+      },
+      {
+        "ts": "2026-08-14T22:41:21.213Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_03_8QmGscr27WkqAXpbKZ7N4655",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m && ls -la 01-decisions/output/ && echo \"---\" && find 01-decisions -type f | head -30 && echo \"---canonical---\" && find . -name \"decisions-canonical.jsonl\" 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-14T22:41:21.220Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ELf1gJ2bJJi1r4m644U51538",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:41:21.221Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_cxeqRJCUAHUEJ2eY5Ltm3821",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:41:21.221Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_qbPTEHKEVeX9EXKRZJqf6826",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:41:21.257Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_8QmGscr27WkqAXpbKZ7N4655",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:41:38.216Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_6FqBBc40Ee8NmhY7AEu22488",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m && python3 - <<'EOF'\nimport json, hashlib\nfrom pathlib import Path\n\np = Path(\"01-decisions/output/decisions-canonical.jsonl\")\nraw = p.read_bytes()\ndecisions = [json.loads(l) for l in raw.splitlines() if l.strip()]\nids = sorted(d[\"id\"] for d in decisions)\nprint(\"record count:\", len(decisions))\nprint(\"ids:\", ids)\nprint(\"dupes:\", len(ids) != len(set(ids)))\nproj = sorted(set(d[\"project\"] for d in decisions))\nprint(\"projects:\", proj)\n# fields present\nkeys = set()\nfor d in decisions:\n    keys.update(d.keys())\nprint(\"fields across records:\", sorted(keys))\nprint(\"source sha256:\", hashlib.sha256(raw).hexdigest())\nEOF"
+      },
+      {
+        "ts": "2026-08-14T22:41:38.217Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Es1G1AhLG2TC03XiA2zC4565",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m && head -30 02-corpus/output/corpus/D14.md && echo \"=====INDEX HEAD=====\" && head -40 02-corpus/output/corpus/index.md"
+      },
+      {
+        "ts": "2026-08-14T22:41:38.217Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_3E4GNbQ9leexHh49CpJR9554",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m && ls 03-ingestion/ && echo \"---\" && find 03-ingestion 04-evaluation -maxdepth 2 -type f | head -20 && echo \"---gddp/nodes---\" && ls gddp/nodes/ 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-14T22:41:38.244Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Es1G1AhLG2TC03XiA2zC4565",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:41:38.251Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_3E4GNbQ9leexHh49CpJR9554",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:41:38.354Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_6FqBBc40Ee8NmhY7AEu22488",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:41:44.517Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_qyEDeoFjilGCbdc92kM32873",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m && python3 - <<'EOF'\nimport importlib.util, sys\nfrom pathlib import Path\n\nspec = importlib.util.spec_from_file_location(\"bc\", \"02-corpus/build_corpus.py\")\nbc = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(bc)\n\nsrc = Path(\"01-decisions/output/decisions-canonical.jsonl\")\ndecisions, sha = bc.load_decisions(src)\noutdir = Path(\"02-corpus/output/corpus\")\n\n# render expected content in memory\nexpected = {\"index.md\": bc.render_index(decisions, sha)}\nfor d in decisions:\n    expected[f\"{d['id']}.md\"] = bc.render_decision(d)\n\nactual_files = sorted(p.name for p in outdir.iterdir())\nexpected_files = sorted(expected.keys())\nprint(\"actual file set == expected file set:\", actual_files == expected_files)\nif actual_files != expected_files:\n    print(\"  only actual:\", set(actual_files) - set(expected_files))\n    print(\"  only expected:\", set(expected_files) - set(actual_files))\n\nmismatches = []\nfor name in expected_files:\n    exp = expected[name] + \"\\n\"  # write_utf8 adds no trailing newline beyond content; render ends with \"\\n\"\n    act = (outdir / name).read_text(encoding=\"utf-8\")\n    # compare against exact file bytes\n    if act != exp.rstrip(\"\\n\") and act != exp:\n        mismatches.append(name)\nprint(\"byte mismatches:\", mismatches)\nprint(\"source sha matches report:\", sha == \"09c15aebd3a424e7f09ce2c27985fa0cbc24a23d9c474182ea4c912b926750a8\")\nEOF"
+      },
+      {
+        "ts": "2026-08-14T22:41:44.518Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_QRGHqE33QUbhHZh8veWU2361",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m && cat 03-ingestion/CONTEXT.md && echo \"=====VALIDATION REPORT (node-05 output)=====\" && head -60 01-decisions/output/validation-report.md"
+      },
+      {
+        "ts": "2026-08-14T22:41:44.541Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_QRGHqE33QUbhHZh8veWU2361",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:41:44.662Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_qyEDeoFjilGCbdc92kM32873",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:41:50.832Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_UStXKW7MafvEKzIQTXxj6470",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m && python3 - <<'EOF'\nimport importlib.util\nfrom pathlib import Path\n\nspec = importlib.util.spec_from_file_location(\"bc\", \"02-corpus/build_corpus.py\")\nbc = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(bc)\n\nsrc = Path(\"01-decisions/output/decisions-canonical.jsonl\")\ndecisions, sha = bc.load_decisions(src)\n\nact = (Path(\"02-corpus/output/corpus/D14.md\")).read_text(encoding=\"utf-8\")\nexp = bc.render_decision([d for d in decisions if d[\"id\"]==\"D14\"][0])\n\nprint(\"len act:\", len(act), \"len exp:\", len(exp))\nprint(\"act endswith newline:\", act.endswith(\"\\n\"), \"exp endswith newline:\", exp.endswith(\"\\n\"))\nprint(\"act == exp:\", act == exp)\nprint(\"act == exp + '\\n':\", act == exp + \"\\n\")\n\n# show first divergence\nfor i,(a,e) in enumerate(zip(act, exp)):\n    if a != e:\n        print(\"first diff at index\", i)\n        print(\"ACT  :\", repr(act[max(0,i-40):i+60]))\n        print(\"EXP  :\", repr(exp[max(0,i-40):i+60]))\n        break\nelse:\n    print(\"no char diff; lengths differ by\", len(act)-len(exp))\n    print(\"act tail:\", repr(act[-80:]))\n    print(\"exp tail:\", repr(exp[-80:]))\nEOF"
+      },
+      {
+        "ts": "2026-08-14T22:41:50.927Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_UStXKW7MafvEKzIQTXxj6470",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:42:10.590Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ichGdrXtC1flrSUKtmQY3250",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m && python3 - <<'EOF'\nimport importlib.util, json\nfrom pathlib import Path\n\nspec = importlib.util.spec_from_file_location(\"bc\", \"02-corpus/build_corpus.py\")\nbc = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(bc)\n\nsrc = Path(\"01-decisions/output/decisions-canonical.jsonl\")\ndecisions, sha = bc.load_decisions(src)\noutdir = Path(\"02-corpus/output/corpus\")\n\nexpected = {\"index.md\": bc.render_index(decisions, sha)}\nfor d in decisions:\n    expected[f\"{d['id']}.md\"] = bc.render_decision(d)\n\nactual_files = sorted(p.name for p in outdir.iterdir())\nexpected_files = sorted(expected.keys())\nprint(\"file set identical:\", actual_files == expected_files)\n\nbad = []\nfor name in expected_files:\n    act = (outdir / name).read_text(encoding=\"utf-8\")\n    if act != expected[name]:\n        bad.append(name)\nprint(\"byte-identical files:\", \"ALL 18 PASS\" if not bad else f\"MISMATCH: {bad}\")\n\n# verbatim project check: frontmatter 'project:' line in each D file equals jsonl value\nproj_bad = []\nfor d in decisions:\n    text = (outdir / f\"{d['id']}.md\").read_text(encoding=\"utf-8\")\n    fm_line = [l for l in text.splitlines() if l.startswith(\"project:\")][0]\n    if json.loads(fm_line.split(\":\",1)[1].strip()) != d[\"project\"]:\n        proj_bad.append((d[\"id\"], fm_line, d[\"project\"]))\nprint(\"verbatim project frontmatter:\", \"PASS\" if not proj_bad else proj_bad)\n\n# no D11 anywhere\nprint(\"D11 references in index:\", \"D11\" in (outdir/\"index.md\").read_text())\nprint(\"D11.md exists:\", (outdir/\"D11.md\").exists())\nprint(\"stdout 'built 17' consistent:\", len(decisions) == 17)\nEOF"
+      },
+      {
+        "ts": "2026-08-14T22:42:10.590Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_moPB9AcLDUDg0e4CuSJ97277",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m && grep -n \"02-corpus\" AGENTS.md IMPLEMENTATION-PLAN.md 2>/dev/null | head -30 && echo \"---CONTEXT input mention---\" && grep -rn \"inputs/\" 02-corpus/ | head && echo \"---git diff stat for the work commit---\" && git diff --stat d301bd2..e1ebe57"
+      },
+      {
+        "ts": "2026-08-14T22:42:10.634Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_moPB9AcLDUDg0e4CuSJ97277",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:42:10.671Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ichGdrXtC1flrSUKtmQY3250",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-14T22:42:30.116Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_FWTGxM4TKDi9VYGkZi7H7742",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "node-05-validate-decision-set is still marked 'provisional' in the graph config while node-06 has fired and nodes 07-13 chain from this corpus. The upstream validation report passes and the corpus consumed the exact validated artifact, so no integrity harm today, but the frontier should confirm node-05's gate is formally closed before the evaluation stage (nodes 10-12) fires, since any late decision-set change would ripple through the corpus snapshot.",
+        "affected_node_ids": [
+          "node-05-validate-decision-set",
+          "node-06-build-corpus",
+          "node-07-khoj-transform",
+          "node-08-khoj-ingest"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9633333333333333,
+  "criteria_confidence": 0.9633333333333333,
+  "completeness": 1.0,
+  "graph_readiness": 0.9633333333333333,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "corpus-exists",
+        "criterion": "02-corpus/output/corpus/ contains the generated corpus (one markdown document per decision plus an index), built by 02-corpus/build_corpus.py from decisions-canonical.jsonl",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "decisions\\-canonical -> line 18: 'decisions-canonical'",
+          "decisions-canonical.jsonl absent"
+        ],
+        "reasoning": "Scanned source files (02-corpus/build_corpus.py) for identifiers named in the criterion (build_corpus, decisions-canonical). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "decisions-canonical.jsonl absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "builder-script",
+        "criterion": "02-corpus/build_corpus.py runs with stdlib only and regenerates the corpus from the canonical jsonl",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (02-corpus/build_corpus.py)"
+        ],
+        "reasoning": "Scanned source files (02-corpus/build_corpus.py) for identifiers named in the criterion (build_corpus). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "rebuild-identical",
+        "criterion": "02-corpus/output/repro-report.md shows a clean rebuild of the corpus into a temp dir diffed against 02-corpus/output/corpus/: identical file set and bytes, or every difference explained and fixed",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (02-corpus/output/repro-report.md)"
+        ],
+        "reasoning": "Scanned source files (02-corpus/output/repro-report.md) for identifiers named in the criterion (repro-report). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md - read it first.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Multi-home project values: preserve project values like MyAPI/Pi/GDDP VERBATIM in YAML frontmatter; derive project homes with split(\"/\") only for corpus index/grouping. Record this rule in 02-corpus/CONTEXT.md so downstream stages do not re-litigate taxonomy",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model xai/grok-4.6 via the subagent tool's model parameter; close with one oracle or reviewer pass before returning",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "02-corpus/build_corpus.py": true,
+      "02-corpus/output/repro-report.md": true
+    },
+    "deps_status": {
+      "node-05-validate-decision-set": "provisional"
+    },
+    "criteria_mismatches": [
+      {
+        "criterion_id": "corpus-exists",
+        "kind": "source_path",
+        "detail": "decisions-canonical.jsonl absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "corpus-exists",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "d301bd26fccf285a546b1935830c4db43d245b99",
+      "tip": "e1ebe5724da26a7c8d34d72da74064a7c19d8068",
+      "files": [
+        {
+          "status": "M",
+          "path": "02-corpus/CONTEXT.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/build_corpus.py"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D01.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D02.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D03.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D04.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D05.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D06.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D07.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D08.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D09.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D10.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D12.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D13.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D14.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D15.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D16.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D17.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D18.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/index.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/repro-report.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 21,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "corpus-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "02-corpus/output/corpus/ contains D01-D10, D12-D18 (17 docs) + index.md (18 files total)",
+          "01-decisions/output/decisions-canonical.jsonl has 17 records with IDs exactly matching the corpus docs",
+          "Independent run: python3 02-corpus/build_corpus.py --input 01-decisions/output/decisions-canonical.jsonl --output <tempdir> exited 0 and produced byte-identical files (filecmp shallow=False, zero mismatches)",
+          "02-corpus/CONTEXT.md documents builder default input 01-decisions/output/decisions-canonical.jsonl"
+        ],
+        "reasoning": "The corpus exists, is one markdown document per canonical decision plus an index, and is generated by 02-corpus/build_corpus.py from the canonical jsonl (verified by re-running the builder and byte-comparing). The deterministic scan's 'decisions-canonical.jsonl absent' was a keyword-scan false negative: the criterion's unqualified 'decisions-canonical.jsonl' resolves to 01-decisions/output/decisions-canonical.jsonl per CONTEXT.md and the builder default. Path is not stale; no implementation gap."
+      },
+      {
+        "criterion_id": "builder-script",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "Imports in 02-corpus/build_corpus.py are stdlib only: argparse, hashlib, json, os, pathlib, re, shutil, tempfile, typing",
+          "Executed successfully (exit 0, 'built 17 decisions + index') against the canonical jsonl into a fresh temp dir",
+          "Regenerated output byte-identical to committed 02-corpus/output/corpus/ (18/18 files, no mismatches)",
+          "REQUIRED_FIELDS in builder match canonical schema required fields in 01-decisions/output/decision-schema.md (id, schema_version, project, title, summary, statement, status, rationale, decided_on, sources[])"
+        ],
+        "reasoning": "The builder runs with stdlib only (verified by reading imports and executing it) and regenerates the corpus from the canonical jsonl. The deterministic scan's 'no hit' for build_corpus identifiers was a source-scan false negative; the script clearly exists and functions."
+      },
+      {
+        "criterion_id": "rebuild-identical",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "02-corpus/output/repro-report.md documents procedure (mktemp temp dir, python3 02-corpus/build_corpus.py --input ... --output $tmp/corpus, diff -qr, independent SHA-256 manifest) and result PASS with 18 files, manifest equality true, no differences",
+          "Repro report's claimed source SHA-256 09c15aeb... matches the actual computed hash of 01-decisions/output/decisions-canonical.jsonl",
+          "Independent replication in this evaluation: file set identical (18/18), byte mismatches none, builder exit 0"
+        ],
+        "reasoning": "The repro report exists and shows a clean temp-dir rebuild diffed against the checked corpus with identical file set and bytes (or all differences explained — here none). I independently reproduced the byte-identical rebuild from the current tree, so the report's substantive claim holds against the committed corpus."
+      }
+    ],
+    "overall_reasoning": "All three acceptance criteria for node-06-build-corpus are satisfied, verified both by artifact inspection and by an independent, non-destructive re-run of the builder. (1) corpus-exists: 02-corpus/output/corpus/ holds one Markdown doc per canonical decision (D01-D10, D12-D18 — D11 correctly absent, dispositioned as rejected in 01-decisions/output/validation-report.md) plus index.md, generated by build_corpus.py from 01-decisions/output/decisions-canonical.jsonl (17 records, IDs match exactly). (2) builder-script: build_corpus.py uses only stdlib imports and regenerates the corpus from the canonical jsonl — executed cleanly (exit 0) into a temp dir with byte-identical output. (3) rebuild-identical: 02-corpus/output/repro-report.md documents the clean temp-dir rebuild, diff -qr and manifest checks passing with 18/18 files byte-identical and no differences to explain; its stated source SHA-256 matches the actual file, and my independent replication confirmed identity. Constraint alignment: multi-home project values preserved verbatim in YAML frontmatter (D14 'MyAPI/Khoj', D15 'MyAPI/Pi/GDDP'), index homes derived only via project.split('/') (GDDP/Khoj/MyAPI/Pi), and the rule is recorded in 02-corpus/CONTEXT.md. The node's intent — a corpus generated from validated decisions by a repeatable process, not hand-assembled — is preserved. The two deterministic 'no hit/absent' flags and the human question about a stale path are resolved: the canonical jsonl lives at 01-decisions/output/decisions-canonical.jsonl as documented in CONTEXT.md and the builder default; no staleness, no missing implementation.",
+    "risks": "1) The repro-report labels its base commit as d301bd2, while the corpus files were added in the d301bd2..e1ebe57 range; the report's base-commit line is a documentation detail, and since the current clean tree rebuilds byte-identically, the substantive claim stands — but the label is slightly inconsistent with the commit that added the corpus. 2) Execution-trio compliance (gpt-5.6-sol main, grok-4.6 subagents, oracle pass) and memo reading are process constraints that cannot be verified from repo contents; they are not acceptance criteria and the deterministic constraint scan found no forbidden patterns. 3) The repro-report's claims were generated by the executor; I independently replicated the rebuild (identical file set and bytes), mitigating trust risk.",
+    "followup_candidates": "Human clarification (minor, non-blocking): 02-corpus/output/repro-report.md states 'Base commit: d301bd2...' but the corpus files (status 'A') landed between d301bd2 and the tip e1ebe57. The current tree rebuild is byte-identical so the verification claim holds, but was the base-commit label intended to reference the pre-corpus commit (e.g., to prove the snapshot predates later changes)? If the label should name the tip commit, update the report for audit cleanliness; otherwise this verdict stands.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-14T22:40:01.048Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_6b919G38ytl29lqYWvdm1004",
+          "command": "pwd && ls -la && echo \"---\" && find . -type f -not -path './.git/*' | head -100"
+        },
+        {
+          "ts": "2026-08-14T22:40:01.050Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_WoMKkycitocp1Wa6rjfu0998",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-14T22:40:01.062Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_WoMKkycitocp1Wa6rjfu0998",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T22:40:01.090Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_6b919G38ytl29lqYWvdm1004",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T22:40:03.020Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_eliLPg9Dj55cgSCy5GcA2571",
+          "command": "find 02-corpus 01-decisions -type f | sort && echo \"=== git status ===\" && git status --short | head -40 && echo \"=== git log ===\" && git log --oneline -5"
+        },
+        {
+          "ts": "2026-08-14T22:40:03.021Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_SgQMxqjkm4rx8VOk9aku9121",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m/02-corpus/CONTEXT.md"
+        },
+        {
+          "ts": "2026-08-14T22:40:03.028Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_SgQMxqjkm4rx8VOk9aku9121",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T22:40:03.515Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_eliLPg9Dj55cgSCy5GcA2571",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T22:40:06.301Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_CUw0Eawb3Zt2BBgi9V9F5601",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m/02-corpus/build_corpus.py"
+        },
+        {
+          "ts": "2026-08-14T22:40:06.301Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_JtURVom0krCFZJLhzXvT2955",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m/02-corpus/output/repro-report.md"
+        },
+        {
+          "ts": "2026-08-14T22:40:06.303Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_CUw0Eawb3Zt2BBgi9V9F5601",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T22:40:06.304Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_JtURVom0krCFZJLhzXvT2955",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T22:40:13.205Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_tifg3aKVzYUFzBXN0A5f4727",
+          "command": "echo \"=== canonical jsonl record count ===\" && wc -l 01-decisions/output/decisions-canonical.jsonl && echo \"=== IDs in canonical jsonl ===\" && python3 -c \"\nimport json\nids=[]\nwith open('01-decisions/output/decisions-canonical.jsonl') as f:\n    for line in f:\n        if line.strip():\n            ids.append(json.loads(line)['id'])\nprint(sorted(ids))\nprint('count:', len(ids))\nprint('projects:', sorted(set(json.loads(l)['project'] for l in open('01-decisions/output/decisions-canonical.jsonl') if l.strip())))\n\" && echo \"=== corpus dir listing ===\" && ls 02-corpus/output/corpus/"
+        },
+        {
+          "ts": "2026-08-14T22:40:13.206Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_23PUT0yBaZpZOn6BQ6MP6417",
+          "command": "echo \"=== imports in build_corpus.py ===\" && head -15 02-corpus/build_corpus.py | grep -E \"^(import|from)\" && echo \"=== node-05 yaml ===\" && cat \"/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-05-validate-decision-set.yaml\""
+        },
+        {
+          "ts": "2026-08-14T22:40:13.234Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_23PUT0yBaZpZOn6BQ6MP6417",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T22:40:13.349Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_tifg3aKVzYUFzBXN0A5f4727",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T22:40:20.405Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_owoILKpmSMSJPYWDEzFL0324",
+          "reason": "command matched blocked pattern",
+          "command": "tmp=$(mktemp -d)\necho \"=== source sha256 (claimed in repro-report: 09c15aeb...) ===\"\nshasum -a 256 01-decisions/output/decisions-canonical.jsonl\necho \"=== run builder (stdlib only) into temp dir ===\"\npython3 02-corpus/build_corpus.py --input 01-decisions/output/decisions-canonical.jsonl --output \"$tmp/corpus\"\necho \"=== diff -qr checked corpus vs temp rebuild ===\"\ndiff -qr 02-corpus/output/corpus \"$tmp/corpus\" && echo \"DIFF-EXIT-0: identical\"\necho \"=== byte-compare with cmp for every file ===\"\nfail=0\nfor f in 02-corpus/output/corpus/*.md; do\n  base=$(basename \"$f\")\n  if ! cmp -s \"$f\" \"$tmp/corpus/$base\"; then echo \"MISMATCH: $base\"; fail=1; fi\ndone\n[ $fail -eq 0 ] && echo \"ALL FILES BYTE-IDENTICAL\"\necho \"=== file counts ===\"\nls 02-corpus/output/corpus/*.md | wc -l\nls \"$tmp/corpus\"/*.md | wc -l\nrm -rf \"$tmp\"",
+          "pattern": "(?:^|\\s|&&|\\|\\|)\\s*(?:rm|rmdir)\\s"
+        },
+        {
+          "ts": "2026-08-14T22:40:20.406Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_owoILKpmSMSJPYWDEzFL0324",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-14T22:40:20.407Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_01_QvoTIkT2niWqVG5a7QBB6169",
+          "reason": "command matched blocked pattern",
+          "command": "echo \"=== check corpus files track committed state (git clean?) ===\" && git status --porcelain | head && echo \"(empty = clean)\"\necho \"=== frontmatter project values across corpus docs ===\"\ngrep -h \"^project:\" 02-corpus/output/corpus/*.md | sort | uniq -c\necho \"=== sample: D01 frontmatter ===\"\nsed -n '1,25p' 02-corpus/output/corpus/D01.md\necho \"=== sample: a multi-home decision frontmatter (grep MyAPI/Pi/GDDP) ===\"\ngrep -rl \"MyAPI/Pi/GDDP\" 02-corpus/output/corpus/*.md | head -3",
+          "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+        },
+        {
+          "ts": "2026-08-14T22:40:20.407Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_QvoTIkT2niWqVG5a7QBB6169",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-14T22:40:32.095Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_0IwRfjp4Ia2cm0lXD5fv7150",
+          "command": "python3 - <<'EOF'\nimport hashlib, subprocess, tempfile, pathlib, sys, filecmp\n\nroot = pathlib.Path('.')\nsrc = root / '01-decisions/output/decisions-canonical.jsonl'\nchecked = root / '02-corpus/output/corpus'\n\n# 1) source hash vs repro-report claim\nh = hashlib.sha256(src.read_bytes()).hexdigest()\nprint('source sha256:', h)\nprint('matches repro-report claim 09c15aeb...:', h.startswith('09c15aebd3a424e7f09ce2c27985fa0cbc24a23d9c474182ea4c912b926750a8'))\n\n# 2) run builder with stdlib into temp dir\nwith tempfile.TemporaryDirectory() as tmp:\n    out = pathlib.Path(tmp) / 'corpus'\n    r = subprocess.run([sys.executable, '02-corpus/build_corpus.py',\n                        '--input', str(src), '--output', str(out)],\n                       capture_output=True, text=True)\n    print('builder exit:', r.returncode)\n    print('builder stdout:', r.stdout.strip())\n    if r.returncode != 0:\n        print('builder stderr:', r.stderr)\n        sys.exit(1)\n\n    # 3) file set equality\n    checked_files = sorted(p.name for p in checked.glob('*'))\n    rebuilt_files = sorted(p.name for p in out.glob('*'))\n    print('checked file set:', checked_files)\n    print('rebuilt file set:', rebuilt_files)\n    print('file set identical:', checked_files == rebuilt_files)\n    print('counts:', len(checked_files), len(rebuilt_files))\n\n    # 4) byte equality (diff-like)\n    mismatches = [f for f in checked_files\n                  if not filecmp.cmp(checked/f, out/f, shallow=False)]\n    print('byte mismatches:', mismatches)\n    print('REBUILD IDENTICAL:', checked_files == rebuilt_files and not mismatches)\n\n# 5) spot-check one multi-home decision frontmatter preserves project verbatim\nprint('\\n--- frontmatter project lines (verbatim preservation) ---')\nimport json\nfor line in src.read_text().splitlines():\n    if not line.strip(): continue\n    d = json.loads(line)\n    fm_proj = [p for p in (checked / f\"{d['id']}.md\").read_text().splitlines() if p.startswith('project:')]\n    print(d['id'], '| canonical:', d['project'], '| frontmatter:', fm_proj[0] if fm_proj else 'MISSING')\n\n# 6) index homes derive only from split('/')\nidx = (checked / 'index.md').read_text()\nhomes_in_idx = [l[4:] for l in idx.splitlines() if l.startswith('### ')]\ncanonical_homes = sorted({h for d in (json.loads(l) for l in src.read_text().splitlines() if l.strip()) for h in d['project'].split('/')})\nprint('\\nindex homes:', homes_in_idx)\nprint('expected from split(\"/\"):', canonical_homes)\nprint('homes match:', homes_in_idx == canonical_homes)\nprint('index mentions split rule:', 'project.split' in idx or 'split(\"/\")' in idx or 'split' in idx)\nEOF"
+        },
+        {
+          "ts": "2026-08-14T22:40:32.312Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_0IwRfjp4Ia2cm0lXD5fv7150",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T22:40:40.495Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_1fqbz5tsMZO7SsOLR0PI5340",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m/02-corpus/output/corpus/index.md"
+        },
+        {
+          "ts": "2026-08-14T22:40:40.496Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_cpFsJsUMPRf7lI04ylno0202",
+          "command": "sed -n '1,60p' 02-corpus/output/corpus/D15.md && echo \"=== D14 head ===\" && sed -n '1,14p' 02-corpus/output/corpus/D14.md"
+        },
+        {
+          "ts": "2026-08-14T22:40:40.497Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_RTHJu5v0r3Tjd0Ble43V3016",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml"
+        },
+        {
+          "ts": "2026-08-14T22:40:40.503Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_1fqbz5tsMZO7SsOLR0PI5340",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T22:40:40.503Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_RTHJu5v0r3Tjd0Ble43V3016",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T22:40:40.526Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_cpFsJsUMPRf7lI04ylno0202",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T22:40:47.871Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_cEWN756ksWVKq7ayJPhu4846",
+          "command": "echo \"=== decision-schema.md field list ===\" && grep -nE \"^\\|?\\s*[-*]?\\s*[a-z_]+\" 01-decisions/output/decision-schema.md | head -40\necho \"=== D11 disposition in validation report ===\" && grep -in \"D11\" 01-decisions/output/validation-report.md | head -10\necho \"=== README mention of corpus stage ===\" && grep -in \"corpus\" README.md | head -15"
+        },
+        {
+          "ts": "2026-08-14T22:40:47.907Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_cEWN756ksWVKq7ayJPhu4846",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-14T22:41:09.429Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_oXsN9T6q6TGfVd9SmXEr6054",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All three acceptance criteria for node-06-build-corpus are satisfied, verified both by artifact inspection and by an independent, non-destructive re-run of the builder. (1) corpus-exists: 02-corpus/output/corpus/ holds one Markdown doc per canonical decision (D01-D10, D12-D18 — D11 correctly absent, dispositioned as rejected in 01-decisions/output/validation-report.md) plus index.md, generated by build_corpus.py from 01-decisions/output/decisions-canonical.jsonl (17 records, IDs match exactly). (2) builder-script: build_corpus.py uses only stdlib imports and regenerates the corpus from the canonical jsonl — executed cleanly (exit 0) into a temp dir with byte-identical output. (3) rebuild-identical: 02-corpus/output/repro-report.md documents the clean temp-dir rebuild, diff -qr and manifest checks passing with 18/18 files byte-identical and no differences to explain; its stated source SHA-256 matches the actual file, and my independent replication confirmed identity. Constraint alignment: multi-home project values preserved verbatim in YAML frontmatter (D14 'MyAPI/Khoj', D15 'MyAPI/Pi/GDDP'), index homes derived only via project.split('/') (GDDP/Khoj/MyAPI/Pi), and the rule is recorded in 02-corpus/CONTEXT.md. The node's intent — a corpus generated from validated decisions by a repeatable process, not hand-assembled — is preserved. The two deterministic 'no hit/absent' flags and the human question about a stale path are resolved: the canonical jsonl lives at 01-decisions/output/decisions-canonical.jsonl as documented in CONTEXT.md and the builder default; no staleness, no missing implementation.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-14T22:42:30.306731+00:00",
+  "evaluated_tree_sha": "757d7b44835189580026df3bdeefd59f1f90a9fb",
+  "evaluated_commit_sha": "e1ebe5724da26a7c8d34d72da74064a7c19d8068",
+  "merge_commit_sha": "e1ebe5724da26a7c8d34d72da74064a7c19d8068",
+  "expected_base_commit_sha": "d301bd26fccf285a546b1935830c4db43d245b99",
+  "pr_ref": null,
+  "job_id": "job_20260814T221953847cb1e568ca22",
+  "execution_attempt_id": "job_20260814T221953847cb1e568ca22:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+    "neighbor:node-05-validate-decision-set": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-05-validate-decision-set.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 2,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-05-validate-decision-set.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 3,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-05-validate-decision-set.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5okpbq5m/README.md"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml"
+      ]
+    },
+    "overall": "high"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-14T22:39:58.802188+00:00",
+    "finished_at": "2026-08-14T22:42:30.306632+00:00",
+    "wall_s": 151.511,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 70.73,
+      "tool_calls": 15
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 80.755,
+      "tool_calls": 18
+    }
+  }
+}
