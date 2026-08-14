@@ -1,0 +1,28 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-04-extract-decisions
+title: Extract raw decision objects from inventoried sources
+type: capability
+why: Stage B. Pull every decision the authoritative sources actually contain - completeness over polish at this step.
+depends_on:
+- node-03-inventory-sources
+acceptance_criteria:
+- id: extraction-complete
+  criterion: 01-decisions/output/decisions-raw.jsonl contains one JSON object per decision found, each citing its source path,
+    covering every source in sources.md
+- id: no-invention
+  criterion: Every raw object quotes or closely paraphrases source text; an object without a source citation fails this criterion
+constraints:
+- 'Thin-node contract: this yaml schedules the work; the semantic room''s CONTEXT.md and tasks/<task>.md hold the working
+  instructions. Read them first.'
+- Follow 01-decisions/tasks/extract-decisions.md
+- Do not normalize yet - raw fidelity is the point
+- 'Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model
+  xai/grok-4.6 via the subagent tool''s model parameter; close with one oracle or reviewer pass before returning'
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- 01-decisions/output/decisions-raw.jsonl
+status: pending
+priority: high
+unlocks: []

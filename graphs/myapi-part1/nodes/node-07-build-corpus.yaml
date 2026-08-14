@@ -1,0 +1,28 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-07-build-corpus
+title: Build the fresh reproducible corpus snapshot
+type: capability
+why: Stage D. A corpus generated from the validated decisions by a repeatable process - not a hand-assembled one.
+depends_on:
+- node-06-validate-decision-set
+acceptance_criteria:
+- id: corpus-exists
+  criterion: 02-corpus/output/corpus/ contains the generated corpus (one markdown document per decision plus an index), built
+    by 02-corpus/build_corpus.py from decisions-canonical.jsonl
+- id: builder-script
+  criterion: 02-corpus/build_corpus.py runs with stdlib only and regenerates the corpus from the canonical jsonl
+constraints:
+- 'Thin-node contract: this yaml schedules the work; the semantic room''s CONTEXT.md and tasks/<task>.md hold the working
+  instructions. Read them first.'
+- Follow 02-corpus/tasks/build-corpus.md
+- 'Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model
+  xai/grok-4.6 via the subagent tool''s model parameter; close with one oracle or reviewer pass before returning'
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- 02-corpus/output/corpus/
+- 02-corpus/build_corpus.py
+status: pending
+priority: high
+unlocks: []

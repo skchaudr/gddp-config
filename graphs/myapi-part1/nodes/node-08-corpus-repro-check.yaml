@@ -1,0 +1,25 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-08-corpus-repro-check
+title: Prove corpus reproducibility
+type: capability
+why: Reproducibility is the claim - verify it by rebuilding from source and diffing.
+depends_on:
+- node-07-build-corpus
+acceptance_criteria:
+- id: rebuild-identical
+  criterion: '02-corpus/output/repro-report.md shows a clean rebuild into a temp dir diffed against the corpus: identical
+    file set, identical bytes (or every difference explained and fixed)'
+constraints:
+- 'Thin-node contract: this yaml schedules the work; the semantic room''s CONTEXT.md and tasks/<task>.md hold the working
+  instructions. Read them first.'
+- Follow 02-corpus/tasks/corpus-repro-check.md
+- 'Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model
+  xai/grok-4.6 via the subagent tool''s model parameter; close with one oracle or reviewer pass before returning'
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- 02-corpus/output/repro-report.md
+status: pending
+priority: high
+unlocks: []

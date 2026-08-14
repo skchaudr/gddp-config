@@ -1,0 +1,28 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-05-normalize-decisions
+title: Normalize raw decisions into canonical objects
+type: capability
+why: Stage B output. Raw extractions become schema-conformant canonical decision objects.
+depends_on:
+- node-02-decision-schema
+- node-04-extract-decisions
+acceptance_criteria:
+- id: all-conform
+  criterion: 01-decisions/output/decisions-canonical.jsonl has one object per raw object, each conforming to decision-schema.md
+    (all required fields present, supersession links resolved where sources support them)
+- id: traceable
+  criterion: Each canonical object carries the source path(s) of its raw origin
+constraints:
+- 'Thin-node contract: this yaml schedules the work; the semantic room''s CONTEXT.md and tasks/<task>.md hold the working
+  instructions. Read them first.'
+- Follow 01-decisions/tasks/normalize-decisions.md
+- 'Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model
+  xai/grok-4.6 via the subagent tool''s model parameter; close with one oracle or reviewer pass before returning'
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- 01-decisions/output/decisions-canonical.jsonl
+status: pending
+priority: high
+unlocks: []

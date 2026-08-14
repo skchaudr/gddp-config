@@ -1,0 +1,39 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-01-icm-scaffold
+title: 'Build the Part 1 ICM scaffold: rooms, CONTEXT maps, task contracts'
+type: capability
+why: 'Every later node is a fresh agent with no history. The scaffold is what makes that work: rooms with local maps and per-task
+  contracts, so the graph stays a thin scheduler. This node writes the instructions every later agent reads - highest-leverage
+  node in the slice.'
+depends_on: []
+acceptance_criteria:
+- id: rooms-exist
+  criterion: MyAPI/ contains AGENTS.md (routing map), docs/CONTEXT.md, and the four stage rooms 01-decisions/, 02-corpus/,
+    03-ingestion/, 04-evaluation/ each with CONTEXT.md, inputs/ or queries/ as shown in the Part 1 memo tree
+- id: task-contracts-exist
+  criterion: 'Every later node in this graph has a tasks/<task>.md contract in its room: 01-decisions/tasks/{decision-schema,inventory-sources,extract-decisions,normalize-decisions,validate-decision-set}.md;
+    02-corpus/tasks/{build-corpus,corpus-repro-check,khoj-transform}.md; 03-ingestion/tasks/{khoj-ingest,verify-retrieval}.md;
+    04-evaluation/tasks/{eval-factual-rationale,eval-supersession-relationship,eval-negative-control,preserve-results}.md'
+- id: contracts-complete
+  criterion: Each task contract names its inputs (paths), its exact output artifact path and shape, and a verification command
+    or check
+- id: map-routes
+  criterion: 'AGENTS.md routes a fresh agent: given a node id, the map plus one hop reaches the right room'
+constraints:
+- Work only in /Users/sab-mini/repos/MyAPI; create directories and markdown only - no code changes to existing files
+- 'Read ''GDDP v MyAPI Part 1 - the first slice'' memo content from this packet''s why field equivalents: the stage sequence
+  is decisions -> corpus -> ingestion -> evaluation; keep each room''s CONTEXT.md under 60 lines'
+- 'Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model
+  xai/grok-4.6 via the subagent tool''s model parameter; close with one oracle or reviewer pass before returning'
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- MyAPI/AGENTS.md
+- 01-decisions/CONTEXT.md
+- 02-corpus/CONTEXT.md
+- 03-ingestion/CONTEXT.md
+- 04-evaluation/CONTEXT.md
+status: ready
+priority: high
+unlocks: []

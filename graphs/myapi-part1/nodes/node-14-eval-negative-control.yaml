@@ -1,0 +1,30 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-14-eval-negative-control
+title: 'Fixed query 5: negative control'
+type: capability
+why: Ask something the corpus cannot answer. A confident unsupported answer is a first-class result - it exposes the most
+  important failure mode.
+depends_on:
+- node-11-verify-retrieval
+acceptance_criteria:
+- id: answer-captured
+  criterion: 04-evaluation/results/q5-negative-control.md contains the exact out-of-scope query, Khoj's raw answer verbatim,
+    and any retrieved evidence
+- id: verdict-recorded
+  criterion: The file states plainly whether Khoj correctly declined/hedged or confabulated - one sentence, no remediation
+constraints:
+- 'Thin-node contract: this yaml schedules the work; the semantic room''s CONTEXT.md and tasks/<task>.md hold the working
+  instructions. Read them first.'
+- Follow 04-evaluation/tasks/eval-negative-control.md
+- Never retry to get a better answer
+- 'Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model
+  xai/grok-4.6 via the subagent tool''s model parameter; close with one oracle or reviewer pass before returning'
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- 04-evaluation/results/q5-negative-control.md
+- 04-evaluation/queries/q5.txt
+status: pending
+priority: high
+unlocks: []
