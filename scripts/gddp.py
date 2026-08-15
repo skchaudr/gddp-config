@@ -922,6 +922,136 @@ def _verdict_chip(verdict: str | None) -> str:
     return ""
 
 
+def _ellipsize(text: str, width: int) -> str:
+    """Truncate to width with a single ellipsis; empty when width is gone."""
+    body = str(text or "")
+    if width <= 0:
+        return ""
+    if len(body) <= width:
+        return body
+    if width == 1:
+        return "…"
+    return body[: width - 1] + "…"
+
+
+def _is_running_state(runtime: str) -> bool:
+    token = str(runtime or "").strip().lower().replace(" ", "_")
+    return token == "running"
+
+
+def _runtime_label(queue_state: str = "-", job_status: str = "-") -> str:
+    """Prefer live queue state; fall back to job status. Never invent graph truth."""
+    queue = str(queue_state or "").strip()
+    if queue and queue != "-":
+        return queue
+    job = str(job_status or "").strip()
+    if job and job != "-":
+        return job
+    return "-"
+
+
+def _is_node_list_desc(description: object) -> bool:
+    return isinstance(description, dict) and {
+        "graph", "runtime", "title",
+    }.issubset(description.keys())
+
+
+def _runtime_column(runtime: str, width: int) -> Text:
+    """Fixed-width runtime cell; running uses a mark + reverse, not color alone."""
+    running = _is_running_state(runtime)
+    mark = "▶" if running else " "
+    label = str(runtime or "-").replace("_", " ")
+    body = mark + _ellipsize(label, max(0, width - 1))
+    cell = Text(f"{body:<{width}}")
+    if running:
+        cell.stylize("bold magenta reverse")
+    else:
+        cell.stylize(_graph_status_style(runtime))
+    return cell
+
+
+def _node_column_budget(room: int) -> tuple[int, int, int, int]:
+    """GRAPH / RUNTIME / EVAL / TITLE widths for a given remainder."""
+    room = max(0, int(room))
+    # mark + "awaiting review" needs 16 so the live phase stays readable.
+    if room < 30:
+        rt_w = min(16, room) if room >= 6 else room
+        title_w = max(0, room - rt_w - (2 if room - rt_w >= 2 else 0))
+        return 0, rt_w, 0, title_w
+    if room < 52:
+        g_w, rt_w, c_w = 12, 16, 4
+        used = g_w + 2 + rt_w + 2 + c_w
+        if used > room:
+            c_w = 0
+            used = g_w + 2 + rt_w
+        title_w = max(0, room - used - (2 if room > used else 0))
+        return g_w, rt_w, c_w, title_w
+    g_w, rt_w, c_w = 16, 16, 4
+    title_w = max(0, room - g_w - 2 - rt_w - 2 - c_w - 2)
+    return g_w, rt_w, c_w, title_w
+
+
+def _format_node_columns(
+    *,
+    graph: str,
+    runtime: str,
+    verdict: str | None,
+    title: str,
+    room: int,
+) -> Text:
+    """Aligned GRAPH / RUNTIME / VERDICT / TITLE; collapse by priority when narrow."""
+    chip = _verdict_chip(verdict)
+    g_w, rt_w, c_w, title_w = _node_column_budget(room)
+    out = Text()
+    if rt_w <= 0 and g_w <= 0:
+        mark = "▶" if _is_running_state(runtime) else "-"
+        return Text(_ellipsize(mark, max(0, int(room))))
+    if g_w:
+        out.append(_ellipsize(graph, g_w).ljust(g_w), style=_graph_status_style(graph))
+        out.append("  ")
+    out.append_text(_runtime_column(runtime, rt_w))
+    if c_w:
+        out.append("  ")
+        if chip:
+            out.append(f"{chip:<{c_w}}", style=_graph_status_style(chip))
+        else:
+            out.append(f"{'-':<{c_w}}", style="dim")
+    if title_w:
+        out.append("  ")
+        out.append(_ellipsize(title, title_w), style="dim")
+    return out
+
+
+def _node_column_header(room: int) -> Text:
+    """Same widths as ``_format_node_columns`` so headers stay under the cells."""
+    g_w, rt_w, c_w, title_w = _node_column_budget(room)
+    bits: list[str] = []
+    if g_w:
+        bits.append(f"{'GRAPH':<{g_w}}")
+    if rt_w:
+        bits.append(f"{'RUNTIME':<{rt_w}}")
+    if c_w:
+        bits.append(f"{'EVAL':<{c_w}}")
+    if title_w:
+        bits.append("TITLE")
+    return Text("  ".join(bits), style="dim")
+
+
+def _node_list_desc(
+    graph: str,
+    runtime: str,
+    title: str = "",
+    verdict: str | None = None,
+) -> dict[str, str]:
+    """Structured picker row: graph truth, runtime, evaluator chip, title."""
+    return {
+        "graph": str(graph or "-"),
+        "runtime": str(runtime or "-"),
+        "verdict": "" if verdict is None else str(verdict),
+        "title": str(title or ""),
+    }
+
+
 def _node_row_description(
     phase: str,
     title: str = "",
@@ -980,8 +1110,17 @@ def _pause(message: str = "press any key to continue") -> str:
     return choice.lower()
 
 
-def _plain_desc(description: str | Text) -> str:
+def _plain_desc(description: str | Text | dict | None) -> str:
     """Strip Rich markup for fzf labels."""
+    if _is_node_list_desc(description):
+        chip = _verdict_chip(description.get("verdict"))
+        bits = [b for b in (
+            chip,
+            str(description.get("graph") or ""),
+            str(description.get("runtime") or ""),
+            str(description.get("title") or ""),
+        ) if b and b != "-"]
+        return " · ".join(bits)
     if isinstance(description, Text):
         return description.plain
     return str(description) if description is not None else ""
@@ -1057,11 +1196,35 @@ def _job_preview_cmd() -> str:
 
 
 def _fzf_items(
-    items: list[tuple[str, str | Text]],
+    items: list[tuple[str, str | Text | dict]],
 ) -> list[tuple[str, str]]:
     """(value, ANSI label) — status column first so rows scan as columns."""
     out: list[tuple[str, str]] = []
     for value, description in items:
+        if _is_node_list_desc(description):
+            graph = str(description.get("graph") or "-")
+            runtime = str(description.get("runtime") or "-")
+            title = str(description.get("title") or "")
+            chip = _verdict_chip(description.get("verdict"))
+            running = _is_running_state(runtime)
+            mark = "▶" if running else " "
+            bits = [
+                _ansi(_ellipsize(graph, 16).ljust(16), _graph_status_style(graph), 16),
+                _ansi(
+                    (mark + _ellipsize(runtime.replace("_", " "), 15)).ljust(16),
+                    "bold magenta" if running else _graph_status_style(runtime),
+                    16,
+                ),
+            ]
+            if chip:
+                bits.append(_ansi(chip, _graph_status_style(chip), 4))
+            else:
+                bits.append(_ansi("-", "dim", 4))
+            bits.append(str(value))
+            if title:
+                bits.append(title)
+            out.append((value, "  ".join(bits)))
+            continue
         lab = _plain_desc(description).strip()
         if not lab or lab == value:
             out.append((value, value))
@@ -1083,7 +1246,7 @@ def _fzf_items(
 
 def _run_fzf(
     heading: str,
-    items: list[tuple[str, str | Text]],
+    items: list[tuple[str, str | Text | dict]],
     *,
     preview_cmd: str | None = None,
     multi: bool = False,
@@ -1107,7 +1270,7 @@ def _run_fzf(
 
 def _pick_list(
     heading: str,
-    items: list[tuple[str, str | Text]],
+    items: list[tuple[str, str | Text | dict]],
     *,
     preview_cmd: str | None = None,
     multi: bool = False,
@@ -1302,6 +1465,25 @@ def _key_label(key: str) -> str:
     return _NAMED_KEY_LABELS.get(key, key)
 
 
+def _letter_keys(actions: dict[str, tuple[str, str | Text]]) -> tuple[str, ...]:
+    """Displayed single-letter shortcuts — must stay in sync with handlers."""
+    return tuple(key for key in actions if len(key) == 1 and not key.isdigit())
+
+
+def _handled_letter_keys(
+    actions: dict[str, tuple[str, str | Text]],
+    handlers: dict[str, object] | None = None,
+) -> tuple[str, ...]:
+    """Letters the menu can actually act on: action keys plus navigation."""
+    handled = set(_letter_keys(actions))
+    if handlers:
+        handled.update(
+            key for key in handlers if len(key) == 1 and not key.isdigit()
+        )
+    # q/b are always selectable when shown; they are handled by the menu loop.
+    return tuple(sorted(handled))
+
+
 def _print_action_menu(actions: dict[str, tuple[str, str | Text]]) -> None:
     """Static action list (no cursor). Prefer ``_menu_choice`` for interactive pick."""
     for key, (name, description) in actions.items():
@@ -1412,8 +1594,16 @@ def _menu_choice(
         drawn += 1
 
 
-def _format_list_description(description: str | Text, room: int) -> Text:
-    """One-line description: color status · title; truncate to keep redraw stable."""
+def _format_list_description(description: str | Text | dict, room: int) -> Text:
+    """One-line description: aligned columns for node rows; else status · title."""
+    if _is_node_list_desc(description):
+        return _format_node_columns(
+            graph=str(description.get("graph") or "-"),
+            runtime=str(description.get("runtime") or "-"),
+            verdict=description.get("verdict"),
+            title=str(description.get("title") or ""),
+            room=room,
+        )
     if isinstance(description, Text):
         plain = description.plain
         if len(plain) > room:
@@ -1440,7 +1630,7 @@ def _format_list_description(description: str | Text, room: int) -> Text:
 
 
 def _checked_values(
-    items: list[tuple[str, str | Text]],
+    items: list[tuple[str, str | Text | dict]],
     checked: set[str],
 ):
     """Checked ids in list order. One id stays a scalar (opens that item)."""
@@ -1450,9 +1640,39 @@ def _checked_values(
     return ordered if len(ordered) > 1 else ordered[0]
 
 
+def _paged_menu_key_spec(
+    *,
+    page_count: int,
+    fzf_ok: bool,
+    refreshable: bool,
+    fzf_multi: bool,
+    back_label: str = "back",
+) -> tuple[list[str], frozenset[str]]:
+    """Help chrome and the letter keys it advertises. Displayed ⊆ handled."""
+    help_bits = ["↑/↓"]
+    letters: set[str] = set()
+    if fzf_multi:
+        help_bits.append("space")
+        letters.add(" ")
+    help_bits.extend(["enter", "1-9"])
+    letters.update(str(i) for i in range(1, 10))
+    if page_count > 1:
+        help_bits.append("←/→ page")
+        letters.update({"p", "n"})
+    if fzf_ok:
+        help_bits.append("f filter")
+        letters.add("f")
+    if refreshable:
+        help_bits.append("r refresh")
+        letters.add("r")
+    help_bits.extend([f"b {back_label}", "q quit"])
+    letters.update({"b", "q"})
+    return help_bits, frozenset(letters)
+
+
 def _paged_menu(
     heading: str,
-    items: list[tuple[str, str | Text]],
+    items: list[tuple[str, str | Text | dict]],
     *,
     page_size: int = 9,
     back_label: str = "back",
@@ -1509,7 +1729,23 @@ def _paged_menu(
                 f"  ·  {n} selected",
                 style="green" if n else "dim",
             )
+        id_w = max((len(str(value)) for value, _ in visible), default=0)
+        if width < 72:
+            id_w = min(id_w, max(8, width // 3))
+        node_list = bool(visible) and all(
+            _is_node_list_desc(description) for _, description in visible
+        )
         lines: list[Text] = [title]
+        if node_list:
+            header = Text()
+            header.append("  #", style="dim")
+            if fzf_multi:
+                header.append("  ", style="dim")
+            header.append(f"  {'ID':<{id_w}}", style="dim")
+            used = 4 + 1 + (2 if fzf_multi else 0) + 2 + id_w + 2
+            header.append("  ")
+            header.append_text(_node_column_header(max(4, width - used)))
+            lines.append(header)
         for offset, (value, description) in enumerate(visible, start=1):
             marker = "›" if offset - 1 == cursor else " "
             row = Text()
@@ -1517,25 +1753,22 @@ def _paged_menu(
             if fzf_multi:
                 on = value in checked
                 row.append(" ✓" if on else "  ", style="green" if on else "dim")
-            row.append(f"  {value}", style="bold")
-            used = 4 + len(str(offset)) + (2 if fzf_multi else 0) + 2 + len(value) + 2
-            room = max(12, width - used)
+            shown_id = _ellipsize(str(value), id_w).ljust(id_w)
+            row.append(f"  {shown_id}", style="bold")
+            used = 4 + len(str(offset)) + (2 if fzf_multi else 0) + 2 + id_w + 2
+            room = max(4, width - used)
             row.append("  ")
             row.append_text(_format_list_description(description, room))
             lines.append(row)
 
-        # One help line — no stacked chrome.
-        help_bits = ["↑/↓"]
-        if fzf_multi:
-            help_bits.append("space")
-        help_bits.extend(["enter", "1-9"])
-        if page_count > 1:
-            help_bits.append("←/→ page")
-        if fzf_ok:
-            help_bits.append("f filter")
-        if refreshable:
-            help_bits.append("r refresh")
-        help_bits.extend([f"b {back_label}", "q quit"])
+        # One help line — no stacked chrome. Letters here must be handled below.
+        help_bits, _displayed = _paged_menu_key_spec(
+            page_count=page_count,
+            fzf_ok=fzf_ok,
+            refreshable=refreshable,
+            fzf_multi=fzf_multi,
+            back_label=back_label,
+        )
         lines.append(Text("  " + " · ".join(help_bits), style="dim"))
 
         if first_paint:
@@ -2376,11 +2609,16 @@ def interactive_nodes(project: str | None = None):
                     verdict = getattr(ev, "verdict", "-") or "-"
                 except Exception:
                     pass
-                phase = _node_menu_phase(graph_status, queue_state, job_status)
                 title = str(doc.get("title") or (entry or {}).get("title") or "")
-                node_items.append(
-                    (node_id, _node_row_description(phase, title, verdict))
-                )
+                node_items.append((
+                    node_id,
+                    _node_list_desc(
+                        graph_status,
+                        _runtime_label(queue_state, job_status),
+                        title,
+                        verdict,
+                    ),
+                ))
 
             picked = _pick_list(
                 f"nodes · {project}",
@@ -2885,8 +3123,12 @@ def static_overview():
     table.add_row("project", "project graph creation and validation", "gddp project -h")
     table.add_row("obsidian", "graph export", "gddp obsidian export")
     console.print(table)
+    tty_bits = [
+        f"{key} {name}" for key, (name, _desc) in _front_page_actions().items()
+        if key != "q"
+    ]
     console.print(Text(
-        "TTY: d dispatch · g graphs · w live · h heartbeat. "
+        "TTY: " + " · ".join(tty_bits) + ". "
         "Shell: `gddp watch`, `gddp jobs live`, `gddp <group> -h`.",
         style="dim",
     ))
@@ -2936,9 +3178,8 @@ def _graph_more_menu(project: str):
             return _MENU_BACK
 
 
-def interactive_graph_hub(project: str):
-    """Primary work for one graph: nodes, dispatch, live. Rest under more."""
-    actions = {
+def _graph_hub_actions() -> dict[str, tuple[str, str]]:
+    return {
         "n": ("nodes", "review evidence and update graph truth"),
         "d": ("dispatch", "send ready work on this graph"),
         "w": ("live", "running executors for this graph"),
@@ -2946,6 +3187,20 @@ def interactive_graph_hub(project: str):
         "b": ("graphs", ""),
         "q": ("quit", ""),
     }
+
+
+def _graph_hub_handlers() -> dict[str, object]:
+    return {
+        "n": interactive_nodes,
+        "d": interactive_dispatch,
+        "w": interactive_watch,
+        "m": _graph_more_menu,
+    }
+
+
+def interactive_graph_hub(project: str):
+    """Primary work for one graph: nodes, dispatch, live. Rest under more."""
+    actions = _graph_hub_actions()
     while True:
         _clear_screen()
         console.print(
@@ -3032,15 +3287,28 @@ def interactive_heartbeat():
     return _MENU_BACK
 
 
-def interactive_menu():
-    """Front door: dispatch, graphs, live. Everything else is under a graph."""
-    actions = {
+def _front_page_actions() -> dict[str, tuple[str, str]]:
+    return {
         "d": ("dispatch", "send ready work through the event pipeline"),
         "g": ("graphs", "active graphs first; archive for idle (>7d)"),
         "w": ("live", "running executors — fleet + drill-in"),
         "h": ("heartbeat", "arm/disarm the control plane (intake + heartbeat)"),
         "q": ("quit", ""),
     }
+
+
+def _front_page_handlers() -> dict[str, object]:
+    return {
+        "d": interactive_dispatch,
+        "g": interactive_graphs,
+        "w": interactive_watch,
+        "h": interactive_heartbeat,
+    }
+
+
+def interactive_menu():
+    """Front door: dispatch, graphs, live. Everything else is under a graph."""
+    actions = _front_page_actions()
     while True:
         _clear_screen()
         console.print(Text("gddp", style="bold").append("  ·  graph control plane", style="dim"))
@@ -3387,10 +3655,16 @@ def _render_single(info: dict, now: float) -> None:
 
 def cmd_watch(args) -> int:
     """Live execution view. Default fleet = running only (`--all` for history)."""
-    runtime_root = resolve_runtime_root()
+    try:
+        runtime_root = resolve_runtime_root()
+    except RuntimeError as exc:
+        print(f"ERROR: live/watch unavailable: {exc}", file=sys.stderr)
+        print("  Set GDDP_RUNTIME_ROOT to a gddp-runtime checkout.", file=sys.stderr)
+        return 2
     spool = _spool_root(runtime_root)
     if not spool.is_dir():
         print(f"no spool at {spool}; nothing has run yet", file=sys.stderr)
+        print("  live needs a local-subprocess spool from gddp-runtime.", file=sys.stderr)
         return 1
     tty = sys.stdout.isatty()
     running_only = not bool(getattr(args, "all", False))
@@ -3426,24 +3700,10 @@ def cmd_watch(args) -> int:
 
 
 def interactive_watch(project: str | None = None) -> object:
-    """Menu entry: fzf pick when available, else live fleet refresh."""
+    """Front-page ``w``: the same live/watch surface as ``gddp watch``."""
     _clear_screen()
-    fzf = _import_module("fzf_pick")
-    if fzf.available():
-        try:
-            cmd_runs(
-                argparse.Namespace(
-                    all=False,
-                    project=project,
-                    list=False,
-                    height="90%",
-                )
-            )
-        except KeyboardInterrupt:
-            pass
-        return _MENU_BACK
     console.print(Text("live", style="bold").append(
-        f"  ·  {project}" if project else "  ·  running attempts",
+        f"  ·  {project}" if project else "  ·  running executors",
         style="dim",
     ))
     console.print(Text("ctrl-c returns to menu", style="dim"))
@@ -3456,9 +3716,17 @@ def interactive_watch(project: str | None = None) -> object:
         project=project,
     )
     try:
-        cmd_watch(ns)
+        rc = cmd_watch(ns)
     except KeyboardInterrupt:
-        pass
+        print()
+        return _MENU_BACK
+    except RuntimeError as exc:
+        console.print(Text(f"ERROR: live/watch unavailable: {exc}", style="bold red"))
+        console.print(Text("Set GDDP_RUNTIME_ROOT to a gddp-runtime checkout.", style="dim"))
+        _pause()
+        return _MENU_BACK
+    if rc != 0:
+        _pause("live/watch could not start — press any key to return")
     return _MENU_BACK
 
 
@@ -3934,9 +4202,13 @@ def _render_project_status_detail(project_id: str) -> None:
         title = str(doc.get("title") or (entry or {}).get("title") or "")
         line = Text()
         line.append(f"  {node_id:<36}", style="bold")
-        line.append_text(_node_row_description(phase, "", verdict))
-        if title:
-            line.append(f"  {title}", style="dim")
+        line.append_text(_format_node_columns(
+            graph=graph_status,
+            runtime=_runtime_label(queue_state, job_status),
+            verdict=verdict,
+            title=title,
+            room=max(24, (console.width or 80) - 40),
+        ))
         console.print(line)
 
     console.print()

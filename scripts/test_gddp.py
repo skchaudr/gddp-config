@@ -618,6 +618,16 @@ class OverviewTests(unittest.TestCase):
         self.assertIs(outcome, gddp._MENU_BACK)
         nodes.assert_called_once_with("demo")
 
+    def test_interactive_graph_hub_w_opens_live_watch(self):
+        with patch.object(gddp, "_menu_choice", side_effect=["w", "b"]), \
+                patch.object(
+                    gddp, "interactive_watch", return_value=gddp._MENU_BACK
+                ) as live, \
+                patch.object(gddp, "_clear_screen"):
+            outcome = gddp.interactive_graph_hub("demo")
+        self.assertIs(outcome, gddp._MENU_BACK)
+        live.assert_called_once_with("demo")
+
     def test_node_status_label_exposes_node_index_desync(self):
         self.assertEqual(
             gddp._node_status_label(
@@ -662,6 +672,170 @@ class OverviewTests(unittest.TestCase):
         self.assertEqual(text.spans[0].style, "bold green")
         none = gddp._node_row_description("ready", "Title", "-")
         self.assertEqual(none.plain, "ready · Title")
+
+    def test_front_page_displayed_letters_are_handled(self):
+        displayed = gddp._letter_keys(gddp._front_page_actions())
+        handled = gddp._handled_letter_keys(
+            gddp._front_page_actions(), gddp._front_page_handlers()
+        )
+        self.assertIn("w", displayed)
+        self.assertEqual(set(displayed), set(handled))
+        self.assertEqual(set(displayed), {"d", "g", "w", "h", "q"})
+        self.assertTrue(
+            {"d", "g", "w", "h"}.issubset(gddp._front_page_handlers())
+        )
+
+    def test_graph_hub_displayed_letters_are_handled(self):
+        displayed = gddp._letter_keys(gddp._graph_hub_actions())
+        handled = gddp._handled_letter_keys(
+            gddp._graph_hub_actions(), gddp._graph_hub_handlers()
+        )
+        self.assertIn("w", displayed)
+        self.assertEqual(set(displayed), set(handled))
+        self.assertTrue(
+            {"n", "d", "w", "m"}.issubset(gddp._graph_hub_handlers())
+        )
+
+    def test_paged_help_letters_stay_in_handled_set(self):
+        help_bits, displayed = gddp._paged_menu_key_spec(
+            page_count=2,
+            fzf_ok=True,
+            refreshable=True,
+            fzf_multi=True,
+            back_label="projects",
+        )
+        chrome = " ".join(help_bits)
+        for letter in displayed:
+            if letter.isdigit() or letter == " ":
+                continue
+            self.assertIn(letter, chrome)
+        self.assertTrue({"f", "r", "b", "q", "p", "n"}.issubset(displayed))
+        self.assertIn("f filter", chrome)
+        self.assertIn("r refresh", chrome)
+        self.assertIn("space", chrome)
+
+    def test_interactive_watch_invokes_cmd_watch_boundary(self):
+        with patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "cmd_watch", return_value=0) as watch:
+            outcome = gddp.interactive_watch()
+        self.assertIs(outcome, gddp._MENU_BACK)
+        watch.assert_called_once()
+        ns = watch.call_args[0][0]
+        self.assertIsNone(ns.target)
+        self.assertFalse(ns.once)
+        self.assertFalse(ns.all)
+        self.assertIsNone(ns.project)
+
+    def test_interactive_watch_keeps_failure_visible(self):
+        with patch.object(gddp, "_clear_screen"), \
+                patch.object(
+                    gddp,
+                    "cmd_watch",
+                    side_effect=RuntimeError("gddp-runtime not found at /missing"),
+                ), \
+                patch.object(gddp, "_pause", return_value="x") as pause, \
+                patch.object(gddp.console, "print") as printed:
+            outcome = gddp.interactive_watch("demo")
+        self.assertIs(outcome, gddp._MENU_BACK)
+        pause.assert_called_once()
+        joined = " ".join(
+            str(getattr(c.args[0], "plain", c.args[0]))
+            for c in printed.call_args_list if c.args
+        )
+        self.assertIn("live/watch unavailable", joined)
+        self.assertIn("GDDP_RUNTIME_ROOT", joined)
+
+    def test_cmd_watch_reports_missing_runtime(self):
+        missing = Path(tempfile.mkdtemp()) / "missing-runtime"
+        ns = argparse.Namespace(
+            target=None, interval=2.0, once=True, all=False, project=None,
+        )
+        err = StringIO()
+        with patch.dict(os.environ, {"GDDP_RUNTIME_ROOT": str(missing)}, clear=False), \
+                patch.object(gddp.sys, "stderr", err):
+            rc = gddp.cmd_watch(ns)
+        self.assertEqual(rc, 2)
+        self.assertIn("live/watch unavailable", err.getvalue())
+        self.assertIn("GDDP_RUNTIME_ROOT", err.getvalue())
+
+    def test_node_columns_align_and_mark_running(self):
+        ready = gddp._format_node_columns(
+            graph="ready",
+            runtime="-",
+            verdict="-",
+            title="Short",
+            room=64,
+        )
+        running = gddp._format_node_columns(
+            graph="ready",
+            runtime="running",
+            verdict="-",
+            title="Preserve run evidence",
+            room=64,
+        )
+        review = gddp._format_node_columns(
+            graph="provisional",
+            runtime="awaiting_review",
+            verdict="pass",
+            title="Validate",
+            room=64,
+        )
+        self.assertTrue(running.plain.startswith("ready"))
+        self.assertEqual(ready.plain[:18], running.plain[:18])
+        self.assertIn("▶running", running.plain)
+        self.assertNotIn("▶", ready.plain)
+        self.assertIn("reverse", " ".join(
+            str(span.style) for span in running.spans if span.style
+        ))
+        self.assertIn("awaiting review", review.plain)
+        self.assertIn("PASS", review.plain)
+        mark_at = running.plain.index("▶")
+        self.assertEqual(ready.plain[mark_at], " ")
+        self.assertEqual(ready.plain[:mark_at], running.plain[:mark_at])
+
+    def test_paged_menu_node_rows_align_at_representative_widths(self):
+        items = [
+            ("n", gddp._node_list_desc("ready", "-", "Tiny id", "-")),
+            (
+                "node-05-validate-decision-set",
+                gddp._node_list_desc(
+                    "provisional", "awaiting_review", "Validate", "pass",
+                ),
+            ),
+            (
+                "node-13-preserve-results",
+                gddp._node_list_desc(
+                    "ready", "running", "Preserve run evidence", "-",
+                ),
+            ),
+        ]
+        for width in (80, 120, 200):
+            output = StringIO()
+            test_console = Console(
+                file=output, width=width, color_system=None, highlight=False,
+            )
+            terminal = self._paged_terminal(lambda: "q")
+            with patch.object(gddp, "_import_module", return_value=terminal), \
+                    patch.object(gddp, "console", test_console):
+                selected = gddp._paged_menu(
+                    "nodes · demo", items, back_label="projects",
+                )
+            self.assertIs(selected, gddp._MENU_QUIT)
+            lines = [
+                ln.rstrip()
+                for ln in output.getvalue().splitlines()
+                if ln.strip() and not ln.startswith("nodes")
+                and "↑/↓" not in ln and "GRAPH" not in ln
+            ]
+            self.assertGreaterEqual(len(lines), 3)
+            prefixes = [ln[:6] for ln in lines]
+            self.assertTrue(all(p[0] in {" ", "›"} for p in prefixes))
+            id_cols = [ln[4:34] for ln in lines]
+            self.assertTrue(all(len(col) == len(id_cols[0]) for col in id_cols))
+            self.assertIn("▶running", output.getvalue())
+            if width >= 80:
+                self.assertIn("GRAPH", output.getvalue())
+                self.assertIn("RUNTIME", output.getvalue())
 
     def test_interactive_status_all_and_one(self):
         keys = iter(["a", "x", "o", "x", "b"])
