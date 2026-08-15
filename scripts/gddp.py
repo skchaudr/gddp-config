@@ -2187,12 +2187,40 @@ def _resolve_branch_start(repo: Path, branch: str) -> str | None:
     return None
 
 
+def _publish_local_target_ref(
+    repo: Path, work: Path, branch: str, expected: str,
+) -> tuple[bool, str]:
+    """Point ``refs/heads/<branch>`` at the detached worktree HEAD.
+
+    Non-force ``git push . HEAD:refs/heads/<branch>`` first. If that is
+    refused because the ordinary checkout already has the branch, fall
+    back to a compare-and-swap ``update-ref`` lease on the same old SHA.
+    """
+    dest = f"refs/heads/{branch}"
+    publish = _git_in(work, "push", ".", f"HEAD:{dest}")
+    if publish.returncode == 0:
+        return True, ""
+    new = _git_in(work, "rev-parse", "HEAD").stdout.strip()
+    current = _git_in(repo, "rev-parse", "--verify", dest)
+    old = current.stdout.strip() if current.returncode == 0 else expected
+    if current.returncode != 0:
+        lease = _git_in(repo, "update-ref", dest, new)
+    else:
+        lease = _git_in(repo, "update-ref", dest, new, old)
+    if lease.returncode != 0:
+        err = (publish.stderr or publish.stdout).strip()
+        err2 = (lease.stderr or lease.stdout).strip()
+        return False, err2 or err or f"could not update {dest}"
+    return True, ""
+
+
 def _merge_into_target_branch(
     repo: Path, branch: str, tip: str, node_id: str,
 ) -> tuple[bool, str]:
-    """Merge ``tip`` into ``branch`` via an isolated worktree.
+    """Merge ``tip`` into ``branch`` on a detached temporary worktree.
 
-    Leaves the operator checkout and its current branch untouched.
+    Never checks the target branch out by name, so the ordinary checkout
+    stays on its current branch even when that branch is the target.
     Returns (ok, short_head_or_error).
     """
     start = _resolve_branch_start(repo, branch)
@@ -2206,10 +2234,6 @@ def _merge_into_target_branch(
         if add.returncode != 0:
             err = (add.stderr or add.stdout).strip() or "worktree add failed"
             return False, err
-        checkout = _git_in(work, "checkout", "-B", branch, start)
-        if checkout.returncode != 0:
-            err = (checkout.stderr or checkout.stdout).strip() or "checkout failed"
-            return False, err
         merge = _git_in(work, "merge", "--ff-only", tip)
         if merge.returncode != 0:
             merge = _git_in(
@@ -2220,6 +2244,9 @@ def _merge_into_target_branch(
                 _git_in(work, "merge", "--abort")
                 err = (merge.stderr or merge.stdout).strip() or "merge failed"
                 return False, err
+        ok, err = _publish_local_target_ref(repo, work, branch, start)
+        if not ok:
+            return False, err
         head = _git_in(work, "rev-parse", "--short", "HEAD").stdout.strip()
         return True, head
     finally:
@@ -2228,7 +2255,8 @@ def _merge_into_target_branch(
 
 
 def _push_target_branch(repo: Path, branch: str) -> None:
-    proc = _git_in(repo, "push", "origin", branch, timeout=120)
+    dest = f"refs/heads/{branch}"
+    proc = _git_in(repo, "push", "origin", f"{dest}:{dest}", timeout=120)
     if proc.returncode != 0:
         err = (proc.stderr or proc.stdout).strip() or "git push failed"
         console.print(Text(f"push failed:\n{err}", style="bold red"))

@@ -1636,6 +1636,42 @@ class ReviewSurfaceTests(unittest.TestCase):
         leftover = list((repo / ".gddp").glob("**/*")) if (repo / ".gddp").exists() else []
         self.assertEqual(leftover, [])
 
+    def test_acceptance_merge_when_target_is_current_checkout(self):
+        import subprocess as sp
+
+        repo, base, tip = self._git_repo()
+        graphs = Path(self.tempdir.name) / "graphs" / "demo"
+        graphs.mkdir(parents=True)
+        (graphs / "project.yaml").write_text("target_branch: release\n")
+        git = lambda *args: sp.run(
+            ["git", "-C", str(repo), *args],
+            capture_output=True, text=True, check=True,
+        )
+        git("checkout", "-q", "-b", "release")
+        self.assertEqual(git("rev-parse", "HEAD").stdout.strip(), base)
+        self.assertEqual(
+            git("rev-parse", "--abbrev-ref", "HEAD").stdout.strip(), "release"
+        )
+        terminal = SimpleNamespace(getch=lambda: "y")
+        with patch.object(gddp, "ROOT", Path(self.tempdir.name)), \
+                patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(
+                    gddp,
+                    "_latest_receipt",
+                    return_value={
+                        "merge_commit_sha": tip,
+                        "evaluated_commit_sha": tip,
+                    },
+                ), \
+                patch.object(gddp, "_resolve_project_repo", return_value=repo), \
+                patch.object(gddp, "_push_target_branch") as push:
+            self.assertTrue(gddp._offer_acceptance_merge("demo", "alpha"))
+        push.assert_called_once_with(repo, "release")
+        after_branch = git("rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
+        self.assertEqual(after_branch, "release")
+        self.assertEqual(git("rev-parse", "release").stdout.strip(), tip)
+        self.assertEqual(git("rev-parse", "HEAD").stdout.strip(), tip)
+
 
 class ReviewRoutingTests(unittest.TestCase):
     def test_review_routes_to_subcommand_not_positional_dispatch(self):
