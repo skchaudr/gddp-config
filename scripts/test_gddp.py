@@ -1358,12 +1358,6 @@ class OverviewTests(unittest.TestCase):
 
     def test_acceptance_merge_pushes_target_branch(self):
         terminal = SimpleNamespace(getch=lambda: "y")
-        calls: list[tuple] = []
-
-        def fake_run(cmd, **kwargs):
-            calls.append(tuple(cmd))
-            return SimpleNamespace(returncode=0, stdout="abc123d\n", stderr="")
-
         with patch.object(gddp, "_import_module", return_value=terminal), \
                 patch.object(
                     gddp,
@@ -1378,12 +1372,12 @@ class OverviewTests(unittest.TestCase):
                 ), \
                 patch.object(gddp, "_acceptance_merge_state", return_value="pending"), \
                 patch.object(gddp, "_default_branch", return_value="release"), \
-                patch.object(gddp.subprocess, "run", side_effect=fake_run):
+                patch.object(
+                    gddp, "_merge_into_target_branch", return_value=(True, "abc123d")
+                ), \
+                patch.object(gddp, "_push_target_branch") as push:
             self.assertTrue(gddp._offer_acceptance_merge("demo", "alpha"))
-        self.assertIn(
-            ("git", "-C", "/tmp/repo", "push", "origin", "release"),
-            calls,
-        )
+        push.assert_called_once_with(Path("/tmp/repo"), "release")
 
     def test_successful_status_change_offers_publish(self):
         terminal = SimpleNamespace(getch=lambda: "y")
@@ -1593,6 +1587,54 @@ class ReviewSurfaceTests(unittest.TestCase):
         repo, _, _ = self._git_repo()
         with patch.object(gddp, "ROOT", Path(self.tempdir.name)):
             self.assertEqual(gddp._default_branch(repo, "missing"), "main")
+
+    def test_acceptance_merge_uses_isolated_target_not_current_checkout(self):
+        import subprocess as sp
+
+        repo, base, tip = self._git_repo()
+        graphs = Path(self.tempdir.name) / "graphs" / "demo"
+        graphs.mkdir(parents=True)
+        (graphs / "project.yaml").write_text("target_branch: release\n")
+        git = lambda *args: sp.run(
+            ["git", "-C", str(repo), *args],
+            capture_output=True, text=True, check=True,
+        )
+        git("branch", "release", base)
+        git("checkout", "-q", "-b", "operator-wip")
+        (repo / "wip.txt").write_text("operator\n")
+        git("add", "wip.txt")
+        git("commit", "-qm", "operator wip")
+        wip = git("rev-parse", "HEAD").stdout.strip()
+        current = git("rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
+        self.assertEqual(current, "operator-wip")
+        terminal = SimpleNamespace(getch=lambda: "y")
+        with patch.object(gddp, "ROOT", Path(self.tempdir.name)), \
+                patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(
+                    gddp,
+                    "_latest_receipt",
+                    return_value={
+                        "merge_commit_sha": tip,
+                        "evaluated_commit_sha": tip,
+                    },
+                ), \
+                patch.object(gddp, "_resolve_project_repo", return_value=repo), \
+                patch.object(gddp, "_push_target_branch") as push:
+            self.assertTrue(gddp._offer_acceptance_merge("demo", "alpha"))
+        push.assert_called_once_with(repo, "release")
+        after_head = git("rev-parse", "HEAD").stdout.strip()
+        after_branch = git("rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
+        self.assertEqual(after_branch, "operator-wip")
+        self.assertEqual(after_head, wip)
+        release = git("rev-parse", "release").stdout.strip()
+        self.assertEqual(release, tip)
+        ancestor = sp.run(
+            ["git", "-C", str(repo), "merge-base", "--is-ancestor", tip, "operator-wip"],
+            capture_output=True, text=True, check=False,
+        )
+        self.assertNotEqual(ancestor.returncode, 0)
+        leftover = list((repo / ".gddp").glob("**/*")) if (repo / ".gddp").exists() else []
+        self.assertEqual(leftover, [])
 
 
 class ReviewRoutingTests(unittest.TestCase):

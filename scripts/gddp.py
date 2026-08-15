@@ -63,9 +63,11 @@ import json
 import os
 import re
 import secrets
+import shutil
 import sqlite3
 import subprocess
 import sys
+import tempfile
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -2170,11 +2172,63 @@ def _acceptance_merge_state(
     return "pending"
 
 
-def _push_target_branch(repo: Path, branch: str) -> None:
-    proc = subprocess.run(
-        ["git", "-C", str(repo), "push", "origin", branch],
-        capture_output=True, text=True, timeout=120, check=False,
+def _git_in(cwd: Path, *args: str, timeout: int = 60) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        ["git", "-C", str(cwd), *args],
+        capture_output=True, text=True, timeout=timeout, check=False,
     )
+
+
+def _resolve_branch_start(repo: Path, branch: str) -> str | None:
+    for ref in (f"refs/heads/{branch}", f"refs/remotes/origin/{branch}"):
+        proc = _git_in(repo, "rev-parse", "--verify", ref)
+        if proc.returncode == 0 and proc.stdout.strip():
+            return proc.stdout.strip()
+    return None
+
+
+def _merge_into_target_branch(
+    repo: Path, branch: str, tip: str, node_id: str,
+) -> tuple[bool, str]:
+    """Merge ``tip`` into ``branch`` via an isolated worktree.
+
+    Leaves the operator checkout and its current branch untouched.
+    Returns (ok, short_head_or_error).
+    """
+    start = _resolve_branch_start(repo, branch)
+    if start is None:
+        return False, f"target branch {branch} not found locally or on origin"
+    work = Path(tempfile.mkdtemp(prefix=f"gddp-accept-{branch.replace('/', '-')}-"))
+    try:
+        add = _git_in(
+            repo, "worktree", "add", "--detach", str(work), start, timeout=60,
+        )
+        if add.returncode != 0:
+            err = (add.stderr or add.stdout).strip() or "worktree add failed"
+            return False, err
+        checkout = _git_in(work, "checkout", "-B", branch, start)
+        if checkout.returncode != 0:
+            err = (checkout.stderr or checkout.stdout).strip() or "checkout failed"
+            return False, err
+        merge = _git_in(work, "merge", "--ff-only", tip)
+        if merge.returncode != 0:
+            merge = _git_in(
+                work, "merge", "--no-ff", tip,
+                "-m", f"accept({node_id}): human-approved result {tip[:12]}",
+            )
+            if merge.returncode != 0:
+                _git_in(work, "merge", "--abort")
+                err = (merge.stderr or merge.stdout).strip() or "merge failed"
+                return False, err
+        head = _git_in(work, "rev-parse", "--short", "HEAD").stdout.strip()
+        return True, head
+    finally:
+        _git_in(repo, "worktree", "remove", "--force", str(work), timeout=60)
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def _push_target_branch(repo: Path, branch: str) -> None:
+    proc = _git_in(repo, "push", "origin", branch, timeout=120)
     if proc.returncode != 0:
         err = (proc.stderr or proc.stdout).strip() or "git push failed"
         console.print(Text(f"push failed:\n{err}", style="bold red"))
@@ -2291,28 +2345,15 @@ def _offer_acceptance_merge(project: str, node_id: str) -> bool:
             style="yellow",
         ))
         return True
-    proc = subprocess.run(
-        ["git", "-C", str(repo), "merge", "--ff-only", tip],
-        capture_output=True, text=True, timeout=60, check=False,
-    )
-    if proc.returncode != 0:
-        proc = subprocess.run(
-            ["git", "-C", str(repo), "merge", "--no-ff", tip,
-             "-m", f"accept({node_id}): human-approved result {tip[:12]}"],
-            capture_output=True, text=True, timeout=60, check=False,
-        )
-        if proc.returncode != 0:
-            console.print(Text(f"merge failed:\n{proc.stderr.strip()}", style="bold red"))
-            console.print(Text(
-                "Graph status not updated. Fix the repo, then retry complete.",
-                style="yellow",
-            ))
-            return False
-    head = subprocess.run(
-        ["git", "-C", str(repo), "rev-parse", "--short", "HEAD"],
-        capture_output=True, text=True, timeout=30, check=False,
-    ).stdout.strip()
-    console.print(Text(f"merged — {repo.name} {branch} now at {head}", style="green"))
+    ok, detail = _merge_into_target_branch(repo, branch, tip, node_id)
+    if not ok:
+        console.print(Text(f"merge failed:\n{detail}", style="bold red"))
+        console.print(Text(
+            "Graph status not updated. Fix the repo, then retry complete.",
+            style="yellow",
+        ))
+        return False
+    console.print(Text(f"merged — {repo.name} {branch} now at {detail}", style="green"))
     _push_target_branch(repo, branch)
     return True
 
