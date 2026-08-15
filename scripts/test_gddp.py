@@ -1356,6 +1356,35 @@ class OverviewTests(unittest.TestCase):
                 gddp._offer_acceptance_merge("demo", "alpha")
             )
 
+    def test_acceptance_merge_pushes_target_branch(self):
+        terminal = SimpleNamespace(getch=lambda: "y")
+        calls: list[tuple] = []
+
+        def fake_run(cmd, **kwargs):
+            calls.append(tuple(cmd))
+            return SimpleNamespace(returncode=0, stdout="abc123d\n", stderr="")
+
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(
+                    gddp,
+                    "_latest_receipt",
+                    return_value={
+                        "merge_commit_sha": "abc123def456",
+                        "evaluated_commit_sha": "abc123def456",
+                    },
+                ), \
+                patch.object(
+                    gddp, "_resolve_project_repo", return_value=Path("/tmp/repo")
+                ), \
+                patch.object(gddp, "_acceptance_merge_state", return_value="pending"), \
+                patch.object(gddp, "_default_branch", return_value="release"), \
+                patch.object(gddp.subprocess, "run", side_effect=fake_run):
+            self.assertTrue(gddp._offer_acceptance_merge("demo", "alpha"))
+        self.assertIn(
+            ("git", "-C", "/tmp/repo", "push", "origin", "release"),
+            calls,
+        )
+
     def test_successful_status_change_offers_publish(self):
         terminal = SimpleNamespace(getch=lambda: "y")
         node_cli = SimpleNamespace(cmd_set_status=lambda **kwargs: 0)
@@ -1551,6 +1580,20 @@ class ReviewSurfaceTests(unittest.TestCase):
         self.assertEqual(
             gddp._acceptance_merge_state(repo, "0" * 40), "unavailable")
 
+    def test_default_branch_reads_project_yaml_target_branch(self):
+        graphs = Path(self.tempdir.name) / "graphs" / "demo"
+        graphs.mkdir(parents=True)
+        (graphs / "project.yaml").write_text("target_branch: release\n")
+        with patch.object(gddp, "ROOT", Path(self.tempdir.name)):
+            self.assertEqual(
+                gddp._default_branch(Path("/tmp/unused"), "demo"), "release"
+            )
+
+    def test_default_branch_falls_back_to_main_without_project_yaml(self):
+        repo, _, _ = self._git_repo()
+        with patch.object(gddp, "ROOT", Path(self.tempdir.name)):
+            self.assertEqual(gddp._default_branch(repo, "missing"), "main")
+
 
 class ReviewRoutingTests(unittest.TestCase):
     def test_review_routes_to_subcommand_not_positional_dispatch(self):
@@ -1561,6 +1604,64 @@ class ReviewRoutingTests(unittest.TestCase):
         self.assertEqual(rc, 0)
         review.assert_called_once()
         dispatch.assert_not_called()
+
+    def test_review_cli_exposes_worktree_flag(self):
+        with patch.object(gddp, "cmd_review", return_value=0) as review:
+            rc = gddp.main([
+                "review", "--project", "p", "--node", "n", "--worktree",
+            ])
+        self.assertEqual(rc, 0)
+        self.assertTrue(review.call_args.args[0].worktree)
+
+    def test_origin_web_url_normalizes_ssh_and_https(self):
+        self.assertEqual(
+            gddp._origin_web_url("git@github.com:skchaudr/MyAPI.git"),
+            "https://github.com/skchaudr/MyAPI",
+        )
+        self.assertEqual(
+            gddp._origin_web_url("https://github.com/skchaudr/MyAPI.git"),
+            "https://github.com/skchaudr/MyAPI",
+        )
+
+    def test_cmd_review_prints_named_review_branch(self):
+        output = StringIO()
+        test_console = Console(file=output, force_terminal=False, width=80)
+        node_cli = SimpleNamespace(cmd_show=lambda **kwargs: 0)
+        args = SimpleNamespace(
+            project="demo", node="alpha", repo_path=None, full=False, worktree=False,
+        )
+        with patch.object(gddp, "console", test_console), \
+                patch.object(gddp, "_resolve_project_repo", return_value=None), \
+                patch.object(gddp, "_import_module", return_value=node_cli), \
+                patch.object(gddp, "_render_evaluation_and_diff"):
+            rc = gddp.cmd_review(args)
+        self.assertEqual(rc, 0)
+        self.assertIn("gddp/review/demo", output.getvalue())
+
+    def test_checkout_review_worktree_adds_named_branch(self):
+        import subprocess as sp
+
+        root = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: __import__("shutil").rmtree(root, ignore_errors=True))
+        repo = root / "repo"
+        repo.mkdir()
+        sp.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+        sp.run(["git", "config", "user.email", "t@t"], cwd=repo, check=True)
+        sp.run(["git", "config", "user.name", "t"], cwd=repo, check=True)
+        (repo / "f.txt").write_text("one\n")
+        sp.run(["git", "add", "-A"], cwd=repo, check=True)
+        sp.run(["git", "commit", "-qm", "base"], cwd=repo, check=True)
+        sp.run(["git", "branch", "gddp/review/demo"], cwd=repo, check=True)
+        output = StringIO()
+        test_console = Console(file=output, force_terminal=False, width=80)
+        with patch.object(gddp, "console", test_console):
+            rc = gddp._checkout_review_worktree("demo", repo)
+        dest = repo / ".gddp" / "worktrees" / "demo-review"
+        self.assertEqual(rc, 0)
+        self.assertTrue((dest / "f.txt").is_file())
+        rendered = output.getvalue().replace("\n", "")
+        self.assertIn("worktree:", rendered)
+        self.assertIn("demo-review", rendered)
 
     def test_cli_commands_cover_all_subcommands(self):
         # _CLI_COMMANDS gates positional dispatch; a subcommand missing here is

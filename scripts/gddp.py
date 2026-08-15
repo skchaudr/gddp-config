@@ -28,6 +28,7 @@ Subcommands:
     <node> [executor] [--yes]   Dispatch one ready node; --yes skips confirm
 
     verify node       Run deterministic node evaluation; emit a receipt
+    review            Graph result branch + node verdict/diff; optional worktree
     receipt           Append a mission worker node receipt to GDDP_RECEIPTS_PATH
 
     obsidian export   Export one graph to ~/Obsidian/gdd-<project>/
@@ -49,6 +50,8 @@ Usage:
     python3 scripts/gddp.py gddp-runtime
     python3 scripts/gddp.py verdict-confidence-split local_subprocess
     python3 scripts/gddp.py jobs show <job-id> --full
+    python3 scripts/gddp.py review --project gddp-runtime --node return-router
+    python3 scripts/gddp.py review --project gddp-runtime --node return-router --worktree
     python3 scripts/gddp.py project new --from-outline outline.md --project-id my-app --repo org/repo
 """
 
@@ -2044,7 +2047,98 @@ def _resolve_project_repo(project: str, repo_path: str | None = None) -> Path | 
     return None
 
 
-def _default_branch(repo: Path) -> str:
+def _load_project_yaml(project: str) -> dict:
+    path = ROOT / "graphs" / project / "project.yaml"
+    if not path.is_file():
+        return {}
+    with open(path) as f:
+        data = yaml.safe_load(f) or {}
+    return data if isinstance(data, dict) else {}
+
+
+def _project_target_branch(project: str | None) -> str:
+    if not project:
+        return ""
+    return str(_load_project_yaml(project).get("target_branch") or "").strip()
+
+
+def _review_branch(project: str) -> str:
+    return f"gddp/review/{project}"
+
+
+def _origin_web_url(origin: str) -> str:
+    url = origin.strip()
+    if url.startswith("git@"):
+        host_path = url[4:]
+        if ":" in host_path:
+            host, path = host_path.split(":", 1)
+            url = f"https://{host}/{path}"
+    elif url.startswith("ssh://git@"):
+        url = "https://" + url[len("ssh://git@"):]
+    if url.endswith(".git"):
+        url = url[:-4]
+    if url.startswith("https://") or url.startswith("http://"):
+        return url.rstrip("/")
+    return ""
+
+
+def _review_branch_url(repo: Path | None) -> str:
+    if repo is None:
+        return ""
+    proc = subprocess.run(
+        ["git", "-C", str(repo), "remote", "get-url", "origin"],
+        capture_output=True, text=True, timeout=30, check=False,
+    )
+    return _origin_web_url((proc.stdout or "").strip())
+
+
+def _print_review_branch(project: str, repo: Path | None) -> None:
+    branch = _review_branch(project)
+    console.print(Text(f"review branch: {branch}", style="bold"))
+    web = _review_branch_url(repo)
+    if web:
+        console.print(Text(f"{web}/tree/{branch}", style="dim"))
+
+
+def _checkout_review_worktree(project: str, repo: Path | None) -> int:
+    if repo is None:
+        console.print(Text(
+            "--worktree needs the target repo checkout (pass --repo-path)",
+            style="bold red",
+        ))
+        return 1
+    ref = _review_branch(project)
+    rel = Path(".gddp") / "worktrees" / f"{project}-review"
+    dest = repo / rel
+    if dest.exists():
+        console.print(Text(f"worktree: {dest}", style="green"))
+        return 0
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["git", "-C", str(repo), "fetch", "origin", ref],
+        capture_output=True, text=True, timeout=120, check=False,
+    )
+    proc = subprocess.run(
+        ["git", "worktree", "add", str(rel), ref],
+        cwd=str(repo), capture_output=True, text=True, timeout=60, check=False,
+    )
+    if proc.returncode != 0:
+        proc = subprocess.run(
+            ["git", "worktree", "add", "-B", ref, str(rel), f"origin/{ref}"],
+            cwd=str(repo), capture_output=True, text=True, timeout=60, check=False,
+        )
+    if proc.returncode != 0:
+        err = (proc.stderr or proc.stdout).strip() or "worktree add failed"
+        console.print(Text(err, style="bold red"))
+        return 1
+    console.print(Text(f"worktree: {dest}", style="green"))
+    return 0
+
+
+def _default_branch(repo: Path, project: str | None = None) -> str:
+    configured = _project_target_branch(project)
+    if configured:
+        return configured
     proc = subprocess.run(
         ["git", "-C", str(repo), "show-ref", "--verify", "refs/heads/main"],
         capture_output=True, timeout=30, check=False,
@@ -2058,7 +2152,9 @@ def _default_branch(repo: Path) -> str:
     return proc.stdout.strip() or "HEAD"
 
 
-def _acceptance_merge_state(repo: Path, sha: str) -> str:
+def _acceptance_merge_state(
+    repo: Path, sha: str, project: str | None = None,
+) -> str:
     """merged | pending | unavailable — is the result commit in the mainline?"""
     def git(*args: str) -> subprocess.CompletedProcess:
         return subprocess.run(
@@ -2068,9 +2164,26 @@ def _acceptance_merge_state(repo: Path, sha: str) -> str:
 
     if git("cat-file", "-e", f"{sha}^{{commit}}").returncode != 0:
         return "unavailable"
-    if git("merge-base", "--is-ancestor", sha, _default_branch(repo)).returncode == 0:
+    branch = _default_branch(repo, project)
+    if git("merge-base", "--is-ancestor", sha, branch).returncode == 0:
         return "merged"
     return "pending"
+
+
+def _push_target_branch(repo: Path, branch: str) -> None:
+    proc = subprocess.run(
+        ["git", "-C", str(repo), "push", "origin", branch],
+        capture_output=True, text=True, timeout=120, check=False,
+    )
+    if proc.returncode != 0:
+        err = (proc.stderr or proc.stdout).strip() or "git push failed"
+        console.print(Text(f"push failed:\n{err}", style="bold red"))
+        console.print(Text(
+            f"Merge is local; push origin {branch} when the remote is ready.",
+            style="yellow",
+        ))
+        return
+    console.print(Text(f"pushed {repo.name} {branch} → origin/{branch}", style="bold green"))
 
 
 def _render_evaluation_and_diff(
@@ -2106,8 +2219,8 @@ def _render_evaluation_and_diff(
     repo = _resolve_project_repo(project, repo_path)
     if not tip or repo is None:
         return
-    state = _acceptance_merge_state(repo, tip)
-    branch = _default_branch(repo)
+    state = _acceptance_merge_state(repo, tip, project)
+    branch = _default_branch(repo, project)
     style = {"merged": "green", "pending": "yellow", "unavailable": "dim"}[state]
     console.print(Text(f"merge state: {state} ({repo.name} {branch})", style=style))
     if state == "merged":
@@ -2137,10 +2250,10 @@ def _offer_acceptance_merge(project: str, node_id: str) -> bool:
     repo = _resolve_project_repo(project)
     if not tip or repo is None:
         return True
-    state = _acceptance_merge_state(repo, tip)
+    state = _acceptance_merge_state(repo, tip, project)
     if state == "merged":
         return True
-    branch = _default_branch(repo)
+    branch = _default_branch(repo, project)
     if state == "unavailable":
         console.print(Text(
             f"result commit {tip[:12]} not in {repo} — "
@@ -2200,11 +2313,18 @@ def _offer_acceptance_merge(project: str, node_id: str) -> bool:
         capture_output=True, text=True, timeout=30, check=False,
     ).stdout.strip()
     console.print(Text(f"merged — {repo.name} {branch} now at {head}", style="green"))
+    _push_target_branch(repo, branch)
     return True
 
 
 def cmd_review(args) -> int:
-    """Human-gate review surface: node summary, latest verdict, diff, merge state."""
+    """Human-gate review surface: graph result branch, verdict, diff, merge state."""
+    repo = _resolve_project_repo(args.project, args.repo_path)
+    _print_review_branch(args.project, repo)
+    if getattr(args, "worktree", False):
+        rc = _checkout_review_worktree(args.project, repo)
+        if rc != 0:
+            return rc
     node_cli = _import_module("node_cli")
     node_cli.cmd_show(project=args.project, node_id=args.node, trace=False, view="summary")
     _render_evaluation_and_diff(args.project, args.node, repo_path=args.repo_path, full=args.full)
@@ -4629,7 +4749,7 @@ def main(argv=None):
 
     review_p = sub.add_parser(
         "review",
-        help="Human-gate review surface: latest verdict, subject diff, merge state",
+        help="Graph result branch plus latest verdict, subject diff, merge state",
     )
     review_p.add_argument("--project", required=True, help="Project ID")
     review_p.add_argument("--node", required=True, help="Node ID")
@@ -4637,6 +4757,11 @@ def main(argv=None):
                           help="Path to the source repo checkout (overrides auto-resolve)")
     review_p.add_argument("--full", action="store_true",
                           help="Full patch instead of --stat")
+    review_p.add_argument(
+        "--worktree",
+        action="store_true",
+        help="Check out gddp/review/<project> at .gddp/worktrees/<project>-review",
+    )
     review_p.set_defaults(func=cmd_review)
 
     obs_p = sub.add_parser("obsidian", help="Obsidian vault export")

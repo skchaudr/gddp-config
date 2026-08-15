@@ -31,6 +31,8 @@ Or use your system Python if it's not PEP-668-locked.
 .venv/bin/python scripts/gddp.py jobs results --all
 .venv/bin/python scripts/gddp.py jobs set <job-id> awaiting_review --reason "returned for review"
 .venv/bin/python scripts/gddp.py verify node --project aa-cli --node common-core
+.venv/bin/python scripts/gddp.py review --project gddp-runtime --node return-router
+.venv/bin/python scripts/gddp.py review --project gddp-runtime --node return-router --worktree
 .venv/bin/python scripts/gddp.py obsidian export --project aa-cli
 .venv/bin/python scripts/gddp.py project new --from-outline outline.md --project-id my-app --repo org/repo
 ```
@@ -107,6 +109,7 @@ Graph status, runtime queue state, and evaluator verdict stay **distinct**.
 - Interactive completion requires current-job overall, criteria, and integrity verdicts to all be `pass`, unless the operator explicitly chooses the menu override after reviewing the missing evidence.
 - Interactive status updates require a reason (stored under runtime `node_status_history/`, not node YAML), preview `old -> new` for both files, and no-op without rewrite when already at target.
 - After a successful status write, the menu offers **publish**: `p` commit+push the dual-written graph paths only, `c` commit only, or `s` leave dirty. Default is `p`.
+- `gddp review --project <id> --node <id>` prints `gddp/review/<project>` (and the origin URL when known). `--worktree` checks that branch out at `.gddp/worktrees/<project>-review` in the target repo. Accepting a node merges into `project.yaml` `target_branch` and pushes that branch.
 - `node list` uses terminal width (`COLUMNS` / `shutil.get_terminal_size`):
   - **&lt;120 cols:** each node is a blank-line-separated multi-line record — exact `node_id` alone on line 1 (copyable, never truncated); line 2+ carries distinct `GRAPH` / `RUNTIME` / `VERDICT`, then TYPE/TITLE soft-wrapped to width
   - **≥120 cols:** table-like scan; exact ID intact; TITLE is the only truncated field; no emitted line exceeds detected width
