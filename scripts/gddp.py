@@ -95,6 +95,7 @@ _CLI_COMMANDS = frozenset(
         "review",
         "receipt",
         "obsidian",
+        "deliver",
         "project",
         "watch",
         "runs",
@@ -2793,6 +2794,31 @@ def run_runtime_jobs(argv: list[str]) -> int:
     return subprocess.run(command, env=env, check=False).returncode
 
 
+def run_graph_delivery(action: str, project: str, *, delete: bool = False) -> int:
+    """Publish one graph's delivery commit, or list/retire its transport refs.
+
+    Delegates to runtime's graph_delivery.py (never runs in-process —
+    mutation stays behind the same subprocess boundary as jobs/verify).
+    """
+    try:
+        runtime_root = resolve_runtime_root()
+    except RuntimeError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
+    command = [
+        runtime_python(runtime_root),
+        str(runtime_root / "scripts" / "runtime" / "graph_delivery.py"),
+        action,
+        project,
+        "--config-root", str(ROOT),
+        *(["--delete"] if delete else []),
+    ]
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(runtime_root)
+    env["GDDP_RUNTIME_ROOT"] = str(runtime_root)
+    return subprocess.run(command, env=env, check=False).returncode
+
+
 def load_runtime_jobs_module():
     """Load the job-only runtime backend used by the interactive menu."""
     runtime_root = resolve_runtime_root()
@@ -3142,6 +3168,7 @@ def _graph_more_menu(project: str):
         "s": ("status", "completion + node phases"),
         "v": ("validate", "check this graph definition"),
         "e": ("evaluations", "evaluator receipts"),
+        "d": ("deliver", "publish review branch / retire transport refs"),
         "b": ("back", ""),
         "q": ("quit", ""),
     }
@@ -3167,6 +3194,8 @@ def _graph_more_menu(project: str):
                 outcome = interactive_validate(project)
             elif choice == "e":
                 outcome = interactive_evaluations()
+            elif choice == "d":
+                outcome = interactive_graph_delivery(project)
             else:
                 outcome = _MENU_BACK
             if outcome is _MENU_QUIT:
@@ -4034,6 +4063,17 @@ def cmd_obsidian_export(args):
     sys.exit(obsidian_export.main(argv))
 
 
+def cmd_deliver(args):
+    """Publish a graph's delivery commit, or list/retire its transport refs.
+
+    Scriptable counterpart to the `deliver` action in the graph hub `more`
+    menu — same run_graph_delivery boundary, no in-process mutation either way.
+    """
+    sys.exit(run_graph_delivery(
+        args.subcommand, args.project, delete=getattr(args, "delete", False)
+    ))
+
+
 def cmd_project_new(args):
     if args.from_outline:
         outline = _import_module("outline_to_nodes")
@@ -4219,6 +4259,45 @@ def _render_project_status_detail(project_id: str) -> None:
         ev_scan = Text("  evaluator       ")
         ev_scan.append_text(_status_counts_text(verdict_counts))
         console.print(ev_scan)
+
+
+def interactive_graph_delivery(project: str):
+    """Publish this graph's delivery commit, or retire its transport refs.
+
+    Both mutate origin. Neither runs without this explicit confirmation —
+    publish and cleanup are never triggered as a side effect of any other
+    graph action (dispatch, node review, etc.).
+    """
+    actions = {
+        "p": ("publish", f"push the delivery commit to review/{project}"),
+        "c": ("cleanup", "list, then optionally delete, transport refs"),
+        "b": ("back", ""),
+        "q": ("quit", ""),
+    }
+    confirm = {"y": ("yes", ""), "n": ("no", "")}
+    while True:
+        _clear_screen()
+        console.print(Text("deliver", style="bold").append(f"  ·  {project}", style="dim"))
+        choice = _menu_choice(actions, default="p")
+        if choice == "q":
+            return _MENU_QUIT
+        if choice == "b":
+            return _MENU_BACK
+        if choice == "p":
+            console.print(
+                f"Publish [bold]{project}[/bold]'s delivery commit to "
+                f"[bold cyan]review/{project}[/bold cyan]?"
+            )
+            if _menu_choice(confirm, default="n") == "y":
+                run_graph_delivery("publish", project)
+            _pause()
+        elif choice == "c":
+            console.print(Text("dry run — nothing deleted yet:", style="dim"))
+            run_graph_delivery("cleanup", project)
+            console.print("Delete the ref(s) listed above?")
+            if _menu_choice(confirm, default="n") == "y":
+                run_graph_delivery("cleanup", project, delete=True)
+            _pause()
 
 
 def interactive_status(project: str | None = None):
@@ -4650,6 +4729,24 @@ def main(argv=None):
                             help="Destination vault (default: ~/Obsidian/gdd-<project>)")
     obs_export.add_argument("--dry-run", action="store_true")
     obs_export.set_defaults(func=cmd_obsidian_export)
+
+    deliver_p = sub.add_parser(
+        "deliver", help="Publish a graph's delivery commit / retire transport refs")
+    deliver_sub = deliver_p.add_subparsers(dest="subcommand")
+
+    deliver_publish = deliver_sub.add_parser(
+        "publish", help="Push the graph's unique delivery commit to review/<project>")
+    deliver_publish.add_argument("project", help="Project ID")
+    deliver_publish.set_defaults(func=cmd_deliver)
+
+    deliver_cleanup = deliver_sub.add_parser(
+        "cleanup", help="List (default) or delete this graph's gddp/attempt-*/result-* refs")
+    deliver_cleanup.add_argument("project", help="Project ID")
+    deliver_cleanup.add_argument(
+        "--delete", action="store_true",
+        help="Actually delete the refs (default: dry run, list only)",
+    )
+    deliver_cleanup.set_defaults(func=cmd_deliver)
 
     proj_p = sub.add_parser("project", help="Project operations")
     proj_sub = proj_p.add_subparsers(dest="subcommand")
