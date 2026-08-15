@@ -2187,40 +2187,24 @@ def _resolve_branch_start(repo: Path, branch: str) -> str | None:
     return None
 
 
-def _publish_local_target_ref(
-    repo: Path, work: Path, branch: str, expected: str,
-) -> tuple[bool, str]:
-    """Point ``refs/heads/<branch>`` at the detached worktree HEAD.
-
-    Non-force ``git push . HEAD:refs/heads/<branch>`` first. If that is
-    refused because the ordinary checkout already has the branch, fall
-    back to a compare-and-swap ``update-ref`` lease on the same old SHA.
-    """
+def _push_detached_head(work: Path, branch: str) -> tuple[bool, str]:
+    """Publish detached worktree HEAD to origin with normal non-force push."""
     dest = f"refs/heads/{branch}"
-    publish = _git_in(work, "push", ".", f"HEAD:{dest}")
-    if publish.returncode == 0:
-        return True, ""
-    new = _git_in(work, "rev-parse", "HEAD").stdout.strip()
-    current = _git_in(repo, "rev-parse", "--verify", dest)
-    old = current.stdout.strip() if current.returncode == 0 else expected
-    if current.returncode != 0:
-        lease = _git_in(repo, "update-ref", dest, new)
-    else:
-        lease = _git_in(repo, "update-ref", dest, new, old)
-    if lease.returncode != 0:
-        err = (publish.stderr or publish.stdout).strip()
-        err2 = (lease.stderr or lease.stdout).strip()
-        return False, err2 or err or f"could not update {dest}"
+    proc = _git_in(work, "push", "origin", f"HEAD:{dest}", timeout=120)
+    if proc.returncode != 0:
+        err = (proc.stderr or proc.stdout).strip() or "git push failed"
+        return False, err
     return True, ""
 
 
 def _merge_into_target_branch(
     repo: Path, branch: str, tip: str, node_id: str,
 ) -> tuple[bool, str]:
-    """Merge ``tip`` into ``branch`` on a detached temporary worktree.
+    """Merge ``tip`` onto ``branch`` in a detached temporary worktree.
 
-    Never checks the target branch out by name, so the ordinary checkout
-    stays on its current branch even when that branch is the target.
+    Never checks the target out by name and never updates the ordinary
+    repo's local ``refs/heads/<branch>``. The merged HEAD is pushed to
+    ``origin/refs/heads/<branch>`` with normal non-force semantics.
     Returns (ok, short_head_or_error).
     """
     start = _resolve_branch_start(repo, branch)
@@ -2244,7 +2228,7 @@ def _merge_into_target_branch(
                 _git_in(work, "merge", "--abort")
                 err = (merge.stderr or merge.stdout).strip() or "merge failed"
                 return False, err
-        ok, err = _publish_local_target_ref(repo, work, branch, start)
+        ok, err = _push_detached_head(work, branch)
         if not ok:
             return False, err
         head = _git_in(work, "rev-parse", "--short", "HEAD").stdout.strip()
@@ -2252,20 +2236,6 @@ def _merge_into_target_branch(
     finally:
         _git_in(repo, "worktree", "remove", "--force", str(work), timeout=60)
         shutil.rmtree(work, ignore_errors=True)
-
-
-def _push_target_branch(repo: Path, branch: str) -> None:
-    dest = f"refs/heads/{branch}"
-    proc = _git_in(repo, "push", "origin", f"{dest}:{dest}", timeout=120)
-    if proc.returncode != 0:
-        err = (proc.stderr or proc.stdout).strip() or "git push failed"
-        console.print(Text(f"push failed:\n{err}", style="bold red"))
-        console.print(Text(
-            f"Merge is local; push origin {branch} when the remote is ready.",
-            style="yellow",
-        ))
-        return
-    console.print(Text(f"pushed {repo.name} {branch} → origin/{branch}", style="bold green"))
 
 
 def _render_evaluation_and_diff(
@@ -2381,8 +2351,10 @@ def _offer_acceptance_merge(project: str, node_id: str) -> bool:
             style="yellow",
         ))
         return False
-    console.print(Text(f"merged — {repo.name} {branch} now at {detail}", style="green"))
-    _push_target_branch(repo, branch)
+    console.print(Text(
+        f"merged — {repo.name} {branch} now at {detail} on origin/{branch}",
+        style="green",
+    ))
     return True
 
 

@@ -1374,10 +1374,11 @@ class OverviewTests(unittest.TestCase):
                 patch.object(gddp, "_default_branch", return_value="release"), \
                 patch.object(
                     gddp, "_merge_into_target_branch", return_value=(True, "abc123d")
-                ), \
-                patch.object(gddp, "_push_target_branch") as push:
+                ) as merge:
             self.assertTrue(gddp._offer_acceptance_merge("demo", "alpha"))
-        push.assert_called_once_with(Path("/tmp/repo"), "release")
+        merge.assert_called_once_with(
+            Path("/tmp/repo"), "release", "abc123def456", "alpha"
+        )
 
     def test_successful_status_change_offers_publish(self):
         terminal = SimpleNamespace(getch=lambda: "y")
@@ -1588,6 +1589,22 @@ class ReviewSurfaceTests(unittest.TestCase):
         with patch.object(gddp, "ROOT", Path(self.tempdir.name)):
             self.assertEqual(gddp._default_branch(repo, "missing"), "main")
 
+    def _bare_origin(self, repo: Path, *branches: str) -> Path:
+        import subprocess as sp
+
+        remote = Path(self.tempdir.name) / "origin.git"
+        sp.run(["git", "init", "-q", "--bare", str(remote)], check=True)
+        sp.run(
+            ["git", "-C", str(repo), "remote", "add", "origin", str(remote)],
+            check=True,
+        )
+        if branches:
+            sp.run(
+                ["git", "-C", str(repo), "push", "-q", "origin", *branches],
+                check=True,
+            )
+        return remote
+
     def test_acceptance_merge_uses_isolated_target_not_current_checkout(self):
         import subprocess as sp
 
@@ -1600,6 +1617,7 @@ class ReviewSurfaceTests(unittest.TestCase):
             capture_output=True, text=True, check=True,
         )
         git("branch", "release", base)
+        remote = self._bare_origin(repo, "release")
         git("checkout", "-q", "-b", "operator-wip")
         (repo / "wip.txt").write_text("operator\n")
         git("add", "wip.txt")
@@ -1618,16 +1636,18 @@ class ReviewSurfaceTests(unittest.TestCase):
                         "evaluated_commit_sha": tip,
                     },
                 ), \
-                patch.object(gddp, "_resolve_project_repo", return_value=repo), \
-                patch.object(gddp, "_push_target_branch") as push:
+                patch.object(gddp, "_resolve_project_repo", return_value=repo):
             self.assertTrue(gddp._offer_acceptance_merge("demo", "alpha"))
-        push.assert_called_once_with(repo, "release")
         after_head = git("rev-parse", "HEAD").stdout.strip()
         after_branch = git("rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
         self.assertEqual(after_branch, "operator-wip")
         self.assertEqual(after_head, wip)
-        release = git("rev-parse", "release").stdout.strip()
-        self.assertEqual(release, tip)
+        self.assertEqual(git("rev-parse", "release").stdout.strip(), base)
+        remote_tip = sp.run(
+            ["git", "-C", str(remote), "rev-parse", "refs/heads/release"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        self.assertEqual(remote_tip, tip)
         ancestor = sp.run(
             ["git", "-C", str(repo), "merge-base", "--is-ancestor", tip, "operator-wip"],
             capture_output=True, text=True, check=False,
@@ -1648,7 +1668,12 @@ class ReviewSurfaceTests(unittest.TestCase):
             capture_output=True, text=True, check=True,
         )
         git("checkout", "-q", "-b", "release")
-        self.assertEqual(git("rev-parse", "HEAD").stdout.strip(), base)
+        remote = self._bare_origin(repo, "release")
+        before_head = git("rev-parse", "HEAD").stdout.strip()
+        before_index = (repo / ".git" / "index").read_bytes()
+        before_files = (repo / "f.txt").read_text()
+        before_status = git("status", "--porcelain").stdout
+        self.assertEqual(before_head, base)
         self.assertEqual(
             git("rev-parse", "--abbrev-ref", "HEAD").stdout.strip(), "release"
         )
@@ -1663,14 +1688,21 @@ class ReviewSurfaceTests(unittest.TestCase):
                         "evaluated_commit_sha": tip,
                     },
                 ), \
-                patch.object(gddp, "_resolve_project_repo", return_value=repo), \
-                patch.object(gddp, "_push_target_branch") as push:
+                patch.object(gddp, "_resolve_project_repo", return_value=repo):
             self.assertTrue(gddp._offer_acceptance_merge("demo", "alpha"))
-        push.assert_called_once_with(repo, "release")
-        after_branch = git("rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
-        self.assertEqual(after_branch, "release")
-        self.assertEqual(git("rev-parse", "release").stdout.strip(), tip)
-        self.assertEqual(git("rev-parse", "HEAD").stdout.strip(), tip)
+        self.assertEqual(
+            git("rev-parse", "--abbrev-ref", "HEAD").stdout.strip(), "release"
+        )
+        self.assertEqual(git("rev-parse", "HEAD").stdout.strip(), before_head)
+        self.assertEqual(git("rev-parse", "release").stdout.strip(), before_head)
+        self.assertEqual((repo / ".git" / "index").read_bytes(), before_index)
+        self.assertEqual((repo / "f.txt").read_text(), before_files)
+        self.assertEqual(git("status", "--porcelain").stdout, before_status)
+        remote_tip = sp.run(
+            ["git", "-C", str(remote), "rev-parse", "refs/heads/release"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        self.assertEqual(remote_tip, tip)
 
 
 class ReviewRoutingTests(unittest.TestCase):
