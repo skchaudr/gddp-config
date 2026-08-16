@@ -20,14 +20,14 @@ acceptance_criteria:
 constraints:
 - The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the
   experiment was executed correctly, never whether the hypothesis won.
-- 'Execution model (operator direction 2026-08-15): You are the ORCHESTRATOR, not the worker. Do NOT perform the node''s work
-  yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6 via the subagent tool''s model
-  parameter) to do the actual investigation, construction, and measurement. Your job is decomposition, dispatch, reviewing
-  returns, integrating, and producing the final artifacts.'
+- 'Execution model (operator direction 2026-08-15, enforced by the attempt preamble): You are the ORCHESTRATOR, not the worker.
+  Do NOT perform the node''s work yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6
+  via the subagent tool''s model parameter) to do the actual investigation, construction, and measurement. Your job is decomposition,
+  dispatch, reviewing returns, integrating, and producing the final artifacts.'
 - 'Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight (worker
-  subagents, Khoj ingestion/processing, long builds), dispatch ONE watcher subagent on model openrouter-discounted-models-cheapest/@preset/deepseek-v4-flash-54-off
-  (DeepSeek V4 Flash) that actively polls with tools (job status, logs, artifact existence) and reports state changes; you
-  go idle between its reports instead of polling yourself.'
+  subagents, Khoj ingestion/processing, long builds), dispatch ONE watcher subagent on model deepseek/deepseek-v4-flash that
+  actively polls with tools (job status, logs, artifact existence) and reports state changes; you go idle between its reports
+  instead of polling yourself.'
 - 'Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/
   self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to
   this node as evidence; work discovered beyond this node''s scope becomes a continuation proposal, never silent execution.'
@@ -38,7 +38,8 @@ constraints:
   the corpus, questions, or ruler to improve scores.'
 - 'This treatment includes exactly: anchor + decisions + git + graphify. Same questions, scorer, answer path, and environment
   as every other treatment.'
-- Close with one oracle or reviewer pass over the produced artifacts before returning.
+- Close with parallel reviewer subagents on model deepseek/deepseek-v4-pro, each assigned a different explicit focus (criteria
+  coverage, evidence integrity, constraint compliance). Resolve their findings before returning.
 allowed_execution_modes:
 - pi_rpc
 required_artifacts:
