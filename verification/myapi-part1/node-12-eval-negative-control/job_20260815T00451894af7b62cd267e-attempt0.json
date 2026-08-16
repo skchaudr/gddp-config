@@ -1,0 +1,767 @@
+{
+  "project_id": "myapi-part1",
+  "node_id": "node-12-eval-negative-control",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.85,
+    "findings": [],
+    "reasoning": "The node-12 work preserves the node's intended role and the graph's integrity. Intent: the node exists to run the fixed negative-control query, capture the raw answer and retrieved evidence verbatim, and state a plain verdict without retrying. The commit (78b2992, 3 files) does exactly that: q5.txt holds the exact predetermined out-of-scope query (byte-identical to the results file's quoted query, written before the run per recorded timestamps); the results file contains the verbatim chat outcome (HTTP 500 error text), five retrieved chunks with scores whose quoted passages I verified against the real corpus files (D16/D07/D09/D06 in 03-ingestion/output/khoj-corpus/), and a single-sentence verdict. The isolated user constraint was honored (health check authenticated as gddp-part1@local; no token in the diff). The 'never retry / weak answers are valid' constraints were honored — the run returned a 500 rather than a confabulation, and it was recorded, not retried, which matches the memo's 'answer quality is measured, not a gate'. Graph integrity: the change is scoped to node-12's own room (04-evaluation/ + handoff), depends_on node-09 whose retrieval-check.md (PASS, committed at c605d36) documented the exact interface node-12 repeated, and both required artifacts exist at their declared paths ready for node-13 to consume. Lane-1's indeterminate deterministic scans reflect scanner identifier limitations, not missing artifacts; my direct read of the files confirms the required content is present. Non-blocking forward risks are noted as graph observations.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-15T01:05:06.909Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_916ciyHtXt5MapTuRMCU0330",
+        "command": "pwd && ls -la"
+      },
+      {
+        "ts": "2026-08-15T01:05:06.911Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_0wlosV2fCUG8cuylUEGy1975",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-12-eval-negative-control.yaml"
+      },
+      {
+        "ts": "2026-08-15T01:05:06.911Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_8VtGU1bq1uI5nO3UEHTS4860",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-09-verify-retrieval.yaml"
+      },
+      {
+        "ts": "2026-08-15T01:05:06.923Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_8VtGU1bq1uI5nO3UEHTS4860",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:06.924Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_0wlosV2fCUG8cuylUEGy1975",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:06.939Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_916ciyHtXt5MapTuRMCU0330",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:09.474Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_rIs93Ymfk3Xk40KaZlMe2313",
+        "path": "04-evaluation/queries/q5.txt"
+      },
+      {
+        "ts": "2026-08-15T01:05:09.475Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_AtMwJZq6GQm5RmkinBU44997",
+        "path": "04-evaluation/results/q5-negative-control.md"
+      },
+      {
+        "ts": "2026-08-15T01:05:09.477Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_cCKpj2vIT2SXb4mppbMh4340",
+        "command": "ls -la .handoffs/ | tail -20 && echo \"---\" && ls -la 04-evaluation/ 04-evaluation/queries/ 04-evaluation/results/"
+      },
+      {
+        "ts": "2026-08-15T01:05:09.483Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_AtMwJZq6GQm5RmkinBU44997",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:09.484Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_rIs93Ymfk3Xk40KaZlMe2313",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:09.510Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_cCKpj2vIT2SXb4mppbMh4340",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:11.857Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_qVwL3RoPk89Ba4cpAZFa0030",
+        "path": ".handoffs/036-negative-control-evaluated.md"
+      },
+      {
+        "ts": "2026-08-15T01:05:11.858Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_dlPBnwxpPCUGWU73NfvM5637",
+        "command": "ls -la 03-ingestion/ 03-ingestion/output/ 2>/dev/null; echo \"---\"; ls -la 04-evaluation/CONTEXT.md; cat 04-evaluation/CONTEXT.md"
+      },
+      {
+        "ts": "2026-08-15T01:05:11.863Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_qVwL3RoPk89Ba4cpAZFa0030",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:11.896Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_dlPBnwxpPCUGWU73NfvM5637",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:14.850Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_pdQ1HNQfq1XuqNKE8yHH0545",
+        "path": "03-ingestion/output/retrieval-check.md"
+      },
+      {
+        "ts": "2026-08-15T01:05:14.851Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_NtAQAyYKJbOjuLH8gWrE3489",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj && git status 2>&1 | head -30; echo \"---LOG---\"; git log --oneline -5 2>&1"
+      },
+      {
+        "ts": "2026-08-15T01:05:14.856Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_pdQ1HNQfq1XuqNKE8yHH0545",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:14.993Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_NtAQAyYKJbOjuLH8gWrE3489",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:17.750Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_v67YzK2IIGecMLiFQDyz6306",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj && git show --stat 78b2992 2>&1 | head -20; echo \"---DIFF---\"; git diff c605d36 78b2992 --stat 2>&1; echo \"---\"; git show 78b2992 --format=\"%H%n%s%n%b\" --stat 2>&1 | head -40"
+      },
+      {
+        "ts": "2026-08-15T01:05:17.751Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_uKUnY3FAdaCiSIyltIHx6378",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml"
+      },
+      {
+        "ts": "2026-08-15T01:05:17.756Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_uKUnY3FAdaCiSIyltIHx6378",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:17.839Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_v67YzK2IIGecMLiFQDyz6306",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:21.603Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_M3GPuuIzDXG4CgHWsRD81850",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj && ls 03-ingestion/output/khoj-corpus/ | head -30; echo \"---\"; for f in D16.md D07.md D09.md D06.md; do echo \"== $f ==\"; cat \"03-ingestion/output/khoj-corpus/$f\" 2>/dev/null | head -15; done"
+      },
+      {
+        "ts": "2026-08-15T01:05:21.604Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_4xv5UBlbrTAWXBu8W4MZ8338",
+        "path": "PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-15T01:05:21.609Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_4xv5UBlbrTAWXBu8W4MZ8338",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:21.646Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_M3GPuuIzDXG4CgHWsRD81850",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:34.543Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_gNpdchU2OUs7hs1q8zc66697",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj && echo \"== q5.txt ==\"; cat -A 04-evaluation/queries/q5.txt; echo \"== grep token scan (new files only) ==\"; git show 78b2992 | grep -inE \"token|bearer|authorization|password|secret\" | head; echo \"== memo present? ==\"; ls -la \"/Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md\" 2>&1; echo \"== other queries (nodes 10, 11) ==\"; ls 04-evaluation/queries/; ls 04-evaluation/results/"
+      },
+      {
+        "ts": "2026-08-15T01:05:34.544Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_U6iM3Q77yaI0X90yFokY1464",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj && git show c605d36 --stat 2>&1 | head -15; echo \"---node09 commit---\"; git show c605d36 --format=\"%s\" --stat 2>&1 | head -15"
+      },
+      {
+        "ts": "2026-08-15T01:05:34.604Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_gNpdchU2OUs7hs1q8zc66697",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:34.608Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_U6iM3Q77yaI0X90yFokY1464",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:39.076Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_yrZQbdga6Vegew5euakW1237",
+        "command": "grep -n -iE \"negative control|evaluation|query 5|q5|confabulat|out of scope|unanswer\" \"/Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md\" | head -30"
+      },
+      {
+        "ts": "2026-08-15T01:05:39.077Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_HsGzrq2zjAwa0yue6Ai45125",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj && sed -n '1,40p' \"/Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md\""
+      },
+      {
+        "ts": "2026-08-15T01:05:39.092Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_HsGzrq2zjAwa0yue6Ai45125",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:39.095Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_yrZQbdga6Vegew5euakW1237",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:05:41.255Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_QW3u7kEB3n7BgS1Hhp6H2895",
+        "command": "sed -n '40,110p' \"/Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md\""
+      },
+      {
+        "ts": "2026-08-15T01:05:41.273Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_QW3u7kEB3n7BgS1Hhp6H2895",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:06:01.761Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_EIGupOTrVasmgoQAj19d7752",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj && od -c 04-evaluation/queries/q5.txt | head -5; echo \"---\"; grep -n \"exact color\" 04-evaluation/results/q5-negative-control.md"
+      },
+      {
+        "ts": "2026-08-15T01:06:01.789Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_EIGupOTrVasmgoQAj19d7752",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T01:06:20.625Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_eQxxo7nu3emEedCzftik0183",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "Node-12 fired while its dependency node-09-verify-retrieval is still provisional (frontier auto-advanced before node-09 acceptance). The retrieval evidence itself is a PASS, so risk is low, but node-09's provisional status should be confirmed accepted before node-13 closes the slice, or node-12's foundation could be revisited.",
+        "affected_node_ids": [
+          "node-09-verify-retrieval",
+          "node-12-eval-negative-control"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "Nodes 10 and 11 (fixed queries 1-4) have produced no queries/ or results/ artifacts yet. Node-13 (preserve run evidence and close Part 1) must not fire until all five query results exist; the frontier should serialize/ensure 10 and 11 complete before 13.",
+        "affected_node_ids": [
+          "node-10-eval-factual-rationale",
+          "node-11-eval-supersession-relationship",
+          "node-13-preserve-results"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Blueprint architecture_notes reference 'node-14 closes' but the node list ends at node-13 (preserve-results). Pre-existing config inconsistency between architecture notes and the node list; reconcile before the closing node fires.",
+        "affected_node_ids": [
+          "node-13-preserve-results"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.91,
+  "criteria_confidence": 0.91,
+  "completeness": 1.0,
+  "graph_readiness": 0.91,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "answer-captured",
+        "criterion": "04-evaluation/results/q5-negative-control.md contains the exact out-of-scope query, Khoj's raw answer verbatim, and any retrieved evidence",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (04-evaluation/results/q5-negative-control.md)"
+        ],
+        "reasoning": "Scanned source files (04-evaluation/results/q5-negative-control.md) for identifiers named in the criterion (q5-negative-control, out-of-scope). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "verdict-recorded",
+        "criterion": "The file states plainly whether Khoj correctly declined/hedged or confabulated - one sentence, no remediation",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md - read it first.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Write the exact query text to its queries/ file BEFORE asking Khoj; the memo's evaluation set is fixed and predetermined",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Answer quality is recorded, never retried - weak answers are valid results",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Never retry to get a better answer",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Isolated Khoj user for this run: email gddp-part1@local on khoj-38-b. Token only on the VM at /home/sab-mini/.khoj/gddp-part1.token. Auth as Authorization: Bearer <token>. Query that user only. Do not query anonymous default@example.com. Do not commit or print the token.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model xai/grok-4.6 via the subagent tool's model parameter; close with one oracle or reviewer pass before returning",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "04-evaluation/queries/q5.txt": true,
+      "04-evaluation/results/q5-negative-control.md": true
+    },
+    "deps_status": {
+      "node-09-verify-retrieval": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "c605d36e63172b70bb960a63107bab1cd1926f83",
+      "tip": "78b2992ae481e002fc56a8028cc3b0eee00e314c",
+      "files": [
+        {
+          "status": "A",
+          "path": ".handoffs/036-negative-control-evaluated.md"
+        },
+        {
+          "status": "A",
+          "path": "04-evaluation/queries/q5.txt"
+        },
+        {
+          "status": "A",
+          "path": "04-evaluation/results/q5-negative-control.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 3,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "answer-captured",
+        "judgment": "judged_pass",
+        "confidence": 0.92,
+        "evidence": [
+          "04-evaluation/results/q5-negative-control.md (read full file)",
+          "04-evaluation/queries/q5.txt (xxd byte dump)",
+          "git show 78b2992 --stat (3 files committed, clean worktree)",
+          "03-ingestion/output/khoj-corpus/D07.md, D09.md, D16.md (verbatim passage match)",
+          "03-ingestion/output/retrieval-check.md (interface consistency)"
+        ],
+        "reasoning": "The result file contains (1) the exact out-of-scope query 'What was the exact color of Sab's front door on January 1, 2010?' under '## Exact query', byte-identical to 04-evaluation/queries/q5.txt — a query unanswerable from a decision corpus, satisfying 'out-of-scope'; (2) Khoj's raw answer verbatim: Khoj returned HTTP 500 with no answer text, and the file quotes the verbatim client-surfaced outcome (urllib.error.HTTPError: HTTP Error 500: Internal Server Error) and the exact request body {'q': ..., 'n': 5, 'stream': false, 'create_new': true} — the faithful raw record given no answer string existed, consistent with the 'record, never retry' constraint; (3) retrieved evidence: five Bearer-authenticated search chunks with scores and quoted passages that I verified occur verbatim in the staged corpus files (D06/D07/D09/D16.md), plus the note that none contains a front-door color or Jan 1 2010 fact. The deterministic scan found no hit only because it searched for literal identifiers 'q5-negative-control'/'out-of-scope' as content words; the filename and query text carry the semantics. Minor interpretive nuance: 'raw answer verbatim' is an HTTP error rather than answer prose because no answer was produced."
+      },
+      {
+        "criterion_id": "verdict-recorded",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "04-evaluation/results/q5-negative-control.md '## Verdict' section (last line of file)",
+          ".handoffs/036-negative-control-evaluated.md ('Empirical Reality' confirms no retry)"
+        ],
+        "reasoning": "The Verdict section is exactly one sentence: 'Khoj neither correctly declined/hedged nor confabulated because it returned HTTP 500 without an answer.' It states plainly which of the named outcome categories applied (neither — because no answer was produced, only a server error), contains no remediation language, and the file/handoff explicitly record that the request was not retried. The criterion's binary framing (declined/hedged vs confabulated) is answered truthfully with a third outcome; the plain one-sentence requirement is satisfied regardless. Deterministic 'no_probe' status is a probe-absence artifact, not a content failure."
+      }
+    ],
+    "overall_reasoning": "Node-12 (Fixed query 5: negative control) satisfies both acceptance criteria. The required artifacts exist, are committed at the tip (78b2992), and the working tree is clean. The result file 04-evaluation/results/q5-negative-control.md contains (a) the exact out-of-scope query byte-identical to 04-evaluation/queries/q5.txt, (b) Khoj's raw outcome verbatim — an HTTP 500 with no answer text, quoted exactly along with the request body, recorded without retry per the 'answer quality recorded, never retried' constraint, and (c) five retrieved-evidence chunks whose quoted passages I verified verbatim against the actual staged corpus files (D06/D07/D09/D16.md). The file's Verdict is one plain sentence stating Khoj did neither decline/hedge nor confabulate because it returned HTTP 500 without an answer — no remediation. Constraints observed as satisfied from artifact evidence: query written (00:46:58Z) before the run (00:47:45Z); isolated user gddp-part1@local confirmed via health check; no token printed or committed; retrieval interface matches node-09's recorded method (GET /api/search, n=5, t=all, Bearer auth). The deterministic indeterminate statuses were artifacts of weak keyword probes (literal 'q5-negative-control'/'out-of-scope' content-word scan and no registered probe for the verdict), not of content deficiencies. The only judgment nuances are interpretive (raw answer = verbatim HTTP error since no answer text existed; verdict names a third outcome rather than forcing the binary), both faithfully representing what actually happened.",
+    "risks": "1) 'Khoj's raw answer verbatim' is an HTTP 500 error string rather than answer prose because Khoj produced no answer; the file faithfully records the verbatim error and request body. If the criterion author intended a strictly non-empty answer string, this would not be capturable without violating the never-retry constraint. 2) The verdict states 'neither' of the two named categories (declined/hedged vs confabulated) with the honest reason (HTTP 500, no answer); if the criterion intended a forced binary labeling, the wording differs, though the 'one sentence, no remediation' requirement is met. 3) VM-side execution claims (health 200, chat 500, search 200) are recorded in the artifact and cannot be independently re-verified from the repo; consistency with node-09's documented interface and corpus files supports plausibility.",
+    "followup_candidates": "1) Human clarification: the deterministic keyword scan for criterion answer-captured searched file content for literal words 'q5-negative-control'/'out-of-scope' and found none because the semantics live in the filename and the query text ('What was the exact color of Sab's front door on January 1, 2010?'), which is unanswerable from the decision corpus. Is a literal 'out-of-scope' wording requirement intended, or is the unanswerable-query semantics sufficient? If literal wording is required, update the criterion and rerun; otherwise this verdict stands. 2) Human clarification: for the negative control, Khoj returned HTTP 500 with no answer text, so 'raw answer verbatim' was recorded as the verbatim HTTP error plus exact request body (per the never-retry constraint). Confirm this is the intended capture for a no-answer outcome, or specify a different recording convention for future no-answer runs. 3) Observed (not in criteria): q5.txt and the result file are committed at 78b2992 with a clean worktree; evidence passages cross-verify against the corpus. Not counted toward the criteria verdict.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-15T01:03:53.369Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_LKkF9F1Nwa7XnyJmXyoj6501",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj && ls -la && echo \"---\" && find . -type f | head -100"
+        },
+        {
+          "ts": "2026-08-15T01:03:53.370Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_Oi9l85ixZujTaQbUSXuv5266",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-15T01:03:53.384Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Oi9l85ixZujTaQbUSXuv5266",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T01:03:53.408Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_LKkF9F1Nwa7XnyJmXyoj6501",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T01:03:56.319Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_vrYv4Hjszw4dnOtT4QMZ7399",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj/04-evaluation/results/q5-negative-control.md"
+        },
+        {
+          "ts": "2026-08-15T01:03:56.320Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_yVcBEM8vJ8TygS6QtiZx8767",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj/04-evaluation/queries/q5.txt"
+        },
+        {
+          "ts": "2026-08-15T01:03:56.321Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_p9uHP9KVd8zUYmA2JY422328",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj/.handoffs/036-negative-control-evaluated.md"
+        },
+        {
+          "ts": "2026-08-15T01:03:56.324Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_vrYv4Hjszw4dnOtT4QMZ7399",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T01:03:56.325Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_yVcBEM8vJ8TygS6QtiZx8767",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T01:03:56.325Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_p9uHP9KVd8zUYmA2JY422328",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T01:04:10.017Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_PcUpk7hKzTZmx4XRGJac2748",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-12-eval-negative-control.yaml"
+        },
+        {
+          "ts": "2026-08-15T01:04:10.017Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_Rxduq2OvAvc2XYGXe9Vz3139",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-09-verify-retrieval.yaml"
+        },
+        {
+          "ts": "2026-08-15T01:04:10.020Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_UX0rV2ajtedgbBYU4YZE6509",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj && ls -la 04-evaluation/ 04-evaluation/queries/ 04-evaluation/results/ && echo \"---git---\" && git log --oneline -5 && echo \"---status---\" && git status --short"
+        },
+        {
+          "ts": "2026-08-15T01:04:10.024Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_PcUpk7hKzTZmx4XRGJac2748",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T01:04:10.024Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Rxduq2OvAvc2XYGXe9Vz3139",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T01:04:10.303Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_UX0rV2ajtedgbBYU4YZE6509",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T01:04:14.019Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_LIHYwzg6mBmFrox3dPNm1690",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj && echo \"=== show 78b2992 (tip) ===\" && git show --stat 78b2992 | head -20 && echo \"=== diff tip vs worktree for node12 files ===\" && git diff 78b2992 -- 04-evaluation/queries/q5.txt 04-evaluation/results/q5-negative-control.md .handoffs/036-negative-control-evaluated.md && echo \"(no diff output above = clean)\" && echo \"=== q5.txt bytes ===\" && xxd 04-evaluation/queries/q5.txt && echo \"=== exact query block in result (lines 11-15) ===\" && sed -n '10,16p' 04-evaluation/results/q5-negative-control.md | cat -A"
+        },
+        {
+          "ts": "2026-08-15T01:04:14.071Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_LIHYwzg6mBmFrox3dPNm1690",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-15T01:04:16.887Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_bB7zIJxQpIvHNMTSeZIx4870",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj && sed -n '8,20p' 04-evaluation/results/q5-negative-control.md | od -c | head -30"
+        },
+        {
+          "ts": "2026-08-15T01:04:16.888Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_F7EK9n4RUFZVWEslBOit3904",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj/04-evaluation/CONTEXT.md"
+        },
+        {
+          "ts": "2026-08-15T01:04:16.892Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_F7EK9n4RUFZVWEslBOit3904",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T01:04:16.905Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_bB7zIJxQpIvHNMTSeZIx4870",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T01:04:31.758Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_pEmpI0OaEAKZ6lxTMp8S4866",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj && ls 03-ingestion/ 03-ingestion/output/ 2>/dev/null | head -40 && echo \"=== grep corpus for quoted passages ===\" && grep -rl \"Evaluator is second-to-last gate\" . --include=\"*.md\" 2>/dev/null | head && grep -rl \"Nodes enter graphs only through the import tool\" . --include=\"*.md\" 2>/dev/null | head && echo \"=== retrieval-check ===\" && ls -la 03-ingestion/output/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-15T01:04:31.760Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_eOQkQmWHBHYarr0CKvLQ4891",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj && grep -n -i \"negative\\|front door\\|q5\\|out.of.scope\" README.md | head -20; echo \"=== README eval section ===\"; grep -n \"04-evaluation\\|negative control\\|evaluation set\" README.md | head -20"
+        },
+        {
+          "ts": "2026-08-15T01:04:31.791Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_eOQkQmWHBHYarr0CKvLQ4891",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T01:04:31.876Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_pEmpI0OaEAKZ6lxTMp8S4866",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T01:04:35.761Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_D2xPpOpo2QMaxohWr5Nb6025",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj && echo \"=== D06/D07/D09/D16 exist in khoj-corpus? ===\" && ls 03-ingestion/output/khoj-corpus/ | head -25 && echo \"=== passage 1 (D16) ===\" && grep -A1 \"Scan session transcripts\" 03-ingestion/output/khoj-corpus/D16.md 2>/dev/null | head -3 && echo \"=== passage 4 (D09) ===\" && grep -A1 \"Nodes enter graphs only\" 03-ingestion/output/khoj-corpus/D09.md 2>/dev/null | head -3 && echo \"=== node-09 method-recorded ===\" && head -50 03-ingestion/output/retrieval-check.md"
+        },
+        {
+          "ts": "2026-08-15T01:04:35.798Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_D2xPpOpo2QMaxohWr5Nb6025",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T01:05:03.328Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_iZ9hQaZXi0stVL0Aw4H36260",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node-12 (Fixed query 5: negative control) satisfies both acceptance criteria. The required artifacts exist, are committed at the tip (78b2992), and the working tree is clean. The result file 04-evaluation/results/q5-negative-control.md contains (a) the exact out-of-scope query byte-identical to 04-evaluation/queries/q5.txt, (b) Khoj's raw outcome verbatim — an HTTP 500 with no answer text, quoted exactly along with the request body, recorded without retry per the 'answer quality recorded, never retried' constraint, and (c) five retrieved-evidence chunks whose quoted passages I verified verbatim against the actual staged corpus files (D06/D07/D09/D16.md). The file's Verdict is one plain sentence stating Khoj did neither decline/hedge nor confabulate because it returned HTTP 500 without an answer — no remediation. Constraints observed as satisfied from artifact evidence: query written (00:46:58Z) before the run (00:47:45Z); isolated user gddp-part1@local confirmed via health check; no token printed or committed; retrieval interface matches node-09's recorded method (GET /api/search, n=5, t=all, Bearer auth). The deterministic indeterminate statuses were artifacts of weak keyword probes (literal 'q5-negative-control'/'out-of-scope' content-word scan and no registered probe for the verdict), not of content deficiencies. The only judgment nuances are interpretive (raw answer = verbatim HTTP error since no answer text existed; verdict names a third outcome rather than forcing the binary), both faithfully representing what actually happened.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-15T01:06:20.684489+00:00",
+  "evaluated_tree_sha": "3033e2ceef0a219e4d256e10ba442293b52d0de7",
+  "evaluated_commit_sha": "78b2992ae481e002fc56a8028cc3b0eee00e314c",
+  "merge_commit_sha": "78b2992ae481e002fc56a8028cc3b0eee00e314c",
+  "expected_base_commit_sha": "c605d36e63172b70bb960a63107bab1cd1926f83",
+  "pr_ref": null,
+  "job_id": "job_20260815T00451894af7b62cd267e",
+  "execution_attempt_id": "job_20260815T00451894af7b62cd267e:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+    "neighbor:node-09-verify-retrieval": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-09-verify-retrieval.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 2,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-09-verify-retrieval.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 3,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-09-verify-retrieval.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-xb_nsldj/README.md"
+      ]
+    },
+    "overall": "high"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-15T01:03:48.817419+00:00",
+    "finished_at": "2026-08-15T01:06:20.684280+00:00",
+    "wall_s": 151.873,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 74.573,
+      "tool_calls": 14
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 77.268,
+      "tool_calls": 20
+    }
+  }
+}

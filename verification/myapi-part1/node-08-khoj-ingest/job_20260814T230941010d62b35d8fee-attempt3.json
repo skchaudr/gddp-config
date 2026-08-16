@@ -1,0 +1,753 @@
+{
+  "project_id": "myapi-part1",
+  "node_id": "node-08-khoj-ingest",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.85,
+    "findings": [],
+    "reasoning": "Node-08's intended role (Stage F: load the transformed corpus into a clean target corpus on the discovered Khoj deployment) is fully preserved. The work ingested the exact node-07 artifact: 03-ingestion/output/khoj-corpus/ is byte-identical to 02-corpus/output/corpus (diff -qr exit 0) and the report's canonical manifest c1fa76ad... matches node-07's transform-notes receipt — the dependency contract is honored. The report records the exact ingestion method (multipart PUT /api/content?client=api with Bearer auth), the target (isolated user gddp-part1@local on khoj-38-b, Khoj 1.42.10), and Khoj's own confirmation (health identity check, pre-ingest num_pages:0, PUT response listing all 18 filenames, post-ingest exact 18-file listing), plus an anonymous-corpus safety check (default@example.com untouched at 395 pages). This equips node-09 with the exact interface to repeat retrieval verification identically. Constraint adherence is sound: attempt 0 correctly blocked (non-empty anonymous corpus, no credentials — no secrets guessed), attempt 3 used only the provisioned isolated user; no token value was committed or printed (only placeholders and the token path, which is permitted). Diff scope is exactly the two expected files; no graph truth or runtime DB touched. Trajectory from 033 (blocked) to 034 (clean-target pass) is coherent with the node's why. Confidence is 0.85 because I could not live-verify the Khoj API responses (network/ssh hard-blocked for this reviewer), but the report is internally consistent, concrete, and aligned with the constraint packet. Lane-1's indeterminate criteria scores are an acceptance-adjudication matter and do not affect this integrity verdict.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-15T00:27:01.624Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_bBzJm40LqFcPny3HSDG73669",
+        "command": "pwd && ls -la"
+      },
+      {
+        "ts": "2026-08-15T00:27:01.626Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_AUfeg9nvEmpAqoonMHa04878",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-07-khoj-transform.yaml"
+      },
+      {
+        "ts": "2026-08-15T00:27:01.627Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_e1EB9Hpmrq2x4kv9lnKj3334",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-08-khoj-ingest.yaml"
+      },
+      {
+        "ts": "2026-08-15T00:27:01.639Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_e1EB9Hpmrq2x4kv9lnKj3334",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:27:01.640Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_AUfeg9nvEmpAqoonMHa04878",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:27:01.653Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_bBzJm40LqFcPny3HSDG73669",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:27:04.806Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_eftn4pvzr6oJ0qQZmtQs3933",
+        "command": "cat .git; echo \"---\"; ls -la 03-ingestion/ 03-ingestion/output/ 2>/dev/null; echo \"---\"; ls -la .handoffs/ | head -50"
+      },
+      {
+        "ts": "2026-08-15T00:27:04.807Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_9Dvqn0VerHHR7Q8b3C5o0700",
+        "path": "03-ingestion/output/ingest-report.md"
+      },
+      {
+        "ts": "2026-08-15T00:27:04.812Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_9Dvqn0VerHHR7Q8b3C5o0700",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:27:04.845Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_eftn4pvzr6oJ0qQZmtQs3933",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:27:07.109Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_LMRraI2pO7V3IvdfLVUr1027",
+        "path": ".handoffs/034-khoj-ingest-clean-target.md"
+      },
+      {
+        "ts": "2026-08-15T00:27:07.110Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_F9muXCLdTSjYhp7dJ6mX0425",
+        "path": "03-ingestion/output/transform-notes.md"
+      },
+      {
+        "ts": "2026-08-15T00:27:07.110Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_liXYSozapfECfqBq8zm98254",
+        "command": "ls -la 03-ingestion/output/khoj-corpus/ && echo \"---\" && ls 02-corpus/output/corpus/ 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-15T00:27:07.115Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_LMRraI2pO7V3IvdfLVUr1027",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:27:07.116Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_F9muXCLdTSjYhp7dJ6mX0425",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:27:07.140Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_liXYSozapfECfqBq8zm98254",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:27:15.099Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_y3P5lZDKmSZG4yQJew8L5569",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git log --oneline -5 2>/dev/null; echo \"---STATUS---\"; git status 2>/dev/null | head -20; echo \"---DIFFSTAT---\"; git diff --stat 31c1eadd28229422f8c65012d5d076e14a3ee63b 36c2f18f55ba83b3bb47a5310a466ef8235c5d82 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-15T00:27:15.100Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_vb6Lzr8NRiUHLaMNKzC62412",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-09-verify-retrieval.yaml"
+      },
+      {
+        "ts": "2026-08-15T00:27:15.100Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_TO3IVJOydxlYBMfpzsCk1949",
+        "command": "ls /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-15T00:27:15.109Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_vb6Lzr8NRiUHLaMNKzC62412",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:27:15.123Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_TO3IVJOydxlYBMfpzsCk1949",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:27:15.250Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_y3P5lZDKmSZG4yQJew8L5569",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:27:27.404Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_KIa1MsaqjeqgFmxgYGSJ6934",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git show 31c1eadd28229422f8c65012d5d076e14a3ee63b:03-ingestion/output/ingest-report.md 2>/dev/null | head -60; echo \"===TIP EXISTS===\"; git cat-file -t 36c2f18f55ba83b3bb47a5310a466ef8235c5d82 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-15T00:27:27.405Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_iaNxPZxEBFfMl0uktHrJ6649",
+        "path": ".handoffs/033-khoj-ingest-blocked-nonempty-target.md"
+      },
+      {
+        "ts": "2026-08-15T00:27:27.409Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_iaNxPZxEBFfMl0uktHrJ6649",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:27:27.471Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_KIa1MsaqjeqgFmxgYGSJ6934",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:27:53.111Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ZZrHywj5IsulkiNJSuGI5406",
+        "command": "cd /Users/sab-mini/repos/MyAPI && diff -qr 02-corpus/output/corpus 03-ingestion/output/khoj-corpus && echo \"BYTES-IDENTICAL: exit $?\"; echo \"---\"; sha256sum 03-ingestion/output/khoj-corpus/*.md 2>/dev/null | awk '{print $1}' | sort | sha256sum"
+      },
+      {
+        "ts": "2026-08-15T00:27:53.113Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ML0d3rGwFtiX7y3a1gHM5635",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== token-like strings in changed files ===\"; grep -nE '[A-Za-z0-9_-]{40,}' 03-ingestion/output/ingest-report.md .handoffs/034-khoj-ingest-clean-target.md | grep -vE '31c1eadd|36c2f18f|sha|SHA|job_2026|c1fa76ad|e1ebe572' | head; echo \"=== Bearer occurrences ===\"; grep -n 'Bearer' 03-ingestion/output/ingest-report.md; echo \"=== token path mentions ===\"; grep -rn 'gddp-part1.token' 03-ingestion/ .handoffs/034-khoj-ingest-clean-target.md | head"
+      },
+      {
+        "ts": "2026-08-15T00:27:53.142Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ZZrHywj5IsulkiNJSuGI5406",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-15T00:27:53.147Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ML0d3rGwFtiX7y3a1gHM5635",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:28:00.924Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Pdvx1aAvdDqwdc7upeM09094",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt && diff -qr 02-corpus/output/corpus 03-ingestion/output/khoj-corpus && echo \"BYTES-IDENTICAL (diff exit 0)\"; echo \"---\"; shasum -a 256 03-ingestion/output/khoj-corpus/*.md | awk '{print $1}' | sort | shasum -a 256"
+      },
+      {
+        "ts": "2026-08-15T00:28:00.925Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Z3Elsk2EUNg0HrOa60cs9778",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt && echo \"=== token-like strings in changed files (excluding known hashes/ids) ===\"; grep -nE '[A-Za-z0-9_\\-\\.]{40,}' 03-ingestion/output/ingest-report.md .handoffs/034-khoj-ingest-clean-target.md | grep -viE '31c1eadd|36c2f18f|36d32fb8|job_2026|c1fa76ad|e1ebe572|worktree|Bearer|gddp-part1@local|gddp-eval|gddp-agent|sab-mini' | head; echo \"=== Bearer lines ===\"; grep -n 'Bearer' 03-ingestion/output/ingest-report.md; echo \"=== token path mentions ===\"; grep -rn 'gddp-part1.token' 03-ingestion/ .handoffs/034-khoj-ingest-clean-target.md | head"
+      },
+      {
+        "ts": "2026-08-15T00:28:00.964Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Z3Elsk2EUNg0HrOa60cs9778",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:28:00.980Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Pdvx1aAvdDqwdc7upeM09094",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:28:21.244Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_R8P3DToM6JYZhI0CqNGo5273",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "Upstream node-07-khoj-transform is still 'provisional' while node-08 executed on its artifact. The ingest manifest is recorded so drift is detectable, but if node-07's format/bytes are later revised, node-08's ingested corpus would be stale; node-09 and the evaluation nodes consume this corpus, so serialize final validation of node-07 (or re-run node-08) before the evaluation split fires.",
+        "affected_node_ids": [
+          "node-07-khoj-transform",
+          "node-08-khoj-ingest",
+          "node-09-verify-retrieval"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Node-08's YAML declares unlocks: [] while node-09-verify-retrieval depends_on node-08; the edge exists via depends_on so integrity holds, but the unlock metadata is asymmetric. Also, Khoj 1.42.10 isolates content per authenticated user rather than by corpus namespace, so the 'target corpus name' is an experiment label; downstream nodes must address the same gddp-part1@local user scope via the recorded VM token path, which the ingest report does record.",
+        "affected_node_ids": [
+          "node-08-khoj-ingest",
+          "node-09-verify-retrieval"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.95,
+  "criteria_confidence": 0.95,
+  "completeness": 1.0,
+  "graph_readiness": 0.95,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "ingested",
+        "criterion": "03-ingestion/output/ingest-report.md records the exact ingestion method, the target corpus name, and Khoj's own confirmation (API response, logs, or UI state) that the files are present",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "API -> line 46: 'API'"
+        ],
+        "reasoning": "Scanned source files (03-ingestion/output/ingest-report.md) for identifiers named in the criterion (ingest-report, API). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "clean-target",
+        "criterion": "The target corpus was empty or newly created for this run - stated in the report",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md - read it first.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "If credentials are needed and unavailable, record precisely what blocked and stop - never guess secrets",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Isolated empty Khoj user for this run: email gddp-part1@local on khoj-38-b. Token lives only on the VM at /home/sab-mini/.khoj/gddp-part1.token. Auth as Authorization: Bearer <token>. Verified empty: GET /api/content/files?client=api&truncated=true&page=0 returns {\"files\":[],\"num_pages\":0}. Do not write to default@example.com (3941 files). Read the token via ssh khoj-38-b; do not commit it or print it into the report.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model xai/grok-4.6 via the subagent tool's model parameter; close with one oracle or reviewer pass before returning",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "03-ingestion/output/ingest-report.md": true
+    },
+    "deps_status": {
+      "node-07-khoj-transform": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "31c1eadd28229422f8c65012d5d076e14a3ee63b",
+      "tip": "36c2f18f55ba83b3bb47a5310a466ef8235c5d82",
+      "files": [
+        {
+          "status": "A",
+          "path": ".handoffs/034-khoj-ingest-clean-target.md"
+        },
+        {
+          "status": "M",
+          "path": "03-ingestion/output/ingest-report.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 2,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "ingested",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "03-ingestion/output/ingest-report.md (report present, required artifact)",
+          "Report 'Exact ingestion method' section: 6 numbered steps (gcloud scp of bounded archive, VM-local token read, /api/health identity check, pre-ingest empty check, multipart PUT /api/content?client=api with repeated files fields media type text/markdown, post-ingest listing verification)",
+          "Report 'Target corpus and clean-target state': target corpus name `myapi-part1-decisions-job_20260814T230941010d62b35d8fee`, user gddp-part1@local on khoj-38-b, Khoj 1.42.10",
+          "Report 'Khoj's confirmation' table: Khoj PUT response body = `D01.md,...,D10.md,D12.md,...,D18.md,index.md`; post-ingest file list HTTP 200, num_pages 2, exact file count 18; independent final read-only verification 2026-08-15T00:15:36Z",
+          "Independent verification: `ls 03-ingestion/output/khoj-corpus` = 18 files (D01-D10, D12-D18, index.md) matching PUT response exactly; `diff -qr` vs 02-corpus/output/corpus = IDENTICAL; reproduced canonical manifest SHA-256 = c1fa76ad157d197e28d16f8e9306680e3c870329808e9c1c115dc7587d2f1a3c (matches report)",
+          "git diff shows only ingest-report.md modified and .handoffs/034 added; no token values present (only VM-local token path referenced)"
+        ],
+        "reasoning": "The criterion asks that the report record (a) the exact ingestion method, (b) the target corpus name, and (c) Khoj's own confirmation that files are present. All three are explicitly recorded: a 6-step method with exact API calls and payload shape, the durable corpus name, and Khoj's PUT response body plus authenticated post-ingest file listing as the confirmation. The recorded facts are internally consistent with the repo: the staged corpus contains exactly the 18 filenames the report says Khoj returned, the corpus is byte-identical to the Stage D snapshot, and the reported manifest SHA-256 reproduces exactly from the staged files. Live API responses cannot be re-verified from this repo (VM/credential-scoped), but the criterion is that the report records them, which it does in detailed, verifiably-consistent form."
+      },
+      {
+        "criterion_id": "clean-target",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "ingest-report.md 'Clean-target state' line: 'PASS — this isolated target corpus was empty for this run'",
+          "Pre-ingest evidence in report: Bearer-authenticated GET /api/content/files?client=api&truncated=true&page=0 returned HTTP 200, num_pages 0, zero files",
+          "Report states PUT was used 'because this was a verified-empty first batch' and 'No request was sent to the anonymous user corpus'",
+          "Report 'Anonymous corpus safety check': default@example.com still num_pages 395; identity check /api/health returned email gddp-part1@local",
+          "Constraint from node definition: isolated empty user gddp-part1@local verified empty {\"files\":[],\"num_pages\":0} — report is consistent with this pre-state"
+        ],
+        "reasoning": "The criterion requires the report to state that the target corpus was empty or newly created for this run. The report states this explicitly and backs it with the immediate pre-ingest authenticated file-list check (HTTP 200, num_pages 0, zero files), the identity check proving the check addressed the isolated user, and a negative control showing the anonymous corpus was untouched. This is stated, evidenced, and consistent with the node's constraint about the verified-empty isolated user."
+      }
+    ],
+    "overall_reasoning": "Both acceptance criteria for node-08-khoj-ingest are satisfied by the content of 03-ingestion/output/ingest-report.md, which is the sole required artifact. The deterministic keyword scan returned indeterminate only because semantic confirmation was needed; reading the report resolves both. Criterion 'ingested' is met: the report records the exact ingestion method (6 concrete steps with exact endpoints, auth scheme, payload shape), the target corpus name (myapi-part1-decisions-job_20260814T230941010d62b35d8fee, physical boundary = dedicated gddp-part1@local user on khoj-38-b), and Khoj's own confirmation (the PUT response body listing all 18 filenames plus the authenticated post-ingest file listing with num_pages 2 / exact 18-file set, and an independent final read-only verification). Criterion 'clean-target' is met: the report explicitly states the isolated target corpus was empty for this run, with the immediate pre-ingest authenticated GET returning HTTP 200, num_pages 0, zero files, and a control showing the anonymous corpus (395 pages) was untouched. The report's claims are internally consistent and independently cross-checkable from the repo: the staged khoj-corpus/ contains exactly the 18 files named in the PUT response, is byte-identical to 02-corpus/output/corpus, and the reported canonical manifest SHA-256 reproduces exactly from the staged files. No credential values appear in the changed files — only the VM-local token path is referenced, honoring the no-secrets constraint. Diff scope matches the stated handoff (only ingest-report.md and .handoffs/034). The only residual limitation is that the live Khoj API responses cannot be re-verified from inside this repo (VM- and credential-scoped evidence), which is inherent to this node type and not a failure of the criterion, which requires the confirmation to be recorded.",
+    "risks": "1. Live API responses (pre-ingest emptiness, PUT 200 + body, post-ingest listing) are recorded but not independently re-verifiable from the repo alone; verification requires VM access and the gddp-part1@local token, which the report correctly kept off-repo. The recorded evidence is internally consistent with all repo-verifiable facts (file set, bytes, manifest hash, corpus identity). 2. The deterministic scan could not resolve these criteria; this verdict rests on semantic reading of the report, not on live API calls. 3. Execution-mode constraint (gpt-5.6-sol main + grok-4.6 subagents + oracle pass) is executor-facing and cannot be confirmed from repo artifacts; no evidence of violation was found.",
+    "followup_candidates": "Observed: the report's recorded Khoj API responses (pre-ingest empty check, PUT response body, post-ingest listing) match the repo-verifiable facts exactly (18 files, byte-identical corpus, reproduced manifest SHA-256). Not independently re-verified live since credentials live only on khoj-38-b. If live re-verification of the recorded responses is intended as part of node-08 acceptance, the node criteria should say so; otherwise the recorded+consistent evidence stands. Also observed: report references Khoj 1.42.10 while node-07's transform-notes recorded the deployment as 'in transition/unavailable' — the transition from discovery to an active deployment at ingest time is consistent with node-07's instruction to re-probe before Stage F; no contradiction.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-15T00:25:57.512Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_v9x6utUuxPedfUQIG0aX4036",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt && ls -la && git log --oneline -5 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-15T00:25:57.514Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_tohJLHWJyCO0DE9jNt2l1032",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-15T00:25:57.528Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_tohJLHWJyCO0DE9jNt2l1032",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:25:57.818Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_v9x6utUuxPedfUQIG0aX4036",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:26:00.052Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_nCfbFkvxQW5jWfwdeDla8952",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt/03-ingestion/output/ingest-report.md"
+        },
+        {
+          "ts": "2026-08-15T00:26:00.055Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_vie9EoFQIkQqyWSn2zdG8996",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt && ls -la 03-ingestion/ 03-ingestion/output/ && cat .handoffs/034-khoj-ingest-clean-target.md"
+        },
+        {
+          "ts": "2026-08-15T00:26:00.061Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_nCfbFkvxQW5jWfwdeDla8952",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:26:00.085Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_vie9EoFQIkQqyWSn2zdG8996",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:26:06.674Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_LdU3Oo4YDVIShqKaUmH58976",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt && ls 03-ingestion/output/khoj-corpus/ && echo \"---count---\" && ls 03-ingestion/output/khoj-corpus/ | wc -l && echo \"---corpus dir---\" && ls -la 02-corpus/output/ 2>/dev/null && echo \"---corpus files---\" && ls 02-corpus/output/corpus/ 2>/dev/null | head -30"
+        },
+        {
+          "ts": "2026-08-15T00:26:06.675Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_mx4uAqhORNSP2LYjrlPo5955",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt/03-ingestion/output/transform-notes.md"
+        },
+        {
+          "ts": "2026-08-15T00:26:06.681Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_mx4uAqhORNSP2LYjrlPo5955",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:26:06.716Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_LdU3Oo4YDVIShqKaUmH58976",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:26:10.414Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_6YGVnv70Kx2DsvS7ABJq3486",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt && (cd 03-ingestion/output/khoj-corpus && cat *.md | sha256sum) && echo \"---diff corpus vs khoj-corpus---\" && diff -qr 02-corpus/output/corpus 03-ingestion/output/khoj-corpus && echo \"IDENTICAL\" && echo \"---report line 46---\" && sed -n '40,50p' 03-ingestion/output/ingest-report.md"
+        },
+        {
+          "ts": "2026-08-15T00:26:10.415Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_bHg1ZWtgLxExVJ2BGOkj5052",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt/03-ingestion/CONTEXT.md"
+        },
+        {
+          "ts": "2026-08-15T00:26:10.421Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_bHg1ZWtgLxExVJ2BGOkj5052",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:26:10.436Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_6YGVnv70Kx2DsvS7ABJq3486",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-15T00:26:12.657Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_nLTrANXjlChutf6ofEY53028",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt && (cd 03-ingestion/output/khoj-corpus && cat *.md | shasum -a 256) && echo \"---diff---\" && diff -qr 02-corpus/output/corpus 03-ingestion/output/khoj-corpus && echo IDENTICAL && echo \"---report line 46---\" && sed -n '42,50p' 03-ingestion/output/ingest-report.md"
+        },
+        {
+          "ts": "2026-08-15T00:26:12.658Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_ZB3rgignhYjts1gvH0Yw3497",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-07-khoj-transform.yaml"
+        },
+        {
+          "ts": "2026-08-15T00:26:12.665Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ZB3rgignhYjts1gvH0Yw3497",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:26:12.726Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_nLTrANXjlChutf6ofEY53028",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:26:15.995Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_2Cz0VUAB2u8AmJKNR3wM5039",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt/03-ingestion/transform_for_khoj.py"
+        },
+        {
+          "ts": "2026-08-15T00:26:15.996Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_MiobhgmSgy8bLMCwXHFU0733",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt/02-corpus/output/repro-report.md"
+        },
+        {
+          "ts": "2026-08-15T00:26:15.998Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_MiobhgmSgy8bLMCwXHFU0733",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:26:15.999Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_2Cz0VUAB2u8AmJKNR3wM5039",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:26:19.517Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_HffBg83avxCmdBdYlWwz2365",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt && python3 -c \"\nimport hashlib, json\nfrom pathlib import Path\nd = Path('03-ingestion/output/khoj-corpus')\nfiles = sorted(d.iterdir(), key=lambda p: p.name)\nm = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in files}\ncanon = json.dumps(m, sort_keys=True, separators=(',', ':')).encode('utf-8')\nprint('files:', len(files))\nprint('digest:', hashlib.sha256(canon).hexdigest())\n\""
+        },
+        {
+          "ts": "2026-08-15T00:26:19.518Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_f1M35Q7m8w0CWKRGc5xl6809",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt && cat README.md | head -80"
+        },
+        {
+          "ts": "2026-08-15T00:26:19.540Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_f1M35Q7m8w0CWKRGc5xl6809",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:26:19.692Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_HffBg83avxCmdBdYlWwz2365",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:26:30.014Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_0DUXfoowl0L4X6dhIR5D5190",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt && git diff 31c1eadd28229422f8c65012d5d076e14a3ee63b HEAD --stat && echo \"---grep token patterns in changed files---\" && grep -rn -i \"token\" 03-ingestion/output/ingest-report.md .handoffs/034-khoj-ingest-clean-target.md | grep -v \"gddp-part1.token\" ; echo \"exit: $?\" && echo \"---grep for long secret-looking strings in report---\" && grep -nE \"[A-Za-z0-9_-]{40,}\" 03-ingestion/output/ingest-report.md .handoffs/034-khoj-ingest-clean-target.md || echo \"no long secret-looking strings\""
+        },
+        {
+          "ts": "2026-08-15T00:26:30.015Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_mZYxqePyvUQF55vIpCXG8298",
+          "command": "ls \"/Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md\" 2>/dev/null || echo \"memo not in this worktree (host path expected)\""
+        },
+        {
+          "ts": "2026-08-15T00:26:30.015Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_BCKPvWLSvIfWQeNfcm2d3186",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml"
+        },
+        {
+          "ts": "2026-08-15T00:26:30.024Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_BCKPvWLSvIfWQeNfcm2d3186",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:26:30.036Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_mZYxqePyvUQF55vIpCXG8298",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:26:30.074Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_0DUXfoowl0L4X6dhIR5D5190",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:26:34.074Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_viQxRE3mjxGpvTOlvzQO9246",
+          "command": "grep -n -i -A 12 \"stage f\\|ingest\\|node-08\\|clean corpus\\|khoj ingest\" \"/Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md\" | head -80"
+        },
+        {
+          "ts": "2026-08-15T00:26:34.097Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_viQxRE3mjxGpvTOlvzQO9246",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:26:56.515Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_h8yrnT6evcKPGIEnUWJM8611",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Both acceptance criteria for node-08-khoj-ingest are satisfied by the content of 03-ingestion/output/ingest-report.md, which is the sole required artifact. The deterministic keyword scan returned indeterminate only because semantic confirmation was needed; reading the report resolves both. Criterion 'ingested' is met: the report records the exact ingestion method (6 concrete steps with exact endpoints, auth scheme, payload shape), the target corpus name (myapi-part1-decisions-job_20260814T230941010d62b35d8fee, physical boundary = dedicated gddp-part1@local user on khoj-38-b), and Khoj's own confirmation (the PUT response body listing all 18 filenames plus the authenticated post-ingest file listing with num_pages 2 / exact 18-file set, and an independent final read-only verification). Criterion 'clean-target' is met: the report explicitly states the isolated target corpus was empty for this run, with the immediate pre-ingest authenticated GET returning HTTP 200, num_pages 0, zero files, and a control showing the anonymous corpus (395 pages) was untouched. The report's claims are internally consistent and independently cross-checkable from the repo: the staged khoj-corpus/ contains exactly the 18 files named in the PUT response, is byte-identical to 02-corpus/output/corpus, and the reported canonical manifest SHA-256 reproduces exactly from the staged files. No credential values appear in the changed files — only the VM-local token path is referenced, honoring the no-secrets constraint. Diff scope matches the stated handoff (only ingest-report.md and .handoffs/034). The only residual limitation is that the live Khoj API responses cannot be re-verified from inside this repo (VM- and credential-scoped evidence), which is inherent to this node type and not a failure of the criterion, which requires the confirmation to be recorded.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-15T00:28:21.385117+00:00",
+  "evaluated_tree_sha": "6f7e0a7ee310143db18cd36dd4eda9b53decde82",
+  "evaluated_commit_sha": "36c2f18f55ba83b3bb47a5310a466ef8235c5d82",
+  "merge_commit_sha": "36c2f18f55ba83b3bb47a5310a466ef8235c5d82",
+  "expected_base_commit_sha": "31c1eadd28229422f8c65012d5d076e14a3ee63b",
+  "pr_ref": null,
+  "job_id": "job_20260814T230941010d62b35d8fee",
+  "execution_attempt_id": "job_20260814T230941010d62b35d8fee:attempt:3",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+    "neighbor:node-07-khoj-transform": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-07-khoj-transform.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 3,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-07-khoj-transform.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "low",
+      "offered": 4,
+      "content_accessed": 1,
+      "not_observed": 3,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-07-khoj-transform.yaml"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1pi9drgt/README.md"
+      ]
+    },
+    "overall": "low"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-15T00:25:54.765759+00:00",
+    "finished_at": "2026-08-15T00:28:21.384791+00:00",
+    "wall_s": 146.623,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 61.91,
+      "tool_calls": 18
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 84.681,
+      "tool_calls": 17
+    }
+  }
+}

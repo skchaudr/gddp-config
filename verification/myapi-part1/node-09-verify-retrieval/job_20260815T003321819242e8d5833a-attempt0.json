@@ -1,0 +1,658 @@
+{
+  "project_id": "myapi-part1",
+  "node_id": "node-09-verify-retrieval",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.92,
+    "findings": [],
+    "reasoning": "The work under review (03-ingestion/output/retrieval-check.md + .handoffs/035) does precisely what node-09 promised: a live, isolated-user probe confirming Khoj retrieves from the ingested decision corpus, with demonstrable evidence provenance (returned passage matches D18.md verbatim; staged D18.md byte-identical to the reproducible source with matching SHA-256 1f3f805a... — re-verified via cmp/shasum). The exact query interface (GET http://localhost:42110/api/search, params q/n/t, Bearer auth, VM locality, identity precheck) is recorded in full so evaluation nodes node-10/11/12 can repeat it identically — this is the load-bearing deliverable for downstream nodes, all of which declare depends_on node-09. The report is fully consistent with upstream node-08's ingest-report (same VM khoj-38-b, user gddp-part1@local, Khoj 1.42.10, localhost:42110, 18-file corpus, same token path) — no drift from what node-09 was allowed to assume. Diff is clean (exactly the 2 expected files, no junk), no token committed or printed, isolated-user constraint honored (health precheck confirms gddp-part1@local, not default@example.com). Lane-1's indeterminate keyword-scan status reflects scan-method limitations, not artifact substance; per my lane (intent/graph integrity, not acceptance re-adjudication) nothing blocks downstream. Verdict: pass.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-15T00:39:28.861Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_cB34Io3EU1s7ZqdFbOUv5587",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-08-khoj-ingest.yaml"
+      },
+      {
+        "ts": "2026-08-15T00:39:28.862Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_a9tQ9xhY6W6ieHEsa8EV0897",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-09-verify-retrieval.yaml"
+      },
+      {
+        "ts": "2026-08-15T00:39:28.863Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_2WA1q6G0MZ2nSAGizwoi3395",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-15T00:39:28.863Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_3JYIAHTrYjv7MmuIiePJ7641",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/README.md"
+      },
+      {
+        "ts": "2026-08-15T00:39:28.871Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_a9tQ9xhY6W6ieHEsa8EV0897",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:39:28.871Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_cB34Io3EU1s7ZqdFbOUv5587",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:39:28.872Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_2WA1q6G0MZ2nSAGizwoi3395",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:39:28.872Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_3JYIAHTrYjv7MmuIiePJ7641",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:39:31.461Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_gdOFJmfiYqUMwEdIUA0Q7840",
+        "command": "pwd && ls -la"
+      },
+      {
+        "ts": "2026-08-15T00:39:31.463Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_dpP8PwrygZfrSg0Ij6lJ0358",
+        "command": "find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh -maxdepth 2 -type d | head -50"
+      },
+      {
+        "ts": "2026-08-15T00:39:31.488Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_gdOFJmfiYqUMwEdIUA0Q7840",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:39:31.489Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_dpP8PwrygZfrSg0Ij6lJ0358",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:39:33.526Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_TjNAmPSj8m8jPyVncIY49076",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/03-ingestion/output/retrieval-check.md"
+      },
+      {
+        "ts": "2026-08-15T00:39:33.527Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_vX4XGRnnggFOcRUFzExO6421",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/.handoffs/035-khoj-retrieval-verified.md"
+      },
+      {
+        "ts": "2026-08-15T00:39:33.529Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_vX4XGRnnggFOcRUFzExO6421",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:39:33.529Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_TjNAmPSj8m8jPyVncIY49076",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:39:40.151Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_3xrgpV95p41RLv9I2xqM3374",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh && ls -la 03-ingestion/output/ 02-corpus/output/ 2>/dev/null && echo \"---khoj-corpus---\" && ls 03-ingestion/output/khoj-corpus/ 2>/dev/null | head -30 && echo \"---corpus---\" && ls 02-corpus/output/corpus/ 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-15T00:39:40.151Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_cFFTHuoHCRaAyfO1ZH660087",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh && ls .handoffs/ | tail -15 && echo \"---\" && ls 03-ingestion/output/*.md"
+      },
+      {
+        "ts": "2026-08-15T00:39:40.178Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_cFFTHuoHCRaAyfO1ZH660087",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:39:40.189Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_3xrgpV95p41RLv9I2xqM3374",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:39:43.407Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_nK5k3Qpk79gm6Hf6JWWl5839",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh && echo \"=== D18 staged ===\" && cat 03-ingestion/output/khoj-corpus/D18.md && echo \"=== cmp ===\" && cmp 03-ingestion/output/khoj-corpus/D18.md 02-corpus/output/corpus/D18.md && echo \"cmp exit 0\" && echo \"=== shas ===\" && shasum -a 256 03-ingestion/output/khoj-corpus/D18.md 02-corpus/output/corpus/D18.md"
+      },
+      {
+        "ts": "2026-08-15T00:39:43.408Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_h7o5HkNEr9KkYOmaiulr6374",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/03-ingestion/output/ingest-report.md"
+      },
+      {
+        "ts": "2026-08-15T00:39:43.413Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_h7o5HkNEr9KkYOmaiulr6374",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:39:43.463Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_nK5k3Qpk79gm6Hf6JWWl5839",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:39:51.193Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_xuHglwSG1OzVv5G7jOpe7573",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh && git status --short | head -30 && echo \"=== log ===\" && git log --oneline -3 && echo \"=== diff stat base..tip ===\" && git diff --stat 36c2f18f55ba83b3bb47a5310a466ef8235c5d82 c605d36e63172b70bb960a63107bab1cd1926f83 2>/dev/null | tail -10"
+      },
+      {
+        "ts": "2026-08-15T00:39:51.194Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_GEQMmsT8cofli3Ph4Aox7487",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh && echo \"=== token leak scan in the two new files ===\" && grep -nE \"Authorization: Bearer [A-Za-z0-9]{20,}|gddp-part1\\.token[^ ]*[A-Za-z0-9]{20,}|Bearer [a-f0-9]{32,}\" .handoffs/035-khoj-retrieval-verified.md 03-ingestion/output/retrieval-check.md; echo \"grep exit: $?\" && echo \"=== quoted passage in corpus source D18 ===\" && grep -c \"Unverified assumptions must not become load-bearing architecture\" 02-corpus/output/corpus/D18.md 03-ingestion/output/khoj-corpus/D18.md"
+      },
+      {
+        "ts": "2026-08-15T00:39:51.219Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_GEQMmsT8cofli3Ph4Aox7487",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:39:51.516Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_xuHglwSG1OzVv5G7jOpe7573",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:39:59.291Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_1h2YJaSojXYPO7P5rO5j6154",
+        "command": "ls /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/ && echo \"===\" && for f in node-10-eval-factual-rationale node-11-eval-supersession-relationship node-12-eval-negative-control node-13-preserve-results; do echo \"--- $f ---\"; grep -E \"node_id|depends_on|title|why|unlocks\" /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/$f.yaml 2>/dev/null; done"
+      },
+      {
+        "ts": "2026-08-15T00:39:59.333Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_1h2YJaSojXYPO7P5rO5j6154",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:40:01.693Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_BfU1TUY8359RHmv93DKf4366",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-10-eval-factual-rationale.yaml"
+      },
+      {
+        "ts": "2026-08-15T00:40:01.696Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_BfU1TUY8359RHmv93DKf4366",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-15T00:40:18.307Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Vq3Zscmr0XqA1sRDCQgP6548",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "Blueprint architecture_notes mention 'node-14 closes' but the node list ends at node-13-preserve-results; node-09 YAML also declares unlocks: [] even though node-10/11/12 depend on it via their own depends_on fields. Edges are coherent in the downstream YAMLs; only the narrative is stale. Worth tidying in config before Stage H fires so the closing node reference is unambiguous.",
+        "affected_node_ids": [
+          "node-09-verify-retrieval",
+          "node-13-preserve-results"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Node-10/11/12 will each re-issue queries against the recorded interface; consider having them cite retrieval-check.md's method block as the canonical repeatable interface (endpoint, params, auth source) to keep Stage H executions byte-identical and avoid per-node interface drift.",
+        "affected_node_ids": [
+          "node-10-eval-factual-rationale",
+          "node-11-eval-supersession-relationship",
+          "node-12-eval-negative-control"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.875,
+  "criteria_confidence": 0.875,
+  "completeness": 1.0,
+  "graph_readiness": 0.875,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "presence-verified",
+        "criterion": "03-ingestion/output/retrieval-check.md shows a probe query whose retrieved evidence demonstrably comes from the ingested decision corpus (quoted passage matches a corpus file)",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (03-ingestion/output/retrieval-check.md)"
+        ],
+        "reasoning": "Scanned source files (03-ingestion/output/retrieval-check.md) for identifiers named in the criterion (retrieval-check). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "method-recorded",
+        "criterion": "The exact query interface used (API endpoint or UI) is recorded so evaluation nodes repeat it identically",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "API -> line 2: 'API'"
+        ],
+        "reasoning": "Scanned source files (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...) for identifiers named in the criterion (API). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md - read it first.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Isolated Khoj user for this run: email gddp-part1@local on khoj-38-b. Token only on the VM at /home/sab-mini/.khoj/gddp-part1.token. Auth as Authorization: Bearer <token>. Probe that user only. Do not query anonymous default@example.com. Do not commit or print the token.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model xai/grok-4.6 via the subagent tool's model parameter; close with one oracle or reviewer pass before returning",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "03-ingestion/output/retrieval-check.md": true
+    },
+    "deps_status": {
+      "node-08-khoj-ingest": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "36c2f18f55ba83b3bb47a5310a466ef8235c5d82",
+      "tip": "c605d36e63172b70bb960a63107bab1cd1926f83",
+      "files": [
+        {
+          "status": "A",
+          "path": ".handoffs/035-khoj-retrieval-verified.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/output/retrieval-check.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 2,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "presence-verified",
+        "judgment": "judged_pass",
+        "confidence": 0.85,
+        "evidence": [
+          "03-ingestion/output/retrieval-check.md: probe query 'What must not become load-bearing architecture?' (GET /api/search?q=...&n=5&t=all), top result D18.md, score 0.13442397117614135, quoted passage 'Unverified assumptions must not become load-bearing architecture.' plus surrounding '## Decision / ... ## Rationale / Companion rule to D17; compounds with multi-agent proposal chains.'",
+          "grep: the quoted sentence appears verbatim in 03-ingestion/output/khoj-corpus/D18.md (6 occurrences) and 02-corpus/output/corpus/D18.md, and in no other corpus file (unique to D18)",
+          "cmp 03-ingestion/output/khoj-corpus/D18.md 02-corpus/output/corpus/D18.md -> exit 0 (byte-identical)",
+          "shasum -a 256 both files -> 1f3f805a852a8437547ab603b82413cde6a42e8fcf197a75446ff657f595c574, matching the hash claimed in the report",
+          "03-ingestion/output/ingest-report.md: the exact payload ingested by node-08 was 03-ingestion/output/khoj-corpus/ (18 files incl. D18.md), PUT into isolated user gddp-part1@local on khoj-38-b"
+        ],
+        "reasoning": "The criterion asks whether retrieval-check.md shows a probe query whose retrieved evidence demonstrably comes from the ingested decision corpus (quoted passage matches a corpus file). The file does show the probe query, the retrieved evidence (D18.md top result with quoted passage), and a corpus-match proof. I independently verified every repo-side claim: the quoted passage occurs verbatim (and uniquely) in khoj-corpus/D18.md, which is byte-identical to the Stage D corpus file with the exact SHA-256 the report states, and that staged directory is the exact payload node-08 ingested per ingest-report.md. The only component not independently replayable from the repo is the live Khoj HTTP response itself (that D18.md was actually returned), which is attested in the report and handoff 035; this is inherent to a retrieval-verification node whose evidence trail is the report plus corpus match. Given the criterion is framed around what the file shows and the corpus match — both fully verified — the criterion is met."
+      },
+      {
+        "criterion_id": "method-recorded",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "03-ingestion/output/retrieval-check.md 'Exact probe interface' table: Interface=Khoj HTTP search API, Method=GET, Endpoint=http://localhost:42110/api/search, q/n/t parameters, canonical request URL http://localhost:42110/api/search?q=What+must+not+become+load-bearing+architecture%3F&n=5&t=all",
+          "Authentication recorded: Authorization: Bearer <token>; token read only on VM from /home/sab-mini/.khoj/gddp-part1.token; not printed or committed",
+          "Runtime locality recorded: GCE VM khoj-38-b, project khoj-r2, zone us-east1-b, Khoj 1.42.10",
+          "Identity precheck recorded: GET /api/health returned HTTP 200 and email gddp-part1@local before the search"
+        ],
+        "reasoning": "The criterion requires the exact query interface (API endpoint or UI) to be recorded so evaluation nodes repeat it identically. The report's 'Exact probe interface' table records the interface type, HTTP method, full endpoint, all query parameters, the canonical request URL, the authentication scheme and token path, the VM/service identity, and the authenticated identity precheck. A downstream evaluation node can reproduce the identical request from the file alone. The deterministic scan only found a weak 'API' keyword match in unrelated scripts; the semantic review confirms the criterion is satisfied by the artifact itself."
+      }
+    ],
+    "overall_reasoning": "Node-09 (verify-retrieval) acceptance criteria are both met by the required artifact 03-ingestion/output/retrieval-check.md. Criterion 1: the file shows a probe query whose retrieved evidence is demonstrated to come from the ingested decision corpus — I independently confirmed the quoted passage appears verbatim and uniquely in khoj-corpus/D18.md (the exact payload node-08 ingested), that khoj-corpus/D18.md is byte-identical to the Stage D corpus file, and that the SHA-256 claimed in the report (1f3f805a852a8437547ab603b82413cde6a42e8fcf197a75446ff657f595c574) is correct. Criterion 2: the exact query interface (Khoj HTTP GET /api/search with q/n/t params, canonical URL, Bearer auth, token path, VM locality, identity precheck) is fully recorded for identical repetition by evaluation nodes. The only element not replayable from the repo is the live Khoj response itself (top result D18.md at score 0.134), which is attested in the report and handoff 035; this is an inherent property of a live retrieval-verification node rather than a gap. Timeline is consistent (ingest 2026-08-15T00:15:36Z precedes retrieval check 2026-08-15T00:34:47Z). Constraints (isolated user gddp-part1@local, token not committed/printed) are respected per the report and no violations appear in the repo.",
+    "risks": "1) The live Khoj response (D18.md as top result, score 0.134) is attested in the report and handoff but cannot be replayed from the repo; if a human wants independent confirmation, a live re-run of the recorded probe on khoj-38-b is required. 2) This node depends on node-08 (status provisional); the retrieval evidence presumes the ingest actually loaded the 18 staged files — the ingest-report.md records that (PUT 200, post-ingest file list of exactly 18), and the retrieval check ran ~19 minutes later, so ordering is consistent. 3) The quoted-passage match is verified against the staged representation (khoj-corpus/D18.md); equivalence to what Khoj holds rests on ingest-report.md's payload/bytes claim, which is internally consistent but VM-side state is not independently re-checkable from this sandbox.",
+    "followup_candidates": "Optional human clarification: the only non-repo-verifiable component of criterion 'presence-verified' is the live Khoj search response itself (top result D18.md). Was a live spot-check of the recorded probe on khoj-38-b (or its raw response capture) intended to be part of the evidence trail? If yes, add that to the node criteria/artifacts and re-verify; otherwise the verdict stands on the repo-verifiable corpus-match proof. Also note: node-08 remains 'provisional' while node-09 evidence depends on it — confirm ingest acceptance was separately resolved before downstream evaluation nodes run.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-15T00:38:28.709Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_5bvxeH2hfbN3lWurer424618",
+          "command": "pwd && ls -la"
+        },
+        {
+          "ts": "2026-08-15T00:38:28.711Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_3Vx8akOFZvLRqdaorTgi0023",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-15T00:38:28.712Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_l73Wqslwqdbg2xToWpsd7006",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/README.md"
+        },
+        {
+          "ts": "2026-08-15T00:38:28.725Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_3Vx8akOFZvLRqdaorTgi0023",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:38:28.726Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_l73Wqslwqdbg2xToWpsd7006",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:38:28.739Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_5bvxeH2hfbN3lWurer424618",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:38:31.541Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_08b1ObfKurDUzANX3az56457",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/03-ingestion/output/retrieval-check.md"
+        },
+        {
+          "ts": "2026-08-15T00:38:31.541Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_UNRBTkVtExNOlNSVclgG9340",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/.handoffs/035-khoj-retrieval-verified.md"
+        },
+        {
+          "ts": "2026-08-15T00:38:31.542Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_ikqzMhsNv3dZxI9GGV3P8479",
+          "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/03-ingestion/ /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/03-ingestion/output/ 2>/dev/null; echo \"---\"; ls /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/02-corpus"
+        },
+        {
+          "ts": "2026-08-15T00:38:31.545Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_UNRBTkVtExNOlNSVclgG9340",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:38:31.546Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_08b1ObfKurDUzANX3az56457",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:38:31.573Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_ikqzMhsNv3dZxI9GGV3P8479",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:38:34.711Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_PH97fJ5pxEHr1eiz5nBw2932",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh && echo \"=== khoj-corpus listing ===\"; ls 03-ingestion/output/khoj-corpus/; echo \"=== corpus listing ===\"; ls 02-corpus/output/corpus/ 2>/dev/null; echo \"=== cmp D18 ===\"; cmp 03-ingestion/output/khoj-corpus/D18.md 02-corpus/output/corpus/D18.md && echo \"cmp exit 0 (identical)\"; echo \"=== sha256 both ===\"; shasum -a 256 03-ingestion/output/khoj-corpus/D18.md 02-corpus/output/corpus/D18.md"
+        },
+        {
+          "ts": "2026-08-15T00:38:34.712Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_Nd4SbTTTms6c20jwi4p85194",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/03-ingestion/output/khoj-corpus/D18.md"
+        },
+        {
+          "ts": "2026-08-15T00:38:34.712Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_aEjEI9naAiULeZCYsNOO9411",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/03-ingestion/CONTEXT.md"
+        },
+        {
+          "ts": "2026-08-15T00:38:34.718Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_aEjEI9naAiULeZCYsNOO9411",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:38:34.719Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Nd4SbTTTms6c20jwi4p85194",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:38:34.772Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_PH97fJ5pxEHr1eiz5nBw2932",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:38:45.656Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_54qssGg7FTW3euXsu4BH2369",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-08-khoj-ingest.yaml"
+        },
+        {
+          "ts": "2026-08-15T00:38:45.657Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_Hu4gsYRg6vM5v7gfJEQg2702",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml"
+        },
+        {
+          "ts": "2026-08-15T00:38:45.658Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_OfMRiE5JhOn5R4vebX3h0230",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/03-ingestion/output/ingest-report.md"
+        },
+        {
+          "ts": "2026-08-15T00:38:45.660Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_54qssGg7FTW3euXsu4BH2369",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:38:45.661Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_OfMRiE5JhOn5R4vebX3h0230",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:38:45.661Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Hu4gsYRg6vM5v7gfJEQg2702",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:39:04.714Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_LcvmObUAgb7PuaXIGkdO6571",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh && echo \"=== exact quoted passage in khoj-corpus/D18.md ===\"; grep -c \"Unverified assumptions must not become load-bearing architecture.\" 03-ingestion/output/khoj-corpus/D18.md; grep -c \"Companion rule to D17; compounds with multi-agent proposal chains.\" 03-ingestion/output/khoj-corpus/D18.md; echo \"=== same strings in stage D corpus D18 ===\"; grep -c \"Unverified assumptions must not become load-bearing architecture.\" 02-corpus/output/corpus/D18.md; echo \"=== quoted passage in retrieval-check.md ===\"; grep -c \"Unverified assumptions must not become load-bearing architecture.\" 03-ingestion/output/retrieval-check.md; echo \"=== interface fields in retrieval-check.md ===\"; grep -n \"api/search\\|Authorization: Bearer\\|khoj-38-b\\|/api/health\\|gddp-part1@local\" 03-ingestion/output/retrieval-check.md; echo \"=== other corpus files containing the phrase (uniqueness check) ===\"; grep -rl \"Unverified assumptions must not become load-bearing architecture\" 03-ingestion/output/khoj-corpus/ 02-corpus/output/corpus/"
+        },
+        {
+          "ts": "2026-08-15T00:39:04.752Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_LcvmObUAgb7PuaXIGkdO6571",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-15T00:39:24.667Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_QwyVMO2NstZAVCDZFrJK3935",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node-09 (verify-retrieval) acceptance criteria are both met by the required artifact 03-ingestion/output/retrieval-check.md. Criterion 1: the file shows a probe query whose retrieved evidence is demonstrated to come from the ingested decision corpus — I independently confirmed the quoted passage appears verbatim and uniquely in khoj-corpus/D18.md (the exact payload node-08 ingested), that khoj-corpus/D18.md is byte-identical to the Stage D corpus file, and that the SHA-256 claimed in the report (1f3f805a852a8437547ab603b82413cde6a42e8fcf197a75446ff657f595c574) is correct. Criterion 2: the exact query interface (Khoj HTTP GET /api/search with q/n/t params, canonical URL, Bearer auth, token path, VM locality, identity precheck) is fully recorded for identical repetition by evaluation nodes. The only element not replayable from the repo is the live Khoj response itself (top result D18.md at score 0.134), which is attested in the report and handoff 035; this is an inherent property of a live retrieval-verification node rather than a gap. Timeline is consistent (ingest 2026-08-15T00:15:36Z precedes retrieval check 2026-08-15T00:34:47Z). Constraints (isolated user gddp-part1@local, token not committed/printed) are respected per the report and no violations appear in the repo.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-15T00:40:18.482729+00:00",
+  "evaluated_tree_sha": "2e1facac74bdae0b17830a688fb86e8d9317bd3d",
+  "evaluated_commit_sha": "c605d36e63172b70bb960a63107bab1cd1926f83",
+  "merge_commit_sha": "c605d36e63172b70bb960a63107bab1cd1926f83",
+  "expected_base_commit_sha": "36c2f18f55ba83b3bb47a5310a466ef8235c5d82",
+  "pr_ref": null,
+  "job_id": "job_20260815T003321819242e8d5833a",
+  "execution_attempt_id": "job_20260815T003321819242e8d5833a:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+    "neighbor:node-08-khoj-ingest": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-08-khoj-ingest.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 4,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-08-khoj-ingest.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 3,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-08-khoj-ingest.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-1isiy0mh/README.md"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml"
+      ]
+    },
+    "overall": "high"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-15T00:38:26.054408+00:00",
+    "finished_at": "2026-08-15T00:40:18.482443+00:00",
+    "wall_s": 112.431,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 58.759,
+      "tool_calls": 13
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 53.64,
+      "tool_calls": 16
+    }
+  }
+}

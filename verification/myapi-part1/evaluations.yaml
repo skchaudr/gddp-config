@@ -1,7 +1,7 @@
 schema_type: node_evaluations
 schema_version: '1.0'
 project_id: myapi-part1
-generated_at: '2026-08-14T22:15:09Z'
+generated_at: '2026-08-15T15:02:10Z'
 source: gddp-runtime db/queue.db (results + decision_results)
 evaluations:
   node-01-icm-scaffold:
@@ -641,3 +641,1667 @@ evaluations:
           status: completed
           elapsed_s: 105.234
           tool_calls: 17
+  node-05-validate-decision-set:
+    verdict: pass
+    evaluated_at: '2026-08-14T22:14:41.228777+00:00'
+    executor: pi_rpc
+    job_id: job_20260814T214732845a5af48c5dcf
+    result_id: res_ses_20260814T2147328450e297e33887
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-05-validate-decision-set/job_20260814T214732845a5af48c5dcf-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node-05-validate-decision-set. The node''s intended role is
+      the Stage C gate: confirm completeness, structure, and canonical status of the decision set before
+      the corpus is built. The delivered validation-report.md fulfills exactly that role — it records
+      structural checks (schema conformance, unique IDs, dangling supersession links, relationship targets,
+      canonical status, provenance), completeness/source coverage with per-source counts and explicit
+      dispositions for every zero-yield source, independent reviewer evidence, and a Stage C gate recommendation.
+      I independently spot-verified the report''s factual claims against the repo: 17 canonical objects
+      with unique IDs D01-D10/D12-D18 (no duplicates), all required schema fields present, zero replaces/replaced_by
+      claims, D18 related_decisions companion→D17 target exists, all objects status=accepted/review_mark=Y,
+      D11 absent with rejection disposition, D13 clarified-then-Y note retained, and every pinned SHA-256
+      matches on-disk artifacts exactly (including the Corpus v1.0 parity witness being byte-identical
+      to the repo-local note). Graph integrity holds: the node consumes only node-04''s decisions-canonical.jsonl
+      (SHA-identical at base and tip — unmodified), the tip commit tree contains both the canonical set
+      and the new validation-report.md so downstream node-06 (which builds the corpus from decisions-canonical.jsonl)
+      will see everything it needs, and the diff adds only the two expected files with no collateral changes
+      to AGENTS.md, CONTEXT stubs, schema, or graph truth. Lane 1''s indeterminate keyword scan (''no
+      hit in source scan'') is explained by harness mechanics — the report lives in the tip wrapper commit
+      d301bd2 while the checked-out working tree sits at base bdf55a6 — not by a missing artifact; the
+      file demonstrably exists in the reviewed tip tree. Verdict: pass with high confidence; no findings
+      affecting this node.'
+    evidence_refs: []
+    acceptance_check:
+      project_id: myapi-part1
+      node_id: node-05-validate-decision-set
+      verdict: pass
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'Fresh-eyes review of node-05-validate-decision-set. The node''s intended role is the
+          Stage C gate: confirm completeness, structure, and canonical status of the decision set before
+          the corpus is built. The delivered validation-report.md fulfills exactly that role — it records
+          structural checks (schema conformance, unique IDs, dangling supersession links, relationship
+          targets, canonical status, provenance), completeness/source coverage with per-source counts
+          and explicit dispositions for every zero-yield source, independent reviewer evidence, and a
+          Stage C gate recommendation. I independently spot-verified the report''s factual claims against
+          the repo: 17 canonical objects with unique IDs D01-D10/D12-D18 (no duplicates), all required
+          schema fields present, zero replaces/replaced_by claims, D18 related_decisions companion→D17
+          target exists, all objects status=accepted/review_mark=Y, D11 absent with rejection disposition,
+          D13 clarified-then-Y note retained, and every pinned SHA-256 matches on-disk artifacts exactly
+          (including the Corpus v1.0 parity witness being byte-identical to the repo-local note). Graph
+          integrity holds: the node consumes only node-04''s decisions-canonical.jsonl (SHA-identical
+          at base and tip — unmodified), the tip commit tree contains both the canonical set and the new
+          validation-report.md so downstream node-06 (which builds the corpus from decisions-canonical.jsonl)
+          will see everything it needs, and the diff adds only the two expected files with no collateral
+          changes to AGENTS.md, CONTEXT stubs, schema, or graph truth. Lane 1''s indeterminate keyword
+          scan (''no hit in source scan'') is explained by harness mechanics — the report lives in the
+          tip wrapper commit d301bd2 while the checked-out working tree sits at base bdf55a6 — not by
+          a missing artifact; the file demonstrably exists in the reviewed tip tree. Verdict: pass with
+          high confidence; no findings affecting this node.'
+        tool_trace:
+        - ts: '2026-08-14T22:13:31.321Z'
+          tool: read
+          blocked: false
+          toolCallId: call_00_aawOsp7bA1HiBMCqdCLE9655
+          path: /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-04-normalize-decisions.yaml
+        - ts: '2026-08-14T22:13:31.322Z'
+          tool: read
+          blocked: false
+          toolCallId: call_01_xnlH2WZGsP0196dYIVw56981
+          path: /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml
+        - ts: '2026-08-14T22:13:31.323Z'
+          tool: read
+          blocked: false
+          toolCallId: call_02_feaLN8SCyJtdEpJEHHpG4598
+          path: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69/PROJECT-BRIEF.md
+        - ts: '2026-08-14T22:13:31.323Z'
+          tool: read
+          blocked: false
+          toolCallId: call_03_5m3KLAvhYarVwO9QCrWD4905
+          path: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69/README.md
+        - ts: '2026-08-14T22:13:31.330Z'
+          event: tool_execution_end
+          toolCallId: call_00_aawOsp7bA1HiBMCqdCLE9655
+          tool: read
+          ok: true
+        - ts: '2026-08-14T22:13:31.330Z'
+          event: tool_execution_end
+          toolCallId: call_01_xnlH2WZGsP0196dYIVw56981
+          tool: read
+          ok: true
+        - ts: '2026-08-14T22:13:31.331Z'
+          event: tool_execution_end
+          toolCallId: call_02_feaLN8SCyJtdEpJEHHpG4598
+          tool: read
+          ok: true
+        - ts: '2026-08-14T22:13:31.331Z'
+          event: tool_execution_end
+          toolCallId: call_03_5m3KLAvhYarVwO9QCrWD4905
+          tool: read
+          ok: true
+        - ts: '2026-08-14T22:13:35.608Z'
+          tool: bash
+          blocked: false
+          toolCallId: call_00_LGyat3R8yinNs3NwcFWx7070
+          command: cd /Users/sab-mini/repos/MyAPI && git log --oneline -5 2>/dev/null; echo "---STATUS---";
+            git status --short 2>/dev/null | head -30; echo "---DIFF FILES---"; git diff --name-status
+            bdf55a6bed363579a84aeb60ea7e403a19b0ce47 d301bd26fccf285a546b1935830c4db43d245b99 2>/dev/null
+        - ts: '2026-08-14T22:13:35.611Z'
+          tool: bash
+          blocked: false
+          toolCallId: call_01_8qPmjnXm9C14fgzge66X5824
+          command: ls -la /Users/sab-mini/repos/MyAPI/01-decisions/output/ 2>/dev/null; echo "---HANDOFFS---";
+            ls -la /Users/sab-mini/repos/MyAPI/.handoffs/ 2>/dev/null | tail -15
+        - ts: '2026-08-14T22:13:35.635Z'
+          event: tool_execution_end
+          toolCallId: call_01_8qPmjnXm9C14fgzge66X5824
+          tool: bash
+          ok: true
+        - ts: '2026-08-14T22:13:35.971Z'
+          event: tool_execution_end
+          toolCallId: call_00_LGyat3R8yinNs3NwcFWx7070
+          tool: bash
+          ok: true
+        - ts: '2026-08-14T22:13:37.892Z'
+          tool: read
+          blocked: false
+          toolCallId: call_00_omrh3DyfXWtqHsrscQNm8145
+          path: /Users/sab-mini/repos/MyAPI/01-decisions/output/validation-report.md
+        - ts: '2026-08-14T22:13:37.892Z'
+          tool: read
+          blocked: false
+          toolCallId: call_01_rocy4kgtrNwW9xsfdvdX5544
+          path: /Users/sab-mini/repos/MyAPI/.handoffs/031-validate-canonical-decision-set.md
+        - ts: '2026-08-14T22:13:37.894Z'
+          event: tool_execution_end
+          toolCallId: call_00_omrh3DyfXWtqHsrscQNm8145
+          tool: read
+          ok: false
+        - ts: '2026-08-14T22:13:37.894Z'
+          event: tool_execution_end
+          toolCallId: call_01_rocy4kgtrNwW9xsfdvdX5544
+          tool: read
+          ok: false
+        - ts: '2026-08-14T22:13:41.379Z'
+          tool: bash
+          blocked: false
+          toolCallId: call_00_ZO4ynIBZquagktlk80IO3979
+          command: 'cd /Users/sab-mini/repos/MyAPI && echo "---HEAD---"; git rev-parse HEAD; echo "---TIP
+            EXISTS?---"; git cat-file -t d301bd26fccf285a546b1935830c4db43d245b99 2>&1; echo "---LOG d301bd2---";
+            git log --oneline -3 d301bd26fccf285a546b1935830c4db43d245b99 2>&1; echo "---SHOW FILES AT
+            TIP---"; git ls-tree -r --name-only d301bd26fccf285a546b1935830c4db43d245b99 2>&1 | grep -E
+            "validation-report|031-validate" '
+        - ts: '2026-08-14T22:13:41.449Z'
+          event: tool_execution_end
+          toolCallId: call_00_ZO4ynIBZquagktlk80IO3979
+          tool: bash
+          ok: true
+        - ts: '2026-08-14T22:13:43.852Z'
+          tool: bash
+          blocked: false
+          toolCallId: call_00_rDmOKjxkvj1i560IKXWb2217
+          command: cd /Users/sab-mini/repos/MyAPI && git show d301bd26fccf285a546b1935830c4db43d245b99:01-decisions/output/validation-report.md
+        - ts: '2026-08-14T22:13:43.853Z'
+          tool: bash
+          blocked: false
+          toolCallId: call_01_rLanSbX18Dy3eIDOlcjA0706
+          command: cd /Users/sab-mini/repos/MyAPI && git show d301bd26fccf285a546b1935830c4db43d245b99:.handoffs/031-validate-canonical-decision-set.md
+        - ts: '2026-08-14T22:13:43.887Z'
+          event: tool_execution_end
+          toolCallId: call_00_rDmOKjxkvj1i560IKXWb2217
+          tool: bash
+          ok: true
+        - ts: '2026-08-14T22:13:43.887Z'
+          event: tool_execution_end
+          toolCallId: call_01_rLanSbX18Dy3eIDOlcjA0706
+          tool: bash
+          ok: true
+        - ts: '2026-08-14T22:13:53.421Z'
+          tool: bash
+          blocked: false
+          toolCallId: call_00_GLXmCBBZaak4IXTLDahr8087
+          command: cd /Users/sab-mini/repos/MyAPI && echo "---SHA of canonical---"; shasum -a 256 01-decisions/output/decisions-canonical.jsonl;
+            echo "---SHA of schema---"; shasum -a 256 01-decisions/output/decision-schema.md; echo "---SHA
+            of sources---"; shasum -a 256 01-decisions/output/sources.md; echo "---SHA of raw---"; shasum
+            -a 256 01-decisions/output/decisions-raw.jsonl
+        - ts: '2026-08-14T22:13:53.422Z'
+          tool: bash
+          blocked: false
+          toolCallId: call_01_kzts7fzSmosLhBrYJP6k3407
+          command: "cd /Users/sab-mini/repos/MyAPI && echo \"---object count---\"; wc -l 01-decisions/output/decisions-canonical.jsonl;\
+            \ echo \"---ids---\"; python3 -c \"\nimport json\nids=[]\nwith open('01-decisions/output/decisions-canonical.jsonl')\
+            \ as f:\n    for line in f:\n        line=line.strip()\n        if not line: continue\n  \
+            \      o=json.loads(line)\n        ids.append(o.get('id'))\nprint(len(ids), 'objects')\nprint('unique:',\
+            \ len(set(ids)))\nprint('ids:', sorted(ids))\nprint('dup check:', len(ids)!=len(set(ids)))\n\
+            \""
+        - ts: '2026-08-14T22:13:53.422Z'
+          tool: read
+          blocked: false
+          toolCallId: call_02_DTWZa1CfyUkY6XYRudGJ9683
+          path: /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-06-build-corpus.yaml
+        - ts: '2026-08-14T22:13:53.430Z'
+          event: tool_execution_end
+          toolCallId: call_02_DTWZa1CfyUkY6XYRudGJ9683
+          tool: read
+          ok: true
+        - ts: '2026-08-14T22:13:53.521Z'
+          event: tool_execution_end
+          toolCallId: call_00_GLXmCBBZaak4IXTLDahr8087
+          tool: bash
+          ok: true
+        - ts: '2026-08-14T22:13:53.557Z'
+          event: tool_execution_end
+          toolCallId: call_01_kzts7fzSmosLhBrYJP6k3407
+          tool: bash
+          ok: true
+        - ts: '2026-08-14T22:13:59.607Z'
+          tool: bash
+          blocked: false
+          toolCallId: call_00_rSYh8kBdDyR5myQzXxDl4360
+          command: cd /Users/sab-mini/repos/MyAPI && echo "---review sheet exists?---"; ls -la "project-docs/corpus-work-2026-08/"
+            2>/dev/null | head; echo "---corpus v1.0 parity---"; shasum -a 256 "Corpus v1.0/40-decisions-and-trajectories/2026-08-08-last2w-decisions.md"
+            2>/dev/null; shasum -a 256 "project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md"
+            2>/dev/null
+        - ts: '2026-08-14T22:13:59.608Z'
+          tool: bash
+          blocked: false
+          toolCallId: call_01_Q38EzRLdxO0NUMo9B6GF4279
+          command: "cd /Users/sab-mini/repos/MyAPI && python3 -c \"\nimport json\nobjs=[]\nwith open('01-decisions/output/decisions-canonical.jsonl')\
+            \ as f:\n    for line in f:\n        line=line.strip()\n        if line: objs.append(json.loads(line))\n\
+            # required fields check\nreq=['id','schema_version','project','title','summary','statement','status','rationale','decided_on','sources']\n\
+            missing={}\nfor o in objs:\n    for r in req:\n        if r not in o or o[r] in (None,'',[]):\n\
+            \            missing.setdefault(r,[]).append(o.get('id'))\nprint('missing required:', missing\
+            \ if missing else 'NONE')\n# supersession\nsups=[(o.get('id'), o.get('replaces'), o.get('replaced_by'))\
+            \ for o in objs if o.get('replaces') or o.get('replaced_by')]\nprint('supersession claims:',\
+            \ sups if sups else 'NONE')\n# relationships\nrels=[(o.get('id'), o.get('relationships'))\
+            \ for o in objs if o.get('relationships')]\nprint('relationships:', rels)\n# status / review_mark\n\
+            stat=set((o.get('status'), o.get('review_mark')) for o in objs)\nprint('status/review_mark\
+            \ set:', stat)\n\""
+        - ts: '2026-08-14T22:13:59.609Z'
+          tool: bash
+          blocked: false
+          toolCallId: call_02_DR0072PPyHj4xT1sQCnC0517
+          command: ls -la /Users/sab-mini/repos/MyAPI/.gddp/ 2>/dev/null; echo "---"; cat /Users/sab-mini/repos/MyAPI/.gddp/*.json
+            2>/dev/null | head -40
+        - ts: '2026-08-14T22:13:59.633Z'
+          event: tool_execution_end
+          toolCallId: call_02_DR0072PPyHj4xT1sQCnC0517
+          tool: bash
+          ok: true
+        - ts: '2026-08-14T22:13:59.678Z'
+          event: tool_execution_end
+          toolCallId: call_00_rSYh8kBdDyR5myQzXxDl4360
+          tool: bash
+          ok: true
+        - ts: '2026-08-14T22:13:59.678Z'
+          event: tool_execution_end
+          toolCallId: call_01_Q38EzRLdxO0NUMo9B6GF4279
+          tool: bash
+          ok: true
+        - ts: '2026-08-14T22:14:02.783Z'
+          tool: bash
+          blocked: false
+          toolCallId: call_00_RtHi2sbmOKzLyQ1Kh3RV2907
+          command: "cd /Users/sab-mini/repos/MyAPI && python3 -c \"\nimport json\nobjs=[]\nwith open('01-decisions/output/decisions-canonical.jsonl')\
+            \ as f:\n    for line in f:\n        line=line.strip()\n        if line: objs.append(json.loads(line))\n\
+            o18=[o for o in objs if o['id']=='D18'][0]\nprint('D18 keys:', list(o18.keys()))\nimport json\
+            \ as j\nprint(j.dumps(o18, indent=1)[:1200])\n\""
+        - ts: '2026-08-14T22:14:02.783Z'
+          tool: bash
+          blocked: false
+          toolCallId: call_01_F4cAKg52KggmVzVVVIa36770
+          command: ls -la /Users/sab-mini/repos/MyAPI/.gddp/gates/ 2>/dev/null; echo "---gate files---";
+            for f in /Users/sab-mini/repos/MyAPI/.gddp/gates/*; do echo "== $f =="; head -30 "$f" 2>/dev/null;
+            done
+        - ts: '2026-08-14T22:14:02.823Z'
+          event: tool_execution_end
+          toolCallId: call_01_F4cAKg52KggmVzVVVIa36770
+          tool: bash
+          ok: true
+        - ts: '2026-08-14T22:14:02.853Z'
+          event: tool_execution_end
+          toolCallId: call_00_RtHi2sbmOKzLyQ1Kh3RV2907
+          tool: bash
+          ok: true
+        - ts: '2026-08-14T22:14:21.340Z'
+          tool: bash
+          blocked: false
+          toolCallId: call_00_daWbBhjMCTSieT3IKVmL8113
+          command: cd /Users/sab-mini/repos/MyAPI && echo "---tip tree (decisions dir)---"; git ls-tree
+            -r --name-only d301bd26fccf285a546b1935830c4db43d245b99 | grep -E "^(01-decisions|02-corpus|03-ingestion|04-evaluation|docs/|AGENTS)"
+            | head -30; echo "---canonical at tip matches working tree?---"; git show d301bd26fccf285a546b1935830c4db43d245b99:01-decisions/output/decisions-canonical.jsonl
+            | shasum -a 256
+        - ts: '2026-08-14T22:14:21.341Z'
+          tool: bash
+          blocked: false
+          toolCallId: call_01_rfaFAlVdbpzOhLqBuLug1619
+          command: "cd /Users/sab-mini/repos/MyAPI && python3 -c \"\nimport json\nobjs=[]\nwith open('01-decisions/output/decisions-canonical.jsonl')\
+            \ as f:\n    for line in f:\n        line=line.strip()\n        if line: objs.append(json.loads(line))\n\
+            o13=[o for o in objs if o['id']=='D13'][0]\nprint('D13 notes:', o13.get('notes', '(no notes\
+            \ field)')[:300])\nprint('D13 review_mark:', o13.get('review_mark'))\nprint('D13 status:',\
+            \ o13.get('status'))\n\""
+        - ts: '2026-08-14T22:14:21.342Z'
+          tool: bash
+          blocked: false
+          toolCallId: call_02_OwNUYvAQ1i9Wj5wSIZfF7024
+          command: cd /Users/sab-mini/repos/MyAPI && grep -n -i "replaces\|replaced_by\|supersession\|MCP"
+            01-decisions/output/decision-schema.md | head -20
+        - ts: '2026-08-14T22:14:21.371Z'
+          event: tool_execution_end
+          toolCallId: call_02_OwNUYvAQ1i9Wj5wSIZfF7024
+          tool: bash
+          ok: true
+        - ts: '2026-08-14T22:14:21.409Z'
+          event: tool_execution_end
+          toolCallId: call_00_daWbBhjMCTSieT3IKVmL8113
+          tool: bash
+          ok: true
+        - ts: '2026-08-14T22:14:21.414Z'
+          event: tool_execution_end
+          toolCallId: call_01_rfaFAlVdbpzOhLqBuLug1619
+          tool: bash
+          ok: true
+        - ts: '2026-08-14T22:14:41.077Z'
+          event: tool_execution_end
+          toolCallId: call_00_pPj8zdNzjpL361F9Smei4959
+          tool: submit_integrity_verdict
+          ok: true
+        graph_observations:
+        - severity: low
+          summary: The validation-report.md and handoff 031 exist only in the tip wrapper commit d301bd2;
+            the checked-out working tree at base bdf55a6 does not contain them (this explains lane 1's
+            'no hit in source scan'). Downstream node-06 must be executed against the tip commit (or a
+            checkout containing validation-report.md) or it will not see the required artifact. Recommend
+            confirming the harness checkouts include wrapper-commit files before node-06 fires.
+          affected_node_ids:
+          - node-05-validate-decision-set
+          - node-06-build-corpus
+        - severity: low
+          summary: Node-05's handoff attests 'no commit or push was made' while the harness wrapper commit
+            (git add -A) captured the untracked artifacts; this is the standard wrapper pattern per subject_diff
+            and does not affect the current verdict, but downstream reviewers should expect artifacts
+            to surface via wrapper commits rather than the executor's own git actions.
+          affected_node_ids:
+          - node-05-validate-decision-set
+        lane_status: completed
+        harness_error: null
+      confidence: 0.95
+      criteria_confidence: 0.95
+      completeness: 1.0
+      graph_readiness: 0.95
+      completeness_status: complete
+      deterministic:
+        criteria:
+        - id: validator-passes
+          criterion: 01-decisions/output/validation-report.md records structural checks (schema conformance,
+            unique ids, dangling supersession links) all passing or each failure explicitly dispositioned
+          status: indeterminate
+          confidence: 0.2
+          method: keyword_scan_source
+          evidence:
+          - no hit in source scan (01-decisions/output/validation-report.md)
+          reasoning: Scanned source files (01-decisions/output/validation-report.md) for identifiers named
+            in the criterion (validation-report). No complete match — absence could mean rewording, missing
+            path, or missing implementation.
+          mismatch_kind: ''
+          mismatch_detail: ''
+          needs_evidence: false
+          human_question: ''
+        - id: coverage-check
+          criterion: Report states decision count per source and confirms no source yielded zero without
+            explanation
+          status: indeterminate
+          confidence: 0.1
+          method: no_probe
+          evidence: []
+          reasoning: No deterministic probe is registered for this criterion and no usable identifiers
+            were found in its text. Needs a human or an explicit probe.
+          mismatch_kind: ''
+          mismatch_detail: ''
+          needs_evidence: false
+          human_question: ''
+        constraints:
+        - constraint: The governing memo is /Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md
+            - read it first.
+          status: clear
+          confidence: 0.85
+          method: forbidden_pattern_scan
+          evidence:
+          - no forbidden patterns matched
+          reasoning: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps).
+            No violations.
+        - constraint: 'Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol;
+            delegate with up to 5 subagents on model xai/grok-4.6 via the subagent tool''s model parameter;
+            close with one oracle or reviewer pass before returning'
+          status: clear
+          confidence: 0.85
+          method: forbidden_pattern_scan
+          evidence:
+          - no forbidden patterns matched
+          reasoning: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps).
+            No violations.
+        artifacts_present:
+          01-decisions/output/validation-report.md: true
+        deps_status:
+          node-04-normalize-decisions: complete
+        criteria_mismatches: []
+        missing_evidence: []
+        human_review_questions: []
+        subject_diff:
+          status: ok
+          base: bdf55a6bed363579a84aeb60ea7e403a19b0ce47
+          tip: d301bd26fccf285a546b1935830c4db43d245b99
+          files:
+          - status: A
+            path: .handoffs/031-validate-canonical-decision-set.md
+          - status: A
+            path: 01-decisions/output/validation-report.md
+          truncated: false
+          file_count: 2
+          note: Includes anything untracked the executor left behind (wrapper commits with git add -A)
+            — junk is deliberately visible here.
+      semantic:
+        judgments:
+        - criterion_id: validator-passes
+          judgment: judged_pass
+          confidence: 0.95
+          evidence:
+          - '01-decisions/output/validation-report.md (exists; records schema conformance PASS, unique
+            IDs PASS, dangling supersession links PASS, relationship targets PASS, canonical status PASS,
+            rejected candidate disposition PASS, provenance PASS; ''Structural failures requiring disposition:
+            none'')'
+          - 01-decisions/output/decisions-canonical.jsonl (17 objects, IDs D01-D10,D12-D18 all unique;
+            all required fields present; status=accepted x17; review_mark=Y x17; decided_on=2026-08-08;
+            schema_version=1.0 x17)
+          - 01-decisions/output/decisions-canonical.jsonl (replaces=[] and replaced_by=null on all 17
+            -> 0 supersession refs, vacuously no dangling links, consistent with report)
+          - 01-decisions/output/decision-schema.md (defines required field set the conformance check is
+            measured against)
+          - project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md (D11 marked N; 17 Y)
+          - '01-decisions/output/decisions-canonical.jsonl (D18 related_decisions: companion -> D17, target
+            exists)'
+          reasoning: 'The required artifact exists and its content matches the criterion''s disjunctive
+            requirement: the three named structural checks (schema conformance, unique IDs, dangling supersession
+            links) are all recorded as PASS, and the report explicitly records that there are no structural
+            failures requiring disposition. Independent re-verification of the canonical JSONL confirms
+            every stated result: 17 unique IDs with no D11, all required fields present and typed per
+            schema, status/review_mark uniform at accepted/Y, zero supersession references (so zero dangling
+            links — a vacuous pass the report correctly explains by excluding the schema''s example pair),
+            and the sole relationship target D17 existing. The deterministic scan''s ''no match'' result
+            appears to be a probe/pattern artifact (it expected the criterion identifier to appear literally),
+            not a content gap.'
+        - criterion_id: coverage-check
+          judgment: judged_pass
+          confidence: 0.95
+          evidence:
+          - '01-decisions/output/validation-report.md (''Decision count per admitted source'' table: review
+            sheet 17, last2w note 17, Corpus v1.0 parity 17, CORPUS-TARGET-SHAPE 1, REBUILD-CONTEXT-ANCHOR
+            2, ARCHITECTURE 2, handoff 030 1; each zero-count source given an explanation)'
+          - 01-decisions/output/validation-report.md ('Zero-yield excluded sources' table dispositioning
+            every zero-count source/class, incl. D11 rejection)
+          - 01-decisions/output/validation-report.md ('No source yielded zero without explanation.')
+          - '01-decisions/output/decisions-canonical.jsonl (jq count per sources[].ref matches report
+            table exactly: 17/17/17/1/2/2/1)'
+          - 01-decisions/output/sources.md (source manifest enumerating decision-truth, supporting, and
+            excluded sources)
+          - project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md (D11 rejection evidence)
+          reasoning: The report states a decision count per source (with canonical IDs or an explanation
+            for each) and confirms no source yielded zero without explanation. I recomputed the per-source
+            citation counts from decisions-canonical.jsonl and they match the report table exactly. All
+            zero-count sources — the four admitted-but-not-authoritative sources (governing memo, room
+            CONTEXT, schema, sources.md) and the excluded classes including D11 — carry an explicit disposition.
+            The criterion is fully satisfied by the report's content, independently corroborated by the
+            data.
+        overall_reasoning: 'Both acceptance criteria for node-05-validate-decision-set are satisfied by
+          the submitted artifact 01-decisions/output/validation-report.md. The report records the three
+          required structural checks (schema conformance, unique ids, dangling supersession links) all
+          passing with zero failures requiring disposition, and it states a decision count per source
+          with explicit dispositions for every zero-yield source, closing with ''No source yielded zero
+          without explanation.'' Independent re-verification of the underlying data (decisions-canonical.jsonl,
+          decision-schema.md, sources.md, DECISIONS-REVIEW-SHEET.md) corroborates every material claim:
+          17 unique IDs D01-D10+D12-D18, all required fields present and conformant, status/review_mark
+          uniform, zero supersession references (vacuously no dangling links, correctly explained), the
+          single relationship D18->D17 target existing, D11 rejected per the review sheet, and per-source
+          citation counts matching the report''s table. The deterministic checks returned indeterminate
+          only because their keyword probe did not match the artifact''s filename/content phrasing; the
+          artifact is present and its content satisfies both criteria. Required artifact is present; upstream
+          node-04 (decisions-canonical.jsonl) is complete; downstream (node-06) may consume the validated
+          set. The node''s constraints (governing memo, execution trio) were scanned by the deterministic
+          pass and showed no violations; reviewer-pass claims in the report are contextual evidence, not
+          part of the acceptance criteria.'
+        risks: 1) The report's input SHA-256 hashes (schema, sources, raw/canonical JSONL, review sheet,
+          normalized note, parity witness) were not independently re-hashed in this sandbox; content-level
+          verification was done instead. Low risk. 2) The three independent grok-4.6 reviewer passes are
+          claimed in the report but not independently verifiable from repo state; they are contextual
+          and not part of the acceptance criteria. 3) The Corpus v1.0 parity witness lives outside the
+          repo (/Users/sab-mini/repos/MyAPI/Corpus v1.0/...) and its byte-identity with the repo-local
+          note could not be checked here; the sources.md manifest documents the parity requirement. 4)
+          Both task artifacts (validation-report.md, handoff 031) are untracked working-tree edits on
+          detached HEAD per the handoff; this is an execution-trail/completeness matter, not a criteria
+          failure.
+        followup_candidates: 'Observed: the deterministic keyword scan reported ''no hit in source scan''
+          for criterion ''validator-passes'' even though 01-decisions/output/validation-report.md exists
+          (artifacts_present=True) and its content directly records the named structural checks. The probe
+          appears to have failed on pattern/path matching rather than content absence. Was the probe pattern
+          intended to match the criterion identifier string in the file? If so, the probe config may need
+          adjustment; this does not affect the semantic verdict, which is judged_pass.'
+        budget_exhausted: false
+        budget_trace:
+          tool_calls:
+          - ts: '2026-08-14T22:12:15.154Z'
+            tool: read
+            blocked: false
+            toolCallId: call_00_duh6QX3izYwRlVzIT5ps6423
+            path: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69/PROJECT-BRIEF.md
+          - ts: '2026-08-14T22:12:15.155Z'
+            tool: read
+            blocked: false
+            toolCallId: call_01_jeMudlWNj9Dug4P9c1hg8666
+            path: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69/README.md
+          - ts: '2026-08-14T22:12:15.159Z'
+            tool: bash
+            blocked: false
+            toolCallId: call_02_Ro1o7SGt8T2EppHOWxk66253
+            command: ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69/
+              && find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69 -type
+              f | head -100
+          - ts: '2026-08-14T22:12:15.175Z'
+            event: tool_execution_end
+            toolCallId: call_00_duh6QX3izYwRlVzIT5ps6423
+            tool: read
+            ok: true
+          - ts: '2026-08-14T22:12:15.175Z'
+            event: tool_execution_end
+            toolCallId: call_01_jeMudlWNj9Dug4P9c1hg8666
+            tool: read
+            ok: true
+          - ts: '2026-08-14T22:12:15.200Z'
+            event: tool_execution_end
+            toolCallId: call_02_Ro1o7SGt8T2EppHOWxk66253
+            tool: bash
+            ok: true
+          - ts: '2026-08-14T22:12:17.865Z'
+            tool: read
+            blocked: false
+            toolCallId: call_00_eVYiNTmbEwvNO0FNgdp20114
+            path: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69/01-decisions/output/validation-report.md
+          - ts: '2026-08-14T22:12:17.866Z'
+            tool: read
+            blocked: false
+            toolCallId: call_01_ZHwjaXAzBgcdyZzWwMJy9596
+            path: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69/.handoffs/031-validate-canonical-decision-set.md
+          - ts: '2026-08-14T22:12:17.869Z'
+            event: tool_execution_end
+            toolCallId: call_00_eVYiNTmbEwvNO0FNgdp20114
+            tool: read
+            ok: true
+          - ts: '2026-08-14T22:12:17.869Z'
+            event: tool_execution_end
+            toolCallId: call_01_ZHwjaXAzBgcdyZzWwMJy9596
+            tool: read
+            ok: true
+          - ts: '2026-08-14T22:12:22.052Z'
+            tool: read
+            blocked: false
+            toolCallId: call_00_aa6gnqcHsijhr1YKEUFb1073
+            path: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69/01-decisions/output/decision-schema.md
+          - ts: '2026-08-14T22:12:22.053Z'
+            tool: read
+            blocked: false
+            toolCallId: call_01_48TLskClDG0faNrdLD5K0745
+            path: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69/01-decisions/output/sources.md
+          - ts: '2026-08-14T22:12:22.055Z'
+            event: tool_execution_end
+            toolCallId: call_01_48TLskClDG0faNrdLD5K0745
+            tool: read
+            ok: true
+          - ts: '2026-08-14T22:12:22.056Z'
+            event: tool_execution_end
+            toolCallId: call_00_aa6gnqcHsijhr1YKEUFb1073
+            tool: read
+            ok: true
+          - ts: '2026-08-14T22:12:25.235Z'
+            tool: bash
+            blocked: false
+            toolCallId: call_00_SNKOL12tO0eT1rT2YQCS7969
+            command: cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69
+              && wc -l 01-decisions/output/decisions-canonical.jsonl 01-decisions/output/decisions-raw.jsonl
+              && echo "---IDS---" && jq -r '.id' 01-decisions/output/decisions-canonical.jsonl | sort
+              | uniq -c && echo "---COUNT---" && jq -s 'length' 01-decisions/output/decisions-canonical.jsonl
+          - ts: '2026-08-14T22:12:25.236Z'
+            tool: bash
+            blocked: false
+            toolCallId: call_01_H6CyWY1e5jDY0SwF84pW1397
+            command: cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69
+              && which jq python3 && jq --version
+          - ts: '2026-08-14T22:12:25.259Z'
+            event: tool_execution_end
+            toolCallId: call_01_H6CyWY1e5jDY0SwF84pW1397
+            tool: bash
+            ok: true
+          - ts: '2026-08-14T22:12:25.266Z'
+            event: tool_execution_end
+            toolCallId: call_00_SNKOL12tO0eT1rT2YQCS7969
+            tool: bash
+            ok: true
+          - ts: '2026-08-14T22:12:30.845Z'
+            tool: bash
+            blocked: false
+            toolCallId: call_00_KdWhci0PIIcdR4RpHMAT5599
+            command: 'cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69
+              && echo "=== required fields check ===" && jq -r ''select((.id|type)!="string" or (.schema_version|type)!="string"
+              or (.project|type)!="string" or (.title|type)!="string" or (.summary|type)!="string" or
+              (.statement|type)!="string" or (.status|type)!="string" or (.rationale|type)!="string" or
+              (.decided_on|type)!="string" or (.sources|type)!="array" or (.sources|length)==0) | "MISSING:
+              \(.id)"'' 01-decisions/output/decisions-canonical.jsonl; echo "(empty above = all required
+              fields present)"; echo "=== status values ===" && jq -r ''.status'' 01-decisions/output/decisions-canonical.jsonl
+              | sort | uniq -c; echo "=== review_mark ===" && jq -r ''.review_mark'' 01-decisions/output/decisions-canonical.jsonl
+              | sort | uniq -c; echo "=== decided_on format ===" && jq -r ''.decided_on'' 01-decisions/output/decisions-canonical.jsonl
+              | grep -vE ''^[0-9]{4}-[0-9]{2}-[0-9]{2}$'' | wc -l; echo "=== schema_version values ==="
+              && jq -r ''.schema_version'' 01-decisions/output/decisions-canonical.jsonl | sort | uniq
+              -c'
+          - ts: '2026-08-14T22:12:30.846Z'
+            tool: bash
+            blocked: false
+            toolCallId: call_01_6E8SXYIJGYcuxawpkYKo9404
+            command: 'cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69
+              && echo "=== replaces/replaced_by across all objects ===" && jq -r ''[.replaces // [], .replaced_by
+              // null] | @json'' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c; echo
+              "=== dangling replaced_by targets ===" && jq -r ''.replaced_by'' 01-decisions/output/decisions-canonical.jsonl
+              | grep -v null | while read t; do grep -qx "$t" <(jq -r ''.id'' 01-decisions/output/decisions-canonical.jsonl)
+              || echo "DANGLING: $t"; done; echo "(empty = none)"; echo "=== related_decisions targets
+              ===" && jq -r ''.related_decisions[]?.target_id'' 01-decisions/output/decisions-canonical.jsonl
+              | while read t; do grep -qx "$t" <(jq -r ''.id'' 01-decisions/output/decisions-canonical.jsonl)
+              || echo "DANGLING REL: $t"; done; echo "(empty = none)"; echo "=== relationship rel values
+              ===" && jq -r ''.related_decisions[]?.rel'' 01-decisions/output/decisions-canonical.jsonl
+              | sort | uniq -c'
+          - ts: '2026-08-14T22:12:30.887Z'
+            event: tool_execution_end
+            toolCallId: call_00_KdWhci0PIIcdR4RpHMAT5599
+            tool: bash
+            ok: true
+          - ts: '2026-08-14T22:12:30.888Z'
+            event: tool_execution_end
+            toolCallId: call_01_6E8SXYIJGYcuxawpkYKo9404
+            tool: bash
+            ok: true
+          - ts: '2026-08-14T22:12:36.735Z'
+            tool: bash
+            blocked: true
+            toolCallId: call_00_QDvUMbG8xXi8I4trk46c4535
+            reason: command matched blocked pattern
+            command: 'cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69
+              && echo "=== which object has related_decisions ===" && jq -r ''select((.related_decisions|length)>0)
+              | "\(.id): \(.related_decisions|@json)"'' 01-decisions/output/decisions-canonical.jsonl;
+              echo "=== source refs per object (canonical) ===" && jq -r ''.id + ": " + ([.sources[].ref]|join("
+              | "))'' 01-decisions/output/decisions-canonical.jsonl | head -20'
+            pattern: (?:\d?>>?|&>)(?!\s*(?:&\d|\/dev\/null))
+          - ts: '2026-08-14T22:12:36.736Z'
+            event: tool_execution_end
+            toolCallId: call_00_QDvUMbG8xXi8I4trk46c4535
+            tool: bash
+            ok: false
+          - ts: '2026-08-14T22:12:36.736Z'
+            tool: bash
+            blocked: false
+            toolCallId: call_01_uB7iqLeh1vMXzYu6ztod4432
+            command: cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69
+              && echo "=== count per source ref ===" && jq -r '.sources[].ref' 01-decisions/output/decisions-canonical.jsonl
+              | sort | uniq -c | sort -rn; echo "=== source kinds ===" && jq -r '.sources[].kind' 01-decisions/output/decisions-canonical.jsonl
+              | sort | uniq -c; echo "=== objects missing review sheet ===" && jq -r 'select([.sources[].ref]
+              | index("DECISIONS-REVIEW-SHEET.md") == null) | .id' 01-decisions/output/decisions-canonical.jsonl;
+              echo "(empty = all cite review sheet)"; echo "=== objects missing corpus v1.0 parity witness
+              ===" && jq -r 'select([.sources[].ref] | index("Corpus v1.0/40-decisions-and-trajectories/2026-08-08-last2w-decisions.md")
+              == null) | .id' 01-decisions/output/decisions-canonical.jsonl; echo "(empty = all cite parity
+              witness)"
+          - ts: '2026-08-14T22:12:36.779Z'
+            event: tool_execution_end
+            toolCallId: call_01_uB7iqLeh1vMXzYu6ztod4432
+            tool: bash
+            ok: true
+          - ts: '2026-08-14T22:12:49.499Z'
+            tool: bash
+            blocked: false
+            toolCallId: call_00_B34gtgJjkxODIWLGa0ty8743
+            command: cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69
+              && echo "=== object(s) with related_decisions ===" && jq -c 'select((.related_decisions|length)
+              != 0) | {id, related_decisions}' 01-decisions/output/decisions-canonical.jsonl; echo "===
+              objects NOT citing review sheet (substring) ===" && jq -r 'select(([.sources[].ref] | map(contains("DECISIONS-REVIEW-SHEET.md"))
+              | any) | not) | .id' 01-decisions/output/decisions-canonical.jsonl; echo "(empty above =
+              all cite review sheet)"; echo "=== objects NOT citing last2w normalized note ===" && jq
+              -r 'select(([.sources[].ref] | map(contains("2026-08-08-last2w-decisions.md")) | any) |
+              not) | .id' 01-decisions/output/decisions-canonical.jsonl; echo "(empty above = all cite)";
+              echo "=== objects NOT citing corpus v1.0 parity witness ===" && jq -r 'select(([.sources[].ref]
+              | map(contains("Corpus v1.0")) | any) | not) | .id' 01-decisions/output/decisions-canonical.jsonl;
+              echo "(empty above = all cite)"
+          - ts: '2026-08-14T22:12:49.500Z'
+            tool: bash
+            blocked: false
+            toolCallId: call_01_RgClWxiltbqdD4TM4wlZ2350
+            command: cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69
+              && echo "=== D13 object (notes/claim check) ===" && jq -c 'select(.id=="D13") | {id, notes,
+              review_mark, sources}' 01-decisions/output/decisions-canonical.jsonl; echo "=== raw jsonl
+              ids ===" && jq -r '.id' 01-decisions/output/decisions-raw.jsonl | sort | tr '\n' ' '; echo;
+              echo "=== decided_on values ===" && jq -r '.decided_on' 01-decisions/output/decisions-canonical.jsonl
+              | sort | uniq -c
+          - ts: '2026-08-14T22:12:49.542Z'
+            event: tool_execution_end
+            toolCallId: call_01_RgClWxiltbqdD4TM4wlZ2350
+            tool: bash
+            ok: true
+          - ts: '2026-08-14T22:12:49.548Z'
+            event: tool_execution_end
+            toolCallId: call_00_B34gtgJjkxODIWLGa0ty8743
+            tool: bash
+            ok: true
+          - ts: '2026-08-14T22:12:59.129Z'
+            tool: bash
+            blocked: false
+            toolCallId: call_00_B2KDm1wN4CDtjt3nmf0b9351
+            command: cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69
+              && ls -la "project-docs/corpus-work-2026-08/" 2>/dev/null | head -20; echo "=== D11 in review
+              sheet ==="; grep -n "D11" project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md 2>/dev/null
+              | head -5; echo "=== D11 in normalized note ==="; grep -n "D11" project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md
+              2>/dev/null | head -5
+          - ts: '2026-08-14T22:12:59.130Z'
+            tool: bash
+            blocked: false
+            toolCallId: call_01_gkpmoN44VFRJtEEWTojF5630
+            command: ls /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/ 2>/dev/null && echo
+              "---" && cat "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-04-normalize-decisions.yaml"
+              2>/dev/null | head -60; echo "=== foundational node ==="; cat "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml"
+              2>/dev/null | head -60
+          - ts: '2026-08-14T22:12:59.165Z'
+            event: tool_execution_end
+            toolCallId: call_01_gkpmoN44VFRJtEEWTojF5630
+            tool: bash
+            ok: true
+          - ts: '2026-08-14T22:12:59.168Z'
+            event: tool_execution_end
+            toolCallId: call_00_B2KDm1wN4CDtjt3nmf0b9351
+            tool: bash
+            ok: true
+          - ts: '2026-08-14T22:13:27.249Z'
+            event: tool_execution_end
+            toolCallId: call_00_LhsZ71rgKmqxDHmW3dpU7671
+            tool: submit_verdict
+            ok: true
+        lane_status: completed
+        harness_error: null
+      decision_reasoning: 'Both acceptance criteria for node-05-validate-decision-set are satisfied by
+        the submitted artifact 01-decisions/output/validation-report.md. The report records the three
+        required structural checks (schema conformance, unique ids, dangling supersession links) all passing
+        with zero failures requiring disposition, and it states a decision count per source with explicit
+        dispositions for every zero-yield source, closing with ''No source yielded zero without explanation.''
+        Independent re-verification of the underlying data (decisions-canonical.jsonl, decision-schema.md,
+        sources.md, DECISIONS-REVIEW-SHEET.md) corroborates every material claim: 17 unique IDs D01-D10+D12-D18,
+        all required fields present and conformant, status/review_mark uniform, zero supersession references
+        (vacuously no dangling links, correctly explained), the single relationship D18->D17 target existing,
+        D11 rejected per the review sheet, and per-source citation counts matching the report''s table.
+        The deterministic checks returned indeterminate only because their keyword probe did not match
+        the artifact''s filename/content phrasing; the artifact is present and its content satisfies both
+        criteria. Required artifact is present; upstream node-04 (decisions-canonical.jsonl) is complete;
+        downstream (node-06) may consume the validated set. The node''s constraints (governing memo, execution
+        trio) were scanned by the deterministic pass and showed no violations; reviewer-pass claims in
+        the report are contextual evidence, not part of the acceptance criteria.'
+      required_next_action: Proceed to accept_node (open evidence PR).
+      generated_at: '2026-08-14T22:14:41.228777+00:00'
+      evaluated_tree_sha: bbb1caa7773c8b6665d7e18fe79c8c11730d3165
+      evaluated_commit_sha: d301bd26fccf285a546b1935830c4db43d245b99
+      merge_commit_sha: d301bd26fccf285a546b1935830c4db43d245b99
+      expected_base_commit_sha: bdf55a6bed363579a84aeb60ea7e403a19b0ce47
+      pr_ref: null
+      job_id: job_20260814T214732845a5af48c5dcf
+      execution_attempt_id: job_20260814T214732845a5af48c5dcf:attempt:0
+      evidence_manifest_sha256: null
+      mission_receipt_id: null
+      canonical_context:
+        readme: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69/README.md
+        project_brief: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69/PROJECT-BRIEF.md
+        foundational_node: /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml
+        neighbor:node-04-normalize-decisions: /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-04-normalize-decisions.yaml
+      context_coverage:
+        criteria:
+          rating: medium
+          offered: 4
+          content_accessed: 2
+          not_observed: 2
+          accessed_paths:
+          - /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69/PROJECT-BRIEF.md
+          - /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69/README.md
+          not_observed_paths:
+          - /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml
+          - /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-04-normalize-decisions.yaml
+        integrity:
+          rating: high
+          offered: 4
+          content_accessed: 4
+          not_observed: 0
+          accessed_paths:
+          - /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml
+          - /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-04-normalize-decisions.yaml
+          - /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69/PROJECT-BRIEF.md
+          - /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-dwha1y69/README.md
+          not_observed_paths: []
+        overall: medium
+      evaluation_timing:
+        started_at: '2026-08-14T22:12:12.357561+00:00'
+        finished_at: '2026-08-14T22:14:41.228544+00:00'
+        wall_s: 148.877
+        criteria:
+          status: completed
+          elapsed_s: 74.937
+          tool_calls: 17
+        integrity:
+          status: completed
+          elapsed_s: 73.909
+          tool_calls: 22
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-05-validate-decision-set/job_20260814T214732845a5af48c5dcf-attempt0.json
+  node-06-build-corpus:
+    verdict: pass
+    evaluated_at: '2026-08-14T22:42:30.401594+00:00'
+    executor: pi_rpc
+    job_id: job_20260814T221953847cb1e568ca22
+    result_id: res_ses_20260814T221953841ce2f82146e7
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-06-build-corpus/job_20260814T221953847cb1e568ca22-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The node''s intended role is Stage D: a corpus generated from VALIDATED decisions
+      by a repeatable process — not hand-assembled. That intent is preserved and independently verified.
+      (1) The corpus is genuinely generated: re-running build_corpus.py''s render logic against the checked-in
+      decisions-canonical.jsonl (17 accepted records, sha 09c15aeb…) reproduces all 18 files (17 D-docs
+      + index.md) byte-for-byte; the builder is stdlib-only and deterministic (sorted ids, fixed UTF-8/\\n
+      writes, atomic temp-dir swap). (2) It consumed the validated upstream set: node-05''s validation-report.md
+      passes with D11 explicitly dispositioned as rejected, and the corpus correctly contains no D11 and
+      no dangling references. (3) The verbatim-taxonomy constraint is honored: every D-file frontmatter
+      project value matches the canonical JSONL verbatim (incl. MyAPI/Khoj, MyAPI/Pi/GDDP), homes derive
+      only via project.split(\"/\"), and the rule is recorded in CONTEXT.md for downstream stages. (4)
+      The repro-report.md is honest and its claims (builder exit 0, 18 files both sides, diff -qr exit
+      0, SHA-256 manifest equality) are reproducible from the repo state. (5) Graph integrity: the work
+      is contained to 02-corpus/ (21 files), touches no graph config, and preserves the downstream contract
+      — 03-ingestion consumes 02-corpus/output/, and node-07 onward transform this same snapshot. The
+      lane-1 ''decisions-canonical.jsonl absent'' mismatch is stale (the file exists at 01-decisions/output/)
+      and does not reflect a real defect in this work. Verdict: pass.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-06-build-corpus/job_20260814T221953847cb1e568ca22-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9633333333333333
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 757d7b44835189580026df3bdeefd59f1f90a9fb
+      evaluated_commit_sha: e1ebe5724da26a7c8d34d72da74064a7c19d8068
+      merge_commit_sha: e1ebe5724da26a7c8d34d72da74064a7c19d8068
+      execution_attempt_id: job_20260814T221953847cb1e568ca22:attempt:0
+      context_coverage:
+        criteria: high
+        integrity: high
+        overall: high
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.92
+        findings:
+        - severity: low
+          summary: 02-corpus/CONTEXT.md 'Local layout' lists an inputs/ directory (pinned decision-set
+            inputs) that does not exist; the builder reads directly from 01-decisions/output/decisions-canonical.jsonl.
+            Cosmetic doc drift only — no impact on reproducibility or downstream consumers.
+          affected_node_ids:
+          - node-06-build-corpus
+        reasoning: 'The node''s intended role is Stage D: a corpus generated from VALIDATED decisions
+          by a repeatable process — not hand-assembled. That intent is preserved and independently verified.
+          (1) The corpus is genuinely generated: re-running build_corpus.py''s render logic against the
+          checked-in decisions-canonical.jsonl (17 accepted records, sha 09c15aeb…) reproduces all 18
+          files (17 D-docs + index.md) byte-for-byte; the builder is stdlib-only and deterministic (sorted
+          ids, fixed UTF-8/\\n writes, atomic temp-dir swap). (2) It consumed the validated upstream set:
+          node-05''s validation-report.md passes with D11 explicitly dispositioned as rejected, and the
+          corpus correctly contains no D11 and no dangling references. (3) The verbatim-taxonomy constraint
+          is honored: every D-file frontmatter project value matches the canonical JSONL verbatim (incl.
+          MyAPI/Khoj, MyAPI/Pi/GDDP), homes derive only via project.split(\"/\"), and the rule is recorded
+          in CONTEXT.md for downstream stages. (4) The repro-report.md is honest and its claims (builder
+          exit 0, 18 files both sides, diff -qr exit 0, SHA-256 manifest equality) are reproducible from
+          the repo state. (5) Graph integrity: the work is contained to 02-corpus/ (21 files), touches
+          no graph config, and preserves the downstream contract — 03-ingestion consumes 02-corpus/output/,
+          and node-07 onward transform this same snapshot. The lane-1 ''decisions-canonical.jsonl absent''
+          mismatch is stale (the file exists at 01-decisions/output/) and does not reflect a real defect
+          in this work. Verdict: pass.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: node-05-validate-decision-set is still marked 'provisional' in the graph config while
+            node-06 has fired and nodes 07-13 chain from this corpus. The upstream validation report passes
+            and the corpus consumed the exact validated artifact, so no integrity harm today, but the
+            frontier should confirm node-05's gate is formally closed before the evaluation stage (nodes
+            10-12) fires, since any late decision-set change would ripple through the corpus snapshot.
+          affected_node_ids:
+          - node-05-validate-decision-set
+          - node-06-build-corpus
+          - node-07-khoj-transform
+          - node-08-khoj-ingest
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      evaluation_timing:
+        started_at: '2026-08-14T22:39:58.802188+00:00'
+        finished_at: '2026-08-14T22:42:30.306632+00:00'
+        wall_s: 151.511
+        criteria:
+          status: completed
+          elapsed_s: 70.73
+          tool_calls: 15
+        integrity:
+          status: completed
+          elapsed_s: 80.755
+          tool_calls: 18
+  node-07-khoj-transform:
+    verdict: pass
+    evaluated_at: '2026-08-14T23:04:40.682071+00:00'
+    executor: pi_rpc
+    job_id: job_20260814T224730724b54653349fe
+    result_id: res_ses_20260814T22473072335d8a95dd4a
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-07-khoj-transform/job_20260814T224730724b54653349fe-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Node-07''s intended role (Stage E: exact ingestible bytes derived from the corpus,
+      format decisions recorded, not improvised at ingest) is preserved. The staged khoj-corpus/ is byte-identical
+      to the Stage D corpus (verified by diff -qr and an independent rerun of transform_for_khoj.py into
+      a temp dir, which reproduced the exact manifest digest recorded in the notes). transform-notes.md
+      records the discovered target (khoj-38:42110, corroborated in deploy/ and scripts/), honestly records
+      the Khoj version as unavailable rather than assuming one, and states the chosen format plus rationale.
+      The change is scoped entirely to 03-ingestion/ plus the handoff file; no other stage artifacts or
+      graph config were touched. Downstream node-08''s expectations are set up correctly: the handoff
+      instructs re-probing the deployment and ingesting exactly the staged directory, consistent with
+      node-08''s constraints. The self-declared ''PASS'' in transform-notes is corroborated by my independent
+      byte-equality check. The one caveat — the ''version'' element of the format-noted criterion answered
+      as ''unavailable'' — is an acceptance-criteria question for lane 1, not an integrity defect; recording
+      absence beats fabrication and matches the ''do not assume'' constraint.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-07-khoj-transform/job_20260814T224730724b54653349fe-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.95
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 3ef4d49538fb9294462cdda9afbab8ea12bed0b7
+      evaluated_commit_sha: 36d32fb8efa44787981d271ee3c881a998bc0913
+      merge_commit_sha: 36d32fb8efa44787981d271ee3c881a998bc0913
+      execution_attempt_id: job_20260814T224730724b54653349fe:attempt:0
+      context_coverage:
+        criteria: high
+        integrity: high
+        overall: high
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'Node-07''s intended role (Stage E: exact ingestible bytes derived from the corpus,
+          format decisions recorded, not improvised at ingest) is preserved. The staged khoj-corpus/ is
+          byte-identical to the Stage D corpus (verified by diff -qr and an independent rerun of transform_for_khoj.py
+          into a temp dir, which reproduced the exact manifest digest recorded in the notes). transform-notes.md
+          records the discovered target (khoj-38:42110, corroborated in deploy/ and scripts/), honestly
+          records the Khoj version as unavailable rather than assuming one, and states the chosen format
+          plus rationale. The change is scoped entirely to 03-ingestion/ plus the handoff file; no other
+          stage artifacts or graph config were touched. Downstream node-08''s expectations are set up
+          correctly: the handoff instructs re-probing the deployment and ingesting exactly the staged
+          directory, consistent with node-08''s constraints. The self-declared ''PASS'' in transform-notes
+          is corroborated by my independent byte-equality check. The one caveat — the ''version'' element
+          of the format-noted criterion answered as ''unavailable'' — is an acceptance-criteria question
+          for lane 1, not an integrity defect; recording absence beats fabrication and matches the ''do
+          not assume'' constraint.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: medium
+          summary: 'Stage F (node-08) carries real convergence risk: the discovered Khoj target (khoj-38:42110)
+            was offline with no running Khoj on the replacement instances, so ingest will depend on re-probing,
+            credentials, and network availability. The handoff correctly instructs re-probe-before-ingest
+            and exact ingestion of the staged dir; if blocked, node-08 should record precisely what blocked
+            per its constraints. Serialize this region and consider a human touchpoint before ingest if
+            the deployment is still down.'
+          affected_node_ids:
+          - node-08-khoj-ingest
+          - node-09-verify-retrieval
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      evaluation_timing:
+        started_at: '2026-08-14T23:02:35.308355+00:00'
+        finished_at: '2026-08-14T23:04:40.562913+00:00'
+        wall_s: 125.259
+        criteria:
+          status: completed
+          elapsed_s: 62.006
+          tool_calls: 16
+        integrity:
+          status: completed
+          elapsed_s: 63.221
+          tool_calls: 26
+  node-08-khoj-ingest:
+    verdict: pass
+    evaluated_at: '2026-08-15T00:28:21.506417+00:00'
+    executor: pi_rpc
+    job_id: job_20260814T230941010d62b35d8fee
+    result_id: res_ses_20260815T0007211422725566a853
+    attempts: 3
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-08-khoj-ingest/job_20260814T230941010d62b35d8fee-attempt3.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Node-08''s intended role (Stage F: load the transformed corpus into a clean target
+      corpus on the discovered Khoj deployment) is fully preserved. The work ingested the exact node-07
+      artifact: 03-ingestion/output/khoj-corpus/ is byte-identical to 02-corpus/output/corpus (diff -qr
+      exit 0) and the report''s canonical manifest c1fa76ad... matches node-07''s transform-notes receipt
+      — the dependency contract is honored. The report records the exact ingestion method (multipart PUT
+      /api/content?client=api with Bearer auth), the target (isolated user gddp-part1@local on khoj-38-b,
+      Khoj 1.42.10), and Khoj''s own confirmation (health identity check, pre-ingest num_pages:0, PUT
+      response listing all 18 filenames, post-ingest exact 18-file listing), plus an anonymous-corpus
+      safety check (default@example.com untouched at 395 pages). This equips node-09 with the exact interface
+      to repeat retrieval verification identically. Constraint adherence is sound: attempt 0 correctly
+      blocked (non-empty anonymous corpus, no credentials — no secrets guessed), attempt 3 used only the
+      provisioned isolated user; no token value was committed or printed (only placeholders and the token
+      path, which is permitted). Diff scope is exactly the two expected files; no graph truth or runtime
+      DB touched. Trajectory from 033 (blocked) to 034 (clean-target pass) is coherent with the node''s
+      why. Confidence is 0.85 because I could not live-verify the Khoj API responses (network/ssh hard-blocked
+      for this reviewer), but the report is internally consistent, concrete, and aligned with the constraint
+      packet. Lane-1''s indeterminate criteria scores are an acceptance-adjudication matter and do not
+      affect this integrity verdict.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-08-khoj-ingest/job_20260814T230941010d62b35d8fee-attempt3.json
+      verdict: pass
+      criteria_confidence: 0.95
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 6f7e0a7ee310143db18cd36dd4eda9b53decde82
+      evaluated_commit_sha: 36c2f18f55ba83b3bb47a5310a466ef8235c5d82
+      merge_commit_sha: 36c2f18f55ba83b3bb47a5310a466ef8235c5d82
+      execution_attempt_id: job_20260814T230941010d62b35d8fee:attempt:3
+      context_coverage:
+        criteria: high
+        integrity: low
+        overall: low
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.85
+        findings: []
+        reasoning: 'Node-08''s intended role (Stage F: load the transformed corpus into a clean target
+          corpus on the discovered Khoj deployment) is fully preserved. The work ingested the exact node-07
+          artifact: 03-ingestion/output/khoj-corpus/ is byte-identical to 02-corpus/output/corpus (diff
+          -qr exit 0) and the report''s canonical manifest c1fa76ad... matches node-07''s transform-notes
+          receipt — the dependency contract is honored. The report records the exact ingestion method
+          (multipart PUT /api/content?client=api with Bearer auth), the target (isolated user gddp-part1@local
+          on khoj-38-b, Khoj 1.42.10), and Khoj''s own confirmation (health identity check, pre-ingest
+          num_pages:0, PUT response listing all 18 filenames, post-ingest exact 18-file listing), plus
+          an anonymous-corpus safety check (default@example.com untouched at 395 pages). This equips node-09
+          with the exact interface to repeat retrieval verification identically. Constraint adherence
+          is sound: attempt 0 correctly blocked (non-empty anonymous corpus, no credentials — no secrets
+          guessed), attempt 3 used only the provisioned isolated user; no token value was committed or
+          printed (only placeholders and the token path, which is permitted). Diff scope is exactly the
+          two expected files; no graph truth or runtime DB touched. Trajectory from 033 (blocked) to 034
+          (clean-target pass) is coherent with the node''s why. Confidence is 0.85 because I could not
+          live-verify the Khoj API responses (network/ssh hard-blocked for this reviewer), but the report
+          is internally consistent, concrete, and aligned with the constraint packet. Lane-1''s indeterminate
+          criteria scores are an acceptance-adjudication matter and do not affect this integrity verdict.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Upstream node-07-khoj-transform is still 'provisional' while node-08 executed on its
+            artifact. The ingest manifest is recorded so drift is detectable, but if node-07's format/bytes
+            are later revised, node-08's ingested corpus would be stale; node-09 and the evaluation nodes
+            consume this corpus, so serialize final validation of node-07 (or re-run node-08) before the
+            evaluation split fires.
+          affected_node_ids:
+          - node-07-khoj-transform
+          - node-08-khoj-ingest
+          - node-09-verify-retrieval
+        - severity: low
+          summary: 'Node-08''s YAML declares unlocks: [] while node-09-verify-retrieval depends_on node-08;
+            the edge exists via depends_on so integrity holds, but the unlock metadata is asymmetric.
+            Also, Khoj 1.42.10 isolates content per authenticated user rather than by corpus namespace,
+            so the ''target corpus name'' is an experiment label; downstream nodes must address the same
+            gddp-part1@local user scope via the recorded VM token path, which the ingest report does record.'
+          affected_node_ids:
+          - node-08-khoj-ingest
+          - node-09-verify-retrieval
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      evaluation_timing:
+        started_at: '2026-08-15T00:25:54.765759+00:00'
+        finished_at: '2026-08-15T00:28:21.384791+00:00'
+        wall_s: 146.623
+        criteria:
+          status: completed
+          elapsed_s: 61.91
+          tool_calls: 18
+        integrity:
+          status: completed
+          elapsed_s: 84.681
+          tool_calls: 17
+    human_decision: 'reject_and_retry: updated empty khoj user now'
+  node-09-verify-retrieval:
+    verdict: pass
+    evaluated_at: '2026-08-15T00:40:18.606110+00:00'
+    executor: pi_rpc
+    job_id: job_20260815T003321819242e8d5833a
+    result_id: res_ses_20260815T00332181d8bfcf7a2fc4
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-09-verify-retrieval/job_20260815T003321819242e8d5833a-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The work under review (03-ingestion/output/retrieval-check.md + .handoffs/035) does
+      precisely what node-09 promised: a live, isolated-user probe confirming Khoj retrieves from the
+      ingested decision corpus, with demonstrable evidence provenance (returned passage matches D18.md
+      verbatim; staged D18.md byte-identical to the reproducible source with matching SHA-256 1f3f805a...
+      — re-verified via cmp/shasum). The exact query interface (GET http://localhost:42110/api/search,
+      params q/n/t, Bearer auth, VM locality, identity precheck) is recorded in full so evaluation nodes
+      node-10/11/12 can repeat it identically — this is the load-bearing deliverable for downstream nodes,
+      all of which declare depends_on node-09. The report is fully consistent with upstream node-08''s
+      ingest-report (same VM khoj-38-b, user gddp-part1@local, Khoj 1.42.10, localhost:42110, 18-file
+      corpus, same token path) — no drift from what node-09 was allowed to assume. Diff is clean (exactly
+      the 2 expected files, no junk), no token committed or printed, isolated-user constraint honored
+      (health precheck confirms gddp-part1@local, not default@example.com). Lane-1''s indeterminate keyword-scan
+      status reflects scan-method limitations, not artifact substance; per my lane (intent/graph integrity,
+      not acceptance re-adjudication) nothing blocks downstream. Verdict: pass.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-09-verify-retrieval/job_20260815T003321819242e8d5833a-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.875
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 2e1facac74bdae0b17830a688fb86e8d9317bd3d
+      evaluated_commit_sha: c605d36e63172b70bb960a63107bab1cd1926f83
+      merge_commit_sha: c605d36e63172b70bb960a63107bab1cd1926f83
+      execution_attempt_id: job_20260815T003321819242e8d5833a:attempt:0
+      context_coverage:
+        criteria: high
+        integrity: high
+        overall: high
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.92
+        findings: []
+        reasoning: 'The work under review (03-ingestion/output/retrieval-check.md + .handoffs/035) does
+          precisely what node-09 promised: a live, isolated-user probe confirming Khoj retrieves from
+          the ingested decision corpus, with demonstrable evidence provenance (returned passage matches
+          D18.md verbatim; staged D18.md byte-identical to the reproducible source with matching SHA-256
+          1f3f805a... — re-verified via cmp/shasum). The exact query interface (GET http://localhost:42110/api/search,
+          params q/n/t, Bearer auth, VM locality, identity precheck) is recorded in full so evaluation
+          nodes node-10/11/12 can repeat it identically — this is the load-bearing deliverable for downstream
+          nodes, all of which declare depends_on node-09. The report is fully consistent with upstream
+          node-08''s ingest-report (same VM khoj-38-b, user gddp-part1@local, Khoj 1.42.10, localhost:42110,
+          18-file corpus, same token path) — no drift from what node-09 was allowed to assume. Diff is
+          clean (exactly the 2 expected files, no junk), no token committed or printed, isolated-user
+          constraint honored (health precheck confirms gddp-part1@local, not default@example.com). Lane-1''s
+          indeterminate keyword-scan status reflects scan-method limitations, not artifact substance;
+          per my lane (intent/graph integrity, not acceptance re-adjudication) nothing blocks downstream.
+          Verdict: pass.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: 'Blueprint architecture_notes mention ''node-14 closes'' but the node list ends at
+            node-13-preserve-results; node-09 YAML also declares unlocks: [] even though node-10/11/12
+            depend on it via their own depends_on fields. Edges are coherent in the downstream YAMLs;
+            only the narrative is stale. Worth tidying in config before Stage H fires so the closing node
+            reference is unambiguous.'
+          affected_node_ids:
+          - node-09-verify-retrieval
+          - node-13-preserve-results
+        - severity: low
+          summary: Node-10/11/12 will each re-issue queries against the recorded interface; consider having
+            them cite retrieval-check.md's method block as the canonical repeatable interface (endpoint,
+            params, auth source) to keep Stage H executions byte-identical and avoid per-node interface
+            drift.
+          affected_node_ids:
+          - node-10-eval-factual-rationale
+          - node-11-eval-supersession-relationship
+          - node-12-eval-negative-control
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      evaluation_timing:
+        started_at: '2026-08-15T00:38:26.054408+00:00'
+        finished_at: '2026-08-15T00:40:18.482443+00:00'
+        wall_s: 112.431
+        criteria:
+          status: completed
+          elapsed_s: 58.759
+          tool_calls: 13
+        integrity:
+          status: completed
+          elapsed_s: 53.64
+          tool_calls: 16
+  node-11-eval-supersession-relationship:
+    verdict: pass
+    evaluated_at: '2026-08-15T00:58:43.020638+00:00'
+    executor: pi_rpc
+    job_id: job_20260815T0045189302c8fd4a6af3
+    result_id: res_ses_20260815T0045189354dd1eab49ea
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-11-eval-supersession-relationship/job_20260815T0045189302c8fd4a6af3-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Node-11''s intended role — run fixed queries 3-4 (supersession + relationship) against
+      the isolated Khoj user and preserve raw answers verbatim — is fully recognizable in the delivered
+      work. The diff adds exactly the four required artifacts (q3.txt, q4.txt, q3-supersession.md, q4-relationship.md)
+      at the exact required paths, with no modifications to existing stage rooms, no collateral damage,
+      and no token leakage (Bearer <token> placeholder only; token path referenced but value never committed).
+      Query texts match the node''s why (''Which decision replaced an earlier one?'' / ''How do two decisions
+      relate?''), and each result file contains the exact query, the complete raw Khoj HTTP response body
+      verbatim, and all five retrieved evidence passages, plus run metadata showing one search request
+      with no retry — consistent with the ''quality recorded, never retried'' constraint. Predetermination
+      is evidenced by recorded write timestamps (00:48:42/00:48:45Z) preceding request start (00:49:41Z).
+      Graph integrity holds: node-11 depends on node-09 (provisional), which the project''s own doctrine
+      (D12 flow-on-provisional) and execution policy explicitly permit, and node-11 repeated node-09''s
+      recorded interface identically (GET /api/search?n=5&t=all, identity precheck gddp-part1@local),
+      satisfying node-09''s method-recorded intent. Downstream, node-13-preserve-results depends on node-11
+      and will link ''every query result file'' in part1-summary.md — the q3/q4 artifacts sit at the exact
+      paths it will reference. Retrieved evidence (D01/D07/D08/D12/D16/index.md) matches files present
+      in the ingested corpus (03-ingestion/output/khoj-corpus/), confirming coherent pipeline provenance.
+      Note: lane 1''s deterministic scan reported ''indeterminate'' for answers-captured (''no hit in
+      source scan''), but direct inspection confirms the files exist with the required content — that
+      indeterminate is a scanner-root artifact, not missing work, and is lane 1''s adjudication concern,
+      not a graph-integrity one.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-11-eval-supersession-relationship/job_20260815T0045189302c8fd4a6af3-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.8
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: e63a102c3a85db484a9def50b729000d66a9d0aa
+      evaluated_commit_sha: 2b84efee94bc0f7f5e0273eeafb65a77173fdbcb
+      merge_commit_sha: 2b84efee94bc0f7f5e0273eeafb65a77173fdbcb
+      execution_attempt_id: job_20260815T0045189302c8fd4a6af3:attempt:0
+      context_coverage:
+        criteria: high
+        integrity: high
+        overall: high
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'Node-11''s intended role — run fixed queries 3-4 (supersession + relationship) against
+          the isolated Khoj user and preserve raw answers verbatim — is fully recognizable in the delivered
+          work. The diff adds exactly the four required artifacts (q3.txt, q4.txt, q3-supersession.md,
+          q4-relationship.md) at the exact required paths, with no modifications to existing stage rooms,
+          no collateral damage, and no token leakage (Bearer <token> placeholder only; token path referenced
+          but value never committed). Query texts match the node''s why (''Which decision replaced an
+          earlier one?'' / ''How do two decisions relate?''), and each result file contains the exact
+          query, the complete raw Khoj HTTP response body verbatim, and all five retrieved evidence passages,
+          plus run metadata showing one search request with no retry — consistent with the ''quality recorded,
+          never retried'' constraint. Predetermination is evidenced by recorded write timestamps (00:48:42/00:48:45Z)
+          preceding request start (00:49:41Z). Graph integrity holds: node-11 depends on node-09 (provisional),
+          which the project''s own doctrine (D12 flow-on-provisional) and execution policy explicitly
+          permit, and node-11 repeated node-09''s recorded interface identically (GET /api/search?n=5&t=all,
+          identity precheck gddp-part1@local), satisfying node-09''s method-recorded intent. Downstream,
+          node-13-preserve-results depends on node-11 and will link ''every query result file'' in part1-summary.md
+          — the q3/q4 artifacts sit at the exact paths it will reference. Retrieved evidence (D01/D07/D08/D12/D16/index.md)
+          matches files present in the ingested corpus (03-ingestion/output/khoj-corpus/), confirming
+          coherent pipeline provenance. Note: lane 1''s deterministic scan reported ''indeterminate''
+          for answers-captured (''no hit in source scan''), but direct inspection confirms the files exist
+          with the required content — that indeterminate is a scanner-root artifact, not missing work,
+          and is lane 1''s adjudication concern, not a graph-integrity one.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: node-13-preserve-results depends on all three concurrent eval branches (nodes 10, 11,
+            12) and will link every query result file in part1-summary.md; only q3/q4 artifacts exist
+            so far, so node-13 will block until node-10 (q1/q2) and node-12 (q5) produce their results.
+            Sibling nodes run independently per the blueprint's concurrent-split design; no action needed
+            for node-11.
+          affected_node_ids:
+          - node-13-preserve-results
+          - node-10-eval-factual-rationale
+          - node-12-eval-negative-control
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      evaluation_timing:
+        started_at: '2026-08-15T00:55:23.673095+00:00'
+        finished_at: '2026-08-15T00:58:42.930195+00:00'
+        wall_s: 199.265
+        criteria:
+          status: completed
+          elapsed_s: 124.262
+          tool_calls: 29
+        integrity:
+          status: completed
+          elapsed_s: 74.976
+          tool_calls: 19
+  node-12-eval-negative-control:
+    verdict: pass
+    evaluated_at: '2026-08-15T01:06:20.787264+00:00'
+    executor: pi_rpc
+    job_id: job_20260815T00451894af7b62cd267e
+    result_id: res_ses_20260815T00451894e2f2a96003f4
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-12-eval-negative-control/job_20260815T00451894af7b62cd267e-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The node-12 work preserves the node''s intended role and the graph''s integrity.
+      Intent: the node exists to run the fixed negative-control query, capture the raw answer and retrieved
+      evidence verbatim, and state a plain verdict without retrying. The commit (78b2992, 3 files) does
+      exactly that: q5.txt holds the exact predetermined out-of-scope query (byte-identical to the results
+      file''s quoted query, written before the run per recorded timestamps); the results file contains
+      the verbatim chat outcome (HTTP 500 error text), five retrieved chunks with scores whose quoted
+      passages I verified against the real corpus files (D16/D07/D09/D06 in 03-ingestion/output/khoj-corpus/),
+      and a single-sentence verdict. The isolated user constraint was honored (health check authenticated
+      as gddp-part1@local; no token in the diff). The ''never retry / weak answers are valid'' constraints
+      were honored — the run returned a 500 rather than a confabulation, and it was recorded, not retried,
+      which matches the memo''s ''answer quality is measured, not a gate''. Graph integrity: the change
+      is scoped to node-12''s own room (04-evaluation/ + handoff), depends_on node-09 whose retrieval-check.md
+      (PASS, committed at c605d36) documented the exact interface node-12 repeated, and both required
+      artifacts exist at their declared paths ready for node-13 to consume. Lane-1''s indeterminate deterministic
+      scans reflect scanner identifier limitations, not missing artifacts; my direct read of the files
+      confirms the required content is present. Non-blocking forward risks are noted as graph observations.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-12-eval-negative-control/job_20260815T00451894af7b62cd267e-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.91
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: 3033e2ceef0a219e4d256e10ba442293b52d0de7
+      evaluated_commit_sha: 78b2992ae481e002fc56a8028cc3b0eee00e314c
+      merge_commit_sha: 78b2992ae481e002fc56a8028cc3b0eee00e314c
+      execution_attempt_id: job_20260815T00451894af7b62cd267e:attempt:0
+      context_coverage:
+        criteria: high
+        integrity: high
+        overall: high
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.85
+        findings: []
+        reasoning: 'The node-12 work preserves the node''s intended role and the graph''s integrity. Intent:
+          the node exists to run the fixed negative-control query, capture the raw answer and retrieved
+          evidence verbatim, and state a plain verdict without retrying. The commit (78b2992, 3 files)
+          does exactly that: q5.txt holds the exact predetermined out-of-scope query (byte-identical to
+          the results file''s quoted query, written before the run per recorded timestamps); the results
+          file contains the verbatim chat outcome (HTTP 500 error text), five retrieved chunks with scores
+          whose quoted passages I verified against the real corpus files (D16/D07/D09/D06 in 03-ingestion/output/khoj-corpus/),
+          and a single-sentence verdict. The isolated user constraint was honored (health check authenticated
+          as gddp-part1@local; no token in the diff). The ''never retry / weak answers are valid'' constraints
+          were honored — the run returned a 500 rather than a confabulation, and it was recorded, not
+          retried, which matches the memo''s ''answer quality is measured, not a gate''. Graph integrity:
+          the change is scoped to node-12''s own room (04-evaluation/ + handoff), depends_on node-09 whose
+          retrieval-check.md (PASS, committed at c605d36) documented the exact interface node-12 repeated,
+          and both required artifacts exist at their declared paths ready for node-13 to consume. Lane-1''s
+          indeterminate deterministic scans reflect scanner identifier limitations, not missing artifacts;
+          my direct read of the files confirms the required content is present. Non-blocking forward risks
+          are noted as graph observations.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: medium
+          summary: Node-12 fired while its dependency node-09-verify-retrieval is still provisional (frontier
+            auto-advanced before node-09 acceptance). The retrieval evidence itself is a PASS, so risk
+            is low, but node-09's provisional status should be confirmed accepted before node-13 closes
+            the slice, or node-12's foundation could be revisited.
+          affected_node_ids:
+          - node-09-verify-retrieval
+          - node-12-eval-negative-control
+        - severity: medium
+          summary: Nodes 10 and 11 (fixed queries 1-4) have produced no queries/ or results/ artifacts
+            yet. Node-13 (preserve run evidence and close Part 1) must not fire until all five query results
+            exist; the frontier should serialize/ensure 10 and 11 complete before 13.
+          affected_node_ids:
+          - node-10-eval-factual-rationale
+          - node-11-eval-supersession-relationship
+          - node-13-preserve-results
+        - severity: low
+          summary: Blueprint architecture_notes reference 'node-14 closes' but the node list ends at node-13
+            (preserve-results). Pre-existing config inconsistency between architecture notes and the node
+            list; reconcile before the closing node fires.
+          affected_node_ids:
+          - node-13-preserve-results
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      evaluation_timing:
+        started_at: '2026-08-15T01:03:48.817419+00:00'
+        finished_at: '2026-08-15T01:06:20.684280+00:00'
+        wall_s: 151.873
+        criteria:
+          status: completed
+          elapsed_s: 74.573
+          tool_calls: 14
+        integrity:
+          status: completed
+          elapsed_s: 77.268
+          tool_calls: 20
+  node-10-eval-factual-rationale:
+    verdict: pass
+    evaluated_at: '2026-08-15T01:07:48.587182+00:00'
+    executor: pi_rpc
+    job_id: job_20260815T0045189219fa28cd0235
+    result_id: res_ses_20260815T004518926ab02cdac1b1
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-10-eval-factual-rationale/job_20260815T0045189219fa28cd0235-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Node-10''s role (Stage H: run fixed queries 1-2 factual+rationale against the isolated
+      Khoj user, capture raw answers verbatim, record quality without retrying) is faithfully executed.
+      Queries were written before the run (file mtimes 00:46:01 precede chat 00:48:03 and evidence 00:48:55
+      requests; ordering PASS documented). Khoj chat returned HTTP 500 for both queries because the isolated
+      user has no chat model configured; the node recorded the raw response verbatim in the .md files
+      and raw-api-responses.json and did NOT retry — exactly the intent ("answer quality is recorded,
+      never retried - weak answers are valid results"; memo: query results end the slice regardless of
+      quality). Retrieved evidence passages were captured once via the authenticated read-only GET /api/search
+      interface — the same interface node-09 recorded for evaluation nodes to repeat identically — and
+      transcriptions match the raw JSON byte-for-byte, which in turn match the ingested corpus (D09.md
+      byte-identical across staged and reproducible corpus dirs). No fabrication, no token leakage (only
+      placeholder <token> committed), scope confined to the 6 expected files under 04-evaluation/, no
+      upstream mutation, and committed bytes match the working tree. Artifacts sit exactly where downstream
+      node-13-preserve-results expects to link them. The work preserves the node''s intended role and
+      graph integrity; lane 1 owns the indeterminate criteria status (the chat-500 raw answer is a faithful,
+      first-class recorded outcome, arguably the experiment''s most informative result).'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-10-eval-factual-rationale/job_20260815T0045189219fa28cd0235-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.885
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: b3010a3cc367a085876e36cb9429068bc0bec023
+      evaluated_commit_sha: e6fac73d3431c61d9c2510d9b7a27149df0422b5
+      merge_commit_sha: e6fac73d3431c61d9c2510d9b7a27149df0422b5
+      execution_attempt_id: job_20260815T0045189219fa28cd0235:attempt:0
+      context_coverage:
+        criteria: high
+        integrity: high
+        overall: high
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.9
+        findings: []
+        reasoning: 'Node-10''s role (Stage H: run fixed queries 1-2 factual+rationale against the isolated
+          Khoj user, capture raw answers verbatim, record quality without retrying) is faithfully executed.
+          Queries were written before the run (file mtimes 00:46:01 precede chat 00:48:03 and evidence
+          00:48:55 requests; ordering PASS documented). Khoj chat returned HTTP 500 for both queries because
+          the isolated user has no chat model configured; the node recorded the raw response verbatim
+          in the .md files and raw-api-responses.json and did NOT retry — exactly the intent ("answer
+          quality is recorded, never retried - weak answers are valid results"; memo: query results end
+          the slice regardless of quality). Retrieved evidence passages were captured once via the authenticated
+          read-only GET /api/search interface — the same interface node-09 recorded for evaluation nodes
+          to repeat identically — and transcriptions match the raw JSON byte-for-byte, which in turn match
+          the ingested corpus (D09.md byte-identical across staged and reproducible corpus dirs). No fabrication,
+          no token leakage (only placeholder <token> committed), scope confined to the 6 expected files
+          under 04-evaluation/, no upstream mutation, and committed bytes match the working tree. Artifacts
+          sit exactly where downstream node-13-preserve-results expects to link them. The work preserves
+          the node''s intended role and graph integrity; lane 1 owns the indeterminate criteria status
+          (the chat-500 raw answer is a faithful, first-class recorded outcome, arguably the experiment''s
+          most informative result).'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: medium
+          summary: Khoj chat returned HTTP 500 for both queries because the isolated user (gddp-part1@local)
+            has no chat model configured (no OpenAI API key / no Local LLM). Sibling eval nodes node-11
+            (queries 3-4) and node-12 (query 5) will hit the same wall. They should record the raw 500
+            verbatim and capture evidence via the recorded GET /api/search interface exactly as node-10
+            did — not retry, not reconfigure Khoj, per the shared constraint.
+          affected_node_ids:
+          - node-11-eval-supersession-relationship
+          - node-12-eval-negative-control
+        - severity: medium
+          summary: node-10 executed while its dependency node-09-verify-retrieval was still provisional
+            (deps_status shows 'provisional'). Node-10's own evidence independently confirms corpus presence
+            and retrieval (search returned D09/D01 passages byte-matching the staged corpus), so the provisional
+            upstream did not invalidate the work; however node-13-preserve-results should confirm node-09's
+            verification resolves before claiming the Part 1 close-out.
+          affected_node_ids:
+          - node-09-verify-retrieval
+          - node-13-preserve-results
+        - severity: low
+          summary: node-13's diagnostic annotation of the memo's list (representation, corpus construction,
+            chunking, metadata, retrieval, query formulation, Khoj) will need to implicate 'Khoj itself
+            / configuration' — the isolated user produced no chat answer because no model was configured.
+            This is a first-class, anticipated outcome of the experiment and should be annotated as such
+            in part1-summary.md.
+          affected_node_ids:
+          - node-13-preserve-results
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      evaluation_timing:
+        started_at: '2026-08-15T01:03:48.817418+00:00'
+        finished_at: '2026-08-15T01:07:48.482475+00:00'
+        wall_s: 239.674
+        criteria:
+          status: completed
+          elapsed_s: 140.101
+          tool_calls: 28
+        integrity:
+          status: completed
+          elapsed_s: 99.546
+          tool_calls: 25
+  node-13-preserve-results:
+    verdict: pass
+    evaluated_at: '2026-08-15T01:45:22.619590+00:00'
+    executor: pi_rpc
+    job_id: job_20260815T01274996591cd849b786
+    result_id: res_ses_20260815T012749965f91b2bbaa0d
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-13-preserve-results/job_20260815T01274996591cd849b786-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'The work under review is a single added file, 04-evaluation/results/part1-summary.md,
+      which is exactly node-13''s required artifact and its stated role ("Stage I + Stop: raw answers,
+      retrieved evidence, run metadata preserved; the slice terminates regardless of answer quality").
+      Fresh-eyes verification: (1) every evidence link in the summary resolves — q1–q5 result files, validation
+      report, repro report, transform notes, ingest report, retrieval check, decisions-canonical.jsonl,
+      corpus index, raw JSON captures all exist with substantive content; (2) run metadata is recorded
+      and cross-checks against git history — all graph job IDs/attempts in the summary match actual wrapper
+      commits, and the stated Stage I base commit is the diff''s parent; (3) the summary closes with the
+      memo''s full diagnostic list annotated stage-by-stage with clears/implicates, explicitly observation-only
+      with no Part 2 scope and a Stop line, honoring the "ends Part 1" constraint; (4) no token value
+      is committed or printed (only placeholders and VM paths); (5) claims in the summary match underlying
+      artifacts (Q1/Q2 chat HTTP 500 with D09 first via search, Q5 negative control HTTP 500 + unrelated
+      passages, 17 accepted decisions D01–D10/D12–D18 with D11 rejected, D18 companion→D17 as sole relation,
+      zero replaces links). Graph integrity: node-13 depends on node-10/11/12 (all complete), unlocks
+      nothing, and the diff touches no upstream or neighbor files, so nothing downstream can break. The
+      lane-1 deterministic scan''s ''part1-summary.md absent'' mismatch is contradicted by artifacts_present=true
+      and direct file inspection; that is a scan methodology false negative, not an integrity defect,
+      and criteria re-adjudication is lane 1''s domain anyway.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part1/node-13-preserve-results/job_20260815T01274996591cd849b786-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9499999999999998
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: e08e8a0f50bcb20922d747467e6a1c9c834f1066
+      evaluated_commit_sha: ef1f55043111334e4411523dca92c7a7bbdb9a6e
+      merge_commit_sha: ef1f55043111334e4411523dca92c7a7bbdb9a6e
+      execution_attempt_id: job_20260815T01274996591cd849b786:attempt:0
+      context_coverage:
+        criteria: medium
+        integrity: high
+        overall: medium
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.92
+        findings: []
+        reasoning: 'The work under review is a single added file, 04-evaluation/results/part1-summary.md,
+          which is exactly node-13''s required artifact and its stated role ("Stage I + Stop: raw answers,
+          retrieved evidence, run metadata preserved; the slice terminates regardless of answer quality").
+          Fresh-eyes verification: (1) every evidence link in the summary resolves — q1–q5 result files,
+          validation report, repro report, transform notes, ingest report, retrieval check, decisions-canonical.jsonl,
+          corpus index, raw JSON captures all exist with substantive content; (2) run metadata is recorded
+          and cross-checks against git history — all graph job IDs/attempts in the summary match actual
+          wrapper commits, and the stated Stage I base commit is the diff''s parent; (3) the summary closes
+          with the memo''s full diagnostic list annotated stage-by-stage with clears/implicates, explicitly
+          observation-only with no Part 2 scope and a Stop line, honoring the "ends Part 1" constraint;
+          (4) no token value is committed or printed (only placeholders and VM paths); (5) claims in the
+          summary match underlying artifacts (Q1/Q2 chat HTTP 500 with D09 first via search, Q5 negative
+          control HTTP 500 + unrelated passages, 17 accepted decisions D01–D10/D12–D18 with D11 rejected,
+          D18 companion→D17 as sole relation, zero replaces links). Graph integrity: node-13 depends on
+          node-10/11/12 (all complete), unlocks nothing, and the diff touches no upstream or neighbor
+          files, so nothing downstream can break. The lane-1 deterministic scan''s ''part1-summary.md
+          absent'' mismatch is contradicted by artifacts_present=true and direct file inspection; that
+          is a scan methodology false negative, not an integrity defect, and criteria re-adjudication
+          is lane 1''s domain anyway.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: Lane-1 keyword/path scans reported 'part1-summary.md absent' for criteria run-metadata
+            and diagnostic-surface even though the file exists in the checkout (artifacts_present=true).
+            If future nodes' automated gates rely on path-presence scans, they may false-negative on freshly
+            added artifacts; consider a re-scan against the tip commit before gating downstream acceptance.
+          affected_node_ids:
+          - node-13-preserve-results
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      evaluation_timing:
+        started_at: '2026-08-15T01:42:54.324099+00:00'
+        finished_at: '2026-08-15T01:45:22.496450+00:00'
+        wall_s: 148.177
+        criteria:
+          status: completed
+          elapsed_s: 87.759
+          tool_calls: 15
+        integrity:
+          status: completed
+          elapsed_s: 60.392
+          tool_calls: 16
