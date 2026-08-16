@@ -1,0 +1,49 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-10-freeze-ruler
+title: Freeze the Part 2 evaluation ruler
+type: capability
+why: The ruler is the measuring stick for every treatment. Freeze it once; a moved ruler invalidates comparison.
+depends_on:
+- node-02-chat-path-scorer
+- node-09-validate-corpus
+acceptance_criteria:
+- id: question-suite
+  criterion: 'part2/ruler/questions.yaml holds 15-25 questions covering all eight classes: factual decisions, rationale, historical
+    change, current implementation, supersession, structural relationships, cross-source synthesis, and deliberately unanswerable
+    - with absolute dates only'
+- id: holdout-marked
+  criterion: A holdout subset is marked in questions.yaml and excluded from every treatment run until node-17
+- id: ruler-locked
+  criterion: part2/ruler/ freezes the judge model, judge prompt and rubric, generation settings, scoring schema (retrieval
+    quality, answer quality, grounding/provenance, abstention scored independently), and exact query wording; RULER.lock records
+    the sha256 of every ruler file
+constraints:
+- The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the
+  experiment was executed correctly, never whether the hypothesis won.
+- 'Execution model (operator direction 2026-08-15): You are the ORCHESTRATOR, not the worker. Do NOT perform the node''s work
+  yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6 via the subagent tool''s model
+  parameter) to do the actual investigation, construction, and measurement. Your job is decomposition, dispatch, reviewing
+  returns, integrating, and producing the final artifacts.'
+- 'Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight (worker
+  subagents, Khoj ingestion/processing, long builds), dispatch ONE watcher subagent on model openrouter-discounted-models-cheapest/@preset/deepseek-v4-flash-54-off
+  (DeepSeek V4 Flash) that actively polls with tools (job status, logs, artifact existence) and reports state changes; you
+  go idle between its reports instead of polling yourself.'
+- 'Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/
+  self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to
+  this node as evidence; work discovered beyond this node''s scope becomes a continuation proposal, never silent execution.'
+- Work in /Users/sab-mini/repos/MyAPI. Write only under part2/ unless this node's text names another path. Never edit GDDP
+  graph truth, runtime databases, or job state.
+- 'Experimental gate: you are gated on correct execution and preserved evidence, never on whether a treatment performed well.
+  A poorly-performing treatment executed correctly PASSES. Record regressions and source pollution as findings; never tune
+  the corpus, questions, or ruler to improve scores.'
+- Once RULER.lock is written, ruler files are immutable; any needed change stops the node and goes to human review.
+- Close with one oracle or reviewer pass over the produced artifacts before returning.
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- part2/ruler/questions.yaml
+- part2/ruler/RULER.lock
+status: pending
+priority: high
+unlocks: []

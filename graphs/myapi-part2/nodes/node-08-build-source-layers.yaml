@@ -1,0 +1,47 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-08-build-source-layers
+title: Build the normalized source layers
+type: capability
+why: Turn the five inventories into reproducible, independently composable corpus layers with provenance intact. Independent
+  layers keep treatment assembly cheap and observable.
+depends_on:
+- node-03-validate-anchor
+- node-04-inventory-decisions
+- node-05-inventory-handoffs
+- node-06-git-evidence
+- node-07-graphify-evidence
+acceptance_criteria:
+- id: five-layers-built
+  criterion: part2/layers/ contains normalized anchor/, decisions/, handoffs/, git/, graphify/ layers in the corpus item format
+    the evidence contract defines
+- id: provenance-intact
+  criterion: Every item in every layer carries source identity (origin path plus the contract's provenance fields) sufficient
+    to trace a retrieved statement back to its origin
+- id: independently-composable
+  criterion: Each layer has its own build script and manifest.json (item count + sha256 per item), and each build script runs
+    without reading another layer's output
+constraints:
+- The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the
+  experiment was executed correctly, never whether the hypothesis won.
+- 'Execution model (operator direction 2026-08-15): You are the ORCHESTRATOR, not the worker. Do NOT perform the node''s work
+  yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6 via the subagent tool''s model
+  parameter) to do the actual investigation, construction, and measurement. Your job is decomposition, dispatch, reviewing
+  returns, integrating, and producing the final artifacts.'
+- 'Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight (worker
+  subagents, Khoj ingestion/processing, long builds), dispatch ONE watcher subagent on model openrouter-discounted-models-cheapest/@preset/deepseek-v4-flash-54-off
+  (DeepSeek V4 Flash) that actively polls with tools (job status, logs, artifact existence) and reports state changes; you
+  go idle between its reports instead of polling yourself.'
+- 'Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/
+  self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to
+  this node as evidence; work discovered beyond this node''s scope becomes a continuation proposal, never silent execution.'
+- Work in /Users/sab-mini/repos/MyAPI. Write only under part2/ unless this node's text names another path. Never edit GDDP
+  graph truth, runtime databases, or job state.
+- Close with one oracle or reviewer pass over the produced artifacts before returning.
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- part2/layers/
+status: pending
+priority: high
+unlocks: []

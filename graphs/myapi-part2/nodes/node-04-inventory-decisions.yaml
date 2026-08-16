@@ -1,0 +1,45 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-04-inventory-decisions
+title: Inventory canonical decisions
+type: capability
+why: Carry the Part 1 decision corpus forward byte-identical as the historical control, and separately inventory the semantic
+  knowledge it represents.
+depends_on:
+- node-01-evidence-contract
+acceptance_criteria:
+- id: payload-preserved
+  criterion: The Part 1 payload 01-decisions/output/decisions-canonical.jsonl is unmodified; part2/layers/decisions/payload-sha256.txt
+    records its sha256 as proof
+- id: semantic-inventory
+  criterion: 'part2/layers/decisions/decisions-inventory.md contains one entry per Part 1 decision object covering: the decision,
+    its rationale, supersession links (replaces/replaced-by), relationships, and evidence references'
+- id: separation-kept
+  criterion: The normalized Part 2 representation lives only under part2/; no Part 1 file was edited, moved, or regenerated
+constraints:
+- The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the
+  experiment was executed correctly, never whether the hypothesis won.
+- 'Execution model (operator direction 2026-08-15): You are the ORCHESTRATOR, not the worker. Do NOT perform the node''s work
+  yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6 via the subagent tool''s model
+  parameter) to do the actual investigation, construction, and measurement. Your job is decomposition, dispatch, reviewing
+  returns, integrating, and producing the final artifacts.'
+- 'Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight (worker
+  subagents, Khoj ingestion/processing, long builds), dispatch ONE watcher subagent on model openrouter-discounted-models-cheapest/@preset/deepseek-v4-flash-54-off
+  (DeepSeek V4 Flash) that actively polls with tools (job status, logs, artifact existence) and reports state changes; you
+  go idle between its reports instead of polling yourself.'
+- 'Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/
+  self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to
+  this node as evidence; work discovered beyond this node''s scope becomes a continuation proposal, never silent execution.'
+- Work in /Users/sab-mini/repos/MyAPI. Write only under part2/ unless this node's text names another path. Never edit GDDP
+  graph truth, runtime databases, or job state.
+- The byte-identical Part 1 payload is the historical control - a normalized Part 2 representation may be produced separately
+  under part2/ but never replaces it.
+- Close with one oracle or reviewer pass over the produced artifacts before returning.
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- part2/layers/decisions/decisions-inventory.md
+- part2/layers/decisions/payload-sha256.txt
+status: pending
+priority: high
+unlocks: []

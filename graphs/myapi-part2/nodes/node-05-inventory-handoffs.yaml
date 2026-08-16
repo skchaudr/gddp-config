@@ -1,0 +1,46 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-05-inventory-handoffs
+title: Inventory the MyAPI handoffs
+type: capability
+why: Handoffs are the why-evidence. Resolve the 29 known handoffs plus VM-only, duplicate, moved, superseded, dated, and missing
+  artifacts into a reproducible manifest.
+depends_on:
+- node-01-evidence-contract
+acceptance_criteria:
+- id: manifest-complete
+  criterion: 'part2/layers/handoffs/handoff-manifest.jsonl has one entry per handoff artifact found (the 29 known plus any
+    VM-only, duplicate, or moved artifacts), each classified on every axis: git-backed|VM-only, duplicate|moved|unique, current|superseded,
+    dated|temporally-ambiguous, present|missing'
+- id: inclusion-reproducible
+  criterion: The manifest records exactly which handoffs are included for corpus construction and the reason for every exclusion,
+    so the included set can be reproduced exactly
+- id: chronology-preserved
+  criterion: Every entry carries occurred_at and recorded_at per the evidence contract; no summarization replaces the source
+    listing
+constraints:
+- The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the
+  experiment was executed correctly, never whether the hypothesis won.
+- 'Execution model (operator direction 2026-08-15): You are the ORCHESTRATOR, not the worker. Do NOT perform the node''s work
+  yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6 via the subagent tool''s model
+  parameter) to do the actual investigation, construction, and measurement. Your job is decomposition, dispatch, reviewing
+  returns, integrating, and producing the final artifacts.'
+- 'Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight (worker
+  subagents, Khoj ingestion/processing, long builds), dispatch ONE watcher subagent on model openrouter-discounted-models-cheapest/@preset/deepseek-v4-flash-54-off
+  (DeepSeek V4 Flash) that actively polls with tools (job status, logs, artifact existence) and reports state changes; you
+  go idle between its reports instead of polling yourself.'
+- 'Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/
+  self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to
+  this node as evidence; work discovered beyond this node''s scope becomes a continuation proposal, never silent execution.'
+- Work in /Users/sab-mini/repos/MyAPI. Write only under part2/ unless this node's text names another path. Never edit GDDP
+  graph truth, runtime databases, or job state.
+- Check the VM surfaces named in MyAPI AGENTS.md (sab-dev) for VM-only handoffs; if a surface is unreachable, mark its artifacts
+  missing with the evidence of unreachability - never drop silently.
+- Close with one oracle or reviewer pass over the produced artifacts before returning.
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- part2/layers/handoffs/handoff-manifest.jsonl
+status: pending
+priority: high
+unlocks: []

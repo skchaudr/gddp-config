@@ -1,0 +1,45 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-03-validate-anchor
+title: Validate the existing MyAPI anchor
+type: capability
+why: REBUILD-CONTEXT-ANCHOR.md is the candidate authority. Assess it against the contract; do not mint a competing golden
+  brief.
+depends_on:
+- node-01-evidence-contract
+acceptance_criteria:
+- id: anchor-assessed
+  criterion: 'part2/layers/anchor/anchor-assessment.md records a per-item verdict on whether project-docs/REBUILD-CONTEXT-ANCHOR.md
+    establishes: project identity and purpose, major components, stable terminology, and enough current orientation to interpret
+    retrieved facts'
+- id: no-competing-brief
+  criterion: No new golden brief or rival anchor document was created anywhere in the repo
+- id: extension-bounded
+  criterion: Any extension is limited to clearly dated current-direction information, is additive, and preserves the pre-existing
+    anchor content verbatim (the assessment records exactly what was added, or that nothing was)
+constraints:
+- The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the
+  experiment was executed correctly, never whether the hypothesis won.
+- 'Execution model (operator direction 2026-08-15): You are the ORCHESTRATOR, not the worker. Do NOT perform the node''s work
+  yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6 via the subagent tool''s model
+  parameter) to do the actual investigation, construction, and measurement. Your job is decomposition, dispatch, reviewing
+  returns, integrating, and producing the final artifacts.'
+- 'Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight (worker
+  subagents, Khoj ingestion/processing, long builds), dispatch ONE watcher subagent on model openrouter-discounted-models-cheapest/@preset/deepseek-v4-flash-54-off
+  (DeepSeek V4 Flash) that actively polls with tools (job status, logs, artifact existence) and reports state changes; you
+  go idle between its reports instead of polling yourself.'
+- 'Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/
+  self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to
+  this node as evidence; work discovered beyond this node''s scope becomes a continuation proposal, never silent execution.'
+- Work in /Users/sab-mini/repos/MyAPI. Write only under part2/ unless this node's text names another path. Never edit GDDP
+  graph truth, runtime databases, or job state.
+- This node may append dated current-direction context to project-docs/REBUILD-CONTEXT-ANCHOR.md only if the assessment finds
+  Part 2 requires it; everything else is written under part2/.
+- Close with one oracle or reviewer pass over the produced artifacts before returning.
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- part2/layers/anchor/anchor-assessment.md
+status: pending
+priority: high
+unlocks: []

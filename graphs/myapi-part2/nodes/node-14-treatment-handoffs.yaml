@@ -1,0 +1,48 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-14-treatment-handoffs
+title: Run the handoff-enriched treatment
+type: capability
+why: 'Controlled treatment: anchor + decisions + handoffs. Primary contribution under test: rationale, chronology, progression,
+  and why-questions.'
+depends_on:
+- node-10-freeze-ruler
+acceptance_criteria:
+- id: composition-correct
+  criterion: The treatment corpus contains exactly the sources this treatment names, hash-verified against its node-09 treatment
+    manifest
+- id: full-run-captured
+  criterion: Every non-holdout ruler question was run through the same answer path and scorer; raw retrieval evidence, generated
+    answers, and judge scores across all four dimensions are saved under the treatment directory
+- id: integrity-preserved
+  criterion: RULER.lock and all layer hashes are unchanged at the end of the run, and results are recorded exactly as measured
+    - no re-runs to improve scores, no corpus edits after run start
+constraints:
+- The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the
+  experiment was executed correctly, never whether the hypothesis won.
+- 'Execution model (operator direction 2026-08-15): You are the ORCHESTRATOR, not the worker. Do NOT perform the node''s work
+  yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6 via the subagent tool''s model
+  parameter) to do the actual investigation, construction, and measurement. Your job is decomposition, dispatch, reviewing
+  returns, integrating, and producing the final artifacts.'
+- 'Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight (worker
+  subagents, Khoj ingestion/processing, long builds), dispatch ONE watcher subagent on model openrouter-discounted-models-cheapest/@preset/deepseek-v4-flash-54-off
+  (DeepSeek V4 Flash) that actively polls with tools (job status, logs, artifact existence) and reports state changes; you
+  go idle between its reports instead of polling yourself.'
+- 'Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/
+  self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to
+  this node as evidence; work discovered beyond this node''s scope becomes a continuation proposal, never silent execution.'
+- Work in /Users/sab-mini/repos/MyAPI. Write only under part2/ unless this node's text names another path. Never edit GDDP
+  graph truth, runtime databases, or job state.
+- 'Experimental gate: you are gated on correct execution and preserved evidence, never on whether a treatment performed well.
+  A poorly-performing treatment executed correctly PASSES. Record regressions and source pollution as findings; never tune
+  the corpus, questions, or ruler to improve scores.'
+- 'This treatment includes exactly: anchor + decisions + handoffs. Same questions, scorer, answer path, and environment as
+  every other treatment.'
+- Close with one oracle or reviewer pass over the produced artifacts before returning.
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- part2/treatments/handoff-enriched/
+status: pending
+priority: high
+unlocks: []
