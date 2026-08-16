@@ -1,0 +1,59 @@
+schema_version: '1.0'
+schema_type: node
+node_id: node-01b-contract-review
+title: Review the evidence contract for over-complexity and revise
+type: capability
+why: 'Human graph amendment (Sab, 2026-08-16). Node-01 passed evaluation at 1,179 lines with a 39-field mandatory provenance
+  envelope per corpus item - coverage-optimized, not need-optimized. Every downstream node pays that tax. This node reviews
+  the contract for over-complexity and downstream effects, then revises it to its minimum executable form BEFORE the corpus
+  layer consumes it. The 1,179-line original is not trash: it becomes the non-normative rationale document.'
+depends_on:
+- node-01-evidence-contract
+acceptance_criteria:
+- id: review-recorded
+  criterion: part2/contract/contract-review.md classifies every major section of the node-01 contract (baseline commit 431b98a)
+    as necessary-contract | useful-explanation | speculative-machinery, and for each kept section names the downstream decision
+    it makes more correct
+- id: contract-revised
+  criterion: 'part2/contract/evidence-contract.md is revised to its minimum executable form: at most 300 lines, and the required
+    provenance envelope per corpus item is at most 12 fields (baseline: 39 required flat fields plus nested objects)'
+- id: rationale-preserved
+  criterion: 'Removed material is moved, not deleted: part2/contract/contract-rationale.md holds the non-normative detail,
+    and every normative rule in the revised contract cites the original section it came from'
+- id: coverage-kept
+  criterion: The revised contract still gives nodes 02-09 mechanical checks for source identity, provenance, time, authority,
+    treatment composition, and reproducibility, and still names the six source classes and the Part 2 research question
+constraints:
+- The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the
+  experiment was executed correctly, never whether the hypothesis won.
+- 'The governing lens is /Users/sab-mini/repos/gddp-runtime/docs/decisions/Overengineering-and-downstream-consequences.md
+  - read it before cutting anything. Its test: what downstream decision becomes more correct because each section exists;
+  can 02-09 consume this without becoming more complicated.'
+- 'Revise, do not rewrite from scratch: the node-01 content is largely sound reasoning - the failure is size and mandate-count,
+  not thinking. Cut speculative machinery and edge-case policy that no planned Part 2 treatment exercises; keep the operational
+  core.'
+- 'Evidence for the review: the cancelled node-06 attempt produced an empty result tree (commit 5d714e9) against the fat contract
+  - treat that as a data point about consumability, not proof.'
+- 'Execution model (operator direction 2026-08-15, enforced by the attempt preamble): You are the ORCHESTRATOR, not the worker.
+  Do NOT perform the node''s work yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6
+  via the subagent tool''s model parameter) to do the actual investigation, construction, and measurement. Your job is decomposition,
+  dispatch, reviewing returns, integrating, and producing the final artifacts.'
+- 'Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight, dispatch
+  ONE watcher subagent on model deepseek/deepseek-v4-flash that actively polls with tools and reports state changes; you go
+  idle between its reports instead of polling yourself.'
+- 'Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/
+  self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to
+  this node as evidence; work discovered beyond this node''s scope becomes a continuation proposal, never silent execution.'
+- Work in /Users/sab-mini/repos/MyAPI. Write only under part2/ unless this node's text names another path. Never edit GDDP
+  graph truth, runtime databases, or job state.
+- Close with parallel reviewer subagents on model deepseek/deepseek-v4-pro, each assigned a different explicit focus (criteria
+  coverage, evidence integrity, constraint compliance). Resolve their findings before returning.
+allowed_execution_modes:
+- pi_rpc
+required_artifacts:
+- part2/contract/contract-review.md
+- part2/contract/evidence-contract.md
+- part2/contract/contract-rationale.md
+status: ready
+priority: high
+unlocks: []
