@@ -1684,10 +1684,11 @@ def _paged_menu(
     """Rich cursor list: ↑/↓, Enter, numbers; ←/→ page.
 
     Optional fzf step-in (does not replace this path):
-      ``f`` / Ctrl-F  — fuzzy filter + preview (single)
+      ``f`` / Ctrl-F  — fuzzy filter + preview
+      (tab multi when ``fzf_multi`` is set)
 
     When ``fzf_multi`` is set, space / ``m`` toggles a checkbox on the
-    current row. Enter with 2+ checked returns that list (batch);
+    current row. Enter with 2+ checked returns that list;
     Enter with 0–1 checked opens that one item.
 
     Static list content is redrawn in place (clear-to-end), not via a full
@@ -1818,15 +1819,19 @@ def _paged_menu(
                 page = (page + 1) % page_count
                 cursor = 0
                 break
-            # f / Ctrl-F — opt-in fzf (single). Cancel returns to this menu.
+            # f / Ctrl-F — opt-in fzf. Cancel returns to this menu.
             if choice in {"f", "F", "\x06"} and fzf_ok:
                 selected = _run_fzf(
                     heading,
                     items,
                     preview_cmd=fzf_preview_cmd,
-                    multi=False,
+                    multi=fzf_multi,
                 )
                 if selected:
+                    if fzf_multi:
+                        picked = _checked_values(items, set(selected))
+                        if picked is not None:
+                            return picked
                     return selected[0]
                 first_paint = True  # fzf wrecked the screen; full redraw
                 break
@@ -2216,6 +2221,7 @@ def _node_review_pick_action(
     *,
     has_siblings: bool,
     default_key: str = "e",
+    allow_batch: bool = False,
 ) -> str:
     """Pick a node-review action with split arrow roles.
 
@@ -2237,6 +2243,11 @@ def _node_review_pick_action(
         ("b", "back", "choose another node"),
         ("q", "quit", ""),
     ]
+    if allow_batch:
+        selectables.insert(
+            2,
+            ("s", "same status", "one status + reason for this set"),
+        )
     by_key = {key: i for i, (key, _, _) in enumerate(selectables)}
     cursor = by_key.get(default_key, 0)
     drawn = 0
@@ -2369,6 +2380,8 @@ def _node_review_menu(
     project: str,
     node_id: str,
     node_ids: list[str] | None = None,
+    *,
+    allow_batch: bool = False,
 ):
     """Review one node and optionally update its human-owned graph status.
 
@@ -2376,6 +2389,7 @@ def _node_review_menu(
       ←/→  previous / next sibling node
       ↑/↓  move action cursor; Enter opens the highlighted action
     Letter keys remain direct shortcuts.
+    ``allow_batch`` adds ``s`` same-status for the current sibling set.
     """
     node_cli = _import_module("node_cli")
     siblings = list(node_ids) if node_ids else []
@@ -2406,7 +2420,10 @@ def _node_review_menu(
             trace=False,
             view="summary",
         )
-        choice = _node_review_pick_action(has_siblings=len(siblings) > 1)
+        choice = _node_review_pick_action(
+            has_siblings=len(siblings) > 1,
+            allow_batch=allow_batch,
+        )
         if choice == "LEFT":
             idx = siblings.index(node_id)
             node_id = siblings[(idx - 1) % len(siblings)]
@@ -2414,6 +2431,11 @@ def _node_review_menu(
         if choice == "RIGHT":
             idx = siblings.index(node_id)
             node_id = siblings[(idx + 1) % len(siblings)]
+            continue
+        if choice == "s" and allow_batch:
+            outcome = _batch_node_status(project, siblings)
+            if outcome is _MENU_QUIT:
+                return _MENU_QUIT
             continue
         if choice == "q":
             return _MENU_QUIT
@@ -2559,8 +2581,9 @@ def _node_status_label(doc: dict, entry: dict | None) -> str:
 def interactive_nodes(project: str | None = None):
     """Project → node → review/update loop for canonical graph truth.
 
-    Default path is the rich paged menu. ``f`` steps into fzf (filter/preview).
-    Space / ``m`` checks rows; Enter with 2+ checked opens batch graph-status.
+    Default path is the rich paged menu. ``f`` steps into fzf (filter/preview;
+    tab multi on this list). Space / ``m`` checks rows; Enter with 2+ checked
+    reviews that set (``s`` still does one status for all).
     """
     node_cli = _import_module("node_cli")
     fixed_project = project is not None
@@ -2639,7 +2662,12 @@ def interactive_nodes(project: str | None = None):
                 break
             ordered_ids = [nid for nid, _ in node_items]
             if isinstance(picked, list) and len(picked) > 1:
-                outcome = _batch_node_status(project, picked)
+                outcome = _node_review_menu(
+                    project,
+                    picked[0],
+                    node_ids=picked,
+                    allow_batch=True,
+                )
             else:
                 node_id = picked[0] if isinstance(picked, list) else picked
                 outcome = _node_review_menu(project, node_id, node_ids=ordered_ids)

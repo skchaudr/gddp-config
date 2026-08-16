@@ -39,7 +39,7 @@ Or use your system Python if it's not PEP-668-locked.
 
 | Command | What | Keystrokes |
 |---|---|---|
-| `node browse [--project X]` | Interactive node review/status menu; project flag skips the project picker | Default: rich ↑/↓ list. **`f`** / Ctrl-F → fzf filter+preview; **`m`** → multi batch status. Node view: ←/→ prev/next; ↑/↓ actions |
+| `node browse [--project X]` | Interactive node review/status menu; project flag skips the project picker | Default: rich ↑/↓ list. **`f`** / Ctrl-F → fzf filter+preview (tab multi); **space** / **`m`** checks rows. 2+ selected → review each (←/→ that set; **`s`** same status for all). |
 | `node rapid` | Minimal-keystroke adder | Type name, Enter, number keys for deps |
 | `node new` | Full TUI scaffold (field-by-field editor) | Number keys, m/s/q/Enter |
 | `node batch` | Walk through REPLACE_ME nodes | Edit acceptance/constraints/why |
@@ -67,9 +67,10 @@ clears and redraws as one screen. **Default list path is the rich paged menu**
 (aligned ID / GRAPH / RUNTIME / EVAL / TITLE; running rows use `▶` plus reverse).
 With `fzf` installed, **`f`** (or Ctrl-F) steps into
 fuzzy filter with a short card under the list (title / status / why — no YAML
-dump). On node/job update lists, **space**
-(or **`m`**) checks rows in place; Enter with 2+ checked opens batch
-status/state. fzf never replaces the default path.
+dump). On node lists, tab multi in fzf or **space** / **`m`** in the paged
+list; Enter with 2+ checked reviews that set (update/accept each; **`s`**
+applies one status to all). Job update lists still batch queue-state. fzf
+never replaces the default path.
 Jobs writes still go through `jobs_status.py`. Redirected bare output prints a
 non-blocking command overview. Resolution uses `GDDP_RUNTIME_ROOT`, defaulting
 to the sibling `../gddp-runtime`; `GDDP_RUNTIME_PYTHON` can override the runtime

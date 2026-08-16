@@ -386,6 +386,50 @@ class OverviewTests(unittest.TestCase):
             selected = gddp._paged_menu("nodes", items, fzf_multi=True)
         self.assertEqual(selected, "n2")
 
+    def test_paged_menu_f_passes_multi_and_returns_fzf_set(self):
+        items = [("n1", "a"), ("n2", "b"), ("n3", "c")]
+        keys = iter(["f"])
+        terminal = self._paged_terminal(lambda: next(keys))
+        fzf = SimpleNamespace(
+            available=lambda: True,
+            pick=Mock(return_value=["n3", "n1"]),
+        )
+
+        def import_module(name):
+            if name == "terminal":
+                return terminal
+            if name == "fzf_pick":
+                return fzf
+            return __import__(name)
+
+        with patch.object(gddp, "_import_module", side_effect=import_module):
+            selected = gddp._paged_menu("nodes", items, fzf_multi=True)
+
+        self.assertEqual(selected, ["n1", "n3"])
+        self.assertTrue(fzf.pick.call_args.kwargs["multi"])
+
+    def test_paged_menu_f_stays_single_when_not_multi(self):
+        items = [("n1", "a"), ("n2", "b")]
+        keys = iter(["f"])
+        terminal = self._paged_terminal(lambda: next(keys))
+        fzf = SimpleNamespace(
+            available=lambda: True,
+            pick=Mock(return_value=["n1", "n2"]),
+        )
+
+        def import_module(name):
+            if name == "terminal":
+                return terminal
+            if name == "fzf_pick":
+                return fzf
+            return __import__(name)
+
+        with patch.object(gddp, "_import_module", side_effect=import_module):
+            selected = gddp._paged_menu("nodes", items, fzf_multi=False)
+
+        self.assertEqual(selected, "n1")
+        self.assertFalse(fzf.pick.call_args.kwargs["multi"])
+
     def test_interactive_jobs_starts_with_real_list_command(self):
         terminal = SimpleNamespace(getch=lambda: "b")
         with patch.object(gddp, "_import_module", return_value=terminal), \
@@ -940,6 +984,67 @@ class OverviewTests(unittest.TestCase):
         self.assertIs(result, gddp._MENU_BACK)
         self.assertEqual(node_cli.iter_nodes.call_count, 2)
         self.assertTrue(picked.call_args_list[0].kwargs["refreshable"])
+
+    def test_multi_pick_reviews_selected_set_not_batch(self):
+        node_cli = SimpleNamespace(
+            iter_nodes=lambda root, project: [
+                ("alpha", {"title": "A", "status": "ready"}, {"status": "ready"}),
+                ("beta", {"title": "B", "status": "ready"}, {"status": "ready"}),
+                ("gamma", {"title": "C", "status": "ready"}, {"status": "ready"}),
+            ],
+            fetch_runtime_evidence=lambda *a, **k: SimpleNamespace(
+                queue_state="-", job_status="-", verdict="-"
+            ),
+        )
+        with patch.object(gddp, "_import_module", return_value=node_cli), \
+                patch.object(
+                    gddp,
+                    "_pick_list",
+                    side_effect=[["beta", "gamma"], gddp._MENU_BACK],
+                ), \
+                patch.object(
+                    gddp, "_node_review_menu", return_value=gddp._MENU_BACK
+                ) as review, \
+                patch.object(gddp, "_batch_node_status") as batch:
+            result = gddp.interactive_nodes("demo")
+
+        self.assertIs(result, gddp._MENU_BACK)
+        review.assert_called_once_with(
+            "demo",
+            "beta",
+            node_ids=["beta", "gamma"],
+            allow_batch=True,
+        )
+        batch.assert_not_called()
+
+    def test_review_same_status_key_opens_batch(self):
+        keys = iter(["s", "b"])
+        terminal = SimpleNamespace(
+            getch=lambda: next(keys),
+            clear_lines=lambda n: None,
+        )
+        node_cli = SimpleNamespace(
+            cmd_show=lambda **kwargs: 0,
+            fetch_runtime_evidence=lambda *a, **k: SimpleNamespace(verdict="-"),
+        )
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(
+                    gddp, "_batch_node_status", return_value=gddp._MENU_BACK
+                ) as batch, \
+                patch.object(gddp, "_clear_screen"):
+            outcome = gddp._node_review_menu(
+                "demo",
+                "beta",
+                node_ids=["beta", "gamma"],
+                allow_batch=True,
+            )
+
+        self.assertIs(outcome, gddp._MENU_BACK)
+        batch.assert_called_once_with("demo", ["beta", "gamma"])
 
     def test_node_workflow_reviews_and_updates_entirely_in_menu(self):
         # paged: project 1 → node 1 → update → complete → confirm → back out
