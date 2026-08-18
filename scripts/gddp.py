@@ -59,6 +59,7 @@ import importlib.util
 import json
 import os
 import re
+import shlex
 import secrets
 import sqlite3
 import subprocess
@@ -2326,7 +2327,7 @@ def _node_review_pick_action(
     # Horizontal sibling nav (←/→) is separate chrome, not a peer option.
     selectables: list[tuple[str, str, str]] = [
         ("e", "evaluation", "verdict, why, criteria — current job evidence"),
-        ("v", "verify now", "run the live judge on this node (new receipt)"),
+        ("v", "evaluate", "run the live judge — same path as gddp eval"),
         ("u", "update", "set graph status (your decision)"),
         ("x", "reject + retry", "return to ready; retry with your fix-list"),
         ("m", "more", "contract · diff · trace"),
@@ -2545,7 +2546,7 @@ def _node_review_menu(
                 continue
         elif choice == "v":
             _clear_screen()
-            console.print(Text(f"verify · {project} / {node_id}", style="bold"))
+            console.print(Text(f"evaluate · {project} / {node_id}", style="bold"))
             _run_live_eval(project, node_id)
             _pause()
             continue
@@ -4292,14 +4293,167 @@ def _auto_base_commit(repo: Path) -> str | None:
     return None
 
 
-def _run_live_eval(project: str, node_id: str, base: str | None = None) -> str:
+_EVAL_PRESETS = {"cheap": "deepseek-v4-flash"}
+_EVAL_LENSES = frozenset({"config", "instructions", "runs", "show"})
+
+
+class EvalKnobError(ValueError):
+    """Operator-facing failure resolving evaluator knobs."""
+
+
+def _parse_semantic_flag(args_str: str, flag: str) -> str | None:
+    try:
+        tokens = shlex.split(args_str or "")
+    except ValueError:
+        return None
+    try:
+        idx = tokens.index(flag)
+    except ValueError:
+        return None
+    if idx + 1 >= len(tokens):
+        return None
+    return tokens[idx + 1]
+
+
+def _resolve_eval_knobs(
+    *,
+    model: str | None = None,
+    thinking: str | None = None,
+    integrity: str | None = None,
+    lanes: str | None = None,
+    base: str | None = None,
+) -> dict:
+    """Resolve evaluator knobs: explicit args → env/settings → defaults."""
+    env_args = os.environ.get("GDDP_VERIFY_SEMANTIC_ARGS", DEFAULT_SEMANTIC_ARGS)
+    env_model = (
+        os.environ.get("GDDP_EVAL_MODEL_CHEAP")
+        or _parse_semantic_flag(env_args, "--semantic-pi-model")
+        or _EVAL_PRESETS["cheap"]
+    )
+    env_thinking = (
+        os.environ.get("GDDP_SEMANTIC_THINKING")
+        or os.environ.get("GDDP_EVAL_THINKING_DEFAULT")
+        or _parse_semantic_flag(env_args, "--semantic-thinking")
+        or "medium"
+    )
+    env_integrity = (os.environ.get("GDDP_INTEGRITY_MODE") or "on").strip().lower()
+    env_lanes = (os.environ.get("GDDP_EVAL_LANES_DEFAULT") or "").strip().lower()
+    if not env_lanes:
+        mode = _parse_semantic_flag(env_args, "--semantic-mode")
+        env_lanes = "deterministic" if mode == "offline" else "live"
+
+    preset: str | None = None
+    raw_model = (model or "").strip()
+    if not raw_model:
+        resolved_model = env_model
+    elif raw_model == "cheap" or raw_model in _EVAL_PRESETS:
+        preset = "cheap"
+        resolved_model = (
+            os.environ.get("GDDP_EVAL_MODEL_CHEAP") or _EVAL_PRESETS["cheap"]
+        ).strip() or _EVAL_PRESETS["cheap"]
+    elif raw_model == "expensive":
+        preset = "expensive"
+        resolved_model = (os.environ.get("GDDP_EVAL_MODEL_EXPENSIVE") or "").strip()
+        if not resolved_model:
+            raise EvalKnobError(
+                "expensive preset is unset — set GDDP_EVAL_MODEL_EXPENSIVE"
+            )
+    else:
+        resolved_model = raw_model
+
+    resolved_thinking = (thinking or env_thinking).strip() or "medium"
+    explicit_integrity = integrity is not None and str(integrity).strip() != ""
+    resolved_integrity = (
+        str(integrity).strip().lower() if explicit_integrity else env_integrity
+    )
+    if resolved_integrity not in {"on", "off"}:
+        raise EvalKnobError(f"integrity must be on or off, got {resolved_integrity!r}")
+    resolved_lanes = (lanes or env_lanes).strip().lower() or "live"
+    if resolved_lanes not in {"live", "deterministic"}:
+        raise EvalKnobError(
+            f"lanes must be live or deterministic, got {resolved_lanes!r}"
+        )
+    if resolved_lanes == "deterministic" and not explicit_integrity:
+        resolved_integrity = "off"
+
+    if resolved_lanes == "deterministic":
+        semantic_args = "--semantic-mode offline"
+    else:
+        semantic_args = (
+            "--semantic-mode live --semantic-harness pi --semantic-provider deepseek "
+            f"--semantic-pi-model {resolved_model} --semantic-thinking {resolved_thinking}"
+        )
+    return {
+        "model": resolved_model,
+        "preset": preset,
+        "thinking": resolved_thinking,
+        "integrity": resolved_integrity,
+        "lanes": resolved_lanes,
+        "semantic_args": semantic_args,
+        "base": base,
+    }
+
+
+def _write_eval_knobs_sidecar(
+    receipt_dir: Path,
+    project: str,
+    node_id: str,
+    job_id: str,
+    attempt: int,
+    knobs: dict,
+) -> Path | None:
+    """Best-effort sidecar next to the receipt. Never fails the eval."""
+    path = Path(receipt_dir) / project / node_id / f"{job_id}-attempt{attempt}.knobs.json"
+    payload = {
+        "model": knobs.get("model"),
+        "preset": knobs.get("preset"),
+        "thinking": knobs.get("thinking"),
+        "integrity": knobs.get("integrity"),
+        "lanes": knobs.get("lanes"),
+        "base": knobs.get("base"),
+        "semantic_args": knobs.get("semantic_args"),
+        "job_id": job_id,
+        "written_at": datetime.now(timezone.utc).isoformat(),
+    }
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        return path
+    except OSError as exc:
+        print(f"warning: could not write knobs sidecar {path}: {exc}", file=sys.stderr)
+        return None
+
+
+def _load_eval_knobs_sidecar(receipt_path: str | Path) -> dict:
+    """Load sibling *.knobs.json next to a receipt; empty dict if missing."""
+    sidecar = Path(receipt_path).with_suffix(".knobs.json")
+    if not sidecar.is_file():
+        return {}
+    try:
+        data = json.loads(sidecar.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _run_live_eval(
+    project: str,
+    node_id: str,
+    base: str | None = None,
+    knobs: dict | None = None,
+) -> str:
     """Run the live two-lane judge on one node; print a compact summary.
 
     Single code path for the interactive menu (`evaluate` front-page action,
     `v` in the node review menu) and the `gddp eval <node>` shell command.
-    Auto-resolves the repo and base commit; always runs semantic + integrity
-    lanes. Returns the verdict string ("pass"/"fail"/...) or "" on error.
+    Auto-resolves the repo and base commit. Returns the verdict string
+    ("pass"/"fail"/...) or "" on error.
     """
+    try:
+        resolved = knobs or _resolve_eval_knobs(base=base)
+    except EvalKnobError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return ""
     try:
         runtime_root = resolve_runtime_root()
     except RuntimeError as exc:
@@ -4319,12 +4473,13 @@ def _run_live_eval(project: str, node_id: str, base: str | None = None) -> str:
             file=sys.stderr,
         )
         return ""
-    base_sha = base or _auto_base_commit(repo)
+    base_sha = base or resolved.get("base") or _auto_base_commit(repo)
+    resolved = {**resolved, "base": base_sha}
     receipt_dir = ROOT / "verification"
     receipt_dir.mkdir(parents=True, exist_ok=True)
+    job_id = "manual-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    attempt = 0
 
-    semantic_args = os.environ.get("GDDP_VERIFY_SEMANTIC_ARGS", DEFAULT_SEMANTIC_ARGS)
-    import shlex
     cmd = [
         runtime_python(runtime_root),
         str(runtime_root / "scripts" / "runtime" / "verification" / "cli.py"),
@@ -4333,13 +4488,13 @@ def _run_live_eval(project: str, node_id: str, base: str | None = None) -> str:
         "--repo", str(repo),
         "--config-root", str(ROOT),
         "--receipt-dir", str(receipt_dir),
-        "--job-id", "manual-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
-        "--attempt", "0",
+        "--job-id", job_id,
+        "--attempt", str(attempt),
     ]
     if base_sha:
         cmd += ["--base", base_sha]
-    cmd += shlex.split(semantic_args)
-    cmd += ["--integrity", "off" if os.environ.get("GDDP_INTEGRITY_MODE", "on").lower() == "off" else "on"]
+    cmd += shlex.split(str(resolved.get("semantic_args") or DEFAULT_SEMANTIC_ARGS))
+    cmd += ["--integrity", "off" if str(resolved.get("integrity") or "on").lower() == "off" else "on"]
 
     env = os.environ.copy()
     env["PYTHONPATH"] = str(runtime_root)
@@ -4347,6 +4502,7 @@ def _run_live_eval(project: str, node_id: str, base: str | None = None) -> str:
 
     print(f"  evaluating {project}/{node_id}  (base {base_sha[:8] if base_sha else 'n/a'})")
     proc = subprocess.run(cmd, env=env, text=True, capture_output=True, check=False)
+    _write_eval_knobs_sidecar(receipt_dir, project, node_id, job_id, attempt, resolved)
     receipt_summary: dict = {}
     if proc.stdout.strip():
         try:
@@ -4364,6 +4520,9 @@ def _run_live_eval(project: str, node_id: str, base: str | None = None) -> str:
     print()
     chip = Text(f"  VERDICT  {verdict.upper()}", style=("bold green" if verdict == "pass" else "bold red"))
     console.print(chip)
+    preset = resolved.get("preset")
+    model = resolved.get("model") or "-"
+    print(f"  model      : {preset}/{model}" if preset else f"  model      : {model}")
     if confidence:
         print(f"  confidence : {confidence}")
     if lane:
@@ -4376,16 +4535,8 @@ def _run_live_eval(project: str, node_id: str, base: str | None = None) -> str:
     return verdict
 
 
-def cmd_eval(args):
-    """Human-friendly live evaluation: gddp eval <node> [--project p].
-
-    Auto-resolves project/node, repo, and base commit. Always runs the full
-    live two-lane judge (semantic + integrity) — no weak deterministic-only
-    default."""
-    project = args.project
-    node_id = args.node
-    # Fuzzy node resolution (exact stem, prefix, or substring) within a
-    # project when given, or across all graphs when not.
+def _resolve_eval_node(project: str | None, node_id: str) -> tuple[str, str] | int:
+    """Fuzzy-resolve (project, node_id). Returns an exit code on failure."""
     def _match_in(proj_name: str) -> list[str]:
         nodes_dir = ROOT / "graphs" / proj_name / "nodes"
         if not nodes_dir.is_dir():
@@ -4398,32 +4549,64 @@ def cmd_eval(args):
     if project:
         stems = _match_in(project)
         if len(stems) == 1:
-            node_id = stems[0]
-        elif len(stems) > 1:
+            return project, stems[0]
+        if len(stems) > 1:
             print(f"Ambiguous node '{node_id}' in project '{project}' — matches: {stems}", file=sys.stderr)
             return 2
-        else:
-            print(f"ERROR: node '{node_id}' not found in graph '{project}'", file=sys.stderr)
-            return 2
-    else:
-        matches = []
-        for proj_dir in (ROOT / "graphs").iterdir():
+        print(f"ERROR: node '{node_id}' not found in graph '{project}'", file=sys.stderr)
+        return 2
+    matches = []
+    graphs = ROOT / "graphs"
+    if graphs.is_dir():
+        for proj_dir in graphs.iterdir():
             if not proj_dir.is_dir() or proj_dir.name.startswith(("_", ".")):
                 continue
             for stem in _match_in(proj_dir.name):
                 matches.append((proj_dir.name, stem))
-        if len(matches) == 1:
-            project, node_id = matches[0]
-        elif len(matches) > 1:
-            print(f"Ambiguous node '{node_id}' — matches:", file=sys.stderr)
-            for proj_name, stem in matches:
-                print(f"  {proj_name}/{stem}", file=sys.stderr)
-            print("Pass --project <id>", file=sys.stderr)
+    if len(matches) == 1:
+        return matches[0]
+    if len(matches) > 1:
+        print(f"Ambiguous node '{node_id}' — matches:", file=sys.stderr)
+        for proj_name, stem in matches:
+            print(f"  {proj_name}/{stem}", file=sys.stderr)
+        print("Pass --project <id>", file=sys.stderr)
+        return 2
+    print(f"ERROR: node '{node_id}' not found in any graph", file=sys.stderr)
+    return 2
+
+
+def cmd_eval(args):
+    """Human-friendly live evaluation: gddp eval <node> [--project p].
+
+    First token in {config,instructions,runs,show} is a lens; otherwise a node
+    id. Auto-resolves project/node, repo, and base commit.
+    """
+    token = getattr(args, "node", None)
+    if token in _EVAL_LENSES:
+        handler = globals().get(f"cmd_eval_{token}")
+        if handler is None:
+            print(f"ERROR: eval {token} is not available", file=sys.stderr)
             return 2
-        else:
-            print(f"ERROR: node '{node_id}' not found in any graph", file=sys.stderr)
-            return 2
-    verdict = _run_live_eval(project, node_id, base=getattr(args, "base", None))
+        return handler(args)
+    if not token:
+        print("ERROR: gddp eval needs a node id (or config|instructions|runs|show)", file=sys.stderr)
+        return 2
+    resolved = _resolve_eval_node(getattr(args, "project", None), token)
+    if isinstance(resolved, int):
+        return resolved
+    project, node_id = resolved
+    try:
+        knobs = _resolve_eval_knobs(
+            model=getattr(args, "model", None),
+            thinking=getattr(args, "thinking", None),
+            integrity=getattr(args, "integrity", None),
+            lanes=getattr(args, "lanes", None),
+            base=getattr(args, "base", None),
+        )
+    except EvalKnobError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
+    verdict = _run_live_eval(project, node_id, base=knobs.get("base"), knobs=knobs)
     if not verdict:
         return 1
     return 0
@@ -5085,12 +5268,34 @@ def main(argv=None):
 
     eval_p = sub.add_parser(
         "eval", help="Live two-lane evaluation on a node (human-friendly)")
-    eval_p.add_argument("node", help="Node ID (exact stem, prefix, or substring)")
+    eval_p.add_argument(
+        "node",
+        nargs="?",
+        help="Node ID, or a lens: config | instructions | runs | show",
+    )
+    eval_p.add_argument(
+        "lens_node",
+        nargs="?",
+        default=None,
+        help="Node ID when the first token is a lens",
+    )
     eval_p.add_argument("--project", default=None,
                         help="Project ID (auto-resolved when unambiguous)")
     eval_p.add_argument("--base", default=None,
                         help="Base commit for subject-diff evidence "
                              "(default: HEAD~1)")
+    eval_p.add_argument("--model", default=None,
+                        help="Preset (cheap|expensive) or raw model id")
+    eval_p.add_argument("--thinking", default=None,
+                        help="Semantic thinking level (e.g. medium, high)")
+    eval_p.add_argument("--integrity", choices=("on", "off"), default=None,
+                        help="Integrity lane (default: on for live)")
+    eval_p.add_argument("--lanes", choices=("live", "deterministic"), default=None,
+                        help="Evaluator lanes (default: live)")
+    eval_p.add_argument("--run", default=None,
+                        help="Receipt job_id for instructions/show")
+    eval_p.add_argument("--preflight", action="store_true",
+                        help="Instructions lens: offered pointers only, no receipt")
     eval_p.set_defaults(func=cmd_eval)
 
     review_p = sub.add_parser(

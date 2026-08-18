@@ -1694,10 +1694,11 @@ class EvalWiringTests(unittest.TestCase):
                 patch.object(gddp, "console", test_console):
             choice = gddp._node_review_pick_action(has_siblings=False)
         self.assertEqual(choice, "v")
-        self.assertIn("verify now", output.getvalue())
+        self.assertIn("evaluate", output.getvalue())
+        self.assertNotIn("verify now", output.getvalue())
 
-    def test_run_live_eval_builds_live_two_lane_command(self):
-        completed = SimpleNamespace(
+    def _completed_eval(self):
+        return SimpleNamespace(
             returncode=0,
             stdout=json.dumps({
                 "verdict": "pass",
@@ -1707,10 +1708,13 @@ class EvalWiringTests(unittest.TestCase):
             }),
             stderr="",
         )
+
+    def test_run_live_eval_builds_live_two_lane_command(self):
         fake_runtime = Path(tempfile.mkdtemp())
         with patch.object(gddp, "resolve_runtime_root", return_value=fake_runtime), \
                 patch.object(gddp, "_auto_base_commit", return_value="abc1234"), \
-                patch.object(gddp.subprocess, "run", return_value=completed) as run:
+                patch.object(gddp, "_write_eval_knobs_sidecar"), \
+                patch.object(gddp.subprocess, "run", return_value=self._completed_eval()) as run:
             verdict = gddp._run_live_eval("myapi-part1", "node-05-validate-decision-set")
         self.assertEqual(verdict, "pass")
         cmd = run.call_args.args[0]
@@ -1722,6 +1726,79 @@ class EvalWiringTests(unittest.TestCase):
         self.assertIn("--integrity on", cmd_str)
         self.assertIn("--receipt-dir", cmd_str)
         self.assertTrue(any(str(c).startswith("manual-") for c in cmd))
+
+    def test_run_live_eval_passes_model_override(self):
+        fake_runtime = Path(tempfile.mkdtemp())
+        knobs = gddp._resolve_eval_knobs(model="cheap")
+        with patch.object(gddp, "resolve_runtime_root", return_value=fake_runtime), \
+                patch.object(gddp, "_auto_base_commit", return_value="abc1234"), \
+                patch.object(gddp, "_write_eval_knobs_sidecar") as sidecar, \
+                patch.object(gddp.subprocess, "run", return_value=self._completed_eval()) as run:
+            gddp._run_live_eval(
+                "myapi-part1", "node-05-validate-decision-set", knobs=knobs,
+            )
+        cmd_str = " ".join(str(c) for c in run.call_args.args[0])
+        self.assertIn("--semantic-pi-model deepseek-v4-flash", cmd_str)
+        sidecar.assert_called_once()
+        written = sidecar.call_args.args[5]
+        self.assertEqual(written["preset"], "cheap")
+        self.assertEqual(written["model"], "deepseek-v4-flash")
+
+    def test_run_live_eval_passes_thinking_and_integrity_off(self):
+        fake_runtime = Path(tempfile.mkdtemp())
+        knobs = gddp._resolve_eval_knobs(thinking="high", integrity="off")
+        with patch.object(gddp, "resolve_runtime_root", return_value=fake_runtime), \
+                patch.object(gddp, "_auto_base_commit", return_value="abc1234"), \
+                patch.object(gddp, "_write_eval_knobs_sidecar"), \
+                patch.object(gddp.subprocess, "run", return_value=self._completed_eval()) as run:
+            gddp._run_live_eval(
+                "myapi-part1", "node-05-validate-decision-set", knobs=knobs,
+            )
+        cmd_str = " ".join(str(c) for c in run.call_args.args[0])
+        self.assertIn("--semantic-thinking high", cmd_str)
+        self.assertIn("--integrity off", cmd_str)
+
+    def test_run_live_eval_lanes_deterministic(self):
+        fake_runtime = Path(tempfile.mkdtemp())
+        knobs = gddp._resolve_eval_knobs(lanes="deterministic")
+        with patch.object(gddp, "resolve_runtime_root", return_value=fake_runtime), \
+                patch.object(gddp, "_auto_base_commit", return_value="abc1234"), \
+                patch.object(gddp, "_write_eval_knobs_sidecar"), \
+                patch.object(gddp.subprocess, "run", return_value=self._completed_eval()) as run:
+            gddp._run_live_eval(
+                "myapi-part1", "node-05-validate-decision-set", knobs=knobs,
+            )
+        cmd = [str(c) for c in run.call_args.args[0]]
+        cmd_str = " ".join(cmd)
+        self.assertIn("--semantic-mode offline", cmd_str)
+        self.assertNotIn("--semantic-harness", cmd_str)
+        self.assertIn("--integrity off", cmd_str)
+        self.assertEqual(knobs["integrity"], "off")
+
+    def test_resolve_eval_knobs_preset_vs_raw_id(self):
+        cheap = gddp._resolve_eval_knobs(model="cheap")
+        self.assertEqual(cheap["preset"], "cheap")
+        self.assertEqual(cheap["model"], "deepseek-v4-flash")
+        raw = gddp._resolve_eval_knobs(model="openai/gpt-5.4")
+        self.assertIsNone(raw["preset"])
+        self.assertEqual(raw["model"], "openai/gpt-5.4")
+
+    def test_cmd_eval_forwards_knob_flags(self):
+        with patch.object(gddp, "_run_live_eval", return_value="pass") as live:
+            rc = gddp.cmd_eval(SimpleNamespace(
+                project="myapi-part1", node="node-05", base=None,
+                model="cheap", thinking="high", integrity="off", lanes="live",
+            ))
+        self.assertEqual(rc, 0)
+        kwargs = live.call_args.kwargs
+        self.assertEqual(kwargs["knobs"]["preset"], "cheap")
+        self.assertEqual(kwargs["knobs"]["thinking"], "high")
+        self.assertEqual(kwargs["knobs"]["integrity"], "off")
+        self.assertEqual(kwargs["knobs"]["lanes"], "live")
+
+    def test_load_eval_knobs_sidecar_missing_is_empty(self):
+        missing = Path(tempfile.mkdtemp()) / "no-such-receipt.json"
+        self.assertEqual(gddp._load_eval_knobs_sidecar(missing), {})
 
     def test_cmd_eval_fuzzy_resolves_within_project(self):
         with patch.object(gddp, "_run_live_eval", return_value="pass") as live:
