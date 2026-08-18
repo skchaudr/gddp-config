@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 import tempfile
@@ -724,7 +725,7 @@ class OverviewTests(unittest.TestCase):
         )
         self.assertIn("w", displayed)
         self.assertEqual(set(displayed), set(handled))
-        self.assertEqual(set(displayed), {"d", "g", "w", "h", "q"})
+        self.assertEqual(set(displayed), {"d", "e", "g", "w", "h", "c", "q"})
         self.assertTrue(
             {"d", "g", "w", "h"}.issubset(gddp._front_page_handlers())
         )
@@ -1680,6 +1681,74 @@ class ReviewRoutingTests(unittest.TestCase):
             "project",
         ):
             self.assertIn(name, gddp._CLI_COMMANDS)
+
+
+class EvalWiringTests(unittest.TestCase):
+    """Coverage for the evaluate/config menu surfaces and gddp eval command."""
+
+    def test_node_review_offers_verify_now_action(self):
+        terminal = SimpleNamespace(getch=lambda: "v", clear_lines=lambda n: None)
+        output = StringIO()
+        test_console = Console(file=output, force_terminal=False, width=100)
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "console", test_console):
+            choice = gddp._node_review_pick_action(has_siblings=False)
+        self.assertEqual(choice, "v")
+        self.assertIn("verify now", output.getvalue())
+
+    def test_run_live_eval_builds_live_two_lane_command(self):
+        completed = SimpleNamespace(
+            returncode=0,
+            stdout=json.dumps({
+                "verdict": "pass",
+                "criteria_confidence": 0.9,
+                "lane_status": {"criteria": "completed", "integrity": "completed"},
+                "required_next_action": "accept",
+            }),
+            stderr="",
+        )
+        fake_runtime = Path(tempfile.mkdtemp())
+        with patch.object(gddp, "resolve_runtime_root", return_value=fake_runtime), \
+                patch.object(gddp, "_auto_base_commit", return_value="abc1234"), \
+                patch.object(gddp.subprocess, "run", return_value=completed) as run:
+            verdict = gddp._run_live_eval("myapi-part1", "node-05-validate-decision-set")
+        self.assertEqual(verdict, "pass")
+        cmd = run.call_args.args[0]
+        cmd_str = " ".join(str(c) for c in cmd)
+        self.assertIn("verification/cli.py", cmd_str)
+        self.assertIn("--base abc1234", cmd_str)
+        self.assertIn("--semantic-mode live", cmd_str)
+        self.assertIn("--semantic-harness pi", cmd_str)
+        self.assertIn("--integrity on", cmd_str)
+        self.assertIn("--receipt-dir", cmd_str)
+        self.assertTrue(any(str(c).startswith("manual-") for c in cmd))
+
+    def test_cmd_eval_fuzzy_resolves_within_project(self):
+        with patch.object(gddp, "_run_live_eval", return_value="pass") as live:
+            rc = gddp.cmd_eval(SimpleNamespace(
+                project="myapi-part1", node="node-05", base=None,
+            ))
+        self.assertEqual(rc, 0)
+        self.assertEqual(
+            live.call_args.args,
+            ("myapi-part1", "node-05-validate-decision-set"),
+        )
+
+    def test_cmd_eval_ambiguous_without_project_exits_2(self):
+        with patch.object(gddp, "_run_live_eval", return_value="pass") as live:
+            rc = gddp.cmd_eval(SimpleNamespace(
+                project=None, node="node-01", base=None,
+            ))
+        self.assertEqual(rc, 2)
+        live.assert_not_called()
+
+    def test_cmd_eval_unknown_node_exits_2(self):
+        with patch.object(gddp, "_run_live_eval", return_value="pass") as live:
+            rc = gddp.cmd_eval(SimpleNamespace(
+                project="myapi-part1", node="node-99-does-not-exist", base=None,
+            ))
+        self.assertEqual(rc, 2)
+        live.assert_not_called()
 
 
 if __name__ == "__main__":
