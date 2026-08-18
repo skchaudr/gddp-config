@@ -92,6 +92,7 @@ _CLI_COMMANDS = frozenset(
         "jobs",
         "evaluations",
         "verify",
+        "eval",
         "review",
         "receipt",
         "obsidian",
@@ -103,6 +104,94 @@ _CLI_COMMANDS = frozenset(
     }
 )
 _ABSTRACT_EXECUTION_MODES = frozenset({"agent", "human"})
+
+# --------------------------------------------------------------------------- #
+# Runtime settings (executor + evaluator configuration)
+# --------------------------------------------------------------------------- #
+# Human-editable config lives in runtime/settings.env (KEY=value lines). gddp
+# loads it at startup into os.environ so every subprocess it spawns inherits
+# executor and evaluator configuration. The interactive `config` menu edits
+# this file; `gddp eval` and the dispatch/evaluate menu paths read it.
+
+SETTINGS_FILE = ROOT / "runtime" / "settings.env"
+
+SETTINGS_FIELDS: dict[str, tuple[str, str]] = {
+    "GDDP_EXECUTOR_OVERRIDE": (
+        "executor",
+        "force a concrete executor for all dispatch (empty = per-project default; pi_rpc, local_subprocess, jules, droid, factory_mission)",
+    ),
+    "GDDP_PI_RPC_MODEL": (
+        "pi_rpc model",
+        "model id for the pi_rpc executor (e.g. xai/grok-4.5)",
+    ),
+    "GDDP_PI_RPC_TOOLS": (
+        "pi_rpc tools",
+        "comma-separated tool allowlist for the pi_rpc executor",
+    ),
+    "GDDP_PI_RPC_TURN_TIMEOUT_S": (
+        "pi_rpc turn timeout",
+        "seconds before a single executor turn is considered hung",
+    ),
+    "GDDP_VERIFY_SEMANTIC_ARGS": (
+        "evaluator lanes",
+        "semantic lane args: --semantic-provider <p> --semantic-pi-model <m> --semantic-thinking <level>",
+    ),
+    "GDDP_INTEGRITY_MODE": (
+        "integrity lane",
+        "on/off — intent/integrity evaluation always runs when on",
+    ),
+    "GDDP_DEEPSEEK_KEY_CMD": (
+        "evaluator key cmd",
+        "shell command that prints the DeepSeek API key (default: pass show api/deepseek)",
+    ),
+}
+
+DEFAULT_SEMANTIC_ARGS = (
+    "--semantic-mode live --semantic-harness pi --semantic-provider deepseek "
+    "--semantic-pi-model deepseek-v4-flash --semantic-thinking medium"
+)
+
+
+def _load_runtime_settings() -> None:
+    """Load runtime/settings.env into os.environ (setdefault semantics).
+
+    Subprocesses spawned later inherit these values. Explicit shell env always
+    wins over the settings file, so an operator can override on the command
+    line without editing the file."""
+    if not SETTINGS_FILE.is_file():
+        return
+    try:
+        for line in SETTINGS_FILE.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if not key:
+                continue
+            os.environ.setdefault(key, value)
+    except OSError as exc:
+        print(f"warning: could not read {SETTINGS_FILE}: {exc}", file=sys.stderr)
+
+
+def _write_runtime_settings(settings: dict[str, str]) -> None:
+    """Persist executor/evaluator settings to runtime/settings.env."""
+    SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "# gddp runtime settings — edited via `gddp config` (front-page c)",
+        "# Loaded into the environment for every executor/evaluator subprocess.",
+    ]
+    for key in SETTINGS_FIELDS:
+        value = settings.get(key, "").strip()
+        if value:
+            lines.append(f"{key}={value}")
+    SETTINGS_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    for key, value in settings.items():
+        if value.strip():
+            os.environ[key] = value.strip()
+        else:
+            os.environ.pop(key, None)
 
 
 # --------------------------------------------------------------------------- #
@@ -2237,6 +2326,7 @@ def _node_review_pick_action(
     # Horizontal sibling nav (←/→) is separate chrome, not a peer option.
     selectables: list[tuple[str, str, str]] = [
         ("e", "evaluation", "verdict, why, criteria — current job evidence"),
+        ("v", "verify now", "run the live judge on this node (new receipt)"),
         ("u", "update", "set graph status (your decision)"),
         ("x", "reject + retry", "return to ready; retry with your fix-list"),
         ("m", "more", "contract · diff · trace"),
@@ -2453,6 +2543,12 @@ def _node_review_menu(
             )
             if _pause("u update · any other key returns to the node") != "u":
                 continue
+        elif choice == "v":
+            _clear_screen()
+            console.print(Text(f"verify · {project} / {node_id}", style="bold"))
+            _run_live_eval(project, node_id)
+            _pause()
+            continue
         elif choice == "x":
             _confirm_reject_and_retry(project, node_id)
             _pause()
@@ -3347,9 +3443,11 @@ def interactive_heartbeat():
 def _front_page_actions() -> dict[str, tuple[str, str]]:
     return {
         "d": ("dispatch", "send ready work through the event pipeline"),
+        "e": ("evaluate", "run the live judge on a node now"),
         "g": ("graphs", "active graphs first; archive for idle (>7d)"),
         "w": ("live", "running executors — fleet + drill-in"),
         "h": ("heartbeat", "arm/disarm the control plane (intake + heartbeat)"),
+        "c": ("config", "executor & evaluator settings (runtime/settings.env)"),
         "q": ("quit", ""),
     }
 
@@ -3357,10 +3455,80 @@ def _front_page_actions() -> dict[str, tuple[str, str]]:
 def _front_page_handlers() -> dict[str, object]:
     return {
         "d": interactive_dispatch,
+        "e": interactive_evaluate,
         "g": interactive_graphs,
         "w": interactive_watch,
         "h": interactive_heartbeat,
+        "c": interactive_config,
     }
+
+
+def interactive_evaluate():
+    """Pick a graph → node → run the live judge → return to the menu."""
+    while True:
+        picked = _pick_graph("evaluate · graphs", back_label="main menu")
+        if picked is _MENU_QUIT:
+            return _MENU_QUIT
+        if picked is _MENU_BACK:
+            return _MENU_BACK
+        project = str(picked)
+        try:
+            nodes = list(_import_module("node_cli").iter_nodes(ROOT, project))
+        except Exception as exc:
+            console.print(Text(f"Could not load {project}: {exc}", style="red"))
+            _pause()
+            continue
+        node_items = [(node_id, str(doc.get("title") or "")) for node_id, doc, _ in nodes]
+        node_picked = _pick_list(
+            f"evaluate · nodes · {project}",
+            node_items,
+            preview_cmd=_node_preview_cmd(project),
+            back_label="graphs",
+        )
+        if node_picked is _MENU_QUIT:
+            return _MENU_QUIT
+        if node_picked is _MENU_BACK:
+            continue
+        node_id = node_picked[0] if isinstance(node_picked, list) else node_picked
+        _clear_screen()
+        console.print(Text(f"evaluate · {project} / {node_id}", style="bold"))
+        _run_live_eval(project, node_id)
+        _pause()
+        return _MENU_BACK
+
+
+def interactive_config():
+    """Editor for executor & evaluator settings (runtime/settings.env)."""
+    _clear_screen()
+    console.print(Text("config · executor & evaluator settings", style="bold").append(
+        f"  ·  {SETTINGS_FILE}", style="dim"
+    ))
+    console.print()
+    console.print(Text("Values shown are in effect for subprocesses. Empty = default.", style="dim"))
+    console.print()
+    settings: dict[str, str] = {}
+    for key, (label, hint) in SETTINGS_FIELDS.items():
+        current = os.environ.get(key, "")
+        console.print(Text(f"  {label}", style="bold cyan"))
+        console.print(Text(f"    {hint}", style="dim"))
+        try:
+            answer = Prompt.ask(
+                f"    [{key}] (enter = keep {current!r}, x = clear)",
+                default=current,
+            ).strip()
+        except (EOFError, KeyboardInterrupt):
+            return _MENU_BACK
+        if answer == "x":
+            settings[key] = ""
+        elif answer != current or answer:
+            settings[key] = answer
+        else:
+            settings[key] = current
+        console.print()
+    _write_runtime_settings(settings)
+    console.print(Text(f"  saved → {SETTINGS_FILE}", style="bold green"))
+    _pause()
+    return _MENU_BACK
 
 
 def interactive_menu():
@@ -3383,6 +3551,10 @@ def interactive_menu():
                     break
                 if outcome is not _MENU_BACK:
                     _pause()
+            elif choice == "e":
+                outcome = interactive_evaluate()
+                if outcome is _MENU_QUIT:
+                    break
             elif choice == "g":
                 outcome = interactive_graphs()
                 if outcome is _MENU_QUIT:
@@ -3391,6 +3563,8 @@ def interactive_menu():
                 interactive_watch()
             elif choice == "h":
                 interactive_heartbeat()
+            elif choice == "c":
+                interactive_config()
         except SystemExit:
             pass
         except KeyboardInterrupt:
@@ -4081,6 +4255,180 @@ def cmd_verify_node(args):
     sys.exit(subprocess.run(cmd, env=env, check=False).returncode)
 
 
+def _resolve_repo_for_project(project: str, repo_path: str | None = None) -> Path | None:
+    """Resolve a project's source checkout: --repo-path > env root > sibling."""
+    project_yaml = ROOT / "graphs" / project / "project.yaml"
+    if not project_yaml.is_file():
+        return None
+    try:
+        with open(project_yaml) as f:
+            proj = yaml.safe_load(f) or {}
+    except Exception:
+        return None
+    repo_name = str(proj.get("repo", "")).split("/")[-1]
+    candidates: list[Path] = []
+    if repo_path:
+        candidates.append(Path(repo_path).expanduser())
+    env_root = os.environ.get("GDDP_REPO_ROOT") or os.environ.get("GDDP_REPOS_ROOT")
+    if env_root and repo_name:
+        candidates.append(Path(env_root).expanduser() / repo_name)
+    if repo_name:
+        candidates.append(ROOT.parent / repo_name)
+    for c in candidates:
+        if c.is_dir():
+            return c
+    return None
+
+
+def _auto_base_commit(repo: Path) -> str | None:
+    """Best-effort base for subject-diff evidence: HEAD~1, else HEAD."""
+    for ref in ("HEAD~1", "HEAD"):
+        proc = subprocess.run(
+            ["git", "-C", str(repo), "rev-parse", ref],
+            capture_output=True, text=True, check=False,
+        )
+        if proc.returncode == 0 and proc.stdout.strip():
+            return proc.stdout.strip()
+    return None
+
+
+def _run_live_eval(project: str, node_id: str, base: str | None = None) -> str:
+    """Run the live two-lane judge on one node; print a compact summary.
+
+    Single code path for the interactive menu (`evaluate` front-page action,
+    `v` in the node review menu) and the `gddp eval <node>` shell command.
+    Auto-resolves the repo and base commit; always runs semantic + integrity
+    lanes. Returns the verdict string ("pass"/"fail"/...) or "" on error.
+    """
+    try:
+        runtime_root = resolve_runtime_root()
+    except RuntimeError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return ""
+    node_yaml = ROOT / "graphs" / project / "nodes" / f"{node_id}.yaml"
+    project_yaml = ROOT / "graphs" / project / "project.yaml"
+    for path, label in ((node_yaml, "node yaml"), (project_yaml, "project yaml")):
+        if not path.is_file():
+            print(f"ERROR: {label} not found at {path}", file=sys.stderr)
+            return ""
+    repo = _resolve_repo_for_project(project)
+    if repo is None:
+        print(
+            f"ERROR: could not resolve repo checkout for project '{project}' "
+            f"(pass --repo-path)",
+            file=sys.stderr,
+        )
+        return ""
+    base_sha = base or _auto_base_commit(repo)
+    receipt_dir = ROOT / "verification"
+    receipt_dir.mkdir(parents=True, exist_ok=True)
+
+    semantic_args = os.environ.get("GDDP_VERIFY_SEMANTIC_ARGS", DEFAULT_SEMANTIC_ARGS)
+    import shlex
+    cmd = [
+        runtime_python(runtime_root),
+        str(runtime_root / "scripts" / "runtime" / "verification" / "cli.py"),
+        "--node-yaml", str(node_yaml),
+        "--project-yaml", str(project_yaml),
+        "--repo", str(repo),
+        "--config-root", str(ROOT),
+        "--receipt-dir", str(receipt_dir),
+        "--job-id", "manual-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
+        "--attempt", "0",
+    ]
+    if base_sha:
+        cmd += ["--base", base_sha]
+    cmd += shlex.split(semantic_args)
+    cmd += ["--integrity", "off" if os.environ.get("GDDP_INTEGRITY_MODE", "on").lower() == "off" else "on"]
+
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(runtime_root)
+    env["GDDP_RUNTIME_ROOT"] = str(runtime_root)
+
+    print(f"  evaluating {project}/{node_id}  (base {base_sha[:8] if base_sha else 'n/a'})")
+    proc = subprocess.run(cmd, env=env, text=True, capture_output=True, check=False)
+    receipt_summary: dict = {}
+    if proc.stdout.strip():
+        try:
+            receipt_summary = json.loads(proc.stdout.strip())
+        except json.JSONDecodeError:
+            receipt_summary = {}
+    if proc.returncode != 0 and not receipt_summary:
+        print(proc.stderr or proc.stdout, file=sys.stderr)
+        return ""
+
+    verdict = str(receipt_summary.get("verdict", ""))
+    confidence = receipt_summary.get("criteria_confidence", "")
+    action = receipt_summary.get("required_next_action", "")
+    lane = receipt_summary.get("lane_status", {})
+    print()
+    chip = Text(f"  VERDICT  {verdict.upper()}", style=("bold green" if verdict == "pass" else "bold red"))
+    console.print(chip)
+    if confidence:
+        print(f"  confidence : {confidence}")
+    if lane:
+        crit = (lane.get("criteria") or "").replace("_", " ")
+        integ = (lane.get("integrity") or "").replace("_", " ")
+        print(f"  lanes     : criteria {crit} · integrity {integ}")
+    if action:
+        print(f"  next      : {action}")
+    print(f"  receipts  : {ROOT / 'verification' / project / node_id}/")
+    return verdict
+
+
+def cmd_eval(args):
+    """Human-friendly live evaluation: gddp eval <node> [--project p].
+
+    Auto-resolves project/node, repo, and base commit. Always runs the full
+    live two-lane judge (semantic + integrity) — no weak deterministic-only
+    default."""
+    project = args.project
+    node_id = args.node
+    # Fuzzy node resolution (exact stem, prefix, or substring) within a
+    # project when given, or across all graphs when not.
+    def _match_in(proj_name: str) -> list[str]:
+        nodes_dir = ROOT / "graphs" / proj_name / "nodes"
+        if not nodes_dir.is_dir():
+            return []
+        return [
+            f.stem for f in nodes_dir.glob("*.yaml")
+            if f.stem == node_id or f.stem.startswith(f"{node_id}-") or node_id in f.stem
+        ]
+
+    if project:
+        stems = _match_in(project)
+        if len(stems) == 1:
+            node_id = stems[0]
+        elif len(stems) > 1:
+            print(f"Ambiguous node '{node_id}' in project '{project}' — matches: {stems}", file=sys.stderr)
+            return 2
+        else:
+            print(f"ERROR: node '{node_id}' not found in graph '{project}'", file=sys.stderr)
+            return 2
+    else:
+        matches = []
+        for proj_dir in (ROOT / "graphs").iterdir():
+            if not proj_dir.is_dir() or proj_dir.name.startswith(("_", ".")):
+                continue
+            for stem in _match_in(proj_dir.name):
+                matches.append((proj_dir.name, stem))
+        if len(matches) == 1:
+            project, node_id = matches[0]
+        elif len(matches) > 1:
+            print(f"Ambiguous node '{node_id}' — matches:", file=sys.stderr)
+            for proj_name, stem in matches:
+                print(f"  {proj_name}/{stem}", file=sys.stderr)
+            print("Pass --project <id>", file=sys.stderr)
+            return 2
+        else:
+            print(f"ERROR: node '{node_id}' not found in any graph", file=sys.stderr)
+            return 2
+    verdict = _run_live_eval(project, node_id, base=getattr(args, "base", None))
+    if not verdict:
+        return 1
+    return 0
+
+
 def cmd_obsidian_export(args):
     obsidian_export = _import_module("obsidian_export")
     argv = ["--project", args.project]
@@ -4479,6 +4827,7 @@ def validate_project(project_id: str | None):
 
 
 def main(argv=None):
+    _load_runtime_settings()
     argv = list(sys.argv[1:] if argv is None else argv)
     # Positional dispatch: gddp <graph|node> [executor] [--yes]. Anything that
     # is not a known subcommand is an exact graph or node target.
@@ -4733,6 +5082,16 @@ def main(argv=None):
                                   "subject-diff evidence (pipeline runs get this "
                                   "from the session row automatically)")
     verify_node.set_defaults(func=cmd_verify_node)
+
+    eval_p = sub.add_parser(
+        "eval", help="Live two-lane evaluation on a node (human-friendly)")
+    eval_p.add_argument("node", help="Node ID (exact stem, prefix, or substring)")
+    eval_p.add_argument("--project", default=None,
+                        help="Project ID (auto-resolved when unambiguous)")
+    eval_p.add_argument("--base", default=None,
+                        help="Base commit for subject-diff evidence "
+                             "(default: HEAD~1)")
+    eval_p.set_defaults(func=cmd_eval)
 
     review_p = sub.add_parser(
         "review",
