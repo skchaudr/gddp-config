@@ -23,6 +23,64 @@ if str(SCRIPTS_DIR) not in sys.path:
 import gddp
 
 
+def _interpret_menu_screen(blob: str, width: int, height: int = 24) -> list[str]:
+    """Apply wrap, CUU, and clear-to-end so leftover rows are visible."""
+    screen = [[" "] * width for _ in range(height)]
+    row = col = 0
+
+    def put(ch: str) -> None:
+        nonlocal row, col
+        if ch == "\n":
+            row = min(height - 1, row + 1)
+            col = 0
+            return
+        if ch == "\r":
+            col = 0
+            return
+        if row >= height:
+            screen.pop(0)
+            screen.append([" "] * width)
+            row = height - 1
+        screen[row][col] = ch
+        col += 1
+        if col >= width:
+            col = 0
+            row += 1
+            if row >= height:
+                screen.pop(0)
+                screen.append([" "] * width)
+                row = height - 1
+
+    i = 0
+    while i < len(blob):
+        ch = blob[i]
+        if ch == "\x1b" and i + 1 < len(blob) and blob[i + 1] == "[":
+            j = i + 2
+            while j < len(blob) and not (
+                "A" <= blob[j] <= "Z" or "a" <= blob[j] <= "z"
+            ):
+                j += 1
+            if j >= len(blob):
+                break
+            final = blob[j]
+            params = blob[i + 2 : j]
+            if final == "A":
+                row = max(0, row - int(params or "1"))
+            elif final == "J" and (params or "0") in {"", "0"}:
+                for x in range(col, width):
+                    screen[row][x] = " "
+                for rr in range(row + 1, height):
+                    screen[rr] = [" "] * width
+            i = j + 1
+            continue
+        put(ch)
+        i += 1
+    lines = ["".join(cells).rstrip() for cells in screen]
+    while lines and not lines[-1]:
+        lines.pop()
+    return lines
+
+
 class RuntimeJobsForwardingTests(unittest.TestCase):
     def setUp(self):
         self.tempdir = tempfile.TemporaryDirectory()
@@ -227,6 +285,41 @@ class OverviewTests(unittest.TestCase):
         }
         with patch.object(gddp, "_import_module", return_value=terminal):
             self.assertEqual(gddp._menu_choice(actions, default="n"), "j")
+
+    def test_menu_choice_up_does_not_duplicate_wrapped_rows(self):
+        """↑ at a wrap-prone width must not leave the first action row behind."""
+        keys = iter(["UP", "q"])
+        output = StringIO()
+        test_console = Console(
+            file=output, width=70, height=24, color_system=None,
+            highlight=False, force_terminal=True,
+        )
+        terminal = SimpleNamespace(
+            getch=lambda: next(keys),
+            clear_lines=lambda n: output.write(f"\033[{n}A\033[J"),
+        )
+        actions = {
+            "d": ("dispatch", "send ready work through the event pipeline"),
+            "e": ("evaluate", "evaluator hub — run, inspect, history"),
+            "g": ("graphs", "active graphs first; archive for idle (>7d)"),
+            "w": ("live", "running executors — fleet + drill-in"),
+            "h": ("heartbeat", "arm/disarm the control plane (intake + heartbeat)"),
+            "c": ("config", "executor & evaluator settings (runtime/settings.env)"),
+            "q": ("quit", ""),
+        }
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "console", test_console):
+            self.assertEqual(gddp._menu_choice(actions, default="g"), "q")
+        screen = _interpret_menu_screen(output.getvalue(), width=70)
+        dispatch_rows = [ln for ln in screen if "dispatch" in ln]
+        self.assertEqual(len(dispatch_rows), 1, screen)
+
+    def test_menu_columns_prefers_ioctl_over_stale_console_width(self):
+        test_console = Console(force_terminal=True, highlight=False)
+        self.assertIsNone(getattr(test_console, "_width", "missing"))
+        with patch.object(gddp, "console", test_console), \
+                patch.object(gddp.os, "get_terminal_size", return_value=os.terminal_size((70, 24))):
+            self.assertEqual(gddp._menu_columns(), 70)
 
     def test_menu_choice_number_picks_by_position(self):
         terminal = self._menu_terminal(lambda: "2")

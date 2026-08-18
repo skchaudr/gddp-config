@@ -1604,6 +1604,37 @@ def _print_action_menu(actions: dict[str, tuple[str, str | Text]]) -> None:
         console.print(row)
 
 
+def _menu_columns() -> int:
+    """Real pane width. Prefer ioctl over stale ``COLUMNS`` / Rich defaults."""
+    explicit = getattr(console, "_width", None)
+    if isinstance(explicit, int) and explicit > 0:
+        width = getattr(console, "width", explicit)
+        return width if isinstance(width, int) and width > 0 else explicit
+    for fd in (1, 0):
+        try:
+            cols = os.get_terminal_size(fd).columns
+        except OSError:
+            continue
+        if isinstance(cols, int) and cols > 0:
+            return cols
+    width = getattr(console, "width", None)
+    return width if isinstance(width, int) and width > 0 else 80
+
+
+def _emit_menu_lines(lines: list[Text]) -> int:
+    """Print each menu row as one terminal row so in-place clear stays aligned.
+
+    A wrap makes ``drawn`` short; the next ↑ then leaves the first row behind.
+    Crop to width-1 so a full-width line cannot add an extra wrap row.
+    """
+    budget = max(1, _menu_columns() - 1)
+    for line in lines:
+        fitted = line.copy()
+        fitted.truncate(budget, overflow="crop")
+        console.print(fitted, overflow="crop", crop=True, no_wrap=True)
+    return len(lines)
+
+
 def _menu_choice(
     actions: dict[str, tuple[str, str | Text]],
     default: str,
@@ -1655,9 +1686,7 @@ def _menu_choice(
             first_paint = False
         else:
             clear_lines(drawn)
-        for line in lines:
-            console.print(line)
-        drawn = len(lines)
+        drawn = _emit_menu_lines(lines)
 
         choice = getch()
         if choice == "\x03":
@@ -1885,9 +1914,7 @@ def _paged_menu(
         else:
             clear_lines(drawn)
 
-        for line in lines:
-            console.print(line, overflow="crop", crop=True, no_wrap=True)
-        drawn = len(lines)
+        drawn = _emit_menu_lines(lines)
 
         # Read keys here so navigation does not echo "up"/"down" or full-clear.
         while True:
@@ -2390,9 +2417,7 @@ def _node_review_pick_action(
             first_paint = False
         else:
             clear_lines(drawn)
-        for line in lines:
-            console.print(line)
-        drawn = len(lines)
+        drawn = _emit_menu_lines(lines)
 
         choice = getch()
         if choice == "\x03":
