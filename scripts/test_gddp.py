@@ -1223,8 +1223,8 @@ class OverviewTests(unittest.TestCase):
     def test_node_review_up_down_enter_opens_update(self):
         """↑/↓ walk the action menu; Enter opens the highlighted action."""
         views: list[tuple[str, str]] = []
-        # default cursor is evaluation (e); one DOWN → update; Enter → status menu → back
-        keys = iter(["DOWN", "\r", "b", "b"])
+        # default cursor is evaluation (e); two DOWN → skip evaluator hub → update
+        keys = iter(["DOWN", "DOWN", "\r", "b", "b"])
         terminal = SimpleNamespace(
             getch=lambda: next(keys),
             clear_lines=lambda n: None,
@@ -1694,7 +1694,7 @@ class EvalWiringTests(unittest.TestCase):
                 patch.object(gddp, "console", test_console):
             choice = gddp._node_review_pick_action(has_siblings=False)
         self.assertEqual(choice, "v")
-        self.assertIn("evaluate", output.getvalue())
+        self.assertIn("evaluator", output.getvalue())
         self.assertNotIn("verify now", output.getvalue())
 
     def _completed_eval(self):
@@ -1826,6 +1826,152 @@ class EvalWiringTests(unittest.TestCase):
             ))
         self.assertEqual(rc, 2)
         live.assert_not_called()
+
+    def test_eval_hub_displayed_letters_are_handled(self):
+        displayed = gddp._letter_keys(gddp._eval_hub_actions())
+        handled = gddp._handled_letter_keys(
+            gddp._eval_hub_actions(), gddp._eval_hub_handlers()
+        )
+        self.assertEqual(set(displayed), set(handled))
+        self.assertEqual(set(displayed), {"r", "k", "c", "i", "h", "s", "b", "q"})
+
+    def test_node_review_v_opens_hub(self):
+        picks = iter(["v", "b"])
+        node_cli = SimpleNamespace(
+            fetch_runtime_evidence=lambda *a, **k: SimpleNamespace(verdict=None),
+            cmd_show=Mock(),
+        )
+        with patch.object(gddp, "_import_module", return_value=node_cli), \
+                patch.object(gddp, "_node_review_pick_action", side_effect=lambda **k: next(picks)), \
+                patch.object(gddp, "interactive_eval_hub", return_value=gddp._MENU_BACK) as hub, \
+                patch.object(gddp, "_run_live_eval") as live, \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "console"):
+            outcome = gddp._node_review_menu("demo", "alpha")
+        hub.assert_called_once_with("demo", "alpha")
+        live.assert_not_called()
+        self.assertIs(outcome, gddp._MENU_BACK)
+
+    def test_interactive_evaluate_opens_hub(self):
+        node_cli = SimpleNamespace(
+            iter_nodes=lambda *a, **k: [("node-05-validate-decision-set", {"title": "x"}, {})],
+        )
+        with patch.object(gddp, "_pick_graph", return_value="myapi-part1"), \
+                patch.object(gddp, "_pick_list", return_value="node-05-validate-decision-set"), \
+                patch.object(gddp, "_import_module", return_value=node_cli), \
+                patch.object(gddp, "interactive_eval_hub", return_value=gddp._MENU_BACK) as hub, \
+                patch.object(gddp, "_run_live_eval") as live, \
+                patch.object(gddp, "_clear_screen"):
+            outcome = gddp.interactive_evaluate()
+        hub.assert_called_once_with("myapi-part1", "node-05-validate-decision-set")
+        live.assert_not_called()
+        self.assertIs(outcome, gddp._MENU_BACK)
+
+    def test_offered_vs_read_formats_lane_files(self):
+        canonical = {
+            "readme": "/var/folders/xx/gddp-eval-wt-abc/README.md",
+            "project_brief": "/var/folders/xx/gddp-eval-wt-abc/PROJECT-BRIEF.md",
+            "neighbor:node-04-normalize-decisions": (
+                "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/"
+                "node-04-normalize-decisions.yaml"
+            ),
+        }
+        coverage = {
+            "criteria": {
+                "rating": "medium",
+                "accessed_paths": [
+                    "/var/folders/xx/gddp-eval-wt-abc/README.md",
+                    "/var/folders/xx/gddp-eval-wt-abc/PROJECT-BRIEF.md",
+                ],
+                "not_observed_paths": [
+                    "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/"
+                    "node-04-normalize-decisions.yaml",
+                ],
+            },
+            "integrity": {
+                "rating": "none",
+                "accessed_paths": [],
+                "not_observed_paths": [],
+            },
+            "overall": "low",
+        }
+        lines = gddp._offered_vs_read_lines(canonical, coverage)
+        blob = "\n".join(lines)
+        self.assertIn("README.md", blob)
+        self.assertIn("PROJECT-BRIEF.md", blob)
+        self.assertIn("README.md  (worktree) ✓", blob)
+        self.assertIn("PROJECT-BRIEF.md  (worktree) ✓", blob)
+        self.assertIn("node-04-normalize-decisions.yaml ✗", blob)
+        self.assertIn("Read (integrity): — (none)", blob)
+        self.assertNotIn("/var/folders", blob)
+
+    def test_offered_vs_read_handles_criteria_not_run(self):
+        lines = gddp._offered_vs_read_lines({}, {"criteria": "not_run", "integrity": {}})
+        blob = "\n".join(lines)
+        self.assertIn("Read (criteria): not run", blob)
+
+    def test_load_receipts_for_node_joins_sidecar(self):
+        tmp = Path(tempfile.mkdtemp())
+        rec_dir = tmp / "demo" / "alpha"
+        rec_dir.mkdir(parents=True)
+        rec = rec_dir / "manual-1-attempt0.json"
+        rec.write_text(json.dumps({
+            "verdict": "pass",
+            "project_id": "demo",
+            "node_id": "alpha",
+            "job_id": "manual-1",
+            "generated_at": "2026-01-01T00:00:00Z",
+        }), encoding="utf-8")
+        rec.with_suffix(".knobs.json").write_text(
+            json.dumps({"model": "deepseek-v4-flash", "preset": "cheap"}),
+            encoding="utf-8",
+        )
+        with patch.object(gddp, "_evaluation_sources", return_value=(None, tmp)):
+            rows = gddp._load_receipts_for_node("demo", "alpha")
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["knobs"]["model"], "deepseek-v4-flash")
+
+    def test_cmd_eval_instructions_without_receipt_is_preflight(self):
+        output = StringIO()
+        test_console = Console(file=output, force_terminal=False, width=100)
+        with patch.object(gddp, "console", test_console):
+            rc = gddp.cmd_eval_instructions(SimpleNamespace(
+                project="myapi-part1",
+                lens_node="node-05-validate-decision-set",
+                preflight=True,
+                run=None,
+            ))
+        self.assertEqual(rc, 0)
+        text = output.getvalue()
+        self.assertIn("preflight — offered only", text)
+        self.assertNotIn("accessed_paths", text)
+        self.assertNotIn("Read (criteria)", text)
+
+    def test_cmd_eval_runs_filters_to_node(self):
+        rows = [
+            {"project_id": "myapi-part1", "node_id": "node-05-validate-decision-set",
+             "verdict": "pass", "job_id": "manual-keep", "sort_at": "2026-01-02",
+             "knobs": {"model": "deepseek-v4-flash"}},
+            {"project_id": "myapi-part1", "node_id": "other",
+             "verdict": "fail", "job_id": "manual-skip", "sort_at": "2026-01-01",
+             "knobs": {}},
+        ]
+        with patch.object(gddp, "_load_receipts_for_node", return_value=rows[:1]) as load:
+            rc = gddp.cmd_eval_runs(SimpleNamespace(
+                project="myapi-part1", lens_node="node-05",
+            ))
+        self.assertEqual(rc, 0)
+        load.assert_called_once()
+        self.assertEqual(load.call_args.args[0], "myapi-part1")
+        self.assertEqual(load.call_args.args[1], "node-05-validate-decision-set")
+
+    def test_cmd_eval_config_prints_resolved_model(self):
+        output = StringIO()
+        test_console = Console(file=output, force_terminal=False, width=120)
+        with patch.object(gddp, "console", test_console):
+            rc = gddp.cmd_eval_config(SimpleNamespace())
+        self.assertEqual(rc, 0)
+        self.assertIn("deepseek-v4-flash", output.getvalue())
 
 
 if __name__ == "__main__":
