@@ -3533,7 +3533,11 @@ def _offered_vs_read_lines(canonical_context, context_coverage) -> list[str]:
         if val.startswith("UNAVAILABLE"):
             offered.append(f"{key} UNAVAILABLE")
             continue
-        offered.append(_human_eval_path(val))
+        human = _human_eval_path(val)
+        if key in {"readme", "project_brief"}:
+            offered.append(human)
+        else:
+            offered.append(f"{key}={human}")
     lines = ["Offered: " + (" · ".join(offered) if offered else "—")]
 
     def _lane_line(name: str, lane) -> str:
@@ -3599,6 +3603,22 @@ def _offered_canonical_pointers(project: str, node_id: str, repo: Path | None) -
     return pointers
 
 
+def _hydrate_eval_row(row: dict) -> dict:
+    """Replace a DB summary `check` with the on-disk receipt when needed."""
+    check = row.get("check") if isinstance(row.get("check"), dict) else {}
+    if check.get("canonical_context"):
+        return row
+    receipt_path = row.get("receipt_path")
+    if not receipt_path:
+        return row
+    node_cli = _import_module("node_cli")
+    loader = getattr(node_cli, "load_receipt_file", None)
+    full = loader(Path(str(receipt_path))) if callable(loader) else None
+    if not isinstance(full, dict):
+        return row
+    return {**row, "check": full}
+
+
 def _load_receipts_for_node(project: str, node_id: str) -> list[dict]:
     # Direct import so tests that stub `_import_module` for node_cli/terminal
     # do not accidentally break the hub if they land on `v`.
@@ -3613,7 +3633,7 @@ def _load_receipts_for_node(project: str, node_id: str) -> list[dict]:
             continue
         receipt_path = row.get("receipt_path")
         knobs = _load_eval_knobs_sidecar(receipt_path) if receipt_path else {}
-        out.append({**row, "knobs": knobs})
+        out.append(_hydrate_eval_row({**row, "knobs": knobs}))
     return out
 
 
@@ -3686,6 +3706,20 @@ def _render_eval_instructions(
                 f"  {item.get('id')}: {item.get('status')} "
                 f"({item.get('method') or '-'})"
             )
+            if item.get("evidence"):
+                console.print(f"    evidence: {item.get('evidence')}")
+        mismatches = det.get("criteria_mismatches") or []
+        if mismatches:
+            console.print("  mismatches:")
+            for item in mismatches:
+                if isinstance(item, dict):
+                    cid = item.get("criterion_id") or item.get("id") or "-"
+                    kind = item.get("kind") or item.get("mismatch_kind") or "-"
+                    console.print(f"    - {cid}: {kind}")
+                else:
+                    console.print(f"    - {item}")
+        if det.get("artifacts_present") is not None:
+            console.print(f"  artifacts_present: {det.get('artifacts_present')}")
         subject = det.get("subject_diff") if isinstance(det.get("subject_diff"), dict) else {}
         if subject:
             console.print(
@@ -3693,6 +3727,11 @@ def _render_eval_instructions(
                 f"{str(subject.get('base') or '')[:8]}..{str(subject.get('tip') or '')[:8]} "
                 f"files={subject.get('file_count')}"
             )
+            for item in subject.get("files") or []:
+                if isinstance(item, dict):
+                    console.print(f"    {item.get('status') or '-'} {item.get('path') or '-'}")
+                else:
+                    console.print(f"    {item}")
         console.print()
         console.print(Text("canonical offered-vs-read", style="bold cyan"))
         for line in _offered_vs_read_lines(
@@ -3723,6 +3762,17 @@ def _render_eval_show(row: dict) -> None:
     console.print(f"  confidence        : {check.get('criteria_confidence') or '-'}")
     console.print(f"  when              : {row.get('sort_at') or '-'}")
     console.print(f"  wall              : {timing.get('wall_s') if timing else row.get('wall_s')}")
+    crit_timing = timing.get("criteria") if isinstance(timing.get("criteria"), dict) else {}
+    integ_timing = timing.get("integrity") if isinstance(timing.get("integrity"), dict) else {}
+    console.print(
+        f"  tools             : c={crit_timing.get('tool_calls', 0)} "
+        f"i={integ_timing.get('tool_calls', 0)}"
+    )
+    if crit_timing or integ_timing:
+        console.print(
+            f"  lanes             : criteria {crit_timing.get('status') or '-'} "
+            f"· integrity {integ_timing.get('status') or '-'}"
+        )
     console.print(f"  commit            : {check.get('evaluated_commit_sha') or '-'}")
     console.print(f"  base              : {check.get('expected_base_commit_sha') or knobs.get('base') or '-'}")
     console.print(
@@ -3774,8 +3824,13 @@ def _render_eval_runs(project: str, node_id: str):
         model = ((row.get("knobs") or {}).get("model") or "-")
         wall = row.get("wall_s")
         wall_s = f"{wall}s" if wall is not None else "-"
-        commit = str(((row.get("check") or {}).get("evaluated_commit_sha") or "-"))[:8]
-        items.append((str(index), f"{when}  {verdict:<8}  {model:<22}  {wall_s:<8}  {commit}"))
+        check = row.get("check") if isinstance(row.get("check"), dict) else {}
+        timing = check.get("evaluation_timing") if isinstance(check.get("evaluation_timing"), dict) else {}
+        crit = timing.get("criteria") if isinstance(timing.get("criteria"), dict) else {}
+        integ = timing.get("integrity") if isinstance(timing.get("integrity"), dict) else {}
+        tools = f"c={crit.get('tool_calls', 0)} i={integ.get('tool_calls', 0)}"
+        commit = str((check.get("evaluated_commit_sha") or "-"))[:8]
+        items.append((str(index), f"{when}  {verdict:<8}  {model:<22}  {wall_s:<8}  {tools:<14}  {commit}"))
     picked = _pick_list(
         f"eval runs · {project}/{node_id}",
         items,
@@ -4614,9 +4669,16 @@ def cmd_verify_node(args):
     """Delegate node verification to the runtime evaluator — the single judge.
 
     Default runs the deterministic lane (offline, fast — the verb's original
-    contract). --live runs the full two-lane evaluation (deterministic +
-    semantic + integrity), the same judge the pipeline uses.
+    contract). --live delegates to `_run_live_eval` so knobs and the sidecar
+    match `gddp eval`.
     """
+    if bool(getattr(args, "live", False)):
+        verdict = _run_live_eval(
+            args.project,
+            args.node,
+            base=getattr(args, "base", None),
+        )
+        sys.exit(0 if verdict else 1)
     try:
         runtime_root = resolve_runtime_root()
     except RuntimeError as exc:
@@ -5075,8 +5137,13 @@ def cmd_eval_runs(args) -> int:
     for row in rows:
         model = ((row.get("knobs") or {}).get("model") or "-")
         when = str(row.get("sort_at") or "-")[:19].replace("T", " ")
+        check = row.get("check") if isinstance(row.get("check"), dict) else {}
+        timing = check.get("evaluation_timing") if isinstance(check.get("evaluation_timing"), dict) else {}
+        crit = timing.get("criteria") if isinstance(timing.get("criteria"), dict) else {}
+        integ = timing.get("integrity") if isinstance(timing.get("integrity"), dict) else {}
+        tools = f"c={crit.get('tool_calls', 0)} i={integ.get('tool_calls', 0)}"
         print(
-            f"{when}  {row.get('verdict') or '-':<8}  {model:<22}  "
+            f"{when}  {row.get('verdict') or '-':<8}  {model:<22}  {tools:<14}  "
             f"{project}/{node_id}  {row.get('job_id') or '-'}"
         )
     print(f"{len(rows)} run(s)")
@@ -5121,7 +5188,7 @@ def cmd_eval_show(args) -> int:
     row = matches[0]
     receipt_path = row.get("receipt_path")
     row = {**row, "knobs": _load_eval_knobs_sidecar(receipt_path) if receipt_path else {}}
-    _render_eval_show(row)
+    _render_eval_show(_hydrate_eval_row(row))
     return 0
 
 

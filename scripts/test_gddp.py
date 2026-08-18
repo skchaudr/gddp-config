@@ -1901,6 +1901,10 @@ class EvalWiringTests(unittest.TestCase):
         self.assertIn("PROJECT-BRIEF.md", blob)
         self.assertIn("README.md  (worktree) ✓", blob)
         self.assertIn("PROJECT-BRIEF.md  (worktree) ✓", blob)
+        self.assertIn(
+            "neighbor:node-04-normalize-decisions=node-04-normalize-decisions.yaml",
+            blob,
+        )
         self.assertIn("node-04-normalize-decisions.yaml ✗", blob)
         self.assertIn("Read (integrity): — (none)", blob)
         self.assertNotIn("/var/folders", blob)
@@ -1930,6 +1934,88 @@ class EvalWiringTests(unittest.TestCase):
             rows = gddp._load_receipts_for_node("demo", "alpha")
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["knobs"]["model"], "deepseek-v4-flash")
+
+    def test_load_receipts_for_node_hydrates_db_summary(self):
+        tmp = Path(tempfile.mkdtemp())
+        rec_dir = tmp / "demo" / "alpha"
+        rec_dir.mkdir(parents=True)
+        rec = rec_dir / "job-1-attempt0.json"
+        rec.write_text(json.dumps({
+            "verdict": "pass",
+            "project_id": "demo",
+            "node_id": "alpha",
+            "job_id": "job-1",
+            "canonical_context": {"readme": str(tmp / "README.md")},
+            "context_coverage": {"overall": "low"},
+        }), encoding="utf-8")
+        summary = {
+            "project_id": "demo",
+            "node_id": "alpha",
+            "job_id": "job-1",
+            "verdict": "pass",
+            "receipt_path": str(rec),
+            "check": {"verdict": "pass", "receipt_path": str(rec)},
+            "knobs": {},
+        }
+        with patch.object(gddp, "_evaluation_sources", return_value=(None, tmp)), \
+                patch.object(gddp, "_import_module", side_effect=lambda name: __import__(name)):
+            # Bypass evaluations walker: feed a DB-shaped summary through hydrate.
+            hydrated = gddp._hydrate_eval_row(summary)
+        self.assertEqual(
+            hydrated["check"]["canonical_context"]["readme"],
+            str(tmp / "README.md"),
+        )
+
+    def test_render_eval_show_empty_knobs_prints_dash(self):
+        output = StringIO()
+        test_console = Console(file=output, force_terminal=False, width=120)
+        row = {
+            "project_id": "demo",
+            "node_id": "alpha",
+            "job_id": "manual-1",
+            "verdict": "pass",
+            "sort_at": "2026-01-01T00:00:00Z",
+            "check": {},
+            "knobs": {},
+        }
+        with patch.object(gddp, "console", test_console):
+            gddp._render_eval_show(row)
+        self.assertIn("model             : -", output.getvalue())
+        self.assertIn("tools             : c=0 i=0", output.getvalue())
+
+    def test_cmd_eval_runs_empty_knobs_prints_dash(self):
+        rows = [{
+            "project_id": "myapi-part1",
+            "node_id": "node-05-validate-decision-set",
+            "verdict": "pass",
+            "job_id": "manual-1",
+            "sort_at": "2026-01-02T00:00:00Z",
+            "knobs": {},
+            "check": {},
+        }]
+        with patch.object(gddp, "_load_receipts_for_node", return_value=rows), \
+                patch("sys.stdout", new_callable=StringIO) as out:
+            rc = gddp.cmd_eval_runs(SimpleNamespace(
+                project="myapi-part1", lens_node="node-05",
+            ))
+        self.assertEqual(rc, 0)
+        self.assertRegex(out.getvalue(), r"pass\s+-\s+")
+
+    def test_cmd_verify_node_live_delegates_to_run_live_eval(self):
+        args = SimpleNamespace(
+            project="myapi-part1",
+            node="node-05-validate-decision-set",
+            live=True,
+            base="abc1234",
+            repo_path=None,
+        )
+        with patch.object(gddp, "_run_live_eval", return_value="pass") as live:
+            with self.assertRaises(SystemExit) as ctx:
+                gddp.cmd_verify_node(args)
+        live.assert_called_once_with(
+            "myapi-part1", "node-05-validate-decision-set", base="abc1234",
+        )
+        self.assertEqual(ctx.exception.code, 0)
 
     def test_cmd_eval_instructions_without_receipt_is_preflight(self):
         output = StringIO()
