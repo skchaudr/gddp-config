@@ -1,0 +1,781 @@
+{
+  "project_id": "myapi-part2",
+  "node_id": "node-05-inventory-handoffs",
+  "verdict": "needs-human-review",
+  "criteria_verdict": "needs-more-evidence",
+  "integrity": {
+    "verdict": "block",
+    "intent_preserved": false,
+    "graph_integrity_preserved": false,
+    "required_human_review": true,
+    "confidence": 0.95,
+    "findings": [
+      {
+        "severity": "high",
+        "summary": "Node-05 produced an empty result commit (6e4c638) with zero file changes; the required artifact part2/layers/handoffs/handoff-manifest.jsonl does not exist in the eval checkout, the real repo (part2/layers absent), or any branch. The node's entire purpose — resolving the 29 known handoffs plus VM-only/duplicate/moved/superseded/dated/missing artifacts into a reproducible manifest with the five classification axes and occurred_at/recorded_at clocks — is unfulfilled. Intent is not preserved in any form.",
+        "affected_node_ids": [
+          "node-05-inventory-handoffs"
+        ]
+      },
+      {
+        "severity": "high",
+        "summary": "The subject attempt never completed: the session log ends with 'Codex error: The usage limit has been reached' (stopReason error, willRetry false) after dispatching workers (one worker was flagged stuck scanning /Users/sab-mini for 240s). The harness nonetheless wrapped the aborted session as a returncode-0 result commit with an empty tree — the exact empty-result-tree failure mode node-01b's constraints flagged (5d714e9). Nothing was measured, classified, or verified; no VM surface check (sab-dev) was recorded.",
+        "affected_node_ids": [
+          "node-05-inventory-handoffs"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "Graph integrity is at risk if this empty result is accepted: node-08-build-source-layers depends_on node-05 and requires part2/layers/ including a normalized handoffs/ layer, and handoff-consuming treatments (node-14, node-16) build on it. Passing an empty node-05 would fire the downstream fan-in against a nonexistent handoff layer, silently dropping the why-evidence source from the corpus experiment.",
+        "affected_node_ids": [
+          "node-08-build-source-layers",
+          "node-14-treatment-handoffs",
+          "node-16-treatment-full-durable"
+        ]
+      }
+    ],
+    "reasoning": "Fresh-eyes review of node-05-inventory-handoffs. Cross-checked three independent sources: (1) the deterministic result and eval checkout at tip 6e4c638 — subject diff fe52852→6e4c638 has file_count 0 and part2/layers/handoffs/handoff-manifest.jsonl is absent; (2) the live repo — part2/ contains no layers/ directory anywhere and no handoff-manifest exists on any branch (the only part2/layers commit, be8dbe4, is node-04's decisions inventory, a different node); (3) the runtime job record — job_20260816T0955312705867d3568cd is confirmed node-05 via the spool dir name, its events.jsonl terminates in a Codex usage-limit error with willRetry:false, yet exit.json reports returncode 0 and an empty result commit was created. The node's why ('Handoffs are the why-evidence. Resolve the 29 known handoffs plus VM-only, duplicate, moved, superseded, dated, and missing artifacts into a reproducible manifest') has no deliverable at all — this is not a subtle veer (drift) or an evidence gap (insufficient); the recorded result actively misrepresents an aborted, empty session as a completed node, and downstream node-08 (and handoff treatments 14/16) structurally depend on the missing manifest. Lane 1 owns criterion adjudication; from the integrity standpoint the work must not stand as node-05's result — a human should decide whether to re-run (with quota/staggering fixes) before dependents fire.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-16T10:40:58.020Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_nswQspvXCIzkfyIbObIA1919",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+      },
+      {
+        "ts": "2026-08-16T10:40:58.021Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_Yfj2JwasBzQRhlJc4X3b0872",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+      },
+      {
+        "ts": "2026-08-16T10:40:58.022Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_18sRJ6fMbKj1CyaRrYjb1932",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-16T10:40:58.022Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_GJAGASsb0dKg0OR7nFPg8455",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f/README.md"
+      },
+      {
+        "ts": "2026-08-16T10:40:58.030Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_nswQspvXCIzkfyIbObIA1919",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:40:58.030Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Yfj2JwasBzQRhlJc4X3b0872",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:40:58.030Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_18sRJ6fMbKj1CyaRrYjb1932",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:40:58.031Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_GJAGASsb0dKg0OR7nFPg8455",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:00.834Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_kccSHelAhQt8YMpzg9Sg7395",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git log --oneline -15 2>/dev/null; echo \"---STATUS---\"; git status --short 2>/dev/null | head -50"
+      },
+      {
+        "ts": "2026-08-16T10:41:00.835Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_x7mw4w4URDfdVcficKWI3646",
+        "command": "ls -la /Users/sab-mini/repos/MyAPI/part2/ 2>/dev/null && echo \"---\" && find /Users/sab-mini/repos/MyAPI/part2 -type f 2>/dev/null | head -100"
+      },
+      {
+        "ts": "2026-08-16T10:41:00.857Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_x7mw4w4URDfdVcficKWI3646",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-16T10:41:00.961Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_kccSHelAhQt8YMpzg9Sg7395",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:06.075Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_LU6yUqEXfOUYCNGwnnpL4128",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git cat-file -t fe52852c0690004253886b6c713fb7f1cc1113ce 2>&1; echo \"---tip---\"; git cat-file -t 6e4c638f39d809408ccabe301e83144fa1084406 2>&1; echo \"---branch---\"; git branch -a 2>/dev/null | head; echo \"---HEAD---\"; git rev-parse HEAD"
+      },
+      {
+        "ts": "2026-08-16T10:41:06.076Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_b8TEdYkojg78edOCfWa55547",
+        "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f/ 2>/dev/null; echo \"---\"; find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f -maxdepth 2 -type d 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-16T10:41:06.103Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_b8TEdYkojg78edOCfWa55547",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:06.143Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_LU6yUqEXfOUYCNGwnnpL4128",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:10.286Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_LfoMmHgBjXFOr4W293Xw6831",
+        "command": "echo \"=== EVAL CHECKOUT part2 ===\"; find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f/part2 -type f 2>/dev/null | sort; echo; echo \"=== REAL REPO part2 ===\"; find /Users/sab-mini/repos/MyAPI/part2 -type f 2>/dev/null | sort | head -50"
+      },
+      {
+        "ts": "2026-08-16T10:41:10.287Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ZZ1TVrEUs1XympQZZQfj7670",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f && cat .git 2>/dev/null; echo \"---\"; git log --oneline -5 2>/dev/null; echo \"---branches with part2---\"; git branch -a 2>/dev/null | grep -i part2 | head"
+      },
+      {
+        "ts": "2026-08-16T10:41:10.316Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_LfoMmHgBjXFOr4W293Xw6831",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:10.360Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ZZ1TVrEUs1XympQZZQfj7670",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:16.840Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_qjonh75yKGZiYaJIcfdH3060",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== attempt branches (08-16) ===\"; git branch -a 2>/dev/null | grep \"gddp/attempt-job_20260816\"; echo \"=== show 6e4c638 files ===\"; git show --stat --oneline 6e4c638f39d809408ccabe301e83144fa1084406 2>/dev/null | head -20; echo \"=== show fe52852 files ===\"; git show --stat --oneline fe52852c0690004253886b6c713fb7f1cc1113ce 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-16T10:41:16.840Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ycuWoy42YnZHBInHgcIy4229",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== .gddp ===\"; find .gddp -maxdepth 3 -type f 2>/dev/null | head -30; echo \"=== .claude ===\"; find .claude -maxdepth 2 -type f 2>/dev/null | head; echo \"=== scratch ===\"; find scratch -maxdepth 2 -type f 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-16T10:41:16.874Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ycuWoy42YnZHBInHgcIy4229",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:16.925Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_qjonh75yKGZiYaJIcfdH3060",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:22.687Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_tq0gWz4wQX7YYf6Oc6UM5820",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f && git status --short 2>/dev/null | head -30; echo \"=== worktree HEAD ===\"; git rev-parse HEAD; echo \"=== search all branches for handoff-manifest ===\"; cd /Users/sab-mini/repos/MyAPI && git log --all --oneline -- '**/handoff-manifest*' 2>/dev/null | head; echo \"=== grep all branches for handoffs/layers ===\"; git log --all --oneline -- part2/layers 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-16T10:41:22.688Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_CKhuRFY7sOemkV0ReLcS5827",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-05-inventory-handoffs.yaml"
+      },
+      {
+        "ts": "2026-08-16T10:41:22.691Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_CKhuRFY7sOemkV0ReLcS5827",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:22.839Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_tq0gWz4wQX7YYf6Oc6UM5820",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:32.827Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_JrhNwAaddipVXsLSi3Tb3634",
+        "command": "cd /Users/sab-mini/repos/MyAPI && for c in 2368526c8fe48c 24703af9989839 252344e6b6557c 2705867d3568cd 289d5961e2646e; do echo \"=== job $c ===\"; git log --all --oneline --grep=\"$c\" 2>/dev/null | head -3; done; echo; echo \"=== be8dbe4 stat ===\"; git show --stat --oneline be8dbe4 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-16T10:41:32.828Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_lYSmv3oYQyriTGmnPcyD6287",
+        "command": "find /Users/sab-mini/repos/gddp-runtime -maxdepth 3 -name \"*.json\" -path \"*job*\" 2>/dev/null | head; echo \"---\"; ls /Users/sab-mini/repos/gddp-runtime 2>/dev/null | head; echo \"---gddp config jobs---\"; find /Users/sab-mini/repos/gddp-config -maxdepth 3 -type d 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-16T10:41:32.914Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_lYSmv3oYQyriTGmnPcyD6287",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:32.976Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_JrhNwAaddipVXsLSi3Tb3634",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:37.471Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_vuMIxn2kMUrSmwLsz8aA1471",
+        "command": "cd /Users/sab-mini/repos/MyAPI && for c in 0502ab1 343957a 40cfdbe; do echo \"=== $c ===\"; git show --stat --oneline $c 2>/dev/null | head -12; echo; done"
+      },
+      {
+        "ts": "2026-08-16T10:41:37.472Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_R1ioWVXs5YOogZNrNIY14883",
+        "command": "find /Users/sab-mini/repos/gddp-runtime -type d -name \"*20260816T095531*\" 2>/dev/null | head; echo \"---jobs dir---\"; ls /Users/sab-mini/repos/gddp-runtime/jobs 2>/dev/null | head -40; echo \"---db---\"; ls /Users/sab-mini/repos/gddp-runtime/db 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-16T10:41:37.551Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_vuMIxn2kMUrSmwLsz8aA1471",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:37.777Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_R1ioWVXs5YOogZNrNIY14883",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:43.715Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_V0ezLoFcFCK1MNVMwCnP4708",
+        "command": "ls -la /Users/sab-mini/repos/gddp-runtime/jobs/job_20260816T0955312705867d3568cd/ 2>/dev/null; echo \"=== spool ===\"; ls -la /Users/sab-mini/repos/gddp-runtime/jobs/local-subprocess-spool/job_20260816T0955312705867d3568cd-node-05-inventory-handoffs-attempt-0-f9c620d0026c483b8a2b02b86470a8b0/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-16T10:41:43.715Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Aqtbuzc0K2MiaG1x2CSc3748",
+        "command": "find /Users/sab-mini/repos/gddp-runtime -iname \"*node-05*\" -o -iname \"*node05*\" 2>/dev/null | grep -v \"\\.git/\" | head -20"
+      },
+      {
+        "ts": "2026-08-16T10:41:43.747Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_V0ezLoFcFCK1MNVMwCnP4708",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:43.952Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Aqtbuzc0K2MiaG1x2CSc3748",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:47.671Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Wb9VKvkq0P3XNxj2j3nO0157",
+        "command": "S=/Users/sab-mini/repos/gddp-runtime/jobs/local-subprocess-spool/job_20260816T0955312705867d3568cd-node-05-inventory-handoffs-attempt-0-f9c620d0026c483b8a2b02b86470a8b0; echo \"=== result.json ===\"; cat $S/result.json; echo; echo \"=== exit.json ===\"; cat $S/exit.json; echo; echo \"=== packet.json (head) ===\"; head -c 2000 $S/packet.json; echo; echo \"=== command.json ===\"; cat $S/command.json; echo; echo \"=== worktree_path ===\"; cat $S/worktree_path"
+      },
+      {
+        "ts": "2026-08-16T10:41:47.672Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_vjpCgafxmFL18YrsMUom8596",
+        "command": "cat /Users/sab-mini/repos/gddp-runtime/node_status_history/myapi-part2/node-05-inventory-handoffs.jsonl 2>/dev/null | tail -20"
+      },
+      {
+        "ts": "2026-08-16T10:41:47.691Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_vjpCgafxmFL18YrsMUom8596",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:47.710Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Wb9VKvkq0P3XNxj2j3nO0157",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:55.326Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_gcgRI8PLTArO8xdwqc9O9433",
+        "command": "S=/Users/sab-mini/repos/gddp-runtime/jobs/local-subprocess-spool/job_20260816T0955312705867d3568cd-node-05-inventory-handoffs-attempt-0-f9c620d0026c483b8a2b02b86470a8b0; echo \"=== events tail ===\"; tail -c 6000 $S/events.jsonl; echo; echo \"=== event types ===\"; python3 -c \"\nimport json\ntypes={}\nwith open('$S/events.jsonl') as f:\n    for line in f:\n        try:\n            e=json.loads(line)\n            t=e.get('type') or e.get('event') or list(e.keys())[0]\n            types[t]=types.get(t,0)+1\n        except: pass\nfor k,v in types.items(): print(v,k)\n\" 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-16T10:41:55.326Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_gES6VHzGaxSpq9rHeppA8696",
+        "command": "for d in /Users/sab-mini/repos/gddp-runtime/jobs/local-subprocess-spool/job_20260816T08195757d5a3423c489f-node-05-inventory-handoffs-attempt-0-*; do echo \"=== $d ===\"; ls $d 2>/dev/null | head; cat $d/result.json 2>/dev/null; echo; cat $d/exit.json 2>/dev/null; echo; done"
+      },
+      {
+        "ts": "2026-08-16T10:41:55.378Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_gES6VHzGaxSpq9rHeppA8696",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:41:55.464Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_gcgRI8PLTArO8xdwqc9O9433",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:42:12.811Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_GmH6UX5cCqOCk7yQMwkH7418",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-08-build-source-layers.yaml"
+      },
+      {
+        "ts": "2026-08-16T10:42:12.812Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_SKF9JqbCk4V3tgqRujmB3299",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== .handoffs count ===\"; ls .handoffs/ | wc -l; ls .handoffs/ | head -40; echo \"=== any handoff manifest anywhere in repo (tracked+untracked) ===\"; find . -iname \"*handoff*manifest*\" -not -path \"./.git/*\" 2>/dev/null | head; echo \"=== part2/layers in real repo ===\"; ls -la part2/ 2>/dev/null; ls part2/layers 2>/dev/null || echo \"NO part2/layers in real repo\"; echo \"=== eval wt untracked ===\"; cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f && git status --porcelain 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-16T10:42:12.817Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_GmH6UX5cCqOCk7yQMwkH7418",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:42:13.659Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_SKF9JqbCk4V3tgqRujmB3299",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:42:27.125Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_EgDCnMcJBgEuJGdTUqoQ9160",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== 343957a (node-03) ===\"; git diff-tree --no-commit-id --name-only -r 343957a 2>/dev/null | wc -l; echo \"=== 40cfdbe (node-06) ===\"; git diff-tree --no-commit-id --name-only -r 40cfdbe 2>/dev/null | wc -l; echo \"=== 6e4c638 (node-05 subject) ===\"; git diff-tree --no-commit-id --name-only -r 6e4c638 2>/dev/null | wc -l; echo \"=== 0502ab1 (node-02) ===\"; git diff-tree --no-commit-id --name-only -r 0502ab1 2>/dev/null | wc -l; echo \"=== be8dbe4 (node-04) ===\"; git diff-tree --no-commit-id --name-only -r be8dbe4 2>/dev/null | wc -l"
+      },
+      {
+        "ts": "2026-08-16T10:42:27.236Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_EgDCnMcJBgEuJGdTUqoQ9160",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:42:42.018Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_V8VWblUT1zYSdczh84xk9181",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "Batch-wide execution failure: of the five nodes dispatched at 09:55 on 2026-08-16 (02,03,04,05,06), only node-02 (6 files) and node-04 (2 files) produced content; nodes 03, 05, and 06 all returned empty result commits. The pattern strongly suggests quota exhaustion from five concurrent codex sessions on one account. Before re-running node-05 (or dispatching 03/06 siblings), the operator should address quota headroom or stagger concurrency, otherwise the same empty-result failure will recur across the fan-in.",
+        "affected_node_ids": [
+          "node-05-inventory-handoffs",
+          "node-03-validate-anchor",
+          "node-06-git-evidence"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The 2026-08-16 graph rewire (node-05 returned to pending behind node-01b, then auto-dispatched at 09:55 on top of fe52852) was executed coherently — the 09:55 attempt did start from 01b's revised contract (evidence-contract.md at 189 lines, envelope 2.0-part2-prov-min) as intended. Graph structure and gating are sound; only the execution output is missing.",
+        "affected_node_ids": [
+          "node-01b-contract-review",
+          "node-05-inventory-handoffs"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.16666666666666666,
+  "criteria_confidence": 0.16666666666666666,
+  "completeness": 0.5,
+  "graph_readiness": 0.0,
+  "completeness_status": "partial",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "manifest-complete",
+        "criterion": "part2/layers/handoffs/handoff-manifest.jsonl has one entry per handoff artifact found (the 29 known plus any VM-only, duplicate, or moved artifacts), each classified on every axis: git-backed|VM-only, duplicate|moved|unique, current|superseded, dated|temporally-ambiguous, present|missing",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "path_mentioned_missing",
+        "evidence": [
+          "part2/layers/handoffs/handoff-manifest.jsonl absent"
+        ],
+        "reasoning": "The criterion names source path(s) that are not present in the checkout. The harness did not scan unrelated files as substitutes.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "part2/layers/handoffs/handoff-manifest.jsonl absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "inclusion-reproducible",
+        "criterion": "The manifest records exactly which handoffs are included for corpus construction and the reason for every exclusion, so the included set can be reproduced exactly",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "chronology-preserved",
+        "criterion": "Every entry carries occurred_at and recorded_at per the evidence contract; no summarization replaces the source listing",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...) for identifiers named in the criterion (occurred_at, recorded_at). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the experiment was executed correctly, never whether the hypothesis won.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution model (operator direction 2026-08-15, enforced by the attempt preamble): You are the ORCHESTRATOR, not the worker. Do NOT perform the node's work yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6 via the subagent tool's model parameter) to do the actual investigation, construction, and measurement. Your job is decomposition, dispatch, reviewing returns, integrating, and producing the final artifacts.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight (worker subagents, Khoj ingestion/processing, long builds), dispatch ONE watcher subagent on model deepseek/deepseek-v4-flash that actively polls with tools (job status, logs, artifact existence) and reports state changes; you go idle between its reports instead of polling yourself.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/ self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to this node as evidence; work discovered beyond this node's scope becomes a continuation proposal, never silent execution.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Work in /Users/sab-mini/repos/MyAPI. Write only under part2/ unless this node's text names another path. Never edit GDDP graph truth, runtime databases, or job state.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Check the VM surfaces named in MyAPI AGENTS.md (sab-dev) for VM-only handoffs; if a surface is unreachable, mark its artifacts missing with the evidence of unreachability - never drop silently.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Close with parallel reviewer subagents on model deepseek/deepseek-v4-pro, each assigned a different explicit focus (criteria coverage, evidence integrity, constraint compliance). Resolve their findings before returning.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "part2/layers/handoffs/handoff-manifest.jsonl": false
+    },
+    "deps_status": {
+      "node-01b-contract-review": "provisional"
+    },
+    "criteria_mismatches": [
+      {
+        "criterion_id": "manifest-complete",
+        "kind": "source_path",
+        "detail": "part2/layers/handoffs/handoff-manifest.jsonl absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "manifest-complete",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "fe52852c0690004253886b6c713fb7f1cc1113ce",
+      "tip": "6e4c638f39d809408ccabe301e83144fa1084406",
+      "files": [],
+      "truncated": false,
+      "file_count": 0,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [],
+    "overall_reasoning": "pi timed out after 1200s",
+    "risks": null,
+    "followup_candidates": null,
+    "budget_exhausted": true,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-16T10:20:55.183Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Xuq7rQfvqWfGwvehqS7G7726",
+          "command": "pwd && ls -la && echo \"---\" && ls -la /Users/sab-mini/repos/MyAPI 2>/dev/null | head -50"
+        },
+        {
+          "ts": "2026-08-16T10:20:55.185Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_Z2UtbQIOVrAuMoZhAwnp7360",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-16T10:20:55.199Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Z2UtbQIOVrAuMoZhAwnp7360",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:20:55.229Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Xuq7rQfvqWfGwvehqS7G7726",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:20:57.477Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_YpwrAYZKXa8GFQtXXnRh3568",
+          "command": "echo \"=== CWD part2 ===\" && find part2 -type f | head -100 && echo \"=== MyAPI repo part2 ===\" && find /Users/sab-mini/repos/MyAPI/part2 -type f 2>/dev/null | head -100"
+        },
+        {
+          "ts": "2026-08-16T10:20:57.478Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_YS5K4pEcKzWB0MDUxh7G9772",
+          "command": "echo \"=== CWD .handoffs ===\" && ls -la .handoffs/ && echo \"=== MyAPI repo .handoffs ===\" && ls -la /Users/sab-mini/repos/MyAPI/.handoffs/"
+        },
+        {
+          "ts": "2026-08-16T10:20:57.508Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_YpwrAYZKXa8GFQtXXnRh3568",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:20:57.515Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_YS5K4pEcKzWB0MDUxh7G9772",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:01.537Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_tJCKrTVTlvv8hJhZk8Mk9792",
+          "command": "echo \"=== CWD part2 tree ===\" && find part2 -type d && echo \"=== git status CWD ===\" && cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f && git status 2>&1 | head -20 && echo \"=== git log ===\" && git log --oneline -15 2>&1"
+        },
+        {
+          "ts": "2026-08-16T10:21:01.538Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_kikbouySnKSZLl3EaQzF5674",
+          "command": "echo \"=== MyAPI .gddp ===\" && find /Users/sab-mini/repos/MyAPI/.gddp -type f 2>/dev/null | head -50 && echo \"=== MyAPI git log ===\" && cd /Users/sab-mini/repos/MyAPI && git log --oneline -15 2>&1 && echo \"=== git status ===\" && git status 2>&1 | head -30"
+        },
+        {
+          "ts": "2026-08-16T10:21:01.691Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_kikbouySnKSZLl3EaQzF5674",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:01.861Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_tJCKrTVTlvv8hJhZk8Mk9792",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:10.442Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_KjGb3N0nSqChbYOm9AFs5662",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f && echo \"=== any layers dir ===\" && find . -type d -name layers 2>/dev/null && find . -path ./node_modules -prune -o -type f -name \"*handoff*\" -print 2>/dev/null | grep -v \"^./.handoffs/\" | head -40 && echo \"=== handoff-manifest anywhere ===\" && find / -name \"handoff-manifest*\" 2>/dev/null | head && echo \"=== occurred_at/recorded_at hits in CWD (excluding .git) ===\" && grep -rl \"occurred_at\" --include=\"*.jsonl\" --include=\"*.md\" --include=\"*.py\" --include=\"*.yaml\" --include=\"*.yml\" . 2>/dev/null | grep -v \"/.git/\" | head -20"
+        },
+        {
+          "ts": "2026-08-16T10:21:10.443Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_j9YgNO4T3UJKKxDGYCCd0966",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f && echo \"=== MyAPI repo: any layers or manifest ===\" && find /Users/sab-mini/repos/MyAPI -type d -name layers 2>/dev/null && find /Users/sab-mini/repos/MyAPI -name \"handoff-manifest*\" 2>/dev/null && echo \"=== part2 in MyAPI repo ===\" && ls -la /Users/sab-mini/repos/MyAPI/part2 2>&1"
+        },
+        {
+          "ts": "2026-08-16T10:21:10.790Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_j9YgNO4T3UJKKxDGYCCd0966",
+          "tool": "bash",
+          "ok": false
+        }
+      ]
+    },
+    "lane_status": "timed-out",
+    "harness_error": "pi timed out after 1200s (preserved logs: stdout=/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-pi-stdout-lixn99sc stderr=/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-pi-stderr-97iwibp4)"
+  },
+  "decision_reasoning": "pi timed out after 1200s",
+  "required_next_action": "Integrity verdict 'block' halts progression (criteria verdict was 'needs-more-evidence'). Human review required; no dependent node may dispatch on this node.",
+  "generated_at": "2026-08-16T10:42:42.058872+00:00",
+  "evaluated_tree_sha": "4cedf877a6bea1d5fcaf3c896a9d5aa82e35873d",
+  "evaluated_commit_sha": "6e4c638f39d809408ccabe301e83144fa1084406",
+  "merge_commit_sha": "6e4c638f39d809408ccabe301e83144fa1084406",
+  "expected_base_commit_sha": "fe52852c0690004253886b6c713fb7f1cc1113ce",
+  "pr_ref": null,
+  "job_id": "job_20260816T0955312705867d3568cd",
+  "execution_attempt_id": "job_20260816T0955312705867d3568cd:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+    "neighbor:node-01b-contract-review": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 4,
+      "content_accessed": 1,
+      "not_observed": 3,
+      "accessed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 4,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-l2171x5f/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "medium"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-16T10:20:51.316961+00:00",
+    "finished_at": "2026-08-16T10:42:42.058755+00:00",
+    "wall_s": 1310.822,
+    "criteria": {
+      "status": "timed-out",
+      "elapsed_s": 1200.145,
+      "tool_calls": 8
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 110.638,
+      "tool_calls": 27
+    }
+  }
+}

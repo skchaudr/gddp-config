@@ -1,0 +1,775 @@
+{
+  "project_id": "myapi-part2",
+  "node_id": "node-07-graphify-evidence",
+  "verdict": "fail",
+  "criteria_verdict": "fail",
+  "integrity": {
+    "verdict": "block",
+    "intent_preserved": false,
+    "graph_integrity_preserved": false,
+    "required_human_review": true,
+    "confidence": 0.95,
+    "findings": [
+      {
+        "severity": "high",
+        "summary": "Node delivered no work at all: the subject diff between base 431b98a and tip 96726e1 is empty (identical trees 17e7ae16), and the required artifact part2/layers/graphify/graphify-inventory.md does not exist. The entire part2/layers/ tree is absent from the checkout — only node-01's part2/contract/evidence-contract.md is present. The node's core purpose (inventory what graphify-out/ knows with real counts from graph.json, preserve dual representation with sha256, document retrieval-vs-structural distinction) is entirely unfulfilled.",
+        "affected_node_ids": [
+          "node-07-graphify-evidence"
+        ]
+      },
+      {
+        "severity": "high",
+        "summary": "Graph forward edge broken: node-08-build-source-layers depends_on node-07-graphify-evidence and its five-layers-built criterion requires part2/layers/ to contain a graphify/ layer. With node-07 delivering nothing, node-08 cannot build the graphify layer; the concurrent-inventory tier (03-07) gating layer build (08) per the blueprint's architecture notes is not satisfied.",
+        "affected_node_ids": [
+          "node-08-build-source-layers"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "Inputs were available and unused: graphify-out/graph.json (67MB), manifest.json, and GRAPH_REPORT.md exist in the checkout, so the inventory could have been produced. No handoff, continuation proposal, or partial evidence was left behind, violating the self-describing/continuation constraint — downstream starts with archaeology and no record of why nothing landed.",
+        "affected_node_ids": [
+          "node-07-graphify-evidence",
+          "node-08-build-source-layers"
+        ]
+      }
+    ],
+    "reasoning": "Fresh-eyes review of node-07-graphify-evidence. The node's stated role is to inventory Graphify structural evidence: produce part2/layers/graphify/graphify-inventory.md with real counts from the actual graph.json, preserve both a retrieval-friendly representation and the deterministic graph.json (sha256 recorded), and document which questions each representation serves. None of this exists. The subject diff is empty (base and tip trees are byte-identical), the required artifact is absent, and no part2/layers/ directory was created at all. The source inputs (graphify-out/graph.json, manifest.json, GRAPH_REPORT.md) were present in the checkout, so this is not a missing-input situation — the node simply did not execute its role. All three acceptance criteria are indeterminate with path_mentioned_missing, consistent with the empty delivery. Graph integrity is also broken: node-08-build-source-layers explicitly depends on node-07 and requires part2/layers/graphify/ to exist, so the empty delivery severs the dependency chain for the layer build and, transitively, corpus validation and all treatments. A human must review before node-07 is accepted or node-08 is allowed to fire; the node must be re-run and actually land its inventory artifact. Confidence is high because the absence is verified directly in the working tree and the diff is provably empty.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-16T08:39:59.655Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_Topq6JwaI7BCvz7IBKDo8484",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-07-graphify-evidence.yaml"
+      },
+      {
+        "ts": "2026-08-16T08:39:59.656Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_nyNlkcjDtdbwN1huDylc6488",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+      },
+      {
+        "ts": "2026-08-16T08:39:59.657Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_lsjM64fl4Tk0xkWXsOVu2403",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-16T08:39:59.657Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_W8u8dvdsXhSHeBfDA0Nm8608",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng/README.md"
+      },
+      {
+        "ts": "2026-08-16T08:39:59.665Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Topq6JwaI7BCvz7IBKDo8484",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:39:59.665Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_lsjM64fl4Tk0xkWXsOVu2403",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:39:59.666Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_W8u8dvdsXhSHeBfDA0Nm8608",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:39:59.666Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_nyNlkcjDtdbwN1huDylc6488",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:40:03.158Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_8TYyL8XQMFn7i6maHFOq3474",
+        "command": "cd /Users/sab-mini/repos/MyAPI && ls -la part2/ 2>/dev/null; echo \"---layers---\"; ls -la part2/layers/ 2>/dev/null; echo \"---graphify---\"; ls -la part2/layers/graphify/ 2>/dev/null; echo \"---find graphify anywhere---\"; find . -maxdepth 4 -iname '*graphify*' 2>/dev/null | head -50"
+      },
+      {
+        "ts": "2026-08-16T08:40:03.160Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_y7d7HgBNpy0lM0Lxds1V1439",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git log --oneline -8 2>/dev/null; echo \"---diff base..tip---\"; git diff --stat 431b98a1953bd1a136a42ce8d270e1f0d96a40d3 96726e17f3e7e0449b3064697d55e291f5d1575e 2>&1 | tail -20; echo \"---status---\"; git status --short 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-16T08:40:03.255Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_8TYyL8XQMFn7i6maHFOq3474",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:40:03.302Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_y7d7HgBNpy0lM0Lxds1V1439",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:40:07.513Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ucPwhC5RZf3JXlnqnZOQ1651",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"---base---\"; git cat-file -t 431b98a1953bd1a136a42ce8d270e1f0d96a40d3 2>&1; echo \"---tip---\"; git cat-file -t 96726e17f3e7e0449b3064697d55e291f5d1575e 2>&1; echo \"---diff name-only base..tip---\"; git diff --name-only 431b98a1953bd1a136a42ce8d270e1f0d96a40d3 96726e17f3e7e0449b3064697d55e291f5d1575e 2>&1 | head; echo \"---untracked---\"; git status --porcelain 2>/dev/null; echo \"---graphify-out contents---\"; ls -la graphify-out/ 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-16T08:40:07.514Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_muyNp9UA8XVC2pEyLJ9T7542",
+        "command": "cd /Users/sab-mini/repos/MyAPI && find . -path ./node_modules -prune -o -name 'graph.json' -print 2>/dev/null | head; echo \"---part2 anywhere---\"; find . -maxdepth 3 -name 'part2' -o -maxdepth 3 -name 'layers' 2>/dev/null | head; echo \"---.gddp---\"; ls -la .gddp/ 2>/dev/null | head -20; echo \"---scratch---\"; ls -la scratch/ 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-16T08:40:07.610Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ucPwhC5RZf3JXlnqnZOQ1651",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:40:07.751Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_muyNp9UA8XVC2pEyLJ9T7542",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:40:15.540Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_00_ymqTuzquU2YkFAop5n8n9402",
+        "reason": "command matched blocked pattern",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"---trees---\"; git rev-parse 431b98a1953bd1a136a42ce8d270e1f0d96a40d3^{tree} 96726e17f3e7e0449b3064697d55e291f5d1575e^{tree}; echo \"---show tip---\"; git show --stat --oneline 96726e17f3e7e0449b3064697d55e291f5d1575e 2>&1 | head -20; echo \"---show base---\"; git show --stat --oneline 431b98a1953bd1a136a42ce8d270e1f0d96a40d3 2>&1 | head -20; echo \"---is tip ancestor/descendant---\"; git merge-base --is-ancestor 431b98a 96726e1 && echo \"base is ancestor of tip\" || echo \"not ancestor\"",
+        "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+      },
+      {
+        "ts": "2026-08-16T08:40:15.541Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ymqTuzquU2YkFAop5n8n9402",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-16T08:40:15.542Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_5CQGQFhyqBIy8Z3NJ2Uj0223",
+        "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng/ 2>/dev/null; echo \"---gates---\"; ls -laR /Users/sab-mini/repos/MyAPI/.gddp/ 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-16T08:40:15.575Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_5CQGQFhyqBIy8Z3NJ2Uj0223",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:40:21.159Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_QnNzJR5XER8MGBHmwPzv2475",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && echo \"---part2 tree---\"; find part2 -type f 2>/dev/null | head -60; echo \"---graphify-out---\"; ls -la graphify-out/ 2>/dev/null; echo \"---git head---\"; git log --oneline -3 2>/dev/null; cat .git 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-16T08:40:21.219Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_QnNzJR5XER8MGBHmwPzv2475",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:40:33.356Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_i7ii4dwyJkNrXij2wrnS3867",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && git rev-parse 431b98a1953bd1a136a42ce8d270e1f0d96a40d3^{tree} 96726e17f3e7e0449b3064697d55e291f5d1575e^{tree} 2>&1; echo \"---log around node-07---\"; git log --oneline --all 2>/dev/null | grep -iE 'node-07|graphify' | head -20; echo \"---gddp in worktree---\"; find .gddp -type f 2>/dev/null | head; echo \"---.jules---\"; find .jules -type f 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-16T08:40:33.358Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_GApJVeLfOPYIyUZd5rkU1225",
+        "command": "cat /Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-08-build-source-layers.yaml 2>/dev/null | head -60; echo \"====NODE-03====\"; grep -E 'depends_on|unlocks|node_id' /Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-03-validate-anchor.yaml 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-16T08:40:33.382Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_GApJVeLfOPYIyUZd5rkU1225",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:40:33.441Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_i7ii4dwyJkNrXij2wrnS3867",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:40:47.203Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_WxWXpKlbBz7X8c44ldEJ3420",
+        "command": "cd /Users/sab-mini/repos/MyAPI && find . -iname '*graphify-inventory*' 2>/dev/null; echo \"---worktrees---\"; ls .git/worktrees/ 2>/dev/null; echo \"---handoffs mentioning node-07/graphify inventory---\"; grep -rl -iE 'graphify-inventory|node-07' .handoffs/ 2>/dev/null | head; echo \"---any sha256/graphify layer refs in part2-adjacent---\"; find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng -maxdepth 4 -iname '*inventory*' 2>/dev/null | head; echo \"---gates for node-07---\"; ls /Users/sab-mini/repos/MyAPI/.gddp/gates/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-16T08:40:47.463Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_WxWXpKlbBz7X8c44ldEJ3420",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:41:04.177Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ZmwvebyczmMb1GiBeQfh6973",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "node-07 ran while its dependency node-01-evidence-contract is still 'provisional' (gate token issued, but contract not final). When node-07 is re-run, sequencing should wait for node-01's evidence contract to be settled so the inventory's counts and provenance fields conform to the final contract rather than a provisional one.",
+        "affected_node_ids": [
+          "node-01-evidence-contract",
+          "node-07-graphify-evidence"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The graph config encodes node-07's forward edge only through node-08's depends_on (node-07's own unlocks is empty). A re-run of node-07 should confirm the edge semantics so gate/advance tooling treats node-08 as blocked until node-07 lands its artifact.",
+        "affected_node_ids": [
+          "node-07-graphify-evidence",
+          "node-08-build-source-layers"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.023333333333333355,
+  "criteria_confidence": 0.023333333333333355,
+  "completeness": 0.5,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "capabilities-inventoried",
+        "criterion": "part2/layers/graphify/graphify-inventory.md states precisely what graphify-out/ knows - symbols, files, relationships, dependencies, references - with real counts taken from the actual graph.json",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "path_mentioned_missing",
+        "evidence": [
+          "graph.json absent",
+          "part2/layers/graphify/graphify-inventory.md absent"
+        ],
+        "reasoning": "The criterion names source path(s) that are not present in the checkout. The harness did not scan unrelated files as substitutes.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "graph.json absent, part2/layers/graphify/graphify-inventory.md absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "dual-representation",
+        "criterion": "The layer preserves both a retrieval-friendly textual representation and the deterministic structural data (graph.json copied or referenced with its sha256 recorded) sufficient for native structural lookup in Part 3",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "path_mentioned_missing",
+        "evidence": [
+          "graph.json absent"
+        ],
+        "reasoning": "The criterion names source path(s) that are not present in the checkout. The harness did not scan unrelated files as substitutes.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "graph.json absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "distinction-documented",
+        "criterion": "graphify-inventory.md explicitly records which questions the retrieval-friendly representation serves versus which require deterministic structural lookup",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "path_mentioned_missing",
+        "evidence": [
+          "graphify-inventory.md absent"
+        ],
+        "reasoning": "The criterion names source path(s) that are not present in the checkout. The harness did not scan unrelated files as substitutes.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "graphify-inventory.md absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the experiment was executed correctly, never whether the hypothesis won.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution model (operator direction 2026-08-15, enforced by the attempt preamble): You are the ORCHESTRATOR, not the worker. Do NOT perform the node's work yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6 via the subagent tool's model parameter) to do the actual investigation, construction, and measurement. Your job is decomposition, dispatch, reviewing returns, integrating, and producing the final artifacts.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight (worker subagents, Khoj ingestion/processing, long builds), dispatch ONE watcher subagent on model deepseek/deepseek-v4-flash that actively polls with tools (job status, logs, artifact existence) and reports state changes; you go idle between its reports instead of polling yourself.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/ self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to this node as evidence; work discovered beyond this node's scope becomes a continuation proposal, never silent execution.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Work in /Users/sab-mini/repos/MyAPI. Write only under part2/ unless this node's text names another path. Never edit GDDP graph truth, runtime databases, or job state.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Close with parallel reviewer subagents on model deepseek/deepseek-v4-pro, each assigned a different explicit focus (criteria coverage, evidence integrity, constraint compliance). Resolve their findings before returning.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "part2/layers/graphify/graphify-inventory.md": false
+    },
+    "deps_status": {
+      "node-01-evidence-contract": "provisional"
+    },
+    "criteria_mismatches": [
+      {
+        "criterion_id": "capabilities-inventoried",
+        "kind": "source_path",
+        "detail": "graph.json absent, part2/layers/graphify/graphify-inventory.md absent"
+      },
+      {
+        "criterion_id": "dual-representation",
+        "kind": "source_path",
+        "detail": "graph.json absent"
+      },
+      {
+        "criterion_id": "distinction-documented",
+        "kind": "source_path",
+        "detail": "graphify-inventory.md absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "capabilities-inventoried",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "criterion_id": "dual-representation",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "criterion_id": "distinction-documented",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "431b98a1953bd1a136a42ce8d270e1f0d96a40d3",
+      "tip": "96726e17f3e7e0449b3064697d55e291f5d1575e",
+      "files": [],
+      "truncated": false,
+      "file_count": 0,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "capabilities-inventoried",
+        "judgment": "judged_fail",
+        "confidence": 0.98,
+        "evidence": [
+          "find . -iname '*inventory*' returns nothing (checked all paths, excluding .git)",
+          "part2/ contains only part2/contract/evidence-contract.md; part2/layers/ does not exist",
+          "git diff --name-status 96726e1~1 96726e1 is empty; tip commit 96726e1 (result wrapper for job_...node-07-graphify-evidence-attempt-0) changed 0 files vs parent 431b98a",
+          "git log --all --oneline -- '**/graphify-inventory.md' returns nothing",
+          "graphify-out/graph.json present: 67,111,631 bytes, 53,573 nodes / 73,117 links (verified by json parse) - source data exists but was never inventoried",
+          "part2/contract/evidence-contract.md lines 121, 275-294 (SC-05) define exactly what node-07 must produce (live counts from actual graph.json, filter used, both representations, both SHAs)"
+        ],
+        "reasoning": "The criterion's required artifact, part2/layers/graphify/graphify-inventory.md stating precisely what graphify-out/ knows (symbols, files, relationships, dependencies, references) with real counts from the actual graph.json, does not exist in the checkout. The node-07 attempt's result commit is empty (zero file changes). The underlying graph.json (53,573 nodes / 73,117 links) and GRAPH_REPORT.md exist as pre-existing repo artifacts, but no inventory document was produced. Note: the deterministic harness's 'graph.json absent' is a path-resolution artifact (the file lives at graphify-out/graph.json, not under part2/layers/graphify/ or the checkout root); the source data is present, the deliverable is not."
+      },
+      {
+        "criterion_id": "dual-representation",
+        "judgment": "judged_fail",
+        "confidence": 0.97,
+        "evidence": [
+          "part2/layers/graphify/ does not exist (find part2 -type d returns only part2 and part2/contract)",
+          "No sha256 of graph.json recorded anywhere: grep -rn -i 'sha256' part2/ shows only contract schema requirements (e.g., line 284 'graph_sha256 | SHA-256 of the pinned graphify-out/graph.json bytes'), never a recorded value",
+          "Computed actual sha256 of graphify-out/graph.json = 847d2e851d3389c50742101f90f54eb0445a297d47e78f22fafbe34202879b8e - not recorded in any file",
+          "graphify-out/graph.json (deterministic structural data) and graphify-out/GRAPH_REPORT.md (textual report, built 2026-08-08 from commit d82a5eae) exist, but as pre-existing graphify outputs committed earlier (git log shows graphify-out/graph.json committed in 6671b45/044c3c4), not as a node-07 'layer' artifact under part2/",
+          "Evidence contract SC-05 (lines 275-294) requires the pin plus both representations recorded on the inventory - none landed"
+        ],
+        "reasoning": "The criterion requires 'the layer' (part2/layers/graphify/) to preserve both a retrieval-friendly textual representation and the deterministic structural data with graph.json's sha256 recorded. The layer directory does not exist and no sha256 of graph.json is recorded anywhere. The deterministic structural data (graphify-out/graph.json) and a textual report (GRAPH_REPORT.md) exist in the repo but predate node-07 and were not preserved as a layer with a recorded pin; the node-07 attempt added nothing."
+      },
+      {
+        "criterion_id": "distinction-documented",
+        "judgment": "judged_fail",
+        "confidence": 0.98,
+        "evidence": [
+          "graphify-inventory.md absent (find -iname '*inventory*' returns nothing; git history for graphify-inventory.md empty)",
+          "grep -rn -i 'graphify' part2/ matches only part2/contract/evidence-contract.md, which does not itself document the retrieval-vs-deterministic question split (it defers that to the node-07 inventory, e.g. line 290: 'Node 07 states the filter it used... a Node 07 measurement recorded on the inventory')",
+          "Governing memo (GDDPvMyAPI-Part2.md, node 07 section) requires preserving the distinction between 'retrieval-friendly Graphify representation' and 'deterministic Graphify structural lookup' - no such record exists in the checkout"
+        ],
+        "reasoning": "The criterion requires graphify-inventory.md to explicitly record which questions the retrieval-friendly representation serves versus which require deterministic structural lookup. The document does not exist, so the distinction is not documented anywhere in node-07's scope. The memo and the evidence contract both explicitly deferred this documentation to the node-07 inventory, which was never produced."
+      }
+    ],
+    "overall_reasoning": "Node-07 (Inventory Graphify structural evidence) delivered nothing. The required artifact part2/layers/graphify/graphify-inventory.md does not exist; part2/ contains only the node-01 evidence contract; the node-07 attempt's result commit (96726e1, job_20260816T08332303b3098ee7c7fb attempt 0) changed zero files. All three acceptance criteria fail on the same root cause: the node's work product never landed. The source data the inventory was supposed to describe (graphify-out/graph.json: 53,573 nodes / 73,117 links, 67,111,631 bytes, matching the node-01 contract's snapshot record; plus GRAPH_REPORT.md and manifest.json) is present and tracked in the repo, so the failure is one of non-delivery, not missing source data. The deterministic harness's 'graph.json absent' is a path-resolution artifact (graph.json is at graphify-out/, not under part2/layers/graphify/ or the checkout root); the substantive finding stands independently. Note also that node-07's dependency, node-01-evidence-contract, is only 'provisional' (not accepted); its contract nonetheless scoped node-07 precisely (SC-05: live counts from actual graph.json, both representations preserved, questions split retrieval vs deterministic, both SHAs recorded), so the executor had explicit instructions that were not executed. Constraint compliance was not violated in the repo (no writes outside part2/, graphify-out/ untouched, working tree clean) - the process simply produced no output.",
+    "risks": "1) The deterministic harness reported 'graph.json absent', which is misleading: the file exists at graphify-out/graph.json (67MB, 53,573 nodes / 73,117 links). A human relying on that message might conclude the source data is missing; it is not - only node-07's deliverables are missing. 2) Dependency node-01-evidence-contract is 'provisional', so node-07's precondition is itself unaccepted; even so, the contract text is present and internally consistent, and the failure here is non-delivery, not a bad contract. 3) If node-07 is re-run, the recorded sha256 must be pinned: computed sha256 of graphify-out/graph.json is 847d2e851d3389c50742101f90f54eb0445a297d47e78f22fafbe34202879b8e, and counts (53,573 nodes / 73,117 links) should be re-derived from the actual file rather than copied from GRAPH_REPORT.md.",
+    "followup_candidates": "Observed: the node-07 attempt (job_20260816T08332303b3098ee7c7fb, attempt 0) produced a result commit with zero file changes - no part2/layers/graphify/ directory and no graphify-inventory.md anywhere in the checkout. Was this an intentional no-op/aborted attempt, or did the executor fail to land its work? If the node is to be completed, it must be re-run to produce part2/layers/graphify/graphify-inventory.md per SC-05 of the evidence contract (live counts from the actual graph.json, sha256 pin of graph.json, both representations preserved, retrieval-vs-deterministic question split documented). Also confirm whether node-01-evidence-contract's 'provisional' status should block node-07 re-execution.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-16T08:38:31.003Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_sgbxY6DW19W2kfaNQYPL5809",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && pwd && ls -la && echo \"---README---\" && cat README.md 2>/dev/null | head -100"
+        },
+        {
+          "ts": "2026-08-16T08:38:31.005Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_oLAMoDJLlQcYGaWQnh7x6171",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-16T08:38:31.020Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_oLAMoDJLlQcYGaWQnh7x6171",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:38:31.039Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_sgbxY6DW19W2kfaNQYPL5809",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:38:34.233Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_EWBAlWZeFn8hP86wjEws0032",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && echo \"===part2 tree===\" && find part2 -maxdepth 4 | head -100 && echo \"===graphify-out===\" && ls -la graphify-out/ && echo \"===part2/layers===\" && find part2/layers -maxdepth 3 2>/dev/null | head -50"
+        },
+        {
+          "ts": "2026-08-16T08:38:34.234Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_nLvVW3YZMxARV4vXktDg8324",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && echo \"===git status===\" && git status 2>&1 | head -20 && echo \"===git log===\" && git log --oneline -10 2>&1 && echo \"===git show head files===\" && git show --stat HEAD 2>&1 | head -40"
+        },
+        {
+          "ts": "2026-08-16T08:38:34.267Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_EWBAlWZeFn8hP86wjEws0032",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:38:34.596Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_nLvVW3YZMxARV4vXktDg8324",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:38:40.239Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_jZwsadvEpX52w7uDSFN24416",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && echo \"===tracked part2===\" && git ls-files part2/ && echo \"===tracked graphify-out===\" && git ls-files graphify-out/ && echo \"===gitignore relevant===\" && grep -n -i \"graphify\\|part2\\|graph.json\\|layers\" .gitignore"
+        },
+        {
+          "ts": "2026-08-16T08:38:40.239Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_8jpH1CwN6YWuliTb6FOx3499",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && echo \"===what did base commit 431b98a touch===\" && git show --stat 431b98a | head -30 && echo \"===what did tip 96726e1 touch===\" && git show --stat 96726e1 | head -30 && echo \"===diff base..tip===\" && git diff --stat 431b98a 96726e1 | tail -5"
+        },
+        {
+          "ts": "2026-08-16T08:38:40.304Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_jZwsadvEpX52w7uDSFN24416",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:38:40.321Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_8jpH1CwN6YWuliTb6FOx3499",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:38:46.547Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_YmrlQnTWDEvFPH4OFvl17332",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && echo \"===graphify-out sizes===\" && du -sh graphify-out/* && echo \"===graph.json head===\" && head -c 2000 graphify-out/graph.json && echo \"\" && echo \"===analysis json===\" && cat graphify-out/.graphify_analysis.json | head -80"
+        },
+        {
+          "ts": "2026-08-16T08:38:46.548Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_zd56hQwX7VZ7rGkp1oqL2107",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && echo \"===manifest head===\" && head -c 3000 graphify-out/manifest.json && echo \"\" && echo \"===grep inventory mentions in part2===\" && grep -rn -i \"graphify\\|graph.json\\|inventory\" part2/ | head -40"
+        },
+        {
+          "ts": "2026-08-16T08:38:46.576Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_YmrlQnTWDEvFPH4OFvl17332",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:38:46.579Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_zd56hQwX7VZ7rGkp1oqL2107",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:39:00.120Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_rhTHmwkfCz9cV5ECuOlS7393",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && echo \"===search for inventory md anywhere===\" && find . -iname \"*inventory*\" -not -path \"./.git/*\" 2>/dev/null && echo \"===search for graphify-inventory in git history===\" && git log --all --oneline -- '**/graphify-inventory.md' 2>/dev/null | head && echo \"===sha256 mentions in part2===\" && grep -rn -i \"sha256\" part2/ | head -20 && echo \"===semantic marker===\" && cat graphify-out/.graphify_semantic_marker && echo \"\" && echo \"===GRAPH_REPORT head===\" && head -60 graphify-out/GRAPH_REPORT.md"
+        },
+        {
+          "ts": "2026-08-16T08:39:00.121Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Eep4aWN3Les5r90tCk3I6212",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && echo \"===sha256 of graph.json (compute)===\" && shasum -a 256 graphify-out/graph.json && echo \"===try reading node-01 yaml and part2 memo===\" && cat /Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml 2>&1 | head -60; echo \"---memo---\"; cat /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md 2>&1 | head -40"
+        },
+        {
+          "ts": "2026-08-16T08:39:00.206Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_rhTHmwkfCz9cV5ECuOlS7393",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:39:00.393Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Eep4aWN3Les5r90tCk3I6212",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:39:04.312Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_B4BstOQ888WsbkHrJ8r71078",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && echo \"===memo node 07 section===\" && grep -n -A 30 \"Inventory Graphify\" /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md 2>/dev/null | head -60; echo \"===gddp-config node-07 yaml===\"; cat /Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-07-graphify-evidence.yaml 2>&1 | head -80"
+        },
+        {
+          "ts": "2026-08-16T08:39:04.313Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_DKvZ7V063UqTtPDZmHKe3506",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && echo \"===any part2 dirs at all===\" && find part2 -type d && echo \"===handoffs listing (recent)===\" && ls -t .handoffs/ | head -15 && echo \"===grep graphify in recent handoffs===\" && grep -rln -i \"graphify\" .handoffs/ 2>/dev/null | head && echo \"===job state / logs anywhere in checkout===\" && find . -maxdepth 3 -iname \"*job*\" -not -path \"./.git/*\" 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-16T08:39:04.337Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_B4BstOQ888WsbkHrJ8r71078",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:39:04.358Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_DKvZ7V063UqTtPDZmHKe3506",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:39:13.926Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_USz0SLxwGy9OTqpqjlUB8737",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && python3 -c \"\nimport json\nwith open('graphify-out/graph.json') as f:\n    g = json.load(f)\nprint('nodes:', len(g['nodes']), 'links:', len(g['links']))\nprint('sample node keys:', sorted(g['nodes'][0].keys()))\nprint('sample link keys:', sorted(g['links'][0].keys()))\n\" 2>&1 | head; echo \"===graph.json entry in manifest===\"; python3 -c \"\nimport json\nm = json.load(open('graphify-out/manifest.json'))\nk = [k for k in m if 'graph' in k.lower()]\nprint(k)\nfor kk in k[:3]:\n    print(kk, m[kk])\nprint('total manifest entries:', len(m))\n\" 2>&1 | head; echo \"===last commits touching graphify-out===\"; git log --oneline -3 -- graphify-out/graph.json"
+        },
+        {
+          "ts": "2026-08-16T08:39:13.926Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_H9lEPwogxZiYHaeWEmPK4348",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && echo \"===grep node-07 / graphify-inventory in handoffs and docs===\" && grep -rln \"node-07\\|graphify-inventory\\|node 07\\|Node 07\\|node 7\" .handoffs/ docs/ part2/ gddp/ 2>/dev/null | head && echo \"===search whole tree for 'graphify' under part2 or docs===\" && grep -rln -i \"graphify\" part2/ docs/ 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-16T08:39:13.959Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_H9lEPwogxZiYHaeWEmPK4348",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:39:14.327Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_USz0SLxwGy9OTqpqjlUB8737",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:39:24.010Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_p3L0lGuFewOrZk1jgEbt7487",
+          "reason": "command matched blocked pattern",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && echo \"===stash===\" && git stash list && echo \"===all refs===\" && git for-each-ref --format='%(refname)' | head -20 && echo \"===files changed by tip commit vs its parent===\" && git diff --name-status 96726e1~1 96726e1 && echo \"===what is 96726e1's parent===\" && git log --format='%H %s' -1 96726e1~1 && echo \"===untracked===\" && git status --porcelain | head",
+          "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+        },
+        {
+          "ts": "2026-08-16T08:39:24.011Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_p3L0lGuFewOrZk1jgEbt7487",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-16T08:39:26.458Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_LazB7z5OVmIZCfP19vAO5059",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng && git for-each-ref --format='%(refname)' | head -20; echo \"===tip vs parent===\"; git diff --name-status 96726e1~1 96726e1; echo \"===parent===\"; git log --format='%H %s' -1 96726e1~1; echo \"===porcelain===\"; git status --porcelain | head"
+        },
+        {
+          "ts": "2026-08-16T08:39:26.562Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_LazB7z5OVmIZCfP19vAO5059",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:39:54.560Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_thQqVR1wOnRbd5iGvzCZ7228",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node-07 (Inventory Graphify structural evidence) delivered nothing. The required artifact part2/layers/graphify/graphify-inventory.md does not exist; part2/ contains only the node-01 evidence contract; the node-07 attempt's result commit (96726e1, job_20260816T08332303b3098ee7c7fb attempt 0) changed zero files. All three acceptance criteria fail on the same root cause: the node's work product never landed. The source data the inventory was supposed to describe (graphify-out/graph.json: 53,573 nodes / 73,117 links, 67,111,631 bytes, matching the node-01 contract's snapshot record; plus GRAPH_REPORT.md and manifest.json) is present and tracked in the repo, so the failure is one of non-delivery, not missing source data. The deterministic harness's 'graph.json absent' is a path-resolution artifact (graph.json is at graphify-out/, not under part2/layers/graphify/ or the checkout root); the substantive finding stands independently. Note also that node-07's dependency, node-01-evidence-contract, is only 'provisional' (not accepted); its contract nonetheless scoped node-07 precisely (SC-05: live counts from actual graph.json, both representations preserved, questions split retrieval vs deterministic, both SHAs recorded), so the executor had explicit instructions that were not executed. Constraint compliance was not violated in the repo (no writes outside part2/, graphify-out/ untouched, working tree clean) - the process simply produced no output.",
+  "required_next_action": "Address semantic failures and re-submit.",
+  "generated_at": "2026-08-16T08:41:04.324902+00:00",
+  "evaluated_tree_sha": "17e7ae16a936beab81fb8f31da49694ef69bc870",
+  "evaluated_commit_sha": "96726e17f3e7e0449b3064697d55e291f5d1575e",
+  "merge_commit_sha": "96726e17f3e7e0449b3064697d55e291f5d1575e",
+  "expected_base_commit_sha": "431b98a1953bd1a136a42ce8d270e1f0d96a40d3",
+  "pr_ref": null,
+  "job_id": "job_20260816T08332303b3098ee7c7fb",
+  "execution_attempt_id": "job_20260816T08332303b3098ee7c7fb:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+    "neighbor:node-01-evidence-contract": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-jqgsocng/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "medium"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-16T08:38:27.247533+00:00",
+    "finished_at": "2026-08-16T08:41:04.324636+00:00",
+    "wall_s": 157.082,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 87.439,
+      "tool_calls": 16
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 69.616,
+      "tool_calls": 14
+    }
+  }
+}

@@ -1,0 +1,1156 @@
+{
+  "project_id": "myapi-part1",
+  "node_id": "node-05-validate-decision-set",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.9,
+    "findings": [],
+    "reasoning": "Fresh-eyes review of node-05-validate-decision-set (Stage C gate). Intent: confirm completeness, structure, and canonical status of the decision set before a corpus is built from it. The delivered validation-report.md does exactly that: it records structural checks (schema conformance, unique IDs, dangling supersession links), canonical status, rejected-candidate disposition, and per-source decision counts with explicit dispositions for every zero-yield source, ending in a Stage C gate PASS recommendation. I independently reproduced the report's claims against the data: 17 canonical objects (D01-D10, D12-D18), all status=accepted / review_mark=Y, all required fields present, 0 replaces/replaced_by entries, single relationship D18->D17 with existing target, decided_on dates schema-conformant. The report's pinned input SHA-256s exactly match the current working-tree files, so the report validated precisely what is on disk now. Graph integrity: node-05's commit (d301bd2) touched only validation-report.md and .handoffs/031 — no mutation of decisions-canonical.jsonl, schema, sources, or runtime state; the handoff confirms read-only, graph-truth untouched. The depends_on chain node-04 -> node-05 -> node-06 is honored: node-04 produced decisions-canonical.jsonl (bdf55a6), node-05 validated it, and node-06's corpus index pins source_sha256 09c15aeb... equal to the exact hash the validation report certified — downstream consumed the validated artifact, not a drifted one. The full downstream chain (corpus -> khoj transform -> ingest -> retrieval -> eval) is present and consistent. Lane 1's indeterminate statuses stem from keyword-scan tooling (no exact identifier match / no registered probe), which is a lane-1 adjudication matter, not an integrity defect; the report's content substantively addresses both criteria. No intent drift, no broken edges, no scope bleed.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-18T09:03:06.233Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_WRDXgZgcKiwS8Od3ctEL6919",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-05-validate-decision-set.yaml"
+      },
+      {
+        "ts": "2026-08-18T09:03:06.234Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_szPVSOjnzk9UgHwBUjCr2114",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-04-normalize-decisions.yaml"
+      },
+      {
+        "ts": "2026-08-18T09:03:06.234Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_3XGAFzIawJWUhQcjLJqC8077",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml"
+      },
+      {
+        "ts": "2026-08-18T09:03:06.241Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_WRDXgZgcKiwS8Od3ctEL6919",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:06.242Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_3XGAFzIawJWUhQcjLJqC8077",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:06.242Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_szPVSOjnzk9UgHwBUjCr2114",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:09.099Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_sHke8Gb8dMMOHKLJ8tmM2872",
+        "command": "ls -la /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/ && echo \"---\" && ls -la /Users/sab-mini/repos/gddp-config/graphs/myapi-part1/"
+      },
+      {
+        "ts": "2026-08-18T09:03:09.101Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ytLGfiyzIgtvto3ANV6V5494",
+        "command": "cd /Users/sab-mini/repos/MyAPI && ls -la && echo \"--- git log ---\" && git log --oneline -20 2>/dev/null && echo \"--- status ---\" && git status 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-18T09:03:09.130Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_sHke8Gb8dMMOHKLJ8tmM2872",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:09.158Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ytLGfiyzIgtvto3ANV6V5494",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:12.733Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_dgZlzhqPwd3Grh9M8iXi6661",
+        "path": "/Users/sab-mini/repos/MyAPI/01-decisions/output/validation-report.md"
+      },
+      {
+        "ts": "2026-08-18T09:03:12.733Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_eFHMyOw8R9XPs3l5Fnkk3249",
+        "path": "/Users/sab-mini/repos/MyAPI/.handoffs/031-validate-canonical-decision-set.md"
+      },
+      {
+        "ts": "2026-08-18T09:03:12.734Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_h3Z7rK3wUp5cNjs4MxzH0697",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-06-build-corpus.yaml"
+      },
+      {
+        "ts": "2026-08-18T09:03:12.735Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_dgZlzhqPwd3Grh9M8iXi6661",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:12.735Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_eFHMyOw8R9XPs3l5Fnkk3249",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:12.736Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_h3Z7rK3wUp5cNjs4MxzH0697",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:20.823Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_00_cPsk2g21jKealzyJf3i75024",
+        "reason": "command matched blocked pattern",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== decisions-canonical.jsonl: line count and ids ===\" && wc -l 01-decisions/output/decisions-canonical.jsonl && jq -r '.id' 01-decisions/output/decisions-canonical.jsonl 2>/dev/null | sort | tr '\\n' ' ' && echo && echo \"=== ids count / duplicates ===\" && jq -r '.id' 01-decisions/output/decisions-canonical.jsonl 2>/dev/null | sort | uniq -d && echo \"(no dup lines above = no duplicates)\" && echo \"=== required fields check ===\" && jq -r 'select((has(\"id\") and has(\"schema_version\") and has(\"project\") and has(\"title\") and has(\"summary\") and has(\"statement\") and has(\"status\") and has(\"rationale\") and has(\"decided_on\") and (.sources|type==\"array\" and length>0)) | .id' 01-decisions/output/decisions-canonical.jsonl | wc -l",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-18T09:03:20.824Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_cPsk2g21jKealzyJf3i75024",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-18T09:03:20.825Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_d0wPHlz9SomVGmEY5PjM5650",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== SHA-256 of validation inputs vs report claims ===\" && shasum -a 256 01-decisions/output/decision-schema.md 01-decisions/output/sources.md 01-decisions/output/decisions-raw.jsonl 01-decisions/output/decisions-canonical.jsonl && echo \"=== report's pinned hashes ===\" && grep -A2 \"SHA-256\" 01-decisions/output/validation-report.md | grep -E \"41289d2b|59ea400b|70c54903|09c15aeb\""
+      },
+      {
+        "ts": "2026-08-18T09:03:20.871Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_d0wPHlz9SomVGmEY5PjM5650",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:25.186Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_32gcTehmdVHzdSUpuE3j0897",
+        "command": "cd /Users/sab-mini/repos/MyAPI && wc -l 01-decisions/output/decisions-canonical.jsonl && jq -r '.id' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c"
+      },
+      {
+        "ts": "2026-08-18T09:03:25.186Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_01_ODeJgR9qefZdOfDKQPRg1122",
+        "reason": "command matched blocked pattern",
+        "command": "cd /Users/sab-mini/repos/MyAPI && jq -r 'select(has(\"id\") and has(\"schema_version\") and has(\"project\") and has(\"title\") and has(\"summary\") and has(\"statement\") and has(\"status\") and has(\"rationale\") and has(\"decided_on\") and (.sources|type==\"array\" and length>0)) | .id' 01-decisions/output/decisions-canonical.jsonl | wc -l",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-18T09:03:25.187Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ODeJgR9qefZdOfDKQPRg1122",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-18T09:03:25.212Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_32gcTehmdVHzdSUpuE3j0897",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:29.295Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_LaOawAhoKhjKByqDgsvK1573",
+        "command": "cd /Users/sab-mini/repos/MyAPI && jq -r 'select(has(\"id\") and has(\"schema_version\") and has(\"project\") and has(\"title\") and has(\"summary\") and has(\"statement\") and has(\"status\") and has(\"rationale\") and has(\"decided_on\") and (.sources|type==\"array\") and (.sources|length!=0)) | .id' 01-decisions/output/decisions-canonical.jsonl | wc -l && echo \"--- status values ---\" && jq -r '.status' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c && echo \"--- schema_version values ---\" && jq -r '.schema_version' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c"
+      },
+      {
+        "ts": "2026-08-18T09:03:29.296Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_j0tUuTMUYRg8gOe6ZqPW6479",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"--- supersession fields ---\" && jq -r '[.replaces, .replaced_by] | @tsv' 01-decisions/output/decisions-canonical.jsonl | grep -v \"null\" | wc -l && echo \"--- relationship field ---\" && jq -c '.relationship // \"none\"' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c && echo \"--- sources per record (count) ---\" && jq -r '.sources | length' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c"
+      },
+      {
+        "ts": "2026-08-18T09:03:29.333Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_LaOawAhoKhjKByqDgsvK1573",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:29.333Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_j0tUuTMUYRg8gOe6ZqPW6479",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:33.099Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_2Ma6bwIOnmrbykjmmDx22056",
+        "path": "/Users/sab-mini/repos/MyAPI/01-decisions/output/decision-schema.md"
+      },
+      {
+        "ts": "2026-08-18T09:03:33.100Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_t5qqjVTfugRjyoU7x5vv9963",
+        "command": "cd /Users/sab-mini/repos/MyAPI && jq -c '.[]' 01-decisions/output/decisions-canonical.jsonl | head -2"
+      },
+      {
+        "ts": "2026-08-18T09:03:33.104Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_2Ma6bwIOnmrbykjmmDx22056",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:33.121Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_t5qqjVTfugRjyoU7x5vv9963",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:37.300Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_TEXcog2GDUDtVebpPPF03213",
+        "command": "cd /Users/sab-mini/repos/MyAPI && head -1 01-decisions/output/decisions-canonical.jsonl | jq -c '{id, schema_version, project, status, review_mark, replaces, replaced_by, related_decisions, source_refs: [.sources[].ref]}'"
+      },
+      {
+        "ts": "2026-08-18T09:03:37.301Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_yp4binStKa3iCwni3dnI1817",
+        "command": "cd /Users/sab-mini/repos/MyAPI && jq -r 'if (.replaces != null and (.replaces|length!=0)) then .id else empty end' 01-decisions/output/decisions-canonical.jsonl | wc -l && jq -r 'if (.replaced_by != null) then .id else empty end' 01-decisions/output/decisions-canonical.jsonl | wc -l && jq -r 'if (.related_decisions != null and (.related_decisions|length!=0)) then .id else empty end' 01-decisions/output/decisions-canonical.jsonl | tr '\\n' ' '"
+      },
+      {
+        "ts": "2026-08-18T09:03:37.322Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_TEXcog2GDUDtVebpPPF03213",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:37.338Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_yp4binStKa3iCwni3dnI1817",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:41.123Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Sv8ecABRH7JLXBcZZWtM3671",
+        "command": "cd /Users/sab-mini/repos/MyAPI && jq -c 'select(.id==\"D18\") | {id, related_decisions}' 01-decisions/output/decisions-canonical.jsonl && echo \"--- D17 exists? ---\" && jq -r '.id' 01-decisions/output/decisions-canonical.jsonl | grep -c \"^D17$\""
+      },
+      {
+        "ts": "2026-08-18T09:03:41.123Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_a8RBSGHuwXwu2jojjm5R1578",
+        "path": "/Users/sab-mini/repos/MyAPI/01-decisions/CONTEXT.md"
+      },
+      {
+        "ts": "2026-08-18T09:03:41.124Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_Qn2GDXXaaqlUq2ABMrLR2083",
+        "path": "/Users/sab-mini/repos/MyAPI/01-decisions/output/sources.md"
+      },
+      {
+        "ts": "2026-08-18T09:03:41.129Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_Qn2GDXXaaqlUq2ABMrLR2083",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:41.129Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_a8RBSGHuwXwu2jojjm5R1578",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:41.154Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Sv8ecABRH7JLXBcZZWtM3671",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:48.525Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_wye2GpHlZFMuW1ArlmGa3825",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git log --oneline --all -- 01-decisions/output/validation-report.md && echo \"=== diff of .gitignore in the range ===\" && git diff 220496ca1dcd56c22f093efb0fd127a7498c90db ffece0a9eeae1d61d1fef8e90595b9d8296d80bf -- .gitignore"
+      },
+      {
+        "ts": "2026-08-18T09:03:48.525Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_3UzbvlZuvcgnYDHVYeD37373",
+        "command": "cd /Users/sab-mini/repos/MyAPI && ls 02-corpus/output/corpus/ && echo \"--- count ---\" && ls 02-corpus/output/corpus/ | grep -c \"\\.md$\" && echo \"--- khoj-corpus ---\" && ls 03-ingestion/output/khoj-corpus/ | head -20 && echo \"--- index ---\" && head -25 02-corpus/output/corpus/index.md"
+      },
+      {
+        "ts": "2026-08-18T09:03:48.554Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_3UzbvlZuvcgnYDHVYeD37373",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:48.606Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_wye2GpHlZFMuW1ArlmGa3825",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:55.090Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_MQ2G38EXna6baW2w446Y3619",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== who created decisions-canonical.jsonl ===\" && git log --oneline --all -- 01-decisions/output/decisions-canonical.jsonl && echo \"=== who created sources.md ===\" && git log --oneline --all -- 01-decisions/output/sources.md && echo \"=== 04-evaluation output ===\" && ls 04-evaluation/output/ 2>/dev/null && echo \"=== .gddp ===\" && ls -R .gddp 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-18T09:03:55.091Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_vNXqu2uBNTePdsU6Edde7288",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-07-khoj-transform.yaml"
+      },
+      {
+        "ts": "2026-08-18T09:03:55.095Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_vNXqu2uBNTePdsU6Edde7288",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:55.158Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_MQ2G38EXna6baW2w446Y3619",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-18T09:03:58.056Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_JssWT7FjermiFlOPySxy5068",
+        "command": "cd /Users/sab-mini/repos/MyAPI && ls -la 04-evaluation/ && echo \"---\" && find 04-evaluation -type f | head -30"
+      },
+      {
+        "ts": "2026-08-18T09:03:58.057Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_VnpuogAyheWIMZDWHjcl1425",
+        "command": "cd /Users/sab-mini/repos/MyAPI && ls 03-ingestion/output/ && echo \"--- transform-notes head ---\" && head -30 03-ingestion/output/transform-notes.md 2>/dev/null && echo \"--- ingest-report head ---\" && head -25 03-ingestion/output/ingest-report.md 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-18T09:03:58.079Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_VnpuogAyheWIMZDWHjcl1425",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:03:58.080Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_JssWT7FjermiFlOPySxy5068",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:04:02.724Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_cVJJckfJOht5HA1GBVdf2015",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== files in node-05 commit d301bd2 ===\" && git show --stat --oneline d301bd2 | head -20 && echo \"=== files in node-04 commit bdf55a6 ===\" && git show --stat --oneline bdf55a6 | head -20"
+      },
+      {
+        "ts": "2026-08-18T09:04:02.725Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_zq1G9xhOgX9EJnULPtZV4048",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== q3 supersession result (head) ===\" && head -30 04-evaluation/results/q3-supersession.md && echo \"=== q5 negative control (head) ===\" && head -30 04-evaluation/results/q5-negative-control.md"
+      },
+      {
+        "ts": "2026-08-18T09:04:02.743Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_zq1G9xhOgX9EJnULPtZV4048",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:04:02.764Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_cVJJckfJOht5HA1GBVdf2015",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:04:16.982Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_llp8YjNsq5azsXQFIWGu7616",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"--- review_mark distribution ---\" && jq -r '.review_mark' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c && echo \"--- decided_on format check ---\" && jq -r '.decided_on' 01-decisions/output/decisions-canonical.jsonl | grep -Ev \"^[0-9]{4}-[0-9]{2}-[0-9]{2}$\" | wc -l && echo \"--- project values ---\" && jq -r '.project' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c"
+      },
+      {
+        "ts": "2026-08-18T09:04:16.983Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_paCZ7CT9Ri2V0AsRzjSt3034",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"--- repo-local normalized note hash ---\" && shasum -a 256 \"project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md\" && echo \"--- Corpus v1.0 copy hash (if present) ---\" && shasum -a 256 \"Corpus v1.0/40-decisions-and-trajectories/2026-08-08-last2w-decisions.md\" 2>/dev/null || echo \"(Corpus v1.0 copy not present locally)\" && echo \"--- is project-docs note tracked? ---\" && git ls-files \"project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md\""
+      },
+      {
+        "ts": "2026-08-18T09:04:17.019Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_llp8YjNsq5azsXQFIWGu7616",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:04:17.044Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_paCZ7CT9Ri2V0AsRzjSt3034",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-18T09:04:36.808Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_OPGYKD00IsPbDGkHqpjT6768",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "All node YAMLs in gddp-config (including node-05) carry unlocks: [] while real edges are encoded only via downstream depends_on (e.g., node-06 depends_on node-05). The slice executed fine end-to-end, but any frontier-advancement logic keyed on unlocks would see an empty graph; harmless here, worth normalizing in config if the next slice reuses the pattern.",
+        "affected_node_ids": [
+          "node-05-validate-decision-set",
+          "node-06-build-corpus"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": ".gitignore now ignores Corpus v1.0/ (parity-witness copy) and agent-run noise dirs. The repo-local normalized note under project-docs/ remains tracked and its hash (4124f8...5558) is pinned in both sources.md and validation-report.md, so decision truth stays reproducible; but the absolute-path Corpus v1.0 refs in sources[].ref will dangle if that untracked copy is ever removed from the working tree. Future reproducibility check should confirm the parity witness still matches before citing it.",
+        "affected_node_ids": [
+          "node-05-validate-decision-set",
+          "node-04-normalize-decisions"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.925,
+  "criteria_confidence": 0.925,
+  "completeness": 1.0,
+  "graph_readiness": 0.925,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "validator-passes",
+        "criterion": "01-decisions/output/validation-report.md records structural checks (schema conformance, unique ids, dangling supersession links) all passing or each failure explicitly dispositioned",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (01-decisions/output/validation-report.md)"
+        ],
+        "reasoning": "Scanned source files (01-decisions/output/validation-report.md) for identifiers named in the criterion (validation-report). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "coverage-check",
+        "criterion": "Report states decision count per source and confirms no source yielded zero without explanation",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/GDDP v MyAPI Part 1 - the first slice.md - read it first.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution trio (operator direction 2026-08-13): main pi session runs gpt-5.6-sol; delegate with up to 5 subagents on model xai/grok-4.6 via the subagent tool's model parameter; close with one oracle or reviewer pass before returning",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "01-decisions/output/validation-report.md": true
+    },
+    "deps_status": {
+      "node-04-normalize-decisions": "complete"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "220496ca1dcd56c22f093efb0fd127a7498c90db",
+      "tip": "ffece0a9eeae1d61d1fef8e90595b9d8296d80bf",
+      "files": [
+        {
+          "status": "M",
+          "path": ".gitignore"
+        },
+        {
+          "status": "A",
+          "path": ".handoffs/030-corpus-vm-semantic-graphify.md"
+        },
+        {
+          "status": "A",
+          "path": ".handoffs/031-validate-canonical-decision-set.md"
+        },
+        {
+          "status": "A",
+          "path": ".handoffs/032-khoj-transform.md"
+        },
+        {
+          "status": "A",
+          "path": ".handoffs/033-khoj-ingest-blocked-nonempty-target.md"
+        },
+        {
+          "status": "A",
+          "path": ".handoffs/034-khoj-ingest-clean-target.md"
+        },
+        {
+          "status": "A",
+          "path": ".handoffs/035-khoj-retrieval-verified.md"
+        },
+        {
+          "status": "A",
+          "path": ".handoffs/036-negative-control-evaluated.md"
+        },
+        {
+          "status": "A",
+          "path": "01-decisions/CONTEXT.md"
+        },
+        {
+          "status": "A",
+          "path": "01-decisions/output/decision-schema.md"
+        },
+        {
+          "status": "A",
+          "path": "01-decisions/output/decisions-canonical.jsonl"
+        },
+        {
+          "status": "A",
+          "path": "01-decisions/output/decisions-raw.jsonl"
+        },
+        {
+          "status": "A",
+          "path": "01-decisions/output/sources.md"
+        },
+        {
+          "status": "A",
+          "path": "01-decisions/output/validation-report.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/CONTEXT.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/build_corpus.py"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D01.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D02.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D03.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D04.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D05.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D06.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D07.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D08.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D09.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D10.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D12.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D13.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D14.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D15.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D16.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D17.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/D18.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/corpus/index.md"
+        },
+        {
+          "status": "A",
+          "path": "02-corpus/output/repro-report.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/CONTEXT.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/output/ingest-report.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/output/khoj-corpus/D01.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/output/khoj-corpus/D02.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/output/khoj-corpus/D03.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/output/khoj-corpus/D04.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/output/khoj-corpus/D05.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/output/khoj-corpus/D06.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/output/khoj-corpus/D07.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/output/khoj-corpus/D08.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/output/khoj-corpus/D09.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/output/khoj-corpus/D10.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/output/khoj-corpus/D12.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/output/khoj-corpus/D13.md"
+        },
+        {
+          "status": "A",
+          "path": "03-ingestion/output/khoj-corpus/D14.md"
+        }
+      ],
+      "truncated": true,
+      "file_count": 87,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "validator-passes",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "01-decisions/output/validation-report.md (Structural checks table: JSONL parsing PASS/17 objects, Schema conformance PASS, Unique IDs PASS/17 unique, Dangling supersession links PASS/0 refs, Relationship targets PASS, Canonical status PASS, Rejected candidate disposition PASS, Required provenance PASS; 'Structural failures requiring disposition: none.')",
+          "Independent jq re-check of 01-decisions/output/decisions-canonical.jsonl: 17 objects; 0 duplicate ids (D01-D10, D12-D18); all required fields (id, schema_version, project, title, summary, statement, status, rationale, decided_on) present and non-empty for all 17; schema_version all '1.0'; status all 'accepted'; review_mark all 'Y'; decided_on all valid YYYY-MM-DD; source kinds within schema enum; no object sets replaces/replaced_by (supersession vacuous, matching the report's disposition of the schema's MCP example as excluded)",
+          "01-decisions/output/decisions-raw.jsonl also has 17 objects with the same ID set, consistent with node-04's one-object-per-raw-object criterion",
+          "D18 related_decisions[0] = {target_id: D17, rel: companion}; D17 exists in set",
+          "All 5 input SHA-256 hashes listed in the report verified identical to actual files"
+        ],
+        "reasoning": "The report records every structural check named in the criterion (schema conformance, unique ids, dangling supersession links) plus additional checks, each with PASS result and explicit evidence; no failure required disposition ('Structural failures requiring disposition: none'), satisfying the 'all passing or each failure explicitly dispositioned' branch. I independently re-ran the structural checks against the canonical JSONL and the data matches the report exactly, so the recorded results are truthful, not just asserted. The deterministic scanner's 'no hit' was a false negative (artifact is present per artifacts_present and contains the exact required content)."
+      },
+      {
+        "criterion_id": "coverage-check",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "01-decisions/output/validation-report.md 'Decision count per admitted source' table: DECISIONS-REVIEW-SHEET.md 17, 2026-08-08-last2w-decisions.md 17, Corpus v1.0 keeper 17, CORPUS-TARGET-SHAPE.md 1 (D14), REBUILD-CONTEXT-ANCHOR.md 2 (D14,D15), ARCHITECTURE.md 2 (D14,D15), handoff 030 1 (D14); each zero-count source/class row carries an explicit disposition in the 'Zero-yield excluded sources' table",
+          "Independent count re-check of sources[].ref in decisions-canonical.jsonl: D14 has 7 sources (incl. CORPUS-TARGET-SHAPE, REBUILD-CONTEXT-ANCHOR, ARCHITECTURE.md, handoff 030), D15 has 5 (incl. REBUILD-CONTEXT-ANCHOR, ARCHITECTURE.md), all others 3 (the three truth sources) — matches the report table exactly",
+          "Report 'Coverage result: PASS. ... No source yielded zero without explanation.'",
+          "sources.md (Stage B manifest) independently corroborates the admitted-vs-excluded source partitioning the report dispositiones"
+        ],
+        "reasoning": "The report states a decision count per source (17 per truth source, exact citation counts for supporting sources) and explicitly dispositiones every zero-count source/class (D11 rejection, schema examples, QUERIES files, QUERY-GROUNDING-PASS1, WORK-MOVED-TO-VM, Corpus v1.0 others, source-of-truth-anchors, other handoffs, framing docs, unreviewed evidence, graphify-out, git history, runtime state), confirming 'no source yielded zero without explanation.' I verified the per-source counts against the actual sources[] arrays in the canonical file and they match precisely. Residual uncertainty is limited to the explanatory text of the zero-yield table (external-inventory assertions), which is internally consistent with sources.md."
+      }
+    ],
+    "overall_reasoning": "Node-05-validate-decision-set satisfies both acceptance criteria. The required artifact 01-decisions/output/validation-report.md exists and records structural checks (schema conformance, unique ids, dangling supersession links) all passing with explicit evidence and no failures requiring disposition, plus a coverage section stating decision count per source with every zero-count source/class explicitly dispositioned and an explicit 'No source yielded zero without explanation' confirmation. Independent re-verification against the actual data files (decisions-canonical.jsonl, decisions-raw.jsonl, DECISIONS-REVIEW-SHEET.md, sources.md) confirmed every substantive claim: 17 objects, 17 unique IDs, required fields present with valid enums/dates, supersession vacuous (no replaces/replaced_by set), D18→D17 relationship target exists, all objects status=accepted with review_mark=Y, D11 absent and marked N in the review sheet, per-source citation counts matching the report table exactly, and all five input hashes in the report matching files byte-for-byte. The report's input-hash table, D11 disposition, and source partitioning are consistent with upstream artifacts from nodes 01–04, and handoff 031 documents the node's execution (validation report + handoff only; no graph/runtime writes). The deterministic 'no hit' for validation-report.md was a scanner false negative (artifacts_present confirms the file). Intent preservation: the Stage C gate (validate completeness/structure before corpus build) is fulfilled and the report explicitly hands the validated canonical set to Stage D. The execution-trio/oracle constraint is claimed in the report (three grok-4.6 reviewer passes) but is execution-trail evidence, not a listed criterion; no violations of the stated constraints were found in the repo.",
+    "risks": "1) The execution-trio constraint (gpt-5.6-sol main + grok-4.6 subagents + oracle/reviewer close) is asserted in the report and handoff but cannot be independently verified from the repo; it is execution-trail evidence, not an acceptance criterion. 2) The report describes a jq 1.7.1 validator invocation but no validator script is committed to the repo, so the structural checks are not re-runnable as an artifact — the criterion only requires the checks be recorded, which they are. 3) 'Dangling supersession links PASS' is a vacuous pass (no supersession claims exist in the closed set); the report dispositiones this correctly, but a future set with real supersession would exercise the check non-trivially. 4) Zero-yield dispositions for excluded external classes (runtime DBs, VM corpus state) are stated as assertions; they are consistent with sources.md but not independently verifiable from this repo snapshot.",
+    "followup_candidates": "1) Observed: the deterministic scanner reported 'no hit in source scan (01-decisions/output/validation-report.md)' and low confidence, yet the artifact is present (artifacts_present=True) and fully satisfies both criteria. The keyword-scan method appears to have false-negatived on the artifact; consider a path-existence probe for required_artifacts before keyword scanning so presence is not misreported as absence. 2) The report cites a jq 1.7.1 validator invocation for the structural checks but no validator script is committed; the criterion does not require one, but if reproducibility of the validation step is intended, ask the human whether a committed validator script should be a node artifact (if yes, update criteria and rerun; otherwise this verdict stands). 3) The report's 'independent review evidence' section claims three read-only grok-4.6 reviewer passes; not part of the acceptance criteria, so not counted toward the verdict — flagging only so the human can confirm the trio constraint was honored if they track execution composition.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-18T09:01:22.820Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_vJLaLZ0fPdSgq3UR5dxV3030",
+          "path": "/Users/sab-mini/repos/MyAPI/01-decisions/output/validation-report.md"
+        },
+        {
+          "ts": "2026-08-18T09:01:22.821Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_FQYqPy1QylgcYJcudPWJ4155",
+          "path": "/Users/sab-mini/repos/MyAPI/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-18T09:01:22.826Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_vJLaLZ0fPdSgq3UR5dxV3030",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-18T09:01:22.826Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_FQYqPy1QylgcYJcudPWJ4155",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-18T09:01:25.303Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_YIsfRwOtozFZ5toFhjz36248",
+          "path": "/Users/sab-mini/repos/MyAPI/01-decisions/output/decision-schema.md"
+        },
+        {
+          "ts": "2026-08-18T09:01:25.304Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_k8D1yIxqujw81NsjVfdW0438",
+          "path": "/Users/sab-mini/repos/MyAPI/01-decisions/output/sources.md"
+        },
+        {
+          "ts": "2026-08-18T09:01:25.307Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_YIsfRwOtozFZ5toFhjz36248",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-18T09:01:25.308Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_k8D1yIxqujw81NsjVfdW0438",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-18T09:01:27.570Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_DcP2UlcE2UqMwVpaWQIC1332",
+          "path": "/Users/sab-mini/repos/MyAPI/01-decisions/output/decisions-canonical.jsonl"
+        },
+        {
+          "ts": "2026-08-18T09:01:27.571Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_kN1eynVwKEwUeD0N82Kb0507",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-04-normalize-decisions.yaml"
+        },
+        {
+          "ts": "2026-08-18T09:01:27.572Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_irKB7MXKdEDsv3BOmCWB8793",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml"
+        },
+        {
+          "ts": "2026-08-18T09:01:27.574Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_irKB7MXKdEDsv3BOmCWB8793",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-18T09:01:27.575Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_kN1eynVwKEwUeD0N82Kb0507",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-18T09:01:27.575Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_DcP2UlcE2UqMwVpaWQIC1332",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-18T09:01:35.471Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_HQ51lOp1WVTD2k6zCKzh4449",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== Object count ===\" && jq -s 'length' 01-decisions/output/decisions-canonical.jsonl && echo \"=== Unique IDs ===\" && jq -r '.id' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -d | wc -l && jq -r '.id' 01-decisions/output/decisions-canonical.jsonl | sort | tr '\\n' ' ' && echo \"\" && echo \"=== Required fields check ===\" && jq -r '[.id, (.id as $id | [[\"id\",\"schema_version\",\"project\",\"title\",\"summary\",\"statement\",\"status\",\"rationale\",\"decided_on\"] | all(.[]; has(.)) and .[] | if (.[0] == null) then false else true end])]' 01-decisions/output/decisions-canonical.jsonl 2>/dev/null | head -5"
+        },
+        {
+          "ts": "2026-08-18T09:01:35.473Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_V1ccDtTxCSCNgazd09wG3148",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== status values ===\" && jq -r '.status' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c && echo \"=== review_mark values ===\" && jq -r '.review_mark' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c && echo \"=== replaces/replaced_by present? ===\" && jq -c '{id, replaces, replaced_by}' 01-decisions/output/decisions-canonical.jsonl | grep -E '\"(replaces|replaced_by)\"' | head && echo \"(above should be empty if absent)\" && echo \"=== related_decisions ===\" && jq -c 'select(.related_decisions != null) | {id, related_decisions}' 01-decisions/output/decisions-canonical.jsonl && echo \"=== sources non-empty for all ===\" && jq -r 'select((.sources | length) == 0) | .id' 01-decisions/output/decisions-canonical.jsonl | wc -l && echo \"=== D11 present? ===\" && jq -r '.id' 01-decisions/output/decisions-canonical.jsonl | grep -c \"^D11$\" || echo \"0 matches (correct)\""
+        },
+        {
+          "ts": "2026-08-18T09:01:35.521Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_HQ51lOp1WVTD2k6zCKzh4449",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-18T09:01:35.530Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_V1ccDtTxCSCNgazd09wG3148",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-18T09:01:41.734Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_fLipkh48pi3c1JtNCAnk0007",
+          "reason": "command matched blocked pattern",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== Required fields per object ===\" && jq -r 'def req: [\"id\",\"schema_version\",\"project\",\"title\",\"summary\",\"statement\",\"status\",\"rationale\",\"decided_on\"]; .id as $id | [req[] | select((has(.) | not) or (.[.] == null) or (.[.] == \"\"))] as $missing | \"\\($id): missing=\\($missing|join(\",\"))\"' 01-decisions/output/decisions-canonical.jsonl && echo \"=== sources[] non-empty strings check ===\" && jq -r '.id as $id | if ((.sources|length) == 0 or ([.sources[].ref | select(. == null or . == \"\")] | length) > 0) then \"\\($id) BAD\" else empty end' 01-decisions/output/decisions-canonical.jsonl && echo \"(no BAD lines = pass)\" && echo \"=== schema_version values ===\" && jq -r '.schema_version' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c && echo \"=== decided_on date format ===\" && jq -r '.decided_on' 01-decisions/output/decisions-canonical.jsonl | grep -vcE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' && echo \"=== source kind enum values ===\" && jq -r '.sources[].kind' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-18T09:01:41.734Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_fLipkh48pi3c1JtNCAnk0007",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-18T09:01:41.735Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_cRS4U0fiCmwUH8qzRg0K5534",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== raw count ===\" && jq -s 'length' 01-decisions/output/decisions-raw.jsonl && echo \"=== raw ids ===\" && jq -r '.id' 01-decisions/output/decisions-raw.jsonl 2>/dev/null | sort | tr '\\n' ' ' ; echo \"\" && echo \"=== source count per canonical object ===\" && jq -r '.id as $id | \"\\($id): \\(.sources|length) sources\"' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c | sort -rn | head -20"
+        },
+        {
+          "ts": "2026-08-18T09:01:41.774Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_cRS4U0fiCmwUH8qzRg0K5534",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-18T09:01:53.810Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_TKBliIhYpYHvS95kX4Et3585",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== required fields present (non-null, non-empty) per object ===\" && jq -r '.id as $id | ([\"id\",\"schema_version\",\"project\",\"title\",\"summary\",\"statement\",\"status\",\"rationale\",\"decided_on\"] | map(select(has(.) | not))) as $absent | \"\\($id): absent=\\($absent|join(\",\"))\"' 01-decisions/output/decisions-canonical.jsonl && echo \"=== schema_version distribution ===\" && jq -r '.schema_version' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c && echo \"=== decided_on date format (lines not matching YYYY-MM-DD) ===\" && jq -r '.decided_on' 01-decisions/output/decisions-canonical.jsonl | grep -vE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' | wc -l && echo \"=== source kind enum values ===\" && jq -r '.sources[].kind' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c && echo \"=== relation rel enum values ===\" && jq -r '.related_decisions[].rel' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c"
+        },
+        {
+          "ts": "2026-08-18T09:01:53.811Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_7F6cA3AM50vJwNE5gNkS9174",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== files referenced by report exist? ===\" && ls -la \"project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md\" \"project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md\" \"Corpus v1.0/40-decisions-and-trajectories/2026-08-08-last2w-decisions.md\" 2>&1 | sed 's|/Users/sab-mini/repos/MyAPI/||' && echo \"=== hashes vs report ===\" && shasum -a 256 \"project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md\" \"Corpus v1.0/40-decisions-and-trajectories/2026-08-08-last2w-decisions.md\" | sed 's|/Users/sab-mini/repos/MyAPI/||' && echo \"=== review sheet candidates ===\" && grep -nE '^\\| *D1[0-8]' \"project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md\" | head -25"
+        },
+        {
+          "ts": "2026-08-18T09:01:53.832Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_TKBliIhYpYHvS95kX4Et3585",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-18T09:01:53.885Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_7F6cA3AM50vJwNE5gNkS9174",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-18T09:01:59.744Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_GcagECZticiKKMTZyoHe6037",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== required fields per object ===\" && jq -r '. as $o | $o.id as $id | ([\"id\",\"schema_version\",\"project\",\"title\",\"summary\",\"statement\",\"status\",\"rationale\",\"decided_on\"] | map(select($o | has(.) | not))) as $absent | \"\\($id): absent=[\\($absent|join(\",\"))]\"' 01-decisions/output/decisions-canonical.jsonl && echo \"=== empty-string required fields ===\" && jq -r '. as $o | $o.id as $id | ([\"id\",\"schema_version\",\"project\",\"title\",\"summary\",\"statement\",\"status\",\"rationale\",\"decided_on\"] | map(select($o[.] == \"\"))) as $empty | \"\\($id): empty=[\\($empty|join(\",\"))]\"' 01-decisions/output/decisions-canonical.jsonl"
+        },
+        {
+          "ts": "2026-08-18T09:01:59.745Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_D4svZuBevCjkLpopLTdB1862",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== schema_version distribution ===\" && jq -r '.schema_version' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c && echo \"=== decided_on non-date lines ===\" && jq -r '.decided_on' 01-decisions/output/decisions-canonical.jsonl | grep -vE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' | wc -l && echo \"=== source kind values ===\" && jq -r '.sources[].kind' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c && echo \"=== rel values ===\" && jq -r '.related_decisions[].rel' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c && echo \"=== relation targets all exist ===\" && jq -r '.related_decisions[].target_id' 01-decisions/output/decisions-canonical.jsonl | while read t; do grep -q \"\\\"id\\\":\\\"$t\\\"\" 01-decisions/output/decisions-canonical.jsonl && echo \"target $t OK\" || echo \"target $t MISSING\"; done"
+        },
+        {
+          "ts": "2026-08-18T09:01:59.767Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_GcagECZticiKKMTZyoHe6037",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-18T09:01:59.800Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_D4svZuBevCjkLpopLTdB1862",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-18T09:02:07.014Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_J40zBVttb20n82rD2lXd0390",
+          "reason": "command matched blocked pattern",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== required fields absent check ===\" && jq -r '. as $o | $o.id as $id | ([\"id\",\"schema_version\",\"project\",\"title\",\"summary\",\"statement\",\"status\",\"rationale\",\"decided_on\"] | map(select(. as $k | ($o | has($k)) | not))) as $absent | \"\\($id): absent=[\\($absent|join(\",\"))]\"' 01-decisions/output/decisions-canonical.jsonl && echo \"=== empty-string required fields ===\" && jq -r '. as $o | $o.id as $id | ([\"id\",\"schema_version\",\"project\",\"title\",\"summary\",\"statement\",\"status\",\"rationale\",\"decided_on\"] | map(select(. as $k | $o[$k] == \"\"))) as $empty | \"\\($id): empty=[\\($empty|join(\",\"))]\"' 01-decisions/output/decisions-canonical.jsonl && echo \"=== relation targets (from related_decisions, null-safe) ===\" && jq -r '[.related_decisions[]?.target_id] | join(\",\")' 01-decisions/output/decisions-canonical.jsonl | tr '\\n' ' ' && echo \"\" && echo \"=== status/project/title sanity: any blank title? ===\" && jq -r 'select((.title | length) == 0 or (.title | length) > 80) | .id' 01-decisions/output/decisions-canonical.jsonl | wc -l && echo \"=== project values ===\" && jq -r '.project' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-18T09:02:07.015Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_J40zBVttb20n82rD2lXd0390",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-18T09:02:12.477Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_VaDCh6sCjqGAdUpqA6x96986",
+          "reason": "command matched blocked pattern",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== required fields absent check ===\" && jq -r '. as $o | $o.id as $id | ([\"id\",\"schema_version\",\"project\",\"title\",\"summary\",\"statement\",\"status\",\"rationale\",\"decided_on\"] | map(select(. as $k | ($o | has($k)) | not))) as $absent | \"\\($id): absent=[\\($absent|join(\",\"))]\"' 01-decisions/output/decisions-canonical.jsonl && echo \"=== empty-string required fields ===\" && jq -r '. as $o | $o.id as $id | ([\"id\",\"schema_version\",\"project\",\"title\",\"summary\",\"statement\",\"status\",\"rationale\",\"decided_on\"] | map(select(. as $k | $o[$k] == \"\"))) as $empty | \"\\($id): empty=[\\($empty|join(\",\"))]\"' 01-decisions/output/decisions-canonical.jsonl && echo \"=== relation targets ===\" && jq -r '[.related_decisions[]?.target_id] | join(\",\")' 01-decisions/output/decisions-canonical.jsonl | tr '\\n' ' ' && echo \"\" && echo \"=== project values ===\" && jq -r '.project' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c && echo \"=== title length violations ===\" && jq -r 'select((.title | length) == 0 or (.title | length) >= 81) | .id' 01-decisions/output/decisions-canonical.jsonl | wc -l",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-18T09:02:12.478Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_VaDCh6sCjqGAdUpqA6x96986",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-18T09:02:21.520Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_yFKExLbhNQ9hT7gfx6l84099",
+          "command": "cd /Users/sab-mini/repos/MyAPI && jq -r '. as $o | $o.id as $id | ([\"id\",\"schema_version\",\"project\",\"title\",\"summary\",\"statement\",\"status\",\"rationale\",\"decided_on\"] | map(select(. as $k | ($o | has($k)) | not))) as $absent | \"\\($id): absent=[\\($absent|join(\",\"))]\"' 01-decisions/output/decisions-canonical.jsonl && echo \"---empty-check---\" && jq -r '. as $o | $o.id as $id | ([\"id\",\"schema_version\",\"project\",\"title\",\"summary\",\"statement\",\"status\",\"rationale\",\"decided_on\"] | map(select(. as $k | $o[$k] == \"\"))) as $empty | \"\\($id): empty=[\\($empty|join(\",\"))]\"' 01-decisions/output/decisions-canonical.jsonl && echo \"---rel-targets---\" && jq -r '[.related_decisions[]?.target_id] | join(\",\")' 01-decisions/output/decisions-canonical.jsonl && echo \"---projects---\" && jq -r '.project' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -c && echo \"---title-lengths---\" && jq -r '.title | length' 01-decisions/output/decisions-canonical.jsonl | awk '$1 == 0 || length($1) == 3 || length($1) == 4' | wc -l"
+        },
+        {
+          "ts": "2026-08-18T09:02:21.571Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_yFKExLbhNQ9hT7gfx6l84099",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-18T09:02:31.432Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_lrMeycnUXnXqEXETIs1S1479",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== hashes vs report table ===\" && shasum -a 256 01-decisions/output/decision-schema.md 01-decisions/output/sources.md 01-decisions/output/decisions-raw.jsonl 01-decisions/output/decisions-canonical.jsonl project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md | sed 's|/Users/sab-mini/repos/MyAPI/||'"
+        },
+        {
+          "ts": "2026-08-18T09:02:31.432Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_fozVsJnIC9O7cOqvEftx5875",
+          "command": "cd /Users/sab-mini/repos/MyAPI && ls .handoffs/ && echo \"---\" && head -40 \".handoffs/031-validate-canonical-decision-set.md\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-18T09:02:31.457Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_fozVsJnIC9O7cOqvEftx5875",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-18T09:02:31.472Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_lrMeycnUXnXqEXETIs1S1479",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-18T09:03:02.046Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_yPsBIzYUuCiwmKz4qpFY1909",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node-05-validate-decision-set satisfies both acceptance criteria. The required artifact 01-decisions/output/validation-report.md exists and records structural checks (schema conformance, unique ids, dangling supersession links) all passing with explicit evidence and no failures requiring disposition, plus a coverage section stating decision count per source with every zero-count source/class explicitly dispositioned and an explicit 'No source yielded zero without explanation' confirmation. Independent re-verification against the actual data files (decisions-canonical.jsonl, decisions-raw.jsonl, DECISIONS-REVIEW-SHEET.md, sources.md) confirmed every substantive claim: 17 objects, 17 unique IDs, required fields present with valid enums/dates, supersession vacuous (no replaces/replaced_by set), D18→D17 relationship target exists, all objects status=accepted with review_mark=Y, D11 absent and marked N in the review sheet, per-source citation counts matching the report table exactly, and all five input hashes in the report matching files byte-for-byte. The report's input-hash table, D11 disposition, and source partitioning are consistent with upstream artifacts from nodes 01–04, and handoff 031 documents the node's execution (validation report + handoff only; no graph/runtime writes). The deterministic 'no hit' for validation-report.md was a scanner false negative (artifacts_present confirms the file). Intent preservation: the Stage C gate (validate completeness/structure before corpus build) is fulfilled and the report explicitly hands the validated canonical set to Stage D. The execution-trio/oracle constraint is claimed in the report (three grok-4.6 reviewer passes) but is execution-trail evidence, not a listed criterion; no violations of the stated constraints were found in the repo.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-18T09:04:36.855421+00:00",
+  "evaluated_tree_sha": "429670df23d55c0e86d655973f67aa51765fcaf1",
+  "evaluated_commit_sha": "ffece0a9eeae1d61d1fef8e90595b9d8296d80bf",
+  "merge_commit_sha": null,
+  "expected_base_commit_sha": "220496ca1dcd56c22f093efb0fd127a7498c90db",
+  "pr_ref": null,
+  "job_id": "manual-20260818T090119Z",
+  "execution_attempt_id": null,
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/Users/sab-mini/repos/MyAPI/README.md",
+    "project_brief": "/Users/sab-mini/repos/MyAPI/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+    "neighbor:node-04-normalize-decisions": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-04-normalize-decisions.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 3,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/MyAPI/PROJECT-BRIEF.md",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-04-normalize-decisions.yaml"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/MyAPI/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "low",
+      "offered": 4,
+      "content_accessed": 2,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-01-decision-schema.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/node-04-normalize-decisions.yaml"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/MyAPI/PROJECT-BRIEF.md",
+        "/Users/sab-mini/repos/MyAPI/README.md"
+      ]
+    },
+    "overall": "low"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-18T09:01:19.364341+00:00",
+    "finished_at": "2026-08-18T09:04:36.855268+00:00",
+    "wall_s": 197.498,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 102.708,
+      "tool_calls": 20
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 94.757,
+      "tool_calls": 31
+    }
+  }
+}
