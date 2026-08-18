@@ -3280,7 +3280,7 @@ def static_overview():
     table.add_column("group", style="bold cyan", no_wrap=True)
     table.add_column("owns")
     table.add_column("start with", style="dim", no_wrap=True)
-    table.add_row("menu", "dispatch · graphs · live · heartbeat", "gddp")
+    table.add_row("menu", "dispatch · evaluate · graphs · live · heartbeat · config", "gddp")
     table.add_row("live", "running executors, diffs, events stream", "gddp watch / gddp jobs live")
     table.add_row("node", "graph truth, authoring, runtime/evaluator join", "gddp node list")
     table.add_row("jobs", "runtime queue, results, and audited state changes", "gddp jobs list")
@@ -3459,7 +3459,7 @@ def interactive_heartbeat():
 def _front_page_actions() -> dict[str, tuple[str, str]]:
     return {
         "d": ("dispatch", "send ready work through the event pipeline"),
-        "e": ("evaluate", "evaluator hub — run, inspect, compare"),
+        "e": ("evaluate", "evaluator hub — run, inspect, history"),
         "g": ("graphs", "active graphs first; archive for idle (>7d)"),
         "w": ("live", "running executors — fleet + drill-in"),
         "h": ("heartbeat", "arm/disarm the control plane (intake + heartbeat)"),
@@ -3485,8 +3485,8 @@ def _eval_hub_actions() -> dict[str, tuple[str, str]]:
         "k": ("knobs", "per-run overrides for the next run"),
         "c": ("config", "resolved evaluator settings"),
         "i": ("instructions", "what the judge is told / offered-vs-read"),
-        "h": ("history", "receipts for this node"),
-        "s": ("show", "drill into selected / latest run"),
+        "h": ("runs", "receipts for this node"),
+        "s": ("show", "latest run for this node"),
         "b": ("back", ""),
         "q": ("quit", ""),
     }
@@ -3494,12 +3494,12 @@ def _eval_hub_actions() -> dict[str, tuple[str, str]]:
 
 def _eval_hub_handlers() -> dict[str, object]:
     return {
-        "r": True,
-        "k": True,
-        "c": True,
-        "i": True,
-        "h": True,
-        "s": True,
+        "r": _run_live_eval,
+        "k": _eval_knob_picker,
+        "c": _render_eval_config,
+        "i": _render_eval_instructions,
+        "h": _render_eval_runs,
+        "s": _render_eval_show,
     }
 
 
@@ -3620,11 +3620,7 @@ def _hydrate_eval_row(row: dict) -> dict:
 
 
 def _load_receipts_for_node(project: str, node_id: str) -> list[dict]:
-    # Direct import so tests that stub `_import_module` for node_cli/terminal
-    # do not accidentally break the hub if they land on `v`.
-    if str(SCRIPTS_DIR) not in sys.path:
-        sys.path.insert(0, str(SCRIPTS_DIR))
-    evaluations = __import__("evaluations")
+    evaluations = _import_module("evaluations")
     db_path, receipt_root = _evaluation_sources()
     rows = evaluations.load_evaluation_rows(db_path=db_path, receipt_root=receipt_root)
     out = []
@@ -3957,21 +3953,21 @@ def interactive_evaluate():
             _pause()
             continue
         node_items = [(node_id, str(doc.get("title") or "")) for node_id, doc, _ in nodes]
-        node_picked = _pick_list(
-            f"evaluate · nodes · {project}",
-            node_items,
-            preview_cmd=_node_preview_cmd(project),
-            back_label="graphs",
-        )
-        if node_picked is _MENU_QUIT:
-            return _MENU_QUIT
-        if node_picked is _MENU_BACK:
-            continue
-        node_id = node_picked[0] if isinstance(node_picked, list) else node_picked
-        outcome = interactive_eval_hub(project, node_id)
-        if outcome is _MENU_QUIT:
-            return _MENU_QUIT
-        return _MENU_BACK
+        while True:
+            node_picked = _pick_list(
+                f"evaluate · nodes · {project}",
+                node_items,
+                preview_cmd=_node_preview_cmd(project),
+                back_label="graphs",
+            )
+            if node_picked is _MENU_QUIT:
+                return _MENU_QUIT
+            if node_picked is _MENU_BACK:
+                break
+            node_id = node_picked[0] if isinstance(node_picked, list) else node_picked
+            outcome = interactive_eval_hub(project, node_id)
+            if outcome is _MENU_QUIT:
+                return _MENU_QUIT
 
 
 def interactive_config():

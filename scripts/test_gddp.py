@@ -1834,6 +1834,9 @@ class EvalWiringTests(unittest.TestCase):
         )
         self.assertEqual(set(displayed), set(handled))
         self.assertEqual(set(displayed), {"r", "k", "c", "i", "h", "s", "b", "q"})
+        self.assertTrue(
+            {"r", "k", "c", "i", "h", "s"}.issubset(gddp._eval_hub_handlers())
+        )
 
     def test_node_review_v_opens_hub(self):
         picks = iter(["v", "b"])
@@ -1856,8 +1859,10 @@ class EvalWiringTests(unittest.TestCase):
         node_cli = SimpleNamespace(
             iter_nodes=lambda *a, **k: [("node-05-validate-decision-set", {"title": "x"}, {})],
         )
-        with patch.object(gddp, "_pick_graph", return_value="myapi-part1"), \
-                patch.object(gddp, "_pick_list", return_value="node-05-validate-decision-set"), \
+        graphs = iter(["myapi-part1", gddp._MENU_BACK])
+        nodes = iter(["node-05-validate-decision-set", gddp._MENU_BACK])
+        with patch.object(gddp, "_pick_graph", side_effect=lambda *a, **k: next(graphs)), \
+                patch.object(gddp, "_pick_list", side_effect=lambda *a, **k: next(nodes)), \
                 patch.object(gddp, "_import_module", return_value=node_cli), \
                 patch.object(gddp, "interactive_eval_hub", return_value=gddp._MENU_BACK) as hub, \
                 patch.object(gddp, "_run_live_eval") as live, \
@@ -1865,6 +1870,30 @@ class EvalWiringTests(unittest.TestCase):
             outcome = gddp.interactive_evaluate()
         hub.assert_called_once_with("myapi-part1", "node-05-validate-decision-set")
         live.assert_not_called()
+        self.assertIs(outcome, gddp._MENU_BACK)
+
+    def test_eval_hub_getch_run_then_back(self):
+        keys = iter(["r", "b"])
+        terminal = SimpleNamespace(
+            getch=lambda: next(keys),
+            clear_lines=lambda n: None,
+        )
+
+        def import_module(name):
+            if name == "terminal":
+                return terminal
+            return __import__(name)
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp, "_load_receipts_for_node", return_value=[]), \
+                patch.object(gddp, "_run_live_eval") as live, \
+                patch.object(gddp, "_pause") as pause, \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "console"):
+            outcome = gddp.interactive_eval_hub("demo", "alpha")
+        live.assert_called_once()
+        self.assertEqual(live.call_args.args[:2], ("demo", "alpha"))
+        pause.assert_called()
         self.assertIs(outcome, gddp._MENU_BACK)
 
     def test_offered_vs_read_formats_lane_files(self):
