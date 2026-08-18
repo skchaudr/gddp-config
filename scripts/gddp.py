@@ -137,6 +137,22 @@ SETTINGS_FIELDS: dict[str, tuple[str, str]] = {
         "evaluator lanes",
         "semantic lane args: --semantic-provider <p> --semantic-pi-model <m> --semantic-thinking <level>",
     ),
+    "GDDP_EVAL_MODEL_CHEAP": (
+        "eval cheap model",
+        "model id for the cheap evaluator preset (default: deepseek-v4-flash)",
+    ),
+    "GDDP_EVAL_MODEL_EXPENSIVE": (
+        "eval expensive model",
+        "model id for the expensive evaluator preset (empty until set)",
+    ),
+    "GDDP_EVAL_THINKING_DEFAULT": (
+        "eval thinking default",
+        "default semantic thinking level (e.g. medium)",
+    ),
+    "GDDP_EVAL_LANES_DEFAULT": (
+        "eval lanes default",
+        "default lanes: live or deterministic",
+    ),
     "GDDP_INTEGRITY_MODE": (
         "integrity lane",
         "on/off — intent/integrity evaluation always runs when on",

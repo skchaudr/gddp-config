@@ -1973,6 +1973,28 @@ class EvalWiringTests(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertIn("deepseek-v4-flash", output.getvalue())
 
+    def test_resolve_eval_knobs_expensive_unset_errors(self):
+        env = {k: v for k, v in os.environ.items() if k != "GDDP_EVAL_MODEL_EXPENSIVE"}
+        with patch.dict(os.environ, env, clear=True):
+            with self.assertRaises(gddp.EvalKnobError) as ctx:
+                gddp._resolve_eval_knobs(model="expensive")
+        self.assertIn("unset", str(ctx.exception))
+
+    def test_resolve_eval_knobs_reads_settings_file(self):
+        settings = Path(tempfile.mkdtemp()) / "settings.env"
+        settings.write_text("GDDP_EVAL_MODEL_CHEAP=custom-cheap\n", encoding="utf-8")
+        env = {k: v for k, v in os.environ.items() if k != "GDDP_EVAL_MODEL_CHEAP"}
+        with patch.object(gddp, "SETTINGS_FILE", settings), \
+                patch.dict(os.environ, env, clear=True):
+            gddp._load_runtime_settings()
+            knobs = gddp._resolve_eval_knobs(model="cheap")
+        self.assertEqual(knobs["model"], "custom-cheap")
+        self.assertEqual(knobs["preset"], "cheap")
+
+    def test_front_page_config_still_lists_new_keys(self):
+        self.assertIn("GDDP_EVAL_MODEL_CHEAP", gddp.SETTINGS_FIELDS)
+        self.assertIn("GDDP_EVAL_MODEL_EXPENSIVE", gddp.SETTINGS_FIELDS)
+
 
 if __name__ == "__main__":
     unittest.main()
