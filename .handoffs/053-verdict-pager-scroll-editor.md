@@ -28,7 +28,7 @@ none — graph truth, node YAML, runtime job state all untouched; menu `u`-updat
 
 ### Current Git state (2-3 sentences max, anything more must be critically justifiable)
 
-main = 88a12a6, pushed (also carried pre-existing ahead commit c80d44c docs). Remaining dirty: 12 verification/*/evaluations.yaml, each a one-line `generated_at` bump that predated this session (export churn from concurrent runtime work — not this session's, left for its owning runs). 282 tests pass, validate.py 0 errors.
+main = 88a12a6, pushed (also carried pre-existing ahead commit c80d44c docs). 12 inherited verification/*/evaluations.yaml timestamp bumps were committed separately (chore) after confirming generated_at-only diffs — tree clean and synced as of 6d09fc7. 282 tests pass, validate.py 0 errors.
 
 ### Artifacts (Filepath - Description, 1 line max per artifact)
 
