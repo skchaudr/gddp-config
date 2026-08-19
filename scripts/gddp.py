@@ -56,15 +56,19 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import io
 import json
 import os
 import re
 import shlex
 import secrets
+import shutil
 import sqlite3
 import subprocess
 import sys
+import tempfile
 import time
+import unicodedata
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -1215,6 +1219,182 @@ def _pause(message: str = "press any key to continue") -> str:
     if choice == "\x03":
         raise KeyboardInterrupt
     return choice.lower()
+
+
+class _TtyCapture(io.StringIO):
+    """Capture stdout while claiming to be a TTY so color guards keep ANSI."""
+
+    def isatty(self) -> bool:
+        return True
+
+
+_ANSI_SGR = re.compile(r"\033\[[0-9;]*m")
+
+
+def _strip_ansi(text: str) -> str:
+    """Drop SGR color codes — the editor file is plain text."""
+    return _ANSI_SGR.sub("", text)
+
+
+def _char_cells(ch: str) -> int:
+    """Terminal cells one character occupies (wcwidth approximation)."""
+    if unicodedata.combining(ch):
+        return 0
+    return 2 if unicodedata.east_asian_width(ch) in {"W", "F"} else 1
+
+
+def _wrap_ansi_line(line: str, width: int) -> list[str]:
+    """Hard-wrap one line, keeping ANSI codes so pager redraw stays aligned."""
+    if width <= 0:
+        return [line]
+    wrapped: list[str] = []
+    chunk: list[str] = []
+    used = 0
+    pos = 0
+    while pos < len(line):
+        match = _ANSI_SGR.match(line, pos)
+        if match is not None:
+            chunk.append(match.group(0))
+            pos = match.end()
+            continue
+        ch = line[pos]
+        pos += 1
+        if ch == "\t":
+            ch = " " * (8 - used % 8)
+        chunk.append(ch)
+        used += len(ch) if len(ch) > 1 else _char_cells(ch)
+        if used >= width:
+            wrapped.append("".join(chunk))
+            chunk, used = [], 0
+    if chunk or not wrapped:
+        wrapped.append("".join(chunk))
+    return wrapped
+
+
+def _editor_command() -> list[str]:
+    """Reading editor for long verdicts: GDDP_EDITOR > $VISUAL > $EDITOR > nvim."""
+    for key in ("GDDP_EDITOR", "VISUAL", "EDITOR"):
+        value = os.environ.get(key, "").strip()
+        if value:
+            return shlex.split(value)
+    for name in ("nvim", "vim", "vi"):
+        found = shutil.which(name)
+        if found:
+            return [found]
+    return []
+
+
+def _open_in_editor(text: str, title: str) -> None:
+    """Open already-rendered output in the operator's editor; temp file is removed."""
+    command = _editor_command()
+    if not command:
+        console.print(Text("no editor found — set $VISUAL or $EDITOR", style="yellow"))
+        _import_module("terminal").getch()
+        return
+    safe = re.sub(r"[^A-Za-z0-9._-]+", "-", title).strip("-")[:48] or "view"
+    fd, path = tempfile.mkstemp(prefix=f"gddp-{safe}-", suffix=".txt")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(_strip_ansi(text).rstrip("\n") + "\n")
+        subprocess.run([*command, path], check=False)
+    finally:
+        try:
+            os.unlink(path)
+        except OSError:
+            pass
+
+
+def _scroll_pause(text: str, title: str = "") -> str:
+    """Hold rendered output on screen with scroll keys instead of one screenful.
+
+    Evaluator verdicts run longer than a terminal; before this, every key but
+    ``u`` dropped the operator back to the menu mid-read. Here: arrows,
+    PgUp/PgDn, j/k, g/G scroll the view; ``o`` opens the same text in the
+    operator's editor (neovim by default); ``u`` passes through so update
+    flows keep working; any other key returns to the calling menu.
+    Returns the exit keypress lowercased (same contract as ``_pause``).
+    """
+    terminal = _import_module("terminal")
+    columns, rows = shutil.get_terminal_size((120, 40))
+    width = max(columns, 20)
+    lines: list[str] = []
+    for raw in text.rstrip("\n").split("\n") or [""]:
+        lines.extend(_wrap_ansi_line(raw, width) or [""])
+    view_height = max(rows - 1, 3)
+    scrollable = len(lines) > view_height
+    editor = _editor_command()
+    editor_name = Path(editor[0]).stem if editor else "editor"
+    top = 0
+
+    def paint() -> int:
+        window = lines[top : top + view_height]
+        if scrollable:
+            position = f"lines {top + 1}–{top + len(window)}/{len(lines)} · "
+        else:
+            position = ""
+        hint = (
+            f"{position}↑↓/PgUp/PgDn scroll · o open in {editor_name}"
+            " · u update · any other key returns"
+        )
+        sys.stdout.write("\n".join(window) + "\n")
+        sys.stdout.write(f"\033[2m{hint}\033[0m\n")
+        sys.stdout.flush()
+        return len(window) + 1
+
+    drawn = paint()
+    with terminal.cbreak() as key_fd:
+        while True:
+            key = terminal.read_key(key_fd)
+            if key == "\x03":
+                raise KeyboardInterrupt
+            if key == "":
+                continue
+            if key == "o":
+                _open_in_editor(text, title)
+                _clear_screen()
+                drawn = paint()
+                continue
+            if not scrollable:
+                return key.lower()
+            moved = {
+                "UP": -1, "k": -1,
+                "DOWN": 1, "j": 1,
+                "PAGE_UP": -view_height, "b": -view_height,
+                "PAGE_DOWN": view_height, "f": view_height, " ": view_height,
+                "HOME": -len(lines), "g": -len(lines),
+                "END": len(lines), "G": len(lines),
+            }.get(key)
+            if moved is None:
+                return key.lower()
+            new_top = max(0, min(top + moved, len(lines) - view_height))
+            if new_top != top:
+                top = new_top
+                terminal.clear_lines(drawn)
+                drawn = paint()
+
+
+def _page_view(render, title: str = "") -> str:
+    """Show one rendered view, paged: scroll and ``o`` editor while it stays up.
+
+    ``render`` either prints to stdout (captured with ANSI colors intact) or
+    returns a string (subprocess output). Returns the exit keypress, matching
+    ``_pause`` so existing menu flows keep their ``u``-update contracts.
+    """
+    if not console.is_terminal:
+        result = render()
+        if isinstance(result, str) and result:
+            print(result)
+        return _pause()
+    capture = _TtyCapture()
+    real_stdout = sys.stdout
+    sys.stdout = capture
+    try:
+        result = render()
+        if isinstance(result, str) and result:
+            capture.write(result)
+    finally:
+        sys.stdout = real_stdout
+    return _scroll_pause(capture.getvalue(), title)
 
 
 def _plain_desc(description: str | Text | dict | None) -> str:
@@ -2577,13 +2757,15 @@ def _node_review_menu(
             return _MENU_BACK
         if choice == "e":
             _clear_screen()
-            node_cli.cmd_show(
-                project=project,
-                node_id=node_id,
-                trace=False,
-                view="evaluation",
-            )
-            if _pause("u update · any other key returns to the node") != "u":
+            if _page_view(
+                lambda: node_cli.cmd_show(
+                    project=project,
+                    node_id=node_id,
+                    trace=False,
+                    view="evaluation",
+                ),
+                title=f"evaluation-{project}-{node_id}",
+            ) != "u":
                 continue
         elif choice == "v":
             outcome = interactive_eval_hub(project, node_id)
@@ -2613,22 +2795,31 @@ def _node_review_menu(
                 continue
             _clear_screen()
             if more_choice == "c":
-                node_cli.cmd_show(
-                    project=project,
-                    node_id=node_id,
-                    trace=False,
-                    view="contract",
+                paged = _page_view(
+                    lambda: node_cli.cmd_show(
+                        project=project,
+                        node_id=node_id,
+                        trace=False,
+                        view="contract",
+                    ),
+                    title=f"contract-{project}-{node_id}",
                 )
             elif more_choice == "t":
-                node_cli.cmd_show(
-                    project=project,
-                    node_id=node_id,
-                    trace=True,
-                    view="evaluation",
+                paged = _page_view(
+                    lambda: node_cli.cmd_show(
+                        project=project,
+                        node_id=node_id,
+                        trace=True,
+                        view="evaluation",
+                    ),
+                    title=f"trace-{project}-{node_id}",
                 )
             else:
-                _render_evaluation_and_diff(project, node_id)
-            if _pause("u update · any other key returns to the node") != "u":
+                paged = _page_view(
+                    lambda: _render_evaluation_and_diff(project, node_id),
+                    title=f"diff-{project}-{node_id}",
+                )
+            if paged != "u":
                 continue
         elif choice != "u":
             continue
@@ -2936,8 +3127,12 @@ def runtime_python(runtime_root: Path) -> str:
     return sys.executable
 
 
-def run_runtime_jobs(argv: list[str]) -> int:
-    """Delegate one jobs invocation through runtime's job-only CLI boundary."""
+def run_runtime_jobs(argv: list[str], *, capture: bool = False) -> int | str:
+    """Delegate one jobs invocation through runtime's job-only CLI boundary.
+
+    ``capture=True`` returns the command's output as text (stderr appended on
+    failure) for paged interactive views instead of an exit code.
+    """
     if not argv or argv[0] not in _RUNTIME_JOB_COMMANDS:
         print(
             "ERROR: unsupported runtime jobs command.",
@@ -2956,6 +3151,15 @@ def run_runtime_jobs(argv: list[str]) -> int:
     ]
     env = os.environ.copy()
     env["GDDP_RUNTIME_ROOT"] = str(runtime_root)
+    if capture:
+        proc = subprocess.run(
+            command, env=env, check=False,
+            capture_output=True, text=True,
+        )
+        text = proc.stdout
+        if proc.returncode != 0 and proc.stderr.strip():
+            text += ("\n" if text else "") + proc.stderr.strip()
+        return text
     return subprocess.run(command, env=env, check=False).returncode
 
 
@@ -3087,12 +3291,15 @@ def interactive_evaluations():
             continue
         row = rows[int(picked)]
         _clear_screen()
-        console.print(Text("evaluation", style="bold"))
-        if row.get("job_id") and row.get("source") == "result":
-            run_runtime_jobs(["show", str(row["job_id"])])
-        else:
+
+        def _show_evaluation():
+            console.print(Text("evaluation", style="bold"))
+            if row.get("job_id") and row.get("source") == "result":
+                return run_runtime_jobs(["show", str(row["job_id"])], capture=True)
             evaluations.print_evaluation_detail(row)
-        _pause()
+            return None
+
+        _page_view(_show_evaluation, title=f"evaluation-{row.get('job_id') or row.get('node_id') or 'detail'}")
 
 
 def cmd_evaluations(_args) -> int:
@@ -3178,9 +3385,12 @@ def interactive_jobs(project: str | None = None):
             continue
         if choice == "e":
             _clear_screen()
-            console.print(Text("evaluator results", style="bold"))
-            run_runtime_jobs(["results"])
-            _pause()
+
+            def _show_results():
+                console.print(Text("evaluator results", style="bold"))
+                return run_runtime_jobs(["results"], capture=True)
+
+            _page_view(_show_results, title="evaluator-results")
             continue
 
         try:
@@ -3211,9 +3421,12 @@ def interactive_jobs(project: str | None = None):
                 if not ref:
                     continue
             _clear_screen()
-            console.print(Text(f"job · {ref}", style="bold"))
-            run_runtime_jobs(["show", ref])
-            _pause()
+
+            def _show_job():
+                console.print(Text(f"job · {ref}", style="bold"))
+                return run_runtime_jobs(["show", ref], capture=True)
+
+            _page_view(_show_job, title=f"job-{ref}")
             continue
 
         # update — paged list; space/m checks rows for batch queue state

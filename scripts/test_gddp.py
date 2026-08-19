@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import os
 import sys
@@ -2202,6 +2203,137 @@ class EvalWiringTests(unittest.TestCase):
     def test_front_page_config_still_lists_new_keys(self):
         self.assertIn("GDDP_EVAL_MODEL_CHEAP", gddp.SETTINGS_FIELDS)
         self.assertIn("GDDP_EVAL_MODEL_EXPENSIVE", gddp.SETTINGS_FIELDS)
+
+
+class PagerWrapTests(unittest.TestCase):
+    """ANSI-aware hard-wrap keeps pager redraw math exact."""
+
+    def test_plain_text_wraps_to_width(self):
+        self.assertEqual(gddp._wrap_ansi_line("abcdefgh", 3), ["abc", "def", "gh"])
+
+    def test_exact_fill_does_not_add_blank_line(self):
+        self.assertEqual(gddp._wrap_ansi_line("abcd", 4), ["abcd"])
+
+    def test_ansi_codes_kept_but_not_counted(self):
+        self.assertEqual(
+            gddp._wrap_ansi_line("\033[1;32mAB\033[0mCD", 2),
+            ["\033[1;32mAB", "\033[0mCD"],
+        )
+
+    def test_tab_expands_to_next_eight_column_stop(self):
+        self.assertEqual(gddp._wrap_ansi_line("a\tb", 8), ["a       ", "b"])
+
+    def test_wide_chars_occupy_two_cells(self):
+        self.assertEqual(gddp._wrap_ansi_line("中文abc", 4), ["中文", "abc"])
+
+    def test_empty_line_stays_one_blank_line(self):
+        self.assertEqual(gddp._wrap_ansi_line("", 10), [""])
+
+    def test_strip_ansi(self):
+        self.assertEqual(gddp._strip_ansi("\033[1;32mAB\033[0mCD"), "ABCD")
+
+
+class PagerScrollTests(unittest.TestCase):
+    """_scroll_pause: scroll keys move the window; o/u/other keys pass through."""
+
+    TEXT = "\n".join(f"line-{i:03d}" for i in range(100))
+
+    class _FakeCbreak:
+        def __enter__(self):
+            return 0
+
+        def __exit__(self, *_exc):
+            return False
+
+    def _scroll(self, keys, text=None, size=(20, 6), title=""):
+        terminal = gddp._import_module("terminal")
+        buffer = StringIO()
+        with patch.object(gddp.shutil, "get_terminal_size", return_value=size), \
+                patch.object(terminal, "cbreak", PagerScrollTests._FakeCbreak), \
+                patch.object(terminal, "read_key", side_effect=keys), \
+                contextlib.redirect_stdout(buffer):
+            result = gddp._scroll_pause(
+                text if text is not None else self.TEXT, title=title,
+            )
+        return result, buffer.getvalue()
+
+    def test_scroll_keys_shift_window_in_place(self):
+        result, shown = self._scroll(["DOWN", " ", "HOME", "q"])
+        self.assertEqual(result, "q")
+        self.assertIn("lines 1–5/100", shown)   # first paint from the top
+        self.assertIn("lines 2–6/100", shown)   # one line down
+        self.assertIn("lines 7–11/100", shown)  # one page down
+        self.assertIn("\033[6A\033[J", shown)   # redraws in place, no flicker
+
+    def test_bottom_clamps_instead_of_scrolling_past_end(self):
+        _, shown = self._scroll(["END", "DOWN", "q"])
+        self.assertIn("lines 96–100/100", shown)
+
+    def test_editor_key_opens_view_then_keeps_paging(self):
+        opened = []
+        with patch.object(gddp, "_open_in_editor", side_effect=lambda t, ttl: opened.append((t, ttl))), \
+                patch.object(gddp, "_clear_screen"):
+            result, _ = self._scroll(["o", "x"], text=self.TEXT, title="eval-detail")
+        self.assertEqual(result, "x")
+        self.assertEqual(opened, [(self.TEXT, "eval-detail")])
+
+    def test_update_key_passes_through_for_status_flows(self):
+        result, _ = self._scroll(["u"])
+        self.assertEqual(result, "u")
+
+    def test_short_view_returns_any_key_without_scrolling(self):
+        result, shown = self._scroll(["UP"], text="short\ntext", size=(40, 10))
+        self.assertEqual(result, "up")
+        self.assertIn("short", shown)
+        self.assertNotIn("lines 1–", shown)
+
+
+class PagerPageViewTests(unittest.TestCase):
+    """_page_view captures renderer output (colors kept) through the tty shim."""
+
+    def test_captures_print_and_string_return_for_paging(self):
+        terminal = gddp._import_module("terminal")
+        gddp.console._force_terminal = True
+        try:
+            def render():
+                print("hello")
+                gddp.console.print("[bold]world[/bold]")
+                return "subproc-out"
+
+            buffer = StringIO()
+            with patch.object(gddp.shutil, "get_terminal_size", return_value=(80, 24)), \
+                    patch.object(terminal, "cbreak", PagerScrollTests._FakeCbreak), \
+                    patch.object(terminal, "read_key", side_effect=["q"]), \
+                    contextlib.redirect_stdout(buffer):
+                result = gddp._page_view(render, "unit")
+        finally:
+            gddp.console._force_terminal = None
+        self.assertEqual(result, "q")
+        body = buffer.getvalue()
+        for fragment in ("hello", "world", "subproc-out", "open in"):
+            self.assertIn(fragment, body)
+
+    def test_non_terminal_renders_directly_and_pauses(self):
+        gddp.console._force_terminal = False
+        rendered = []
+        try:
+            with patch.object(gddp, "_pause", return_value="x") as pause:
+                result = gddp._page_view(lambda: (rendered.append(1), "plain\noutput")[1], "unit")
+        finally:
+            gddp.console._force_terminal = None
+        self.assertEqual(result, "x")
+        self.assertEqual(rendered, [1])
+
+
+class EditorCommandTests(unittest.TestCase):
+    def test_env_precedence_gddp_over_visual_over_editor(self):
+        env = {k: v for k, v in os.environ.items() if k not in {"GDDP_EDITOR", "VISUAL", "EDITOR"}}
+        with patch.dict(os.environ, env, clear=True), \
+                patch.dict(os.environ, {"VISUAL": "vis-binary", "EDITOR": "ed-binary"}):
+            self.assertEqual(gddp._editor_command(), ["vis-binary"])
+        with patch.dict(os.environ, env, clear=True), \
+                patch.dict(os.environ, {"EDITOR": "ed -w"}):
+            self.assertEqual(gddp._editor_command(), ["ed", "-w"])
 
 
 if __name__ == "__main__":

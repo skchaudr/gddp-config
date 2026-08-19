@@ -97,6 +97,71 @@ def clear_lines(n: int) -> None:
     sys.stdout.flush()
 
 
+def read_key(fd: int) -> str:
+    """Read one keypress from an fd already held in cbreak mode.
+
+    Same decoding contract as ``getch`` (arrows, PgUp/PgDn, Ctrl-C passthrough)
+    but without touching termios — pair with the ``cbreak`` context manager so
+    typeahead queued during redraws is not stranded between reads.
+    """
+    ch = os.read(fd, 1).decode("utf-8", errors="replace")
+    if ch != "\x1b":
+        return ch
+
+    def read_available() -> str | None:
+        readable, _, _ = select.select(
+            [fd], [], [], ESCAPE_SEQUENCE_TIMEOUT_SECONDS
+        )
+        if not readable:
+            return None
+        return os.read(fd, 1).decode("utf-8", errors="replace")
+
+    return _decode_escape_sequence(ch, read_available)
+
+
+class cbreak:
+    """Hold the terminal in cbreak mode across several key reads.
+
+    ``getch`` restores the previous (canonical) mode after every keypress;
+    bytes typed while a caller redraws between getch calls land in the
+    canonical line buffer and are stranded when cbreak mode is re-entered.
+    Pagers that redraw per key hold cbreak for their whole loop instead, so
+    fast scroll input (held arrows, quick PgDn taps) is never lost.
+    """
+
+    def __init__(self, fd: int | None = None):
+        self.requested_fd = fd
+        self.fd: int | None = None
+        self.old = None
+        self.tty_handle = None
+
+    def __enter__(self) -> int:
+        stream = None
+        if sys.stdin.isatty():
+            stream = sys.stdin
+        else:
+            try:
+                self.tty_handle = open("/dev/tty", encoding="utf-8")
+                stream = self.tty_handle
+            except OSError:
+                stream = None
+        if stream is None or not stream.isatty():
+            raise RuntimeError("interactive terminal required")
+        self.fd = self.requested_fd if self.requested_fd is not None else stream.fileno()
+        self.old = termios.tcgetattr(self.fd)
+        tty.setcbreak(self.fd)
+        return self.fd
+
+    def __exit__(self, *_exc) -> None:
+        if self.old is not None and self.fd is not None:
+            try:
+                termios.tcsetattr(self.fd, termios.TCSADRAIN, self.old)
+            except termios.error:
+                pass
+        if self.tty_handle is not None:
+            self.tty_handle.close()
+
+
 def getch() -> str:
     """Read one keypress without Enter. Arrow keys decoded to UP/DOWN/LEFT/RIGHT.
 
@@ -122,17 +187,7 @@ def getch() -> str:
     old = termios.tcgetattr(fd)
     try:
         tty.setcbreak(fd)
-        ch = os.read(fd, 1).decode("utf-8", errors="replace")
-        if ch == "\x1b":
-            def read_available() -> str | None:
-                readable, _, _ = select.select(
-                    [fd], [], [], ESCAPE_SEQUENCE_TIMEOUT_SECONDS
-                )
-                if not readable:
-                    return None
-                return os.read(fd, 1).decode("utf-8", errors="replace")
-
-            return _decode_escape_sequence(ch, read_available)
+        return read_key(fd)
     finally:
         try:
             # TCSAFLUSH drops queued keystrokes, including an arrow sequence tail.
@@ -141,7 +196,6 @@ def getch() -> str:
             pass
         if tty_in is not None:
             tty_in.close()
-    return ch
 
 
 def getline(prompt: str) -> str:

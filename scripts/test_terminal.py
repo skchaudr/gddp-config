@@ -87,6 +87,10 @@ class TerminalDecodeTests(unittest.TestCase):
                     output.extend(os.read(fd, 4096))
 
             self.assertIn(b"READY", output)
+            # Give the child time to enter cbreak: bytes written while the
+            # line discipline is still canonical echo into the pending line
+            # and get stranded when ICANON flips off (BSD/macOS behavior).
+            time.sleep(0.2)
             os.write(fd, b"\x1b")
             time.sleep(0.08)
             os.write(fd, b"[C")
@@ -128,6 +132,10 @@ class TerminalDecodeTests(unittest.TestCase):
                     output.extend(os.read(fd, 4096))
 
             self.assertIn(b"READY", output)
+            # Give the child time to enter cbreak: bytes written while the
+            # line discipline is still canonical echo into the pending line
+            # and get stranded when ICANON flips off (BSD/macOS behavior).
+            time.sleep(0.2)
             os.write(fd, b"\x1b[1;3A")
 
             deadline = time.monotonic() + 2
@@ -148,3 +156,89 @@ class TerminalDecodeTests(unittest.TestCase):
                 os.waitpid(pid, 0)
             except ChildProcessError:
                 pass
+
+
+class CbreakTypeaheadTests(unittest.TestCase):
+    """Held cbreak keeps typeahead queued during redraws from being stranded."""
+
+    def test_typeahead_sent_while_busy_survives(self):
+        pid, fd = pty.fork()
+        if pid == 0:
+            sys.stdin = open(0, encoding="utf-8", closefd=False)
+            with terminal.cbreak() as key_fd:
+                os.write(1, b"READY\n")
+                time.sleep(0.6)  # parent types ahead during this window
+                first = terminal.read_key(key_fd)
+                second = terminal.read_key(key_fd)
+            os.write(1, f"PAIR={first!r},{second!r}\n".encode())
+            os._exit(0)
+
+        output = bytearray()
+        try:
+            deadline = time.monotonic() + 2
+            while b"READY" not in output and time.monotonic() < deadline:
+                readable, _, _ = select.select([fd], [], [], 0.1)
+                if readable:
+                    output.extend(os.read(fd, 4096))
+            self.assertIn(b"READY", output)
+            os.write(fd, b"aj")  # typed while the "pager" is busy redrawing
+            deadline = time.monotonic() + 2
+            while b"PAIR=" not in output and time.monotonic() < deadline:
+                readable, _, _ = select.select([fd], [], [], 0.1)
+                if readable:
+                    try:
+                        output.extend(os.read(fd, 4096))
+                    except OSError:
+                        break
+            self.assertIn(b"PAIR='a','j'", output)
+        finally:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+            try:
+                os.waitpid(pid, 0)
+            except ChildProcessError:
+                pass
+
+    def test_read_key_decodes_page_down(self):
+        pid, fd = pty.fork()
+        if pid == 0:
+            sys.stdin = open(0, encoding="utf-8", closefd=False)
+            with terminal.cbreak() as key_fd:
+                os.write(1, b"READY\n")
+                key = terminal.read_key(key_fd)
+            os.write(1, f"KEY={key!r}\n".encode())
+            os._exit(0)
+
+        output = bytearray()
+        try:
+            deadline = time.monotonic() + 2
+            while b"READY" not in output and time.monotonic() < deadline:
+                readable, _, _ = select.select([fd], [], [], 0.1)
+                if readable:
+                    output.extend(os.read(fd, 4096))
+            self.assertIn(b"READY", output)
+            os.write(fd, b"\x1b[6~")
+            deadline = time.monotonic() + 2
+            while b"KEY=" not in output and time.monotonic() < deadline:
+                readable, _, _ = select.select([fd], [], [], 0.1)
+                if readable:
+                    try:
+                        output.extend(os.read(fd, 4096))
+                    except OSError:
+                        break
+            self.assertIn(b"KEY='PAGE_DOWN'", output)
+        finally:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+            try:
+                os.waitpid(pid, 0)
+            except ChildProcessError:
+                pass
+
+
+if __name__ == "__main__":
+    unittest.main()
