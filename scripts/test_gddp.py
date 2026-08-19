@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 import tempfile
@@ -20,6 +21,64 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 import gddp
+
+
+def _interpret_menu_screen(blob: str, width: int, height: int = 24) -> list[str]:
+    """Apply wrap, CUU, and clear-to-end so leftover rows are visible."""
+    screen = [[" "] * width for _ in range(height)]
+    row = col = 0
+
+    def put(ch: str) -> None:
+        nonlocal row, col
+        if ch == "\n":
+            row = min(height - 1, row + 1)
+            col = 0
+            return
+        if ch == "\r":
+            col = 0
+            return
+        if row >= height:
+            screen.pop(0)
+            screen.append([" "] * width)
+            row = height - 1
+        screen[row][col] = ch
+        col += 1
+        if col >= width:
+            col = 0
+            row += 1
+            if row >= height:
+                screen.pop(0)
+                screen.append([" "] * width)
+                row = height - 1
+
+    i = 0
+    while i < len(blob):
+        ch = blob[i]
+        if ch == "\x1b" and i + 1 < len(blob) and blob[i + 1] == "[":
+            j = i + 2
+            while j < len(blob) and not (
+                "A" <= blob[j] <= "Z" or "a" <= blob[j] <= "z"
+            ):
+                j += 1
+            if j >= len(blob):
+                break
+            final = blob[j]
+            params = blob[i + 2 : j]
+            if final == "A":
+                row = max(0, row - int(params or "1"))
+            elif final == "J" and (params or "0") in {"", "0"}:
+                for x in range(col, width):
+                    screen[row][x] = " "
+                for rr in range(row + 1, height):
+                    screen[rr] = [" "] * width
+            i = j + 1
+            continue
+        put(ch)
+        i += 1
+    lines = ["".join(cells).rstrip() for cells in screen]
+    while lines and not lines[-1]:
+        lines.pop()
+    return lines
 
 
 class RuntimeJobsForwardingTests(unittest.TestCase):
@@ -226,6 +285,41 @@ class OverviewTests(unittest.TestCase):
         }
         with patch.object(gddp, "_import_module", return_value=terminal):
             self.assertEqual(gddp._menu_choice(actions, default="n"), "j")
+
+    def test_menu_choice_up_does_not_duplicate_wrapped_rows(self):
+        """↑ at a wrap-prone width must not leave the first action row behind."""
+        keys = iter(["UP", "q"])
+        output = StringIO()
+        test_console = Console(
+            file=output, width=70, height=24, color_system=None,
+            highlight=False, force_terminal=True,
+        )
+        terminal = SimpleNamespace(
+            getch=lambda: next(keys),
+            clear_lines=lambda n: output.write(f"\033[{n}A\033[J"),
+        )
+        actions = {
+            "d": ("dispatch", "send ready work through the event pipeline"),
+            "e": ("evaluate", "evaluator hub — run, inspect, history"),
+            "g": ("graphs", "active graphs first; archive for idle (>7d)"),
+            "w": ("live", "running executors — fleet + drill-in"),
+            "h": ("heartbeat", "arm/disarm the control plane (intake + heartbeat)"),
+            "c": ("config", "executor & evaluator settings (runtime/settings.env)"),
+            "q": ("quit", ""),
+        }
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "console", test_console):
+            self.assertEqual(gddp._menu_choice(actions, default="g"), "q")
+        screen = _interpret_menu_screen(output.getvalue(), width=70)
+        dispatch_rows = [ln for ln in screen if "dispatch" in ln]
+        self.assertEqual(len(dispatch_rows), 1, screen)
+
+    def test_menu_columns_prefers_ioctl_over_stale_console_width(self):
+        test_console = Console(force_terminal=True, highlight=False)
+        self.assertIsNone(getattr(test_console, "_width", "missing"))
+        with patch.object(gddp, "console", test_console), \
+                patch.object(gddp.os, "get_terminal_size", return_value=os.terminal_size((70, 24))):
+            self.assertEqual(gddp._menu_columns(), 70)
 
     def test_menu_choice_number_picks_by_position(self):
         terminal = self._menu_terminal(lambda: "2")
@@ -724,7 +818,7 @@ class OverviewTests(unittest.TestCase):
         )
         self.assertIn("w", displayed)
         self.assertEqual(set(displayed), set(handled))
-        self.assertEqual(set(displayed), {"d", "g", "w", "h", "q"})
+        self.assertEqual(set(displayed), {"d", "e", "g", "w", "h", "c", "q"})
         self.assertTrue(
             {"d", "g", "w", "h"}.issubset(gddp._front_page_handlers())
         )
@@ -1222,8 +1316,8 @@ class OverviewTests(unittest.TestCase):
     def test_node_review_up_down_enter_opens_update(self):
         """↑/↓ walk the action menu; Enter opens the highlighted action."""
         views: list[tuple[str, str]] = []
-        # default cursor is evaluation (e); one DOWN → update; Enter → status menu → back
-        keys = iter(["DOWN", "\r", "b", "b"])
+        # default cursor is evaluation (e); two DOWN → skip evaluator hub → update
+        keys = iter(["DOWN", "DOWN", "\r", "b", "b"])
         terminal = SimpleNamespace(
             getch=lambda: next(keys),
             clear_lines=lambda n: None,
@@ -1680,6 +1774,434 @@ class ReviewRoutingTests(unittest.TestCase):
             "project",
         ):
             self.assertIn(name, gddp._CLI_COMMANDS)
+
+
+class EvalWiringTests(unittest.TestCase):
+    """Coverage for the evaluate/config menu surfaces and gddp eval command."""
+
+    def test_node_review_offers_verify_now_action(self):
+        terminal = SimpleNamespace(getch=lambda: "v", clear_lines=lambda n: None)
+        output = StringIO()
+        test_console = Console(file=output, force_terminal=False, width=100)
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "console", test_console):
+            choice = gddp._node_review_pick_action(has_siblings=False)
+        self.assertEqual(choice, "v")
+        self.assertIn("evaluator", output.getvalue())
+        self.assertNotIn("verify now", output.getvalue())
+
+    def _completed_eval(self):
+        return SimpleNamespace(
+            returncode=0,
+            stdout=json.dumps({
+                "verdict": "pass",
+                "criteria_confidence": 0.9,
+                "lane_status": {"criteria": "completed", "integrity": "completed"},
+                "required_next_action": "accept",
+            }),
+            stderr="",
+        )
+
+    def test_run_live_eval_builds_live_two_lane_command(self):
+        fake_runtime = Path(tempfile.mkdtemp())
+        with patch.object(gddp, "resolve_runtime_root", return_value=fake_runtime), \
+                patch.object(gddp, "_auto_base_commit", return_value="abc1234"), \
+                patch.object(gddp, "_write_eval_knobs_sidecar"), \
+                patch.object(gddp.subprocess, "run", return_value=self._completed_eval()) as run:
+            verdict = gddp._run_live_eval("myapi-part1", "node-05-validate-decision-set")
+        self.assertEqual(verdict, "pass")
+        cmd = run.call_args.args[0]
+        cmd_str = " ".join(str(c) for c in cmd)
+        self.assertIn("verification/cli.py", cmd_str)
+        self.assertIn("--base abc1234", cmd_str)
+        self.assertIn("--semantic-mode live", cmd_str)
+        self.assertIn("--semantic-harness pi", cmd_str)
+        self.assertIn("--integrity on", cmd_str)
+        self.assertIn("--receipt-dir", cmd_str)
+        self.assertTrue(any(str(c).startswith("manual-") for c in cmd))
+
+    def test_run_live_eval_passes_model_override(self):
+        fake_runtime = Path(tempfile.mkdtemp())
+        knobs = gddp._resolve_eval_knobs(model="cheap")
+        with patch.object(gddp, "resolve_runtime_root", return_value=fake_runtime), \
+                patch.object(gddp, "_auto_base_commit", return_value="abc1234"), \
+                patch.object(gddp, "_write_eval_knobs_sidecar") as sidecar, \
+                patch.object(gddp.subprocess, "run", return_value=self._completed_eval()) as run:
+            gddp._run_live_eval(
+                "myapi-part1", "node-05-validate-decision-set", knobs=knobs,
+            )
+        cmd_str = " ".join(str(c) for c in run.call_args.args[0])
+        self.assertIn("--semantic-pi-model deepseek-v4-flash", cmd_str)
+        sidecar.assert_called_once()
+        written = sidecar.call_args.args[5]
+        self.assertEqual(written["preset"], "cheap")
+        self.assertEqual(written["model"], "deepseek-v4-flash")
+
+    def test_run_live_eval_passes_thinking_and_integrity_off(self):
+        fake_runtime = Path(tempfile.mkdtemp())
+        knobs = gddp._resolve_eval_knobs(thinking="high", integrity="off")
+        with patch.object(gddp, "resolve_runtime_root", return_value=fake_runtime), \
+                patch.object(gddp, "_auto_base_commit", return_value="abc1234"), \
+                patch.object(gddp, "_write_eval_knobs_sidecar"), \
+                patch.object(gddp.subprocess, "run", return_value=self._completed_eval()) as run:
+            gddp._run_live_eval(
+                "myapi-part1", "node-05-validate-decision-set", knobs=knobs,
+            )
+        cmd_str = " ".join(str(c) for c in run.call_args.args[0])
+        self.assertIn("--semantic-thinking high", cmd_str)
+        self.assertIn("--integrity off", cmd_str)
+
+    def test_run_live_eval_lanes_deterministic(self):
+        fake_runtime = Path(tempfile.mkdtemp())
+        knobs = gddp._resolve_eval_knobs(lanes="deterministic")
+        with patch.object(gddp, "resolve_runtime_root", return_value=fake_runtime), \
+                patch.object(gddp, "_auto_base_commit", return_value="abc1234"), \
+                patch.object(gddp, "_write_eval_knobs_sidecar"), \
+                patch.object(gddp.subprocess, "run", return_value=self._completed_eval()) as run:
+            gddp._run_live_eval(
+                "myapi-part1", "node-05-validate-decision-set", knobs=knobs,
+            )
+        cmd = [str(c) for c in run.call_args.args[0]]
+        cmd_str = " ".join(cmd)
+        self.assertIn("--semantic-mode offline", cmd_str)
+        self.assertNotIn("--semantic-harness", cmd_str)
+        self.assertIn("--integrity off", cmd_str)
+        self.assertEqual(knobs["integrity"], "off")
+
+    def test_resolve_eval_knobs_preset_vs_raw_id(self):
+        cheap = gddp._resolve_eval_knobs(model="cheap")
+        self.assertEqual(cheap["preset"], "cheap")
+        self.assertEqual(cheap["model"], "deepseek-v4-flash")
+        raw = gddp._resolve_eval_knobs(model="openai/gpt-5.4")
+        self.assertIsNone(raw["preset"])
+        self.assertEqual(raw["model"], "openai/gpt-5.4")
+
+    def test_cmd_eval_forwards_knob_flags(self):
+        with patch.object(gddp, "_run_live_eval", return_value="pass") as live:
+            rc = gddp.cmd_eval(SimpleNamespace(
+                project="myapi-part1", node="node-05", base=None,
+                model="cheap", thinking="high", integrity="off", lanes="live",
+            ))
+        self.assertEqual(rc, 0)
+        kwargs = live.call_args.kwargs
+        self.assertEqual(kwargs["knobs"]["preset"], "cheap")
+        self.assertEqual(kwargs["knobs"]["thinking"], "high")
+        self.assertEqual(kwargs["knobs"]["integrity"], "off")
+        self.assertEqual(kwargs["knobs"]["lanes"], "live")
+
+    def test_load_eval_knobs_sidecar_missing_is_empty(self):
+        missing = Path(tempfile.mkdtemp()) / "no-such-receipt.json"
+        self.assertEqual(gddp._load_eval_knobs_sidecar(missing), {})
+
+    def test_cmd_eval_fuzzy_resolves_within_project(self):
+        with patch.object(gddp, "_run_live_eval", return_value="pass") as live:
+            rc = gddp.cmd_eval(SimpleNamespace(
+                project="myapi-part1", node="node-05", base=None,
+            ))
+        self.assertEqual(rc, 0)
+        self.assertEqual(
+            live.call_args.args,
+            ("myapi-part1", "node-05-validate-decision-set"),
+        )
+
+    def test_cmd_eval_ambiguous_without_project_exits_2(self):
+        with patch.object(gddp, "_run_live_eval", return_value="pass") as live:
+            rc = gddp.cmd_eval(SimpleNamespace(
+                project=None, node="node-01", base=None,
+            ))
+        self.assertEqual(rc, 2)
+        live.assert_not_called()
+
+    def test_cmd_eval_unknown_node_exits_2(self):
+        with patch.object(gddp, "_run_live_eval", return_value="pass") as live:
+            rc = gddp.cmd_eval(SimpleNamespace(
+                project="myapi-part1", node="node-99-does-not-exist", base=None,
+            ))
+        self.assertEqual(rc, 2)
+        live.assert_not_called()
+
+    def test_eval_hub_displayed_letters_are_handled(self):
+        displayed = gddp._letter_keys(gddp._eval_hub_actions())
+        handled = gddp._handled_letter_keys(
+            gddp._eval_hub_actions(), gddp._eval_hub_handlers()
+        )
+        self.assertEqual(set(displayed), set(handled))
+        self.assertEqual(set(displayed), {"r", "k", "c", "i", "h", "s", "b", "q"})
+        self.assertTrue(
+            {"r", "k", "c", "i", "h", "s"}.issubset(gddp._eval_hub_handlers())
+        )
+
+    def test_node_review_v_opens_hub(self):
+        picks = iter(["v", "b"])
+        node_cli = SimpleNamespace(
+            fetch_runtime_evidence=lambda *a, **k: SimpleNamespace(verdict=None),
+            cmd_show=Mock(),
+        )
+        with patch.object(gddp, "_import_module", return_value=node_cli), \
+                patch.object(gddp, "_node_review_pick_action", side_effect=lambda **k: next(picks)), \
+                patch.object(gddp, "interactive_eval_hub", return_value=gddp._MENU_BACK) as hub, \
+                patch.object(gddp, "_run_live_eval") as live, \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "console"):
+            outcome = gddp._node_review_menu("demo", "alpha")
+        hub.assert_called_once_with("demo", "alpha")
+        live.assert_not_called()
+        self.assertIs(outcome, gddp._MENU_BACK)
+
+    def test_interactive_evaluate_opens_hub(self):
+        node_cli = SimpleNamespace(
+            iter_nodes=lambda *a, **k: [("node-05-validate-decision-set", {"title": "x"}, {})],
+        )
+        graphs = iter(["myapi-part1", gddp._MENU_BACK])
+        nodes = iter(["node-05-validate-decision-set", gddp._MENU_BACK])
+        with patch.object(gddp, "_pick_graph", side_effect=lambda *a, **k: next(graphs)), \
+                patch.object(gddp, "_pick_list", side_effect=lambda *a, **k: next(nodes)), \
+                patch.object(gddp, "_import_module", return_value=node_cli), \
+                patch.object(gddp, "interactive_eval_hub", return_value=gddp._MENU_BACK) as hub, \
+                patch.object(gddp, "_run_live_eval") as live, \
+                patch.object(gddp, "_clear_screen"):
+            outcome = gddp.interactive_evaluate()
+        hub.assert_called_once_with("myapi-part1", "node-05-validate-decision-set")
+        live.assert_not_called()
+        self.assertIs(outcome, gddp._MENU_BACK)
+
+    def test_eval_hub_getch_run_then_back(self):
+        keys = iter(["r", "b"])
+        terminal = SimpleNamespace(
+            getch=lambda: next(keys),
+            clear_lines=lambda n: None,
+        )
+
+        def import_module(name):
+            if name == "terminal":
+                return terminal
+            return __import__(name)
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp, "_load_receipts_for_node", return_value=[]), \
+                patch.object(gddp, "_run_live_eval") as live, \
+                patch.object(gddp, "_pause") as pause, \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "console"):
+            outcome = gddp.interactive_eval_hub("demo", "alpha")
+        live.assert_called_once()
+        self.assertEqual(live.call_args.args[:2], ("demo", "alpha"))
+        pause.assert_called()
+        self.assertIs(outcome, gddp._MENU_BACK)
+
+    def test_offered_vs_read_formats_lane_files(self):
+        canonical = {
+            "readme": "/var/folders/xx/gddp-eval-wt-abc/README.md",
+            "project_brief": "/var/folders/xx/gddp-eval-wt-abc/PROJECT-BRIEF.md",
+            "neighbor:node-04-normalize-decisions": (
+                "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/"
+                "node-04-normalize-decisions.yaml"
+            ),
+        }
+        coverage = {
+            "criteria": {
+                "rating": "medium",
+                "accessed_paths": [
+                    "/var/folders/xx/gddp-eval-wt-abc/README.md",
+                    "/var/folders/xx/gddp-eval-wt-abc/PROJECT-BRIEF.md",
+                ],
+                "not_observed_paths": [
+                    "/Users/sab-mini/repos/gddp-config/graphs/myapi-part1/nodes/"
+                    "node-04-normalize-decisions.yaml",
+                ],
+            },
+            "integrity": {
+                "rating": "none",
+                "accessed_paths": [],
+                "not_observed_paths": [],
+            },
+            "overall": "low",
+        }
+        lines = gddp._offered_vs_read_lines(canonical, coverage)
+        blob = "\n".join(lines)
+        self.assertIn("README.md", blob)
+        self.assertIn("PROJECT-BRIEF.md", blob)
+        self.assertIn("README.md  (worktree) ✓", blob)
+        self.assertIn("PROJECT-BRIEF.md  (worktree) ✓", blob)
+        self.assertIn(
+            "neighbor:node-04-normalize-decisions=node-04-normalize-decisions.yaml",
+            blob,
+        )
+        self.assertIn("node-04-normalize-decisions.yaml ✗", blob)
+        self.assertIn("Read (integrity): — (none)", blob)
+        self.assertNotIn("/var/folders", blob)
+
+    def test_offered_vs_read_handles_criteria_not_run(self):
+        lines = gddp._offered_vs_read_lines({}, {"criteria": "not_run", "integrity": {}})
+        blob = "\n".join(lines)
+        self.assertIn("Read (criteria): not run", blob)
+
+    def test_load_receipts_for_node_joins_sidecar(self):
+        tmp = Path(tempfile.mkdtemp())
+        rec_dir = tmp / "demo" / "alpha"
+        rec_dir.mkdir(parents=True)
+        rec = rec_dir / "manual-1-attempt0.json"
+        rec.write_text(json.dumps({
+            "verdict": "pass",
+            "project_id": "demo",
+            "node_id": "alpha",
+            "job_id": "manual-1",
+            "generated_at": "2026-01-01T00:00:00Z",
+        }), encoding="utf-8")
+        rec.with_suffix(".knobs.json").write_text(
+            json.dumps({"model": "deepseek-v4-flash", "preset": "cheap"}),
+            encoding="utf-8",
+        )
+        with patch.object(gddp, "_evaluation_sources", return_value=(None, tmp)):
+            rows = gddp._load_receipts_for_node("demo", "alpha")
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["knobs"]["model"], "deepseek-v4-flash")
+
+    def test_load_receipts_for_node_hydrates_db_summary(self):
+        tmp = Path(tempfile.mkdtemp())
+        rec_dir = tmp / "demo" / "alpha"
+        rec_dir.mkdir(parents=True)
+        rec = rec_dir / "job-1-attempt0.json"
+        rec.write_text(json.dumps({
+            "verdict": "pass",
+            "project_id": "demo",
+            "node_id": "alpha",
+            "job_id": "job-1",
+            "canonical_context": {"readme": str(tmp / "README.md")},
+            "context_coverage": {"overall": "low"},
+        }), encoding="utf-8")
+        summary = {
+            "project_id": "demo",
+            "node_id": "alpha",
+            "job_id": "job-1",
+            "verdict": "pass",
+            "receipt_path": str(rec),
+            "check": {"verdict": "pass", "receipt_path": str(rec)},
+            "knobs": {},
+        }
+        with patch.object(gddp, "_evaluation_sources", return_value=(None, tmp)), \
+                patch.object(gddp, "_import_module", side_effect=lambda name: __import__(name)):
+            # Bypass evaluations walker: feed a DB-shaped summary through hydrate.
+            hydrated = gddp._hydrate_eval_row(summary)
+        self.assertEqual(
+            hydrated["check"]["canonical_context"]["readme"],
+            str(tmp / "README.md"),
+        )
+
+    def test_render_eval_show_empty_knobs_prints_dash(self):
+        output = StringIO()
+        test_console = Console(file=output, force_terminal=False, width=120)
+        row = {
+            "project_id": "demo",
+            "node_id": "alpha",
+            "job_id": "manual-1",
+            "verdict": "pass",
+            "sort_at": "2026-01-01T00:00:00Z",
+            "check": {},
+            "knobs": {},
+        }
+        with patch.object(gddp, "console", test_console):
+            gddp._render_eval_show(row)
+        self.assertIn("model             : -", output.getvalue())
+        self.assertIn("tools             : c=0 i=0", output.getvalue())
+
+    def test_cmd_eval_runs_empty_knobs_prints_dash(self):
+        rows = [{
+            "project_id": "myapi-part1",
+            "node_id": "node-05-validate-decision-set",
+            "verdict": "pass",
+            "job_id": "manual-1",
+            "sort_at": "2026-01-02T00:00:00Z",
+            "knobs": {},
+            "check": {},
+        }]
+        with patch.object(gddp, "_load_receipts_for_node", return_value=rows), \
+                patch("sys.stdout", new_callable=StringIO) as out:
+            rc = gddp.cmd_eval_runs(SimpleNamespace(
+                project="myapi-part1", lens_node="node-05",
+            ))
+        self.assertEqual(rc, 0)
+        self.assertRegex(out.getvalue(), r"pass\s+-\s+")
+
+    def test_cmd_verify_node_live_delegates_to_run_live_eval(self):
+        args = SimpleNamespace(
+            project="myapi-part1",
+            node="node-05-validate-decision-set",
+            live=True,
+            base="abc1234",
+            repo_path=None,
+        )
+        with patch.object(gddp, "_run_live_eval", return_value="pass") as live:
+            with self.assertRaises(SystemExit) as ctx:
+                gddp.cmd_verify_node(args)
+        live.assert_called_once_with(
+            "myapi-part1", "node-05-validate-decision-set", base="abc1234",
+        )
+        self.assertEqual(ctx.exception.code, 0)
+
+    def test_cmd_eval_instructions_without_receipt_is_preflight(self):
+        output = StringIO()
+        test_console = Console(file=output, force_terminal=False, width=100)
+        with patch.object(gddp, "console", test_console):
+            rc = gddp.cmd_eval_instructions(SimpleNamespace(
+                project="myapi-part1",
+                lens_node="node-05-validate-decision-set",
+                preflight=True,
+                run=None,
+            ))
+        self.assertEqual(rc, 0)
+        text = output.getvalue()
+        self.assertIn("preflight — offered only", text)
+        self.assertNotIn("accessed_paths", text)
+        self.assertNotIn("Read (criteria)", text)
+
+    def test_cmd_eval_runs_filters_to_node(self):
+        rows = [
+            {"project_id": "myapi-part1", "node_id": "node-05-validate-decision-set",
+             "verdict": "pass", "job_id": "manual-keep", "sort_at": "2026-01-02",
+             "knobs": {"model": "deepseek-v4-flash"}},
+            {"project_id": "myapi-part1", "node_id": "other",
+             "verdict": "fail", "job_id": "manual-skip", "sort_at": "2026-01-01",
+             "knobs": {}},
+        ]
+        with patch.object(gddp, "_load_receipts_for_node", return_value=rows[:1]) as load:
+            rc = gddp.cmd_eval_runs(SimpleNamespace(
+                project="myapi-part1", lens_node="node-05",
+            ))
+        self.assertEqual(rc, 0)
+        load.assert_called_once()
+        self.assertEqual(load.call_args.args[0], "myapi-part1")
+        self.assertEqual(load.call_args.args[1], "node-05-validate-decision-set")
+
+    def test_cmd_eval_config_prints_resolved_model(self):
+        output = StringIO()
+        test_console = Console(file=output, force_terminal=False, width=120)
+        with patch.object(gddp, "console", test_console):
+            rc = gddp.cmd_eval_config(SimpleNamespace())
+        self.assertEqual(rc, 0)
+        self.assertIn("deepseek-v4-flash", output.getvalue())
+
+    def test_resolve_eval_knobs_expensive_unset_errors(self):
+        env = {k: v for k, v in os.environ.items() if k != "GDDP_EVAL_MODEL_EXPENSIVE"}
+        with patch.dict(os.environ, env, clear=True):
+            with self.assertRaises(gddp.EvalKnobError) as ctx:
+                gddp._resolve_eval_knobs(model="expensive")
+        self.assertIn("unset", str(ctx.exception))
+
+    def test_resolve_eval_knobs_reads_settings_file(self):
+        settings = Path(tempfile.mkdtemp()) / "settings.env"
+        settings.write_text("GDDP_EVAL_MODEL_CHEAP=custom-cheap\n", encoding="utf-8")
+        env = {k: v for k, v in os.environ.items() if k != "GDDP_EVAL_MODEL_CHEAP"}
+        with patch.object(gddp, "SETTINGS_FILE", settings), \
+                patch.dict(os.environ, env, clear=True):
+            gddp._load_runtime_settings()
+            knobs = gddp._resolve_eval_knobs(model="cheap")
+        self.assertEqual(knobs["model"], "custom-cheap")
+        self.assertEqual(knobs["preset"], "cheap")
+
+    def test_front_page_config_still_lists_new_keys(self):
+        self.assertIn("GDDP_EVAL_MODEL_CHEAP", gddp.SETTINGS_FIELDS)
+        self.assertIn("GDDP_EVAL_MODEL_EXPENSIVE", gddp.SETTINGS_FIELDS)
 
 
 if __name__ == "__main__":

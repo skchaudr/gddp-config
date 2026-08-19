@@ -1,0 +1,682 @@
+{
+  "project_id": "myapi-part2",
+  "node_id": "node-06-git-evidence",
+  "verdict": "fail",
+  "criteria_verdict": "fail",
+  "integrity": {
+    "verdict": "contradicted",
+    "intent_preserved": false,
+    "graph_integrity_preserved": false,
+    "required_human_review": true,
+    "confidence": 0.93,
+    "findings": [
+      {
+        "severity": "high",
+        "summary": "The node-06 result commit (5d714e9, job_20260816T08195758ad5424eed95c) contains zero file changes relative to its parent; the required artifact part2/layers/git/ does not exist anywhere (not in the eval worktree, not in /Users/sab-mini/repos/MyAPI, no build_git_export.(py|sh) script, no export file found). The node's intended role — reproducibly capture git temporal/change evidence per contract SC-04/IN-06 — was not performed at all; the result envelope claims completion for a node that produced nothing.",
+        "affected_node_ids": [
+          "node-06-git-evidence"
+        ]
+      },
+      {
+        "severity": "high",
+        "summary": "Graph integrity is broken downstream: node-08-build-source-layers assembles the five layer dirs including part2/layers/git/, and treatments no-decisions (13), code-reality (15), and full-durable (16) all include the git source_class per the frozen treatment matrix. With the git layer absent, node-08 and the git-inclusive treatments cannot proceed; dependents must not fire on the assumption the layer exists.",
+        "affected_node_ids": [
+          "node-08-build-source-layers",
+          "node-13-treatment-no-decisions",
+          "node-15-treatment-code-reality",
+          "node-16-treatment-full-durable"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "node-06 was executed and closed against a provisional upstream: node-01-evidence-contract has a result commit (431b98a added part2/contract/evidence-contract.md) but no accept commit and status 'provisional'. The chain currently has no human-accepted contract anchor, and node-06's empty result provides nothing verifiable against it.",
+        "affected_node_ids": [
+          "node-01-evidence-contract",
+          "node-06-git-evidence"
+        ]
+      }
+    ],
+    "reasoning": "Fresh-eyes review of node-06-git-evidence. The node's role (from its YAML 'why' and the evidence contract's SC-04/IN-06): produce part2/layers/git/ with a generated, reproducible commit export (commits, absolute ISO-8601 author/committer dates, parents, affected paths, messages, bounded change_evidence) plus the generator script build_git_export.(py|sh), covering the contract-named repos at contract-named depth. Independent verification: (1) the subject diff base 431b98a → tip 5d714e9 is empty (git diff --stat shows 0 changes) — the node's own result commit contributed nothing; (2) find over the eval worktree, the main repo, and untracked areas shows no part2/layers/git/ directory, no export, and no build_git_export script anywhere — the only part2/ content is node-01's evidence-contract.md; (3) the deterministic result agrees (artifacts_present={'part2/layers/git/': False}; all three criteria indeterminate with no evidence). This is not a subtle drift and not an evidence shortage — it is a total non-delivery that directly contradicts the node's stated intent. Lane 1's indeterminate criteria are consistent with (not the cause of) this. Graph impact: node-08 and treatments 13/15/16 require the git layer; the empty result leaves the graph stalled at this node. Additionally, the node ran against a provisional (unaccepted) contract upstream, compounding the risk. Human review is required before any dependent fires; the node must be re-executed to produce the git evidence artifact. Confidence is high (0.93) because the absence is directly observed, not inferred; the only residual uncertainty is work performed outside the repo, which the contract/constraints would not permit as a substitute for the required artifact.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-16T08:26:50.909Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_fO2Uxjb5blJ2q4vRh5l53639",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-16T08:26:50.911Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_K30daslRDJpk3sUSac4v0388",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2/README.md"
+      },
+      {
+        "ts": "2026-08-16T08:26:50.911Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_tFi7MkekEJNnmK7PdEvo9471",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+      },
+      {
+        "ts": "2026-08-16T08:26:50.915Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_03_taG2xn0VFNgOjmvfkNfR7781",
+        "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2/ 2>&1; echo \"---\"; ls -la /Users/sab-mini/repos/MyAPI 2>&1 | head -50"
+      },
+      {
+        "ts": "2026-08-16T08:26:50.929Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_tFi7MkekEJNnmK7PdEvo9471",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:26:50.929Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_fO2Uxjb5blJ2q4vRh5l53639",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:26:50.930Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_K30daslRDJpk3sUSac4v0388",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:26:50.951Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_taG2xn0VFNgOjmvfkNfR7781",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:26:56.761Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_oIx2WunYKjj0w1AI2EJ94712",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2 && echo \"=== .git file ===\"; cat .git; echo; echo \"=== find part2 ===\"; find part2 -type f 2>/dev/null | head -50; echo \"=== find part2 dirs ===\"; find part2 -type d 2>/dev/null | head -30; echo \"=== git status ===\"; git status 2>&1 | head -40; echo \"=== git log ===\"; git log --oneline -15 2>&1"
+      },
+      {
+        "ts": "2026-08-16T08:26:56.762Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_TmcOUePLDpiAUIFcMqbU8777",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== find part2 ===\"; find part2 -type f 2>/dev/null | head -50; echo \"=== part2 dirs ===\"; find part2 -type d 2>/dev/null | head -30; echo \"=== git log ===\"; git log --oneline -20 2>&1; echo \"=== git status ===\"; git status 2>&1 | head -30"
+      },
+      {
+        "ts": "2026-08-16T08:26:56.890Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_oIx2WunYKjj0w1AI2EJ94712",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:26:56.892Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_TmcOUePLDpiAUIFcMqbU8777",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:27:13.158Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_utbo7RNvzB8LH5Vix42t1856",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2 && echo \"=== diff ffece0a..431b98a (node-01 job commit) ===\"; git diff --stat ffece0a 431b98a; echo; echo \"=== diff 431b98a..5d714e9 (node-06 job commit) ===\"; git diff --stat 431b98a 5d714e9; echo \"(empty = no changes)\"; echo; echo \"=== files in 5d714e9 (worktree HEAD) ===\"; git ls-tree -r --name-only HEAD | grep -i part2; echo \"=== full part2 tree at HEAD ===\"; git ls-tree -r --name-only HEAD | grep -iE \"part2|git_export|layers\" | head -30; echo \"=== show commit messages ===\"; git show -s --format='%H %s' 431b98a; git show -s --format='%H %s' 5d714e9"
+      },
+      {
+        "ts": "2026-08-16T08:27:13.159Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_HO52B88HcVUJpUeObgxL1548",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2/part2/contract/evidence-contract.md"
+      },
+      {
+        "ts": "2026-08-16T08:27:13.166Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_HO52B88HcVUJpUeObgxL1548",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:27:13.284Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_utbo7RNvzB8LH5Vix42t1856",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:27:46.009Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_4KhDIbRE4M2P2F6gJWt05150",
+        "command": "echo \"=== search worktree for git_export / layers/git ===\"; find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2 -iname \"*git_export*\" 2>/dev/null; find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2 -path \"*layers*\" -name \"*\" 2>/dev/null | head; echo \"--- (end worktree search)\"; echo; echo \"=== search main repo for git_export / layers/git ===\"; find /Users/sab-mini/repos/MyAPI -iname \"*git_export*\" -not -path \"*/.git/*\" 2>/dev/null; find /Users/sab-mini/repos/MyAPI -path \"*part2*\" -not -path \"*/.git/*\" 2>/dev/null | head; echo \"--- (end main repo search)\"; echo; echo \"=== main repo untracked: scratch/ and .gddp/ contents (top-level only) ===\"; ls -la /Users/sab-mini/repos/MyAPI/scratch 2>/dev/null | head -20; echo \"---\"; ls -la /Users/sab-mini/repos/MyAPI/.gddp 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-16T08:27:46.009Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_z850XXht7D5CwjRMO8NF1786",
+        "command": "cat /Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-06-git-evidence.yaml 2>/dev/null | head -80; echo \"=== git log for node-06 job / worktree refs ===\"; cd /Users/sab-mini/repos/MyAPI && git worktree list 2>/dev/null; echo \"---\"; git log --all --oneline --source 2>/dev/null | grep -iE \"08195758|07321016\" | head; echo \"=== check if 5d714e9 / 431b98a exist on any branch ===\"; git branch -a --contains 5d714e97371224e9d25d48ae28c02c2fa34c4655 2>/dev/null; git branch -a --contains 431b98a1953bd1a136a42ce8d270e1f0d96a40d3 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-16T08:27:46.109Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_z850XXht7D5CwjRMO8NF1786",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:27:47.029Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_4KhDIbRE4M2P2F6gJWt05150",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T08:28:22.392Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_rx5ZhEn5T54Rx8I8rq2z2098",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "Four sibling agent worktrees (gddp-agent-wt-5pwbzg21, ee90bcun, gv3nvnp9, mgudoje6) all sit at 431b98a — the node-01 provisional result commit — consistent with concurrent inventory nodes 03/04/05/07 also executing against an unaccepted contract. Before node-08-build-source-layers assembles the five layers, verify each sibling's result commit actually contains its layer artifact; the same empty-result pattern may be repeated across the frontier.",
+        "affected_node_ids": [
+          "node-03-validate-anchor",
+          "node-04-inventory-decisions",
+          "node-05-inventory-handoffs",
+          "node-07-graphify-evidence",
+          "node-08-build-source-layers"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Convergence risk: node-08 is the single assembly point for all five layer dirs (anchor, decisions, handoffs, git, graphify). Each layer's artifact gate should be verified independently before node-08 dispatch; a missing git layer alone blocks three of the six treatments even if every other layer lands.",
+        "affected_node_ids": [
+          "node-08-build-source-layers"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.03333333333333336,
+  "criteria_confidence": 0.03333333333333336,
+  "completeness": 0.5,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "export-created",
+        "criterion": "part2/layers/git/ contains a generated commit export covering commits, timestamps, parents, affected files, commit messages, and the change evidence the contract requires, for the repositories the contract names",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "reproducible",
+        "criterion": "The exact script used is saved at part2/layers/git/build_git_export.(py|sh) and re-running it produces byte-identical output (the recorded sha256 matches on rebuild)",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...) for identifiers named in the criterion (build_git_export, re-running, byte-identical). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "absolute-dates",
+        "criterion": "Every date in the export is an absolute ISO-8601 date (no relative dates)",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...) for identifiers named in the criterion (ISO-8601). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the experiment was executed correctly, never whether the hypothesis won.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution model (operator direction 2026-08-15, enforced by the attempt preamble): You are the ORCHESTRATOR, not the worker. Do NOT perform the node's work yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6 via the subagent tool's model parameter) to do the actual investigation, construction, and measurement. Your job is decomposition, dispatch, reviewing returns, integrating, and producing the final artifacts.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight (worker subagents, Khoj ingestion/processing, long builds), dispatch ONE watcher subagent on model deepseek/deepseek-v4-flash that actively polls with tools (job status, logs, artifact existence) and reports state changes; you go idle between its reports instead of polling yourself.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/ self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to this node as evidence; work discovered beyond this node's scope becomes a continuation proposal, never silent execution.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Work in /Users/sab-mini/repos/MyAPI. Write only under part2/ unless this node's text names another path. Never edit GDDP graph truth, runtime databases, or job state.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Generated artifacts and the generator script both live under part2/layers/git/; scope of repos and history depth is exactly what the evidence contract names.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Close with parallel reviewer subagents on model deepseek/deepseek-v4-pro, each assigned a different explicit focus (criteria coverage, evidence integrity, constraint compliance). Resolve their findings before returning.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "part2/layers/git/": false
+    },
+    "deps_status": {
+      "node-01-evidence-contract": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "431b98a1953bd1a136a42ce8d270e1f0d96a40d3",
+      "tip": "5d714e97371224e9d25d48ae28c02c2fa34c4655",
+      "files": [],
+      "truncated": false,
+      "file_count": 0,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "export-created",
+        "judgment": "judged_fail",
+        "confidence": 0.98,
+        "evidence": [
+          "find part2 -> only part2/contract/evidence-contract.md; no part2/layers/git/ directory",
+          "git show --stat 5d714e9 (node-06 result commit) shows zero files changed vs parent 431b98a",
+          "git rev-parse 431b98a^{tree} == remotes/origin/gddp/result-job_...-node-06-git-evidence-...^{tree} (identical tree hash 17e7ae16a936beab81fb8f31da49694ef69bc870)",
+          "find . -type d -name layers / -iname '*git*export*' across full worktree: no hits",
+          "real repo /Users/sab-mini/repos/MyAPI: no part2/ directory exists (ls -la /Users/sab-mini/repos/MyAPI/part2 -> NO part2 in real repo)",
+          "gddp-config verification/ contains only node-01-evidence-contract job record; no node-06 record"
+        ],
+        "reasoning": "The required artifact part2/layers/git/ is entirely absent. The node-06 job (job_20260816T08195758ad5424eed95c) produced an empty wrapper commit (5d714e9) with a tree byte-identical to its parent; no commit export (commits, timestamps, parents, affected files, messages, change_evidence per contract SC-04) exists in the worktree, any branch, or the real repo. The contract names the repo set (MyAPI worktree at ffece0a, sibling witness, cited decision repos) and required fields (commit_sha, parent_shas, author_date, committer_date, subject, affected_paths, change_evidence.stat/diff/max_bytes/truncated) — none were produced. Direct filesystem inspection resolves what the keyword-scan probe could not."
+      },
+      {
+        "criterion_id": "reproducible",
+        "judgment": "judged_fail",
+        "confidence": 0.97,
+        "evidence": [
+          "find part2 -type f -> only part2/contract/evidence-contract.md; no build_git_export.(py|sh) at part2/layers/git/",
+          "grep -rl 'build_git_export' across worktree -> only hit is the contract text itself, no script",
+          "no sha256 pin/record file anywhere under part2/ or matching '*sha256*'",
+          "node-06 result commit 5d714e9 diff is empty; nothing to re-run"
+        ],
+        "reasoning": "The criterion requires the exact script saved at part2/layers/git/build_git_export.(py|sh) and a recorded sha256 that matches on rebuild. No script exists at the required path (nor anywhere else), no export exists, and no sha256 was recorded. The reproducible pipeline was never created, so the criterion cannot be satisfied."
+      },
+      {
+        "criterion_id": "absolute-dates",
+        "judgment": "judged_fail",
+        "confidence": 0.95,
+        "evidence": [
+          "No export file exists anywhere (find sweeps for part2/, layers, *export*: no git export artifact)",
+          "part2/ contains only contract/evidence-contract.md (76,548 bytes), which is the contract, not the export",
+          "node-06 job produced zero files (empty result commit 5d714e9, tree identical to 431b98a)"
+        ],
+        "reasoning": "The criterion is a property of the export ('every date in the export is an absolute ISO-8601 date'). Since the export does not exist at all — no part2/layers/git/ directory, no export bytes in any branch or the real repo — there is no export in which the date property could hold. The failure is the total absence of the artifact rather than a date-format defect in an existing export; either way the criterion is not met."
+      }
+    ],
+    "overall_reasoning": "Node-06 (git-evidence) was executed as a GDDP job (job_20260816T08195758ad5424eed95c) but produced nothing: the result commit 5d714e9 is empty (tree hash identical to its parent, the node-01 evidence-contract commit 431b98a), the remote node-06 result branch contains no added files, and no part2/layers/git/ directory, export file, build_git_export script, sha256 record, or repo-set/depth-rule note exists in the eval worktree, any git branch, or the real /Users/sab-mini/repos/MyAPI (which lacks part2/ entirely). All three acceptance criteria therefore fail on the factual ground that the required deliverables were never created. The upstream contract (node-01 SC-04, IN-06-P) defines the exact export shape and repo scope; nothing matching it exists. This is a definitive absence verified by direct filesystem and git inspection, not merely a missing evidence trail.",
+    "risks": "The eval worktree was checked out at the node-06 result tip (5d714e9); if the executor's artifacts were produced outside the repo (e.g., in a scratch/VM location) they are not committed and not visible, but the acceptance criteria explicitly require artifacts under part2/layers/git/ in the repo, so the absence is definitive for this verdict. Note also that node-01's evidence-contract commit (431b98a) exists only on gddp/* branches; the real repo's main is at ffece0a without part2/ — this does not affect the node-06 verdict but indicates repo/branch state divergence worth the operator's awareness. Repo-internal test suites and other project files were inspected only as context; they are not part of this node's acceptance criteria and were not counted.",
+    "followup_candidates": "Observed: the node-06 job (job_20260816T08195758ad5424eed95c) completed with an empty result commit — no artifacts under part2/layers/git/. Was node-06 actually dispatched and completed, and were its artifacts lost between attempt and result (or never created)? If the intent was to complete node-06, a re-run is needed; if the job was intentionally aborted, the graph status for node-06 should reflect that rather than 'ready'. Also observed: gddp-config verification/ has a job record for node-01 (job_20260816T073210169ef51e46057c-attempt0.json) but no record for the node-06 job — confirm whether the runtime recorded a result/evidence packet for job_20260816T08195758ad5424eed95c elsewhere, and whether that packet (if any) explains the empty wrapper commit.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-16T08:25:07.271Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_rm4WJj5gbM8sQWe0ct0h1085",
+          "command": "pwd && ls -la && echo \"---\" && ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2/ 2>/dev/null | head -50"
+        },
+        {
+          "ts": "2026-08-16T08:25:07.272Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_4B6gFXo7m1Imq33fYQ9p1359",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2/README.md"
+        },
+        {
+          "ts": "2026-08-16T08:25:07.273Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_Mf58IxrFTB7s58Ft1Qvp1221",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-16T08:25:07.280Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_4B6gFXo7m1Imq33fYQ9p1359",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:25:07.280Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_Mf58IxrFTB7s58Ft1Qvp1221",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:25:07.294Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_rm4WJj5gbM8sQWe0ct0h1085",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:25:09.899Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_OIsf8GrNmXGaemkYLe2m5534",
+          "command": "find part2 -type f 2>/dev/null | head -100; echo \"---DIRS---\"; find part2 -type d 2>/dev/null | head -50; echo \"---GITLOG---\"; git log --oneline -5 2>/dev/null; echo \"---STATUS---\"; git status --short 2>/dev/null | head -40"
+        },
+        {
+          "ts": "2026-08-16T08:25:09.900Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_VvupDTFm1W7balcJ20FZ9620",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+        },
+        {
+          "ts": "2026-08-16T08:25:09.906Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_VvupDTFm1W7balcJ20FZ9620",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:25:10.496Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_OIsf8GrNmXGaemkYLe2m5534",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:25:15.753Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_kAexhnPP8mgxv0sm8Xfo7593",
+          "command": "echo \"--- real repo? ---\"; ls -la /Users/sab-mini/repos/MyAPI/part2 2>/dev/null || echo \"NO /Users/sab-mini/repos/MyAPI/part2\"; ls -d /Users/sab-mini/repos/MyAPI 2>/dev/null || echo \"NO /Users/sab-mini/repos/MyAPI\"; echo \"--- contract file ---\"; ls -la part2/contract/; echo \"--- last 3 commits ---\"; git log --stat -3 2>/dev/null | head -80"
+        },
+        {
+          "ts": "2026-08-16T08:25:15.754Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_s0drXsVUBivcNAFTL30t8731",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2/part2/contract/evidence-contract.md"
+        },
+        {
+          "ts": "2026-08-16T08:25:15.762Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_s0drXsVUBivcNAFTL30t8731",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:25:15.815Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_kAexhnPP8mgxv0sm8Xfo7593",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:25:27.828Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_J7FqrE0qGanDGZLI4Lqy7813",
+          "command": "echo \"=== git log all (last 15) ===\"; git log --all --oneline -15 2>/dev/null; echo; echo \"=== show tip commit stat ===\"; git show --stat 5d714e9 2>/dev/null | head -30; echo; echo \"=== branches ===\"; git branch -a 2>/dev/null; echo; echo \"=== search worktree for git export artifacts ===\"; find . -path ./.git -prune -o -name '*git*export*' -print 2>/dev/null; find . -path ./.git -prune -o -type d -name 'layers' -print 2>/dev/null; echo \"=== grep for build_git_export anywhere ===\"; grep -rl 'build_git_export' . --include='*' 2>/dev/null | grep -v '\\.git/' | head; echo \"=== grep for part2/layers ===\"; grep -rl 'part2/layers' . 2>/dev/null | grep -v '\\.git/' | head"
+        },
+        {
+          "ts": "2026-08-16T08:25:27.829Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_564wyxOLdE2sMK7BeCRE6927",
+          "command": "echo \"=== gddp dir ===\"; find gddp -maxdepth 3 2>/dev/null | head -40; echo; echo \"=== handoffs listing (node-06 refs) ===\"; grep -rl -i 'node-06\\|git-evidence\\|git evidence\\|part2/layers/git' .handoffs project-docs 2>/dev/null | head; echo; echo \"=== any result logs / job dirs ===\"; find . -maxdepth 3 -iname '*job*' -o -maxdepth 3 -iname '*result*' 2>/dev/null | grep -v '\\.git/' | head -20"
+        },
+        {
+          "ts": "2026-08-16T08:25:27.913Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_564wyxOLdE2sMK7BeCRE6927",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:25:28.811Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_J7FqrE0qGanDGZLI4Lqy7813",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:25:37.615Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_SV9Nn0JDNJmNjc6R5aa26800",
+          "command": "echo \"=== tip commit full ===\"; git show --format=fuller --name-status 5d714e9 2>/dev/null | head -20; echo; echo \"=== parent of tip ===\"; git rev-parse 5d714e9^ 2>/dev/null; git log --oneline 5d714e9 -3 2>/dev/null; echo; echo \"=== attempt branch tree ===\"; git log --oneline gddp/attempt-job_20260816T08195758ad5424eed95c-attempt-0 -5 2>/dev/null; echo; echo \"=== result branch log ===\"; git log --oneline gddp/result-job_20260816T08195758ad5424eed95c-job_20260816T08195758ad5424eed95c-node-06-git-evidence-attempt-0-ac5d8a687ee3410db079758de2f49ced -5 2>/dev/null; echo; echo \"=== files in result branch (vs its parent) ===\"; git diff --name-status gddp/result-job_20260816T08195758ad5424eed95c-job_20260816T08195758ad5424eed95c-node-06-git-evidence-attempt-0-ac5d8a687ee3410db079758de2f49ced^ gddp/result-job_20260816T08195758ad5424eed95c-job_20260816T08195758ad5424eed95c-node-06-git-evidence-attempt-0-ac5d8a687ee3410db079758de2f49ced 2>/dev/null | head -30; echo \"(end diff)\""
+        },
+        {
+          "ts": "2026-08-16T08:25:37.712Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_SV9Nn0JDNJmNjc6R5aa26800",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:25:50.258Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_jR3B2Kj8DeRx1rfHm7cl0535",
+          "command": "echo \"=== real repo /Users/sab-mini/repos/MyAPI ===\"; ls -la /Users/sab-mini/repos/MyAPI/ 2>/dev/null | head -25; echo \"--- part2 in real repo? ---\"; ls -la /Users/sab-mini/repos/MyAPI/part2 2>/dev/null || echo \"NO part2 in real repo\"; echo; echo \"--- git status of real repo ---\"; cd /Users/sab-mini/repos/MyAPI 2>/dev/null && git status --short 2>/dev/null | head -20 && git log --oneline -3 2>/dev/null; echo; echo \"=== remote node-06 result branch ===\"; cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2 && git log --oneline -3 remotes/origin/gddp/result-job_20260816T08195758ad5424eed95c-job_20260816T08195758ad5424eed95c-node-06-git-evidence-attempt-0-ac5d8a687ee3410db079758de2f49ced 2>/dev/null; git diff --stat 431b98a remotes/origin/gddp/result-job_20260816T08195758ad5424eed95c-job_20260816T08195758ad5424eed95c-node-06-git-evidence-attempt-0-ac5d8a687ee3410db079758de2f49ced 2>/dev/null | tail -5"
+        },
+        {
+          "ts": "2026-08-16T08:25:50.259Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_b9QfVKV0JdPo5fVyCY2q2965",
+          "command": "echo \"=== gddp-config: node-06 result records ===\"; find /Users/sab-mini/repos/gddp-config -iname '*node-06*' 2>/dev/null | head -20; echo \"--- jobs dir ---\"; ls /Users/sab-mini/repos/gddp-config/jobs 2>/dev/null | head; find /Users/sab-mini/repos/gddp-config -maxdepth 2 -type d 2>/dev/null | head -30"
+        },
+        {
+          "ts": "2026-08-16T08:25:50.357Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_jR3B2Kj8DeRx1rfHm7cl0535",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:25:50.419Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_b9QfVKV0JdPo5fVyCY2q2965",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:25:57.607Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_zV2G11c2GDuhqINigcbl2012",
+          "command": "echo \"=== search gddp-config for myapi-part2 runtime records ===\"; find /Users/sab-mini/repos/gddp-config -path '*myapi-part2*' 2>/dev/null | head -30; echo; echo \"=== search for job_20260816T08195758 in gddp-config ===\"; grep -rl 'job_20260816T08195758' /Users/sab-mini/repos/gddp-config 2>/dev/null | head -10; echo; echo \"=== verification-runtime-live/myapi ===\"; find /Users/sab-mini/repos/gddp-config/verification-runtime-live/myapi -maxdepth 3 2>/dev/null | head -30"
+        },
+        {
+          "ts": "2026-08-16T08:25:57.608Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_UWGE0ciRaxJ4wBje0hJw3697",
+          "command": "echo \"=== .gddp in real repo ===\"; find /Users/sab-mini/repos/MyAPI/.gddp -maxdepth 3 2>/dev/null | head -30; echo; echo \"=== eval worktree .git/gddp? ===\"; find .git -maxdepth 2 -iname '*gddp*' 2>/dev/null | head; echo; echo \"=== any sha256/pin files under part2 in eval ===\"; find part2 -type f -exec ls -la {} \\; 2>/dev/null; echo; echo \"=== recheck: any file anywhere mentioning node-06 result or sha256 record ===\"; grep -rl '5d714e9\\|node-06-git-evidence' . 2>/dev/null | grep -v '\\.git/' | head"
+        },
+        {
+          "ts": "2026-08-16T08:25:59.024Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_UWGE0ciRaxJ4wBje0hJw3697",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:25:59.207Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_zV2G11c2GDuhqINigcbl2012",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:26:18.533Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_KBSWyJaSqryONlUxPE6W5357",
+          "command": "echo \"=== final sweep: anything under part2/ ===\"; find part2 2>/dev/null; echo; echo \"=== hidden files with git/export/sha in name ===\"; find . -path ./.git -prune -o -type f \\( -iname '*sha256*' -o -iname '*export*' -o -iname '*git*' \\) -print 2>/dev/null | grep -v '\\.git/' | head -20; echo; echo \"=== .gitignore relevant entries ===\"; grep -n -i 'part2\\|layers\\|export' .gitignore 2>/dev/null | head; echo; echo \"=== full tree depth check for part2 ===\"; ls -laR part2 2>/dev/null | head -20; echo; echo \"=== confirm remote result branch tree identical to 431b98a ===\"; git rev-parse 431b98a^{tree} remotes/origin/gddp/result-job_20260816T08195758ad5424eed95c-job_20260816T08195758ad5424eed95c-node-06-git-evidence-attempt-0-ac5d8a687ee3410db079758de2f49ced^{tree} 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-16T08:26:18.603Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_KBSWyJaSqryONlUxPE6W5357",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T08:26:41.017Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_BiMzec7hfl1S1jviRFHV5558",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node-06 (git-evidence) was executed as a GDDP job (job_20260816T08195758ad5424eed95c) but produced nothing: the result commit 5d714e9 is empty (tree hash identical to its parent, the node-01 evidence-contract commit 431b98a), the remote node-06 result branch contains no added files, and no part2/layers/git/ directory, export file, build_git_export script, sha256 record, or repo-set/depth-rule note exists in the eval worktree, any git branch, or the real /Users/sab-mini/repos/MyAPI (which lacks part2/ entirely). All three acceptance criteria therefore fail on the factual ground that the required deliverables were never created. The upstream contract (node-01 SC-04, IN-06-P) defines the exact export shape and repo scope; nothing matching it exists. This is a definitive absence verified by direct filesystem and git inspection, not merely a missing evidence trail.",
+  "required_next_action": "Address semantic failures and re-submit.",
+  "generated_at": "2026-08-16T08:28:22.552273+00:00",
+  "evaluated_tree_sha": "17e7ae16a936beab81fb8f31da49694ef69bc870",
+  "evaluated_commit_sha": "5d714e97371224e9d25d48ae28c02c2fa34c4655",
+  "merge_commit_sha": "5d714e97371224e9d25d48ae28c02c2fa34c4655",
+  "expected_base_commit_sha": "431b98a1953bd1a136a42ce8d270e1f0d96a40d3",
+  "pr_ref": null,
+  "job_id": "job_20260816T08195758ad5424eed95c",
+  "execution_attempt_id": "job_20260816T08195758ad5424eed95c:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+    "neighbor:node-01-evidence-contract": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-7t9ztxw2/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "high"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-16T08:25:01.784747+00:00",
+    "finished_at": "2026-08-16T08:28:22.552016+00:00",
+    "wall_s": 200.774,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 99.283,
+      "tool_calls": 15
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 101.452,
+      "tool_calls": 10
+    }
+  }
+}

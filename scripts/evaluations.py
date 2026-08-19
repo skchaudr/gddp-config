@@ -106,6 +106,8 @@ def _rows_from_db(db_path: Path, seen_receipts: set[str]) -> list[dict]:
 def _rows_from_receipts(receipt_root: Path, seen_receipts: set[str]) -> list[dict]:
     rows = []
     for path in sorted(receipt_root.rglob("*.json")):
+        if path.name.endswith(".knobs.json"):
+            continue
         resolved = str(path.resolve())
         if resolved in seen_receipts or str(path) in seen_receipts:
             continue

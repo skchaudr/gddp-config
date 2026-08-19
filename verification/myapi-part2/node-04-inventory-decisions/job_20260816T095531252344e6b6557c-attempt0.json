@@ -1,0 +1,1065 @@
+{
+  "project_id": "myapi-part2",
+  "node_id": "node-04-inventory-decisions",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.95,
+    "findings": [],
+    "reasoning": "Fresh-eyes review of node-04-inventory-decisions (commit be8dbe4 on base fe52852). The node's why — carry the Part 1 decision payload forward byte-identical as the historical control, and separately inventory the semantic knowledge it represents — is exactly what the diff delivers, and only that. (1) payload-preserved: payload-sha256.txt = 09c15aebd3a424e7f09ce2c27985fa0cbc24a23d9c474182ea4c912b926750a8, which I recomputed live on 01-decisions/output/decisions-canonical.jsonl and at the base commit — identical bytes, and it matches the evidence contract's locked pin part1_canonical_jsonl. (2) semantic-inventory: the payload contains 17 objects with ids D01-D10, D12-D18; the inventory has exactly 17 canonical entries covering those ids (plus an explicitly labeled D11 rejection entry with EX-d11-rejected, which the contract requires over silent omission), each with Decision, Rationale, Replaces, Replaced-by, Relationships, and Evidence references subsections. I independently verified the inventory's structural claims against the JSONL: replaces/replaced_by keys absent on all 17 objects (0 edges, no minted supersession per contract §11), related_decisions present only on D18→D17 companion, git_refs absent, authority_rank=2 and native source_id form decisions:D14 per contract §5. Evidence quotes from DECISIONS-REVIEW-SHEET.md and 2026-08-08-last2w-decisions.md match source text, and the parity-witness sha256 4124f800... verifies against the actual Corpus v1.0 file. (3) separation-kept: git diff fe52852..be8dbe4 adds exactly 2 files, both under part2/layers/decisions/; no Part 1 file was edited, moved, or regenerated; worktree is clean. Downstream coherence: node-08-build-source-layers lists node-04 in depends_on and expects part2/layers/decisions/ to be consumable — the inventory is self-describing (control path, pin id, measured counts, labeled absences) so node-08 can materialize the normalized layer without archaeology, and AO-03 (normalized twin cites control SHA, never replaces it) is respected. Lane-1's low-confidence keyword-scan indeterminacy appears to be an artifact of scanning lib files rather than the repo; my direct byte-level verification resolves the substance. Verdict: pass — intent and graph integrity preserved.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-16T10:23:37.444Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_KvjDFE6eNzDmB1OBPRIZ6679",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-16T10:23:37.446Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_7s5DeKopVtiJjXnZhq9a9151",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/README.md"
+      },
+      {
+        "ts": "2026-08-16T10:23:37.446Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_cwczPl2oqmSZeHfjKXSi8924",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-04-inventory-decisions.yaml"
+      },
+      {
+        "ts": "2026-08-16T10:23:37.447Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_qp7XLsyD1jZefvANB2in7793",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+      },
+      {
+        "ts": "2026-08-16T10:23:37.447Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_04_gGiOlLDvi4rtSUBzLjbm9469",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+      },
+      {
+        "ts": "2026-08-16T10:23:37.456Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_KvjDFE6eNzDmB1OBPRIZ6679",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:23:37.457Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_04_gGiOlLDvi4rtSUBzLjbm9469",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:23:37.457Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_qp7XLsyD1jZefvANB2in7793",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:23:37.457Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_cwczPl2oqmSZeHfjKXSi8924",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:23:37.457Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_7s5DeKopVtiJjXnZhq9a9151",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:23:40.201Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_JqUxly9iE5FPhQssxkdn4525",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git log --oneline -5 2>/dev/null; echo \"---\"; git status --short 2>/dev/null | head -30; echo \"---\"; ls part2/ 2>/dev/null; echo \"---\"; ls part2/layers/decisions/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-16T10:23:40.204Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_k06aUsRDxQWZE3YJWqAM7315",
+        "command": "ls -la /Users/sab-mini/repos/MyAPI/01-decisions/output/ 2>/dev/null; echo \"---\"; ls /Users/sab-mini/repos/MyAPI/part2/ 2>/dev/null; echo \"---\"; find /Users/sab-mini/repos/MyAPI/part2 -type f | head -50"
+      },
+      {
+        "ts": "2026-08-16T10:23:40.242Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_k06aUsRDxQWZE3YJWqAM7315",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:23:40.604Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_JqUxly9iE5FPhQssxkdn4525",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-16T10:23:43.880Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_5fxfdrAqV3za299iOj7I2723",
+        "command": "pwd; echo \"---\"; ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/ | head -30; echo \"---\"; find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 -maxdepth 3 -type d | head -40"
+      },
+      {
+        "ts": "2026-08-16T10:23:43.942Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_5fxfdrAqV3za299iOj7I2723",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:23:48.897Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_KXz4wqST6ikwlmkFz6id2926",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && cat .git; echo \"---\"; git rev-parse --git-dir 2>/dev/null; echo \"---\"; git log --oneline -3 2>/dev/null; echo \"---\"; git status --short 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-16T10:23:48.897Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_eFgHyvEA5FVwmzBJx3Nx4670",
+        "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/part2/ /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/part2/layers/ /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/part2/layers/decisions/ /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/part2/contract/"
+      },
+      {
+        "ts": "2026-08-16T10:23:48.922Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_eFgHyvEA5FVwmzBJx3Nx4670",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:23:49.002Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_KXz4wqST6ikwlmkFz6id2926",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:23:53.813Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_CEdpHPwrtEpKk3wInxlQ0712",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && cat part2/layers/decisions/payload-sha256.txt; echo; echo \"--- computed sha256 of Part 1 payload ---\"; shasum -a 256 01-decisions/output/decisions-canonical.jsonl; echo \"--- sha256 at base commit fe52852 ---\"; git show fe52852:01-decisions/output/decisions-canonical.jsonl | shasum -a 256; echo \"--- diff of Part1 payload between base and tip ---\"; git diff fe52852 be8dbe4 -- 01-decisions/output/decisions-canonical.jsonl | head -5; echo \"(empty = unchanged)\""
+      },
+      {
+        "ts": "2026-08-16T10:23:53.813Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_ErZKosxrcBMByExyhJwp2933",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/part2/layers/decisions/decisions-inventory.md"
+      },
+      {
+        "ts": "2026-08-16T10:23:53.817Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ErZKosxrcBMByExyhJwp2933",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:23:53.910Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_CEdpHPwrtEpKk3wInxlQ0712",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:24:00.113Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_dDPorGB2jqqwGyWTzUqQ6769",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && wc -l 01-decisions/output/decisions-canonical.jsonl && echo \"--- object count ---\" && python3 -c \"\nimport json\nwith open('01-decisions/output/decisions-canonical.jsonl') as f:\n    objs = [json.loads(l) for l in f if l.strip()]\nprint('objects:', len(objs))\nids = [o.get('id') for o in objs]\nprint('ids:', ids)\n# key presence checks\nfor k in ['replaces','replaced_by','related_decisions','git_refs']:\n    present = [o.get('id') for o in objs if k in o]\n    print(k, 'present in:', present)\n# D18 relationships\nd18 = [o for o in objs if o.get('id')=='D18'][0]\nprint('D18 keys:', list(d18.keys()))\n\""
+      },
+      {
+        "ts": "2026-08-16T10:24:00.114Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_xpP2q7QZ5JttbOX65Uyw7071",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && grep -c '^## D' part2/layers/decisions/decisions-inventory.md; echo \"--- headings ---\"; grep '^## D' part2/layers/decisions/decisions-inventory.md; echo \"--- inventory sha vs payload sha ---\"; grep -n 'part1_payload_sha256' part2/layers/decisions/decisions-inventory.md; echo \"--- payload-sha256.txt content ---\"; cat part2/layers/decisions/payload-sha256.txt"
+      },
+      {
+        "ts": "2026-08-16T10:24:00.149Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_xpP2q7QZ5JttbOX65Uyw7071",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:24:00.247Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_dDPorGB2jqqwGyWTzUqQ6769",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:24:07.090Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_sKyiUBSmGf1538XVUcoR8476",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"=== full diff stat base..tip ===\"; git diff --stat fe52852 be8dbe4; echo \"=== files changed ===\"; git diff --name-status fe52852 be8dbe4; echo \"=== untracked in worktree ===\"; git status --short | head -20; echo \"=== 01-decisions dir in worktree vs base ===\"; git diff fe52852 be8dbe4 --stat -- 01-decisions/"
+      },
+      {
+        "ts": "2026-08-16T10:24:07.091Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_NtWUOuhhbY9lVjJj98Ck7246",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"=== evidence files exist? ===\"; ls -la \"project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md\" \"project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md\" \"project-docs/corpus-work-2026-08/CORPUS-TARGET-SHAPE.md\" 2>&1; echo \"=== parity witness sha ===\"; shasum -a 256 \"/Users/sab-mini/repos/MyAPI/Corpus v1.0/40-decisions-and-trajectories/2026-08-08-last2w-decisions.md\" 2>&1; echo \"=== corpus-work-2026-08 dir listing ===\"; ls -la project-docs/corpus-work-2026-08/ 2>&1 | head -20"
+      },
+      {
+        "ts": "2026-08-16T10:24:07.151Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_NtWUOuhhbY9lVjJj98Ck7246",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:24:07.187Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_sKyiUBSmGf1538XVUcoR8476",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:24:16.849Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_6qqBiFoxXGhbYPHzNLQa9124",
+        "command": "ls /Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/ 2>/dev/null; echo \"===\"; cat /Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-08-build-source-layers.yaml 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-16T10:24:16.850Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_vZDiX8dxXEkiayuPTtvU2727",
+        "command": "ls /Users/sab-mini/repos/gddp-config/docs/ 2>/dev/null; echo \"===\"; wc -l /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-16T10:24:16.874Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_6qqBiFoxXGhbYPHzNLQa9124",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:24:16.874Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_vZDiX8dxXEkiayuPTtvU2727",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:24:19.633Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_ac7pq5vdujDcrAi3cQVJ2876",
+        "path": "/Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md"
+      },
+      {
+        "ts": "2026-08-16T10:24:19.635Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ac7pq5vdujDcrAi3cQVJ2876",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:24:22.081Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_QfibakURHX2bsPDlsbYM9296",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/part2/contract/evidence-contract.md"
+      },
+      {
+        "ts": "2026-08-16T10:24:22.083Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_QfibakURHX2bsPDlsbYM9296",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:24:37.499Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_pC2SKSIjLohcQJHZrA1V8543",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"=== review sheet ===\"; cat project-docs/corpus-work-2026-08/DECISIONS-REVIEW-SHEET.md; echo; echo \"=== memo D18/D17 excerpt ===\"; grep -n -A2 \"D18\\|D17\" project-docs/corpus-work-2026-08/2026-08-08-last2w-decisions.md | head -30"
+      },
+      {
+        "ts": "2026-08-16T10:24:37.500Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ORqLGo6Niaw1m3LoH9Lm5738",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"=== worktree status ===\"; git status --short; echo \"(clean if empty)\"; echo \"=== worktree HEAD ===\"; git log --oneline -2; echo \"=== untracked/ignored in part2 ===\"; git status --short --ignored part2/ 2>/dev/null | head; echo \"=== any modification to Part 1 files in worktree vs index ===\"; git diff --stat HEAD -- 01-decisions/ 03-ingestion/ 04-evaluation/ project-docs/ 2>/dev/null; echo \"(empty if none)\""
+      },
+      {
+        "ts": "2026-08-16T10:24:37.530Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_pC2SKSIjLohcQJHZrA1V8543",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:24:37.598Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ORqLGo6Niaw1m3LoH9Lm5738",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:25:00.212Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_gYaGSEP6bse0ujMxK2PX3109",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "Pre-existing config convention: node-04 (and node-01b, node-08) declare unlocks: [] even though node-08 depends_on node-04. Admission appears driven by depends_on edges, so the graph is coherent, but if the unlocks field is meant to encode downstream visibility, the config is inconsistent across nodes. Not introduced or worsened by this work.",
+        "affected_node_ids": [
+          "node-04-inventory-decisions",
+          "node-08-build-source-layers"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9566666666666667,
+  "criteria_confidence": 0.9566666666666667,
+  "completeness": 1.0,
+  "graph_readiness": 0.9566666666666667,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "payload-preserved",
+        "criterion": "The Part 1 payload 01-decisions/output/decisions-canonical.jsonl is unmodified; part2/layers/decisions/payload-sha256.txt records its sha256 as proof",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (01-decisions/output/decisions-canonical.jsonl, part2/layers/decisions/payload-sha256.txt)"
+        ],
+        "reasoning": "Scanned source files (01-decisions/output/decisions-canonical.jsonl, part2/layers/decisions/payload-sha256.txt) for identifiers named in the criterion (decisions-canonical, payload-sha256). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "semantic-inventory",
+        "criterion": "part2/layers/decisions/decisions-inventory.md contains one entry per Part 1 decision object covering: the decision, its rationale, supersession links (replaces/replaced-by), relationships, and evidence references",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (part2/layers/decisions/decisions-inventory.md)"
+        ],
+        "reasoning": "Scanned source files (part2/layers/decisions/decisions-inventory.md) for identifiers named in the criterion (decisions-inventory, replaced-by). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "separation-kept",
+        "criterion": "The normalized Part 2 representation lives only under part2/; no Part 1 file was edited, moved, or regenerated",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the experiment was executed correctly, never whether the hypothesis won.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution model (operator direction 2026-08-15, enforced by the attempt preamble): You are the ORCHESTRATOR, not the worker. Do NOT perform the node's work yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6 via the subagent tool's model parameter) to do the actual investigation, construction, and measurement. Your job is decomposition, dispatch, reviewing returns, integrating, and producing the final artifacts.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight (worker subagents, Khoj ingestion/processing, long builds), dispatch ONE watcher subagent on model deepseek/deepseek-v4-flash that actively polls with tools (job status, logs, artifact existence) and reports state changes; you go idle between its reports instead of polling yourself.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/ self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to this node as evidence; work discovered beyond this node's scope becomes a continuation proposal, never silent execution.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Work in /Users/sab-mini/repos/MyAPI. Write only under part2/ unless this node's text names another path. Never edit GDDP graph truth, runtime databases, or job state.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "The byte-identical Part 1 payload is the historical control - a normalized Part 2 representation may be produced separately under part2/ but never replaces it.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Close with parallel reviewer subagents on model deepseek/deepseek-v4-pro, each assigned a different explicit focus (criteria coverage, evidence integrity, constraint compliance). Resolve their findings before returning.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "part2/layers/decisions/decisions-inventory.md": true,
+      "part2/layers/decisions/payload-sha256.txt": true
+    },
+    "deps_status": {
+      "node-01b-contract-review": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "fe52852c0690004253886b6c713fb7f1cc1113ce",
+      "tip": "be8dbe4914ef7676e8220c211924f02794f09ab8",
+      "files": [
+        {
+          "status": "A",
+          "path": "part2/layers/decisions/decisions-inventory.md"
+        },
+        {
+          "status": "A",
+          "path": "part2/layers/decisions/payload-sha256.txt"
+        }
+      ],
+      "truncated": false,
+      "file_count": 2,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "payload-preserved",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "part2/layers/decisions/payload-sha256.txt content = 09c15aebd3a424e7f09ce2c27985fa0cbc24a23d9c474182ea4c912b926750a8",
+          "shasum -a 256 of 01-decisions/output/decisions-canonical.jsonl = 09c15aebd3a424e7f09ce2c27985fa0cbc24a23d9c474182ea4c912b926750a8 (matches recorded hash)",
+          "git show {bdf55a6, ffece0a, fe52852, be8dbe4}:01-decisions/output/decisions-canonical.jsonl all hash to 09c15aeb...750a8",
+          "git log --follow shows decisions-canonical.jsonl last modified at bdf55a6 (Part 1 origin commit); never touched since",
+          "part2/contract/evidence-contract.md (upstream node-01b) pins part1_canonical_jsonl sha256 = same 09c15aeb...750a8"
+        ],
+        "reasoning": "The recorded sha256 in payload-sha256.txt exactly equals the live computed sha256 of the Part 1 payload file, and the file content is byte-identical across the Part 1 origin commit, the Part 1 accept commit, this node's base, this node's tip, and the working tree (git history confirms it was never modified after its Part 1 creation). The upstream evidence contract independently pins the identical hash, corroborating the proof. Criterion satisfied."
+      },
+      {
+        "criterion_id": "semantic-inventory",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "payload contains 17 objects, ids D01-D10,D12-D18, no duplicates (verified via python json parse and grep id extraction; wc -l = 17)",
+          "decisions-inventory.md has exactly 17 canonical entries ## D01..## D18 (skipping D11) plus a labeled non-canonical ## D11 (rejected) rejection-evidence section",
+          "every canonical entry contains the six subsections: Decision, Rationale, Replaces, Replaced-by, Relationships, Evidence references",
+          "statement/rationale/evidence_paths/sources for all 17 entries byte-match the payload fields (full file read + payload dump comparison)",
+          "D18 related_decisions (target D17, rel companion) captured under Relationships; D13 notes and D16-D18 tags values match payload; D15 tags correctly None (key omitted in payload)",
+          "inventory header self-describes ids, counts, bytes 26917, lines 17, replaces/replaced_by edge absence, and the D11 exclusion (consistent with contract SC-02 'D11 out')"
+        ],
+        "reasoning": "The inventory contains exactly one entry per Part 1 decision object: 17 payload objects map to 17 canonical entries with matching ids. Each entry covers the decision (statement/title/summary/status/decided_on/by/review_mark/confidence/tags/notes), the rationale, supersession links (Replaces/Replaced-by), relationships, and evidence references (sources with quotes, evidence_paths, sources_not_in_evidence_paths, git_refs). Full-file reading plus field-level comparison against the payload confirmed byte-fidelity of statements, rationales, evidence paths, sources, notes, tags, and the D18->D17 companion relationship. D11 is absent from the payload and is documented only as rejection evidence, so it is not a missing entry. Criterion satisfied."
+      },
+      {
+        "criterion_id": "separation-kept",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "git diff --name-status fe52852..be8dbe4 returns only: A part2/layers/decisions/decisions-inventory.md, A part2/layers/decisions/payload-sha256.txt",
+          "git status: working tree clean, no untracked files",
+          "git diff fe52852..be8dbe4 -- 01-decisions/ and git diff ffece0a..fe52852 -- 01-decisions/ both empty (no Part 1 file edited, moved, or regenerated from Part 1 accept through node tip)",
+          "inventory preamble states the Part 1 payload is the historical control and 'cannot replace the control'",
+          "all node writes are under part2/, consistent with the 'Write only under part2/' constraint"
+        ],
+        "reasoning": "The node's complete base->tip diff consists solely of two new files under part2/layers/decisions/; the working tree is clean with no untracked files; and no file under 01-decisions/ changed between the Part 1 accept commit, the node base, and the node tip. The Part 1 payload therefore was neither edited, moved, nor regenerated, and the normalized representation lives only under part2/. The inventory itself states it does not replace the control. Criterion satisfied."
+      }
+    ],
+    "overall_reasoning": "All three acceptance criteria for node-04-inventory-decisions are satisfied, verified by direct inspection of the working tree, git history, and artifact content. (1) payload-preserved: the recorded payload-sha256.txt equals the live sha256 of 01-decisions/output/decisions-canonical.jsonl, and the hash is byte-identical at the Part 1 origin commit, Part 1 accept commit, node base, node tip, and working tree; the upstream evidence contract pins the same value. (2) semantic-inventory: the inventory contains exactly one entry per Part 1 decision object (17 objects -> 17 canonical entries D01-D10,D12-D18), each covering the decision, rationale, supersession links (Replaces/Replaced-by), relationships, and evidence references; statements, rationales, evidence paths, sources, notes, tags, and the D18-D17 companion relationship all match the payload fields byte-for-byte; D11 is correctly documented as rejection evidence since it is absent from the canonical payload. (3) separation-kept: the base->tip diff contains only the two new part2/layers/decisions/ files, the working tree is clean, and no 01-decisions/ file changed from Part 1 accept through tip, so the byte-identical historical control is untouched and the normalized representation lives only under part2/. Deterministic keyword scans were indeterminate only because they could not read file content; direct content inspection resolves all three to pass.",
+    "risks": "- The semantic-inventory criterion's 'one entry per Part 1 decision object' is met, but the inventory also carries a non-canonical '## D11 (rejected)' section; the file explicitly labels it as not a canonical entry and D11 is absent from the payload (consistent with contract SC-02 'D11 out'), so this is supplementary documentation, not a violation. Low residual risk if a strict reader misreads it as a canonical entry.\n- Upstream dep node-01b-contract-review is 'provisional'; node-04's artifacts agree with the revised contract's pin, but if the upstream contract were revised again the pinned hash expectations could shift. No impact on this node's own criteria.\n- The inventory records sources_not_in_evidence_paths entries using an absolute path (/Users/sab-mini/repos/MyAPI/Corpus v1.0/...), which is a portability/documentation nuance, not a criterion failure.\n- Confirmed payload integrity rests on the git history and the recorded hash matching; no independent out-of-band copy was compared, but four distinct commits plus the working tree all hash identically, which is strong evidence of non-modification.",
+    "followup_candidates": "- Human clarification (optional): upstream node-01b-contract-review is still 'provisional'. Node-04's payload pin matches the revised contract's pinned hash for part1_canonical_jsonl; if the contract review is later revised again, confirm the pin does not change and that node-04's payload-sha256.txt remains authoritative.\n- Observed (contextual, not in criteria): the payload-sha256.txt is a bare 64-hex hash with no path or label; its meaning is documented in the inventory header and the evidence contract. If a machine-consumable pin file (path+hash) is desired for later nodes, consider a follow-up enrichment under part2/.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-16T10:20:55.701Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_gfkY2FdjRRdIgdtpVIZC6804",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-16T10:20:55.702Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_Wa5ukwmbwyMsZGFM2iac4674",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/README.md"
+        },
+        {
+          "ts": "2026-08-16T10:20:55.704Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_qielK4WVvTu1BSvfXeS57028",
+          "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/ 2>&1; echo \"---\"; ls -la /Users/sab-mini/repos/MyAPI 2>&1 | head -50"
+        },
+        {
+          "ts": "2026-08-16T10:20:55.719Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_gfkY2FdjRRdIgdtpVIZC6804",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:20:55.720Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Wa5ukwmbwyMsZGFM2iac4674",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:20:55.746Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_qielK4WVvTu1BSvfXeS57028",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:01.005Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_4QEONwyclnTdEBU7PidD6509",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && cat .git 2>/dev/null; echo \"---GIT STATUS---\"; git status 2>&1 | head -30; echo \"---GIT LOG---\"; git log --oneline -10 2>&1"
+        },
+        {
+          "ts": "2026-08-16T10:21:01.006Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Xxjvl0ZNfCf8WQodkN1g2046",
+          "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/part2/layers/decisions/ 2>&1; echo \"---01-decisions---\"; find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/01-decisions -type f | head -40"
+        },
+        {
+          "ts": "2026-08-16T10:21:01.046Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Xxjvl0ZNfCf8WQodkN1g2046",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:01.312Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_4QEONwyclnTdEBU7PidD6509",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:06.558Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_FkbVceGp1WeXhFxMcDtY4806",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"---payload-sha256.txt---\"; cat part2/layers/decisions/payload-sha256.txt; echo; echo \"---computed sha256 of decisions-canonical.jsonl---\"; shasum -a 256 01-decisions/output/decisions-canonical.jsonl; echo \"---computed sha256 of decisions-raw.jsonl (context)---\"; shasum -a 256 01-decisions/output/decisions-raw.jsonl; echo \"---file stats---\"; ls -la 01-decisions/output/decisions-canonical.jsonl"
+        },
+        {
+          "ts": "2026-08-16T10:21:06.559Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_D3PM19EQe2oG1tZ6MGvB5574",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"---git log for decisions-canonical.jsonl---\"; git log --oneline --follow -- 01-decisions/output/decisions-canonical.jsonl | head -20; echo \"---git log for part2 files---\"; git log --oneline -- part2/layers/decisions/ | head -10"
+        },
+        {
+          "ts": "2026-08-16T10:21:06.634Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_D3PM19EQe2oG1tZ6MGvB5574",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:06.636Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_FkbVceGp1WeXhFxMcDtY4806",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:13.337Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_yJKCFlolPmCBnwrK0Gzd8636",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"---hash at base fe52852---\"; git show fe52852:01-decisions/output/decisions-canonical.jsonl | shasum -a 256; echo \"---hash at tip be8dbe4---\"; git show be8dbe4:01-decisions/output/decisions-canonical.jsonl | shasum -a 256; echo \"---hash at bdf55a6 (Part 1 origin)---\"; git show bdf55a6:01-decisions/output/decisions-canonical.jsonl | shasum -a 256; echo \"---hash at Part1 accept ffece0a---\"; git show ffece0a:01-decisions/output/decisions-canonical.jsonl 2>/dev/null | shasum -a 256 || echo \"not present at ffece0a\""
+        },
+        {
+          "ts": "2026-08-16T10:21:13.337Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_A4wQUs2IEnZmIcsEHRTo6155",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"---diff base..tip (name-status)---\"; git diff --name-status fe52852 be8dbe4; echo \"---diff base..tip (stat)---\"; git diff --stat fe52852 be8dbe4"
+        },
+        {
+          "ts": "2026-08-16T10:21:13.365Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_A4wQUs2IEnZmIcsEHRTo6155",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:13.396Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_yJKCFlolPmCBnwrK0Gzd8636",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:20.925Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_bisRV9lUEDOtdOTlkZyn0706",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"---decision objects in payload---\"; python3 -c \"\nimport json\ncount = 0\nwith open('01-decisions/output/decisions-canonical.jsonl') as f:\n    for line in f:\n        line = line.strip()\n        if not line: continue\n        obj = json.loads(line)\n        count += 1\n        print('OBJ', count, '| keys:', sorted(obj.keys()))\nprint('TOTAL objects:', count)\n\""
+        },
+        {
+          "ts": "2026-08-16T10:21:20.926Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_jMGmHrRofCZOthnU49mk3986",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"---inventory headers---\"; grep -n \"^#\" part2/layers/decisions/decisions-inventory.md | head -80"
+        },
+        {
+          "ts": "2026-08-16T10:21:20.932Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_jMGmHrRofCZOthnU49mk3986",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:21.030Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_bisRV9lUEDOtdOTlkZyn0706",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:26.256Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Fs4BynI9CO1AVhj3duhz8159",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && python3 -c \"\nimport json\nwith open('01-decisions/output/decisions-canonical.jsonl') as f:\n    for i, line in enumerate(f, 1):\n        line = line.strip()\n        if not line: continue\n        o = json.loads(line)\n        print(i, o.get('id'), '| status:', o.get('status'), '| title:', o.get('title'))\n\""
+        },
+        {
+          "ts": "2026-08-16T10:21:26.256Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_pibYGwOLZWKLSSZ5pClH6330",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"---all headers in inventory---\"; grep -n \"^#\" part2/layers/decisions/decisions-inventory.md; echo \"---line count---\"; wc -l part2/layers/decisions/decisions-inventory.md"
+        },
+        {
+          "ts": "2026-08-16T10:21:26.265Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_pibYGwOLZWKLSSZ5pClH6330",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:26.290Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Fs4BynI9CO1AVhj3duhz8159",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:33.691Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_qCKOcbQAyxtcvQ5zSZCI2150",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/part2/layers/decisions/decisions-inventory.md"
+        },
+        {
+          "ts": "2026-08-16T10:21:33.691Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_nB3bH5GfXXkRCuweDNyV5527",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && python3 -c \"\nimport json\nwith open('01-decisions/output/decisions-canonical.jsonl') as f:\n    for i, line in enumerate(f, 1):\n        line = line.strip()\n        if not line: continue\n        o = json.loads(line)\n        did = o.get('id')\n        print('===', did, '===')\n        print('statement:', o.get('statement'))\n        print('rationale:', o.get('rationale'))\n        print('related_decisions:', o.get('related_decisions'))\n        print('evidence_paths:', o.get('evidence_paths'))\n        print('sources:', o.get('sources'))\n        print('summary:', o.get('summary'))\n\" 2>&1 | head -150"
+        },
+        {
+          "ts": "2026-08-16T10:21:33.692Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_qCKOcbQAyxtcvQ5zSZCI2150",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:33.723Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_nB3bH5GfXXkRCuweDNyV5527",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:39.348Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_yZBXd0DjCO7tXIzVmoIq7546",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/part2/layers/decisions/decisions-inventory.md"
+        },
+        {
+          "ts": "2026-08-16T10:21:39.349Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_yZBXd0DjCO7tXIzVmoIq7546",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:41.787Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_QIVqomD8YAqzn8OpLToh2471",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/part2/layers/decisions/decisions-inventory.md"
+        },
+        {
+          "ts": "2026-08-16T10:21:41.787Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_QIVqomD8YAqzn8OpLToh2471",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:43.514Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_u9xevqzB8zULkMcG8BZA8985",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/part2/layers/decisions/decisions-inventory.md"
+        },
+        {
+          "ts": "2026-08-16T10:21:43.515Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_u9xevqzB8zULkMcG8BZA8985",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:21:56.379Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ewsEyzKuq7gFDIXl1X3v6350",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"---full part2 tree---\"; find part2 -type f | sort; echo \"---untracked---\"; git status --porcelain; echo \"(empty above = clean)\"; echo \"---changes 01-decisions between Part1 accept ffece0a and base fe52852---\"; git diff --name-status ffece0a fe52852 -- 01-decisions/; echo \"(empty above = none)\"; echo \"---changes 01-decisions between base fe52852 and tip be8dbe4---\"; git diff --name-status fe52852 be8dbe4 -- 01-decisions/; echo \"(empty above = none)\""
+        },
+        {
+          "ts": "2026-08-16T10:21:56.380Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_01_aOqvP7tmkS9sZX64LrCU8772",
+          "reason": "command matched blocked pattern",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && python3 -c \"\nimport json, collections\nids = []\nwith open('01-decisions/output/decisions-canonical.jsonl') as f:\n    lines = [l for l in f if l.strip()]\n    for l in lines:\n        ids.append(json.loads(l)['id'])\nprint('lines:', len(lines), '| objects:', len(ids))\nprint('duplicates:', [k for k,v in collections.Counter(ids).items() if v>1])\nprint('sorted ids match D01..D10,D12..D18:', sorted(ids) == ['D%02d' % i for i in range(1,11)] + ['D%02d' % i for i in range(12,19)])\n\"",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-16T10:21:56.381Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_aOqvP7tmkS9sZX64LrCU8772",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-16T10:21:56.494Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ewsEyzKuq7gFDIXl1X3v6350",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:22:05.508Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_BWYg8WoEdzdOGZHaCtGJ7872",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"---line count of payload---\"; wc -l < 01-decisions/output/decisions-canonical.jsonl; echo \"---duplicate ids (should be empty)---\"; grep -o '\"id\": *\"[^\"]*\"' 01-decisions/output/decisions-canonical.jsonl | sort | uniq -d; echo \"---ids in order---\"; grep -o '\"id\": *\"[^\"]*\"' 01-decisions/output/decisions-canonical.jsonl | sed 's/\"id\": *\"//;s/\"//'"
+        },
+        {
+          "ts": "2026-08-16T10:22:05.544Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_BWYg8WoEdzdOGZHaCtGJ7872",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:22:09.282Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_L5Deli3XhkKKbX6mUaQH5113",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+        },
+        {
+          "ts": "2026-08-16T10:22:09.284Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_sKhnYCwAdgxi6eE2Uv0o5896",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"---contract-rationale.md head---\"; head -40 part2/contract/contract-rationale.md; echo; echo \"---evidence-contract.md head---\"; head -60 part2/contract/evidence-contract.md"
+        },
+        {
+          "ts": "2026-08-16T10:22:09.288Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_L5Deli3XhkKKbX6mUaQH5113",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:22:09.310Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_sKhnYCwAdgxi6eE2Uv0o5896",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:22:15.610Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_lppEQ10qz2s0aCrRg7s84227",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"---evidence-contract: decisions layer section---\"; sed -n '/SC-02/,/SC-03/p' part2/contract/evidence-contract.md | head -40; echo \"---grep inventory mentions in contract---\"; grep -n -i \"inventory\" part2/contract/evidence-contract.md | head -20"
+        },
+        {
+          "ts": "2026-08-16T10:22:15.611Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_6fSpP2gnnHsN3uivVFiz3854",
+          "command": "ls -la /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md 2>&1; grep -n -A 15 \"04\" /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md 2>/dev/null | grep -i -A 10 \"inventory\" | head -40"
+        },
+        {
+          "ts": "2026-08-16T10:22:15.639Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_lppEQ10qz2s0aCrRg7s84227",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:22:15.641Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_6fSpP2gnnHsN3uivVFiz3854",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:22:28.933Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_aJnwn2B7Yeu1y0EHlHvm6368",
+          "reason": "command matched blocked pattern",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && python3 - <<'PYEOF'\nimport json\ntargets = {'D13': 'notes', 'D15': 'tags', 'D16': 'tags', 'D17': 'tags', 'D18': 'tags'}\nwith open('01-decisions/output/decisions-canonical.jsonl') as f:\n    for line in f:\n        line = line.strip()\n        if not line: continue\n        o = json.loads(line)\n        if o['id'] in targets:\n            k = targets[o['id']]\n            print(o['id'], '->', k, '=', repr(o.get(k)))\nPYEOF",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-16T10:22:28.934Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_aJnwn2B7Yeu1y0EHlHvm6368",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-16T10:22:34.581Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_eTYkc024GUQVCsc37Ph52160",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"---payload optional fields (D13 notes / D15-18 tags / D18 related)---\"; grep -n -E '\"id\": \"(D13|D15|D16|D17|D18)\"' 01-decisions/output/decisions-canonical.jsonl | cut -c1-400"
+        },
+        {
+          "ts": "2026-08-16T10:22:34.603Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_eTYkc024GUQVCsc37Ph52160",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:22:39.093Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_lLtLrbKzoHnwSTAcjo8T7218",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && for d in D13 D15 D16 D17 D18; do echo \"--- $d ---\"; grep -o \"\\\"id\\\": *\\\"$d\\\"[^}]*\" 01-decisions/output/decisions-canonical.jsonl | grep -o \"\\\"notes\\\":[^,]*\\|\\\"tags\\\":[^,]*\\|\\\"related_decisions\\\":[^]]*\\]\" ; done"
+        },
+        {
+          "ts": "2026-08-16T10:22:39.140Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_lLtLrbKzoHnwSTAcjo8T7218",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:22:43.357Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_YKHevStrKBB62fasTZy51291",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"---D13 raw line (notes field)---\"; grep -o '\"id\":\"D13\"[^}]*' 01-decisions/output/decisions-canonical.jsonl; echo; echo \"---D15 raw line (tags field)---\"; grep -o '\"id\":\"D15\"[^}]*' 01-decisions/output/decisions-canonical.jsonl"
+        },
+        {
+          "ts": "2026-08-16T10:22:43.387Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_YKHevStrKBB62fasTZy51291",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:22:46.695Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_AHKiSFSngGqpWs7nwus20417",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && echo \"---optional fields per id (split by comma)---\"; grep -E '\"id\":\"D1[3578]\"' 01-decisions/output/decisions-canonical.jsonl | tr ',' '\\n' | grep -E '\"id\"|\"notes\"|\"tags\"|\"related_decisions\"' | cut -c1-220"
+        },
+        {
+          "ts": "2026-08-16T10:22:46.720Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_AHKiSFSngGqpWs7nwus20417",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:22:50.364Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_rXYMDKF61Qoi6PYUQEBb1370",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1 && grep '\"id\":\"D15\"' 01-decisions/output/decisions-canonical.jsonl | tr ',' '\\n' | grep -n 'tags'; echo \"---tail of D15 line---\"; grep '\"id\":\"D15\"' 01-decisions/output/decisions-canonical.jsonl | tail -c 300"
+        },
+        {
+          "ts": "2026-08-16T10:22:50.394Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_rXYMDKF61Qoi6PYUQEBb1370",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:23:21.649Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_MEWl71SsIIePqpNKmnlH0131",
+          "tool": "submit_verdict",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-16T10:23:33.401Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_5qWdrt78RwGuHmpr4Dn71839",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All three acceptance criteria for node-04-inventory-decisions are satisfied, verified by direct inspection of the working tree, git history, and artifact content. (1) payload-preserved: the recorded payload-sha256.txt equals the live sha256 of 01-decisions/output/decisions-canonical.jsonl, and the hash is byte-identical at the Part 1 origin commit, Part 1 accept commit, node base, node tip, and working tree; the upstream evidence contract pins the same value. (2) semantic-inventory: the inventory contains exactly one entry per Part 1 decision object (17 objects -> 17 canonical entries D01-D10,D12-D18), each covering the decision, rationale, supersession links (Replaces/Replaced-by), relationships, and evidence references; statements, rationales, evidence paths, sources, notes, tags, and the D18-D17 companion relationship all match the payload fields byte-for-byte; D11 is correctly documented as rejection evidence since it is absent from the canonical payload. (3) separation-kept: the base->tip diff contains only the two new part2/layers/decisions/ files, the working tree is clean, and no 01-decisions/ file changed from Part 1 accept through tip, so the byte-identical historical control is untouched and the normalized representation lives only under part2/. Deterministic keyword scans were indeterminate only because they could not read file content; direct content inspection resolves all three to pass.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-16T10:25:00.383065+00:00",
+  "evaluated_tree_sha": "d9f0bb0dfb6915f4c72e6900b07c13be2b58a927",
+  "evaluated_commit_sha": "be8dbe4914ef7676e8220c211924f02794f09ab8",
+  "merge_commit_sha": "be8dbe4914ef7676e8220c211924f02794f09ab8",
+  "expected_base_commit_sha": "fe52852c0690004253886b6c713fb7f1cc1113ce",
+  "pr_ref": null,
+  "job_id": "job_20260816T095531252344e6b6557c",
+  "execution_attempt_id": "job_20260816T095531252344e6b6557c:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+    "neighbor:node-01b-contract-review": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 3,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/README.md"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+      ]
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 4,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-kw3_bgm1/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "high"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-16T10:20:51.413522+00:00",
+    "finished_at": "2026-08-16T10:25:00.382818+00:00",
+    "wall_s": 248.977,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 162.023,
+      "tool_calls": 31
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 86.911,
+      "tool_calls": 22
+    }
+  }
+}

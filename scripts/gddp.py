@@ -59,6 +59,7 @@ import importlib.util
 import json
 import os
 import re
+import shlex
 import secrets
 import sqlite3
 import subprocess
@@ -92,6 +93,7 @@ _CLI_COMMANDS = frozenset(
         "jobs",
         "evaluations",
         "verify",
+        "eval",
         "review",
         "receipt",
         "obsidian",
@@ -103,6 +105,110 @@ _CLI_COMMANDS = frozenset(
     }
 )
 _ABSTRACT_EXECUTION_MODES = frozenset({"agent", "human"})
+
+# --------------------------------------------------------------------------- #
+# Runtime settings (executor + evaluator configuration)
+# --------------------------------------------------------------------------- #
+# Human-editable config lives in runtime/settings.env (KEY=value lines). gddp
+# loads it at startup into os.environ so every subprocess it spawns inherits
+# executor and evaluator configuration. The interactive `config` menu edits
+# this file; `gddp eval` and the dispatch/evaluate menu paths read it.
+
+SETTINGS_FILE = ROOT / "runtime" / "settings.env"
+
+SETTINGS_FIELDS: dict[str, tuple[str, str]] = {
+    "GDDP_EXECUTOR_OVERRIDE": (
+        "executor",
+        "force a concrete executor for all dispatch (empty = per-project default; pi_rpc, local_subprocess, jules, droid, factory_mission)",
+    ),
+    "GDDP_PI_RPC_MODEL": (
+        "pi_rpc model",
+        "model id for the pi_rpc executor (e.g. xai/grok-4.5)",
+    ),
+    "GDDP_PI_RPC_TOOLS": (
+        "pi_rpc tools",
+        "comma-separated tool allowlist for the pi_rpc executor",
+    ),
+    "GDDP_PI_RPC_TURN_TIMEOUT_S": (
+        "pi_rpc turn timeout",
+        "seconds before a single executor turn is considered hung",
+    ),
+    "GDDP_VERIFY_SEMANTIC_ARGS": (
+        "evaluator lanes",
+        "semantic lane args: --semantic-provider <p> --semantic-pi-model <m> --semantic-thinking <level>",
+    ),
+    "GDDP_EVAL_MODEL_CHEAP": (
+        "eval cheap model",
+        "model id for the cheap evaluator preset (default: deepseek-v4-flash)",
+    ),
+    "GDDP_EVAL_MODEL_EXPENSIVE": (
+        "eval expensive model",
+        "model id for the expensive evaluator preset (empty until set)",
+    ),
+    "GDDP_EVAL_THINKING_DEFAULT": (
+        "eval thinking default",
+        "default semantic thinking level (e.g. medium)",
+    ),
+    "GDDP_EVAL_LANES_DEFAULT": (
+        "eval lanes default",
+        "default lanes: live or deterministic",
+    ),
+    "GDDP_INTEGRITY_MODE": (
+        "integrity lane",
+        "on/off — intent/integrity evaluation always runs when on",
+    ),
+    "GDDP_DEEPSEEK_KEY_CMD": (
+        "evaluator key cmd",
+        "shell command that prints the DeepSeek API key (default: pass show api/deepseek)",
+    ),
+}
+
+DEFAULT_SEMANTIC_ARGS = (
+    "--semantic-mode live --semantic-harness pi --semantic-provider deepseek "
+    "--semantic-pi-model deepseek-v4-flash --semantic-thinking medium"
+)
+
+
+def _load_runtime_settings() -> None:
+    """Load runtime/settings.env into os.environ (setdefault semantics).
+
+    Subprocesses spawned later inherit these values. Explicit shell env always
+    wins over the settings file, so an operator can override on the command
+    line without editing the file."""
+    if not SETTINGS_FILE.is_file():
+        return
+    try:
+        for line in SETTINGS_FILE.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if not key:
+                continue
+            os.environ.setdefault(key, value)
+    except OSError as exc:
+        print(f"warning: could not read {SETTINGS_FILE}: {exc}", file=sys.stderr)
+
+
+def _write_runtime_settings(settings: dict[str, str]) -> None:
+    """Persist executor/evaluator settings to runtime/settings.env."""
+    SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "# gddp runtime settings — edited via `gddp config` (front-page c)",
+        "# Loaded into the environment for every executor/evaluator subprocess.",
+    ]
+    for key in SETTINGS_FIELDS:
+        value = settings.get(key, "").strip()
+        if value:
+            lines.append(f"{key}={value}")
+    SETTINGS_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    for key, value in settings.items():
+        if value.strip():
+            os.environ[key] = value.strip()
+        else:
+            os.environ.pop(key, None)
 
 
 # --------------------------------------------------------------------------- #
@@ -1498,6 +1604,37 @@ def _print_action_menu(actions: dict[str, tuple[str, str | Text]]) -> None:
         console.print(row)
 
 
+def _menu_columns() -> int:
+    """Real pane width. Prefer ioctl over stale ``COLUMNS`` / Rich defaults."""
+    explicit = getattr(console, "_width", None)
+    if isinstance(explicit, int) and explicit > 0:
+        width = getattr(console, "width", explicit)
+        return width if isinstance(width, int) and width > 0 else explicit
+    for fd in (1, 0):
+        try:
+            cols = os.get_terminal_size(fd).columns
+        except OSError:
+            continue
+        if isinstance(cols, int) and cols > 0:
+            return cols
+    width = getattr(console, "width", None)
+    return width if isinstance(width, int) and width > 0 else 80
+
+
+def _emit_menu_lines(lines: list[Text]) -> int:
+    """Print each menu row as one terminal row so in-place clear stays aligned.
+
+    A wrap makes ``drawn`` short; the next ↑ then leaves the first row behind.
+    Crop to width-1 so a full-width line cannot add an extra wrap row.
+    """
+    budget = max(1, _menu_columns() - 1)
+    for line in lines:
+        fitted = line.copy()
+        fitted.truncate(budget, overflow="crop")
+        console.print(fitted, overflow="crop", crop=True, no_wrap=True)
+    return len(lines)
+
+
 def _menu_choice(
     actions: dict[str, tuple[str, str | Text]],
     default: str,
@@ -1549,9 +1686,7 @@ def _menu_choice(
             first_paint = False
         else:
             clear_lines(drawn)
-        for line in lines:
-            console.print(line)
-        drawn = len(lines)
+        drawn = _emit_menu_lines(lines)
 
         choice = getch()
         if choice == "\x03":
@@ -1779,9 +1914,7 @@ def _paged_menu(
         else:
             clear_lines(drawn)
 
-        for line in lines:
-            console.print(line, overflow="crop", crop=True, no_wrap=True)
-        drawn = len(lines)
+        drawn = _emit_menu_lines(lines)
 
         # Read keys here so navigation does not echo "up"/"down" or full-clear.
         while True:
@@ -2237,6 +2370,7 @@ def _node_review_pick_action(
     # Horizontal sibling nav (←/→) is separate chrome, not a peer option.
     selectables: list[tuple[str, str, str]] = [
         ("e", "evaluation", "verdict, why, criteria — current job evidence"),
+        ("v", "evaluator", "evaluator hub for this node"),
         ("u", "update", "set graph status (your decision)"),
         ("x", "reject + retry", "return to ready; retry with your fix-list"),
         ("m", "more", "contract · diff · trace"),
@@ -2283,9 +2417,7 @@ def _node_review_pick_action(
             first_paint = False
         else:
             clear_lines(drawn)
-        for line in lines:
-            console.print(line)
-        drawn = len(lines)
+        drawn = _emit_menu_lines(lines)
 
         choice = getch()
         if choice == "\x03":
@@ -2453,6 +2585,11 @@ def _node_review_menu(
             )
             if _pause("u update · any other key returns to the node") != "u":
                 continue
+        elif choice == "v":
+            outcome = interactive_eval_hub(project, node_id)
+            if outcome is _MENU_QUIT:
+                return _MENU_QUIT
+            continue
         elif choice == "x":
             _confirm_reject_and_retry(project, node_id)
             _pause()
@@ -3168,7 +3305,7 @@ def static_overview():
     table.add_column("group", style="bold cyan", no_wrap=True)
     table.add_column("owns")
     table.add_column("start with", style="dim", no_wrap=True)
-    table.add_row("menu", "dispatch · graphs · live · heartbeat", "gddp")
+    table.add_row("menu", "dispatch · evaluate · graphs · live · heartbeat · config", "gddp")
     table.add_row("live", "running executors, diffs, events stream", "gddp watch / gddp jobs live")
     table.add_row("node", "graph truth, authoring, runtime/evaluator join", "gddp node list")
     table.add_row("jobs", "runtime queue, results, and audited state changes", "gddp jobs list")
@@ -3347,9 +3484,11 @@ def interactive_heartbeat():
 def _front_page_actions() -> dict[str, tuple[str, str]]:
     return {
         "d": ("dispatch", "send ready work through the event pipeline"),
+        "e": ("evaluate", "evaluator hub — run, inspect, history"),
         "g": ("graphs", "active graphs first; archive for idle (>7d)"),
         "w": ("live", "running executors — fleet + drill-in"),
         "h": ("heartbeat", "arm/disarm the control plane (intake + heartbeat)"),
+        "c": ("config", "executor & evaluator settings (runtime/settings.env)"),
         "q": ("quit", ""),
     }
 
@@ -3357,10 +3496,537 @@ def _front_page_actions() -> dict[str, tuple[str, str]]:
 def _front_page_handlers() -> dict[str, object]:
     return {
         "d": interactive_dispatch,
+        "e": interactive_evaluate,
         "g": interactive_graphs,
         "w": interactive_watch,
         "h": interactive_heartbeat,
+        "c": interactive_config,
     }
+
+
+def _eval_hub_actions() -> dict[str, tuple[str, str]]:
+    return {
+        "r": ("run", "run the live judge with current knobs"),
+        "k": ("knobs", "per-run overrides for the next run"),
+        "c": ("config", "resolved evaluator settings"),
+        "i": ("instructions", "what the judge is told / offered-vs-read"),
+        "h": ("runs", "receipts for this node"),
+        "s": ("show", "latest run for this node"),
+        "b": ("back", ""),
+        "q": ("quit", ""),
+    }
+
+
+def _eval_hub_handlers() -> dict[str, object]:
+    return {
+        "r": _run_live_eval,
+        "k": _eval_knob_picker,
+        "c": _render_eval_config,
+        "i": _render_eval_instructions,
+        "h": _render_eval_runs,
+        "s": _render_eval_show,
+    }
+
+
+def _load_yaml_mapping(path: Path) -> dict:
+    if not path.is_file():
+        return {}
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except Exception:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _human_eval_path(path: str) -> str:
+    text = str(path or "")
+    if text.startswith("UNAVAILABLE"):
+        return text
+    name = Path(text).name or text
+    normalized = text.replace("\\", "/")
+    if "gddp-eval-wt-" in normalized:
+        return f"{name}  (worktree)"
+    return name
+
+
+def _offered_vs_read_lines(canonical_context, context_coverage) -> list[str]:
+    """Pure formatter: offered pointers + per-lane accessed/not-observed files."""
+    offered: list[str] = []
+    for key, val in (canonical_context or {}).items():
+        if not isinstance(val, str):
+            continue
+        if val.startswith("UNAVAILABLE"):
+            offered.append(f"{key} UNAVAILABLE")
+            continue
+        human = _human_eval_path(val)
+        if key in {"readme", "project_brief"}:
+            offered.append(human)
+        else:
+            offered.append(f"{key}={human}")
+    lines = ["Offered: " + (" · ".join(offered) if offered else "—")]
+
+    def _lane_line(name: str, lane) -> str:
+        if lane == "not_run" or lane is None:
+            return f"Read ({name}): not run"
+        if not isinstance(lane, dict):
+            return f"Read ({name}): —"
+        accessed = [_human_eval_path(p) for p in (lane.get("accessed_paths") or [])]
+        missing = [_human_eval_path(p) for p in (lane.get("not_observed_paths") or [])]
+        bits = [f"{p} ✓" for p in accessed] + [f"{p} ✗" for p in missing]
+        if not bits:
+            return f"Read ({name}): — (none)"
+        return f"Read ({name}): " + " · ".join(bits)
+
+    cov = context_coverage or {}
+    lines.append(_lane_line("criteria", cov.get("criteria")))
+    lines.append(_lane_line("integrity", cov.get("integrity")))
+    if cov.get("overall"):
+        lines.append(f"Overall coverage: {cov.get('overall')}")
+    return lines
+
+
+def _offered_canonical_pointers(project: str, node_id: str, repo: Path | None) -> dict[str, str]:
+    """Local reimplementation of runtime canonical pointers. Do not import runtime."""
+    pointers: dict[str, str] = {}
+    if repo is not None:
+        repo = Path(repo)
+        for name, filename in (("readme", "README.md"), ("project_brief", "PROJECT-BRIEF.md")):
+            found = None
+            for variant in (filename, filename.upper(), filename.lower()):
+                path = repo / variant
+                if path.is_file():
+                    found = str(path)
+                    break
+            pointers[name] = found or f"UNAVAILABLE: {repo / filename} does not exist"
+    else:
+        pointers["readme"] = "UNAVAILABLE: no repo"
+        pointers["project_brief"] = "UNAVAILABLE: no repo"
+
+    project_yaml = ROOT / "graphs" / project / "project.yaml"
+    pdata = _load_yaml_mapping(project_yaml)
+    nodes = pdata.get("nodes") or []
+    first_id = ""
+    if nodes:
+        first = nodes[0]
+        first_id = first.get("id", "") if isinstance(first, dict) else str(first)
+    nodes_dir = ROOT / "graphs" / project / "nodes"
+    if first_id:
+        path = nodes_dir / f"{first_id}.yaml"
+        pointers["foundational_node"] = (
+            str(path) if path.is_file() else f"UNAVAILABLE: {path} does not exist"
+        )
+    else:
+        pointers["foundational_node"] = "UNAVAILABLE: no first node id in project.yaml"
+
+    ndata = _load_yaml_mapping(nodes_dir / f"{node_id}.yaml")
+    neighbor_ids = list(ndata.get("depends_on") or []) + list(ndata.get("unlocks") or [])
+    for nid in neighbor_ids:
+        path = nodes_dir / f"{nid}.yaml"
+        pointers[f"neighbor:{nid}"] = (
+            str(path) if path.is_file() else f"UNAVAILABLE: {path} does not exist"
+        )
+    return pointers
+
+
+def _hydrate_eval_row(row: dict) -> dict:
+    """Replace a DB summary `check` with the on-disk receipt when needed."""
+    check = row.get("check") if isinstance(row.get("check"), dict) else {}
+    if check.get("canonical_context"):
+        return row
+    receipt_path = row.get("receipt_path")
+    if not receipt_path:
+        return row
+    node_cli = _import_module("node_cli")
+    loader = getattr(node_cli, "load_receipt_file", None)
+    full = loader(Path(str(receipt_path))) if callable(loader) else None
+    if not isinstance(full, dict):
+        return row
+    return {**row, "check": full}
+
+
+def _load_receipts_for_node(project: str, node_id: str) -> list[dict]:
+    evaluations = _import_module("evaluations")
+    db_path, receipt_root = _evaluation_sources()
+    rows = evaluations.load_evaluation_rows(db_path=db_path, receipt_root=receipt_root)
+    out = []
+    for row in rows:
+        if row.get("project_id") != project or row.get("node_id") != node_id:
+            continue
+        receipt_path = row.get("receipt_path")
+        knobs = _load_eval_knobs_sidecar(receipt_path) if receipt_path else {}
+        out.append(_hydrate_eval_row({**row, "knobs": knobs}))
+    return out
+
+
+def _render_eval_config() -> None:
+    """Read-only resolved evaluator settings (not the settings writer)."""
+    try:
+        knobs = _resolve_eval_knobs()
+    except EvalKnobError as exc:
+        console.print(Text(str(exc), style="red"))
+        return
+    cheap = (os.environ.get("GDDP_EVAL_MODEL_CHEAP") or _EVAL_PRESETS["cheap"]).strip()
+    expensive = (os.environ.get("GDDP_EVAL_MODEL_EXPENSIVE") or "").strip() or "UNSET"
+    table = Table(title="evaluator config", box=box.SIMPLE, show_header=False)
+    table.add_column("key", style="bold cyan")
+    table.add_column("value")
+    table.add_row("model", str(knobs.get("model") or "-"))
+    table.add_row("preset", str(knobs.get("preset") or "-"))
+    table.add_row("thinking", str(knobs.get("thinking") or "-"))
+    table.add_row("integrity", str(knobs.get("integrity") or "-"))
+    table.add_row("lanes", str(knobs.get("lanes") or "-"))
+    table.add_row("cheap →", cheap)
+    table.add_row("expensive →", expensive)
+    table.add_row("key cmd", os.environ.get("GDDP_DEEPSEEK_KEY_CMD") or "-")
+    table.add_row("settings", str(SETTINGS_FILE))
+    console.print(table)
+
+
+def _render_eval_instructions(
+    project: str,
+    node_id: str,
+    receipt: dict | None = None,
+) -> None:
+    node_doc = _load_yaml_mapping(ROOT / "graphs" / project / "nodes" / f"{node_id}.yaml")
+    project_doc = _load_yaml_mapping(ROOT / "graphs" / project / "project.yaml")
+    blueprint = project_doc.get("blueprint") if isinstance(project_doc.get("blueprint"), dict) else {}
+    console.print(Text(f"instructions · {project} / {node_id}", style="bold"))
+    if receipt is None:
+        console.print(Text("preflight — offered only", style="yellow"))
+    console.print()
+    console.print(Text("node contract", style="bold cyan"))
+    why = node_doc.get("why") or "-"
+    console.print(f"  why: {why}")
+    criteria = node_doc.get("acceptance_criteria") or []
+    if criteria:
+        console.print("  acceptance:")
+        for item in criteria:
+            if isinstance(item, dict):
+                console.print(f"    - {item.get('id')}: {item.get('criterion')}")
+            else:
+                console.print(f"    - {item}")
+    constraints = node_doc.get("constraints") or []
+    if constraints:
+        console.print("  constraints:")
+        for item in constraints:
+            console.print(f"    - {item}")
+    console.print()
+    console.print(Text("project vision", style="bold cyan"))
+    console.print(f"  {blueprint.get('vision') or '-'}")
+    if blueprint.get("architecture_notes"):
+        console.print(f"  notes: {blueprint.get('architecture_notes')}")
+
+    if receipt:
+        det = receipt.get("deterministic") if isinstance(receipt.get("deterministic"), dict) else {}
+        console.print()
+        console.print(Text("deterministic evidence", style="bold cyan"))
+        for item in det.get("criteria") or []:
+            if not isinstance(item, dict):
+                continue
+            console.print(
+                f"  {item.get('id')}: {item.get('status')} "
+                f"({item.get('method') or '-'})"
+            )
+            if item.get("evidence"):
+                console.print(f"    evidence: {item.get('evidence')}")
+        mismatches = det.get("criteria_mismatches") or []
+        if mismatches:
+            console.print("  mismatches:")
+            for item in mismatches:
+                if isinstance(item, dict):
+                    cid = item.get("criterion_id") or item.get("id") or "-"
+                    kind = item.get("kind") or item.get("mismatch_kind") or "-"
+                    console.print(f"    - {cid}: {kind}")
+                else:
+                    console.print(f"    - {item}")
+        if det.get("artifacts_present") is not None:
+            console.print(f"  artifacts_present: {det.get('artifacts_present')}")
+        subject = det.get("subject_diff") if isinstance(det.get("subject_diff"), dict) else {}
+        if subject:
+            console.print(
+                f"  subject-diff: {subject.get('status')} "
+                f"{str(subject.get('base') or '')[:8]}..{str(subject.get('tip') or '')[:8]} "
+                f"files={subject.get('file_count')}"
+            )
+            for item in subject.get("files") or []:
+                if isinstance(item, dict):
+                    console.print(f"    {item.get('status') or '-'} {item.get('path') or '-'}")
+                else:
+                    console.print(f"    {item}")
+        console.print()
+        console.print(Text("canonical offered-vs-read", style="bold cyan"))
+        for line in _offered_vs_read_lines(
+            receipt.get("canonical_context") or {},
+            receipt.get("context_coverage") or {},
+        ):
+            console.print(f"  {line}")
+    else:
+        repo = _resolve_repo_for_project(project)
+        pointers = _offered_canonical_pointers(project, node_id, repo)
+        console.print()
+        console.print(Text("canonical offered (preflight)", style="bold cyan"))
+        for key, val in pointers.items():
+            console.print(f"  {key}: {_human_eval_path(val) if not str(val).startswith('UNAVAILABLE') else val}")
+
+
+def _render_eval_show(row: dict) -> None:
+    check = row.get("check") if isinstance(row.get("check"), dict) else {}
+    knobs = row.get("knobs") if isinstance(row.get("knobs"), dict) else {}
+    timing = check.get("evaluation_timing") if isinstance(check.get("evaluation_timing"), dict) else {}
+    integrity = check.get("integrity") if isinstance(check.get("integrity"), dict) else {}
+    console.print(Text(
+        f"run · {row.get('project_id')}/{row.get('node_id')} · {row.get('job_id') or '-'}",
+        style="bold",
+    ))
+    console.print(f"  verdict           : {row.get('verdict') or check.get('verdict') or '-'}")
+    console.print(f"  criteria verdict  : {check.get('criteria_verdict') or '-'}")
+    console.print(f"  confidence        : {check.get('criteria_confidence') or '-'}")
+    console.print(f"  when              : {row.get('sort_at') or '-'}")
+    console.print(f"  wall              : {timing.get('wall_s') if timing else row.get('wall_s')}")
+    crit_timing = timing.get("criteria") if isinstance(timing.get("criteria"), dict) else {}
+    integ_timing = timing.get("integrity") if isinstance(timing.get("integrity"), dict) else {}
+    console.print(
+        f"  tools             : c={crit_timing.get('tool_calls', 0)} "
+        f"i={integ_timing.get('tool_calls', 0)}"
+    )
+    if crit_timing or integ_timing:
+        console.print(
+            f"  lanes             : criteria {crit_timing.get('status') or '-'} "
+            f"· integrity {integ_timing.get('status') or '-'}"
+        )
+    console.print(f"  commit            : {check.get('evaluated_commit_sha') or '-'}")
+    console.print(f"  base              : {check.get('expected_base_commit_sha') or knobs.get('base') or '-'}")
+    console.print(
+        f"  model             : {knobs.get('preset') + '/' if knobs.get('preset') else ''}"
+        f"{knobs.get('model') or '-'}"
+    )
+    console.print(
+        f"  knobs             : thinking={knobs.get('thinking') or '-'} "
+        f"integrity={knobs.get('integrity') or '-'} lanes={knobs.get('lanes') or '-'}"
+    )
+    if integrity:
+        console.print(
+            f"  integrity         : {integrity.get('verdict')} "
+            f"preserved={integrity.get('intent_preserved')}"
+        )
+        if integrity.get("reasoning"):
+            console.print(f"    {integrity.get('reasoning')}")
+    if check.get("required_next_action"):
+        console.print(f"  next              : {check.get('required_next_action')}")
+    if row.get("receipt_path"):
+        console.print(f"  receipt           : {row.get('receipt_path')}")
+    console.print()
+    for line in _offered_vs_read_lines(
+        check.get("canonical_context") or {},
+        check.get("context_coverage") or {},
+    ):
+        console.print(f"  {line}")
+    det = check.get("deterministic") if isinstance(check.get("deterministic"), dict) else {}
+    criteria = det.get("criteria") or []
+    if criteria:
+        console.print()
+        console.print(Text("deterministic criteria", style="bold cyan"))
+        for item in criteria:
+            if not isinstance(item, dict):
+                continue
+            console.print(f"  {item.get('id')}: {item.get('status')} ({item.get('method') or '-'})")
+
+
+def _render_eval_runs(project: str, node_id: str):
+    rows = _load_receipts_for_node(project, node_id)
+    if not rows:
+        console.print(Text(f"No evaluator receipts for {project}/{node_id}", style="yellow"))
+        _pause()
+        return _MENU_BACK
+    items = []
+    for index, row in enumerate(rows):
+        when = str(row.get("sort_at") or "-")[:19].replace("T", " ")
+        verdict = str(row.get("verdict") or "-")
+        model = ((row.get("knobs") or {}).get("model") or "-")
+        wall = row.get("wall_s")
+        wall_s = f"{wall}s" if wall is not None else "-"
+        check = row.get("check") if isinstance(row.get("check"), dict) else {}
+        timing = check.get("evaluation_timing") if isinstance(check.get("evaluation_timing"), dict) else {}
+        crit = timing.get("criteria") if isinstance(timing.get("criteria"), dict) else {}
+        integ = timing.get("integrity") if isinstance(timing.get("integrity"), dict) else {}
+        tools = f"c={crit.get('tool_calls', 0)} i={integ.get('tool_calls', 0)}"
+        commit = str((check.get("evaluated_commit_sha") or "-"))[:8]
+        items.append((str(index), f"{when}  {verdict:<8}  {model:<22}  {wall_s:<8}  {tools:<14}  {commit}"))
+    picked = _pick_list(
+        f"eval runs · {project}/{node_id}",
+        items,
+        back_label="hub",
+    )
+    if picked in {_MENU_BACK, _MENU_QUIT, _MENU_REFRESH}:
+        return picked
+    _clear_screen()
+    _render_eval_show(rows[int(picked)])
+    _pause()
+    return _MENU_BACK
+
+
+def _eval_knob_picker(current: dict) -> dict:
+    """Per-run overrides for the next hub run. Not persisted to settings.env."""
+    _clear_screen()
+    console.print(Text("eval knobs · next run only", style="bold"))
+    try:
+        model = Prompt.ask(
+            "model (cheap|expensive|raw id)",
+            default=str(current.get("preset") or current.get("model") or ""),
+        ).strip()
+        thinking = Prompt.ask(
+            "thinking", default=str(current.get("thinking") or "medium"),
+        ).strip()
+        integrity = Prompt.ask(
+            "integrity (on|off)", default=str(current.get("integrity") or "on"),
+        ).strip()
+        lanes = Prompt.ask(
+            "lanes (live|deterministic)", default=str(current.get("lanes") or "live"),
+        ).strip()
+        base = Prompt.ask(
+            "base sha (empty = auto)", default=str(current.get("base") or ""),
+        ).strip()
+    except (EOFError, KeyboardInterrupt):
+        return current
+    try:
+        return _resolve_eval_knobs(
+            model=model or None,
+            thinking=thinking or None,
+            integrity=integrity or None,
+            lanes=lanes or None,
+            base=base or None,
+        )
+    except EvalKnobError as exc:
+        console.print(Text(str(exc), style="red"))
+        _pause()
+        return current
+
+
+def interactive_eval_hub(project: str, node_id: str):
+    """One evaluator surface: run / knobs / config / instructions / history."""
+    try:
+        knobs = _resolve_eval_knobs()
+    except EvalKnobError:
+        knobs = {"model": "-", "preset": None, "thinking": "medium",
+                 "integrity": "on", "lanes": "live", "base": None}
+    while True:
+        _clear_screen()
+        rows = _load_receipts_for_node(project, node_id)
+        latest = rows[0] if rows else None
+        latest_verdict = (latest or {}).get("verdict") or "-"
+        latest_model = ((latest or {}).get("knobs") or {}).get("model") or "-"
+        latest_when = str((latest or {}).get("sort_at") or "-")[:19]
+        console.print(Text(f"evaluate · {project} / {node_id}", style="bold").append(
+            f"  ·  latest {latest_verdict} · {latest_model} · {latest_when}",
+            style="dim",
+        ))
+        next_model = knobs.get("preset") or knobs.get("model") or "-"
+        console.print(Text(
+            f"next run: model={next_model} thinking={knobs.get('thinking')} "
+            f"integrity={knobs.get('integrity')} lanes={knobs.get('lanes')}",
+            style="dim",
+        ))
+        console.print()
+        try:
+            choice = _menu_choice(_eval_hub_actions(), default="r")
+        except (EOFError, KeyboardInterrupt):
+            return _MENU_BACK
+        if choice == "q":
+            return _MENU_QUIT
+        if choice == "b":
+            return _MENU_BACK
+        if choice == "r":
+            _run_live_eval(project, node_id, base=knobs.get("base"), knobs=knobs)
+            _pause()
+        elif choice == "k":
+            knobs = _eval_knob_picker(knobs)
+        elif choice == "c":
+            _clear_screen()
+            _render_eval_config()
+            _pause()
+        elif choice == "i":
+            _clear_screen()
+            receipt = (latest or {}).get("check") if latest else None
+            _render_eval_instructions(project, node_id, receipt=receipt)
+            _pause()
+        elif choice == "h":
+            outcome = _render_eval_runs(project, node_id)
+            if outcome is _MENU_QUIT:
+                return _MENU_QUIT
+        elif choice == "s":
+            _clear_screen()
+            if latest:
+                _render_eval_show(latest)
+            else:
+                console.print(Text("No runs yet.", style="yellow"))
+            _pause()
+
+
+def interactive_evaluate():
+    """Pick a graph → node → open the evaluator hub."""
+    while True:
+        picked = _pick_graph("evaluate · graphs", back_label="main menu")
+        if picked is _MENU_QUIT:
+            return _MENU_QUIT
+        if picked is _MENU_BACK:
+            return _MENU_BACK
+        project = str(picked)
+        try:
+            nodes = list(_import_module("node_cli").iter_nodes(ROOT, project))
+        except Exception as exc:
+            console.print(Text(f"Could not load {project}: {exc}", style="red"))
+            _pause()
+            continue
+        node_items = [(node_id, str(doc.get("title") or "")) for node_id, doc, _ in nodes]
+        while True:
+            node_picked = _pick_list(
+                f"evaluate · nodes · {project}",
+                node_items,
+                preview_cmd=_node_preview_cmd(project),
+                back_label="graphs",
+            )
+            if node_picked is _MENU_QUIT:
+                return _MENU_QUIT
+            if node_picked is _MENU_BACK:
+                break
+            node_id = node_picked[0] if isinstance(node_picked, list) else node_picked
+            outcome = interactive_eval_hub(project, node_id)
+            if outcome is _MENU_QUIT:
+                return _MENU_QUIT
+
+
+def interactive_config():
+    """Editor for executor & evaluator settings (runtime/settings.env)."""
+    _clear_screen()
+    console.print(Text("config · executor & evaluator settings", style="bold").append(
+        f"  ·  {SETTINGS_FILE}", style="dim"
+    ))
+    console.print()
+    console.print(Text("Values shown are in effect for subprocesses. Empty = default.", style="dim"))
+    console.print()
+    settings: dict[str, str] = {}
+    for key, (label, hint) in SETTINGS_FIELDS.items():
+        current = os.environ.get(key, "")
+        console.print(Text(f"  {label}", style="bold cyan"))
+        console.print(Text(f"    {hint}", style="dim"))
+        try:
+            answer = Prompt.ask(
+                f"    [{key}] (enter = keep {current!r}, x = clear)",
+                default=current,
+            ).strip()
+        except (EOFError, KeyboardInterrupt):
+            return _MENU_BACK
+        if answer == "x":
+            settings[key] = ""
+        elif answer != current or answer:
+            settings[key] = answer
+        else:
+            settings[key] = current
+        console.print()
+    _write_runtime_settings(settings)
+    console.print(Text(f"  saved → {SETTINGS_FILE}", style="bold green"))
+    _pause()
+    return _MENU_BACK
 
 
 def interactive_menu():
@@ -3383,6 +4049,10 @@ def interactive_menu():
                     break
                 if outcome is not _MENU_BACK:
                     _pause()
+            elif choice == "e":
+                outcome = interactive_evaluate()
+                if outcome is _MENU_QUIT:
+                    break
             elif choice == "g":
                 outcome = interactive_graphs()
                 if outcome is _MENU_QUIT:
@@ -3391,6 +4061,8 @@ def interactive_menu():
                 interactive_watch()
             elif choice == "h":
                 interactive_heartbeat()
+            elif choice == "c":
+                interactive_config()
         except SystemExit:
             pass
         except KeyboardInterrupt:
@@ -4018,9 +4690,16 @@ def cmd_verify_node(args):
     """Delegate node verification to the runtime evaluator — the single judge.
 
     Default runs the deterministic lane (offline, fast — the verb's original
-    contract). --live runs the full two-lane evaluation (deterministic +
-    semantic + integrity), the same judge the pipeline uses.
+    contract). --live delegates to `_run_live_eval` so knobs and the sidecar
+    match `gddp eval`.
     """
+    if bool(getattr(args, "live", False)):
+        verdict = _run_live_eval(
+            args.project,
+            args.node,
+            base=getattr(args, "base", None),
+        )
+        sys.exit(0 if verdict else 1)
     try:
         runtime_root = resolve_runtime_root()
     except RuntimeError as exc:
@@ -4079,6 +4758,459 @@ def cmd_verify_node(args):
     env["PYTHONPATH"] = str(runtime_root)
     env["GDDP_RUNTIME_ROOT"] = str(runtime_root)
     sys.exit(subprocess.run(cmd, env=env, check=False).returncode)
+
+
+def _resolve_repo_for_project(project: str, repo_path: str | None = None) -> Path | None:
+    """Resolve a project's source checkout: --repo-path > env root > sibling."""
+    project_yaml = ROOT / "graphs" / project / "project.yaml"
+    if not project_yaml.is_file():
+        return None
+    try:
+        with open(project_yaml) as f:
+            proj = yaml.safe_load(f) or {}
+    except Exception:
+        return None
+    repo_name = str(proj.get("repo", "")).split("/")[-1]
+    candidates: list[Path] = []
+    if repo_path:
+        candidates.append(Path(repo_path).expanduser())
+    env_root = os.environ.get("GDDP_REPO_ROOT") or os.environ.get("GDDP_REPOS_ROOT")
+    if env_root and repo_name:
+        candidates.append(Path(env_root).expanduser() / repo_name)
+    if repo_name:
+        candidates.append(ROOT.parent / repo_name)
+    for c in candidates:
+        if c.is_dir():
+            return c
+    return None
+
+
+def _auto_base_commit(repo: Path) -> str | None:
+    """Best-effort base for subject-diff evidence: HEAD~1, else HEAD."""
+    for ref in ("HEAD~1", "HEAD"):
+        proc = subprocess.run(
+            ["git", "-C", str(repo), "rev-parse", ref],
+            capture_output=True, text=True, check=False,
+        )
+        if proc.returncode == 0 and proc.stdout.strip():
+            return proc.stdout.strip()
+    return None
+
+
+_EVAL_PRESETS = {"cheap": "deepseek-v4-flash"}
+_EVAL_LENSES = frozenset({"config", "instructions", "runs", "show"})
+
+
+class EvalKnobError(ValueError):
+    """Operator-facing failure resolving evaluator knobs."""
+
+
+def _parse_semantic_flag(args_str: str, flag: str) -> str | None:
+    try:
+        tokens = shlex.split(args_str or "")
+    except ValueError:
+        return None
+    try:
+        idx = tokens.index(flag)
+    except ValueError:
+        return None
+    if idx + 1 >= len(tokens):
+        return None
+    return tokens[idx + 1]
+
+
+def _resolve_eval_knobs(
+    *,
+    model: str | None = None,
+    thinking: str | None = None,
+    integrity: str | None = None,
+    lanes: str | None = None,
+    base: str | None = None,
+) -> dict:
+    """Resolve evaluator knobs: explicit args → env/settings → defaults."""
+    env_args = os.environ.get("GDDP_VERIFY_SEMANTIC_ARGS", DEFAULT_SEMANTIC_ARGS)
+    env_model = (
+        os.environ.get("GDDP_EVAL_MODEL_CHEAP")
+        or _parse_semantic_flag(env_args, "--semantic-pi-model")
+        or _EVAL_PRESETS["cheap"]
+    )
+    env_thinking = (
+        os.environ.get("GDDP_SEMANTIC_THINKING")
+        or os.environ.get("GDDP_EVAL_THINKING_DEFAULT")
+        or _parse_semantic_flag(env_args, "--semantic-thinking")
+        or "medium"
+    )
+    env_integrity = (os.environ.get("GDDP_INTEGRITY_MODE") or "on").strip().lower()
+    env_lanes = (os.environ.get("GDDP_EVAL_LANES_DEFAULT") or "").strip().lower()
+    if not env_lanes:
+        mode = _parse_semantic_flag(env_args, "--semantic-mode")
+        env_lanes = "deterministic" if mode == "offline" else "live"
+
+    preset: str | None = None
+    raw_model = (model or "").strip()
+    if not raw_model:
+        resolved_model = env_model
+    elif raw_model == "cheap" or raw_model in _EVAL_PRESETS:
+        preset = "cheap"
+        resolved_model = (
+            os.environ.get("GDDP_EVAL_MODEL_CHEAP") or _EVAL_PRESETS["cheap"]
+        ).strip() or _EVAL_PRESETS["cheap"]
+    elif raw_model == "expensive":
+        preset = "expensive"
+        resolved_model = (os.environ.get("GDDP_EVAL_MODEL_EXPENSIVE") or "").strip()
+        if not resolved_model:
+            raise EvalKnobError(
+                "expensive preset is unset — set GDDP_EVAL_MODEL_EXPENSIVE"
+            )
+    else:
+        resolved_model = raw_model
+
+    resolved_thinking = (thinking or env_thinking).strip() or "medium"
+    explicit_integrity = integrity is not None and str(integrity).strip() != ""
+    resolved_integrity = (
+        str(integrity).strip().lower() if explicit_integrity else env_integrity
+    )
+    if resolved_integrity not in {"on", "off"}:
+        raise EvalKnobError(f"integrity must be on or off, got {resolved_integrity!r}")
+    resolved_lanes = (lanes or env_lanes).strip().lower() or "live"
+    if resolved_lanes not in {"live", "deterministic"}:
+        raise EvalKnobError(
+            f"lanes must be live or deterministic, got {resolved_lanes!r}"
+        )
+    if resolved_lanes == "deterministic" and not explicit_integrity:
+        resolved_integrity = "off"
+
+    if resolved_lanes == "deterministic":
+        semantic_args = "--semantic-mode offline"
+    else:
+        semantic_args = (
+            "--semantic-mode live --semantic-harness pi --semantic-provider deepseek "
+            f"--semantic-pi-model {resolved_model} --semantic-thinking {resolved_thinking}"
+        )
+    return {
+        "model": resolved_model,
+        "preset": preset,
+        "thinking": resolved_thinking,
+        "integrity": resolved_integrity,
+        "lanes": resolved_lanes,
+        "semantic_args": semantic_args,
+        "base": base,
+    }
+
+
+def _write_eval_knobs_sidecar(
+    receipt_dir: Path,
+    project: str,
+    node_id: str,
+    job_id: str,
+    attempt: int,
+    knobs: dict,
+) -> Path | None:
+    """Best-effort sidecar next to the receipt. Never fails the eval."""
+    path = Path(receipt_dir) / project / node_id / f"{job_id}-attempt{attempt}.knobs.json"
+    payload = {
+        "model": knobs.get("model"),
+        "preset": knobs.get("preset"),
+        "thinking": knobs.get("thinking"),
+        "integrity": knobs.get("integrity"),
+        "lanes": knobs.get("lanes"),
+        "base": knobs.get("base"),
+        "semantic_args": knobs.get("semantic_args"),
+        "job_id": job_id,
+        "written_at": datetime.now(timezone.utc).isoformat(),
+    }
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        return path
+    except OSError as exc:
+        print(f"warning: could not write knobs sidecar {path}: {exc}", file=sys.stderr)
+        return None
+
+
+def _load_eval_knobs_sidecar(receipt_path: str | Path) -> dict:
+    """Load sibling *.knobs.json next to a receipt; empty dict if missing."""
+    sidecar = Path(receipt_path).with_suffix(".knobs.json")
+    if not sidecar.is_file():
+        return {}
+    try:
+        data = json.loads(sidecar.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _run_live_eval(
+    project: str,
+    node_id: str,
+    base: str | None = None,
+    knobs: dict | None = None,
+) -> str:
+    """Run the live two-lane judge on one node; print a compact summary.
+
+    Single code path for the interactive menu (`evaluate` front-page action,
+    `v` in the node review menu) and the `gddp eval <node>` shell command.
+    Auto-resolves the repo and base commit. Returns the verdict string
+    ("pass"/"fail"/...) or "" on error.
+    """
+    try:
+        resolved = knobs or _resolve_eval_knobs(base=base)
+    except EvalKnobError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return ""
+    try:
+        runtime_root = resolve_runtime_root()
+    except RuntimeError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return ""
+    node_yaml = ROOT / "graphs" / project / "nodes" / f"{node_id}.yaml"
+    project_yaml = ROOT / "graphs" / project / "project.yaml"
+    for path, label in ((node_yaml, "node yaml"), (project_yaml, "project yaml")):
+        if not path.is_file():
+            print(f"ERROR: {label} not found at {path}", file=sys.stderr)
+            return ""
+    repo = _resolve_repo_for_project(project)
+    if repo is None:
+        print(
+            f"ERROR: could not resolve repo checkout for project '{project}' "
+            f"(pass --repo-path)",
+            file=sys.stderr,
+        )
+        return ""
+    base_sha = base or resolved.get("base") or _auto_base_commit(repo)
+    resolved = {**resolved, "base": base_sha}
+    receipt_dir = ROOT / "verification"
+    receipt_dir.mkdir(parents=True, exist_ok=True)
+    job_id = "manual-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    attempt = 0
+
+    cmd = [
+        runtime_python(runtime_root),
+        str(runtime_root / "scripts" / "runtime" / "verification" / "cli.py"),
+        "--node-yaml", str(node_yaml),
+        "--project-yaml", str(project_yaml),
+        "--repo", str(repo),
+        "--config-root", str(ROOT),
+        "--receipt-dir", str(receipt_dir),
+        "--job-id", job_id,
+        "--attempt", str(attempt),
+    ]
+    if base_sha:
+        cmd += ["--base", base_sha]
+    cmd += shlex.split(str(resolved.get("semantic_args") or DEFAULT_SEMANTIC_ARGS))
+    cmd += ["--integrity", "off" if str(resolved.get("integrity") or "on").lower() == "off" else "on"]
+
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(runtime_root)
+    env["GDDP_RUNTIME_ROOT"] = str(runtime_root)
+
+    print(f"  evaluating {project}/{node_id}  (base {base_sha[:8] if base_sha else 'n/a'})")
+    proc = subprocess.run(cmd, env=env, text=True, capture_output=True, check=False)
+    _write_eval_knobs_sidecar(receipt_dir, project, node_id, job_id, attempt, resolved)
+    receipt_summary: dict = {}
+    if proc.stdout.strip():
+        try:
+            receipt_summary = json.loads(proc.stdout.strip())
+        except json.JSONDecodeError:
+            receipt_summary = {}
+    if proc.returncode != 0 and not receipt_summary:
+        print(proc.stderr or proc.stdout, file=sys.stderr)
+        return ""
+
+    verdict = str(receipt_summary.get("verdict", ""))
+    confidence = receipt_summary.get("criteria_confidence", "")
+    action = receipt_summary.get("required_next_action", "")
+    lane = receipt_summary.get("lane_status", {})
+    print()
+    chip = Text(f"  VERDICT  {verdict.upper()}", style=("bold green" if verdict == "pass" else "bold red"))
+    console.print(chip)
+    preset = resolved.get("preset")
+    model = resolved.get("model") or "-"
+    print(f"  model      : {preset}/{model}" if preset else f"  model      : {model}")
+    if confidence:
+        print(f"  confidence : {confidence}")
+    if lane:
+        crit = (lane.get("criteria") or "").replace("_", " ")
+        integ = (lane.get("integrity") or "").replace("_", " ")
+        print(f"  lanes     : criteria {crit} · integrity {integ}")
+    if action:
+        print(f"  next      : {action}")
+    print(f"  receipts  : {ROOT / 'verification' / project / node_id}/")
+    return verdict
+
+
+def _resolve_eval_node(project: str | None, node_id: str) -> tuple[str, str] | int:
+    """Fuzzy-resolve (project, node_id). Returns an exit code on failure."""
+    def _match_in(proj_name: str) -> list[str]:
+        nodes_dir = ROOT / "graphs" / proj_name / "nodes"
+        if not nodes_dir.is_dir():
+            return []
+        return [
+            f.stem for f in nodes_dir.glob("*.yaml")
+            if f.stem == node_id or f.stem.startswith(f"{node_id}-") or node_id in f.stem
+        ]
+
+    if project:
+        stems = _match_in(project)
+        if len(stems) == 1:
+            return project, stems[0]
+        if len(stems) > 1:
+            print(f"Ambiguous node '{node_id}' in project '{project}' — matches: {stems}", file=sys.stderr)
+            return 2
+        print(f"ERROR: node '{node_id}' not found in graph '{project}'", file=sys.stderr)
+        return 2
+    matches = []
+    graphs = ROOT / "graphs"
+    if graphs.is_dir():
+        for proj_dir in graphs.iterdir():
+            if not proj_dir.is_dir() or proj_dir.name.startswith(("_", ".")):
+                continue
+            for stem in _match_in(proj_dir.name):
+                matches.append((proj_dir.name, stem))
+    if len(matches) == 1:
+        return matches[0]
+    if len(matches) > 1:
+        print(f"Ambiguous node '{node_id}' — matches:", file=sys.stderr)
+        for proj_name, stem in matches:
+            print(f"  {proj_name}/{stem}", file=sys.stderr)
+        print("Pass --project <id>", file=sys.stderr)
+        return 2
+    print(f"ERROR: node '{node_id}' not found in any graph", file=sys.stderr)
+    return 2
+
+
+def cmd_eval(args):
+    """Human-friendly live evaluation: gddp eval <node> [--project p].
+
+    First token in {config,instructions,runs,show} is a lens; otherwise a node
+    id. Auto-resolves project/node, repo, and base commit.
+    """
+    token = getattr(args, "node", None)
+    if token in _EVAL_LENSES:
+        handler = globals().get(f"cmd_eval_{token}")
+        if handler is None:
+            print(f"ERROR: eval {token} is not available", file=sys.stderr)
+            return 2
+        return handler(args)
+    if not token:
+        print("ERROR: gddp eval needs a node id (or config|instructions|runs|show)", file=sys.stderr)
+        return 2
+    resolved = _resolve_eval_node(getattr(args, "project", None), token)
+    if isinstance(resolved, int):
+        return resolved
+    project, node_id = resolved
+    try:
+        knobs = _resolve_eval_knobs(
+            model=getattr(args, "model", None),
+            thinking=getattr(args, "thinking", None),
+            integrity=getattr(args, "integrity", None),
+            lanes=getattr(args, "lanes", None),
+            base=getattr(args, "base", None),
+        )
+    except EvalKnobError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
+    verdict = _run_live_eval(project, node_id, base=knobs.get("base"), knobs=knobs)
+    if not verdict:
+        return 1
+    return 0
+
+
+def _eval_lens_node(args) -> tuple[str, str] | int:
+    token = getattr(args, "lens_node", None)
+    if not token:
+        print("ERROR: this eval lens needs a node id", file=sys.stderr)
+        return 2
+    return _resolve_eval_node(getattr(args, "project", None), token)
+
+
+def cmd_eval_config(_args) -> int:
+    _render_eval_config()
+    return 0
+
+
+def cmd_eval_instructions(args) -> int:
+    resolved = _eval_lens_node(args)
+    if isinstance(resolved, int):
+        return resolved
+    project, node_id = resolved
+    receipt = None
+    if not getattr(args, "preflight", False):
+        rows = _load_receipts_for_node(project, node_id)
+        run_id = getattr(args, "run", None)
+        if run_id:
+            rows = [row for row in rows if row.get("job_id") == run_id]
+        if rows:
+            receipt = rows[0].get("check") if isinstance(rows[0].get("check"), dict) else None
+    _render_eval_instructions(project, node_id, receipt=receipt)
+    return 0
+
+
+def cmd_eval_runs(args) -> int:
+    resolved = _eval_lens_node(args)
+    if isinstance(resolved, int):
+        return resolved
+    project, node_id = resolved
+    rows = _load_receipts_for_node(project, node_id)
+    if not rows:
+        print(f"No evaluator receipts for {project}/{node_id}")
+        return 0
+    for row in rows:
+        model = ((row.get("knobs") or {}).get("model") or "-")
+        when = str(row.get("sort_at") or "-")[:19].replace("T", " ")
+        check = row.get("check") if isinstance(row.get("check"), dict) else {}
+        timing = check.get("evaluation_timing") if isinstance(check.get("evaluation_timing"), dict) else {}
+        crit = timing.get("criteria") if isinstance(timing.get("criteria"), dict) else {}
+        integ = timing.get("integrity") if isinstance(timing.get("integrity"), dict) else {}
+        tools = f"c={crit.get('tool_calls', 0)} i={integ.get('tool_calls', 0)}"
+        print(
+            f"{when}  {row.get('verdict') or '-':<8}  {model:<22}  {tools:<14}  "
+            f"{project}/{node_id}  {row.get('job_id') or '-'}"
+        )
+    print(f"{len(rows)} run(s)")
+    return 0
+
+
+def cmd_eval_show(args) -> int:
+    token = getattr(args, "lens_node", None) or getattr(args, "run", None)
+    if not token:
+        print("ERROR: gddp eval show needs a job id or receipt path", file=sys.stderr)
+        return 2
+    path = Path(token).expanduser()
+    if path.is_file():
+        try:
+            check = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            print(f"ERROR: could not read {path}: {exc}", file=sys.stderr)
+            return 2
+        if not isinstance(check, dict):
+            print(f"ERROR: {path} is not a receipt object", file=sys.stderr)
+            return 2
+        row = {
+            "project_id": check.get("project_id"),
+            "node_id": check.get("node_id"),
+            "job_id": check.get("job_id"),
+            "verdict": check.get("verdict"),
+            "sort_at": (check.get("evaluation_timing") or {}).get("finished_at")
+            if isinstance(check.get("evaluation_timing"), dict) else check.get("generated_at"),
+            "receipt_path": str(path),
+            "check": check,
+            "knobs": _load_eval_knobs_sidecar(path),
+        }
+        _render_eval_show(row)
+        return 0
+    evaluations = _import_module("evaluations")
+    db_path, receipt_root = _evaluation_sources()
+    rows = evaluations.load_evaluation_rows(db_path=db_path, receipt_root=receipt_root)
+    matches = [row for row in rows if row.get("job_id") == token]
+    if not matches:
+        print(f"ERROR: no receipt with job_id {token!r}", file=sys.stderr)
+        return 2
+    row = matches[0]
+    receipt_path = row.get("receipt_path")
+    row = {**row, "knobs": _load_eval_knobs_sidecar(receipt_path) if receipt_path else {}}
+    _render_eval_show(_hydrate_eval_row(row))
+    return 0
 
 
 def cmd_obsidian_export(args):
@@ -4479,6 +5611,7 @@ def validate_project(project_id: str | None):
 
 
 def main(argv=None):
+    _load_runtime_settings()
     argv = list(sys.argv[1:] if argv is None else argv)
     # Positional dispatch: gddp <graph|node> [executor] [--yes]. Anything that
     # is not a known subcommand is an exact graph or node target.
@@ -4733,6 +5866,38 @@ def main(argv=None):
                                   "subject-diff evidence (pipeline runs get this "
                                   "from the session row automatically)")
     verify_node.set_defaults(func=cmd_verify_node)
+
+    eval_p = sub.add_parser(
+        "eval", help="Live two-lane evaluation on a node (human-friendly)")
+    eval_p.add_argument(
+        "node",
+        nargs="?",
+        help="Node ID, or a lens: config | instructions | runs | show",
+    )
+    eval_p.add_argument(
+        "lens_node",
+        nargs="?",
+        default=None,
+        help="Node ID when the first token is a lens",
+    )
+    eval_p.add_argument("--project", default=None,
+                        help="Project ID (auto-resolved when unambiguous)")
+    eval_p.add_argument("--base", default=None,
+                        help="Base commit for subject-diff evidence "
+                             "(default: HEAD~1)")
+    eval_p.add_argument("--model", default=None,
+                        help="Preset (cheap|expensive) or raw model id")
+    eval_p.add_argument("--thinking", default=None,
+                        help="Semantic thinking level (e.g. medium, high)")
+    eval_p.add_argument("--integrity", choices=("on", "off"), default=None,
+                        help="Integrity lane (default: on for live)")
+    eval_p.add_argument("--lanes", choices=("live", "deterministic"), default=None,
+                        help="Evaluator lanes (default: live)")
+    eval_p.add_argument("--run", default=None,
+                        help="Receipt job_id for instructions/show")
+    eval_p.add_argument("--preflight", action="store_true",
+                        help="Instructions lens: offered pointers only, no receipt")
+    eval_p.set_defaults(func=cmd_eval)
 
     review_p = sub.add_parser(
         "review",

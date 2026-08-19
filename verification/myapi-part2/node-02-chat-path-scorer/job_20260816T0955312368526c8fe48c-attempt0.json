@@ -1,0 +1,964 @@
+{
+  "project_id": "myapi-part2",
+  "node_id": "node-02-chat-path-scorer",
+  "verdict": "fail",
+  "criteria_verdict": "fail",
+  "integrity": {
+    "verdict": "contradicted",
+    "intent_preserved": false,
+    "graph_integrity_preserved": false,
+    "required_human_review": true,
+    "confidence": 0.85,
+    "findings": [
+      {
+        "severity": "high",
+        "summary": "scorer-mechanics.md is absent (required artifact of node-02). No scoring path (judge invocation, inputs, outputs) is documented or demonstrated anywhere in the checkout. The node's title and why promise 'scoring capability'; it was not delivered.",
+        "affected_node_ids": [
+          "node-02-chat-path-scorer",
+          "node-10-freeze-ruler",
+          "node-11-part1-control",
+          "node-12-treatment-decisions",
+          "node-13-treatment-no-decisions",
+          "node-14-treatment-handoffs",
+          "node-15-treatment-code-reality",
+          "node-16-treatment-full-durable"
+        ]
+      },
+      {
+        "severity": "high",
+        "summary": "The one-shot chat answer path is NOT proven: the last measured isolated-user chat returned HTTP 500 (raw-api-responses.json, 'Set your OpenAI API key or enable Local LLM via Khoj settings'), and this node's own artifact states it did not attempt a live /api/chat because the VM was terminated ('Chat generation is out of this lane'). No raw request/response of a working generated answer is saved under part2/probe/. The node's core why ('no treatment can be measured') remains unresolved.",
+        "affected_node_ids": [
+          "node-02-chat-path-scorer",
+          "node-10-freeze-ruler",
+          "node-11-part1-control",
+          "node-12-treatment-decisions",
+          "node-13-treatment-no-decisions",
+          "node-14-treatment-handoffs",
+          "node-15-treatment-code-reality",
+          "node-16-treatment-full-durable"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "No new probe retrieval-evidence + generated-answer capture was produced under part2/probe/. The metadata analysis reuses Part 1 captures from 04-evaluation/results/; there is no file under part2/probe/ holding a generated answer for a probe question.",
+        "affected_node_ids": [
+          "node-02-chat-path-scorer"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "The deferred chat-path gap is silently parked inside metadata-behavior.md ('out of this lane') rather than filed as a continuation proposal, violating the constraint 'work discovered beyond this node's scope becomes a continuation proposal, never silent execution.'",
+        "affected_node_ids": [
+          "node-02-chat-path-scorer"
+        ]
+      }
+    ],
+    "reasoning": "Node-02's intended role is to de-risk the entire measurement layer: prove a working one-shot chat answer path, capture retrieval+answer evidence, record Khoj metadata behavior, and prepare scorer mechanics — explicitly so that 'no treatment can be measured' is resolved before nodes 10-18 fire. The submitted change (git diff fe52852..0502ab1, 6 files, 373 insertions) is 100% metadata-behavior work. It is high-quality, honest, evidence-backed work on that single sub-goal (criterion 3), with residual limits clearly labeled. However, the other three capabilities are not delivered: the chat path remains at its last-measured HTTP 500 state (the artifact itself says the VM was down and chat generation was 'out of this lane'); scorer-mechanics.md — a listed required artifact that node-10 (which depends_on node-02) must freeze into the ruler — does not exist anywhere; and no new probe retrieval+answer evidence was captured. The evidence therefore contradicts the node's stated intent rather than merely underdelivering it subtly: the delivered artifact explicitly disclaims the node's primary purpose. Graph integrity: no structural damage was done (only part2/ files added; no graph truth, DB, or corpus touched), but accepting this change as node-02's deliverable would close the graph's de-risking gate with its two load-bearing capabilities unproven, so node-10 cannot freeze 'the same question, scorer, answer path, and environment' and treatments 11-16 would inherit an unmeasurable path. This is a lane-1-adjudicated incompleteness, but it has a structural consequence my lane must flag: a human should decide whether to reopen node-02 for the chat-path and scorer work or to formally register the deferral as a continuation proposal before the frontier advances. Verdict: contradicted (evidence contradicts stated intent), intent not preserved, graph integrity not preserved, human review required.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-16T10:12:19.971Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_RK7ixlkurRHWtZeNuzJW8157",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-16T10:12:19.972Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_pDIitvTGrnI40KOkGEpc9853",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0/README.md"
+      },
+      {
+        "ts": "2026-08-16T10:12:19.973Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_7TKVBQlivbiTbAWnxw8d4064",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+      },
+      {
+        "ts": "2026-08-16T10:12:19.973Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_dcK1Gksno9IGqssad0qZ6379",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+      },
+      {
+        "ts": "2026-08-16T10:12:19.981Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_7TKVBQlivbiTbAWnxw8d4064",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:12:19.982Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_dcK1Gksno9IGqssad0qZ6379",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:12:19.982Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_RK7ixlkurRHWtZeNuzJW8157",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:12:19.982Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_pDIitvTGrnI40KOkGEpc9853",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:12:21.987Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_RyquiURUpyuk0fsbRqNb5135",
+        "command": "find /Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/ -name \"*.yaml\" | sort"
+      },
+      {
+        "ts": "2026-08-16T10:12:21.990Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_l37ke4NKzZIzSr7zkQKR7129",
+        "command": "ls -la /Users/sab-mini/repos/MyAPI/part2/ 2>/dev/null && echo \"---PROBE---\" && ls -la /Users/sab-mini/repos/MyAPI/part2/probe/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-16T10:12:22.015Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_RyquiURUpyuk0fsbRqNb5135",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:12:22.016Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_l37ke4NKzZIzSr7zkQKR7129",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-16T10:12:24.194Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_IwfAPojtyZ7t9mnqqLur9018",
+        "command": "pwd && echo \"---\" && ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0/"
+      },
+      {
+        "ts": "2026-08-16T10:12:24.195Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_b2Lt6Y7blxH2ueLUo4Nb4974",
+        "command": "find / -maxdepth 4 -type d -name \"part2\" 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-16T10:12:24.204Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_IwfAPojtyZ7t9mnqqLur9018",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:12:25.062Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_b2Lt6Y7blxH2ueLUo4Nb4974",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:12:26.792Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_2hH0icu80IFNsAZAHtTN7339",
+        "command": "find part2/ -type f | sort && echo \"---TREE---\" && ls -laR part2/ | head -100"
+      },
+      {
+        "ts": "2026-08-16T10:12:26.820Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_2hH0icu80IFNsAZAHtTN7339",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:12:30.130Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_PKcyvb4lw72ugUgx1GkP2313",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-02-chat-path-scorer.yaml"
+      },
+      {
+        "ts": "2026-08-16T10:12:30.131Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_Ay5YbMpgpF84SgfSOhgJ5782",
+        "path": "/Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md"
+      },
+      {
+        "ts": "2026-08-16T10:12:30.134Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Ay5YbMpgpF84SgfSOhgJ5782",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:12:30.135Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_PKcyvb4lw72ugUgx1GkP2313",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:12:39.251Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_RUsTTxtTmjtZ5qrEvfJs2007",
+        "path": "part2/probe/metadata-behavior.md"
+      },
+      {
+        "ts": "2026-08-16T10:12:39.252Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_E4Y7lPIHqMGTG7FPFjDO8418",
+        "path": "part2/probe/metadata-live-host-status.txt"
+      },
+      {
+        "ts": "2026-08-16T10:12:39.255Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_E4Y7lPIHqMGTG7FPFjDO8418",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:12:39.256Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_RUsTTxtTmjtZ5qrEvfJs2007",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:12:44.620Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_uxXZQhmDzooekU04pIFw4304",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0 && git log --oneline -15 2>/dev/null; echo \"---STATUS---\"; git status --short 2>/dev/null | head -30; echo \"---DIFF STATS base..tip---\"; git diff --stat fe52852c0690004253886b6c713fb7f1cc1113ce 0502ab18020eadf775f49002525f481058dd9392 2>/dev/null | tail -15"
+      },
+      {
+        "ts": "2026-08-16T10:12:44.620Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_sJRy0PqL5dSXo2Mtf4Sh5663",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0 && echo \"---scorer-mechanics anywhere?---\" && find . -iname \"*scorer*\" -not -path \"./.git/*\" 2>/dev/null; echo \"---one-shot / chat probe files---\" && find part2 -type f 2>/dev/null | sort; echo \"---raw chat/search responses in 04-evaluation---\"; find 04-evaluation -type f 2>/dev/null | sort | head -40"
+      },
+      {
+        "ts": "2026-08-16T10:12:44.661Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_sJRy0PqL5dSXo2Mtf4Sh5663",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:12:44.758Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_uxXZQhmDzooekU04pIFw4304",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:12:50.453Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_PJg69yaKH2xj6P1l5nLs0208",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0 && echo \"===raw-api-responses.json (head)===\" && head -c 1500 04-evaluation/results/raw-api-responses.json; echo; echo \"===part2 manifests/readmes?===\"; find part2 -maxdepth 2 -iname \"*readme*\" -o -maxdepth 2 -iname \"*manifest*\" -o -maxdepth 2 -iname \"*index*\" 2>/dev/null; echo \"===part2 top-level listing===\"; ls -la part2/"
+      },
+      {
+        "ts": "2026-08-16T10:12:50.453Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_rbRzcdSWNERVM8JFsErL7681",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0 && echo \"===gddp dir===\" && find gddp -type f | head -20 && echo \"===grep for chat path / one-shot / 500 across part2 and gddp===\" && grep -ril \"one-shot\\|one shot\\|HTTP 500\\|http 500\\|/api/chat\" part2 gddp 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-16T10:12:50.486Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_PJg69yaKH2xj6P1l5nLs0208",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:12:50.499Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_rbRzcdSWNERVM8JFsErL7681",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:13:08.723Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ISUZwc8RtXajRSDJiRIH6415",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0 && echo \"===continuation proposals / handoffs mentioning node-02===\" && grep -ril \"continuation proposal\\|node-02\\|chat-path-scorer\" . --include=\"*.md\" 2>/dev/null | grep -v \".git/\" | head; echo; echo \"===any 200 chat evidence anywhere (non-git)===\"; grep -rl '\"/api/chat\"\\|api/chat' . --include=\"*.json\" --include=\"*.md\" 2>/dev/null | grep -v \".git/\" | head; echo; echo \"===git show 0502ab1 file list===\"; git show --stat --format=\"%s\" 0502ab18020eadf775f49002525f481058dd9392 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-16T10:13:08.724Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_t8YILmrZYh633PzlwTPU7039",
+        "path": "part2/probe/metadata-search-key-census.json"
+      },
+      {
+        "ts": "2026-08-16T10:13:08.730Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_t8YILmrZYh633PzlwTPU7039",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:13:10.086Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ISUZwc8RtXajRSDJiRIH6415",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:13:13.434Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_piHqT3wyDPnjA3iU1tQ90150",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0 && grep -n -i \"api/chat\\|HTTP 500\\|http_status\\|generated answer\" 04-evaluation/results/q1-factual.md 04-evaluation/results/q2-rationale.md 04-evaluation/results/q5-negative-control.md 2>/dev/null | head -20; echo \"===part1-summary head===\"; head -60 04-evaluation/results/part1-summary.md"
+      },
+      {
+        "ts": "2026-08-16T10:13:13.464Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_piHqT3wyDPnjA3iU1tQ90150",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:13:34.554Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_tHvNE06yDmnL4BEFNNkP2274",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0 && grep -n -i \"scorer\\|scoring\\|judge\" part2/contract/evidence-contract.md | head -15; echo \"===node-10 freeze ruler yaml (answer path/scorer references)===\"; grep -n -i \"scorer\\|answer path\\|chat\" /Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-10-freeze-ruler.yaml | head -15"
+      },
+      {
+        "ts": "2026-08-16T10:13:34.578Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_tHvNE06yDmnL4BEFNNkP2274",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:13:53.981Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_nGncHMPnrJbtXJuONkzo3824",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "Node-10 (freeze ruler) depends_on node-02 and must freeze 'the same question, scorer, answer path, and environment' for treatments 11-16. The scorer/answer-path gap found here must be closed before node-10; otherwise the ruler freeze and all six treatments inherit an unmeasurable path. Serialize the chat-path + scorer fix ahead of the ruler freeze.",
+        "affected_node_ids": [
+          "node-10-freeze-ruler",
+          "node-11-part1-control",
+          "node-12-treatment-decisions",
+          "node-13-treatment-no-decisions",
+          "node-14-treatment-handoffs",
+          "node-15-treatment-code-reality",
+          "node-16-treatment-full-durable"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The metadata-behavior finding (Khoj 1.42.10 treats the Part 2 envelope fields as document text; EntryDates harvests ISO dates from text rather than named fields; only file:/+/dt filters are structured) is load-bearing for node-08 (layer build) and node-09 (corpus validation). It should be carried forward so those nodes do not re-derive it or assume structured envelope consumption.",
+        "affected_node_ids": [
+          "node-08-build-source-layers",
+          "node-09-validate-corpus"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.05666666666666668,
+  "criteria_confidence": 0.05666666666666668,
+  "completeness": 0.5,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "one-shot-answer-works",
+        "criterion": "A one-shot chat against the isolated Khoj user returns a generated answer (not HTTP 500); the raw request and response are saved under part2/probe/",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "HTTP -> line 32: 'HTTP'"
+        ],
+        "reasoning": "Scanned source files (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...) for identifiers named in the criterion (one-shot, HTTP). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "evidence-capture-proven",
+        "criterion": "Both retrieval evidence (search results) and the generated answer are captured to files under part2/probe/ for at least one probe question",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "metadata-behavior-recorded",
+        "criterion": "part2/probe/metadata-behavior.md records the observed behavior: whether the installed Khoj version consumes temporal and provenance fields as metadata or sees them only as document text",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "metadata\\-behavior -> line 4: 'metadata-behavior'"
+        ],
+        "reasoning": "Scanned source files (part2/probe/metadata-behavior.md) for identifiers named in the criterion (metadata-behavior). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "scorer-mechanics-ready",
+        "criterion": "part2/probe/scorer-mechanics.md documents a working scoring path (judge invocation, inputs, outputs) demonstrated end-to-end on one probe answer",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "path_mentioned_missing",
+        "evidence": [
+          "part2/probe/scorer-mechanics.md absent"
+        ],
+        "reasoning": "The criterion names source path(s) that are not present in the checkout. The harness did not scan unrelated files as substitutes.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "part2/probe/scorer-mechanics.md absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the experiment was executed correctly, never whether the hypothesis won.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution model (operator direction 2026-08-15, enforced by the attempt preamble): You are the ORCHESTRATOR, not the worker. Do NOT perform the node's work yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6 via the subagent tool's model parameter) to do the actual investigation, construction, and measurement. Your job is decomposition, dispatch, reviewing returns, integrating, and producing the final artifacts.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight (worker subagents, Khoj ingestion/processing, long builds), dispatch ONE watcher subagent on model deepseek/deepseek-v4-flash that actively polls with tools (job status, logs, artifact existence) and reports state changes; you go idle between its reports instead of polling yourself.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/ self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to this node as evidence; work discovered beyond this node's scope becomes a continuation proposal, never silent execution.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Work in /Users/sab-mini/repos/MyAPI. Write only under part2/ unless this node's text names another path. Never edit GDDP graph truth, runtime databases, or job state.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Probe questions are throwaway; the evaluation questions remain unfrozen until node-10. Record observed Khoj metadata behavior - do not redesign the corpus around it.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Close with parallel reviewer subagents on model deepseek/deepseek-v4-pro, each assigned a different explicit focus (criteria coverage, evidence integrity, constraint compliance). Resolve their findings before returning.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "part2/probe/metadata-behavior.md": true,
+      "part2/probe/scorer-mechanics.md": false
+    },
+    "deps_status": {
+      "node-01b-contract-review": "provisional"
+    },
+    "criteria_mismatches": [
+      {
+        "criterion_id": "scorer-mechanics-ready",
+        "kind": "source_path",
+        "detail": "part2/probe/scorer-mechanics.md absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "scorer-mechanics-ready",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "fe52852c0690004253886b6c713fb7f1cc1113ce",
+      "tip": "0502ab18020eadf775f49002525f481058dd9392",
+      "files": [
+        {
+          "status": "A",
+          "path": "part2/probe/metadata-behavior.md"
+        },
+        {
+          "status": "A",
+          "path": "part2/probe/metadata-datefilter-local-demo.json"
+        },
+        {
+          "status": "A",
+          "path": "part2/probe/metadata-khoj-1.42.10-schema-excerpt.json"
+        },
+        {
+          "status": "A",
+          "path": "part2/probe/metadata-live-host-status.txt"
+        },
+        {
+          "status": "A",
+          "path": "part2/probe/metadata-q1-d09-frontmatter-vs-body.json"
+        },
+        {
+          "status": "A",
+          "path": "part2/probe/metadata-search-key-census.json"
+        }
+      ],
+      "truncated": false,
+      "file_count": 6,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "one-shot-answer-works",
+        "judgment": "judged_fail",
+        "confidence": 0.95,
+        "evidence": [
+          "find part2/probe → only 6 metadata-* files; no raw chat request/response file",
+          "subject diff fe52852..0502ab1 adds only metadata-* files (6 files, 373 insertions)",
+          "04-evaluation/results/raw-api-responses.json → q1 and q2 both http_status 500, detail 'Set your OpenAI API key or enable Local LLM via Khoj settings.'",
+          "part2/probe/metadata-behavior.md §8: 'Chat generation is out of this lane. Prior isolated-user chat was HTTP 500'",
+          "git status clean at HEAD 0502ab1; no untracked probe artifacts"
+        ],
+        "reasoning": "The criterion requires a one-shot chat against the isolated Khoj user that returns a generated answer (not HTTP 500) AND the raw request and response saved under part2/probe/. Neither half is met: the only recorded isolated-user chat attempt returned HTTP 500 for both queries (OpenAI key / Local LLM not configured), and no raw request/response file exists under part2/probe/ — the directory holds only the metadata lane's six files. The node's own metadata-behavior.md explicitly states chat generation was out of this lane. A generated answer does not exist anywhere in the checkout."
+      },
+      {
+        "criterion_id": "evidence-capture-proven",
+        "judgment": "judged_fail",
+        "confidence": 0.9,
+        "evidence": [
+          "part2/probe/metadata-search-key-census.json — search-hit census of 20 hits (Q1-Q4, sourced from 04-evaluation/results/raw-search-responses.json, i.e., prior Part 1 captures)",
+          "part2/probe/metadata-q1-d09-frontmatter-vs-body.json — paired search-hit extract for Q1 (http_status 200, /api/search)",
+          "No generated answer file anywhere in checkout (grep/find for chat/answer/response under part2/probe)",
+          "04-evaluation/results/raw-api-responses.json — only chat responses recorded are HTTP 500"
+        ],
+        "reasoning": "The criterion requires BOTH retrieval evidence (search results) AND the generated answer to be captured to files under part2/probe/ for at least one probe question. Retrieval-derived material partially exists under part2/probe/ (a hit census and a paired extract), though it is re-derived from prior Part 1 evaluation captures rather than a fresh probe-question run. Decisively, the generated-answer half is entirely absent: no successful chat ever occurred, so there is no generated answer to capture. Both halves are required; the criterion fails."
+      },
+      {
+        "criterion_id": "metadata-behavior-recorded",
+        "judgment": "judged_pass",
+        "confidence": 0.85,
+        "evidence": [
+          "part2/probe/metadata-behavior.md (221 lines) — verdict: 'Khoj 1.42.10 sees temporal and provenance values as document text, not as named structured metadata'",
+          "§1 verdict table with measured/source-measured kinds; §4 20-hit key census; §6 Entry model + markdown splitter + DateFilter source inspection; §7 field-by-field table",
+          "Supporting raw evidence files under part2/probe/: metadata-live-host-status.txt, metadata-search-key-census.json, metadata-q1-d09-frontmatter-vs-body.json, metadata-khoj-1.42.10-schema-excerpt.json, metadata-datefilter-local-demo.json",
+          "§2.2/§8 disclose that the VM was TERMINATED and no fresh live /api/search or /api/chat was issued this run"
+        ],
+        "reasoning": "The criterion requires the file to record the observed behavior: whether the installed Khoj version consumes temporal and provenance fields as metadata or sees them only as document text. The file does exactly that — it states the observed answer (document text only, with Khoj-native fields like file/source/compiled/heading being the only structured metadata), and supports it with a 20-hit census of real isolated-user search payloads, wheel-source inspection of the 1.42.10 Entry model and markdown splitter, and a local replay of the 1.42.10 date-extraction regexes. Observation method is partially source-derived/prior-capture because the host was down; this is honestly disclosed and does not change that the record exists and answers the criterion's question. Small confidence discount for the observation being partly indirect (no fresh live query this run)."
+      },
+      {
+        "criterion_id": "scorer-mechanics-ready",
+        "judgment": "judged_fail",
+        "confidence": 0.98,
+        "evidence": [
+          "find part2/probe → scorer-mechanics.md absent (artifacts_present={'part2/probe/scorer-mechanics.md': False})",
+          "subject diff adds no scorer file; deterministic check: 'part2/probe/scorer-mechanics.md absent'",
+          "No judge invocation/inputs/outputs documented anywhere under part2/; no probe answer exists to score (no successful chat)",
+          "Node required_artifacts lists part2/probe/scorer-mechanics.md — unfulfilled"
+        ],
+        "reasoning": "The criterion requires part2/probe/scorer-mechanics.md documenting a working scoring path (judge invocation, inputs, outputs) demonstrated end-to-end on one probe answer. The file is absent — this is not a stale path (it matches the node's required_artifacts); the implementation simply has not landed. Moreover, the demonstration is impossible in the current state because no probe answer exists (chat never returned a generated answer). The criterion fails."
+      }
+    ],
+    "overall_reasoning": "Node-02-chat-path-scorer's submission (commit 0502ab1, clean working tree) delivers only the metadata lane: six part2/probe/metadata-* files. Three of the four acceptance criteria fail because the node's two core capability proofs were never produced: (1) the one-shot chat path — the only recorded isolated-user chat attempt returned HTTP 500 (missing OpenAI key / Local LLM config) and no raw request/response was saved under part2/probe/; (2) evidence capture — no generated answer exists to capture, so the 'both retrieval evidence AND generated answer' requirement is unmet; (4) scorer mechanics — part2/probe/scorer-mechanics.md is absent and no end-to-end scoring demonstration exists (nothing to score). Criterion (3), metadata-behavior-recorded, passes: metadata-behavior.md is a substantive, well-evidenced record answering exactly the question the criterion poses (installed Khoj 1.42.10 consumes temporal/provenance as document text, not named metadata), with honest disclosure that the observation is partly prior-capture/source-derived because the VM was terminated. The node's own 'why' — 'Without a working one-shot answer path and scorer mechanics, no treatment can be measured' — confirms these missing pieces are load-bearing for the rest of the graph. The metadata lane's content quality and constraint compliance (record-only, no corpus redesign, read-only inspection, throwaway probes) are good, but the node as submitted does not satisfy its acceptance criteria.",
+    "risks": "1) The chat failure is environmental (Khoj on the terminated VM lacks an OpenAI key / Local LLM setting, per the HTTP 500 detail); a rerun that starts the VM and configures the LLM could satisfy criteria 1 and 2 — the failure is execution, not criteria interpretation. 2) The search-hit data under part2/probe/ is re-derived from prior Part 1 captures (04-evaluation/results/raw-search-responses.json, Q1-Q4) rather than fresh probe-question runs; if the intent for criterion 2 was fresh probe runs, that compounds the fail. 3) metadata-behavior.md's verdict is partially indirect (wheel source + prior captures) because the host was down; a human may want a live confirmation when the VM is next up, but the criterion as written only requires the record, which exists. 4) Judgment of criterion 3 rests on content rather than a fresh live measurement; if the human requires live-observed behavior, criterion 3 would need re-scoring.",
+    "followup_candidates": "Human clarification needed: the submitted diff delivers only the metadata lane (6 files under part2/probe/); the one-shot chat probe (raw request+response, non-500 generated answer) and part2/probe/scorer-mechanics.md are missing, and the only recorded isolated-user chat attempt returned HTTP 500 (Khoj LLM not configured, VM terminated). Is node-02 to be re-attempted with the VM started and Khoj LLM configured so the chat path and scorer mechanics can be demonstrated, or was the metadata lane intentionally submitted as a partial result? Also confirm: should the search-result captures for criterion 2 come from fresh probe-question runs, or are re-derived extracts of prior Part 1 captures acceptable as retrieval evidence? If fresh runs are required, that criterion's evidence base needs regenerating.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-16T10:10:46.353Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_47Vey3yZ3qwlllaH6fjr1848",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-16T10:10:46.354Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_OkopyedBmyB94mHua5b29714",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0/README.md"
+        },
+        {
+          "ts": "2026-08-16T10:10:46.354Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_UjhhckTt4QRARELcFmeP5762",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+        },
+        {
+          "ts": "2026-08-16T10:10:46.355Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_03_IgmGl5xwtmPn0htqKspQ4312",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+        },
+        {
+          "ts": "2026-08-16T10:10:46.360Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_47Vey3yZ3qwlllaH6fjr1848",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:46.361Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_UjhhckTt4QRARELcFmeP5762",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:46.361Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_OkopyedBmyB94mHua5b29714",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:46.361Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_IgmGl5xwtmPn0htqKspQ4312",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:50.687Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_BvUcEqS67xEvitH57BdH8265",
+          "command": "cd /Users/sab-mini/repos/MyAPI && pwd && git status --short 2>/dev/null | head -50 && echo \"---LOG---\" && git log --oneline -8 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-16T10:10:50.689Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ChH7E8FTZK0myqzLHdSU8812",
+          "command": "cd /Users/sab-mini/repos/MyAPI && find part2 -type f 2>/dev/null | sort"
+        },
+        {
+          "ts": "2026-08-16T10:10:50.708Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ChH7E8FTZK0myqzLHdSU8812",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:51.125Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_BvUcEqS67xEvitH57BdH8265",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:56.177Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_tz9lzbQZpqza3aIo8HMd1307",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0 && pwd && ls -la && echo \"---\" && find . -maxdepth 3 -type d -not -path '*/.git/*' | head -50"
+        },
+        {
+          "ts": "2026-08-16T10:10:56.177Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_QdRed7vj3ywUbHcaywRp5796",
+          "command": "cd /Users/sab-mini/repos/MyAPI && git cat-file -t 0502ab18020eadf775f49002525f481058dd9392 2>&1; git cat-file -t fe52852c0690004253886b6c713fb7f1cc1113ce 2>&1; echo \"---show tip part2---\"; git ls-tree -r --name-only 0502ab18020eadf775f49002525f481058dd9392 -- part2 2>&1 | head -40"
+        },
+        {
+          "ts": "2026-08-16T10:10:56.199Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_tz9lzbQZpqza3aIo8HMd1307",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:56.231Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_QdRed7vj3ywUbHcaywRp5796",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:59.032Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ab98303BkHOOBn26JKbG5167",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0 && find part2 -type f | sort && echo \"===GIT STATUS===\" && git status --short 2>/dev/null | head -30 && echo \"===HEAD===\" && git log --oneline -3 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-16T10:10:59.033Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_1XHYK6lvGpRGIQqgUrg21193",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0 && ls -la part2/probe/ && echo \"---\" && du -sh part2/probe/* 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-16T10:10:59.065Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_1XHYK6lvGpRGIQqgUrg21193",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:59.282Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ab98303BkHOOBn26JKbG5167",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:11:04.681Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_EJte7EZdy2WpMXoau0R60543",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0/part2/probe/metadata-behavior.md"
+        },
+        {
+          "ts": "2026-08-16T10:11:04.684Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_EJte7EZdy2WpMXoau0R60543",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:11:19.056Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_iWeFWhCGTJUCEBvZpO524242",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0 && echo \"===search for probe/chat/scorer artifacts===\" && find . -path ./.git -prune -o -type f \\( -iname '*probe*' -o -iname '*scorer*' -o -iname '*chat*' -o -iname '*one-shot*' -o -iname '*request*' -o -iname '*response*' \\) -print 2>/dev/null | head -40"
+        },
+        {
+          "ts": "2026-08-16T10:11:19.057Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_5IRooTvudBCv6m5vAxSC9892",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0 && echo \"===04-evaluation/results===\" && ls -la 04-evaluation/results/ 2>/dev/null && echo \"===raw-api-responses head===\" && head -c 1200 04-evaluation/results/raw-api-responses.json 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-16T10:11:19.057Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_3t9IlIvIbxBrRQiMCpeU4822",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0 && echo \"===gddp/nodes===\" && ls gddp/nodes/ 2>/dev/null && echo \"===node-02 file (if any)===\" && cat gddp/nodes/node-02-chat-path-scorer.yaml 2>/dev/null | head -60"
+        },
+        {
+          "ts": "2026-08-16T10:11:19.084Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_3t9IlIvIbxBrRQiMCpeU4822",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:11:19.087Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_5IRooTvudBCv6m5vAxSC9892",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:11:19.088Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_iWeFWhCGTJUCEBvZpO524242",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:11:25.421Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_MdoTKrchVxKalxfsJyn84287",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0 && echo \"===datefilter demo===\" && cat part2/probe/metadata-datefilter-local-demo.json && echo && echo \"===search-key-census (head)===\" && head -c 900 part2/probe/metadata-search-key-census.json && echo && echo \"===grep for answer/chat/generated in part2===\" && grep -ril \"chat\\|generated answer\\|one-shot\\|http_status.*200\\|HTTP 200\" part2/ 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-16T10:11:25.422Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_LcrTEgozFJdhnWQSkAaE8514",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0 && echo \"===subject diff stat (base..tip)===\" && git diff --stat fe52852 0502ab1 && echo \"===full file list in diff===\" && git diff --name-status fe52852 0502ab1"
+        },
+        {
+          "ts": "2026-08-16T10:11:25.462Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_MdoTKrchVxKalxfsJyn84287",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:11:25.486Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_LcrTEgozFJdhnWQSkAaE8514",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:11:37.933Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_WKU2R3qohG4S2zmcUse82825",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0 && grep -in \"chat\\|generated\\|answer\" part2/probe/metadata-q1-d09-frontmatter-vs-body.json | head && echo \"===metadata-live-host-status.txt===\" && cat part2/probe/metadata-live-host-status.txt"
+        },
+        {
+          "ts": "2026-08-16T10:11:37.961Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_WKU2R3qohG4S2zmcUse82825",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:11:43.529Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_rXwSfgByKjUtJqKWHDJo1347",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0/part2/probe/metadata-q1-d09-frontmatter-vs-body.json"
+        },
+        {
+          "ts": "2026-08-16T10:11:43.531Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_rXwSfgByKjUtJqKWHDJo1347",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:12:16.226Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_5jZDHPDCioMQEUjAtf1G7836",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node-02-chat-path-scorer's submission (commit 0502ab1, clean working tree) delivers only the metadata lane: six part2/probe/metadata-* files. Three of the four acceptance criteria fail because the node's two core capability proofs were never produced: (1) the one-shot chat path — the only recorded isolated-user chat attempt returned HTTP 500 (missing OpenAI key / Local LLM config) and no raw request/response was saved under part2/probe/; (2) evidence capture — no generated answer exists to capture, so the 'both retrieval evidence AND generated answer' requirement is unmet; (4) scorer mechanics — part2/probe/scorer-mechanics.md is absent and no end-to-end scoring demonstration exists (nothing to score). Criterion (3), metadata-behavior-recorded, passes: metadata-behavior.md is a substantive, well-evidenced record answering exactly the question the criterion poses (installed Khoj 1.42.10 consumes temporal/provenance as document text, not named metadata), with honest disclosure that the observation is partly prior-capture/source-derived because the VM was terminated. The node's own 'why' — 'Without a working one-shot answer path and scorer mechanics, no treatment can be measured' — confirms these missing pieces are load-bearing for the rest of the graph. The metadata lane's content quality and constraint compliance (record-only, no corpus redesign, read-only inspection, throwaway probes) are good, but the node as submitted does not satisfy its acceptance criteria.",
+  "required_next_action": "Address semantic failures and re-submit.",
+  "generated_at": "2026-08-16T10:13:53.997612+00:00",
+  "evaluated_tree_sha": "53a18a96019c701559cbd159f4a7b9ada8ebfec3",
+  "evaluated_commit_sha": "0502ab18020eadf775f49002525f481058dd9392",
+  "merge_commit_sha": "0502ab18020eadf775f49002525f481058dd9392",
+  "expected_base_commit_sha": "fe52852c0690004253886b6c713fb7f1cc1113ce",
+  "pr_ref": null,
+  "job_id": "job_20260816T0955312368526c8fe48c",
+  "execution_attempt_id": "job_20260816T0955312368526c8fe48c:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+    "neighbor:node-01b-contract-review": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 4,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 4,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-d3fjfit0/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "high"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-16T10:10:40.829114+00:00",
+    "finished_at": "2026-08-16T10:13:53.997548+00:00",
+    "wall_s": 193.174,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 95.405,
+      "tool_calls": 18
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 97.728,
+      "tool_calls": 21
+    }
+  }
+}

@@ -1,0 +1,1084 @@
+{
+  "project_id": "myapi-part2",
+  "node_id": "node-03-validate-anchor",
+  "verdict": "fail",
+  "criteria_verdict": "fail",
+  "integrity": {
+    "verdict": "contradicted",
+    "intent_preserved": false,
+    "graph_integrity_preserved": false,
+    "required_human_review": true,
+    "confidence": 0.9,
+    "findings": [
+      {
+        "severity": "high",
+        "summary": "Node-03's required artifact part2/layers/anchor/anchor-assessment.md does not exist anywhere in the repo; the attempt's result commit 343957a is empty relative to its base fe52852c (0 files changed, working tree clean). The node's core promise — a per-item verdict on whether REBUILD-CONTEXT-ANCHOR.md establishes identity/purpose, major components, stable terminology, and current orientation — was never recorded, so downstream node-08 has no assessment to build the anchor layer from.",
+        "affected_node_ids": [
+          "node-03-validate-anchor",
+          "node-08-build-source-layers"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "The criterion path is not stale: the governing memo (§03 'Validate the existing MyAPI anchor' and §08) and node-08's acceptance criteria both locate the assessment under part2/layers/anchor/. The absence is therefore an execution failure (work did not land), not a path/definition problem — a re-run or human decision is required, and lane 1's 'implementation not landed yet' reading is confirmed.",
+        "affected_node_ids": [
+          "node-03-validate-anchor"
+        ]
+      }
+    ],
+    "reasoning": "Fresh-eyes lane-2 review of node-03-validate-anchor. The node's intended role (memo §03 + node YAML) is to treat project-docs/REBUILD-CONTEXT-ANCHOR.md as the candidate authority, assess it against the evidence contract across four dimensions (identity/purpose, major components, stable terminology, current orientation), record per-item verdicts at part2/layers/anchor/anchor-assessment.md, mint no competing brief, and extend the anchor only if Part 2 requires dated current-direction info. The work under review contradicts that intent: the required artifact is absent (confirmed by filesystem find across the entire worktree — part2/ contains only node-01b's contract/ files), the attempt's result commit 343957a is byte-empty relative to base fe52852c (confirmed via git diff --stat/--name-status, which returned nothing, and git status clean), and no attempt logs or evidence artifacts were left behind. Sibling commits in the same batch (fe52852: +1612 lines; 0502ab1: +373 lines) prove the harness does land artifacts when work occurs — 343957a is an anomaly, not a convention. Graph integrity is compromised in execution terms: node-08-build-source-layers depends on node-03 and must produce the normalized anchor/ layer from this assessment; with frontier_auto_advance enabled, accepting the empty result would let node-08 fire without its required input. (Graph structure YAML is untouched, which is correct, but the dependency edge carries no payload.) Because the evidence decisively contradicts the stated deliverable rather than merely lacking detail, the verdict is 'contradicted' with required human review: a human must decide whether node-03 is re-run, whether the attempt failed at dispatch, or whether the anchor assessment can be produced before node-08's layer build consumes it.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-16T10:13:38.315Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_GzRndHSp77aGx7eCi2r72773",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-03-validate-anchor.yaml"
+      },
+      {
+        "ts": "2026-08-16T10:13:38.317Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_KkW4g9D9tmfpYAHVCFEk6145",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+      },
+      {
+        "ts": "2026-08-16T10:13:38.317Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_ztd2jxvuTlOAnQycTb910729",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+      },
+      {
+        "ts": "2026-08-16T10:13:38.318Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_0Wu3bnPt6FFKNk5keS974900",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-16T10:13:38.325Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_KkW4g9D9tmfpYAHVCFEk6145",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:13:38.326Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_GzRndHSp77aGx7eCi2r72773",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:13:38.326Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_ztd2jxvuTlOAnQycTb910729",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:13:38.326Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_0Wu3bnPt6FFKNk5keS974900",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:13:44.276Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_sEa66rL4P3fRJV7OUgKx5032",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && pwd && ls -la && echo \"---README---\" && cat README.md 2>/dev/null | head -100"
+      },
+      {
+        "ts": "2026-08-16T10:13:44.276Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_QfnO0eLfJBMZO2RlnlY64882",
+        "command": "ls -la /Users/sab-mini/repos/MyAPI 2>/dev/null | head -60; echo \"===PART2 TREE===\"; find /Users/sab-mini/repos/MyAPI/part2 -type f 2>/dev/null | head -100"
+      },
+      {
+        "ts": "2026-08-16T10:13:44.288Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_QfnO0eLfJBMZO2RlnlY64882",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:13:44.288Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_sEa66rL4P3fRJV7OUgKx5032",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:13:51.341Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_i86tfIuhNHOPS2jRaFzh1144",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== .git file ===\" && cat .git && echo && echo \"=== part2 tree (eval dir) ===\" && find part2 -type f -o -type d | sort && echo && echo \"=== part2 ls -la ===\" && ls -la part2/"
+      },
+      {
+        "ts": "2026-08-16T10:13:51.341Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_RXUIazOTzRLS6eRSiTJx2946",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== MyAPI part2 ===\" && ls -la part2/ 2>/dev/null && echo && echo \"=== find part2 ===\" && find part2 2>/dev/null | head -50 && echo && echo \"=== git log (recent 25) ===\" && git log --oneline -25 2>/dev/null && echo && echo \"=== git status ===\" && git status --short 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-16T10:13:51.347Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_RXUIazOTzRLS6eRSiTJx2946",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-16T10:13:51.353Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_i86tfIuhNHOPS2jRaFzh1144",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:13:59.333Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_CHrGcmXHYcoyMrzgULbh8836",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== git worktree status ===\" && git status 2>&1 | head -30 && echo && echo \"=== branch/HEAD ===\" && git branch -avv 2>&1 | head -20 && echo && echo \"=== HEAD ===\" && git rev-parse HEAD 2>&1"
+      },
+      {
+        "ts": "2026-08-16T10:13:59.334Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_9e6r7MBUmoLaMrHFQRfq2409",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== MyAPI git log -15 ===\" && git log --oneline -15 2>&1 | head -20 && echo && echo \"=== MyAPI branch ===\" && git branch -avv 2>&1 | head -20"
+      },
+      {
+        "ts": "2026-08-16T10:13:59.476Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_9e6r7MBUmoLaMrHFQRfq2409",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:13:59.489Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_CHrGcmXHYcoyMrzgULbh8836",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:14:19.234Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_00_5zVCTbmXDV3Hg9jXwY5R2927",
+        "reason": "command matched blocked pattern",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== diff fe52852c..343957a --stat ===\" && git diff --stat fe52852c 343957a 2>&1 && echo && echo \"=== diff name-only ===\" && git diff --name-status fe52852c 343957a 2>&1 && echo && echo \"=== is 343957a descendant of fe52852c? ===\" && git merge-base --is-ancestor fe52852c 343957a && echo \"YES: tip descends from base\" || echo \"NO\" && echo && echo \"=== what does 343957a commit contain (tree vs fe52852c) ===\" && git log --oneline fe52852c..343957a 2>&1 | head",
+        "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+      },
+      {
+        "ts": "2026-08-16T10:14:19.234Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_5zVCTbmXDV3Hg9jXwY5R2927",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-16T10:14:19.235Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_vpndOXAzMFQO5cPdpZsm6161",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== anchor doc location ===\" && ls -la project-docs/ 2>/dev/null | grep -i -E \"anchor|context\" ; ls -la project-documents/ 2>/dev/null | grep -i -E \"anchor|context\" ; echo && echo \"=== find REBUILD-CONTEXT-ANCHOR ===\" && find . -iname \"*REBUILD-CONTEXT-ANCHOR*\" -not -path \"./.git/*\" 2>/dev/null && echo && echo \"=== find any anchor-assessment ===\" && find . -iname \"*anchor-assessment*\" -not -path \"./.git/*\" 2>/dev/null && echo \"(none found if empty)\""
+      },
+      {
+        "ts": "2026-08-16T10:14:19.292Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_vpndOXAzMFQO5cPdpZsm6161",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:14:29.251Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_1osxkS1OVq2THMWJv8M79407",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== diff base..tip --stat ===\" && git diff --stat fe52852c 343957a 2>&1; echo \"=== diff --name-status ===\" && git diff --name-status fe52852c 343957a 2>&1; echo \"=== log base..tip ===\" && git log --oneline fe52852c..343957a 2>&1 | head; echo \"=== untracked files ===\" && git status --porcelain 2>&1 | head"
+      },
+      {
+        "ts": "2026-08-16T10:14:29.252Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_qdNfkdoXLrbgDjpYrbve1801",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_/project-docs/REBUILD-CONTEXT-ANCHOR.md"
+      },
+      {
+        "ts": "2026-08-16T10:14:29.257Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_qdNfkdoXLrbgDjpYrbve1801",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:14:29.349Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_1osxkS1OVq2THMWJv8M79407",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:14:40.650Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_ptOWyFsPe7UmZeMV4bHM1076",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-08-build-source-layers.yaml"
+      },
+      {
+        "ts": "2026-08-16T10:14:40.651Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_RjYYnZXkbbmHEsy1wzUu9979",
+        "command": "cd /Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes && for f in node-04-inventory-decisions.yaml node-05-inventory-handoffs.yaml node-06-git-evidence.yaml node-07-graphify-evidence.yaml; do echo \"=== $f ===\"; grep -E \"node_id|depends_on|unlocks|why:|title\" \"$f\" | head -8; echo; done"
+      },
+      {
+        "ts": "2026-08-16T10:14:40.652Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_K8po5g5trvMzikj7joKT2474",
+        "command": "cd /Users/sab-mini/repos/gddp-config && ls docs/ 2>/dev/null && echo \"---\" && grep -n -i -E \"anchor|node-03|validate\" docs/GDDPvMyAPI-Part2.md 2>/dev/null | head -40"
+      },
+      {
+        "ts": "2026-08-16T10:14:40.659Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ptOWyFsPe7UmZeMV4bHM1076",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:14:40.683Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_K8po5g5trvMzikj7joKT2474",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:14:40.693Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_RjYYnZXkbbmHEsy1wzUu9979",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:14:54.427Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_u5OOA6v38eJ0g7vTTzTw1404",
+        "command": "cd /Users/sab-mini/repos/gddp-config && sed -n '95,140p' docs/GDDPvMyAPI-Part2.md"
+      },
+      {
+        "ts": "2026-08-16T10:14:54.428Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_XiteMKkOgtIQmBytDtHl0784",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && for c in fe52852 0502ab1 343957a 40cfdbe; do echo \"=== $c ===\"; git show --stat --oneline $c 2>&1 | head -12; echo; done"
+      },
+      {
+        "ts": "2026-08-16T10:14:54.429Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_wvgrBXby8Nh3JJ38NPOA4887",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== any assessment-ish files anywhere (excluding .git) ===\" && find . -not -path \"./.git/*\" \\( -iname \"*assess*\" -o -iname \"*anchor*\" \\) -type f 2>/dev/null | head -20; echo \"=== part2 full tree ===\" && find part2 -type f 2>/dev/null | sort"
+      },
+      {
+        "ts": "2026-08-16T10:14:54.453Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_u5OOA6v38eJ0g7vTTzTw1404",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:14:54.469Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_wvgrBXby8Nh3JJ38NPOA4887",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:14:54.527Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_XiteMKkOgtIQmBytDtHl0784",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:15:16.309Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_DB5JnkQiPyXvqQB4uLGz1830",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== 5d714e9 (node-06 first attempt, referenced in node-01b constraint) ===\" && git show --stat --oneline 5d714e9 2>&1 | head -6; echo; echo \"=== 40cfdbe (node-06 second attempt) ===\" && git show --stat --oneline 40cfdbe 2>&1 | head -6; echo; echo \"=== 96726e1 (node-07 graphify) ===\" && git show --stat --oneline 96726e1 2>&1 | head -8"
+      },
+      {
+        "ts": "2026-08-16T10:15:16.310Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Tbg3iaNRbMRWy4BxULhJ6403",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== .gddp dir ===\" && ls -la .gddp 2>/dev/null && find .gddp -type f 2>/dev/null | head; echo \"=== any attempt/log/evidence dirs under part2? ===\" && find part2 -type d 2>/dev/null; echo \"=== worktree .git dir listing (read-only) ===\" && ls /Users/sab-mini/repos/MyAPI/.git/worktrees/gddp-eval-wt-f3t2xsl_/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-16T10:15:16.342Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Tbg3iaNRbMRWy4BxULhJ6403",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:15:16.389Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_DB5JnkQiPyXvqQB4uLGz1830",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T10:15:45.276Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_QkCvq3tLlhqRLvDT43T18150",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "Batch-level execution failure pattern in the concurrent source-inventory tier: node-03 (343957a), node-06 both attempts (5d714e9, 40cfdbe), and node-07 (96726e1) all produced empty result commits, while only node-02 (0502ab1) landed artifacts. node-08 depends on all of 03-07 to build its five layers; if the remaining inventory nodes also land empty, the five-layer build starts with missing inputs. Recommend verifying each inventory node's required artifacts exist (and re-running empties) before node-08 fires.",
+        "affected_node_ids": [
+          "node-08-build-source-layers",
+          "node-03-validate-anchor",
+          "node-06-git-evidence",
+          "node-07-graphify-evidence"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "node-01b-contract-review remains provisional while node-03 (and node-08) depend on its revised contract; node-03's assessment was supposed to be made 'against the contract', so the anchor assessment should be re-run against the finalized revised contract before the layer build consumes it.",
+        "affected_node_ids": [
+          "node-01b-contract-review",
+          "node-03-validate-anchor",
+          "node-08-build-source-layers"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.125,
+  "criteria_confidence": 0.125,
+  "completeness": 0.5,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "anchor-assessed",
+        "criterion": "part2/layers/anchor/anchor-assessment.md records a per-item verdict on whether project-docs/REBUILD-CONTEXT-ANCHOR.md establishes: project identity and purpose, major components, stable terminology, and enough current orientation to interpret retrieved facts",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "project\\-docs -> line 149: 'project-docs'",
+          "REBUILD\\-CONTEXT\\-ANCHOR -> line 165: 'REBUILD-CONTEXT-ANCHOR'",
+          "part2/layers/anchor/anchor-assessment.md absent"
+        ],
+        "reasoning": "Scanned source files (project-docs/REBUILD-CONTEXT-ANCHOR.md) for identifiers named in the criterion (anchor-assessment, per-item, project-docs, REBUILD-CONTEXT-ANCHOR). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "source_path",
+        "mismatch_detail": "part2/layers/anchor/anchor-assessment.md absent",
+        "needs_evidence": false,
+        "human_question": "Is the criterion path stale, or has the implementation not landed yet?"
+      },
+      {
+        "id": "no-competing-brief",
+        "criterion": "No new golden brief or rival anchor document was created anywhere in the repo",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "extension-bounded",
+        "criterion": "Any extension is limited to clearly dated current-direction information, is additive, and preserves the pre-existing anchor content verbatim (the assessment records exactly what was added, or that nothing was)",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...) for identifiers named in the criterion (current-direction, pre-existing). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the experiment was executed correctly, never whether the hypothesis won.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution model (operator direction 2026-08-15, enforced by the attempt preamble): You are the ORCHESTRATOR, not the worker. Do NOT perform the node's work yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6 via the subagent tool's model parameter) to do the actual investigation, construction, and measurement. Your job is decomposition, dispatch, reviewing returns, integrating, and producing the final artifacts.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight (worker subagents, Khoj ingestion/processing, long builds), dispatch ONE watcher subagent on model deepseek/deepseek-v4-flash that actively polls with tools (job status, logs, artifact existence) and reports state changes; you go idle between its reports instead of polling yourself.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/ self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to this node as evidence; work discovered beyond this node's scope becomes a continuation proposal, never silent execution.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Work in /Users/sab-mini/repos/MyAPI. Write only under part2/ unless this node's text names another path. Never edit GDDP graph truth, runtime databases, or job state.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "This node may append dated current-direction context to project-docs/REBUILD-CONTEXT-ANCHOR.md only if the assessment finds Part 2 requires it; everything else is written under part2/.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Close with parallel reviewer subagents on model deepseek/deepseek-v4-pro, each assigned a different explicit focus (criteria coverage, evidence integrity, constraint compliance). Resolve their findings before returning.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "part2/layers/anchor/anchor-assessment.md": false
+    },
+    "deps_status": {
+      "node-01b-contract-review": "provisional"
+    },
+    "criteria_mismatches": [
+      {
+        "criterion_id": "anchor-assessed",
+        "kind": "source_path",
+        "detail": "part2/layers/anchor/anchor-assessment.md absent"
+      }
+    ],
+    "missing_evidence": [],
+    "human_review_questions": [
+      {
+        "criterion_id": "anchor-assessed",
+        "question": "Is the criterion path stale, or has the implementation not landed yet?"
+      }
+    ],
+    "subject_diff": {
+      "status": "ok",
+      "base": "fe52852c0690004253886b6c713fb7f1cc1113ce",
+      "tip": "343957a052eab2803f70dd7bc1da163d5242fdef",
+      "files": [],
+      "truncated": false,
+      "file_count": 0,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "anchor-assessed",
+        "judgment": "judged_fail",
+        "confidence": 0.97,
+        "evidence": [
+          "part2/layers/anchor/anchor-assessment.md absent from worktree, all git refs, and live repo (/Users/sab-mini/repos/MyAPI)",
+          "git log --all -- part2/layers and --all for 'anchor-assessment' return no commits (never created)",
+          "Node-03 result commit 343957a (HEAD of eval worktree) is empty: git diff fe52852..343957a shows 0 files; git show --stat 343957a has no file changes",
+          "Attempt log gddp-runtime/jobs/local-subprocess-spool/job_20260816T09553124703af9989839-.../events.jsonl: 4 turns all stopReason=error, 'Codex error: The usage limit has been reached'",
+          "part2/contract/evidence-contract.md §3 names part2/layers/{anchor,...}/ as the node 03-08 write path, so the criterion path is not stale"
+        ],
+        "reasoning": "The criterion is the existence and content of part2/layers/anchor/anchor-assessment.md recording a per-item verdict on identity/purpose, major components, stable terminology, and current orientation. The file does not exist anywhere: the worktree has only part2/contract/*, no git commit ever touched part2/layers, and the node's own result commit is empty. The attempt aborted on provider usage-limit errors before producing anything (exit plumbing returned 0 but the model session errored 4 times). The path is confirmed non-stale because the revised evidence contract explicitly allocates part2/layers/anchor/ to node 03 and pins the anchor hash. Implementation simply never landed."
+      },
+      {
+        "criterion_id": "no-competing-brief",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "Node-03 result commit 343957a changed zero files (git diff fe52852..343957a empty; git show --stat empty)",
+          "All golden-brief files predate Part 2: evals/golden_briefs/* added in f35059c (2026-07-01); project-docs/archive-pre-part2/evals/golden_briefs/* archived in ef90da5",
+          "project-docs/REBUILD-CONTEXT-ANCHOR.md sha256 = 92d212841321dffc9add20c01c9ecb3d832e9ce58fcecce6c652ecd61ea7df7a, byte-identical to the contract pin (evidence-contract.md line 47)",
+          "find for *anchor* and *assess* names shows only pre-existing files (source-of-truth-anchors/, benchmark runs, handoff 011)",
+          "Only post-node-01b non-empty commit is 0502ab1 adding part2/probe/metadata-* (node-02 chat-path probe artifacts, not on HEAD history, not a brief/anchor)"
+        ],
+        "reasoning": "The negative constraint 'no new golden brief or rival anchor document was created anywhere in the repo' holds. The node created nothing at all (empty commit), so no competing document was minted; the pinned REBUILD-CONTEXT-ANCHOR.md remains the single authority, byte-identical to the contract pin; all golden briefs in the tree predate Part 2. Pass is vacuous in the sense that it holds only because the attempt performed no work - there was no assessment in which a rival could have been minted. That absence of work is judged under criterion anchor-assessed, not here."
+      },
+      {
+        "criterion_id": "extension-bounded",
+        "judgment": "judged_fail",
+        "confidence": 0.78,
+        "evidence": [
+          "No extension occurred: git log -- project-docs/REBUILD-CONTEXT-ANCHOR.md last touch is 3b510d9 (2026-07-28, pre-Part 2); worktree sha256 matches contract pin 92d21284...",
+          "Boundedness clause therefore holds vacuously (nothing was added, nothing to be non-additive or non-verbatim)",
+          "Recording clause unmet: part2/layers/anchor/anchor-assessment.md does not exist, so nothing records 'exactly what was added, or that nothing was'",
+          "Attempt aborted: events.jsonl shows 4 turns stopReason=error 'usage limit has been reached'; result commit 343957a empty"
+        ],
+        "reasoning": "The criterion has two parts: (a) any extension must be dated/additive/verbatim-preserving, and (b) the assessment must record exactly what was added, or that nothing was. Part (a) is clean - no extension was made; the anchor is byte-identical to the contract pin and last touched before Part 2. Part (b) fails: the parenthetical explicitly requires the record even in the nothing-added case, and the assessment file that would carry that record does not exist. Confidence is not higher because a human could read the parenthetical as conditional on an extension having occurred; but the text's 'or that nothing was' covers the no-extension case, and the node's sole required artifact is absent."
+      }
+    ],
+    "overall_reasoning": "Node node-03-validate-anchor did not execute: the orchestrator attempt (job_20260816T09553124703af9989839:attempt:0) hit repeated provider usage-limit errors (4 turns, all stopReason=error, 'Codex error: The usage limit has been reached') and committed an empty result commit (343957a, zero file changes from base fe52852). The node's sole required artifact, part2/layers/anchor/anchor-assessment.md, was never created - it is absent from the evaluation worktree, from all git refs, and from the live repo. Consequently: criterion anchor-assessed fails (the assessment file that IS the criterion does not exist); criterion extension-bounded fails on its recording clause (no assessment exists to record 'what was added, or that nothing was'), although the underlying anchor behavior is clean - REBUILD-CONTEXT-ANCHOR.md is byte-identical to the contract pin 92d21284... and was not modified during Part 2; criterion no-competing-brief passes vacuously (the node created no files at all, so no golden brief or rival anchor was minted; all pre-existing golden briefs date to 2026-07-01). The criterion path is not stale: the revised evidence contract (§3) explicitly allocates part2/layers/anchor/ to nodes 03-08 and pins the anchor hash, confirming the required artifact location. This is a completeness/execution failure (work never landed), not a semantic mismatch.",
+    "risks": "1) Criterion extension-bounded has a plausible vacuous-pass reading (no extension occurred, so the boundedness clause is trivially satisfied); the fail rests on the parenthetical recording requirement, which is unambiguous in text ('the assessment records exactly what was added, or that nothing was') but could be contested. 2) Criterion no-competing-brief passes only because the attempt produced nothing; this should not be read as evidence the node's work was done. 3) The attempt failure is an execution/quota issue (provider usage limit), not an evidence-quality issue; execution_policy retry_budget=3 exists, and node-01b (the dependency) is still 'provisional', which may also have affected gating. 4) The empty result commit was created with returncode 0 at the plumbing level despite the model session erroring - wrapper-level success masking an aborted attempt.",
+    "followup_candidates": "1) Observed: node-03 attempt job_20260816T09553124703af9989839 aborted on provider usage-limit errors (4 turns, stopReason=error) and committed no files; part2/layers/anchor/anchor-assessment.md was never created. Is this a quota-retry situation (retry_budget=3), and should the node be re-run before judging? 2) The criterion path part2/layers/anchor/anchor-assessment.md is confirmed non-stale: the revised evidence contract (§3) names part2/layers/{anchor,decisions,handoffs,git,graphify}/ as the node 03-08 write path and pins anchor hash 92d21284...; the anchor still matches the pin. So the deterministic 'path stale or not landed?' question resolves to 'not landed'. 3) Criterion no-competing-brief is satisfied only vacuously (no files created at all). If the intent is that the node completes with explicit negative evidence, that gap is captured by criterion anchor-assessed's missing artifact, not by a no-competing-brief violation. 4) Minor observation: wrapper commit 343957a recorded success (returncode 0) while the underlying session errored - worth confirming the attempt-commit mechanism records aborted attempts distinctly so future empty-result commits are distinguishable from real no-op results.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-16T10:10:44.625Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_33iYyWMMte2B0Kjly1zJ1168",
+          "command": "pwd && ls -la && echo \"---\" && ls -la /Users/sab-mini/repos/MyAPI 2>/dev/null | head -50"
+        },
+        {
+          "ts": "2026-08-16T10:10:44.626Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_WTkbk8DuVSPFrr3SWBwx3027",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_/README.md"
+        },
+        {
+          "ts": "2026-08-16T10:10:44.627Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_d1tzSYnfrOlIOywjgUbN8666",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-16T10:10:44.636Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_WTkbk8DuVSPFrr3SWBwx3027",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:44.636Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_d1tzSYnfrOlIOywjgUbN8666",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:44.711Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_33iYyWMMte2B0Kjly1zJ1168",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:50.224Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_asOxwwnh54JPPYyjb3wv2157",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && find part2 -type f 2>/dev/null | head -100; echo \"---part2 dirs---\"; find part2 -type d 2>/dev/null | head -50"
+        },
+        {
+          "ts": "2026-08-16T10:10:50.226Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_d4VnJ9ZrVAOpV15h2pZL6165",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && ls project-docs/ | head -40; echo \"---project-documents?---\"; ls -d project-documents 2>/dev/null || echo \"no project-documents dir\"; echo \"---REBUILD-CONTEXT-ANCHOR locations---\"; find . -name \"*REBUILD-CONTEXT-ANCHOR*\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-16T10:10:50.227Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_HZwWKVjI28B3GruFZpW76762",
+          "command": "ls -la /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md 2>/dev/null && echo \"MEMO EXISTS\" || echo \"memo missing\""
+        },
+        {
+          "ts": "2026-08-16T10:10:50.258Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_HZwWKVjI28B3GruFZpW76762",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:50.259Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_asOxwwnh54JPPYyjb3wv2157",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:50.270Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_d4VnJ9ZrVAOpV15h2pZL6165",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:53.685Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_HeYr9C9Fb7ftvyM3Lo1J2423",
+          "path": "/Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md"
+        },
+        {
+          "ts": "2026-08-16T10:10:53.685Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_XfDEunlMOh8XR9zXWNLf4029",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+        },
+        {
+          "ts": "2026-08-16T10:10:53.686Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_LmMZorm5sm2u83GbAW4W0054",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+        },
+        {
+          "ts": "2026-08-16T10:10:53.687Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_XfDEunlMOh8XR9zXWNLf4029",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:53.688Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_HeYr9C9Fb7ftvyM3Lo1J2423",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:53.688Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_LmMZorm5sm2u83GbAW4W0054",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:59.367Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ZJ4Np6Oa296CqaqMlN9M7902",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && git status --short 2>/dev/null | head -40; echo \"---git log---\"; git log --oneline -10 2>/dev/null; echo \"---untracked part2---\"; git status --porcelain part2/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-16T10:10:59.367Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_kSIhBsb4K5hpmXumHGr65154",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && ls -la part2/contract/ && echo \"---\" && git log --oneline --all -- part2/ 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-16T10:10:59.447Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_kSIhBsb4K5hpmXumHGr65154",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:10:59.634Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ZJ4Np6Oa296CqaqMlN9M7902",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:11:06.530Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_2vhOXmNr2BjXYUZMV5YH9494",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== 343957a (HEAD) stat ===\"; git show --stat 343957a 2>/dev/null | head -30; echo \"=== 0502ab1 stat ===\"; git show --stat 0502ab1 2>/dev/null | head -30; echo \"=== diff fe52852..343957a names ===\"; git diff --name-status fe52852 343957a 2>/dev/null | head -40; echo \"=== 0502ab1 files ===\"; git show --name-only 0502ab1 2>/dev/null | head -40"
+        },
+        {
+          "ts": "2026-08-16T10:11:06.531Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_kOfiQ59rBV43VPlyBtfk3061",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== all commits touching part2/layers ===\"; git log --oneline --all -- part2/layers 2>/dev/null; echo \"=== search for anchor-assessment anywhere in git history ===\"; git log --all --oneline -- '**/anchor-assessment.md' 2>/dev/null; git log --all --oneline --name-only 2>/dev/null | grep -i \"anchor-assessment\" | head; echo \"=== find in working tree ===\"; find . -name \"*anchor*\" -not -path \"./.git/*\" 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-16T10:11:06.627Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_2vhOXmNr2BjXYUZMV5YH9494",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:11:06.668Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_kOfiQ59rBV43VPlyBtfk3061",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:11:14.326Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_PYFYvoNspiDW50JD9t903376",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== full status incl untracked ===\"; git status --porcelain --untracked-files=all 2>/dev/null | head -30; echo \"=== status (short) ===\"; git status -s | head; echo \"=== git log for REBUILD-CONTEXT-ANCHOR ===\"; git log --oneline --all -- project-docs/REBUILD-CONTEXT-ANCHOR.md 2>/dev/null | head -20; echo \"=== .gddp ===\"; find .gddp -type f 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-16T10:11:14.327Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_dLdFojG7wNGI2whlOYRa5583",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== search for golden brief mentions in recent commits (all) ===\"; git log --all --oneline -20 --name-only 2>/dev/null | head -80; echo; echo \"=== files mentioning 'golden brief' ===\"; grep -ril \"golden brief\" . --include=\"*.md\" --include=\"*.yaml\" --include=\"*.yml\" --include=\"*.json\" 2>/dev/null | grep -v \".git/\" | head -20"
+        },
+        {
+          "ts": "2026-08-16T10:11:14.427Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_PYFYvoNspiDW50JD9t903376",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:11:14.542Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_dLdFojG7wNGI2whlOYRa5583",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:11:25.909Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_TVLiR2UGvc8noZVIhvjk1932",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_/project-docs/REBUILD-CONTEXT-ANCHOR.md"
+        },
+        {
+          "ts": "2026-08-16T10:11:25.909Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_eN4xXXILoickCoFmGJti9435",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== 343957a parents ===\"; git log --format=\"%H %P\" -1 343957a; echo \"=== 40cfdbe contents ===\"; git show --name-only --format=\"%H %s\" 40cfdbe | head; echo \"=== log with dates (last 8) ===\"; git log --format=\"%h %ad %s\" --date=iso -8; echo \"=== was REBUILD-CONTEXT-ANCHOR modified in part2 window? ===\"; git log --format=\"%h %ad %s\" --date=iso -3 -- project-docs/REBUILD-CONTEXT-ANCHOR.md"
+        },
+        {
+          "ts": "2026-08-16T10:11:25.912Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_TVLiR2UGvc8noZVIhvjk1932",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:11:25.979Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_eN4xXXILoickCoFmGJti9435",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:11:46.472Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_iyMPVzaWqx8hRP5ZogaU0157",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== .git file ===\"; cat .git; echo; echo \"=== live repo part2 ===\"; find /Users/sab-mini/repos/MyAPI/part2 -type f 2>/dev/null; echo \"=== live repo anchor-assessment anywhere ===\"; find /Users/sab-mini/repos/MyAPI -name \"*anchor-assess*\" -o -name \"*anchor-assessment*\" 2>/dev/null | grep -v \".git/\"; echo \"=== live repo git log part2 ===\"; git -C /Users/sab-mini/repos/MyAPI log --oneline -5 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-16T10:11:46.473Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_6s0vA9NRwRGedj1Z0Y3L9400",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== any file under part2 ===\"; find part2 -type f | sort; echo \"=== search whole tree for assessment-like files created recently ===\"; find . -newermt \"2026-08-15\" -type f -not -path \"./.git/*\" 2>/dev/null | head -30; echo \"=== grep for 'per-item' or 'anchor' verdict in part2 ===\"; grep -rl \"anchor\" part2/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-16T10:11:46.514Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_6s0vA9NRwRGedj1Z0Y3L9400",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:11:46.746Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_iyMPVzaWqx8hRP5ZogaU0157",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:12:06.778Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_3llpGsg4zz0mLnDyfXLq8184",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== golden briefs commit history ===\"; git log --oneline --all -- evals/golden_briefs/ 2>/dev/null | head; echo \"=== first commit for evals/golden_briefs ===\"; git log --diff-filter=A --format=\"%h %ad %s\" --date=iso --all -- evals/golden_briefs/get_project_context_myapi_rebuild.md 2>/dev/null | head -3; echo \"=== gddp-config job dirs ===\"; ls /Users/sab-mini/repos/gddp-config 2>/dev/null; echo \"=== gddp-runtime ===\"; ls /Users/sab-mini/repos/gddp-runtime 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-16T10:12:06.778Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_xpIM1r7mmRGYEZ4c3kFA4768",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && head -120 part2/contract/evidence-contract.md"
+        },
+        {
+          "ts": "2026-08-16T10:12:06.789Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_xpIM1r7mmRGYEZ4c3kFA4768",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:12:06.852Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_3llpGsg4zz0mLnDyfXLq8184",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:12:15.785Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_4wpvpOsY3wNlLhHUb2Iw1534",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== sha256 of anchor ===\"; shasum -a 256 project-docs/REBUILD-CONTEXT-ANCHOR.md; echo \"=== contract anchor pin ===\"; grep -n \"92d21284\" part2/contract/evidence-contract.md | head -5; echo \"=== contract-review anchor mentions ===\"; grep -n -i \"anchor\" part2/contract/contract-review.md | head -30"
+        },
+        {
+          "ts": "2026-08-16T10:12:15.786Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_w3fyPiFXqtFup3QGpL0j0590",
+          "command": "find /Users/sab-mini/repos/gddp-config /Users/sab-mini/repos/gddp-runtime -name \"*09553124703*\" 2>/dev/null | head; echo \"---\"; find /Users/sab-mini/repos/gddp-config/verification-runtime* -maxdepth 3 -type d 2>/dev/null | head -20; echo \"--- jobs dirs ---\"; ls /Users/sab-mini/repos/gddp-config/verification-runtime 2>/dev/null | head; ls /Users/sab-mini/repos/gddp-config/verification-runtime-live 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-16T10:12:15.841Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_4wpvpOsY3wNlLhHUb2Iw1534",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:12:16.035Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_w3fyPiFXqtFup3QGpL0j0590",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:12:19.356Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_frh40uHFOfPE9KRifVuF8381",
+          "command": "ls -la /Users/sab-mini/repos/gddp-runtime/jobs/job_20260816T09553124703af9989839/ 2>/dev/null; echo \"---\"; find /Users/sab-mini/repos/gddp-runtime/jobs/job_20260816T09553124703af9989839 -type f 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-16T10:12:19.389Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_frh40uHFOfPE9KRifVuF8381",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:12:28.308Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_dyD0b8lzqz0FZmiGBl1L0875",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && echo \"=== files with 'assessment' in name ===\"; find . -iname \"*assess*\" -not -path \"./.git/*\" 2>/dev/null; echo \"=== files with 'verdict' or 'per-item' content ===\"; grep -rl -i \"per-item\\|per item verdict\" . --include=\"*.md\" 2>/dev/null | grep -v \".git/\" | head; echo \"=== spool dir ===\"; ls -la /Users/sab-mini/repos/gddp-runtime/jobs/local-subprocess-spool/job_20260816T09553124703af9989839-node-03-validate-anchor-attempt-0-7993febcf0204a80b2e42219605e9641/ 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-16T10:12:28.392Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_dyD0b8lzqz0FZmiGBl1L0875",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:12:30.860Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_uOKpHC8exmT1BiXWTJNH3740",
+          "command": "cd /Users/sab-mini/repos/gddp-runtime/jobs/local-subprocess-spool/job_20260816T09553124703af9989839-node-03-validate-anchor-attempt-0-7993febcf0204a80b2e42219605e9641/ && echo \"=== result.json ===\"; cat result.json; echo; echo \"=== exit.json ===\"; cat exit.json; echo; echo \"=== packet.json (head) ===\"; head -60 packet.json"
+        },
+        {
+          "ts": "2026-08-16T10:12:30.893Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_uOKpHC8exmT1BiXWTJNH3740",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:12:34.289Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_F9lL9z7ePGbMPKqWWg7C1376",
+          "command": "cd /Users/sab-mini/repos/gddp-runtime/jobs/local-subprocess-spool/job_20260816T09553124703af9989839-node-03-validate-anchor-attempt-0-7993febcf0204a80b2e42219605e9641/ && echo \"=== last 5 events ===\"; tail -5 events.jsonl | cut -c1-400; echo; echo \"=== event type counts ===\"; python3 -c \"\nimport json\nfrom collections import Counter\nc=Counter()\nwith open('events.jsonl') as f:\n    for line in f:\n        try:\n            e=json.loads(line)\n            c[e.get('type','?')]+=1\n        except: pass\nfor k,v in c.most_common(25): print(k,v)\n\""
+        },
+        {
+          "ts": "2026-08-16T10:12:34.452Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_F9lL9z7ePGbMPKqWWg7C1376",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:12:38.179Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_kcgadPyZGmpfWUyg7S4m9103",
+          "command": "cd /Users/sab-mini/repos/gddp-runtime/jobs/local-subprocess-spool/job_20260816T09553124703af9989839-node-03-validate-anchor-attempt-0-7993febcf0204a80b2e42219605e9641/ && python3 -c \"\nimport json\nwith open('events.jsonl') as f:\n    for line in f:\n        e=json.loads(line)\n        t=e.get('type')\n        if t in ('tool_execution_start','tool_execution_end'):\n            m=e.get('message',{})\n            print(t, '|', m.get('name'), '|', (m.get('input') or {}).get('tool_name') or (m.get('output') or {}).get('tool_name'), '|', str(m.get('errorMessage'))[:120])\n\" 2>/dev/null | head -30"
+        },
+        {
+          "ts": "2026-08-16T10:12:38.226Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_kcgadPyZGmpfWUyg7S4m9103",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:12:41.789Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_WdYH2l0uEzPGDVhTdNCX6723",
+          "command": "cd /Users/sab-mini/repos/gddp-runtime/jobs/local-subprocess-spool/job_20260816T09553124703af9989839-node-03-validate-anchor-attempt-0-7993febcf0204a80b2e42219605e9641/ && python3 -c \"\nimport json\nn=0\nwith open('events.jsonl') as f:\n    for line in f:\n        e=json.loads(line)\n        if e.get('type')=='message_update':\n            m=e.get('message',{})\n            parts=m.get('content') or []\n            for p in parts:\n                if p.get('type')=='output_text':\n                    txt=p.get('text','')\n                    if txt.strip():\n                        n+=1\n                        print('--- msg', n, '---')\n                        print(txt[:600])\n\" 2>/dev/null | head -80"
+        },
+        {
+          "ts": "2026-08-16T10:12:41.876Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_WdYH2l0uEzPGDVhTdNCX6723",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:12:46.337Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_wCiYrtk397xa0lSU9wIv7815",
+          "command": "cd /Users/sab-mini/repos/gddp-runtime/jobs/local-subprocess-spool/job_20260816T09553124703af9989839-node-03-validate-anchor-attempt-0-7993febcf0204a80b2e42219605e9641/ && grep -o '\"errorMessage\":\"[^\"]*\"' events.jsonl | sort | uniq -c | sort -rn | head; echo \"=== stopReasons ===\"; grep -o '\"stopReason\":\"[^\"]*\"' events.jsonl | sort | uniq -c"
+        },
+        {
+          "ts": "2026-08-16T10:12:46.448Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_wCiYrtk397xa0lSU9wIv7815",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:13:03.514Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_PekOq9Hsv73ZYgTRGNyx7498",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_ && head -25 part2/probe/metadata-behavior.md; echo \"=== confirm no part2/layers dir ===\"; ls -la part2/ part2/layers 2>&1 | head -12"
+        },
+        {
+          "ts": "2026-08-16T10:13:03.531Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_PekOq9Hsv73ZYgTRGNyx7498",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T10:13:33.191Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_N7HN9bGcK3qtcjQULBux6193",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node node-03-validate-anchor did not execute: the orchestrator attempt (job_20260816T09553124703af9989839:attempt:0) hit repeated provider usage-limit errors (4 turns, all stopReason=error, 'Codex error: The usage limit has been reached') and committed an empty result commit (343957a, zero file changes from base fe52852). The node's sole required artifact, part2/layers/anchor/anchor-assessment.md, was never created - it is absent from the evaluation worktree, from all git refs, and from the live repo. Consequently: criterion anchor-assessed fails (the assessment file that IS the criterion does not exist); criterion extension-bounded fails on its recording clause (no assessment exists to record 'what was added, or that nothing was'), although the underlying anchor behavior is clean - REBUILD-CONTEXT-ANCHOR.md is byte-identical to the contract pin 92d21284... and was not modified during Part 2; criterion no-competing-brief passes vacuously (the node created no files at all, so no golden brief or rival anchor was minted; all pre-existing golden briefs date to 2026-07-01). The criterion path is not stale: the revised evidence contract (§3) explicitly allocates part2/layers/anchor/ to nodes 03-08 and pins the anchor hash, confirming the required artifact location. This is a completeness/execution failure (work never landed), not a semantic mismatch.",
+  "required_next_action": "Address semantic failures and re-submit.",
+  "generated_at": "2026-08-16T10:15:45.454594+00:00",
+  "evaluated_tree_sha": "4cedf877a6bea1d5fcaf3c896a9d5aa82e35873d",
+  "evaluated_commit_sha": "343957a052eab2803f70dd7bc1da163d5242fdef",
+  "merge_commit_sha": "343957a052eab2803f70dd7bc1da163d5242fdef",
+  "expected_base_commit_sha": "fe52852c0690004253886b6c713fb7f1cc1113ce",
+  "pr_ref": null,
+  "job_id": "job_20260816T09553124703af9989839",
+  "execution_attempt_id": "job_20260816T09553124703af9989839:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+    "neighbor:node-01b-contract-review": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 4,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 3,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_/PROJECT-BRIEF.md"
+      ],
+      "not_observed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-f3t2xsl_/README.md"
+      ]
+    },
+    "overall": "high"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-16T10:10:40.528718+00:00",
+    "finished_at": "2026-08-16T10:15:45.454336+00:00",
+    "wall_s": 304.935,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 172.74,
+      "tool_calls": 31
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 132.151,
+      "tool_calls": 22
+    }
+  }
+}

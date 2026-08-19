@@ -1,0 +1,1019 @@
+{
+  "project_id": "myapi-part2",
+  "node_id": "node-01b-contract-review",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.93,
+    "findings": [],
+    "reasoning": "Node-01b's role is to review the 1,179-line node-01 contract for over-complexity, revise it to minimum executable form before the corpus layer consumes it, and move (not delete) non-normative detail to a rationale doc. All three required artifacts are present and coherent: (1) contract-review.md classifies every major baseline section (Sec 0-19 plus all SC/AO/IN/7.x/8.x/11.x/12.x subsections, verified against the 431b98a heading inventory) with a class of necessary-contract | useful-explanation | speculative-machinery and, for kept sections, the downstream decision made more correct; (2) evidence-contract.md is 189 lines (under the 300 cap) with exactly 12 envelope fields (under the 12 cap), names the six source classes and both research-question strings, and provides a §12 mechanical check table for nodes 02-09 covering identity, provenance, time, authority, treatment composition, and reproducibility; (3) contract-rationale.md (1,367 lines) holds the moved bodies under 44 RAT-* anchors with a traceability matrix and field-reduction map, and the revised contract carries 64 [src: ORIG-...] citations that resolve to baseline sections. Independent verification confirmed the contract's measured pins: decisions-canonical.jsonl SHA 09c15aeb..., anchor SHA 92d21284..., 26 .handoffs/*.md files, graph.json 67111631 bytes with built_at_commit d82a5ea..., all five qN.txt hashes, 17 closed decision IDs D01-D10/D12-D18, and zero actual supersession edges (the single 'replaces' grep hit is prose in D15's rationale, not an edge). The 5d714e9 empty-tree consumability data point is accurate (identical tree hashes 17e7ae16...). Graph integrity is preserved: nodes 02-07 all depend on node-01b, so the revision gates the corpus layer before consumption as intended; node-08 chains 03-07, node-09 chains 08, node-10 chains 02+09, and the revised contract declares itself the sole normative surface for 02-09 with contract-rationale.md explicitly non-law. The subject diff is confined to part2/contract/ (3 files), respecting the write-scope constraint and touching no graph truth, runtime DB, or job state. Out-of-scope discoveries (harness zero-diff receipt bug, 06/07 re-dispatch, node spawn ENOENT) are correctly framed as continuation proposals, not silently executed. The only minor notes are forward-looking: node-01-evidence-contract remains 'provisional' in graph status while node-01b is 'ready' (a pre-existing graph-state nuance, not caused by this work), and the khoj manifest digest c1fa76ad... could not be independently re-derived here (algorithm-specific), though all other pins verify. Neither affects this verdict.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-16T09:48:30.888Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_t8Ry33PIHPoMYnZXDusC9191",
+        "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu/ 2>&1; echo \"---\"; ls -la /Users/sab-mini/repos/MyAPI/part2/contract/ 2>&1"
+      },
+      {
+        "ts": "2026-08-16T09:48:30.890Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_WPZzabvMfJpwsV20enr12476",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+      },
+      {
+        "ts": "2026-08-16T09:48:30.891Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_oBcadT9Nkn8WxUilTrzI6513",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+      },
+      {
+        "ts": "2026-08-16T09:48:30.904Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_WPZzabvMfJpwsV20enr12476",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:48:30.905Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_oBcadT9Nkn8WxUilTrzI6513",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:48:30.923Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_t8Ry33PIHPoMYnZXDusC9191",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-16T09:48:34.546Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_uUsgyxAOoEv88Vf7tupV1189",
+        "command": "echo \"=== temp dir part2 ===\"; find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu/part2 -type f 2>/dev/null | head -50; echo \"=== MyAPI repo part2 ===\"; find /Users/sab-mini/repos/MyAPI/part2 -type f 2>/dev/null | head -50; echo \"=== MyAPI repo exists? ===\"; ls -la /Users/sab-mini/repos/MyAPI 2>&1 | head -20"
+      },
+      {
+        "ts": "2026-08-16T09:48:34.547Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_MzqxbO0GStbudTZaoKGK2366",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && git log --oneline -15 2>&1; echo \"---\"; git status 2>&1 | head -30"
+      },
+      {
+        "ts": "2026-08-16T09:48:34.586Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_uUsgyxAOoEv88Vf7tupV1189",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:48:34.681Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_MzqxbO0GStbudTZaoKGK2366",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:48:39.240Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_IloWm9mutz4DrwQd686k1400",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && wc -l part2/contract/*.md; echo \"---\"; git show --stat 431b98a -- part2/contract/evidence-contract.md 2>&1 | head -10; echo \"--- baseline at 431b98a ---\"; git show 431b98a:part2/contract/evidence-contract.md 2>&1 | wc -l"
+      },
+      {
+        "ts": "2026-08-16T09:48:39.241Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_ShKp94QjI44IIDK31mFG4889",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu/part2/contract/contract-review.md"
+      },
+      {
+        "ts": "2026-08-16T09:48:39.247Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ShKp94QjI44IIDK31mFG4889",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:48:39.313Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_IloWm9mutz4DrwQd686k1400",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:48:41.091Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_0CR9JAqeF0G4qHlIC4iY0901",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu/part2/contract/evidence-contract.md"
+      },
+      {
+        "ts": "2026-08-16T09:48:41.094Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_0CR9JAqeF0G4qHlIC4iY0901",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:48:45.175Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_aju95YB310uOGeHUigdx7737",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu/part2/contract/contract-rationale.md"
+      },
+      {
+        "ts": "2026-08-16T09:48:45.176Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_01_EZim7ajgvVIEZt62jHta3569",
+        "reason": "command matched blocked pattern",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && git show 431b98a:part2/contract/evidence-contract.md > /tmp/baseline-contract.md 2>&1 && grep -n \"^#\\|^##\\|^###\" /tmp/baseline-contract.md | head -60",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-16T09:48:45.177Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_EZim7ajgvVIEZt62jHta3569",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-16T09:48:45.180Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_aju95YB310uOGeHUigdx7737",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:48:47.988Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_GFeXGPif4wF4ZK34RDZe6710",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && git show 431b98a:part2/contract/evidence-contract.md | grep -n \"^#\\|^##\\|^###\" | head -60"
+      },
+      {
+        "ts": "2026-08-16T09:48:47.989Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_j0N3nLiw2HCSaZHCLlZv9024",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu/part2/contract/contract-rationale.md"
+      },
+      {
+        "ts": "2026-08-16T09:48:47.994Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_j0N3nLiw2HCSaZHCLlZv9024",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:48:48.036Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_GFeXGPif4wF4ZK34RDZe6710",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:49:07.281Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_vOhOYPStb33m4QShCVwa0728",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && echo \"=== full subject diff stat ===\"; git diff --stat 431b98a fe52852; echo; echo \"=== 5d714e9 tree vs 431b98a tree ===\"; git rev-parse 5d714e9^{tree} 2>&1; git rev-parse 431b98a^{tree} 2>&1; echo; echo \"=== files in 5d714e9 part2 ===\"; git ls-tree -r --name-only 5d714e9 -- part2/ 2>&1; echo \"(empty above means no part2 files)\""
+      },
+      {
+        "ts": "2026-08-16T09:49:07.282Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_xp0UaEjjkKefKdFPyWV85218",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && echo \"=== baseline 7.1 table rows (L396-459) ===\"; git show 431b98a:part2/contract/evidence-contract.md | sed -n '396,459p' | grep -c '^|' ; echo \"=== baseline 7.1 header/field rows ===\"; git show 431b98a:part2/contract/evidence-contract.md | sed -n '396,459p' | grep '^|' | sed -n '1,5p'; echo; echo \"=== AO-04 unheaded region L373-388 ===\"; git show 431b98a:part2/contract/evidence-contract.md | sed -n '373,388p'"
+      },
+      {
+        "ts": "2026-08-16T09:49:07.366Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_xp0UaEjjkKefKdFPyWV85218",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:49:07.379Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_vOhOYPStb33m4QShCVwa0728",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:49:12.846Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_DDgs0rJp40aFQz8Vw7gM3065",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && echo \"=== all pipe rows in L396-459 ===\"; git show 431b98a:part2/contract/evidence-contract.md | sed -n '396,459p' | grep '^|' | nl -ba | head -50"
+      },
+      {
+        "ts": "2026-08-16T09:49:12.891Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_DDgs0rJp40aFQz8Vw7gM3065",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:49:22.472Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_EpfUCmEadYt2I27QYgXV5258",
+        "command": "ls /Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/ 2>&1; echo \"===\"; for f in node-02-chat-path-scorer node-03-validate-anchor node-08-build-source-layers node-09-validate-corpus node-01b-contract-review; do echo \"--- $f ---\"; grep -A6 \"depends_on\\|unlocks\" /Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/$f.yaml 2>/dev/null; done"
+      },
+      {
+        "ts": "2026-08-16T09:49:22.473Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ZbfEj0zGTvKGc4JIBgEY0563",
+        "command": "echo \"=== memo ===\"; ls -la /Users/sab-mini/repos/gddp-config/docs/ 2>&1 | grep -i part2; echo \"=== lens doc ===\"; ls -la /Users/sab-mini/repos/gddp-runtime/docs/decisions/ 2>&1 | grep -i overeng"
+      },
+      {
+        "ts": "2026-08-16T09:49:22.505Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ZbfEj0zGTvKGc4JIBgEY0563",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:49:22.518Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_EpfUCmEadYt2I27QYgXV5258",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:49:26.583Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_FQNp8ObPLg2VqTTWxeSc4944",
+        "command": "for f in node-04-inventory-decisions node-05-inventory-handoffs node-06-git-evidence node-07-graphify-evidence node-10-freeze-ruler node-17-gap-fill-cli; do echo \"--- $f ---\"; grep -A5 \"^depends_on\" /Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/$f.yaml 2>/dev/null; done"
+      },
+      {
+        "ts": "2026-08-16T09:49:26.584Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_f0tFF4ZLqVUljpLHuK4Q4628",
+        "path": "/Users/sab-mini/repos/gddp-runtime/docs/decisions/Overengineering-and-downstream-consequences.md"
+      },
+      {
+        "ts": "2026-08-16T09:49:26.589Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_f0tFF4ZLqVUljpLHuK4Q4628",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:49:26.629Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_FQNp8ObPLg2VqTTWxeSc4944",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:49:39.489Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Dtr9AZYRh0maYiStIf5G0817",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && echo \"decisions-canonical.jsonl:\"; shasum -a 256 01-decisions/output/decisions-canonical.jsonl 2>&1; echo \"REBUILD-CONTEXT-ANCHOR.md:\"; shasum -a 256 project-docs/REBUILD-CONTEXT-ANCHOR.md 2>&1; echo \"handoff count:\"; ls .handoffs/*.md 2>/dev/null | wc -l; echo \"graph.json size:\"; stat -f \"%z\" graphify-out/graph.json 2>&1; echo \"q1..q5:\"; for i in 1 2 3 4 5; do shasum -a 256 04-evaluation/queries/q$i.txt 2>&1; done"
+      },
+      {
+        "ts": "2026-08-16T09:49:39.490Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_7UdpC4DrQ2lRyFse0WWq6516",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && echo \"=== khoj manifest digest c1fa76ad claim ===\"; ls 03-ingestion/output/khoj-corpus/ 2>&1 | head -5; echo \"=== D-ids in decisions-canonical.jsonl ===\"; grep -o '\"id\": *\"D[0-9]*\"' 01-decisions/output/decisions-canonical.jsonl 2>/dev/null | sort -u | tr '\\n' ' '; echo; echo \"=== replaces/replaced_by count ===\"; grep -c 'replaces' 01-decisions/output/decisions-canonical.jsonl 2>/dev/null; echo \"=== graph.json built_at_commit ===\"; grep -o 'built_at_commit[^,]*' graphify-out/graph.json 2>/dev/null | head -2"
+      },
+      {
+        "ts": "2026-08-16T09:49:39.623Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Dtr9AZYRh0maYiStIf5G0817",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:49:39.981Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_7UdpC4DrQ2lRyFse0WWq6516",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:49:44.449Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_5DHF0vfru42pp9KoFS500210",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && grep -n 'replaces' 01-decisions/output/decisions-canonical.jsonl 2>/dev/null | head -3; echo \"---\"; python3 -c \"\nimport json\nrows=[json.loads(l) for l in open('01-decisions/output/decisions-canonical.jsonl') if l.strip()]\nprint('row count:', len(rows))\nimport collections\nrep=0; repby=0\nfor r in rows:\n    def walk(o):\n        global rep, repby\n        if isinstance(o, dict):\n            for k,v in o.items():\n                if k=='replaces' and v not in (None,[],''): rep+=1\n                if k=='replaced_by' and v not in (None,[],''): repby+=1\n                walk(v)\n        elif isinstance(o, list):\n            for i in o: walk(i)\n    walk(r)\nprint('non-empty replaces:', rep, 'non-empty replaced_by:', repby)\n\""
+      },
+      {
+        "ts": "2026-08-16T09:49:44.598Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_5DHF0vfru42pp9KoFS500210",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:50:11.633Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ejKdkxyfQBTSRnppf1wr7231",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && echo \"=== every baseline heading appears in review table? (spot) ===\"; for h in \"SC-01\" \"SC-02\" \"SC-03\" \"SC-04\" \"SC-05\" \"SC-06\" \"AO-01\" \"AO-02\" \"AO-03\" \"7.1\" \"7.2\" \"7.3\" \"7.4\" \"8.1\" \"8.2\" \"8.3\" \"IN-01\" \"IN-07\" \"11.1\" \"11.7\" \"12.1\" \"12.2\" \"18\" \"19\"; do c=$(grep -c \"$h\" part2/contract/contract-review.md); echo \"$h: $c\"; done; echo; echo \"=== revised contract src citations sample ===\"; grep -o '\\[src: [^]]*\\]' part2/contract/evidence-contract.md | sort | uniq -c | sort -rn | head -8; echo \"total src citations:\"; grep -o '\\[src: [^]]*\\]' part2/contract/evidence-contract.md | wc -l"
+      },
+      {
+        "ts": "2026-08-16T09:50:11.638Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_PqeRlSuY87uTe3NjxB416760",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && echo \"=== RAT anchors in rationale ===\"; grep -o '^### RAT-[a-zA-Z0-9_-]*' part2/contract/contract-rationale.md | wc -l; grep -o '^### RAT-[a-zA-Z0-9_-]*' part2/contract/contract-rationale.md | head -30; echo; echo \"=== files in subject diff outside part2/contract? ===\"; git diff --name-only 431b98a fe52852 | grep -v '^part2/contract/' || echo \"none — all confined to part2/contract/\""
+      },
+      {
+        "ts": "2026-08-16T09:50:11.691Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_PqeRlSuY87uTe3NjxB416760",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:50:11.746Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ejKdkxyfQBTSRnppf1wr7231",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-16T09:50:30.578Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_fmOVj7HPrQe6MOdLt5Lv5489",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "node-01-evidence-contract still shows status 'provisional' in the graph while node-01b (which revises its artifact) is 'ready'. Downstream nodes 02-07 correctly depend on node-01b, so the corpus layer consumes the revised contract; but a human may want to reconcile node-01's graph status to avoid future confusion about which contract is law.",
+        "affected_node_ids": [
+          "node-01-evidence-contract",
+          "node-01b-contract-review"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The review's continuation proposals (re-dispatch node-06 and node-07 against the slim contract after 01b lands, and the harness zero-diff receipt bug) are the real convergence risk for the git/graphify layer nodes. These should be scheduled as deliberate next steps after 01b acceptance rather than being rediscovered by each downstream node.",
+        "affected_node_ids": [
+          "node-06-git-evidence",
+          "node-07-graphify-evidence",
+          "node-08-build-source-layers"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9375,
+  "criteria_confidence": 0.9375,
+  "completeness": 1.0,
+  "graph_readiness": 0.9375,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "review-recorded",
+        "criterion": "part2/contract/contract-review.md classifies every major section of the node-01 contract (baseline commit 431b98a) as necessary-contract | useful-explanation | speculative-machinery, and for each kept section names the downstream decision it makes more correct",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "node\\-01 -> line 1: 'node-01'",
+          "necessary\\-contract -> line 6: 'necessary-contract'",
+          "useful\\-explanation -> line 6: 'useful-explanation'",
+          "speculative\\-machinery -> line 6: 'speculative-machinery'"
+        ],
+        "reasoning": "Scanned source files (part2/contract/contract-review.md) for identifiers named in the criterion (contract-review, node-01, necessary-contract, useful-explanation, speculative-machinery). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "contract-revised",
+        "criterion": "part2/contract/evidence-contract.md is revised to its minimum executable form: at most 300 lines, and the required provenance envelope per corpus item is at most 12 fields (baseline: 39 required flat fields plus nested objects)",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "evidence\\-contract -> line 3: 'evidence-contract'"
+        ],
+        "reasoning": "Scanned source files (part2/contract/evidence-contract.md) for identifiers named in the criterion (evidence-contract). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "rationale-preserved",
+        "criterion": "Removed material is moved, not deleted: part2/contract/contract-rationale.md holds the non-normative detail, and every normative rule in the revised contract cites the original section it came from",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "contract\\-rationale -> line 4: 'contract-rationale'",
+          "non\\-normative -> line 1: 'non-normative'"
+        ],
+        "reasoning": "Scanned source files (part2/contract/contract-rationale.md) for identifiers named in the criterion (contract-rationale, non-normative). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "coverage-kept",
+        "criterion": "The revised contract still gives nodes 02-09 mechanical checks for source identity, provenance, time, authority, treatment composition, and reproducibility, and still names the six source classes and the Part 2 research question",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the experiment was executed correctly, never whether the hypothesis won.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "The governing lens is /Users/sab-mini/repos/gddp-runtime/docs/decisions/Overengineering-and-downstream-consequences.md - read it before cutting anything. Its test: what downstream decision becomes more correct because each section exists; can 02-09 consume this without becoming more complicated.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Revise, do not rewrite from scratch: the node-01 content is largely sound reasoning - the failure is size and mandate-count, not thinking. Cut speculative machinery and edge-case policy that no planned Part 2 treatment exercises; keep the operational core.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Evidence for the review: the cancelled node-06 attempt produced an empty result tree (commit 5d714e9) against the fat contract - treat that as a data point about consumability, not proof.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution model (operator direction 2026-08-15, enforced by the attempt preamble): You are the ORCHESTRATOR, not the worker. Do NOT perform the node's work yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6 via the subagent tool's model parameter) to do the actual investigation, construction, and measurement. Your job is decomposition, dispatch, reviewing returns, integrating, and producing the final artifacts.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight, dispatch ONE watcher subagent on model deepseek/deepseek-v4-flash that actively polls with tools and reports state changes; you go idle between its reports instead of polling yourself.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/ self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to this node as evidence; work discovered beyond this node's scope becomes a continuation proposal, never silent execution.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Work in /Users/sab-mini/repos/MyAPI. Write only under part2/ unless this node's text names another path. Never edit GDDP graph truth, runtime databases, or job state.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Close with parallel reviewer subagents on model deepseek/deepseek-v4-pro, each assigned a different explicit focus (criteria coverage, evidence integrity, constraint compliance). Resolve their findings before returning.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "part2/contract/contract-review.md": true,
+      "part2/contract/evidence-contract.md": true,
+      "part2/contract/contract-rationale.md": true
+    },
+    "deps_status": {
+      "node-01-evidence-contract": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "431b98a1953bd1a136a42ce8d270e1f0d96a40d3",
+      "tip": "fe52852c0690004253886b6c713fb7f1cc1113ce",
+      "files": [
+        {
+          "status": "A",
+          "path": "part2/contract/contract-rationale.md"
+        },
+        {
+          "status": "A",
+          "path": "part2/contract/contract-review.md"
+        },
+        {
+          "status": "M",
+          "path": "part2/contract/evidence-contract.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 3,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "review-recorded",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "part2/contract/contract-review.md classification table: 53 rows covering Sec 0–19 and every ## / ### heading of baseline 431b98a (SC-01..06, AO-01..03 + unheaded AO-04, 7.1–7.4, 8.1–8.3, IN-01..07, 11.1–11.7, 12.1–12.2), each with Class ∈ {necessary-contract, useful-explanation, speculative-machinery}",
+          "git show 431b98a:part2/contract/evidence-contract.md | grep -n '^#\\{1,3\\} ' — 52 headings enumerated; line ranges in the review match baseline heading lines (e.g., 7.1 L396–459, §18 L1035–1167, §19 L1168–1179)",
+          "shasum -a 256 of 431b98a blob = eb9f225a45587a30861d4b79707d29776f456fdd6f41fec87b5ffd2d3c05034f (matches review header); baseline wc -l = 1179 (matches)",
+          "Review 'Downstream 02–09 decision made more correct (kept only)' column populated for every necessary-contract row; cut/move rows explain downstream simplification instead"
+        ],
+        "reasoning": "The review classifies every major section of the node-01 contract at baseline commit 431b98a (verified heading inventory and blob hash), assigns exactly one of the three required lens bins per section, and for each kept section names the downstream 02–09 decision it makes more correct. Coverage is complete: 52 headings + the unheaded AO-04 table = 53 classified rows, no heading dropped. The one-line '0' row (header) is also classified. This satisfies the criterion as written."
+      },
+      {
+        "criterion_id": "contract-revised",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "wc -l part2/contract/evidence-contract.md = 189 lines (≤ 300 required)",
+          "Revised §7 'Required provenance envelope' lists exactly 12 keys: item_id, source_class, source_id, origin_path, origin_sha256, content_sha256, occurred_at, recorded_at, temporal_confidence, authority_rank, inclusion_status, replaces",
+          "Revised contract states 'Missing key = Node 09 FAIL. The envelope has no 13th required key.' and marks derived/conditional keys (exclusion_reason, layer_id, replaced_by, provenance_kind) as non-envelope",
+          "Baseline 431b98a §7.1 table verified: 36 required keys (34 yes + 2 'yes (key required)') + 1 conditional (canonical_item_id) + 1 optional (claim_type) = 38 rows; review documents that the packet phrase '39 required flat fields' is not reproduced by live parse"
+        ],
+        "reasoning": "The revised contract is 189 lines, well under the 300-line cap, and the required provenance envelope per corpus item is exactly 12 fields, with an explicit no-13th-key rule. The reduction from the baseline envelope (measured 36 required keys + nested objects) to 12 is real and documented, including the review's measured discrepancy with the criterion's parenthetical '39' (a documentation note, not a failure: the operative limit is met)."
+      },
+      {
+        "criterion_id": "rationale-preserved",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "part2/contract/contract-rationale.md line 1: '# Part 2 evidence-contract rationale (non-normative)'; line 3: 'contract-rationale.md must not be imported as PASS/FAIL law'; 1367 lines",
+          "Rationale holds moved bodies: RAT-AO-04 (winner table L374–386), RAT-nested-objects (§7.2 L460–509), RAT-continuations (§16 L1004–1022), 'O. Full original field index (ORIG-§18)', RAT-risks (§19), RAT-P-S-register (supersession kind machine), D field-reduction map (36→12), C traceability matrix with per-ORIG disposition",
+          "Revised contract contains 63 '[src: ORIG-…]' citations; §12 mechanical-check table has per-row src column; all normative paragraphs carry citations",
+          "Sampled citations resolve to baseline: P-ID-1/2/3/5, P-HASH-1/2, P-A-4, P-T-1/2/8/10/11/12, TM-01, TC-01/09/10/11/14/15/17/20, SU-01, IN-06, CENSUS-HANDOFF, R1–R5, AO-01/02/03 all present at the cited baseline lines"
+        ],
+        "reasoning": "Removed material is moved, not deleted: the rationale file holds the non-normative detail under RAT-* anchors and is explicitly non-normative, and the revised normative contract cites original sections throughout ([src: ORIG-…] on every normative paragraph; per-row citations in the check table; section-level citations adjacent to data tables). The citation convention (ORIG-§N / ORIG-SC-0k / ORIG-P-* / ORIG-R#) is defined in the rationale's Meta and resolves against the pinned baseline blob. Minor interpretive latitude: a few data-table rows (pins, class table, treatment table) carry the citation at section level rather than per row, but every rule-bearing sentence and every check-table row has an explicit citation, so the criterion's intent is met."
+      },
+      {
+        "criterion_id": "coverage-kept",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "Revised §12 'Mechanical checks for nodes 02–09' table: ID-1..3 (identity, nodes 08/09, 03–09), P-1..3 (provenance, 08/09/09), T-1..4 (time, 08/09/09/10/06/09), A-1..2 (authority, 09/04/09), TC-1..4 (treatment, 08/09/09/09/11), R-1..2 (repro, 08/09), X-1 (gate, 09/11–17); every node 02–09 appears",
+          "Revised §5 'Source classes' names the six classes: anchor, decisions, handoffs, git, graphify, cli-derived (closed enum, no seventh durable class; SC-01..SC-06 PASS checks)",
+          "Revised §1 names the Part 2 research question in memo form and contiguous-lowercase packet form, both normative for rg -F"
+        ],
+        "reasoning": "The revised contract retains mechanical, executable checks for nodes 02–09 across all six required axes — source identity (ID-1..3), provenance (P-1..3 + the 12-field envelope), time (T-1..4 + §8 two-clock rules), authority (A-1..2 + §6 rank rules), treatment composition (TC-1..4 + §10 frozen matrix), and reproducibility (R-1..2 hash determinism and diff -qr rebuild) — and still names the six source classes and the Part 2 research question. Coverage is preserved in the revision."
+      }
+    ],
+    "overall_reasoning": "All four acceptance criteria are satisfied by the submitted artifacts. contract-review.md (122 lines) classifies every major section of the baseline contract at commit 431b98a (verified: 1179 lines, SHA-256 eb9f225a…, heading inventory matches the review's line ranges) into exactly the three required bins and names the downstream 02–09 decision each kept section makes more correct. evidence-contract.md is revised to 189 lines (≤300) with a required provenance envelope of exactly 12 fields (no 13th required key), down from the baseline's measured 36 required keys plus nested objects. Removed material is preserved non-normatively in contract-rationale.md (1367 lines, explicitly non-normative, RAT-* anchors for every moved body), and the revised normative contract carries 63 [src: ORIG-…] citations that resolve to the baseline (spot-verified against baseline content). The revision keeps nodes 02–09 mechanical checks for identity, provenance, time, authority, treatment composition, and reproducibility (§12 table with per-row src), names all six source classes (§5), and names the Part 2 research question (§1). The review also verifiably characterizes the cancelled node-06 commit 5d714e9 as an identical-tree consumability data point (git diff 431b98a 5d714e9 empty), consistent with the constraint to treat it as a data point, not proof. No criterion-level failures found.",
+    "risks": "1. Upstream node-01-evidence-contract is 'provisional' in the graph; this review anchors to baseline 431b98a, which exists and is verified, but if node-01's acceptance later changes the contract, the review's citations and the revised contract's ORIG-* anchors would need re-anchoring. 2. The criterion's parenthetical baseline '39 required flat fields' is not reproduced by a live parse of baseline §7.1 (measured 36 required keys / 38 rows); the review documents this with evidence and the operative ≤12 limit is met, but a human may want to confirm the baseline-count phrasing in the node criteria. 3. contract-rationale.md (1367 lines) is larger than the 1179-line original; this is intentional (it holds the moved material) and the 'minimum executable form' limit applies to the normative file only (189 lines), but future readers may misread the rationale size as contract bloat. 4. Execution-model constraints (orchestrator-only dispatch, watcher subagent, parallel reviewer subagents) cannot be verified from repo artifacts alone; deterministic constraint scans reported 'clear'. 5. 'For each kept section names the downstream decision' is satisfied at section level; a few data tables (pins, class table, treatment matrix) carry citations at section level rather than per row, which is consistent with the criterion but slightly looser than per-row citation.",
+    "followup_candidates": "1. Observed: baseline §7.1 measures 36 required keys (38 rows), not the '39 required flat fields' stated in the node's acceptance criterion text; the review documents this discrepancy. Was the '39' intended as a binding baseline measurement? If yes, update the criterion phrasing and rerun; otherwise the ≤12-field limit (met) stands as the operative requirement. 2. Observed: upstream node-01-evidence-contract is 'provisional'. Should node-01b's acceptance be gated on node-01's final acceptance, or is anchoring to baseline commit 431b98a (as this node does) sufficient? 3. Observed: contract-rationale.md (1367 lines) exceeds the original contract's size by design. Confirm the 'minimum executable form' size limit applies only to the normative evidence-contract.md (189 lines), not the rationale, to avoid a future node misapplying the 300-line cap. 4. Execution-model constraints (orchestrator-only, watcher subagent, parallel reviewer subagents) are not evidenced in repo artifacts; deterministic scans flagged constraints 'clear'. If artifact-level evidence of constraint compliance is expected, note it for future nodes.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-16T09:46:18.419Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_SVa1alNxRwaeMsNIQR8k4239",
+          "command": "pwd && ls -la && echo \"---\" && find . -maxdepth 3 -type f | head -50"
+        },
+        {
+          "ts": "2026-08-16T09:46:18.421Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_cJZ1SiU0JXr9N7mKCadx4718",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-16T09:46:18.421Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_cxBkra0YvLbF24TvTi0q1616",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu/README.md"
+        },
+        {
+          "ts": "2026-08-16T09:46:18.433Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_cxBkra0YvLbF24TvTi0q1616",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:46:18.433Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_cJZ1SiU0JXr9N7mKCadx4718",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:46:18.457Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_SVa1alNxRwaeMsNIQR8k4239",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:46:20.549Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Ts9W5roKhtAr2BPFv8ko5623",
+          "command": "find part2 -type f | sort && echo \"---\" && wc -l part2/contract/*.md"
+        },
+        {
+          "ts": "2026-08-16T09:46:20.551Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_q12YBOugjiZ9sIrTIwh76343",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && git log --oneline -10 2>/dev/null; echo \"---\"; git status 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-16T09:46:20.579Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Ts9W5roKhtAr2BPFv8ko5623",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:46:21.053Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_q12YBOugjiZ9sIrTIwh76343",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:46:24.327Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_wV9cA9gCUkGpRZHiP1iA0600",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu/part2/contract/contract-review.md"
+        },
+        {
+          "ts": "2026-08-16T09:46:24.328Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_dgInJbM3lq3YUy8K457F9112",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && git show 431b98a --stat | head -30 && echo \"---BASELINE FILE LIST---\" && git ls-tree -r --name-only 431b98a | grep -i part2"
+        },
+        {
+          "ts": "2026-08-16T09:46:24.334Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_wV9cA9gCUkGpRZHiP1iA0600",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:46:24.397Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_dgInJbM3lq3YUy8K457F9112",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:46:28.199Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_6JjoT0DI5uP8k7EsKCac7690",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu/part2/contract/evidence-contract.md"
+        },
+        {
+          "ts": "2026-08-16T09:46:28.203Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_6JjoT0DI5uP8k7EsKCac7690",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:46:30.879Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_UvS2fVsffQONEhisdujt1148",
+          "reason": "command matched blocked pattern",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && git show 431b98a:part2/contract/evidence-contract.md > /tmp/baseline-contract.md && grep -n '^#\\{1,3\\} ' /tmp/baseline-contract.md",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-16T09:46:30.880Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_UvS2fVsffQONEhisdujt1148",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-16T09:46:30.880Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_pE4fo9ofZ8g9Ln1mrRUS7779",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && grep -n '^#\\{1,4\\} ' part2/contract/contract-rationale.md | head -80"
+        },
+        {
+          "ts": "2026-08-16T09:46:30.901Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_pE4fo9ofZ8g9Ln1mrRUS7779",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:46:33.257Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_TKzeKjnC9Ph1WiYrZQLc8423",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && git show 431b98a:part2/contract/evidence-contract.md | grep -n '^#\\{1,3\\} '"
+        },
+        {
+          "ts": "2026-08-16T09:46:33.258Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_xRqRkUC4qW5YrYFZ5jXW4608",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && git show 431b98a:part2/contract/evidence-contract.md | wc -l && git show 431b98a:part2/contract/evidence-contract.md | git hash-object --stdin"
+        },
+        {
+          "ts": "2026-08-16T09:46:33.305Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_TKzeKjnC9Ph1WiYrZQLc8423",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:46:33.326Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_xRqRkUC4qW5YrYFZ5jXW4608",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:46:53.450Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_LeY9e1fC2lIefzXLOeQk3355",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && git show 431b98a:part2/contract/evidence-contract.md | shasum -a 256 && echo \"---5d714e9 tree check---\" && git show 5d714e9 --stat | head -20 && echo \"---diff 431b98a 5d714e9---\" && git diff 431b98a 5d714e9 --stat"
+        },
+        {
+          "ts": "2026-08-16T09:46:53.451Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_SMUH4iC5UBDRVr7ahcpD3565",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && grep -c '\\[src:' part2/contract/evidence-contract.md && echo \"---lines without src citation---\" && grep -n -v '\\[src:' part2/contract/evidence-contract.md | head -40"
+        },
+        {
+          "ts": "2026-08-16T09:46:53.478Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_SMUH4iC5UBDRVr7ahcpD3565",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:46:53.563Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_LeY9e1fC2lIefzXLOeQk3355",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:46:56.822Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_mWEtvxCGo8LSeeNLlcdP0641",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && grep -n -v '\\[src:' part2/contract/evidence-contract.md | sed -n '40,200p'"
+        },
+        {
+          "ts": "2026-08-16T09:46:56.845Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_mWEtvxCGo8LSeeNLlcdP0641",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:47:04.465Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_xk8Dq77qsoPCgr1TSUSl1256",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && git show 431b98a:part2/contract/evidence-contract.md | grep -n -E 'CENSUS-HANDOFF|R1|R2|R3|R4|R5|TC-01|TC-09|TC-10|TC-11|TC-14|TC-15|TC-17|TC-20|P-ID-1|P-ID-2|P-ID-3|P-ID-5|P-HASH-1|P-HASH-2|P-T-1|P-T-2|P-T-8|P-T-11|AO-01|AO-02|AO-03|SU-01|TM-01|P-A-4|IN-06' | head -60"
+        },
+        {
+          "ts": "2026-08-16T09:47:04.465Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_lCduqC3jik4bDtMOR7Mv9760",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && grep -o '\\[src: [^]]*\\]' part2/contract/evidence-contract.md | sed 's/\\[src: //; s/\\]//' | tr ';' '\\n' | sed 's/^ *//; s/ *$//' | sort -u | head -120"
+        },
+        {
+          "ts": "2026-08-16T09:47:04.495Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_lCduqC3jik4bDtMOR7Mv9760",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:47:04.531Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_xk8Dq77qsoPCgr1TSUSl1256",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:47:19.019Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_rGEpqUkfBbNQxdL5LBDs9314",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && grep -n -E '^#{1,4} ' part2/contract/contract-rationale.md | sed -n '80,200p'"
+        },
+        {
+          "ts": "2026-08-16T09:47:19.020Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_3m0dBmvI24WHQRckTK1i3920",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && grep -n -i -E 'continuation|field index|AO-04|winner table|supersession.kind|kind machine|origin span|nested|P-T-1|RAT-16|RAT-18' part2/contract/contract-rationale.md | head -40"
+        },
+        {
+          "ts": "2026-08-16T09:47:19.044Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_rGEpqUkfBbNQxdL5LBDs9314",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:47:19.076Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_3m0dBmvI24WHQRckTK1i3920",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:47:37.542Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_CD5HzcJGJrFEXINrf6xo8730",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && git show 431b98a:part2/contract/evidence-contract.md | sed -n '396,459p' | grep -c '^|' && echo \"--- 7.1 table rows ---\" && git show 431b98a:part2/contract/evidence-contract.md | sed -n '396,459p' | grep '^|' | grep -v '^|---' | grep -v '^||' | head -45"
+        },
+        {
+          "ts": "2026-08-16T09:47:37.543Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Qzi1YJkdPY2GK7X8SlsQ6340",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && sed -n '107,165p' part2/contract/contract-rationale.md"
+        },
+        {
+          "ts": "2026-08-16T09:47:37.562Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Qzi1YJkdPY2GK7X8SlsQ6340",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:47:37.611Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_CD5HzcJGJrFEXINrf6xo8730",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:47:53.857Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_45XUTZ2XZUlXkYNnCDh97457",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu && sed -n '1,26p' part2/contract/contract-rationale.md && echo \"===D.1 core===\" && sed -n '165,190p' part2/contract/contract-rationale.md && echo \"===tail===\" && sed -n '1348,1367p' part2/contract/contract-rationale.md"
+        },
+        {
+          "ts": "2026-08-16T09:47:53.891Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_45XUTZ2XZUlXkYNnCDh97457",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-16T09:48:26.796Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_bD4f0T8NqB5Im01OBqJP8386",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ]
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All four acceptance criteria are satisfied by the submitted artifacts. contract-review.md (122 lines) classifies every major section of the baseline contract at commit 431b98a (verified: 1179 lines, SHA-256 eb9f225a…, heading inventory matches the review's line ranges) into exactly the three required bins and names the downstream 02–09 decision each kept section makes more correct. evidence-contract.md is revised to 189 lines (≤300) with a required provenance envelope of exactly 12 fields (no 13th required key), down from the baseline's measured 36 required keys plus nested objects. Removed material is preserved non-normatively in contract-rationale.md (1367 lines, explicitly non-normative, RAT-* anchors for every moved body), and the revised normative contract carries 63 [src: ORIG-…] citations that resolve to the baseline (spot-verified against baseline content). The revision keeps nodes 02–09 mechanical checks for identity, provenance, time, authority, treatment composition, and reproducibility (§12 table with per-row src), names all six source classes (§5), and names the Part 2 research question (§1). The review also verifiably characterizes the cancelled node-06 commit 5d714e9 as an identical-tree consumability data point (git diff 431b98a 5d714e9 empty), consistent with the constraint to treat it as a data point, not proof. No criterion-level failures found.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-16T09:50:30.726454+00:00",
+  "evaluated_tree_sha": "4cedf877a6bea1d5fcaf3c896a9d5aa82e35873d",
+  "evaluated_commit_sha": "fe52852c0690004253886b6c713fb7f1cc1113ce",
+  "merge_commit_sha": "fe52852c0690004253886b6c713fb7f1cc1113ce",
+  "expected_base_commit_sha": "431b98a1953bd1a136a42ce8d270e1f0d96a40d3",
+  "pr_ref": null,
+  "job_id": "job_20260816T08460487b56a25c411fa",
+  "execution_attempt_id": "job_20260816T08460487b56a25c411fa:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+    "neighbor:node-01-evidence-contract": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "medium",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu/README.md"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+      ]
+    },
+    "integrity": {
+      "rating": "low",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+      ],
+      "not_observed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-r9vktjdu/README.md"
+      ]
+    },
+    "overall": "low"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-16T09:46:13.076018+00:00",
+    "finished_at": "2026-08-16T09:50:30.726266+00:00",
+    "wall_s": 257.66,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 133.792,
+      "tool_calls": 22
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 123.831,
+      "tool_calls": 24
+    }
+  }
+}
