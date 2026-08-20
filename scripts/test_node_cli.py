@@ -1099,6 +1099,70 @@ class NormalizeShapeTests(unittest.TestCase):
         self.assertIsNone(harness2["criteria"])
 
 
+class FollowupFieldsTests(unittest.TestCase):
+    def test_receipt_nested_shape_is_primary(self):
+        receipt = {
+            "semantic": {"risks": "r", "followup_candidates": "f"},
+            "deterministic": {
+                "human_review_questions": [
+                    {"criterion_id": "c1", "question": "q1"}
+                ]
+            },
+        }
+        risks, followups, questions = node_cli._followup_fields(receipt, {})
+        self.assertEqual(risks, "r")
+        self.assertEqual(followups, "f")
+        self.assertEqual(questions, [{"criterion_id": "c1", "question": "q1"}])
+
+    def test_acceptance_summary_keys_are_fallback(self):
+        acceptance = {
+            "semantic_risks": "summary risk",
+            "followup_candidates": "summary followup",
+            "human_review_questions": [
+                {"criterion_id": "c2", "question": "q2"}
+            ],
+        }
+        risks, followups, questions = node_cli._followup_fields(None, acceptance)
+        self.assertEqual(risks, "summary risk")
+        self.assertEqual(followups, "summary followup")
+        self.assertEqual(questions, acceptance["human_review_questions"])
+
+    def test_all_absent_returns_none(self):
+        risks, followups, questions = node_cli._followup_fields({}, {})
+        self.assertIsNone(risks)
+        self.assertIsNone(followups)
+        self.assertIsNone(questions)
+
+
+class EvaluationPayloadFollowupTests(unittest.TestCase):
+    def _render(self, acceptance, receipt):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            node_cli._print_evaluation_payload(
+                acceptance, receipt, verdict="pass"
+            )
+        return buf.getvalue()
+
+    def test_section_renders_when_fields_present(self):
+        receipt = {
+            "semantic": {"risks": "risk text", "followup_candidates": "followup text"},
+            "deterministic": {
+                "human_review_questions": [
+                    {"criterion_id": "c1", "question": "q1"}
+                ]
+            },
+        }
+        out = self._render({}, receipt)
+        self.assertIn("FOLLOWUPS & QUESTIONS", out)
+        self.assertIn("risk text", out)
+        self.assertIn("followup text", out)
+        self.assertIn("q1 (c1)", out)
+
+    def test_section_omitted_when_all_absent(self):
+        out = self._render({}, {})
+        self.assertNotIn("FOLLOWUPS & QUESTIONS", out)
+
+
 class ReplaceHelpersTests(unittest.TestCase):
     def test_replace_node_status_only_toplevel(self):
         text = "node_id: x\nstatus: pending\npriority: high\n"

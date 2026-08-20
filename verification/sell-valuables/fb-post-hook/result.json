@@ -1,0 +1,149 @@
+{
+  "project_id": "sell-valuables",
+  "node_id": "fb-post-hook",
+  "verdict": "blocked",
+  "confidence": 0.9,
+  "criteria_checked": [
+    {
+      "id": "console-script-entrypoint",
+      "criterion": "pyproject.toml registers sell-post-fb entry point to sell_valuables.post_to_fb:main",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in pyproject.toml",
+        "sell-post-fb\\s*=\\s*\\\"sell_valuables\\.post_to_fb:main\\\" -> line 21: 'sell-post-fb = \"sell_valuables.post_to_fb:main\"'"
+      ],
+      "reasoning": "Probed pyproject.toml for all of ['sell-post-fb\\\\s*=\\\\s*\\\\\"sell_valuables\\\\.post_to_fb:main\\\\\"']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "generates-listing-first",
+      "criterion": "sell-post-fb always calls generate_listing before any browser action and prints Wrote listing.md path",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "func",
+      "evidence": [
+        "in src/sell_valuables/post_to_fb.py",
+        "\\bmain\\s*\\( -> line 143: 'main('",
+        "generate_listing\\(item_dir\\) -> line 177: 'generate_listing(item_dir)'",
+        "Wrote -> line 178: 'Wrote'"
+      ],
+      "reasoning": "Looked for function `main()` plus body markers ['generate_listing\\\\(item_dir\\\\)', 'Wrote'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "open-flag-browser",
+      "criterion": "--open opens FB_MARKETPLACE_CREATE_URL via webbrowser.open and on macOS reveals photos/ with open command",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in src/sell_valuables/post_to_fb.py",
+        "--open -> line 153: '--open'",
+        "webbrowser\\.open -> line 20: 'webbrowser.open'",
+        "FB_MARKETPLACE_CREATE_URL -> line 13: 'FB_MARKETPLACE_CREATE_URL'",
+        "subprocess\\.run\\(\\[\\\"open\\\" -> line 200: 'subprocess.run([\"open\"'"
+      ],
+      "reasoning": "Probed src/sell_valuables/post_to_fb.py for all of ['--open', 'webbrowser\\\\.open', 'FB_MARKETPLACE_CREATE_URL', 'subprocess\\\\.run\\\\(\\\\[\\\\\"open\\\\\"']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "playwright-flag-skeleton",
+      "criterion": "--playwright invokes post_with_playwright with dry_run=True and prints result dict",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in src/sell_valuables/post_to_fb.py",
+        "--playwright -> line 158: '--playwright'",
+        "post_with_playwright -> line 69: 'post_with_playwright'",
+        "dry_run=True -> line 77: 'dry_run=True'",
+        "print\\(result\\) -> line 191: 'print(result)'"
+      ],
+      "reasoning": "Probed src/sell_valuables/post_to_fb.py for all of ['--playwright', 'post_with_playwright', 'dry_run=True', 'print\\\\(result\\\\)']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "default-manual-instructions",
+      "criterion": "when neither --open nor --playwright is passed CLI prints manual Marketplace URL and rerun hints",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in src/sell_valuables/post_to_fb.py",
+        "Open manually: -> line 202: 'Open manually:'",
+        "--open or --playwright -> line 203: '--open or --playwright'"
+      ],
+      "reasoning": "Probed src/sell_valuables/post_to_fb.py for all of ['Open manually:', '--open or --playwright']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    }
+  ],
+  "constraints_checked": [
+    {
+      "constraint": "require explicit item_id argument \u2014 no auto-single-folder selection in sell-post-fb",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    },
+    {
+      "constraint": "do not submit listings from the default CLI path",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    },
+    {
+      "constraint": "keep post_to_fb.py separate from generate_listing.py concerns",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    }
+  ],
+  "files_inspected": [
+    "<repo:Automating-Selling-Random-Valuables>",
+    "Automating-Selling-Random-Valuables/pyproject.toml",
+    "Automating-Selling-Random-Valuables/src/sell_valuables/post_to_fb.py",
+    "graphs/sell-valuables/nodes/fb-post-hook.yaml",
+    "graphs/sell-valuables/project.yaml"
+  ],
+  "commands_run": [
+    {
+      "command": "test -f schema/packet.schema.json",
+      "exit_code": 1,
+      "stdout_tail": ""
+    }
+  ],
+  "evidence_summary": "[pass] console-script-entrypoint: Probed pyproject.toml for all of ['sell-post-fb\\\\s*=\\\\s*\\\\\"sell_valuables\\\\.post_to_fb:main\\\\\"']. All present.\n[pass] generates-listing-first: Looked for function `main()` plus body markers ['generate_listing\\\\(item_dir\\\\)', 'Wrote'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.\n[pass] open-flag-browser: Probed src/sell_valuables/post_to_fb.py for all of ['--open', 'webbrowser\\\\.open', 'FB_MARKETPLACE_CREATE_URL', 'subprocess\\\\.run\\\\(\\\\[\\\\\"open\\\\\"']. All present.\n[pass] playwright-flag-skeleton: Probed src/sell_valuables/post_to_fb.py for all of ['--playwright', 'post_with_playwright', 'dry_run=True', 'print\\\\(result\\\\)']. All present.\n[pass] default-manual-instructions: Probed src/sell_valuables/post_to_fb.py for all of ['Open manually:', '--open or --playwright']. All present.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.",
+  "reasoning_summary": "deps: listing-cli=pending; criteria: 5/5 pass; constraints: 3/3 clear; artifacts: 0/3 present",
+  "required_next_action": "Dependencies not complete: listing-cli. Complete or unblock them before this node can be verified.",
+  "criteria_mismatches": [],
+  "missing_evidence": [],
+  "human_review_questions": []
+}

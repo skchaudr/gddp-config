@@ -1,0 +1,150 @@
+{
+  "project_id": "sell-valuables",
+  "node_id": "listing-cli",
+  "verdict": "blocked",
+  "confidence": 0.9,
+  "criteria_checked": [
+    {
+      "id": "console-script-entrypoint",
+      "criterion": "pyproject.toml registers sell-listing entry point to sell_valuables.generate_listing:main",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in pyproject.toml",
+        "sell-listing\\s*=\\s*\\\"sell_valuables\\.generate_listing:main\\\" -> line 20: 'sell-listing = \"sell_valuables.generate_listing:main\"'"
+      ],
+      "reasoning": "Probed pyproject.toml for all of ['sell-listing\\\\s*=\\\\s*\\\\\"sell_valuables\\\\.generate_listing:main\\\\\"']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "generate-listing-writes-file",
+      "criterion": "generate_listing loads the item and writes listing.md inside the item folder using build_listing_markdown",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "func",
+      "evidence": [
+        "in src/sell_valuables/generate_listing.py",
+        "\\bgenerate_listing\\s*\\( -> line 13: 'generate_listing('",
+        "load_item -> line 9: 'load_item'",
+        "listing\\.md -> line 1: 'listing.md'",
+        "build_listing_markdown -> line 10: 'build_listing_markdown'",
+        "write_text -> line 16: 'write_text'"
+      ],
+      "reasoning": "Looked for function `generate_listing()` plus body markers ['load_item', 'listing\\\\.md', 'build_listing_markdown', 'write_text'] in src/sell_valuables/generate_listing.py. Defined and uses expected helpers.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "item-id-argument",
+      "criterion": "CLI accepts item_id folder name under incoming/ and errors when incoming/ is missing",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "func",
+      "evidence": [
+        "in src/sell_valuables/generate_listing.py",
+        "\\bmain\\s*\\( -> line 20: 'main('",
+        "item_id -> line 23: 'item_id'",
+        "incoming/ not found -> line 37: 'incoming/ not found'",
+        "incoming / args\\.item_id -> line 41: 'incoming / args.item_id'"
+      ],
+      "reasoning": "Looked for function `main()` plus body markers ['item_id', 'incoming/ not found', 'incoming / args\\\\.item_id'] in src/sell_valuables/generate_listing.py. Defined and uses expected helpers.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "auto-single-candidate",
+      "criterion": "when item_id is omitted CLI selects the sole non-underscore folder in incoming/ or errors if count is not exactly one",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in src/sell_valuables/generate_listing.py",
+        "candidates -> line 43: 'candidates'",
+        "not d\\.name\\.startswith\\(\\\"_\\\"\\) -> line 45: 'not d.name.startswith(\"_\")'",
+        "len\\(candidates\\) != 1 -> line 47: 'len(candidates) != 1'"
+      ],
+      "reasoning": "Probed src/sell_valuables/generate_listing.py for all of ['candidates', 'not d\\\\.name\\\\.startswith\\\\(\\\\\"_\\\\\"\\\\)', 'len\\\\(candidates\\\\) != 1']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "incoming-override-flag",
+      "criterion": "--incoming flag overrides default resolve_incoming_root path for fixtures and tests",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in src/sell_valuables/generate_listing.py",
+        "--incoming -> line 28: '--incoming'",
+        "args\\.incoming or resolve_incoming_root -> line 35: 'args.incoming or resolve_incoming_root'"
+      ],
+      "reasoning": "Probed src/sell_valuables/generate_listing.py for all of ['--incoming', 'args\\\\.incoming or resolve_incoming_root']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    }
+  ],
+  "constraints_checked": [
+    {
+      "constraint": "CLI must exit non-zero on FileNotFoundError and ValueError from load_item",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    },
+    {
+      "constraint": "print the output path on success to stdout",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    },
+    {
+      "constraint": "do not open a browser from sell-listing",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    }
+  ],
+  "files_inspected": [
+    "<repo:Automating-Selling-Random-Valuables>",
+    "Automating-Selling-Random-Valuables/pyproject.toml",
+    "Automating-Selling-Random-Valuables/src/sell_valuables/generate_listing.py",
+    "graphs/sell-valuables/nodes/listing-cli.yaml",
+    "graphs/sell-valuables/project.yaml"
+  ],
+  "commands_run": [
+    {
+      "command": "test -f schema/packet.schema.json",
+      "exit_code": 1,
+      "stdout_tail": ""
+    }
+  ],
+  "evidence_summary": "[pass] console-script-entrypoint: Probed pyproject.toml for all of ['sell-listing\\\\s*=\\\\s*\\\\\"sell_valuables\\\\.generate_listing:main\\\\\"']. All present.\n[pass] generate-listing-writes-file: Looked for function `generate_listing()` plus body markers ['load_item', 'listing\\\\.md', 'build_listing_markdown', 'write_text'] in src/sell_valuables/generate_listing.py. Defined and uses expected helpers.\n[pass] item-id-argument: Looked for function `main()` plus body markers ['item_id', 'incoming/ not found', 'incoming / args\\\\.item_id'] in src/sell_valuables/generate_listing.py. Defined and uses expected helpers.\n[pass] auto-single-candidate: Probed src/sell_valuables/generate_listing.py for all of ['candidates', 'not d\\\\.name\\\\.startswith\\\\(\\\\\"_\\\\\"\\\\)', 'len\\\\(candidates\\\\) != 1']. All present.\n[pass] incoming-override-flag: Probed src/sell_valuables/generate_listing.py for all of ['--incoming', 'args\\\\.incoming or resolve_incoming_root']. All present.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.",
+  "reasoning_summary": "deps: listing-text-builder=pending; criteria: 5/5 pass; constraints: 3/3 clear; artifacts: 0/3 present",
+  "required_next_action": "Dependencies not complete: listing-text-builder. Complete or unblock them before this node can be verified.",
+  "criteria_mismatches": [],
+  "missing_evidence": [],
+  "human_review_questions": []
+}

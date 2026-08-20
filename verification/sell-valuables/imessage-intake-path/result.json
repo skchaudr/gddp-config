@@ -1,0 +1,150 @@
+{
+  "project_id": "sell-valuables",
+  "node_id": "imessage-intake-path",
+  "verdict": "blocked",
+  "confidence": 0.9,
+  "criteria_checked": [
+    {
+      "id": "imessage-shortcuts-doc-exists",
+      "criterion": "docs/imessage-shortcuts.md explains Apple does not expose iMessage to Python and documents manual folder workflow",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in docs/imessage-shortcuts.md",
+        "Apple does not expose iMessage to Python -> line 3: 'Apple does not expose iMessage to Python'",
+        "manual folder workflow|Manual -> line 5: 'Manual'"
+      ],
+      "reasoning": "Probed docs/imessage-shortcuts.md for all of ['Apple does not expose iMessage to Python', 'manual folder workflow|Manual']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "manual-steps-documented",
+      "criterion": "docs/imessage-shortcuts.md lists create incoming/<item-id>/, save photos to photos/, paste description.txt, run sell-listing and sell-post-fb --open",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in docs/imessage-shortcuts.md",
+        "incoming/YYYY-MM-DD-slug -> line 7: 'incoming/YYYY-MM-DD-slug'",
+        "photos/ -> line 8: 'photos/'",
+        "description\\.txt -> line 9: 'description.txt'",
+        "sell-listing -> line 13: 'sell-listing'",
+        "sell-post-fb -> line 14: 'sell-post-fb'"
+      ],
+      "reasoning": "Probed docs/imessage-shortcuts.md for all of ['incoming/YYYY-MM-DD-slug', 'photos/', 'description\\\\.txt', 'sell-listing', 'sell-post-fb']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "shortcuts-recommended-flow",
+      "criterion": "docs/imessage-shortcuts.md describes Shortcuts steps for Share sheet images, slug generation, iCloud save path, and description append",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in docs/imessage-shortcuts.md",
+        "Shortcuts -> line 3: 'Shortcuts'",
+        "Share sheet -> line 21: 'Share sheet'",
+        "slug -> line 7: 'slug'",
+        "iCloud Drive -> line 23: 'iCloud Drive'",
+        "description\\.txt -> line 9: 'description.txt'"
+      ],
+      "reasoning": "Probed docs/imessage-shortcuts.md for all of ['Shortcuts', 'Share sheet', 'slug', 'iCloud Drive', 'description\\\\.txt']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "later-options-noted",
+      "criterion": "docs/imessage-shortcuts.md mentions Twilio and BlueBubbles as heavier later options without implementing them",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in docs/imessage-shortcuts.md",
+        "Twilio -> line 30: 'Twilio'",
+        "BlueBubbles -> line 31: 'BlueBubbles'"
+      ],
+      "reasoning": "Probed docs/imessage-shortcuts.md for all of ['Twilio', 'BlueBubbles']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "incoming-readme-cross-link",
+      "criterion": "incoming/README.md links to docs/imessage-shortcuts.md for the iMessage path",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in incoming/README.md",
+        "docs/imessage-shortcuts\\.md -> line 32: 'docs/imessage-shortcuts.md'"
+      ],
+      "reasoning": "Probed incoming/README.md for all of ['docs/imessage-shortcuts\\\\.md']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    }
+  ],
+  "constraints_checked": [
+    {
+      "constraint": "v0 is documentation and operator workflow only \u2014 no Messages.app automation in Python",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    },
+    {
+      "constraint": "Shortcuts paths must target Automating-Selling-Random-Valuables/incoming/<slug>/ layout",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    },
+    {
+      "constraint": "do not store Chris's PII in committed fixtures beyond sample-item test data",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    }
+  ],
+  "files_inspected": [
+    "<repo:Automating-Selling-Random-Valuables>",
+    "Automating-Selling-Random-Valuables/docs/imessage-shortcuts.md",
+    "Automating-Selling-Random-Valuables/incoming/README.md",
+    "graphs/sell-valuables/nodes/imessage-intake-path.yaml",
+    "graphs/sell-valuables/project.yaml"
+  ],
+  "commands_run": [
+    {
+      "command": "test -f schema/packet.schema.json",
+      "exit_code": 1,
+      "stdout_tail": ""
+    }
+  ],
+  "evidence_summary": "[pass] imessage-shortcuts-doc-exists: Probed docs/imessage-shortcuts.md for all of ['Apple does not expose iMessage to Python', 'manual folder workflow|Manual']. All present.\n[pass] manual-steps-documented: Probed docs/imessage-shortcuts.md for all of ['incoming/YYYY-MM-DD-slug', 'photos/', 'description\\\\.txt', 'sell-listing', 'sell-post-fb']. All present.\n[pass] shortcuts-recommended-flow: Probed docs/imessage-shortcuts.md for all of ['Shortcuts', 'Share sheet', 'slug', 'iCloud Drive', 'description\\\\.txt']. All present.\n[pass] later-options-noted: Probed docs/imessage-shortcuts.md for all of ['Twilio', 'BlueBubbles']. All present.\n[pass] incoming-readme-cross-link: Probed incoming/README.md for all of ['docs/imessage-shortcuts\\\\.md']. All present.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.",
+  "reasoning_summary": "deps: intake-folder-convention=pending; criteria: 5/5 pass; constraints: 3/3 clear; artifacts: 0/2 present",
+  "required_next_action": "Dependencies not complete: intake-folder-convention. Complete or unblock them before this node can be verified.",
+  "criteria_mismatches": [],
+  "missing_evidence": [],
+  "human_review_questions": []
+}

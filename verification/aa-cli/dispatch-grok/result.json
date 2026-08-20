@@ -1,0 +1,158 @@
+{
+  "project_id": "aa-cli",
+  "node_id": "dispatch-grok",
+  "verdict": "blocked",
+  "confidence": 0.9,
+  "criteria_checked": [
+    {
+      "id": "grk-default-tier",
+      "criterion": "targets.conf registers grk default sync grk and aa_target_lookup resolves it",
+      "status": "pass",
+      "confidence": 0.85,
+      "method": "tier_distinct",
+      "evidence": [
+        "targets.conf: grk -> default=grk, frontier=grk, speed=grk"
+      ],
+      "reasoning": "grk tiers resolve as expected in targets.conf; no distinctness, marker, or alias problems.",
+      "mismatch_kind": "source_path",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "grk-tier-variants",
+      "criterion": "grk speed and frontier tiers resolve to distinct grk command variants including --model grok-frontier",
+      "status": "indeterminate",
+      "confidence": 0.6,
+      "method": "tier_distinct",
+      "evidence": [
+        "targets.conf: grk -> default=grk, frontier=grk, speed=grk",
+        "required marker --model grok-frontier not in any grk tier command"
+      ],
+      "reasoning": "grk in targets.conf: non-distinct tiers: default+speed+frontier -> grk. Code partially disagrees with the criterion; needs human decision on whether the gap is intended.",
+      "mismatch_kind": "tier_distinct",
+      "mismatch_detail": "non-distinct tiers: default+speed+frontier -> grk",
+      "needs_evidence": false,
+      "human_question": "grk speed tier is identical to default in targets.conf (no --model). Is that intended, or should speed map to a distinct grok variant?"
+    },
+    {
+      "id": "sync-fire-records-ledger",
+      "criterion": "firing a grk sync packet records done or error in ledger.tsv with ref '-'",
+      "status": "indeterminate",
+      "confidence": 0.1,
+      "method": "no_probe",
+      "evidence": [],
+      "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "prompt-on-stdin",
+      "criterion": "composed prompt.txt is passed to grk on stdin inside packet workdir",
+      "status": "indeterminate",
+      "confidence": 0.1,
+      "method": "no_probe",
+      "evidence": [],
+      "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "acceptance-test-covers-grk",
+      "criterion": "tests/acceptance.zsh includes at least one grk or sync-target smoke path",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "path",
+      "evidence": [
+        "tests/acceptance.zsh exists",
+        "\\bgrk\\b|grok -> line 425: 'grk'"
+      ],
+      "reasoning": "Path tests/acceptance.zsh exists and contains expected marker(s) ['\\\\bgrk\\\\b|grok'].",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    }
+  ],
+  "constraints_checked": [
+    {
+      "constraint": "grk remains a sync target \u2014 do not convert to async without a spec change",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    },
+    {
+      "constraint": "do not bypass aa_command_owns_clipboard for grk wrapper commands",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    },
+    {
+      "constraint": "keep tier keys limited to default, speed, frontier",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    }
+  ],
+  "files_inspected": [
+    "<repo:aa-cli>",
+    "aa-cli/lib/common.zsh",
+    "aa-cli/lib/context.zsh",
+    "aa-cli/lib/deck.zsh",
+    "aa-cli/lib/fire.zsh",
+    "aa-cli/lib/generate-path.zsh",
+    "aa-cli/lib/generate.zsh",
+    "aa-cli/lib/inventory.zsh",
+    "aa-cli/lib/jules.zsh",
+    "aa-cli/lib/ledger.zsh",
+    "aa-cli/lib/pi.zsh",
+    "aa-cli/lib/reconcile.zsh",
+    "aa-cli/lib/targets.zsh",
+    "aa-cli/lib/validate.zsh",
+    "aa-cli/lib/vault.zsh",
+    "aa-cli/lib/verbs.zsh",
+    "aa-cli/targets.conf",
+    "graphs/aa-cli/nodes/dispatch-grok.yaml",
+    "graphs/aa-cli/project.yaml"
+  ],
+  "commands_run": [
+    {
+      "command": "test -f schema/packet.schema.json",
+      "exit_code": 0,
+      "stdout_tail": ""
+    }
+  ],
+  "evidence_summary": "[pass] grk-default-tier: grk tiers resolve as expected in targets.conf; no distinctness, marker, or alias problems.\n[indeterminate] grk-tier-variants: grk in targets.conf: non-distinct tiers: default+speed+frontier -> grk. Code partially disagrees with the criterion; needs human decision on whether the gap is intended.\n[indeterminate] sync-fire-records-ledger: No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.\n[indeterminate] prompt-on-stdin: No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.\n[pass] acceptance-test-covers-grk: Path tests/acceptance.zsh exists and contains expected marker(s) ['\\\\bgrk\\\\b|grok'].\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.",
+  "reasoning_summary": "deps: dispatch-router=pending; criteria: 2/5 pass; constraints: 3/3 clear; artifacts: 0/3 present",
+  "required_next_action": "Dependencies not complete: dispatch-router. Complete or unblock them before this node can be verified.",
+  "criteria_mismatches": [
+    {
+      "criterion_id": "grk-tier-variants",
+      "kind": "tier_distinct",
+      "detail": "non-distinct tiers: default+speed+frontier -> grk"
+    }
+  ],
+  "missing_evidence": [],
+  "human_review_questions": [
+    {
+      "criterion_id": "grk-tier-variants",
+      "question": "grk speed tier is identical to default in targets.conf (no --model). Is that intended, or should speed map to a distinct grok variant?"
+    }
+  ]
+}

@@ -849,6 +849,32 @@ def _findings_lines(receipt: dict | None, acceptance: dict) -> list[str]:
     return lines
 
 
+def _followup_fields(
+    receipt: dict | None, acceptance: dict
+) -> tuple[str | None, str | None, list | None]:
+    """Return (risks, followup_candidates, human_review_questions).
+
+    Receipt is primary (full nested shape); acceptance summary keys are the
+    fallback (semantic_risks / followup_candidates / human_review_questions).
+    All None when absent.
+    """
+    receipt_semantic = _as_dict((receipt or {}).get("semantic"))
+    receipt_deterministic = _as_dict((receipt or {}).get("deterministic"))
+
+    risks = receipt_semantic.get("risks")
+    if not risks:
+        risks = _pick(acceptance, receipt, "semantic_risks")
+    followups = receipt_semantic.get("followup_candidates")
+    if not followups:
+        followups = _pick(acceptance, receipt, "followup_candidates")
+
+    questions = receipt_deterministic.get("human_review_questions")
+    if not questions:
+        questions = _pick(acceptance, receipt, "human_review_questions")
+
+    return risks, followups, questions
+
+
 def _evaluator_reasoning_parts(
     receipt: dict | None, acceptance: dict
 ) -> tuple[str | None, str | None]:
@@ -1371,6 +1397,27 @@ def _print_evaluation_payload(
             _print_wrapped_bullet(item)
     else:
         print(f"    {_ansi('2', '(none)')}")
+
+    # ── 5b. Follow-ups & questions (criteria-lane free text + deterministic
+    #        human questions — shown only when at least one is present) ─────
+    risks, followups, questions = _followup_fields(receipt, acceptance)
+    if risks or followups or questions:
+        print()
+        print(f"  {_ansi('1', 'FOLLOWUPS & QUESTIONS')}")
+        if risks:
+            _print_prose_block("RISKS", str(risks))
+        if followups:
+            _print_prose_block("FOLLOWUPS", str(followups))
+        if questions:
+            for q in questions:
+                if isinstance(q, dict):
+                    qtext = q.get("question") or q.get("criterion_id") or str(q)
+                    qid = q.get("criterion_id")
+                else:
+                    qtext = str(q)
+                    qid = None
+                bullet = qtext + (f" ({qid})" if qid else "")
+                _print_wrapped_bullet(bullet)
 
     # ── 6. Integrity notes (long secondary prose — after the scan blocks) ─
     if detail_why:

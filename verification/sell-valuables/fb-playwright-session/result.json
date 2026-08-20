@@ -1,0 +1,151 @@
+{
+  "project_id": "sell-valuables",
+  "node_id": "fb-playwright-session",
+  "verdict": "blocked",
+  "confidence": 0.9,
+  "criteria_checked": [
+    {
+      "id": "optional-browser-extra",
+      "criterion": "pyproject.toml browser optional extra installs playwright and documents pip install -e '.[browser]' requirement",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in pyproject.toml",
+        "in src/sell_valuables/post_to_fb.py",
+        "browser\\s*= -> line 15: 'browser ='",
+        "playwright -> line 16: 'playwright'",
+        "pip install -e '\\.\\[browser\\]' -> line 79: \"pip install -e '.[browser]'\""
+      ],
+      "reasoning": "Probed pyproject.toml, src/sell_valuables/post_to_fb.py for all of ['browser\\\\s*=', 'playwright', \"pip install -e '\\\\.\\\\[browser\\\\]'\"]. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "storage-state-path",
+      "criterion": "post_with_playwright loads .fb-session/storage_state.json from repo root when the file exists",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in src/sell_valuables/post_to_fb.py",
+        "\\.fb-session -> line 24: '.fb-session'",
+        "storage_state\\.json -> line 16: 'storage_state.json'",
+        "storage_state -> line 16: 'storage_state'"
+      ],
+      "reasoning": "Probed src/sell_valuables/post_to_fb.py for all of ['\\\\.fb-session', 'storage_state\\\\.json', 'storage_state']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "playwright-import-error",
+      "criterion": "missing playwright raises RuntimeError with install instructions instead of crashing import time",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "func",
+      "evidence": [
+        "in src/sell_valuables/post_to_fb.py",
+        "\\bpost_with_playwright\\s*\\( -> line 69: 'post_with_playwright('",
+        "except ImportError -> line 84: 'except ImportError'",
+        "RuntimeError -> line 85: 'RuntimeError'",
+        "Playwright not installed -> line 86: 'Playwright not installed'"
+      ],
+      "reasoning": "Looked for function `post_with_playwright()` plus body markers ['except ImportError', 'RuntimeError', 'Playwright not installed'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "chromium-launch",
+      "criterion": "post_with_playwright launches chromium with headless flag support and opens FB_MARKETPLACE_CREATE_URL",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "func",
+      "evidence": [
+        "in src/sell_valuables/post_to_fb.py",
+        "\\bpost_with_playwright\\s*\\( -> line 69: 'post_with_playwright('",
+        "chromium\\.launch\\(headless=headless\\) -> line 108: 'chromium.launch(headless=headless)'",
+        "page\\.goto\\(FB_MARKETPLACE_CREATE_URL -> line 114: 'page.goto(FB_MARKETPLACE_CREATE_URL'"
+      ],
+      "reasoning": "Looked for function `post_with_playwright()` plus body markers ['chromium\\\\.launch\\\\(headless=headless\\\\)', 'page\\\\.goto\\\\(FB_MARKETPLACE_CREATE_URL'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "session-dir-created",
+      "criterion": "automation creates .fb-session parent directory when missing to support future storage_state save",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "func",
+      "evidence": [
+        "in src/sell_valuables/post_to_fb.py",
+        "\\bpost_with_playwright\\s*\\( -> line 69: 'post_with_playwright('",
+        "session_dir\\.mkdir\\(parents=True, exist_ok=True\\) -> line 94: 'session_dir.mkdir(parents=True, exist_ok=True)'"
+      ],
+      "reasoning": "Looked for function `post_with_playwright()` plus body markers ['session_dir\\\\.mkdir\\\\(parents=True, exist_ok=True\\\\)'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    }
+  ],
+  "constraints_checked": [
+    {
+      "constraint": ".fb-session/ must stay gitignored \u2014 never commit Facebook session cookies",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    },
+    {
+      "constraint": "session bootstrap must work with dry_run=True without submitting",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    },
+    {
+      "constraint": "do not hardcode operator credentials in source",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    }
+  ],
+  "files_inspected": [
+    "<repo:Automating-Selling-Random-Valuables>",
+    "Automating-Selling-Random-Valuables/pyproject.toml",
+    "Automating-Selling-Random-Valuables/src/sell_valuables/post_to_fb.py",
+    "graphs/sell-valuables/nodes/fb-playwright-session.yaml",
+    "graphs/sell-valuables/project.yaml"
+  ],
+  "commands_run": [
+    {
+      "command": "test -f schema/packet.schema.json",
+      "exit_code": 1,
+      "stdout_tail": ""
+    }
+  ],
+  "evidence_summary": "[pass] optional-browser-extra: Probed pyproject.toml, src/sell_valuables/post_to_fb.py for all of ['browser\\\\s*=', 'playwright', \"pip install -e '\\\\.\\\\[browser\\\\]'\"]. All present.\n[pass] storage-state-path: Probed src/sell_valuables/post_to_fb.py for all of ['\\\\.fb-session', 'storage_state\\\\.json', 'storage_state']. All present.\n[pass] playwright-import-error: Looked for function `post_with_playwright()` plus body markers ['except ImportError', 'RuntimeError', 'Playwright not installed'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.\n[pass] chromium-launch: Looked for function `post_with_playwright()` plus body markers ['chromium\\\\.launch\\\\(headless=headless\\\\)', 'page\\\\.goto\\\\(FB_MARKETPLACE_CREATE_URL'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.\n[pass] session-dir-created: Looked for function `post_with_playwright()` plus body markers ['session_dir\\\\.mkdir\\\\(parents=True, exist_ok=True\\\\)'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.",
+  "reasoning_summary": "deps: fb-post-hook=pending; criteria: 5/5 pass; constraints: 3/3 clear; artifacts: 0/3 present",
+  "required_next_action": "Dependencies not complete: fb-post-hook. Complete or unblock them before this node can be verified.",
+  "criteria_mismatches": [],
+  "missing_evidence": [],
+  "human_review_questions": []
+}

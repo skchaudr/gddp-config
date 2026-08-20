@@ -1,0 +1,161 @@
+{
+  "project_id": "sell-valuables",
+  "node_id": "intake-loader",
+  "verdict": "blocked",
+  "confidence": 0.9,
+  "criteria_checked": [
+    {
+      "id": "item-intake-dataclass",
+      "criterion": "ItemIntake frozen dataclass exposes item_id, root, description, photos tuple, and meta dict in src/sell_valuables/intake.py",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in src/sell_valuables/intake.py",
+        "@dataclass\\(frozen=True\\) -> line 13: '@dataclass(frozen=True)'",
+        "class ItemIntake -> line 14: 'class ItemIntake'",
+        "item_id: str -> line 15: 'item_id: str'",
+        "root: Path -> line 16: 'root: Path'",
+        "description: str -> line 17: 'description: str'",
+        "photos: tuple\\[Path, \\.\\.\\.\\] -> line 18: 'photos: tuple[Path, ...]'",
+        "meta: dict -> line 19: 'meta: dict'"
+      ],
+      "reasoning": "Probed src/sell_valuables/intake.py for all of ['@dataclass\\\\(frozen=True\\\\)', 'class ItemIntake', 'item_id: str', 'root: Path', 'description: str', 'photos: tuple\\\\[Path, \\\\.\\\\.\\\\.\\\\]', 'meta: dict']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "load-item-requires-description",
+      "criterion": "load_item raises FileNotFoundError when description.txt is missing and ValueError when it is empty",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "func",
+      "evidence": [
+        "in src/sell_valuables/intake.py",
+        "\\bload_item\\s*\\( -> line 22: 'load_item('",
+        "description\\.txt -> line 28: 'description.txt'",
+        "FileNotFoundError -> line 23: 'FileNotFoundError'",
+        "if not description -> line 33: 'if not description'",
+        "ValueError -> line 23: 'ValueError'"
+      ],
+      "reasoning": "Looked for function `load_item()` plus body markers ['description\\\\.txt', 'FileNotFoundError', 'if not description', 'ValueError'] in src/sell_valuables/intake.py. Defined and uses expected helpers.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "photos-filtered-by-extension",
+      "criterion": "load_item collects sorted photos from photos/ accepting .jpg, .jpeg, .png, .heic, and .webp only",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in src/sell_valuables/intake.py",
+        "PHOTO_EXTENSIONS -> line 10: 'PHOTO_EXTENSIONS'",
+        "\\.jpg -> line 10: '.jpg'",
+        "\\.jpeg -> line 10: '.jpeg'",
+        "\\.png -> line 10: '.png'",
+        "\\.heic -> line 10: '.heic'",
+        "\\.webp -> line 10: '.webp'",
+        "suffix\\.lower\\(\\) -> line 41: 'suffix.lower()'"
+      ],
+      "reasoning": "Probed src/sell_valuables/intake.py for all of ['PHOTO_EXTENSIONS', '\\\\.jpg', '\\\\.jpeg', '\\\\.png', '\\\\.heic', '\\\\.webp', 'suffix\\\\.lower\\\\(\\\\)']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "meta-yaml-parsed",
+      "criterion": "load_item parses optional meta.yaml into a dict mapping and rejects non-mapping YAML with ValueError",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "func",
+      "evidence": [
+        "in src/sell_valuables/intake.py",
+        "\\bload_item\\s*\\( -> line 22: 'load_item('",
+        "meta\\.yaml -> line 45: 'meta.yaml'",
+        "yaml\\.safe_load -> line 47: 'yaml.safe_load'",
+        "isinstance\\(meta, dict\\) -> line 48: 'isinstance(meta, dict)'",
+        "ValueError -> line 23: 'ValueError'"
+      ],
+      "reasoning": "Looked for function `load_item()` plus body markers ['meta\\\\.yaml', 'yaml\\\\.safe_load', 'isinstance\\\\(meta, dict\\\\)', 'ValueError'] in src/sell_valuables/intake.py. Defined and uses expected helpers.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "resolve-incoming-root",
+      "criterion": "resolve_incoming_root returns repo_root/incoming defaulting to package parents[2]",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "func",
+      "evidence": [
+        "in src/sell_valuables/intake.py",
+        "\\bresolve_incoming_root\\s*\\( -> line 60: 'resolve_incoming_root('",
+        "parents\\[2\\] -> line 61: 'parents[2]'",
+        "return root / \\\"incoming\\\" -> line 62: 'return root / \"incoming\"'"
+      ],
+      "reasoning": "Looked for function `resolve_incoming_root()` plus body markers ['parents\\\\[2\\\\]', 'return root / \\\\\"incoming\\\\\"'] in src/sell_valuables/intake.py. Defined and uses expected helpers.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    }
+  ],
+  "constraints_checked": [
+    {
+      "constraint": "implement in src/sell_valuables/intake.py only for this node",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    },
+    {
+      "constraint": "use pathlib and pyyaml already declared in pyproject.toml",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    },
+    {
+      "constraint": "do not add network calls or Facebook logic to intake loader",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    }
+  ],
+  "files_inspected": [
+    "<repo:Automating-Selling-Random-Valuables>",
+    "Automating-Selling-Random-Valuables/src/sell_valuables/intake.py",
+    "graphs/sell-valuables/nodes/intake-loader.yaml",
+    "graphs/sell-valuables/project.yaml"
+  ],
+  "commands_run": [
+    {
+      "command": "test -f schema/packet.schema.json",
+      "exit_code": 1,
+      "stdout_tail": ""
+    }
+  ],
+  "evidence_summary": "[pass] item-intake-dataclass: Probed src/sell_valuables/intake.py for all of ['@dataclass\\\\(frozen=True\\\\)', 'class ItemIntake', 'item_id: str', 'root: Path', 'description: str', 'photos: tuple\\\\[Path, \\\\.\\\\.\\\\.\\\\]', 'meta: dict']. All present.\n[pass] load-item-requires-description: Looked for function `load_item()` plus body markers ['description\\\\.txt', 'FileNotFoundError', 'if not description', 'ValueError'] in src/sell_valuables/intake.py. Defined and uses expected helpers.\n[pass] photos-filtered-by-extension: Probed src/sell_valuables/intake.py for all of ['PHOTO_EXTENSIONS', '\\\\.jpg', '\\\\.jpeg', '\\\\.png', '\\\\.heic', '\\\\.webp', 'suffix\\\\.lower\\\\(\\\\)']. All present.\n[pass] meta-yaml-parsed: Looked for function `load_item()` plus body markers ['meta\\\\.yaml', 'yaml\\\\.safe_load', 'isinstance\\\\(meta, dict\\\\)', 'ValueError'] in src/sell_valuables/intake.py. Defined and uses expected helpers.\n[pass] resolve-incoming-root: Looked for function `resolve_incoming_root()` plus body markers ['parents\\\\[2\\\\]', 'return root / \\\\\"incoming\\\\\"'] in src/sell_valuables/intake.py. Defined and uses expected helpers.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.",
+  "reasoning_summary": "deps: intake-folder-convention=pending; criteria: 5/5 pass; constraints: 3/3 clear; artifacts: 0/3 present",
+  "required_next_action": "Dependencies not complete: intake-folder-convention. Complete or unblock them before this node can be verified.",
+  "criteria_mismatches": [],
+  "missing_evidence": [],
+  "human_review_questions": []
+}

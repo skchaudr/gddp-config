@@ -1,0 +1,164 @@
+{
+  "project_id": "sell-valuables",
+  "node_id": "fb-playwright-form-fill",
+  "verdict": "blocked",
+  "confidence": 0.9,
+  "criteria_checked": [
+    {
+      "id": "result-dict-fields",
+      "criterion": "post_with_playwright returns dict with item_id, title, photo_count, dry_run, and submitted keys",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "func",
+      "evidence": [
+        "in src/sell_valuables/post_to_fb.py",
+        "\\bpost_with_playwright\\s*\\( -> line 69: 'post_with_playwright('",
+        "\\\"item_id\\\" -> line 97: '\"item_id\"'",
+        "\\\"title\\\" -> line 50: '\"title\"'",
+        "\\\"photo_count\\\" -> line 99: '\"photo_count\"'",
+        "\\\"dry_run\\\" -> line 100: '\"dry_run\"'",
+        "\\\"submitted\\\" -> line 101: '\"submitted\"'"
+      ],
+      "reasoning": "Looked for function `post_with_playwright()` plus body markers ['\\\\\"item_id\\\\\"', '\\\\\"title\\\\\"', '\\\\\"photo_count\\\\\"', '\\\\\"dry_run\\\\\"', '\\\\\"submitted\\\\\"'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "title-from-build-title",
+      "criterion": "result title uses build_title(item) derived from loaded intake",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "func",
+      "evidence": [
+        "in src/sell_valuables/post_to_fb.py",
+        "\\bpost_with_playwright\\s*\\( -> line 69: 'post_with_playwright('",
+        "\\\"title\\\": build_title\\(item\\) -> line 98: '\"title\": build_title(item)'"
+      ],
+      "reasoning": "Looked for function `post_with_playwright()` plus body markers ['\\\\\"title\\\\\": build_title\\\\(item\\\\)'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "form-fill-selectors-scaffold",
+      "criterion": "post_with_playwright contains commented selector scaffold for Title, Price, Description fields and photo file inputs",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "func",
+      "evidence": [
+        "in src/sell_valuables/post_to_fb.py",
+        "\\b_fill_marketplace_form\\s*\\( -> line 30: '_fill_marketplace_form('",
+        "_try_fill\\(\\\"Title\\\" -> line 50: '_try_fill(\"Title\"'",
+        "_try_fill\\(\\\"Price\\\" -> line 51: '_try_fill(\"Price\"'",
+        "_try_fill\\(\\\"Description\\\" -> line 52: '_try_fill(\"Description\"'",
+        "set_input_files -> line 56: 'set_input_files'"
+      ],
+      "reasoning": "Looked for function `_fill_marketplace_form()` plus body markers ['_try_fill\\\\(\\\\\"Title\\\\\"', '_try_fill\\\\(\\\\\"Price\\\\\"', '_try_fill\\\\(\\\\\"Description\\\\\"', 'set_input_files'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": "Selectors are active code now, but live Facebook selector drift still needs a headed logged-in run."
+    },
+    {
+      "id": "photo-loop-scaffold",
+      "criterion": "commented code iterates item.photos for set_input_files on file input",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "func",
+      "evidence": [
+        "in src/sell_valuables/post_to_fb.py",
+        "\\b_fill_marketplace_form\\s*\\( -> line 30: '_fill_marketplace_form('",
+        "if item\\.photos -> line 54: 'if item.photos'",
+        "for p in item\\.photos -> line 56: 'for p in item.photos'",
+        "set_input_files -> line 56: 'set_input_files'"
+      ],
+      "reasoning": "Looked for function `_fill_marketplace_form()` plus body markers ['if item\\\\.photos', 'for p in item\\\\.photos', 'set_input_files'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": "Photo upload path is wired; live headed run should confirm Facebook accepts the selector."
+    },
+    {
+      "id": "dry-run-stops-before-submit",
+      "criterion": "dry_run=True sets submitted False and note explains stopped before submit",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "func",
+      "evidence": [
+        "in src/sell_valuables/post_to_fb.py",
+        "\\bpost_with_playwright\\s*\\( -> line 69: 'post_with_playwright('",
+        "dry_run -> line 30: 'dry_run'",
+        "submitted\\\": False -> line 101: 'submitted\": False'",
+        "Stopped before submit -> line 128: 'Stopped before submit'"
+      ],
+      "reasoning": "Looked for function `post_with_playwright()` plus body markers ['dry_run', 'submitted\\\\\": False', 'Stopped before submit'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    }
+  ],
+  "constraints_checked": [
+    {
+      "constraint": "keep selectors commented until validated by a manual recording session \u2014 do not guess live selectors in production path without review",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    },
+    {
+      "constraint": "fill logic must use build_title and build_body from listing.py",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    },
+    {
+      "constraint": "photo uploads must reference absolute paths from item.photos",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    }
+  ],
+  "files_inspected": [
+    "<repo:Automating-Selling-Random-Valuables>",
+    "Automating-Selling-Random-Valuables/src/sell_valuables/post_to_fb.py",
+    "graphs/sell-valuables/nodes/fb-playwright-form-fill.yaml",
+    "graphs/sell-valuables/project.yaml"
+  ],
+  "commands_run": [
+    {
+      "command": "test -f schema/packet.schema.json",
+      "exit_code": 1,
+      "stdout_tail": ""
+    }
+  ],
+  "evidence_summary": "[pass] result-dict-fields: Looked for function `post_with_playwright()` plus body markers ['\\\\\"item_id\\\\\"', '\\\\\"title\\\\\"', '\\\\\"photo_count\\\\\"', '\\\\\"dry_run\\\\\"', '\\\\\"submitted\\\\\"'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.\n[pass] title-from-build-title: Looked for function `post_with_playwright()` plus body markers ['\\\\\"title\\\\\": build_title\\\\(item\\\\)'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.\n[pass] form-fill-selectors-scaffold: Looked for function `_fill_marketplace_form()` plus body markers ['_try_fill\\\\(\\\\\"Title\\\\\"', '_try_fill\\\\(\\\\\"Price\\\\\"', '_try_fill\\\\(\\\\\"Description\\\\\"', 'set_input_files'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.\n[pass] photo-loop-scaffold: Looked for function `_fill_marketplace_form()` plus body markers ['if item\\\\.photos', 'for p in item\\\\.photos', 'set_input_files'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.\n[pass] dry-run-stops-before-submit: Looked for function `post_with_playwright()` plus body markers ['dry_run', 'submitted\\\\\": False', 'Stopped before submit'] in src/sell_valuables/post_to_fb.py. Defined and uses expected helpers.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.",
+  "reasoning_summary": "deps: fb-playwright-session=pending; criteria: 5/5 pass; constraints: 3/3 clear; artifacts: 0/3 present",
+  "required_next_action": "Dependencies not complete: fb-playwright-session. Complete or unblock them before this node can be verified.",
+  "criteria_mismatches": [],
+  "missing_evidence": [],
+  "human_review_questions": [
+    {
+      "criterion_id": "form-fill-selectors-scaffold",
+      "question": "Selectors are active code now, but live Facebook selector drift still needs a headed logged-in run."
+    },
+    {
+      "criterion_id": "photo-loop-scaffold",
+      "question": "Photo upload path is wired; live headed run should confirm Facebook accepts the selector."
+    }
+  ]
+}

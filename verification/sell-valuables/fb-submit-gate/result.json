@@ -1,0 +1,152 @@
+{
+  "project_id": "sell-valuables",
+  "node_id": "fb-submit-gate",
+  "verdict": "blocked",
+  "confidence": 0.9,
+  "criteria_checked": [
+    {
+      "id": "dry-run-default-true",
+      "criterion": "post_with_playwright defaults dry_run=True and sell-post-fb --playwright always passes dry_run=True",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in src/sell_valuables/post_to_fb.py",
+        "dry_run: bool = True -> line 73: 'dry_run: bool = True'",
+        "dry_run=True -> line 77: 'dry_run=True'"
+      ],
+      "reasoning": "Probed src/sell_valuables/post_to_fb.py for all of ['dry_run: bool = True', 'dry_run=True']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "submit-not-implemented-guard",
+      "criterion": "when dry_run=False code path returns note that submit is not implemented until selectors and review gate are wired",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in src/sell_valuables/post_to_fb.py",
+        "Submit not implemented -> line 131: 'Submit not implemented'",
+        "decision\\.md selector approval -> line 131: 'decision.md selector approval'"
+      ],
+      "reasoning": "Probed src/sell_valuables/post_to_fb.py for all of ['Submit not implemented', 'decision\\\\.md selector approval']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "publish-click-scaffold",
+      "criterion": "commented page.get_by_role button Publish click exists as the final step after form fill",
+      "status": "indeterminate",
+      "confidence": 0.8,
+      "method": "human_review",
+      "evidence": [
+        "No Publish click scaffold should be enabled until selector approval exists; confirm whether a commented final-step placeholder is desired before treating this as missing."
+      ],
+      "reasoning": "No Publish click scaffold should be enabled until selector approval exists; confirm whether a commented final-step placeholder is desired before treating this as missing.",
+      "mismatch_kind": "human_review",
+      "mismatch_detail": "No Publish click scaffold should be enabled until selector approval exists; confirm whether a commented final-step placeholder is desired before treating this as missing.",
+      "needs_evidence": false,
+      "human_question": "Should the graph require a commented Publish-click placeholder, or is the stronger not-implemented submit guard the intended evidence?"
+    },
+    {
+      "id": "submitted-flag-false-until-wired",
+      "criterion": "result submitted stays False until explicit submit gate is implemented and tested",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "symbol",
+      "evidence": [
+        "in src/sell_valuables/post_to_fb.py",
+        "\\\"submitted\\\": False -> line 101: '\"submitted\": False'",
+        "Submit not implemented -> line 131: 'Submit not implemented'"
+      ],
+      "reasoning": "Probed src/sell_valuables/post_to_fb.py for all of ['\\\\\"submitted\\\\\": False', 'Submit not implemented']. All present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    },
+    {
+      "id": "human-review-required-policy",
+      "criterion": "project execution_policy require_human_review_before_overnight remains true for this graph",
+      "status": "pass",
+      "confidence": 0.9,
+      "method": "project_policy",
+      "evidence": [
+        "graphs/sell-valuables/project.yaml exists",
+        "require_human_review_before_overnight:\\s*true -> line 77: 'require_human_review_before_overnight: true'"
+      ],
+      "reasoning": "Checked project policy in graphs/sell-valuables/project.yaml. Policy present.",
+      "mismatch_kind": "",
+      "mismatch_detail": "",
+      "needs_evidence": false,
+      "human_question": ""
+    }
+  ],
+  "constraints_checked": [
+    {
+      "constraint": "never auto-submit in CI or overnight jobs without human review artifact",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    },
+    {
+      "constraint": "require a merged decision.md approving selector map before enabling dry_run=False",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    },
+    {
+      "constraint": "log enough context in result dict for operator to verify title and photo_count pre-submit",
+      "status": "clear",
+      "confidence": 0.85,
+      "method": "forbidden_pattern_scan",
+      "evidence": [
+        "no forbidden patterns matched"
+      ],
+      "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+    }
+  ],
+  "files_inspected": [
+    "<repo:Automating-Selling-Random-Valuables>",
+    "Automating-Selling-Random-Valuables/src/sell_valuables/post_to_fb.py",
+    "graphs/sell-valuables/nodes/fb-submit-gate.yaml",
+    "graphs/sell-valuables/project.yaml"
+  ],
+  "commands_run": [
+    {
+      "command": "test -f schema/packet.schema.json",
+      "exit_code": 1,
+      "stdout_tail": ""
+    }
+  ],
+  "evidence_summary": "[pass] dry-run-default-true: Probed src/sell_valuables/post_to_fb.py for all of ['dry_run: bool = True', 'dry_run=True']. All present.\n[pass] submit-not-implemented-guard: Probed src/sell_valuables/post_to_fb.py for all of ['Submit not implemented', 'decision\\\\.md selector approval']. All present.\n[indeterminate] publish-click-scaffold: No Publish click scaffold should be enabled until selector approval exists; confirm whether a commented final-step placeholder is desired before treating this as missing.\n[pass] submitted-flag-false-until-wired: Probed src/sell_valuables/post_to_fb.py for all of ['\\\\\"submitted\\\\\": False', 'Submit not implemented']. All present.\n[pass] human-review-required-policy: Checked project policy in graphs/sell-valuables/project.yaml. Policy present.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.\n[clear] constraint: Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations.",
+  "reasoning_summary": "deps: fb-playwright-form-fill=pending; criteria: 4/5 pass; constraints: 3/3 clear; artifacts: 0/3 present",
+  "required_next_action": "Dependencies not complete: fb-playwright-form-fill. Complete or unblock them before this node can be verified.",
+  "criteria_mismatches": [
+    {
+      "criterion_id": "publish-click-scaffold",
+      "kind": "human_review",
+      "detail": "No Publish click scaffold should be enabled until selector approval exists; confirm whether a commented final-step placeholder is desired before treating this as missing."
+    }
+  ],
+  "missing_evidence": [],
+  "human_review_questions": [
+    {
+      "criterion_id": "publish-click-scaffold",
+      "question": "Should the graph require a commented Publish-click placeholder, or is the stronger not-implemented submit guard the intended evidence?"
+    }
+  ]
+}
