@@ -1,0 +1,1143 @@
+{
+  "project_id": "myapi-part2",
+  "node_id": "node-06-git-evidence",
+  "verdict": "fail",
+  "criteria_verdict": "fail",
+  "integrity": {
+    "verdict": "drift",
+    "intent_preserved": false,
+    "graph_integrity_preserved": true,
+    "required_human_review": true,
+    "confidence": 0.82,
+    "findings": [
+      {
+        "severity": "medium",
+        "summary": "IN-06 scope bound not honored: the export is a full-clone dump (manifest scope: 'full history, topo-order oldest-first', 164 commits at head 131a143) rather than the contract's bounded git capture. IN-06 (kept normative by the node-01b review, which states IN-06 'is the actual Git job') includes a commit only if it touches the named project-history paths / decision git_refs / Node-10 dated window, and explicitly lists 'full clone dump' as an IN-06-P FAIL. The dump includes ~304 distinct out-of-scope paths (context-refinery/, api/, tests/, Corpus v1.0/, ingest/) and even GDDP runtime state (.gddp/gates/node-01-evidence-contract.token, .gddp/gates/node-01b-contract-review.token) — the kind of runtime/job state the constraints say must not leak. Node-06's own constraint requires scope 'exactly what the evidence contract names'. If node-08 carries this dump into the git layer, node-09 fails IN-06 and treatments 13/15/16 receive out-of-scope what-changed evidence (corpus pollution). Recovery is available (node-08 applies the bound; the Node-10 dated window legitimately could not be applied yet), but the node did not perform the bounded capture its role and upstream review assign to it.",
+        "affected_node_ids": [
+          "node-06-git-evidence",
+          "node-08-build-source-layers",
+          "node-09-validate-corpus"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "Reproducible-rerun promise does not hold at the current repo state: the export was generated at head 131a143 (164 commits) but the repo now sits at 53f0ca8 (181 commits). build_git_export.py binds to moving HEAD (git rev-parse HEAD / git rev-list --count HEAD) with no commit pin, and the recorded sha256 exists only abbreviated (b3ae90b0...) inside the landing commit message — no persisted digest in part2/layers/git/. Re-running the script now yields a 181-commit export with different bytes, so 're-running produces byte-identical output (recorded sha256 matches)' fails and node-09's rebuild-equality checks (R-2/TC-10) would break if the export is ever regenerated. The node's why promises the evidence is captured 'reproducibly'; the artifact is deterministic only at the moment of capture, not on rebuild.",
+        "affected_node_ids": [
+          "node-06-git-evidence",
+          "node-09-validate-corpus"
+        ]
+      }
+    ],
+    "reasoning": "Node-06's intended role — bounded, reproducible git what-changed capture per the evidence contract (IN-06, 'the actual Git job', with full-clone dump as an explicit FAIL) — is recognizably delivered in substance: the export covers commits, absolute ISO-8601 UTC authored/committed dates (T-4 mapping representable), parents, full messages, and per-file numstat change evidence for the named MyAPI repo, and the generator script lives alongside the artifact. However, the deliverable veers on two load-bearing constraints of that role. First, scope: it is a full-history, full-repo dump including ~304 paths outside the IN-06 bound and GDDP runtime gate tokens; the contract and node-06's own constraint ('scope ... exactly what the evidence contract names') require bounded inclusion. Second, stability: the export is pinned to a pre-deliverable HEAD (131a143, 164 commits) while the repo has advanced to 53f0ca8 (181 commits); the script targets moving HEAD with no pin and no persisted full sha256, so a rebuild now produces different bytes, contradicting the 'reproducibly' promise that is central to the node's why and to node-09's deterministic-rebuild checks. Neither veer is destructive or structural: everything lives under part2/, the capture is a transparent superset, and node-08 can apply the IN-06 bound (including the Node-10 dated window node-06 legitimately could not know) and treat git-export.jsonl as immutable snapshot bytes. That recoverable path keeps graph integrity intact, but a human should confirm the node-08 bounding plan and the pin/stability decision before dependents fire, hence drift + required human review. Envelope-key absence and class-extra naming (commit vs commit_sha, files vs affected_paths, no diff field) were reviewed and are consistent with sibling layers' convention (node-05's handoff manifest likewise carries inventory fields, not the 12-key envelope) — the envelope is node-08's normalization job, so those are not findings against this node. Lane-1 owns the acceptance criteria; my verdict is about role/graph preservation.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-21T09:49:25.327Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_1MbicF0OHAxOkAz0xEK79505",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+      },
+      {
+        "ts": "2026-08-21T09:49:25.327Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_EPc91g0PLj1X6xqSrclV9015",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+      },
+      {
+        "ts": "2026-08-21T09:49:25.327Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_2XF7fMfrlr6KazIR5KhL5614",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-fsmu4ch1/PROJECT-BRIEF.md"
+      },
+      {
+        "ts": "2026-08-21T09:49:25.327Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_03_6koy1kwvsbytMds5IQij4164",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-fsmu4ch1/README.md"
+      },
+      {
+        "ts": "2026-08-21T09:49:25.329Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_EPc91g0PLj1X6xqSrclV9015",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:49:25.329Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_1MbicF0OHAxOkAz0xEK79505",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:49:25.329Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_2XF7fMfrlr6KazIR5KhL5614",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:49:25.329Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_03_6koy1kwvsbytMds5IQij4164",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:49:27.696Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Fn5qNgHcUxf9LHoAEaie8838",
+        "command": "ls -la /Users/sab-mini/repos/MyAPI/part2/ 2>/dev/null; echo \"---\"; ls -la /Users/sab-mini/repos/MyAPI/part2/layers/ 2>/dev/null; echo \"---\"; ls -la /Users/sab-mini/repos/MyAPI/part2/layers/git/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-21T09:49:27.698Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Wy31iDxnmnoQGRPmD9tc9094",
+        "command": "ls -la /Users/sab-mini/repos/MyAPI/ 2>/dev/null | head -50; echo \"---\"; git -C /Users/sab-mini/repos/MyAPI log --oneline -15 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-21T09:49:27.720Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Wy31iDxnmnoQGRPmD9tc9094",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:49:27.720Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Fn5qNgHcUxf9LHoAEaie8838",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:49:29.970Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_ERvrbb6Bx7i1FyFy7lRi0974",
+        "command": "ls -la /Users/sab-mini/repos/MyAPI/part2/contract/; echo \"---\"; ls -la /Users/sab-mini/repos/MyAPI/part2/layers/decisions/ /Users/sab-mini/repos/MyAPI/part2/layers/handoffs/ /Users/sab-mini/repos/MyAPI/part2/layers/anchor/ /Users/sab-mini/repos/MyAPI/part2/layers/graphify/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-21T09:49:29.971Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_aGLH2MOWMkIA6ZRK2I3q0361",
+        "command": "ls -la /Users/sab-mini/repos/gddp-config/docs/ 2>/dev/null; echo \"---\"; ls -la /Users/sab-mini/repos/gddp-config/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-21T09:49:29.990Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ERvrbb6Bx7i1FyFy7lRi0974",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:49:29.990Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_aGLH2MOWMkIA6ZRK2I3q0361",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:49:31.664Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_49kZrtoB81CPrMpHrdLW3184",
+        "path": "/Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md"
+      },
+      {
+        "ts": "2026-08-21T09:49:31.666Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_49kZrtoB81CPrMpHrdLW3184",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:49:33.254Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_qVGxRxZAoknXp2NeeGfb6944",
+        "path": "/Users/sab-mini/repos/MyAPI/part2/contract/evidence-contract.md"
+      },
+      {
+        "ts": "2026-08-21T09:49:33.257Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_qVGxRxZAoknXp2NeeGfb6944",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:49:36.715Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_HWV1CvOEFoo0JH7cRK319491",
+        "path": "/Users/sab-mini/repos/MyAPI/part2/layers/git/build_git_export.py"
+      },
+      {
+        "ts": "2026-08-21T09:49:36.716Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_IeXTXJERujB2J7QHaAjz3178",
+        "command": "head -c 3000 /Users/sab-mini/repos/MyAPI/part2/layers/git/git-export.jsonl; echo; echo \"=== line count ===\"; wc -l /Users/sab-mini/repos/MyAPI/part2/layers/git/git-export.jsonl"
+      },
+      {
+        "ts": "2026-08-21T09:49:36.719Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_HWV1CvOEFoo0JH7cRK319491",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:49:36.728Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_IeXTXJERujB2J7QHaAjz3178",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:50:34.507Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_i8xjZ4HraX6FXxCIXiNq8486",
+        "command": "head -c 2500 /Users/sab-mini/repos/MyAPI/part2/layers/handoffs/handoff-manifest.jsonl; echo; echo \"=== build_handoff_manifest.py (head) ===\"; head -60 /Users/sab-mini/repos/MyAPI/part2/layers/handoffs/build_handoff_manifest.py"
+      },
+      {
+        "ts": "2026-08-21T09:50:34.508Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_YgfLlrp66bOWuC5DEkL75044",
+        "command": "grep -n -i \"IN-06\\|full-clone\\|full clone\\|git bound\\|scope\" /Users/sab-mini/repos/MyAPI/part2/contract/contract-review.md | head -40"
+      },
+      {
+        "ts": "2026-08-21T09:50:34.518Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_YgfLlrp66bOWuC5DEkL75044",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:50:34.518Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_i8xjZ4HraX6FXxCIXiNq8486",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:51:02.751Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_yPbgWg5ZNy4SSDXHih3F4482",
+        "command": "cd /Users/sab-mini/repos/MyAPI && git rev-list --count HEAD; echo \"--- count at 131a143 (export head) ---\"; git rev-list --count 131a143; echo \"--- commits after 131a143 ---\"; git log --oneline 131a143..HEAD; echo \"--- commit msg of 0fbcb09 ---\"; git log -1 --format='%H%n%s%n%b' 0fbcb09"
+      },
+      {
+        "ts": "2026-08-21T09:51:02.752Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_XXwD9WalaiMkCmpWIAyV9454",
+        "command": "cd /Users/sab-mini/repos/MyAPI && grep -rn \"sha256\\|digest\" part2/layers/git/ 2>/dev/null; echo \"--- search for recorded git export sha anywhere in part2 ---\"; grep -rn \"git-export\\|build_git_export\" part2/ --include=\"*.md\" --include=\"*.json*\" --include=\"*.txt\" 2>/dev/null | grep -v \"layers/git/\" | head -20"
+      },
+      {
+        "ts": "2026-08-21T09:51:02.780Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_XXwD9WalaiMkCmpWIAyV9454",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:51:02.793Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_yPbgWg5ZNy4SSDXHih3F4482",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:51:17.851Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_PYjfFgEYJt6qC28a9nPa1740",
+        "command": "cd /Users/sab-mini/repos/MyAPI && python3 - <<'EOF'\nimport json\npath=\"part2/layers/git/git-export.jsonl\"\nrecs=[json.loads(l) for l in open(path) if l.strip()]\nprint(\"total records:\", len(recs))\nhdr=recs[0]\nprint(\"header keys:\", sorted(hdr.keys()))\nprint(\"header:\", {k:hdr[k] for k in (\"commit_count\",\"head_commit\",\"scope\")})\nimport re\niso=re.compile(r\"^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$\")\nbad_dates=0; empty_files=0; bad_keys=0; quoted_paths=0\nfor r in recs[1:]:\n    if not (iso.match(r[\"authored_at\"]) and iso.match(r[\"committed_at\"])):\n        bad_dates+=1\n    if \"files\" not in r or not isinstance(r[\"files\"],list):\n        bad_keys+=1\n    elif not r[\"files\"]:\n        empty_files+=1\n    for f in r.get(\"files\",[]):\n        if \"\\\\\" in f[\"path\"] or f[\"path\"].startswith('\"'):\n            quoted_paths+=1\nprint(\"bad dates:\", bad_dates, \"| empty-files commits:\", empty_files, \"| records missing files key:\", bad_keys, \"| C-quoted paths:\", quoted_paths)\n# check envelope keys presence\nenv={\"item_id\",\"source_class\",\"source_id\",\"origin_path\",\"origin_sha256\",\"content_sha256\",\"occurred_at\",\"recorded_at\",\"temporal_confidence\",\"authority_rank\",\"inclusion_status\",\"replaces\"}\nfor r in recs[1:3]:\n    print(\"record keys:\", sorted(r.keys()))\n    print(\"envelope keys present:\", env & set(r.keys()))\n# out-of-scope paths present?\nout_of_scope=[]\nfor r in recs[1:]:\n    for f in r.get(\"files\",[]):\n        p=f[\"path\"]\n        if not any(p.startswith(x) for x in (\".handoffs/\",\"project-docs/\",\"01-decisions/\",\"02-corpus/\",\"03-ingestion/\",\"04-evaluation/\",\"gddp/\",\"graphify-out/GRAPH_REPORT.md\")) and p not in (\"AGENTS.md\",\"PROJECT-BRIEF.md\"):\n            out_of_scope.append(p)\nprint(\"distinct out-of-scope paths (IN-06):\", len(set(out_of_scope)))\nprint(sorted(set(out_of_scope))[:25])\nEOF"
+      },
+      {
+        "ts": "2026-08-21T09:51:17.852Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_A8lIvd8BJFRFvgn3uosl2208",
+        "command": "grep -n \"IN-06\" /Users/sab-mini/repos/MyAPI/part2/contract/contract-rationale.md | head; echo \"---\"; sed -n '/IN-06/,/^## /p' /Users/sab-mini/repos/MyAPI/part2/contract/contract-rationale.md | head -60"
+      },
+      {
+        "ts": "2026-08-21T09:51:17.865Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_A8lIvd8BJFRFvgn3uosl2208",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:51:17.885Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_PYjfFgEYJt6qC28a9nPa1740",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:51:53.423Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_WNTymk7COGGwI1nCG3SZ5983",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"export head: 131a143 (164 commits)\"; echo \"current HEAD: $(git rev-parse --short HEAD) ($(git rev-list --count HEAD) commits)\"; echo \"--- export claims 'full history' scope; IN-06-P FAIL = 'full clone dump' ---\"; grep -c \"context-refinery\" part2/layers/git/git-export.jsonl; echo \"records mentioning .gddp runtime tokens:\"; grep -c \"gates/node-0\" part2/layers/git/git-export.jsonl; echo \"--- script pins to moving HEAD? ---\"; grep -n \"rev-parse\\|rev-list\\|log \" part2/layers/git/build_git_export.py | head -8"
+      },
+      {
+        "ts": "2026-08-21T09:51:53.457Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_WNTymk7COGGwI1nCG3SZ5983",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:52:12.792Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_3rgns5bDosjB7WFZGPxH7906",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "Convergence risk at node-08/node-09: node-08 must apply the IN-06 bound (path-touch set + decision git_refs + Node-10 dated window) when materializing the git layer, and must treat part2/layers/git/git-export.jsonl as immutable snapshot bytes (compose by reference, never regenerate) so node-09's layer manifests, content_sha256 rehash, and rebuild-equality checks stay green. If node-08 regenerates the export at a later HEAD, the git layer hash changes and treatment manifests diverge.",
+        "affected_node_ids": [
+          "node-08-build-source-layers",
+          "node-09-validate-corpus"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Numstat normalization detail for node-08: rename entries surface as 'old => new' path strings and special characters may be C-quoted by git; affected_paths normalization in the layer build should decode/expand these so path-based IN-06 filtering and retrieval keys match real repo paths.",
+        "affected_node_ids": [
+          "node-08-build-source-layers"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.30000000000000004,
+  "criteria_confidence": 0.30000000000000004,
+  "completeness": 0.5,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "export-created",
+        "criterion": "part2/layers/git/ contains a generated commit export covering commits, timestamps, parents, affected files, commit messages, and the change evidence the contract requires, for the repositories the contract names",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "reproducible",
+        "criterion": "The exact script used is saved at part2/layers/git/build_git_export.(py|sh) and re-running it produces byte-identical output (the recorded sha256 matches on rebuild)",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...) for identifiers named in the criterion (build_git_export, re-running, byte-identical). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "absolute-dates",
+        "criterion": "Every date in the export is an absolute ISO-8601 date (no relative dates)",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...) for identifiers named in the criterion (ISO-8601). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the experiment was executed correctly, never whether the hypothesis won.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution model (operator direction 2026-08-15, enforced by the attempt preamble): You are the ORCHESTRATOR, not the worker. Do NOT perform the node's work yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6 via the subagent tool's model parameter) to do the actual investigation, construction, and measurement. Your job is decomposition, dispatch, reviewing returns, integrating, and producing the final artifacts.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight (worker subagents, Khoj ingestion/processing, long builds), dispatch ONE watcher subagent on model deepseek/deepseek-v4-flash that actively polls with tools (job status, logs, artifact existence) and reports state changes; you go idle between its reports instead of polling yourself.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/ self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to this node as evidence; work discovered beyond this node's scope becomes a continuation proposal, never silent execution.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Work in /Users/sab-mini/repos/MyAPI. Write only under part2/ unless this node's text names another path. Never edit GDDP graph truth, runtime databases, or job state.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Generated artifacts and the generator script both live under part2/layers/git/; scope of repos and history depth is exactly what the evidence contract names.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Close with parallel reviewer subagents on model deepseek/deepseek-v4-pro, each assigned a different explicit focus (criteria coverage, evidence integrity, constraint compliance). Resolve their findings before returning.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "part2/layers/git/": false
+    },
+    "deps_status": {
+      "node-01b-contract-review": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "131a143fa0bfa4151645a29fedb80f99c7df1055",
+      "tip": "0fbcb09c1de17561e4cda9c2aa3bf9a0046c5f56",
+      "files": [
+        {
+          "status": "A",
+          "path": "part2/layers/git/build_git_export.py"
+        },
+        {
+          "status": "A",
+          "path": "part2/layers/git/git-export.jsonl"
+        }
+      ],
+      "truncated": false,
+      "file_count": 2,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "export-created",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "/Users/sab-mini/repos/MyAPI/part2/layers/git/git-export.jsonl (190046 bytes, 165 lines) exists and is committed in 0fbcb09, an ancestor of current HEAD 53f0ca8; working tree clean",
+          "/Users/sab-mini/repos/MyAPI/part2/layers/git/build_git_export.py (3432 bytes) exists",
+          "Export: manifest + 164 records; each record has commit sha, parents[], authored_at, committed_at, author, committer, message, files[] with path/status/lines_added/lines_deleted (numstat change evidence)",
+          "git rev-list --count 131a143 = 164 == manifest commit_count; manifest head_commit=131a143 matches generation state",
+          "Repo label 'skchaudr/MyAPI' matches origin git@github.com:skchaudr/MyAPI.git; node-01b contract review cut optional satellite repos (gddp-runtime/gddp-config/pi-agent) from normative, so single-repo scope is correct",
+          "Evidence contract SC-04/IN-06: stat always emitted (present); change_evidence.diff is conditional ('only for those commits, bounded') and the IN-06 commit-inclusion bound is deferred to layer build (node 08/09)",
+          "Memo node 06: 'reproducible representation of Git evidence ... sufficient diff or change information' — numstat qualifies"
+        ],
+        "reasoning": "The generated commit export exists at the required path, is committed and tracked in HEAD, and covers every element the criterion lists: commits (sha), timestamps (authored_at/committed_at absolute ISO-8601), parents, affected files (paths), full commit messages, and change evidence (per-file numstat lines_added/lines_deleted). It covers the single repository the revised contract names (MyAPI). The export is a full-history snapshot at 131a143 (164 commits) — a superset raw export from which the IN-06-bounded layer and bounded change_evidence.diff are applied downstream at node 08/09; the criterion does not require the bound at node 06, and the memo asks only for 'sufficient diff or change information', which the numstat provides. Minor note: the export is frozen at 131a143 while the repo has since advanced to 53f0ca8 (181 commits) — inherent to a git snapshot and explicitly documented in the script docstring and commit message."
+      },
+      {
+        "criterion_id": "reproducible",
+        "judgment": "judged_fail",
+        "confidence": 0.7,
+        "evidence": [
+          "Script saved at exact path part2/layers/git/build_git_export.py (criterion part a satisfied)",
+          "Recorded sha256 'b3ae90b0...' in commit message 0fbcb09; actual artifact sha256 = b3ae90b02f6cad7d0f02f60fffcb0f8628c123acb2c7652e586131149bf941e1 — recorded digest matches the committed artifact",
+          "EMPIRICAL REBUILD: replicated the script's exact pipeline (git rev-parse/rev-list/log --reverse --topo-order --format + --numstat, json sort_keys) against a faithful scratch clone of the repo at the exact generation state 131a143 (164 commits)",
+          "Default git config (myers): rebuilt sha256 2551e0c747aec98006fc07d79a0a65cd14f3b6642dff1e78c6be85021086ab8f != recorded b3ae90b0... — 9 of 164 records differ, all in lines_added/lines_deleted only",
+          "git -c diff.algorithm=histogram: rebuilt sha256 b3ae90b02f6cad7d0f02f60fffcb0f8628c123acb2c7652e586131149bf941e1 == recorded, byte-identical TRUE",
+          "No diff.algorithm setting anywhere: repo .git/config, ~/.gitconfig (absent), system config, no .gitattributes; script does not pass -c diff.algorithm or -Xdiff-algorithm",
+          "Script docstring claims 'Output depends only on immutable git objects; reruns are byte-identical' — empirically inaccurate: output depends on the unrecorded diff.algorithm knob",
+          "git version 2.54.0; default diff algorithm is myers in all git versions, so generation necessarily ran under an unrecorded histogram configuration"
+        ],
+        "reasoning": "The exact script is saved at the required path and the recorded sha256 matches the committed artifact, but the criterion's operative test — 're-running it produces byte-identical output (the recorded sha256 matches on rebuild)' — fails in the environment where the artifact lives. I reproduced the script's full pipeline at the exact generation state in a faithful clone with the repo's actual (default) configuration and got sha256 2551e0c..., not the recorded b3ae90b0.... Byte-identity holds only under `git -c diff.algorithm=histogram`, and that requirement is pinned nowhere: not in the script, not in repo/global/system git config, not in any manifest. The reproducibility guarantee therefore does not transfer to a clean rebuild, which is precisely what this criterion (and contract R-2 'rebuild diff -qr 0 and manifests equal', consumed by node 09) is meant to guarantee. Counterfactual: if the executor's pi_rpc environment globally sets diff.algorithm=histogram, a rebuild there would match — but nothing in the deliverable records or enforces that, so the criterion fails as stated at moderate confidence."
+      },
+      {
+        "criterion_id": "absolute-dates",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "Programmatic scan of all 164 records: every authored_at and committed_at matches ^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$ (ISO-8601 absolute UTC); zero non-ISO date fields found",
+          "Script converts unix timestamps via datetime.fromtimestamp(int(unix), tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ') — structurally incapable of emitting relative dates",
+          "Manifest line declares 'date_convention': 'all dates absolute ISO-8601 UTC'",
+          "grep for relative words (yesterday/today/ago/last week/tonight/...) matched only natural-language phrases inside verbatim commit message bodies (e.g., 'fix-tonight'), which are immutable source content, not date fields",
+          "Evidence contract §8 (SC-04): git occurred_at=author_date, recorded_at=committer_date, absolute ISO — export emits both, absolute"
+        ],
+        "reasoning": "Every structured date in the export is an absolute ISO-8601 UTC datetime with no relative dates; the generator converts from git's unix timestamps into a fixed UTC format, so the property holds by construction and was verified empirically across all 164 records. Commit-message prose may contain date-like words, but those are verbatim source content (cannot and should not be rewritten) and are not 'dates in the export' in the criterion's sense; no relative date appears in any temporal field."
+      }
+    ],
+    "overall_reasoning": "Node-06 was re-executed after the earlier empty-result attempt (40cfdbe, correctly failed on 2026-08-16): the re-dispatch (0fbcb09) produced the full deliverable at /Users/sab-mini/repos/MyAPI/part2/layers/git/ — build_git_export.py + git-export.jsonl — committed, tracked in current HEAD, working tree clean. Two of the three acceptance criteria are satisfied: (1) export-created — a 164-commit export covering commits, absolute timestamps, parents, affected files, full messages, and per-file numstat change evidence for the single repo the revised contract names (skchaudr/MyAPI); (2) absolute-dates — every temporal field is absolute ISO-8601 UTC, verified programmatically, no relative dates. The third criterion, reproducible, fails at moderate confidence: the recorded sha256 (b3ae90b0... in commit message 0fbcb09) matches the committed artifact, but an empirical rebuild of the exact script pipeline at the exact generation state (131a143/164 commits) under the repo's own default configuration yields a different sha256 (2551e0c...) because 9 of 164 records' numstat values depend on git's diff algorithm; byte-identity holds only with an unrecorded `diff.algorithm=histogram` that is pinned nowhere (not in the script, repo config, global config, or any manifest). The script's docstring claim that output depends only on immutable git objects is inaccurate, so the criterion's literal test — re-run produces byte-identical output / recorded sha256 matches on rebuild — does not hold in the environment where the artifact resides. This is a genuine reproducibility defect for node 09's R-2 rebuild gate, not a completeness nit. All constraint checks remain clear (artifacts written only under part2/, single-repo scope per the revised contract, no graph-truth or runtime-state edits observed).",
+    "risks": "1) Rebuild-environment uncertainty: if the pi_rpc executor environment globally sets diff.algorithm=histogram, a rebuild there would reproduce b3ae90b0... and the reproducible criterion would pass; this cannot be verified from the repo, and nothing in the deliverable records or enforces the setting — the guarantee currently fails in the repo's own environment (default myers). 2) Snapshot staleness: the export is frozen at 131a143 (164 commits); main has since advanced to 53f0ca8 (181 commits), so any rebuild today produces a different, larger export by design (documented in the script and commit message) — node 08/09 must either freeze the state or re-generate and re-record the sha256. 3) IN-06 bound deferral: the export is a full-history superset, not IN-06-path-filtered, and emits no change_evidence.diff; this is assumed to be applied at node 08/09 layer build — if node 06 was itself expected to emit the bounded layer, that is a gap. 4) Deterministic gating: artifacts_present={'part2/layers/git/': False} was stale (no probe registered); the deterministic lane had no way to see the real tree, so gating relied on this semantic review.",
+    "followup_candidates": "\"Observed: the committed git-export.jsonl is byte-identical to a rebuild of build_git_export.py ONLY with git -c diff.algorithm=histogram; the recorded sha256 b3ae90b0... does not match a default-config rebuild (2551e0c..., 9/164 records differ in numstat). The script pins nothing. Was the executor environment guaranteed to set diff.algorithm=histogram, and should build_git_export.py pin it (e.g., pass -c diff.algorithm=histogram or -Xdiff-algorithm=histogram) so the recorded sha256 is reproducible in any environment? If yes to the environment guarantee, this criterion could be re-judged pass; otherwise the reproducible criterion stands as failed.\"; \"Observed: the export covers 164 commits at HEAD 131a143, but main has advanced to 53f0ca8 (181 commits). Is the git layer intended as a frozen snapshot (re-generate and re-record at node 08 layer build) or must the export be refreshed to the current HEAD before corpus construction?\"; \"Observed: the export is a full-history superset; the contract's IN-06 commit-inclusion bound and conditional bounded change_evidence.diff are not applied in it. Confirm these are applied at node 08/09 layer build rather than being a node-06 omission.\"; \"Observed: deterministic gating reported artifacts_present=False for part2/layers/git/ because no probe is registered, even though the artifacts exist and are committed. Register an explicit deterministic probe (path presence + recorded-sha256 rebuild with pinned diff config) for node-06 and future git-layer gating.\"",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-21T09:43:57.409Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_nSofhliSHj2lhnChmwE75366",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-fsmu4ch1/README.md"
+        },
+        {
+          "ts": "2026-08-21T09:43:57.410Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_LuUcxrRlF5cGcRmqM7t17596",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-fsmu4ch1/PROJECT-BRIEF.md"
+        },
+        {
+          "ts": "2026-08-21T09:43:57.410Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_qzfUeDSnaP7RCEqCfitA3571",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+        },
+        {
+          "ts": "2026-08-21T09:43:57.410Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_03_oDm09HQs79gZdOaPXlAr3905",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+        },
+        {
+          "ts": "2026-08-21T09:43:57.412Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_qzfUeDSnaP7RCEqCfitA3571",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:43:57.412Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_03_oDm09HQs79gZdOaPXlAr3905",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:43:57.412Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_nSofhliSHj2lhnChmwE75366",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:43:57.412Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_LuUcxrRlF5cGcRmqM7t17596",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:44:00.876Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_tlSxCRxHly5BxavpSKzX8994",
+          "command": "ls -la /Users/sab-mini/repos/MyAPI/part2/ 2>/dev/null && echo \"---LAYERS---\" && ls -la /Users/sab-mini/repos/MyAPI/part2/layers/ 2>/dev/null && echo \"---GIT---\" && ls -la /Users/sab-mini/repos/MyAPI/part2/layers/git/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-21T09:44:00.878Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ceqLUJFtrpDh1nGPPAwn3254",
+          "command": "ls -la /Users/sab-mini/repos/MyAPI/part2/contract/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-21T09:44:00.890Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ceqLUJFtrpDh1nGPPAwn3254",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:44:00.898Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_tlSxCRxHly5BxavpSKzX8994",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:44:03.714Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_2EKdCmXDaDIX2zudoq6q4197",
+          "path": "/Users/sab-mini/repos/MyAPI/part2/layers/git/build_git_export.py"
+        },
+        {
+          "ts": "2026-08-21T09:44:03.715Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_zItENcosLv862VvBGVK47043",
+          "path": "/Users/sab-mini/repos/MyAPI/part2/contract/evidence-contract.md"
+        },
+        {
+          "ts": "2026-08-21T09:44:03.716Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_2EKdCmXDaDIX2zudoq6q4197",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:44:03.717Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_zItENcosLv862VvBGVK47043",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:44:24.422Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_01Cb1xvXj895NtutuNfv7883",
+          "command": "ls /Users/sab-mini/repos/gddp-config/docs/ 2>/dev/null | head -30; echo \"---\"; ls -la /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-21T09:44:24.423Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_quTblLdEWSCkBaX1kTNu7787",
+          "command": "cd /Users/sab-mini/repos/MyAPI && grep -rn \"sha256\" part2/layers/git/ 2>/dev/null; echo \"---manifest search in part2---\"; grep -rln \"git-export\\|git_export\\|build_git_export\" part2/ 2>/dev/null; echo \"---any recorded digest---\"; grep -rn \"sha256\\|digest\" part2/layers/git/build_git_export.py"
+        },
+        {
+          "ts": "2026-08-21T09:44:24.437Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_01Cb1xvXj895NtutuNfv7883",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:44:24.443Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_quTblLdEWSCkBaX1kTNu7787",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:44:26.242Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_PIF0Lnz9TeuTd3JtiQ3c9631",
+          "path": "/Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md"
+        },
+        {
+          "ts": "2026-08-21T09:44:26.242Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_RlD6xIBfKIxnhWkGVykb5016",
+          "command": "cd /Users/sab-mini/repos/MyAPI && grep -n \"IN-06\\|node-06\\|node 06\\|git\" part2/contract/contract-review.md | head -40"
+        },
+        {
+          "ts": "2026-08-21T09:44:26.243Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_PIF0Lnz9TeuTd3JtiQ3c9631",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:44:26.249Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_RlD6xIBfKIxnhWkGVykb5016",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:44:43.256Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_EvPxC6h464RkoYQaxk105692",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== file line counts ===\" && wc -l part2/layers/git/git-export.jsonl && echo \"=== first record (manifest) ===\" && head -1 part2/layers/git/git-export.jsonl && echo \"=== second record (first commit) ===\" && sed -n '2p' part2/layers/git/git-export.jsonl && echo \"=== last record ===\" && tail -1 part2/layers/git/git-export.jsonl"
+        },
+        {
+          "ts": "2026-08-21T09:44:43.256Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_FwmDwtHSzNhnfscqry120283",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== HEAD ===\" && git rev-parse HEAD && echo \"=== total commits ===\" && git rev-list --count HEAD && echo \"=== repo remote ===\" && git remote -v 2>/dev/null | head -2 && echo \"=== commit count in export (json lines minus manifest) ===\" && python3 -c \"\nimport json\nn=0\nwith open('part2/layers/git/git-export.jsonl') as f:\n    for i,line in enumerate(f):\n        line=line.strip()\n        if not line: continue\n        if i==0:\n            m=json.loads(line); print('manifest:', m)\n        else:\n            n+=1\nprint('records after manifest:', n)\n\""
+        },
+        {
+          "ts": "2026-08-21T09:44:43.275Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_EvPxC6h464RkoYQaxk105692",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:44:43.311Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_FwmDwtHSzNhnfscqry120283",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:44:58.452Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_kN3Bn9Gyozu4YSKIFdZz7666",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== commits touching part2/layers/git ===\" && git log --oneline --all -- part2/layers/git/ | head -10 && echo \"=== full log tail (recent commits) ===\" && git log --oneline -12 && echo \"=== show the export commit(s) ===\" && git log --all --format='%H %s' -- part2/layers/git/build_git_export.py"
+        },
+        {
+          "ts": "2026-08-21T09:44:58.453Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Sm9o3dqEWxGpGdO3X6Py5262",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== relative date word scan in export ===\" && grep -nEi 'yesterday|today|last week|last month|last year|ago|earlier|recently|a few days|tonight|tomorrow' part2/layers/git/git-export.jsonl | head -20; echo \"exit: $?\" && echo \"=== scan for any non-ISO datetime-looking strings ===\" && python3 -c \"\nimport json, re\niso = re.compile(r'^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$')\nbad=[]\nwith open('part2/layers/git/git-export.jsonl') as f:\n    for i,line in enumerate(f):\n        line=line.strip()\n        if not line: continue\n        rec=json.loads(line)\n        if i==0: continue\n        for k in ('authored_at','committed_at'):\n            v=rec.get(k)\n            if v is None or not iso.match(v):\n                bad.append((rec.get('commit'),k,v))\nprint('non-ISO datetime fields:', bad if bad else 'NONE')\nprint('total date fields OK')\n\""
+        },
+        {
+          "ts": "2026-08-21T09:44:58.495Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_kN3Bn9Gyozu4YSKIFdZz7666",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:44:58.520Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Sm9o3dqEWxGpGdO3X6Py5262",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:45:19.666Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_PRARY9522wFsrfyD7rcD0669",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== full commit message of 0fbcb09 ===\" && git log -1 --format='%B' 0fbcb09 && echo \"=== rev-list count at 131a143 ===\" && git rev-list --count 131a143 && echo \"=== does 131a143 tree contain the export? ===\" && git ls-tree 131a143 part2/layers/git/"
+        },
+        {
+          "ts": "2026-08-21T09:45:19.666Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_lOPlkKotAX5PvprwR7rY9726",
+          "command": "find /Users/sab-mini/repos/gddp-config -type d -name \"evidence*\" 2>/dev/null | head; echo \"---\"; find /Users/sab-mini/repos/gddp-config -path \"*node-06*\" -o -path \"*node06*\" 2>/dev/null | grep -v \".git/\" | head -20; echo \"---node-06 mentions in gddp-config---\"; grep -rln \"node-06\\|node-6-git\\|git evidence\" /Users/sab-mini/repos/gddp-config --include=\"*.md\" --include=\"*.json\" --include=\"*.yaml\" --include=\"*.yml\" 2>/dev/null | grep -v \".git/\" | head -20"
+        },
+        {
+          "ts": "2026-08-21T09:45:19.693Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_PRARY9522wFsrfyD7rcD0669",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:45:21.703Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_lOPlkKotAX5PvprwR7rY9726",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:45:26.143Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_avzHTItd8UjKQaZshZOp1752",
+          "command": "cd /Users/sab-mini/repos/MyAPI && shasum -a 256 part2/layers/git/git-export.jsonl && shasum -a 256 part2/layers/git/build_git_export.py"
+        },
+        {
+          "ts": "2026-08-21T09:45:26.143Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_hhxzp6ZcxnCiXgUfn1Sz6562",
+          "path": "/Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-06-git-evidence/job_20260816T095531289d5961e2646e-attempt0.json"
+        },
+        {
+          "ts": "2026-08-21T09:45:26.148Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_hhxzp6ZcxnCiXgUfn1Sz6562",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:45:26.178Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_avzHTItd8UjKQaZshZOp1752",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:45:46.644Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_07TcECCZwrxpaLzFq5Qd9022",
+          "command": "du -sh /Users/sab-mini/repos/MyAPI/.git 2>/dev/null; du -sh /Users/sab-mini/repos/MyAPI 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-21T09:45:46.644Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_01_3JLGVgRmADrZIYVbUsLe0815",
+          "reason": "command matched blocked pattern",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== merge commits check: any record with 2 parents ===\" && python3 -c \"\nimport json\nn_merge=0; n_no_files=0; n_files=0\nwith open('part2/layers/git/git-export.jsonl') as f:\n    for i,line in enumerate(f):\n        line=line.strip()\n        if not line or i==0: continue\n        r=json.loads(line)\n        if len(r['parents'])>1: n_merge+=1\n        if not r['files']: n_no_files+=1\n        else: n_files+=1\nprint('records:', n_merge+n_no_files+n_files, '| merges(multi-parent):', n_merge, '| commits with no file entries:', n_no_files, '| with files:', n_files)\n\"",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-21T09:45:46.645Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_3JLGVgRmADrZIYVbUsLe0815",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-21T09:45:46.782Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_07TcECCZwrxpaLzFq5Qd9022",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:46:06.831Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_07yKpRYYA4pQRN6Mzc3e8307",
+          "command": "cd /Users/sab-mini/repos/MyAPI && python3 -c \"\nimport json\nn_merge=0; n_no_files=0; n_files=0; total=0\nwith open('part2/layers/git/git-export.jsonl') as f:\n    for i,line in enumerate(f):\n        line=line.strip()\n        if not line or i==0: continue\n        total+=1\n        r=json.loads(line)\n        if len(r['parents']) in (2,3,4,5): n_merge+=1\n        if not r['files']: n_no_files+=1\n        else: n_files+=1\nprint('total records:', total)\nprint('merges (multi-parent):', n_merge)\nprint('commits with no file entries:', n_no_files)\nprint('commits with files:', n_files)\n\""
+        },
+        {
+          "ts": "2026-08-21T09:46:06.832Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_01_T82DjdKj8IjdGbt3t6g01904",
+          "reason": "command matched blocked pattern",
+          "command": "rm -rf /tmp/myapi-verify131 && git clone --local --no-checkout /Users/sab-mini/repos/MyAPI /tmp/myapi-verify131 2>&1 | tail -2 && git -C /tmp/myapi-verify131 checkout --detach 131a143fa0bfa4151645a29fedb80f99c7df1055 2>&1 | tail -2 && echo \"CLONE-AT-131a143-OK\" && git -C /tmp/myapi-verify131 rev-parse HEAD && git -C /tmp/myapi-verify131 rev-list --count HEAD",
+          "pattern": "(?:^|\\s|&&|\\|\\|)\\s*(?:rm|rmdir)\\s"
+        },
+        {
+          "ts": "2026-08-21T09:46:06.832Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_T82DjdKj8IjdGbt3t6g01904",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-21T09:46:06.869Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_07yKpRYYA4pQRN6Mzc3e8307",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:46:09.774Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_1tGKG8X5X79nUr27ZU024428",
+          "command": "VDIR=$(mktemp -d /tmp/gddp-verify-131.XXXXXX) && echo \"VDIR=$VDIR\" && git clone --local --no-checkout /Users/sab-mini/repos/MyAPI \"$VDIR/repo\" 2>&1 | tail -1 && git -C \"$VDIR/repo\" checkout --detach 131a143fa0bfa4151645a29fedb80f99c7df1055 2>&1 | tail -1 && echo \"HEAD=$(git -C \"$VDIR/repo\" rev-parse HEAD)\" && echo \"COUNT=$(git -C \"$VDIR/repo\" rev-list --count HEAD)\" && echo \"VDIR=$VDIR\" "
+        },
+        {
+          "ts": "2026-08-21T09:46:09.983Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_1tGKG8X5X79nUr27ZU024428",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:46:13.048Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_PrIEGq7m1DLddG3P2pp47597",
+          "reason": "command matched blocked pattern",
+          "command": "VDIR=/tmp/gddp-verify-131.U8QHZb && mkdir -p \"$VDIR/repo/part2/layers/git\" && cp /Users/sab-mini/repos/MyAPI/part2/layers/git/build_git_export.py \"$VDIR/repo/part2/layers/git/\" && cd \"$VDIR/repo\" && python3 part2/layers/git/build_git_export.py && echo \"=== regenerated sha256 ===\" && shasum -a 256 part2/layers/git/git-export.jsonl && echo \"=== recorded artifact sha256 ===\" && shasum -a 256 /Users/sab-mini/repos/MyAPI/part2/layers/git/git-export.jsonl && echo \"=== byte diff (empty = identical) ===\" && diff part2/layers/git/git-export.jsonl /Users/sab-mini/repos/MyAPI/part2/layers/git/git-export.jsonl && echo \"BYTE-IDENTICAL-OK\"",
+          "pattern": "(?:^|\\s|&&|\\|\\|)\\s*cp\\s.*\\s+\\S+"
+        },
+        {
+          "ts": "2026-08-21T09:46:13.049Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_PrIEGq7m1DLddG3P2pp47597",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-21T09:46:29.043Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_q6C9AFh29kHVKpHs8zSi1095",
+          "command": "python3 -c '\nimport hashlib, json, subprocess\nfrom datetime import datetime, timezone\nfrom pathlib import Path\n\nREPO = \"/tmp/gddp-verify-131.U8QHZb/repo\"\nREC_SEP = \"\\x1e\"\nEND_SEP = \"\\x1f\"\nCOMMIT_FMT = REC_SEP.join([\"%H\", \"%P\", \"%at\", \"%ct\", \"%aN\", \"%cN\"]) + REC_SEP + \"%B\" + END_SEP\n\ndef git(*args):\n    r = subprocess.run([\"git\", *args], cwd=REPO, capture_output=True, text=True)\n    if r.returncode != 0:\n        raise RuntimeError(r.stderr.strip())\n    return r.stdout\n\ndef iso_utc(unix):\n    return datetime.fromtimestamp(int(unix), tz=timezone.utc).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\n\nhead = git(\"rev-parse\", \"HEAD\").strip()\ntotal = int(git(\"rev-list\", \"--count\", \"HEAD\").strip())\n\nmeta_raw = git(\"log\", \"--reverse\", \"--topo-order\", \"--format=\" + COMMIT_FMT)\nentries = []\nby_sha = {}\nfor rec in meta_raw.split(END_SEP):\n    rec = rec.strip(\"\\n\")\n    if not rec.strip():\n        continue\n    sha, parents, at, ct, an, cn, body = rec.split(REC_SEP)\n    entry = {\"commit\": sha, \"parents\": parents.split() if parents else [], \"authored_at\": iso_utc(at), \"committed_at\": iso_utc(ct), \"author\": an, \"committer\": cn, \"message\": body.strip(\"\\n\"), \"files\": []}\n    entries.append(entry)\n    by_sha[sha] = entry\n\nraw = git(\"log\", \"--reverse\", \"--topo-order\", \"--numstat\", \"--format=%H\")\ncurrent = None\nfor line in raw.splitlines():\n    if not line.strip():\n        continue\n    if len(line) == 40 and all(c in \"0123456789abcdef\" for c in line):\n        current = by_sha[line]\n    elif current is not None:\n        parts = line.split(\"\\t\")\n        if len(parts) == 3:\n            added, deleted, path = parts\n            current[\"files\"].append({\"path\": path, \"status\": \"binary\" if added == \"-\" else \"text\", \"lines_added\": None if added == \"-\" else int(added), \"lines_deleted\": None if deleted == \"-\" else int(deleted)})\n\nassert len(entries) == total, (len(entries), total)\n\nout_lines = []\nout_lines.append(json.dumps({\"manifest\": \"part2/layers/git/git-export.jsonl\", \"generated_by\": \"build_git_export.py\", \"repo\": \"skchaudr/MyAPI\", \"head_commit\": head, \"commit_count\": total, \"scope\": \"full history, topo-order oldest-first\", \"date_convention\": \"all dates absolute ISO-8601 UTC\"}, sort_keys=True))\nfor e in entries:\n    out_lines.append(json.dumps(e, sort_keys=True))\ncontent = (\"\\n\".join(out_lines) + \"\\n\").encode(\"utf-8\")\n\ncommitted = Path(\"/Users/sab-mini/repos/MyAPI/part2/layers/git/git-export.jsonl\").read_bytes()\nprint(\"reconstructed sha256:\", hashlib.sha256(content).hexdigest())\nprint(\"committed   sha256:\", hashlib.sha256(committed).hexdigest())\nprint(\"byte-identical:\", content == committed)\nprint(\"commit_count in artifact manifest vs rebuilt:\", total)\n'"
+        },
+        {
+          "ts": "2026-08-21T09:46:29.473Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_q6C9AFh29kHVKpHs8zSi1095",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:46:40.897Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_zRZQI1mUEp6ar6uwmJCL7325",
+          "reason": "command matched blocked pattern",
+          "command": "python3 -c '\nimport json, subprocess, difflib\nfrom datetime import datetime, timezone\nfrom pathlib import Path\n\nREPO = \"/tmp/gddp-verify-131.U8QHZb/repo\"\nREC_SEP = \"\\x1e\"\nEND_SEP = \"\\x1f\"\nCOMMIT_FMT = REC_SEP.join([\"%H\", \"%P\", \"%at\", \"%ct\", \"%aN\", \"%cN\"]) + REC_SEP + \"%B\" + END_SEP\n\ndef git(*args):\n    r = subprocess.run([\"git\", *args], cwd=REPO, capture_output=True, text=True)\n    return r.stdout\n\ndef iso_utc(unix):\n    return datetime.fromtimestamp(int(unix), tz=timezone.utc).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\n\nhead = git(\"rev-parse\", \"HEAD\").strip()\ntotal = int(git(\"rev-list\", \"--count\", \"HEAD\").strip())\nmeta_raw = git(\"log\", \"--reverse\", \"--topo-order\", \"--format=\" + COMMIT_FMT)\nentries = []\nby_sha = {}\nfor rec in meta_raw.split(END_SEP):\n    rec = rec.strip(\"\\n\")\n    if not rec.strip():\n        continue\n    sha, parents, at, ct, an, cn, body = rec.split(REC_SEP)\n    entry = {\"commit\": sha, \"parents\": parents.split() if parents else [], \"authored_at\": iso_utc(at), \"committed_at\": iso_utc(ct), \"author\": an, \"committer\": cn, \"message\": body.strip(\"\\n\"), \"files\": []}\n    entries.append(entry)\n    by_sha[sha] = entry\nraw = git(\"log\", \"--reverse\", \"--topo-order\", \"--numstat\", \"--format=%H\")\ncurrent = None\nfor line in raw.splitlines():\n    if not line.strip():\n        continue\n    if len(line) == 40 and all(c in \"0123456789abcdef\" for c in line):\n        current = by_sha[line]\n    elif current is not None:\n        parts = line.split(\"\\t\")\n        if len(parts) == 3:\n            added, deleted, path = parts\n            current[\"files\"].append({\"path\": path, \"status\": \"binary\" if added == \"-\" else \"text\", \"lines_added\": None if added == \"-\" else int(added), \"lines_deleted\": None if deleted == \"-\" else int(deleted)})\n\nout_lines = [json.dumps({\"manifest\": \"part2/layers/git/git-export.jsonl\", \"generated_by\": \"build_git_export.py\", \"repo\": \"skchaudr/MyAPI\", \"head_commit\": head, \"commit_count\": total, \"scope\": \"full history, topo-order oldest-first\", \"date_convention\": \"all dates absolute ISO-8601 UTC\"}, sort_keys=True)]\nfor e in entries:\n    out_lines.append(json.dumps(e, sort_keys=True))\ncontent = \"\\n\".join(out_lines) + \"\\n\"\n\ncommitted = Path(\"/Users/sab-mini/repos/MyAPI/part2/layers/git/git-export.jsonl\").read_text()\nc_lines = content.splitlines()\nk_lines = committed.splitlines()\nprint(\"rebuilt lines:\", len(c_lines), \"committed lines:\", len(k_lines))\nsm = difflib.SequenceMatcher(None, c_lines, k_lines, autojunk=False)\ndiffs = 0\nfor tag, i1, i2, j1, j2 in sm.get_opcodes():\n    if tag != \"equal\":\n        diffs += 1\n        print(\"---\", tag, \"rebuilt[%d:%d] vs committed[%d:%d]\" % (i1, i2, j1, j2))\n        for l in c_lines[i1:i2][:3]:\n            print(\"  rebuilt :\", l[:300])\n        for l in k_lines[j1:j2][:3]:\n            print(\"  committed:\", l[:300])\n        if diffs >= 6:\n            break\nprint(\"diff blocks:\", diffs)\n'",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-21T09:46:40.897Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_zRZQI1mUEp6ar6uwmJCL7325",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-21T09:46:48.063Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Lu6eSTOCuTY3pMhLmKtD8843",
+          "command": "python3 -c '\nimport json, subprocess, difflib\nfrom datetime import datetime, timezone\nfrom pathlib import Path\n\nREPO = \"/tmp/gddp-verify-131.U8QHZb/repo\"\nREC_SEP = \"\\x1e\"\nEND_SEP = \"\\x1f\"\nCOMMIT_FMT = REC_SEP.join([\"%H\", \"%P\", \"%at\", \"%ct\", \"%aN\", \"%cN\"]) + REC_SEP + \"%B\" + END_SEP\n\ndef git(*args):\n    r = subprocess.run([\"git\", *args], cwd=REPO, capture_output=True, text=True)\n    return r.stdout\n\ndef iso_utc(unix):\n    return datetime.fromtimestamp(int(unix), tz=timezone.utc).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\n\nhead = git(\"rev-parse\", \"HEAD\").strip()\ntotal = int(git(\"rev-list\", \"--count\", \"HEAD\").strip())\nmeta_raw = git(\"log\", \"--reverse\", \"--topo-order\", \"--format=\" + COMMIT_FMT)\nentries = []\nby_sha = {}\nfor rec in meta_raw.split(END_SEP):\n    rec = rec.strip(\"\\n\")\n    if not rec.strip():\n        continue\n    sha, parents, at, ct, an, cn, body = rec.split(REC_SEP)\n    entry = {\"commit\": sha, \"parents\": parents.split() if parents else [], \"authored_at\": iso_utc(at), \"committed_at\": iso_utc(ct), \"author\": an, \"committer\": cn, \"message\": body.strip(\"\\n\"), \"files\": []}\n    entries.append(entry)\n    by_sha[sha] = entry\nraw = git(\"log\", \"--reverse\", \"--topo-order\", \"--numstat\", \"--format=%H\")\ncurrent = None\nfor line in raw.splitlines():\n    if not line.strip():\n        continue\n    if len(line) == 40 and all(c in \"0123456789abcdef\" for c in line):\n        current = by_sha[line]\n    elif current is not None:\n        parts = line.split(\"\\t\")\n        if len(parts) == 3:\n            added, deleted, path = parts\n            current[\"files\"].append({\"path\": path, \"status\": \"binary\" if added == \"-\" else \"text\", \"lines_added\": None if added == \"-\" else int(added), \"lines_deleted\": None if deleted == \"-\" else int(deleted)})\n\nout_lines = [json.dumps({\"manifest\": \"part2/layers/git/git-export.jsonl\", \"generated_by\": \"build_git_export.py\", \"repo\": \"skchaudr/MyAPI\", \"head_commit\": head, \"commit_count\": total, \"scope\": \"full history, topo-order oldest-first\", \"date_convention\": \"all dates absolute ISO-8601 UTC\"}, sort_keys=True)]\nfor e in entries:\n    out_lines.append(json.dumps(e, sort_keys=True))\ncontent = \"\\n\".join(out_lines) + \"\\n\"\n\ncommitted = Path(\"/Users/sab-mini/repos/MyAPI/part2/layers/git/git-export.jsonl\").read_text()\nc_lines = content.splitlines()\nk_lines = committed.splitlines()\nprint(\"rebuilt lines:\", len(c_lines), \"committed lines:\", len(k_lines))\nsm = difflib.SequenceMatcher(None, c_lines, k_lines, autojunk=False)\ndiffs = 0\nfor tag, i1, i2, j1, j2 in sm.get_opcodes():\n    if tag != \"equal\":\n        diffs += 1\n        print(\"---\", tag, \"rebuilt[%d:%d] vs committed[%d:%d]\" % (i1, i2, j1, j2))\n        for l in c_lines[i1:i2][:3]:\n            print(\"  rebuilt :\", l[:300])\n        for l in k_lines[j1:j2][:3]:\n            print(\"  committed:\", l[:300])\n        if diffs == 8:\n            break\nprint(\"diff blocks:\", diffs)\n'"
+        },
+        {
+          "ts": "2026-08-21T09:46:48.494Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Lu6eSTOCuTY3pMhLmKtD8843",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:47:13.214Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_eKTRUwvEPiwanLE2I2yU6280",
+          "command": "python3 -c '\nimport json, subprocess, difflib\nfrom datetime import datetime, timezone\nfrom pathlib import Path\nREPO = \"/tmp/gddp-verify-131.U8QHZb/repo\"\nREC_SEP = \"\\x1e\"; END_SEP = \"\\x1f\"\nCOMMIT_FMT = REC_SEP.join([\"%H\",\"%P\",\"%at\",\"%ct\",\"%aN\",\"%cN\"]) + REC_SEP + \"%B\" + END_SEP\ndef git(*args):\n    r = subprocess.run([\"git\",\"*args\" if False else *args], cwd=REPO, capture_output=True, text=True)\n    return r.stdout\ndef iso_utc(unix):\n    return datetime.fromtimestamp(int(unix), tz=timezone.utc).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\nhead = git(\"rev-parse\",\"HEAD\").strip()\ntotal = int(git(\"rev-list\",\"--count\",\"HEAD\").strip())\nmeta_raw = git(\"log\",\"--reverse\",\"--topo-order\",\"--format=\"+COMMIT_FMT)\nentries=[]; by_sha={}\nfor rec in meta_raw.split(END_SEP):\n    rec = rec.strip(\"\\n\")\n    if not rec.strip(): continue\n    sha,parents,at,ct,an,cn,body = rec.split(REC_SEP)\n    e = {\"commit\":sha,\"parents\":parents.split() if parents else [],\"authored_at\":iso_utc(at),\"committed_at\":iso_utc(ct),\"author\":an,\"committer\":cn,\"message\":body.strip(\"\\n\"),\"files\":[]}\n    entries.append(e); by_sha[sha]=e\nraw = git(\"log\",\"--reverse\",\"--topo-order\",\"--numstat\",\"--format=%H\")\ncurrent=None\nfor line in raw.splitlines():\n    if not line.strip(): continue\n    if len(line)==40 and all(c in \"0123456789abcdef\" for c in line):\n        current=by_sha[line]\n    elif current is not None:\n        parts=line.split(\"\\t\")\n        if len(parts)==3:\n            added,deleted,path=parts\n            current[\"files\"].append({\"path\":path,\"status\":\"binary\" if added==\"-\" else \"text\",\"lines_added\":None if added==\"-\" else int(added),\"lines_deleted\":None if deleted==\"-\" else int(deleted)})\nout_lines=[json.dumps({\"manifest\":\"part2/layers/git/git-export.jsonl\",\"generated_by\":\"build_git_export.py\",\"repo\":\"skchaudr/MyAPI\",\"head_commit\":head,\"commit_count\":total,\"scope\":\"full history, topo-order oldest-first\",\"date_convention\":\"all dates absolute ISO-8601 UTC\"},sort_keys=True)]\nfor e in entries: out_lines.append(json.dumps(e,sort_keys=True))\nrebuilt=out_lines\ncommitted=Path(\"/Users/sab-mini/repos/MyAPI/part2/layers/git/git-export.jsonl\").read_text().splitlines()\n# compare record-by-record by commit sha\nrmap={}\nfor l in rebuilt[1:]:\n    r=json.loads(l); rmap[r[\"commit\"]]=r\ncmap={}\nfor l in committed[1:]:\n    r=json.loads(l); cmap[r[\"commit\"]]=r\nprint(\"rebuilt commits:\", len(rmap), \"committed commits:\", len(cmap))\nprint(\"same commit set:\", set(rmap)==set(cmap))\ncount=0\nfor sha in rmap:\n    a=rmap[sha]; b=cmap.get(sha)\n    if b is None: continue\n    if a != b:\n        count+=1\n        if count==1 or count==2:\n            print(\"=== first differing commit\", sha, \"===\")\n            # compare fields\n            for k in a:\n                if a[k]!=b[k]:\n                    print(\" field:\", k)\n                    print(\"  rebuilt  :\", json.dumps(a[k])[:400])\n                    print(\"  committed:\", json.dumps(b[k])[:400])\nprint(\"records with any field difference:\", count)\n'"
+        },
+        {
+          "ts": "2026-08-21T09:47:13.263Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_eKTRUwvEPiwanLE2I2yU6280",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-21T09:47:18.748Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_krWkRXECxrNAJEkRKXs95126",
+          "command": "python3 -c '\nimport json, subprocess\nfrom datetime import datetime, timezone\nfrom pathlib import Path\nREPO = \"/tmp/gddp-verify-131.U8QHZb/repo\"\nREC_SEP = \"\\x1e\"; END_SEP = \"\\x1f\"\nCOMMIT_FMT = REC_SEP.join([\"%H\",\"%P\",\"%at\",\"%ct\",\"%aN\",\"%cN\"]) + REC_SEP + \"%B\" + END_SEP\ndef git(*args):\n    r = subprocess.run([\"git\", *args], cwd=REPO, capture_output=True, text=True)\n    return r.stdout\ndef iso_utc(unix):\n    return datetime.fromtimestamp(int(unix), tz=timezone.utc).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\nhead = git(\"rev-parse\",\"HEAD\").strip()\ntotal = int(git(\"rev-list\",\"--count\",\"HEAD\").strip())\nmeta_raw = git(\"log\",\"--reverse\",\"--topo-order\",\"--format=\"+COMMIT_FMT)\nentries=[]; by_sha={}\nfor rec in meta_raw.split(END_SEP):\n    rec = rec.strip(\"\\n\")\n    if not rec.strip(): continue\n    sha,parents,at,ct,an,cn,body = rec.split(REC_SEP)\n    e = {\"commit\":sha,\"parents\":parents.split() if parents else [],\"authored_at\":iso_utc(at),\"committed_at\":iso_utc(ct),\"author\":an,\"committer\":cn,\"message\":body.strip(\"\\n\"),\"files\":[]}\n    entries.append(e); by_sha[sha]=e\nraw = git(\"log\",\"--reverse\",\"--topo-order\",\"--numstat\",\"--format=%H\")\ncurrent=None\nfor line in raw.splitlines():\n    if not line.strip(): continue\n    if len(line)==40 and all(c in \"0123456789abcdef\" for c in line):\n        current=by_sha[line]\n    elif current is not None:\n        parts=line.split(\"\\t\")\n        if len(parts)==3:\n            added,deleted,path=parts\n            current[\"files\"].append({\"path\":path,\"status\":\"binary\" if added==\"-\" else \"text\",\"lines_added\":None if added==\"-\" else int(added),\"lines_deleted\":None if deleted==\"-\" else int(deleted)})\nout_lines=[json.dumps({\"manifest\":\"part2/layers/git/git-export.jsonl\",\"generated_by\":\"build_git_export.py\",\"repo\":\"skchaudr/MyAPI\",\"head_commit\":head,\"commit_count\":total,\"scope\":\"full history, topo-order oldest-first\",\"date_convention\":\"all dates absolute ISO-8601 UTC\"},sort_keys=True)]\nfor e in entries: out_lines.append(json.dumps(e,sort_keys=True))\nrebuilt=out_lines\ncommitted=Path(\"/Users/sab-mini/repos/MyAPI/part2/layers/git/git-export.jsonl\").read_text().splitlines()\nrmap={}; cmap={}\nfor l in rebuilt[1:]: r=json.loads(l); rmap[r[\"commit\"]]=r\nfor l in committed[1:]: r=json.loads(l); cmap[r[\"commit\"]]=r\nprint(\"rebuilt commits:\", len(rmap), \"committed commits:\", len(cmap))\nprint(\"same commit set:\", set(rmap)==set(cmap))\ncount=0\nfor sha in rmap:\n    a=rmap[sha]; b=cmap.get(sha)\n    if b is None: continue\n    if a != b:\n        count+=1\n        if count in (1,2,3):\n            print(\"=== differing commit\", sha, \"===\")\n            for k in a:\n                if a[k]!=b[k]:\n                    print(\" field:\", k)\n                    print(\"  rebuilt  :\", json.dumps(a[k])[:400])\n                    print(\"  committed:\", json.dumps(b[k])[:400])\nprint(\"records with any field difference:\", count)\n'"
+        },
+        {
+          "ts": "2026-08-21T09:47:19.184Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_krWkRXECxrNAJEkRKXs95126",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:47:29.842Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_RC6TiMxvDg0D9jhFnidK6226",
+          "command": "cd /tmp/gddp-verify-131.U8QHZb/repo && echo \"=== git version ===\" && git --version && echo \"=== diff-related config ===\" && git config --list | grep -i diff; echo \"(rc=$?)\" && echo \"=== numstat for 28d44c6 default ===\" && git show --numstat --format= 28d44c6 | head -3 && echo \"=== with histogram ===\" && git -c diff.algorithm=histogram show --numstat --format= 28d44c6 | head -3 && echo \"=== with patience ===\" && git -c diff.algorithm=patience show --numstat --format= 28d44c6 | head -3 && echo \"=== with myers ===\" && git -c diff.algorithm=myers show --numstat --format= 28d44c6 | head -3"
+        },
+        {
+          "ts": "2026-08-21T09:47:29.892Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_RC6TiMxvDg0D9jhFnidK6226",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:47:36.045Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_4QPqq380ECQsnCATqhFB0468",
+          "command": "echo \"=== source repo config (all, with origin) ===\" && cd /Users/sab-mini/repos/MyAPI && git config --list --show-origin 2>/dev/null | grep -iE \"diff|core\" ; echo \"=== global/user gitconfig diff settings ===\" && git config --global --list 2>/dev/null | grep -i diff; echo \"(global rc=$?)\" && echo \"=== system gitconfig diff settings ===\" && git config --system --list 2>/dev/null | grep -i diff; echo \"(system rc=$?)\" && echo \"=== .gitattributes in repo? ===\" && ls -la /Users/sab-mini/repos/MyAPI/.gitattributes 2>/dev/null; find /Users/sab-mini/repos/MyAPI -maxdepth 2 -name \".gitattributes\" 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-21T09:47:36.045Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ZdB8ubT336Z180pyInoZ2936",
+          "command": "echo \"=== scratch clone config diff settings ===\" && git -C /tmp/gddp-verify-131.U8QHZb/repo config --list --show-origin 2>/dev/null | grep -iE \"diff|core\" ; echo \"=== env GIT_CONFIG* ===\" && env | grep -i git; echo \"=== other global configs (XDG) ===\" && ls -la ~/.gitconfig ~/.config/git/config 2>/dev/null; cat ~/.gitconfig 2>/dev/null | head -40"
+        },
+        {
+          "ts": "2026-08-21T09:47:36.070Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ZdB8ubT336Z180pyInoZ2936",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:47:36.082Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_4QPqq380ECQsnCATqhFB0468",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:47:50.737Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_2LTBg1WP7Rsn1cJDPGiu7625",
+          "command": "python3 -c '\nimport json, subprocess, hashlib\nfrom datetime import datetime, timezone\nfrom pathlib import Path\nREPO = \"/tmp/gddp-verify-131.U8QHZb/repo\"\nREC_SEP = \"\\x1e\"; END_SEP = \"\\x1f\"\nCOMMIT_FMT = REC_SEP.join([\"%H\",\"%P\",\"%at\",\"%ct\",\"%aN\",\"%cN\"]) + REC_SEP + \"%B\" + END_SEP\ndef git(*args):\n    r = subprocess.run([\"git\", *args], cwd=REPO, capture_output=True, text=True)\n    return r.stdout\ndef iso_utc(unix):\n    return datetime.fromtimestamp(int(unix), tz=timezone.utc).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\ndef build(extra_cfg):\n    head = git(*extra_cfg, \"rev-parse\",\"HEAD\").strip()\n    total = int(git(*extra_cfg, \"rev-list\",\"--count\",\"HEAD\").strip())\n    meta_raw = git(*extra_cfg, \"log\",\"--reverse\",\"--topo-order\",\"--format=\"+COMMIT_FMT)\n    entries=[]; by_sha={}\n    for rec in meta_raw.split(END_SEP):\n        rec = rec.strip(\"\\n\")\n        if not rec.strip(): continue\n        sha,parents,at,ct,an,cn,body = rec.split(REC_SEP)\n        e = {\"commit\":sha,\"parents\":parents.split() if parents else [],\"authored_at\":iso_utc(at),\"committed_at\":iso_utc(ct),\"author\":an,\"committer\":cn,\"message\":body.strip(\"\\n\"),\"files\":[]}\n        entries.append(e); by_sha[sha]=e\n    raw = git(*extra_cfg, \"log\",\"--reverse\",\"--topo-order\",\"--numstat\",\"--format=%H\")\n    current=None\n    for line in raw.splitlines():\n        if not line.strip(): continue\n        if len(line)==40 and all(c in \"0123456789abcdef\" for c in line):\n            current=by_sha[line]\n        elif current is not None:\n            parts=line.split(\"\\t\")\n            if len(parts)==3:\n                added,deleted,path=parts\n                current[\"files\"].append({\"path\":path,\"status\":\"binary\" if added==\"-\" else \"text\",\"lines_added\":None if added==\"-\" else int(added),\"lines_deleted\":None if deleted==\"-\" else int(deleted)})\n    out_lines=[json.dumps({\"manifest\":\"part2/layers/git/git-export.jsonl\",\"generated_by\":\"build_git_export.py\",\"repo\":\"skchaudr/MyAPI\",\"head_commit\":head,\"commit_count\":total,\"scope\":\"full history, topo-order oldest-first\",\"date_convention\":\"all dates absolute ISO-8601 UTC\"},sort_keys=True)]\n    for e in entries: out_lines.append(json.dumps(e,sort_keys=True))\n    return (\"\\n\".join(out_lines)+\"\\n\").encode(\"utf-8\")\n\ncommitted = Path(\"/Users/sab-mini/repos/MyAPI/part2/layers/git/git-export.jsonl\").read_bytes()\nprint(\"committed sha256:\", hashlib.sha256(committed).hexdigest())\nfor label, cfg in [(\"default(myers)\", []), (\"histogram\", [\"-c\",\"diff.algorithm=histogram\"]), (\"patience\", [\"-c\",\"diff.algorithm=patience\"])]:\n    b = build(cfg)\n    print(label, \"sha256:\", hashlib.sha256(b).hexdigest(), \"byte-identical:\", b == committed)\n'"
+        },
+        {
+          "ts": "2026-08-21T09:47:51.610Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_2LTBg1WP7Rsn1cJDPGiu7625",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:48:44.107Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_00_zNzaUYQd8Bi6BTjBSejd3302",
+          "reason": "command matched blocked pattern",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== HEAD ===\" && git rev-parse --short HEAD && echo \"=== part2/layers/git in HEAD tree ===\" && git ls-tree -r --name-only HEAD part2/layers/git/ && echo \"=== is 0fbcb09 ancestor of HEAD? ===\" && git merge-base --is-ancestor 0fbcb09 HEAD && echo \"YES-0fbcb09-IS-ANCESTOR\" && echo \"=== working tree status for these files ===\" && git status --porcelain part2/layers/git/ ; echo \"(empty=clean)\" && echo \"=== only two files in dir? ===\" && ls -1 part2/layers/git/",
+          "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+        },
+        {
+          "ts": "2026-08-21T09:48:44.108Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_zNzaUYQd8Bi6BTjBSejd3302",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-21T09:48:47.398Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ILLlrSV49zWbYuW4zT9w7816",
+          "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== HEAD ===\" && git rev-parse --short HEAD && echo \"=== part2/layers/git in HEAD tree ===\" && git ls-tree -r --name-only HEAD part2/layers/git/ && echo \"=== is 0fbcb09 an ancestor of HEAD (count of rev-list hits) ===\" && git rev-list HEAD | grep -c \"^0fbcb09\" ; echo \"=== working tree status for these files ===\" && git status --porcelain part2/layers/git/ ; echo \"(empty=clean)\" && echo \"=== only two files in dir? ===\" && ls -1 part2/layers/git/"
+        },
+        {
+          "ts": "2026-08-21T09:48:47.446Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ILLlrSV49zWbYuW4zT9w7816",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:49:21.896Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_qXTRa02nwff7fww2AL633415",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ],
+      "prompt_cache_report": {
+        "total_input_tokens": 4492,
+        "protocol_tokens": 765,
+        "project_tokens": 1260,
+        "node_tokens": 761,
+        "attempt_tokens": 1706,
+        "potential_reuse_tokens": 2786,
+        "potential_reuse_ratio": 0.6202,
+        "actual_cached_tokens": 5367936
+      }
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node-06 was re-executed after the earlier empty-result attempt (40cfdbe, correctly failed on 2026-08-16): the re-dispatch (0fbcb09) produced the full deliverable at /Users/sab-mini/repos/MyAPI/part2/layers/git/ — build_git_export.py + git-export.jsonl — committed, tracked in current HEAD, working tree clean. Two of the three acceptance criteria are satisfied: (1) export-created — a 164-commit export covering commits, absolute timestamps, parents, affected files, full messages, and per-file numstat change evidence for the single repo the revised contract names (skchaudr/MyAPI); (2) absolute-dates — every temporal field is absolute ISO-8601 UTC, verified programmatically, no relative dates. The third criterion, reproducible, fails at moderate confidence: the recorded sha256 (b3ae90b0... in commit message 0fbcb09) matches the committed artifact, but an empirical rebuild of the exact script pipeline at the exact generation state (131a143/164 commits) under the repo's own default configuration yields a different sha256 (2551e0c...) because 9 of 164 records' numstat values depend on git's diff algorithm; byte-identity holds only with an unrecorded `diff.algorithm=histogram` that is pinned nowhere (not in the script, repo config, global config, or any manifest). The script's docstring claim that output depends only on immutable git objects is inaccurate, so the criterion's literal test — re-run produces byte-identical output / recorded sha256 matches on rebuild — does not hold in the environment where the artifact resides. This is a genuine reproducibility defect for node 09's R-2 rebuild gate, not a completeness nit. All constraint checks remain clear (artifacts written only under part2/, single-repo scope per the revised contract, no graph-truth or runtime-state edits observed).",
+  "required_next_action": "Address semantic failures and re-submit.",
+  "generated_at": "2026-08-21T09:52:12.811541+00:00",
+  "evaluated_tree_sha": "36a3eec09a59edf672bf50aa27cf1e5d1b8985ea",
+  "evaluated_commit_sha": "0fbcb09c1de17561e4cda9c2aa3bf9a0046c5f56",
+  "merge_commit_sha": "0fbcb09c1de17561e4cda9c2aa3bf9a0046c5f56",
+  "expected_base_commit_sha": "131a143fa0bfa4151645a29fedb80f99c7df1055",
+  "pr_ref": null,
+  "job_id": "job_20260821T093228438f68b4ace762",
+  "execution_attempt_id": "job_20260821T093228438f68b4ace762:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-fsmu4ch1/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-fsmu4ch1/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+    "neighbor:node-01b-contract-review": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 4,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-fsmu4ch1/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-fsmu4ch1/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 4,
+      "content_accessed": 4,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-fsmu4ch1/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-fsmu4ch1/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "high"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-21T09:43:52.001420+00:00",
+    "finished_at": "2026-08-21T09:52:12.811480+00:00",
+    "wall_s": 500.814,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 330.09,
+      "tool_calls": 37
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 170.69,
+      "tool_calls": 19
+    }
+  }
+}

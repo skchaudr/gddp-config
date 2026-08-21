@@ -1,0 +1,1104 @@
+{
+  "project_id": "myapi-part2",
+  "node_id": "node-05-inventory-handoffs",
+  "verdict": "fail",
+  "criteria_verdict": "fail",
+  "integrity": {
+    "verdict": "drift",
+    "intent_preserved": false,
+    "graph_integrity_preserved": true,
+    "required_human_review": true,
+    "confidence": 0.72,
+    "findings": [
+      {
+        "severity": "medium",
+        "summary": "009-legacy-handoff-template.md is a blank legacy template (title identical to the 000 template placeholder, no session content) yet is classified included=true as a session record. The governing contract (CENSUS-HANDOFF / SC-03-P, node-01b revision) requires templates to default to inclusion_status=excluded with exclusion_reason=EX-template, and explicitly lists 'treat templates as project history' as a FAIL condition. This misclassification changes what the downstream handoff source layer will ingest.",
+        "affected_node_ids": [
+          "node-05-inventory-handoffs"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "The VM-only axis is unresolved without evidence. The constraint requires probing the VM surfaces named in AGENTS.md (sab-dev) and .handoffs/030 (khoj-38:~/corpus-work/session-review/ with ~35 cleaned UA sessions, from-air/, git-maps/) and marking unreachable artifacts missing with evidence of unreachability. The manifest asserts vm_only=false on all 26 rows with only an acknowledgment note ('not verifiable from this checkout'); no probe attempt or unreachability evidence exists anywhere under part2/. This under-delivers the node's why ('resolve ... VM-only ... artifacts') and skirts the 'never drop silently' constraint.",
+        "affected_node_ids": [
+          "node-05-inventory-handoffs"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Missing artifacts (001, 003-008, 016-019) exist only as a census-level array, not as per-artifact presence=missing stub rows as the contract's CENSUS-HANDOFF requires ('stub missing 000-036'). Exact reproduction of the excluded set is weaker than the contract's 'one row per census hit' design.",
+        "affected_node_ids": [
+          "node-05-inventory-handoffs"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The duplicate|moved|unique and current|superseded classification axes from memo section 05 are absent from manifest entries; only git-backed|VM-only (vm_only) and dated|temporally-ambiguous (occurred_at + basis) are implemented, plus census-level present|missing. The five-axis resolution promised by the node's why is only partially delivered.",
+        "affected_node_ids": [
+          "node-05-inventory-handoffs"
+        ]
+      }
+    ],
+    "reasoning": "Fresh-eyes review of node-05 (Inventory the MyAPI handoffs) against its why, constraints, upstream contract (node-01 evidence contract as revised by node-01b), and the current repo state at HEAD (53f0ca8). The deliverable is a genuine, deterministic, provenance-preserving inventory: build_handoff_manifest.py regenerates part2/layers/handoffs/handoff-manifest.jsonl purely from .handoffs/ contents plus git add-dates; every entry carries sha256, bytes, occurred_at (+ occurred_at_basis), recorded_at, and inclusion state; the census enumerates the 11 missing numbers with a reason; 000-template is excluded. At commit 131a143 (the subject tip) the manifest exactly matched the repo (26 .handoffs files, matching the contract's pinned live facts: 26 files, missing 001,003-008,016-019), and the node wrote only under part2/layers/handoffs/, so structural graph integrity is preserved. However, the work subtly veers from the node's intended role in ways that affect downstream consumption: (1) 009-legacy-handoff-template.md (a blank template) is included as a session record — the contract's SC-03-P explicitly flags treating templates as project history as a FAIL, and the handoff layer node-08 builds will ingest a template as a handoff; (2) the VM-only question is closed (vm_only=false on all rows) with an acknowledgment note rather than the probe-plus-evidence-of-unreachability the constraint mandates, despite .handoffs/030 naming concrete VM paths; (3) missing artifacts are not stubbed as presence=missing rows; (4) the duplicate/moved and current/superseded axes are absent. Separately, the committed manifest is now stale relative to HEAD because merge 53f0ca8 landed 4 additional .handoffs files (and duplicate numbers 030/031/032) after the manifest was committed — this is a post-node merge artifact, not an execution error, so it is raised as a forward-looking graph observation (regenerate before node-08 consumes the layer). Because the core inventory is real and reproducible but the resolution of VM-only/duplicate/superseded/missing artifacts — the heart of the node's why — is only partially and in places incorrectly delivered, the verdict is drift with human review recommended before dependents fire.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-21T09:37:20.047Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_dnNMnzj8bKw13c2ZF2zS6588",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-k6veshhe && ls -la && echo \"---\" && cat PROJECT-BRIEF.md 2>/dev/null | head -100"
+      },
+      {
+        "ts": "2026-08-21T09:37:20.049Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_9xMx02D80ts0sToBue9l7819",
+        "command": "cd /Users/sab-mini/repos/MyAPI 2>/dev/null && ls -la part2/layers/handoffs/ 2>/dev/null && echo \"===\" && git -C /Users/sab-mini/repos/MyAPI log --oneline -5 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-21T09:37:20.075Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_dnNMnzj8bKw13c2ZF2zS6588",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:37:20.150Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_9xMx02D80ts0sToBue9l7819",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:37:22.912Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_uDf9KbFtLIKZUviQWhzm7712",
+        "command": "cat /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-k6veshhe/.git 2>/dev/null; echo \"---\"; cd /Users/sab-mini/repos/MyAPI && git status --short 2>/dev/null | head -20; echo \"---\"; git log --oneline -3 -- part2/layers/handoffs/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-21T09:37:22.913Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_XyHWSOAPVTcB4jxnNE136924",
+        "command": "cat /Users/sab-mini/repos/MyAPI/part2/layers/handoffs/handoff-manifest.jsonl 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-21T09:37:22.933Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_XyHWSOAPVTcB4jxnNE136924",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:37:22.973Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_uDf9KbFtLIKZUviQWhzm7712",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:37:25.378Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_APDMoj5Ri5fpPW5xO9nL0964",
+        "command": "cd /Users/sab-mini/repos/MyAPI && wc -l part2/layers/handoffs/handoff-manifest.jsonl && echo \"---\" && cat part2/layers/handoffs/build_handoff_manifest.py"
+      },
+      {
+        "ts": "2026-08-21T09:37:25.379Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_De2sYOSfa699dglNvCpx2031",
+        "command": "cd /Users/sab-mini/repos/MyAPI && ls -la .handoffs/ | head -50"
+      },
+      {
+        "ts": "2026-08-21T09:37:25.386Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_De2sYOSfa699dglNvCpx2031",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:37:25.386Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_APDMoj5Ri5fpPW5xO9nL0964",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:37:39.890Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_aiCY7L4E6iqp0tNRg4Uy5474",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== files in .handoffs tracked on main (HEAD) ===\" && git ls-tree -r --name-only HEAD -- .handoffs/ | sort && echo \"=== git log for the 4 suspect files ===\" && for f in .handoffs/030-decision-graph-implementation-plan.md .handoffs/031-decision-fixtures-grok-f06-f10.md .handoffs/032-decision-fixture-review-f01-f10.md .handoffs/037-archive-pre-part2-plan-evals.md; do echo \"--- $f\"; git log --oneline --follow -- \"$f\" 2>/dev/null | head -3; done"
+      },
+      {
+        "ts": "2026-08-21T09:37:39.890Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Q7J1gano7dZ4qmi9ysP24933",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== status of .handoffs ===\" && git status --short -- .handoffs/ && echo \"=== branch ===\" && git branch --show-current && echo \"=== HEAD ===\" && git rev-parse HEAD"
+      },
+      {
+        "ts": "2026-08-21T09:37:39.930Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Q7J1gano7dZ4qmi9ysP24933",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:37:39.971Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_aiCY7L4E6iqp0tNRg4Uy5474",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:37:47.606Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_IgyVhVd20B9NAKdKJIrp7680",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== commit topology ===\" && git log --oneline --graph -20 && echo \"=== .handoffs at bee41ba6 (subject base) ===\" && git ls-tree -r --name-only bee41ba6cf284057ff0e36416fe1b919d5395f16 -- .handoffs/ | sort && echo \"=== .handoffs at 131a143 (subject tip) ===\" && git ls-tree -r --name-only 131a143fa0bfa4151645a29fedb80f99c7df1055 -- .handoffs/ | sort"
+      },
+      {
+        "ts": "2026-08-21T09:37:47.606Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_OZkaeDcZAsNYm2klGfbX9350",
+        "command": "cat /Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml 2>/dev/null; echo \"=====FOUNDATIONAL=====\"; cat /Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml 2>/dev/null | head -120"
+      },
+      {
+        "ts": "2026-08-21T09:37:47.615Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_OZkaeDcZAsNYm2klGfbX9350",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:37:47.649Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_IgyVhVd20B9NAKdKJIrp7680",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:38:09.581Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_rLKuAwC6nT4LZRZU23wW1455",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== part2 tree ===\" && find part2 -type f | sort && echo \"=== memo? ===\" && ls docs/ && grep -rn \"29\" /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-21T09:38:09.581Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Pfp2GrVygwRagXhJzKO84233",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== AGENTS.md VM surfaces ===\" && grep -n -i \"vm\\|sab-dev\\|surface\" AGENTS.md | head -40"
+      },
+      {
+        "ts": "2026-08-21T09:38:09.592Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Pfp2GrVygwRagXhJzKO84233",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:38:09.594Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_rLKuAwC6nT4LZRZU23wW1455",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:38:11.703Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_f5SYfKsx5DqkF6z4xCDZ3137",
+        "command": "sed -n '15,35p' /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md; echo \"=== lines 115-150 ===\"; sed -n '115,150p' /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md"
+      },
+      {
+        "ts": "2026-08-21T09:38:11.703Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_udXbgjASzBynPBFf3dzV1554",
+        "command": "cd /Users/sab-mini/repos/MyAPI && sed -n '20,50p' AGENTS.md && echo \"=== evidence-contract.md (head) ===\" && head -80 part2/contract/evidence-contract.md"
+      },
+      {
+        "ts": "2026-08-21T09:38:11.710Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_f5SYfKsx5DqkF6z4xCDZ3137",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:38:11.711Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_udXbgjASzBynPBFf3dzV1554",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:38:51.386Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_00_U52ScUBmPGqeclMyWeLv9819",
+        "reason": "command matched blocked pattern",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== VM paths in .handoffs/030 ===\" && cat .handoffs/030-corpus-vm-semantic-graphify.md && echo \"=== any VM probe evidence in part2? ===\" && grep -rn -i \"unreachable\\|sab-dev\\|ssh\\|EX-unreachable\\|inclusion_status\" part2/ | head -20",
+        "pattern": "\\b(?:curl|wget|ssh|scp|sftp|rsync|nc|netcat|telnet|ftp|pip|npm|pnpm|yarn|brew)\\b"
+      },
+      {
+        "ts": "2026-08-21T09:38:51.387Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_U52ScUBmPGqeclMyWeLv9819",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-21T09:38:51.387Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_01_Fnli48tIlLrz9Me5LAO08229",
+        "reason": "command matched blocked pattern",
+        "command": "cd /Users/sab-mini/repos/MyAPI && cp part2/layers/handoffs/build_handoff_manifest.py /tmp/bhm.py && sed -i '' 's|REPO = Path(__file__).resolve().parents\\[3\\]|REPO = Path(\"/Users/sab-mini/repos/MyAPI\")|; s|OUT = Path(__file__).resolve().parent / \"handoff-manifest.jsonl\"|OUT = Path(\"/tmp/regen-manifest.jsonl\")|' /tmp/bhm.py && python3 /tmp/bhm.py && echo \"=== regenerated census ===\" && head -1 /tmp/regen-manifest.jsonl | python3 -m json.tool | head -20 && echo \"=== regenerated entry count ===\" && python3 -c \"\nimport json\nlines = open('/tmp/regen-manifest.jsonl').read().splitlines()\nentries = [json.loads(l) for l in lines if l.startswith('{\\\"artifact\\\"')]\nprint('entries:', len(entries))\nfor e in entries:\n    if e['number'] in (30,31,32,37): print(e['number'], e['artifact'], 'included=', e['included'])\n\"",
+        "pattern": "(?:^|\\s|&&|\\|\\|)\\s*cp\\s.*\\s+\\S+"
+      },
+      {
+        "ts": "2026-08-21T09:38:51.387Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Fnli48tIlLrz9Me5LAO08229",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-21T09:38:56.907Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_HAsegZOCMJKNaFp6quCA4295",
+        "path": "/Users/sab-mini/repos/MyAPI/.handoffs/030-corpus-vm-semantic-graphify.md"
+      },
+      {
+        "ts": "2026-08-21T09:38:56.908Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_01_nY3bhzx3gTW3p1na0owO8601",
+        "reason": "command matched blocked pattern",
+        "command": "cd /Users/sab-mini/repos/MyAPI && python3 - <<'EOF'\nimport pathlib, re\n# scan part2 for any VM probe / unreachability / inclusion_status evidence\nfor p in sorted(pathlib.Path('part2').rglob('*')):\n    if p.is_file():\n        t = p.read_text(errors='replace')\n        for kw in ('unreachable','inclusion_status','EX-unreachable','sab-dev','vm_only','VM-only','probe'):\n            if kw in t:\n                hits = [l.strip()[:120] for l in t.splitlines() if kw in l][:3]\n                print(f\"{p}: {kw} -> {hits}\")\n                break\nEOF",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-21T09:38:56.909Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_nY3bhzx3gTW3p1na0owO8601",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-21T09:38:56.914Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_HAsegZOCMJKNaFp6quCA4295",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:39:02.501Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_DFQNYJjDxFgWtBDX9gcQ8585",
+        "command": "cd /Users/sab-mini/repos/MyAPI && python3 - <<'EOF'\nimport pathlib\nfor p in sorted(pathlib.Path('part2').rglob('*')):\n    if p.is_file():\n        t = p.read_text(errors='replace')\n        for kw in ('unreachable','inclusion_status','EX-unreachable','sab-dev','vm_only','VM-only','probe','khoj-38'):\n            if kw in t:\n                hits = [l.strip()[:120] for l in t.splitlines() if kw in l][:2]\n                print(p, '|', kw, '|', hits)\n                break\nEOF"
+      },
+      {
+        "ts": "2026-08-21T09:39:02.502Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_01_ktVifVqUDBlI3ZCFwiwl6070",
+        "reason": "command matched blocked pattern",
+        "command": "cd /Users/sab-mini/repos/MyAPI && python3 - <<'EOF'\nimport pathlib, json, hashlib, re, subprocess\n# Replicate build_handoff_manifest.py logic read-only against current .handoffs/ to see what regeneration yields\nHANDOFF_DIR = pathlib.Path('.handoffs')\nDATE_LINE = re.compile(r\"^Date:\\s*(\\d{4}-\\d{2}-\\d{2})\", re.MULTILINE)\nISO_ANY = re.compile(r\"20\\d{2}-\\d{2}-\\d{2}\")\nNUM = re.compile(r\"^(\\d{3})-\")\ndef git_added(path):\n    r = subprocess.run([\"git\",\"log\",\"--diff-filter=A\",\"--follow\",\"--format=%aI\",\"--\",str(path)], cwd=\".\", capture_output=True, text=True)\n    lines = [l for l in r.stdout.splitlines() if l.strip()]\n    return lines[-1] if lines else \"\"\ndef occurred_at(path):\n    text = path.read_text(errors=\"replace\")\n    m = DATE_LINE.search(text)\n    if m: return m.group(1), \"header-date-line\"\n    b = ISO_ANY.search(text)\n    if b: return b.group(0), \"body-first-iso-mention\"\n    return None, \"absent-in-document\"\nentries=[]; present=set()\nfor path in sorted(HANDOFF_DIR.glob(\"*.md\")):\n    m = NUM.match(path.name)\n    num = int(m.group(1)) if m else None\n    if num: present.add(num)\n    entries.append((num, path.name))\nmaxn = max(present) if present else 0\ngaps = [n for n in range(1, maxn+1) if n not in present]\nprint(\"files on disk now:\", len(entries))\nprint(\"max number:\", maxn)\nprint(\"missing numbers:\", gaps)\nprint(\"numbers with duplicate files:\", sorted({n for n,_ in entries if sum(1 for x,_ in entries if x==n)>1}))\nEOF",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-21T09:39:02.502Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ktVifVqUDBlI3ZCFwiwl6070",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-21T09:39:02.619Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_DFQNYJjDxFgWtBDX9gcQ8585",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:39:17.714Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_pgIkLuJ4Gq306kq2iu1K2199",
+        "command": "cd /Users/sab-mini/repos/MyAPI && python3 - <<'EOF'\nimport pathlib\nt = pathlib.Path('part2/contract/evidence-contract.md').read_text()\ni = t.find('CENSUS-HANDOFF')\nprint(t[max(0,i-200):i+900])\nEOF"
+      },
+      {
+        "ts": "2026-08-21T09:39:17.714Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_T907whzo7446K8wGVY1N9278",
+        "command": "cd /Users/sab-mini/repos/MyAPI && python3 - <<'EOF'\nimport pathlib\nt = pathlib.Path('part2/contract/contract-rationale.md').read_text()\ni = t.find('SC-03-P')\nprint(t[max(0,i-400):i+700])\nEOF"
+      },
+      {
+        "ts": "2026-08-21T09:39:17.753Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_T907whzo7446K8wGVY1N9278",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:39:17.754Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_pgIkLuJ4Gq306kq2iu1K2199",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:39:56.123Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_NUfY05HeuDC9gwOJxKir6058",
+        "command": "cd /Users/sab-mini/repos/MyAPI && echo \"=== 009 content ===\" && cat .handoffs/009-legacy-handoff-template.md && echo \"\" && echo \"=== 000 content (first 12 lines) ===\" && head -12 .handoffs/000-template.md"
+      },
+      {
+        "ts": "2026-08-21T09:39:56.123Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_zxisLQnhY4gnPsRdnKO05553",
+        "command": "cd /Users/sab-mini/repos/MyAPI && python3 - <<'EOF'\nimport pathlib, json\nlines = pathlib.Path('part2/layers/handoffs/handoff-manifest.jsonl').read_text().splitlines()\ncensus = json.loads(lines[0])['census']\nentries = [json.loads(l) for l in lines[1:]]\nprint('census:', census)\nprint('entries:', len(entries))\nprint('entries with occurred_at null:', sum(1 for e in entries if e['occurred_at'] is None))\nprint('entries with recorded_at empty:', sum(1 for e in entries if not e.get('recorded_at')))\nprint('009 row:', [e for e in entries if e['number']==9][0])\nEOF"
+      },
+      {
+        "ts": "2026-08-21T09:39:56.133Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_NUfY05HeuDC9gwOJxKir6058",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:39:56.167Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_zxisLQnhY4gnPsRdnKO05553",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-21T09:40:17.788Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_N6wAKx83zNcyoqPyIM2X7066",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "handoff-manifest.jsonl is stale relative to main HEAD: merge 53f0ca8 landed 4 additional .handoffs files (030-decision-graph-implementation-plan, 031-decision-fixtures-grok-f06-f10, 032-decision-fixture-review-f01-f10, 037-archive-pre-part2-plan-evals) after the manifest commit 131a143, and numbers 030/031/032 now each have two files (duplicate-number namespace). The build script is deterministic and re-runnable; regenerate the manifest before node-08 builds the handoff source layer, and adjudicate whether the decision-fixture/plan docs under .handoffs belong to the handoffs layer or the decisions layer (node-04/05 boundary).",
+        "affected_node_ids": [
+          "node-05-inventory-handoffs",
+          "node-08-build-source-layers",
+          "node-09-validate-corpus"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Manifest schema uses included(bool) + exclusion_reason where the contract names inclusion_status + EX-* codes. Downstream node-08/node-09 consumers should either adopt the manifest schema explicitly or normalize to the contract field names to avoid mechanical mismatch during layer build and corpus validation.",
+        "affected_node_ids": [
+          "node-08-build-source-layers",
+          "node-09-validate-corpus"
+        ]
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.15000000000000002,
+  "criteria_confidence": 0.15000000000000002,
+  "completeness": 1.0,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "manifest-complete",
+        "criterion": "part2/layers/handoffs/handoff-manifest.jsonl has one entry per handoff artifact found (the 29 known plus any VM-only, duplicate, or moved artifacts), each classified on every axis: git-backed|VM-only, duplicate|moved|unique, current|superseded, dated|temporally-ambiguous, present|missing",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "handoff\\-manifest -> line 1: 'handoff-manifest'"
+        ],
+        "reasoning": "Scanned source files (part2/layers/handoffs/handoff-manifest.jsonl) for identifiers named in the criterion (handoff-manifest, VM-only, git-backed, VM-only, temporally-ambiguous). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "inclusion-reproducible",
+        "criterion": "The manifest records exactly which handoffs are included for corpus construction and the reason for every exclusion, so the included set can be reproduced exactly",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "chronology-preserved",
+        "criterion": "Every entry carries occurred_at and recorded_at per the evidence contract; no summarization replaces the source listing",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/acceptance.py, scripts/audit_tags_v4.py, scripts/benchmark_to_refinement_queue.py, scripts/build_daily_active_corpus.py...) for identifiers named in the criterion (occurred_at, recorded_at). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "The governing memo is /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md - read it first. GDDP gates whether the experiment was executed correctly, never whether the hypothesis won.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Execution model (operator direction 2026-08-15, enforced by the attempt preamble): You are the ORCHESTRATOR, not the worker. Do NOT perform the node's work yourself. Decompose it and dispatch worker subagents (up to 5 concurrent, model xai/grok-4.6 via the subagent tool's model parameter) to do the actual investigation, construction, and measurement. Your job is decomposition, dispatch, reviewing returns, integrating, and producing the final artifacts.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Watching (operator direction 2026-08-15): never block on sleep loops or polling scripts. When work is in flight (worker subagents, Khoj ingestion/processing, long builds), dispatch ONE watcher subagent on model deepseek/deepseek-v4-flash that actively polls with tools (job status, logs, artifact existence) and reports state changes; you go idle between its reports instead of polling yourself.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Think past this node: graph completion is the goal, not this node alone. You persist beyond node boundaries, so leave part2/ self-describing (manifests, paths, conventions) such that the next node starts without archaeology. Attach discoveries to this node as evidence; work discovered beyond this node's scope becomes a continuation proposal, never silent execution.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Work in /Users/sab-mini/repos/MyAPI. Write only under part2/ unless this node's text names another path. Never edit GDDP graph truth, runtime databases, or job state.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Check the VM surfaces named in MyAPI AGENTS.md (sab-dev) for VM-only handoffs; if a surface is unreachable, mark its artifacts missing with the evidence of unreachability - never drop silently.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Close with parallel reviewer subagents on model deepseek/deepseek-v4-pro, each assigned a different explicit focus (criteria coverage, evidence integrity, constraint compliance). Resolve their findings before returning.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "part2/layers/handoffs/handoff-manifest.jsonl": true
+    },
+    "deps_status": {
+      "node-01b-contract-review": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "bee41ba6cf284057ff0e36416fe1b919d5395f16",
+      "tip": "131a143fa0bfa4151645a29fedb80f99c7df1055",
+      "files": [
+        {
+          "status": "A",
+          "path": "part2/layers/handoffs/build_handoff_manifest.py"
+        },
+        {
+          "status": "A",
+          "path": "part2/layers/handoffs/handoff-manifest.jsonl"
+        }
+      ],
+      "truncated": false,
+      "file_count": 2,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "manifest-complete",
+        "judgment": "judged_fail",
+        "confidence": 0.85,
+        "evidence": [
+          "part2/layers/handoffs/handoff-manifest.jsonl (27 lines: census + 26 entries, one per .handoffs/*.md; all 26 files git-tracked per git status)",
+          "entry keys: artifact, bytes, exclusion_reason, included, number, occurred_at, occurred_at_basis, recorded_at, sha256, title, vm_only — no duplicate|moved|unique and no current|superseded field",
+          "git history: 678b9b7 'docs: normalize handoffs directory' renamed HANDOFF-PI-README.md->002, VM-MIGRATION-HANDOFF.md->023, handoff-for-khoj-vm.md->024 (moved artifacts exist, unclassified)",
+          "git history: 64e063e 'docs: remove fabricated workflow handoff' deleted .handoffs/001-agent-workflow-handoff-standard.md on main (added 678b9b7), contradicting census note 'Missing numbers were never committed to this repo on main'",
+          "009-legacy-handoff-template.md: 230 bytes, empty template skeleton, title '000 - *Session Name / Stopping Point*', marked included:true with no exclusion_reason",
+          "evidence-contract.md CENSUS-HANDOFF: 'stub missing 000-036; probe VM paths named in AGENTS.md / .handoffs/030 and keep unreachable as inclusion_status=excluded + EX-unreachable-vm; do not redefine 29 as 26'",
+          "AGENTS.md lines 28-31: 'VM sab-dev (myapi + myapi-corpus): vault at ../myapi-corpus/Corpus v1.0/'",
+          ".handoffs/030-corpus-vm-semantic-graphify.md: VM-only paths khoj-38:~/corpus-work/**, ~/khoj-data/notes/ (no probe recorded in manifest)",
+          "11 missing numbers appear only in census list; no per-artifact missing stubs"
+        ],
+        "reasoning": "The manifest correctly enumerates the 26 found .handoffs/*.md files (one entry each, all git-backed), matching the contract's live facts. However it does not classify each artifact on every required axis: (a) duplicate|moved|unique axis is entirely absent from the schema although git history proves moved artifacts (002/023/024 renames) and a template duplicate (009) exist; (b) current|superseded axis is entirely absent; (c) present|missing is not per-artifact — the 11 missing numbers get no stub entries, contrary to the contract CENSUS-HANDOFF directive 'stub missing 000-036'; (d) git-backed|VM-only is only a boolean vm_only=false for all entries with no VM-surface probe and no EX-unreachable-vm evidence, despite AGENTS.md naming VM sab-dev and .handoffs/030 naming khoj-38 paths; the census note substitutes a soft 'not verifiable from this checkout' claim for the required probe; (e) the census note is factually wrong for #001 (committed then removed as fabricated on main). Additionally 009-legacy-handoff-template.md (an empty template) is marked included though contract §9 defaults templates to excluded/EX-template, and the '29 known' memo target is never reconciled. The deterministic keyword scan flagged the file as present but could not judge the axis-level classification, which is exactly what fails here."
+      },
+      {
+        "criterion_id": "inclusion-reproducible",
+        "judgment": "judged_pass",
+        "confidence": 0.55,
+        "evidence": [
+          "manifest census: files_found 26, included 25, excluded 1; every entry carries included:true/false",
+          "single exclusion (000-template.md) has exclusion_reason 'canonical template, not a session record'",
+          "build_handoff_manifest.py is deterministic: output depends only on .handoffs/ contents + git add-dates; re-running reproduces the same included set",
+          "009-legacy-handoff-template.md marked included:true (template mis-included)",
+          "missing numbers 1,3-8,16-19 recorded only in census list with one (inaccurate for #001) note, not per-artifact"
+        ],
+        "reasoning": "The mechanical core of the criterion is met: the manifest records included=true/false for every entry, records a reason for the one exclusion it applies, and the builder script is deterministic so the recorded included set can be reproduced exactly by re-running it. Caveats that prevent higher confidence: the recorded included set itself is arguably wrong (009-legacy-handoff-template.md, an empty template, is marked included contrary to contract §9 'templates default excluded/EX-template', so node 08/09 would inherit a template into the handoffs layer unless they re-filter); the exclusion_reason is free-text rather than a closed EX-* code; and the 11 missing artifacts have no per-artifact exclusion record — their non-inclusion rests on a census note that is factually incorrect for #001. These are substantive correctness risks to the corpus, but they concern the content of the inclusion decision rather than the criterion's recording/reproducibility mechanics, which are satisfied."
+      },
+      {
+        "criterion_id": "chronology-preserved",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "all 26 entries carry occurred_at key (7 null with occurred_at_basis='absent-in-document')",
+          "all 26 entries carry recorded_at key with ISO datetime from git add-date (0 nulls)",
+          "per-entry rows list artifact path, title, sha256, bytes — source listing preserved, no summarization",
+          "evidence-contract.md §8: occurred_at=when it happened, recorded_at=when written down; keys always exist; null allowed for unknown; no guessing"
+        ],
+        "reasoning": "Every entry carries both occurred_at and recorded_at per the contract's time rules: occurred_at is null only where the document contains no date and occurred_at_basis records the basis (absent-in-document), and recorded_at is the measured git add-date present on every entry. The manifest does not summarize the source history away — each artifact is individually listed with its own row, hash, and provenance fields. Minor observations not rising to a violation: the manifest uses occurred_at_basis instead of the contract envelope's temporal_confidence label (manifest is not a corpus item, so the full 12-key envelope is not required here), and entry 026's recorded_at (2026-07-01T21:30) precedes its occurred_at (2026-07-02) — measured git truth, not a guess."
+      }
+    ],
+    "overall_reasoning": "Node-05's deliverable (handoff-manifest.jsonl + build_handoff_manifest.py, the only two files in the subject diff, both under part2/ — no scope violation) is a mechanically sound, deterministic enumeration of the 26 .handoffs/*.md files present in the checkout, with per-entry hashes and chronology fields. It matches the evidence contract's live facts for counts (26 files; missing 1,3-8,16-19). However, it does not meet the node's central acceptance criterion: the manifest fails to classify each artifact on the required axes. The duplicate|moved|unique and current|superseded axes are entirely absent from the entry schema even though git history proves moved artifacts exist (002/023/024 renamed in 678b9b7), the present|missing axis is not per-artifact (no stub entries for the 11 missing numbers, contrary to the contract's CENSUS-HANDOFF 'stub missing 000-036'), and the git-backed|VM-only axis was never actually probed — AGENTS.md (VM sab-dev) and .handoffs/030 (khoj-38) name VM surfaces the contract says to probe, and the manifest records no probe nor EX-unreachable-vm evidence, only a soft 'not verifiable from this checkout' note. Two factual/correctness defects compound this: the census note claiming missing numbers 'were never committed to this repo on main' is false for #001 (committed in 678b9b7, removed as 'fabricated' in 64e063e), and 009-legacy-handoff-template.md (an empty template) is marked included though the contract defaults templates to excluded/EX-template — a defect that will propagate into the node-08 handoffs layer. Criterion 2 (recording + reasons + reproducibility) passes mechanically at moderate confidence with those risks flagged; criterion 3 (chronology) passes cleanly. Overall: the enumeration and chronology work is real, but the classification completeness — the stated purpose of the node ('resolve each artifact on every axis') — is not satisfied.",
+    "risks": "1. Missing-artifact accounting is inaccurate: census note says missing numbers were never committed on main, but .handoffs/001 was committed (678b9b7) and deleted as 'fabricated' (64e063e) on main; downstream nodes 08/09 would inherit a false 'never existed' record and lose the fabricated/removed history. 2. No VM-surface probe: AGENTS.md (sab-dev) and .handoffs/030 (khoj-38) name VM-only handoff surfaces; the manifest records no probe attempt and no unreachability evidence, so VM-only handoffs may be silently absent from the corpus despite the constraint 'never drop silently'. 3. 009-legacy-handoff-template.md is included as a session record (templates default excluded/EX-template per contract §9); it will leak into the node-08 handoffs layer unless node 08 re-filters. 4. The manifest schema diverges from the contract's CENSUS-HANDOFF vocabulary (inclusion_status enum, EX-* codes, per-missing stubs), so it is not machine-consumable against the §9/§10 EX-* set; exclusion_reason is free-text. 5. The memo's '29 known handoffs' target is never reconciled in the manifest (contract §4 calls it a search target, so this is minor, but the manifest never mentions it). 6. record axis note: entry 026 recorded_at (2026-07-01T21:30) precedes its occurred_at (2026-07-02) — measured, not a violation, but worth an explicit note for the ruler.",
+    "followup_candidates": "1. Observed: git history shows .handoffs/001-agent-workflow-handoff-standard.md was committed (678b9b7) and removed as 'fabricated' (64e063e) on main, contradicting the manifest census note 'Missing numbers were never committed to this repo on main'. Should the manifest carry per-artifact missing stubs (contract CENSUS-HANDOFF 'stub missing 000-036') with the removal reason (EX-missing / deletion evidence)? If yes, update node-05 and rerun; otherwise this verdict stands. 2. Observed: contract CENSUS-HANDOFF requires probing VM paths named in AGENTS.md (sab-dev) and .handoffs/030 (khoj-38) and keeping unreachable surfaces as excluded + EX-unreachable-vm; the manifest records no probe and no evidence of unreachability. Was the VM surface actually checked, and is the 'not verifiable from this checkout' note the intended evidence? 3. Observed: the manifest has no duplicate|moved|unique or current|superseded classification, though git history shows moved artifacts (HANDOFF-PI-README.md→002, VM-MIGRATION-HANDOFF.md→023, handoff-for-khoj-vm.md→024). Should these axes be added to satisfy 'each classified on every axis'? 4. Observed: 009-legacy-handoff-template.md is an empty template marked included=true; contract §9 defaults templates to excluded/EX-template. Was this deliberate? If not, it should be excluded before node 08 consumes the manifest.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-21T09:34:03.673Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_DWEc5oc9wYoySq3l4gDH9988",
+          "command": "pwd && ls -la && echo \"---\" && ls -la part2 2>/dev/null || echo \"no part2 in cwd\""
+        },
+        {
+          "ts": "2026-08-21T09:34:03.674Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_5gDcN8XHyT9NmG9f2f011358",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml"
+        },
+        {
+          "ts": "2026-08-21T09:34:03.676Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_pIkIWozWhD4TSvC0MABR5448",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+        },
+        {
+          "ts": "2026-08-21T09:34:03.687Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_5gDcN8XHyT9NmG9f2f011358",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:34:03.687Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_pIkIWozWhD4TSvC0MABR5448",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:34:03.700Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_DWEc5oc9wYoySq3l4gDH9988",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:34:05.382Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_kkHIzYh90uHNXUuJVO440779",
+          "command": "find part2 -type f | head -50 && echo \"---LAYERS---\" && ls -la part2/layers/ && echo \"---HANDOFFS---\" && ls -la part2/layers/handoffs/"
+        },
+        {
+          "ts": "2026-08-21T09:34:05.383Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ftNtQblyiENCuOUgJo3M1019",
+          "command": "wc -l part2/layers/handoffs/handoff-manifest.jsonl part2/layers/handoffs/build_handoff_manifest.py 2>/dev/null; echo \"---\"; head -20 part2/layers/handoffs/handoff-manifest.jsonl"
+        },
+        {
+          "ts": "2026-08-21T09:34:05.392Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ftNtQblyiENCuOUgJo3M1019",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:34:05.398Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_kkHIzYh90uHNXUuJVO440779",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:34:07.082Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_KhKtjOfTJpPZZRMRsXX50400",
+          "path": "part2/layers/handoffs/handoff-manifest.jsonl"
+        },
+        {
+          "ts": "2026-08-21T09:34:07.082Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_lMB3Y3zwvsxM2WjTmCOm0323",
+          "path": "part2/layers/handoffs/build_handoff_manifest.py"
+        },
+        {
+          "ts": "2026-08-21T09:34:07.083Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_KhKtjOfTJpPZZRMRsXX50400",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:34:07.083Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_lMB3Y3zwvsxM2WjTmCOm0323",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:34:21.016Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_kqTe3YGokEYJWu0NcVXe6192",
+          "command": "ls -la .handoffs/ && echo \"---COUNT---\" && ls .handoffs/ | wc -l && echo \"---MEMO---\" && ls /Users/sab-mini/repos/gddp-config/docs/ 2>/dev/null | head -30"
+        },
+        {
+          "ts": "2026-08-21T09:34:21.017Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_taZMbieZvBbUsPOtQ0lN7964",
+          "command": "find part2 -type f -name \"*.md\" | head; echo \"---\"; cat part2/contract/evidence-contract.md 2>/dev/null | head -100 || echo \"NO CONTRACT IN CWD\""
+        },
+        {
+          "ts": "2026-08-21T09:34:21.048Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_taZMbieZvBbUsPOtQ0lN7964",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:34:21.056Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_kqTe3YGokEYJWu0NcVXe6192",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:34:23.536Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Nm0eW9IGEcWtL7p5evFn3944",
+          "command": "cat .git; echo \"---\"; git -C . log --oneline -5 2>/dev/null; echo \"---REMOTE---\"; git -C . remote -v 2>/dev/null; echo \"---MEMO---\"; ls /Users/sab-mini/repos/MyAPI/part2/ 2>/dev/null; echo \"---CONTRACT---\"; ls /Users/sab-mini/repos/MyAPI/part2/contract/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-21T09:34:23.536Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_FbXMqBrVdjl3nKjFUyLh5393",
+          "command": "head -120 /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md"
+        },
+        {
+          "ts": "2026-08-21T09:34:23.542Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_FbXMqBrVdjl3nKjFUyLh5393",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:34:23.621Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Nm0eW9IGEcWtL7p5evFn3944",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:34:25.734Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_BgtwsteNMjA9IaX7sMvI9254",
+          "command": "sed -n 120,260p /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md"
+        },
+        {
+          "ts": "2026-08-21T09:34:25.734Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_5tthWbaTE6oeaqdH5PcX6303",
+          "path": "/Users/sab-mini/repos/MyAPI/part2/contract/evidence-contract.md"
+        },
+        {
+          "ts": "2026-08-21T09:34:25.737Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_5tthWbaTE6oeaqdH5PcX6303",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:34:25.748Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_BgtwsteNMjA9IaX7sMvI9254",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:34:54.160Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_c7EUXUGugBp0T6ff45Vj1630",
+          "command": "grep -n -i \"vm\\|sab-dev\\|surface\" AGENTS.md | head -30; echo \"===HANDOFF 030===\"; cat .handoffs/030-corpus-vm-semantic-graphify.md"
+        },
+        {
+          "ts": "2026-08-21T09:34:54.161Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_zK9jVeadvMGvrBkVYH6v5999",
+          "command": "cat .handoffs/009-legacy-handoff-template.md; echo \"===000===\"; head -12 .handoffs/000-template.md"
+        },
+        {
+          "ts": "2026-08-21T09:34:54.183Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_c7EUXUGugBp0T6ff45Vj1630",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:34:54.183Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_zK9jVeadvMGvrBkVYH6v5999",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:35:00.779Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_dB6ETF1ksCw4gABWcKfE5781",
+          "command": "sed -n 20,55p AGENTS.md; echo \"===GREP 29===\"; grep -rn \"29 known\\|29 handoff\" README.md PROJECT-BRIEF.md AGENTS.md docs/ part2/ 2>/dev/null | head; echo \"===docs===\"; ls docs/"
+        },
+        {
+          "ts": "2026-08-21T09:35:00.779Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_p1clD1gm6oilmGklTvfS2559",
+          "command": "git -C . log --oneline --all -- part2/layers/handoffs/ 2>/dev/null | head; echo \"===WORKTREE HEAD vs branch===\"; git -C . log --oneline -1 HEAD; git -C . status --short | head -20"
+        },
+        {
+          "ts": "2026-08-21T09:35:00.810Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_dB6ETF1ksCw4gABWcKfE5781",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:35:01.087Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_p1clD1gm6oilmGklTvfS2559",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:35:05.545Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_rdWCQjiw0f0UnEHaq2ks4080",
+          "command": "git -C . log --oneline --all --diff-filter=A -- .handoffs/ | head -20; echo \"===ever-deleted===\"; git -C . log --all --diff-filter=D --name-only -- .handoffs/ 2>/dev/null | grep -c \"\\.handoffs/\"; echo \"===count on other branches===\"; git -C . branch -a | head"
+        },
+        {
+          "ts": "2026-08-21T09:35:05.546Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Xn9mDFpATTyaqn4GJQ728742",
+          "command": "grep -n -i \"handoff\" README.md | head -20; echo \"===BRIEF===\"; grep -n -i \"handoff\" PROJECT-BRIEF.md | head -10"
+        },
+        {
+          "ts": "2026-08-21T09:35:05.572Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Xn9mDFpATTyaqn4GJQ728742",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:35:05.619Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_rdWCQjiw0f0UnEHaq2ks4080",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:35:09.533Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_OBnp3zVHs0j57xwVlOif0199",
+          "command": "git -C . log --all --diff-filter=D --name-status -- .handoffs/ 2>/dev/null; echo \"===RENUMBER COMMIT===\"; git -C . show --stat 678b9b7 | head -40"
+        },
+        {
+          "ts": "2026-08-21T09:35:09.533Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_5oVb7trynHFw9fQFXLZ93298",
+          "command": "git -C . log --all --name-only --format=\"%h %s\" -- .handoffs/001* .handoffs/003* .handoffs/016* .handoffs/017* .handoffs/018* .handoffs/019* 2>/dev/null | head -30; echo \"===any commits touching missing numbers===\"; git -C . log --all --oneline -- .handoffs/001* .handoffs/003* .handoffs/004* .handoffs/005* .handoffs/006* .handoffs/007* .handoffs/008* .handoffs/016* .handoffs/017* .handoffs/018* .handoffs/019* | head"
+        },
+        {
+          "ts": "2026-08-21T09:35:09.593Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_OBnp3zVHs0j57xwVlOif0199",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:35:09.603Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_5oVb7trynHFw9fQFXLZ93298",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:35:26.367Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_XjRmHQGvtM0xnVqi0frj2802",
+          "command": "git -C . branch -a | grep -i main; echo \"===is 64e063e on main?===\"; git -C . merge-base --is-ancestor 64e063e origin/main 2>/dev/null && echo \"64e063e IS ancestor of origin/main\" || echo \"64e063e NOT ancestor of origin/main\"; git -C . merge-base --is-ancestor 678b9b7 origin/main 2>/dev/null && echo \"678b9b7 IS ancestor of origin/main\" || echo \"678b9b7 NOT ancestor of origin/main\"; echo \"===001 deleted file stat===\"; git -C . show 64e063e --stat | head -10"
+        },
+        {
+          "ts": "2026-08-21T09:35:26.368Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_AQ32qOprKb9MYdhV2lmW1218",
+          "command": "grep -rn \"29\\b\" /Users/sab-mini/repos/gddp-config/docs/GDDPvMyAPI-Part2.md | grep -i handoff; echo \"===search 29 known in repo===\"; grep -rn \"29 known\\|29 handoffs\" . --include=\"*.md\" 2>/dev/null | grep -v node_modules | head; echo \"===vm probe evidence?===\"; find . -iname \"*vm*\" -newer part2/layers/handoffs/handoff-manifest.jsonl 2>/dev/null | head; ls part2/layers/handoffs/"
+        },
+        {
+          "ts": "2026-08-21T09:35:26.445Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_XjRmHQGvtM0xnVqi0frj2802",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:35:26.445Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_AQ32qOprKb9MYdhV2lmW1218",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:35:53.249Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_YBEIV9kYNy1U0o1Dj4vd5701",
+          "command": "python3 -c \"\nimport json\nrows=[json.loads(l) for l in open('part2/layers/handoffs/handoff-manifest.jsonl')]\ncensus=rows[0]\nentries=rows[1:]\nprint('total lines:', len(rows), 'entries:', len(entries))\nprint('census files_found:', census['census']['files_found'], '== entries:', len(entries)==census['census']['files_found'])\nprint('included:', census['census']['included'], 'excluded:', census['census']['excluded'])\nkeys=set()\nfor e in entries:\n    keys|=set(e.keys())\nprint('entry keys:', sorted(keys))\nprint('all have occurred_at key:', all('occurred_at' in e for e in entries))\nprint('all have recorded_at key:', all('recorded_at' in e for e in entries))\nprint('recorded_at nulls:', sum(1 for e in entries if e['recorded_at'] is None))\nprint('occurred_at nulls:', sum(1 for e in entries if e['occurred_at'] is None))\nprint('vm_only values:', {e['vm_only'] for e in entries})\nprint('included flags:', {e['included'] for e in entries})\nprint('exclusion_reasons:', {e['exclusion_reason'] for e in entries if e['exclusion_reason']})\nprint('009 entry:', [e for e in entries if '009' in e['artifact']])\n\""
+        },
+        {
+          "ts": "2026-08-21T09:35:53.250Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_1nKZDMyZEeoWCG6blDTm4672",
+          "command": "git -C . ls-files .handoffs/ | wc -l; echo \"===untracked in .handoffs===\"; git -C . status --porcelain .handoffs/ | head; echo \"===all .handoffs tracked?===\"; comm -13 <(git -C . ls-files .handoffs/ | sort) <(ls .handoffs/ | sort)"
+        },
+        {
+          "ts": "2026-08-21T09:35:53.318Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_1nKZDMyZEeoWCG6blDTm4672",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:35:53.363Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_YBEIV9kYNy1U0o1Dj4vd5701",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:36:13.013Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_RvRgm1maOBz2Hn97mnoC3575",
+          "command": "grep -rln \"29\" project-docs/ scratch/ 2>/dev/null | xargs grep -l -i \"handoff\" 2>/dev/null | head; echo \"===check 001 deletion===\"; git -C . log --oneline --all --follow -- .handoffs/001-agent-workflow-handoff-standard.md | head; echo \"===003-008 ever exist?===\"; git -C . log --all --oneline -- .handoffs/00[3-8]* | head; echo \"===016-019 ever exist?===\"; git -C . log --all --oneline -- .handoffs/01[6-9]* | head"
+        },
+        {
+          "ts": "2026-08-21T09:36:13.124Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_RvRgm1maOBz2Hn97mnoC3575",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:36:15.327Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_mLQyuINJF9Nigl6mFVNb9163",
+          "command": "grep -n -B2 -A4 \"29\" project-docs/corpus-freshness-audit-2026-07-01.md | head -40"
+        },
+        {
+          "ts": "2026-08-21T09:36:15.344Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_mLQyuINJF9Nigl6mFVNb9163",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:36:19.336Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_qEVk3fahYZnj7qpSC68S6677",
+          "command": "ls -d handoffs Corpus* 2>/dev/null; echo \"---any other handoff-like dirs---\"; find . -maxdepth 2 -type d -iname \"*handoff*\" 2>/dev/null | grep -v \".git\" | head; echo \"---md files outside .handoffs mentioning HANDOFF---\"; grep -rln \"HANDOFF \\u2014\\|Session Name / Stopping Point\" --include=\"*.md\" . 2>/dev/null | grep -v \".git/\" | grep -v \".handoffs/\" | head"
+        },
+        {
+          "ts": "2026-08-21T09:36:19.425Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_qEVk3fahYZnj7qpSC68S6677",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-21T09:36:58.355Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_NWKZ7p6iI247UNExf5Wt5784",
+          "tool": "submit_verdict",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-21T09:37:16.558Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_TT7cKKCKkAJqF4tvDFMC3824",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ],
+      "prompt_cache_report": {
+        "total_input_tokens": 4557,
+        "protocol_tokens": 765,
+        "project_tokens": 1257,
+        "node_tokens": 817,
+        "attempt_tokens": 1718,
+        "potential_reuse_tokens": 2839,
+        "potential_reuse_ratio": 0.623,
+        "actual_cached_tokens": 2119040
+      }
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node-05's deliverable (handoff-manifest.jsonl + build_handoff_manifest.py, the only two files in the subject diff, both under part2/ — no scope violation) is a mechanically sound, deterministic enumeration of the 26 .handoffs/*.md files present in the checkout, with per-entry hashes and chronology fields. It matches the evidence contract's live facts for counts (26 files; missing 1,3-8,16-19). However, it does not meet the node's central acceptance criterion: the manifest fails to classify each artifact on the required axes. The duplicate|moved|unique and current|superseded axes are entirely absent from the entry schema even though git history proves moved artifacts exist (002/023/024 renamed in 678b9b7), the present|missing axis is not per-artifact (no stub entries for the 11 missing numbers, contrary to the contract's CENSUS-HANDOFF 'stub missing 000-036'), and the git-backed|VM-only axis was never actually probed — AGENTS.md (VM sab-dev) and .handoffs/030 (khoj-38) name VM surfaces the contract says to probe, and the manifest records no probe nor EX-unreachable-vm evidence, only a soft 'not verifiable from this checkout' note. Two factual/correctness defects compound this: the census note claiming missing numbers 'were never committed to this repo on main' is false for #001 (committed in 678b9b7, removed as 'fabricated' in 64e063e), and 009-legacy-handoff-template.md (an empty template) is marked included though the contract defaults templates to excluded/EX-template — a defect that will propagate into the node-08 handoffs layer. Criterion 2 (recording + reasons + reproducibility) passes mechanically at moderate confidence with those risks flagged; criterion 3 (chronology) passes cleanly. Overall: the enumeration and chronology work is real, but the classification completeness — the stated purpose of the node ('resolve each artifact on every axis') — is not satisfied.",
+  "required_next_action": "Address semantic failures and re-submit.",
+  "generated_at": "2026-08-21T09:40:17.848300+00:00",
+  "evaluated_tree_sha": "997a4750610ce4423a7194506a91913dbd59e31e",
+  "evaluated_commit_sha": "131a143fa0bfa4151645a29fedb80f99c7df1055",
+  "merge_commit_sha": "131a143fa0bfa4151645a29fedb80f99c7df1055",
+  "expected_base_commit_sha": "bee41ba6cf284057ff0e36416fe1b919d5395f16",
+  "pr_ref": null,
+  "job_id": "job_20260821T0932282911d48a6ff944",
+  "execution_attempt_id": "job_20260821T0932282911d48a6ff944:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-k6veshhe/README.md",
+    "project_brief": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-k6veshhe/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+    "neighbor:node-01b-contract-review": "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "low",
+      "offered": 4,
+      "content_accessed": 2,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml"
+      ],
+      "not_observed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-k6veshhe/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-k6veshhe/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "none",
+      "offered": 4,
+      "content_accessed": 0,
+      "not_observed": 4,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01-evidence-contract.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/myapi-part2/nodes/node-01b-contract-review.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-k6veshhe/PROJECT-BRIEF.md",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-k6veshhe/README.md"
+      ]
+    },
+    "overall": "none"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-21T09:33:59.104701+00:00",
+    "finished_at": "2026-08-21T09:40:17.848229+00:00",
+    "wall_s": 378.755,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 197.585,
+      "tool_calls": 28
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 181.121,
+      "tool_calls": 24
+    }
+  }
+}

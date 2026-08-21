@@ -1,7 +1,7 @@
 schema_type: node_evaluations
 schema_version: '1.0'
 project_id: myapi-part2
-generated_at: '2026-08-20T08:42:08Z'
+generated_at: '2026-08-21T09:56:11Z'
 source: gddp-runtime db/queue.db (results + decision_results)
 evaluations:
   node-01-evidence-contract:
@@ -122,149 +122,158 @@ evaluations:
           tool_calls: 14
   node-06-git-evidence:
     verdict: fail
-    evaluated_at: '2026-08-16T10:14:43.272063+00:00'
-    executor: pi_rpc
-    job_id: job_20260816T095531289d5961e2646e
-    result_id: res_ses_20260816T0955312878a3eadd5f6b
-    attempts: 2
-    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-06-git-evidence/job_20260816T095531289d5961e2646e-attempt0.json
+    evaluated_at: '2026-08-21T09:53:53.732433+00:00'
+    executor: local_subprocess
+    job_id: job_20260821T093228438f68b4ace762
+    result_id: res_ses_20260821T093228438aba304f7411
+    attempts: 3
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-06-git-evidence/job_20260821T093228438f68b4ace762-attempt0-rerun1.json
     intent_preserved: false
-    graph_integrity_preserved: false
-    evaluator_note: 'Fresh-eyes review of node-06-git-evidence (attempt job_20260816T095531289d5961e2646e,
-      result commit 40cfdbe). The node''s stated intent is to capture Git temporal/change evidence — commits,
-      timestamps, parents, affected files, messages, change evidence, reproducibly — at part2/layers/git/
-      per the revised evidence contract (SC-04, IN-06, git class extras). Direct inspection shows the
-      opposite of the intent: the result commit is empty (subject_diff file_count=0; 40cfdbe tree == fe52852
-      tree), no part2/ directory exists in the working tree (HEAD=main has zero part2 paths), no part2/layers/git/
-      exists in any git branch or commit (part2 appears in history only as contract/* from nodes 01/01b
-      and probe/* from node-02), and no build_git_export script or sha256 record exists. The deterministic
-      verification independently reports artifacts_present=false and all three criteria indeterminate
-      with no evidence; no gate token exists for node-06. This mirrors the prior attempt (5d714e9) which
-      was already verified fail with an integrity verdict of ''contradicted'' — the same situation has
-      recurred verbatim. Graph integrity is threatened in the forward direction: node-08, node-09, treatments
-      13/15/16, and node-18 all consume the git layer; an accepted empty result propagates a missing evidence
-      class into the corpus build and treatments. A human must look before dependents fire — the evidence
-      contradicts the node''s stated deliverable rather than merely being thin. Verdict: contradicted
-      (not block, since the empty commit itself does not actively mutate the graph; the contradiction
-      is that the claimed deliverable is definitively absent).'
+    graph_integrity_preserved: true
+    evaluator_note: 'Node-06''s core role — capture git what-changed evidence (commits, timestamps, parents,
+      files, messages, change evidence) reproducibly under part2/layers/git/ with a saved generator script
+      — is recognizably delivered: the export is well-formed JSONL with a manifest header, all dates are
+      absolute ISO-8601 UTC (verified 0 bad dates), author vs committer dates are correctly distinguished
+      (matching contract T-4 semantics occurred_at=author, recorded_at=committer), and the script is deterministic
+      given a frozen HEAD. However, the node''s own constraint binds its scope to the evidence contract,
+      and the contract''s IN-06 rule (explicitly labeled (06)) bounds the git layer to commits touching
+      named durable-source paths / cited in decisions / in the Node-10 dated window, with ''No full-clone
+      dump'' and a change_evidence.diff requirement. The delivered artifact is a full-history unfiltered
+      dump (102/164 commits touch no IN-06 path) with numstat-only change evidence and no diff field,
+      and the reproducibility property is only conditional (HEAD not pinned; sha256 printed but not recorded
+      as an artifact; re-run at current HEAD yields 165 records vs the recorded 164). These are subtle
+      but real veers from the node''s intended role as bounded by its own constraints — drift, not block:
+      the files are at the required path, the format is consumable, and downstream can recover (node-08
+      can apply IN-06 filtering when materializing corpus items; node-09 can pin HEAD to the recorded
+      head_commit at rebuild). Graph structure and dependency placement are intact (node-06→08→09→13/15/16
+      chain is sound), so graph integrity at the structural level is preserved; the risks are forward-looking
+      and carried as observations. A human should look because the over-inclusive export and non-persisted
+      hash directly affect the next node''s (08/09) ability to pass contract inclusion and deterministic-rebuild
+      checks.'
     evidence_refs:
-    - eval worktree find part2 -> only part2/contract/{contract-rationale,contract-review,evidence-contract}.md;
-      no part2/layers/git/
-    - git diff --stat fe52852 40cfdbe is empty (node-06 result commit added zero files)
-    - git diff --name-status 5d714e9^ 5d714e9 empty (earlier node-06 attempt also added nothing)
-    - 'git for-each-ref loop: no branch/ref contains any path under part2/layers'
-    - find /Users/sab-mini/repos/MyAPI -path '*layers*' -> nothing; main repo has no part2/ dir
-    - 'git status: working tree clean in eval worktree'
-    - find across eval worktree + main repo for '*build_git_export*' -> no results
-    - git grep 'build_git_export' across all refs -> only hits are part2/contract/*.md (the contract docs
-      describing what node 06 must produce), no script
-    - grep -rl 'change_evidence' in worktree -> only part2/contract/*.md
-    - part2/layers/git/ absent (see export-created) so no recorded sha256 of export output exists anywhere
-    - 'No export exists to inspect: part2/layers/git/ absent in eval worktree, all branches, main repo
-      (see export-created evidence)'
-    - grep for ISO-8601/date content in any generated artifact -> nothing generated exists
-    - 'Memo GDDPvMyAPI-Part2.md §133-145 confirms node 06 scope: commits+timestamps, parents, affected
-      files, messages, diff info, absolute dates'
+    - Script saved at part2/layers/git/build_git_export.py (required path, .py extension)
+    - Commit 0fbcb09 records 'sha256 b3ae90b0...' and shipped file's sha256 = b3ae90b02f6cad7d0f02f60fffcb0f8628c123acb2c7652e586131149bf941e1
+      (recorded sha matches artifact)
+    - Faithful rebuild at manifest-pinned head 131a143fa (script logic replicated exactly and cross-checked
+      against direct git calls) yields sha256 2551e0c747aec98006fc07d79a0a65cd14f3b6642dff1e78c6be85021086ab8f
+      — NOT equal to recorded b3ae90b0...
+    - '9 of 164 entries differ on rebuild, all confined to lines_added/lines_deleted (numstat); direct
+      checks: git log -1 --numstat 28d44c6 -> services.py 69/6 vs disk 70/7; git diff-tree 6671b45 graph.json
+      -> 1418822/657 vs disk 1418909/744'
+    - 'Root cause: numstat output is git version/config-sensitive (diff algorithm/rename detection); git
+      2.54.0 in this environment; script does not pin git version/config'
+    - Commit-level fields (sha, parents, dates, author, committer, message, paths, status) are byte-identical
+      on rebuild; only change-evidence counts diverge
     acceptance_check:
       verification_status: ok
-      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-06-git-evidence/job_20260816T095531289d5961e2646e-attempt0.json
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-06-git-evidence/job_20260821T093228438f68b4ace762-attempt0-rerun1.json
       verdict: fail
-      criteria_confidence: 0.04666666666666667
+      criteria_confidence: 0.19999999999999996
       completeness_status: complete
       required_next_action: Address semantic failures and re-submit.
-      evaluated_tree_sha: 4cedf877a6bea1d5fcaf3c896a9d5aa82e35873d
-      evaluated_commit_sha: 40cfdbefd202e77328581c8d0d3e41cf14d9f74f
-      merge_commit_sha: 40cfdbefd202e77328581c8d0d3e41cf14d9f74f
-      execution_attempt_id: job_20260816T095531289d5961e2646e:attempt:0
+      evaluated_tree_sha: 36a3eec09a59edf672bf50aa27cf1e5d1b8985ea
+      evaluated_commit_sha: 0fbcb09c1de17561e4cda9c2aa3bf9a0046c5f56
+      merge_commit_sha: 0fbcb09c1de17561e4cda9c2aa3bf9a0046c5f56
+      execution_attempt_id: job_20260821T093228438f68b4ace762:attempt:0
       context_coverage:
-        criteria: medium
+        criteria: low
         integrity: high
-        overall: medium
+        overall: low
       criteria_verdict: fail
       integrity:
-        verdict: contradicted
+        verdict: drift
         intent_preserved: false
-        graph_integrity_preserved: false
+        graph_integrity_preserved: true
         required_human_review: true
-        confidence: 0.95
+        confidence: 0.66
         findings:
-        - severity: high
-          summary: 'The node-06 result commit 40cfdbe contains zero file changes relative to its parent
-            fe52852 (tree byte-identical); the required artifact part2/layers/git/ does not exist in the
-            working tree, in any git branch/commit, or in /Users/sab-mini/repos/MyAPI. No build_git_export.(py|sh)
-            script, no commit export, no sha256 record exists anywhere (grep for build_git_export / layers/git:
-            zero hits). The node''s intended role — reproducibly capture git temporal/change evidence
-            per contract SC-04/IN-06 — was not performed at all; the result commit claims completion for
-            a node that produced nothing.'
+        - severity: medium
+          summary: Export scope does not match the contract's IN-06 git bound that the node's own constraint
+            defers to ('scope of repos and history depth is exactly what the evidence contract names').
+            The contract (part2/contract/evidence-contract.md, IN-06, labeled (06)) requires including
+            a commit ONLY if it touches .handoffs/, project-docs/, 01-decisions/, 02-corpus/, 03-ingestion/,
+            04-evaluation/, AGENTS.md, PROJECT-BRIEF.md, gddp/, graphify-out/GRAPH_REPORT.md, is cited
+            in admitted decision git_refs[], or falls in the Node-10 dated window — and explicitly says
+            'No full-clone dump.' The delivered export dumps ALL 164 commits; 102 of 164 touch no IN-06
+            path (context-refinery/, scratch/, .gddp/ gate tokens, api/, deploy/, etc.). The export also
+            carries no IN-06 inclusion markers, so the bounded set is not identifiable downstream.
           affected_node_ids:
           - node-06-git-evidence
-        - severity: high
-          summary: 'Graph integrity is not preserved downstream: node-08-build-source-layers materializes
-            the five durable layer dirs including part2/layers/git/, node-09 validates the corpus including
-            the git source_class, treatments no-decisions (13), code-reality (15), and full-durable (16)
-            include git per the frozen treatment matrix, and node-18 converges on all six sources. Accepting
-            this empty result would let dependents fire on a missing git evidence layer, silently dropping
-            the ''what_changed'' evidence class from the experiment.'
+          - node-08-build-source-layers
+          - node-09-validate-corpus
+        - severity: medium
+          summary: 'Change evidence is partial relative to the contract: export carries per-file numstat
+            (stat-like: lines_added/lines_deleted, binary|text status) but no change_evidence.diff at
+            all, whereas IN-06 requires ''Always emit change_evidence.stat'' AND ''Emit change_evidence.diff
+            only for those commits, bounded and truncated if clipped.'' The git class extras in the contract
+            (change_evidence.{stat,diff,truncated}) cannot be satisfied from this artifact alone.'
           affected_node_ids:
           - node-06-git-evidence
+          - node-08-build-source-layers
+          - node-09-validate-corpus
+        - severity: medium
+          summary: 'Reproducibility guarantee is not fully delivered: the script is deterministic given
+            a fixed HEAD but has no HEAD-pinning guard, and the sha256 is only printed to stdout — no
+            persisted hash artifact in part2/layers/git/. The export was generated at head 131a143 (164
+            commits); the wrapper commit 0fbcb09 (which adds the export files themselves) is already in
+            history, so a naive re-run at the current HEAD produces a 165-record file that is NOT byte-identical
+            to the recorded export. The docstring documents this caveat honestly, but the ''recorded sha256
+            matches on rebuild'' property that the reproducible criterion (and node-09''s deterministic-rebuild
+            check) relies on is not verifiable from the artifact set as delivered.'
+          affected_node_ids:
+          - node-06-git-evidence
+          - node-09-validate-corpus
+        reasoning: 'Node-06''s core role — capture git what-changed evidence (commits, timestamps, parents,
+          files, messages, change evidence) reproducibly under part2/layers/git/ with a saved generator
+          script — is recognizably delivered: the export is well-formed JSONL with a manifest header,
+          all dates are absolute ISO-8601 UTC (verified 0 bad dates), author vs committer dates are correctly
+          distinguished (matching contract T-4 semantics occurred_at=author, recorded_at=committer), and
+          the script is deterministic given a frozen HEAD. However, the node''s own constraint binds its
+          scope to the evidence contract, and the contract''s IN-06 rule (explicitly labeled (06)) bounds
+          the git layer to commits touching named durable-source paths / cited in decisions / in the Node-10
+          dated window, with ''No full-clone dump'' and a change_evidence.diff requirement. The delivered
+          artifact is a full-history unfiltered dump (102/164 commits touch no IN-06 path) with numstat-only
+          change evidence and no diff field, and the reproducibility property is only conditional (HEAD
+          not pinned; sha256 printed but not recorded as an artifact; re-run at current HEAD yields 165
+          records vs the recorded 164). These are subtle but real veers from the node''s intended role
+          as bounded by its own constraints — drift, not block: the files are at the required path, the
+          format is consumable, and downstream can recover (node-08 can apply IN-06 filtering when materializing
+          corpus items; node-09 can pin HEAD to the recorded head_commit at rebuild). Graph structure
+          and dependency placement are intact (node-06→08→09→13/15/16 chain is sound), so graph integrity
+          at the structural level is preserved; the risks are forward-looking and carried as observations.
+          A human should look because the over-inclusive export and non-persisted hash directly affect
+          the next node''s (08/09) ability to pass contract inclusion and deterministic-rebuild checks.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: medium
+          summary: node-08 (build source layers) must apply the contract's IN-06 filter (path-touch /
+            decision git_refs / Node-10 dated window) when materializing the git corpus layer; if it composes
+            directly from this full-history export, node-09's IN-06/inclusion checks will fail and treatments
+            13/15/16 (no-decisions, code-reality, full-durable) will inherit ~100 out-of-scope commits,
+            risking 'source pollution' findings that the contract treats as failures.
+          affected_node_ids:
           - node-08-build-source-layers
           - node-09-validate-corpus
           - node-13-treatment-no-decisions
           - node-15-treatment-code-reality
           - node-16-treatment-full-durable
-          - node-18-convergence-report
         - severity: medium
-          summary: Second consecutive empty result for node-06 (first attempt 5d714e9 already verified
-            fail with integrity 'contradicted' on 2026-08-16; this attempt 40cfdbe repeats the exact same
-            empty-tree outcome). The empty-tree pattern also hits node-03 (343957a) and node-07 (96726e1)
-            result commits — only node-02 produced artifacts. This indicates the executor dispatch is
-            wrapping empty commits as results rather than producing work; a human must intervene at the
-            execution layer (re-dispatch with working workers) rather than re-verifying.
+          summary: node-09's deterministic-rebuild check for the git layer must pin the rebuild to the
+            recorded head_commit 131a143 (detached worktree) and persist the sha256 as a layer artifact;
+            without that, re-running build_git_export.py at any later HEAD (wrapper commits move HEAD
+            with git add -A per the diff note) will not match the recorded 164-commit export, failing
+            R-2/deterministic-rebuild and treatment-manifest hashing.
           affected_node_ids:
-          - node-06-git-evidence
-          - node-03-validate-anchor
-          - node-07-graphify-evidence
-        reasoning: 'Fresh-eyes review of node-06-git-evidence (attempt job_20260816T095531289d5961e2646e,
-          result commit 40cfdbe). The node''s stated intent is to capture Git temporal/change evidence
-          — commits, timestamps, parents, affected files, messages, change evidence, reproducibly — at
-          part2/layers/git/ per the revised evidence contract (SC-04, IN-06, git class extras). Direct
-          inspection shows the opposite of the intent: the result commit is empty (subject_diff file_count=0;
-          40cfdbe tree == fe52852 tree), no part2/ directory exists in the working tree (HEAD=main has
-          zero part2 paths), no part2/layers/git/ exists in any git branch or commit (part2 appears in
-          history only as contract/* from nodes 01/01b and probe/* from node-02), and no build_git_export
-          script or sha256 record exists. The deterministic verification independently reports artifacts_present=false
-          and all three criteria indeterminate with no evidence; no gate token exists for node-06. This
-          mirrors the prior attempt (5d714e9) which was already verified fail with an integrity verdict
-          of ''contradicted'' — the same situation has recurred verbatim. Graph integrity is threatened
-          in the forward direction: node-08, node-09, treatments 13/15/16, and node-18 all consume the
-          git layer; an accepted empty result propagates a missing evidence class into the corpus build
-          and treatments. A human must look before dependents fire — the evidence contradicts the node''s
-          stated deliverable rather than merely being thin. Verdict: contradicted (not block, since the
-          empty commit itself does not actively mutate the graph; the contradiction is that the claimed
-          deliverable is definitively absent).'
-        lane_status: completed
-        harness_error: null
-        graph_observations:
-        - severity: medium
-          summary: 'The concurrent inventory batch 03-07 is nearly uniformly empty: node-03 (343957a)
-            and node-07 (96726e1) result commits are also empty trees, and only node-02 produced part2/probe/*.
-            Node-08-build-source-layers depends on all five inventories to materialize the durable layer
-            dirs; before it fires, the batch needs a successful re-execution. Note also that main does
-            not yet contain part2/contract (nodes 01/01b results live only on result branches), so the
-            canonical working tree lacks even the contract the layers must conform to.'
+          - node-09-validate-corpus
+          - node-08-build-source-layers
+        - severity: low
+          summary: The git layer currently lacks the manifest.json (item count + sha256 per item) convention
+            node-08's acceptance criteria describe; consider having the generator emit a hash/manifest
+            artifact so the layer matches the layer-manifest convention other layers will follow.
           affected_node_ids:
           - node-08-build-source-layers
           - node-09-validate-corpus
-          - node-03-validate-anchor
-          - node-07-graphify-evidence
-        - severity: low
-          summary: No deterministic probe is registered for the three node-06 criteria (no_probe / keyword_scan_source
-            with no hits), so lane-1 evidence is thin and the definitive absence had to be established
-            by direct filesystem/git inspection. Registering an explicit probe for part2/layers/git/ presence
-            plus sha256 reproducibility would give future attempts deterministic gating and prevent empty-result
-            commits from coasting on indeterminate criteria.
-          affected_node_ids:
-          - node-06-git-evidence
       lane_status:
         criteria: completed
         integrity: completed
@@ -272,184 +281,144 @@ evaluations:
         criteria: null
         integrity: null
       evaluation_timing:
-        started_at: '2026-08-16T10:10:40.593971+00:00'
-        finished_at: '2026-08-16T10:14:43.167387+00:00'
-        wall_s: 242.581
+        started_at: '2026-08-21T09:45:53.113988+00:00'
+        finished_at: '2026-08-21T09:53:53.596829+00:00'
+        wall_s: 480.496
         criteria:
           status: completed
-          elapsed_s: 107.056
+          elapsed_s: 314.987
           tool_calls: 18
         integrity:
           status: completed
-          elapsed_s: 135.482
-          tool_calls: 22
+          elapsed_s: 165.477
+          tool_calls: 20
       criteria_findings:
-      - criterion_id: export-created
-        judgment: judged_fail
-        evidence:
-        - eval worktree find part2 -> only part2/contract/{contract-rationale,contract-review,evidence-contract}.md;
-          no part2/layers/git/
-        - git diff --stat fe52852 40cfdbe is empty (node-06 result commit added zero files)
-        - git diff --name-status 5d714e9^ 5d714e9 empty (earlier node-06 attempt also added nothing)
-        - 'git for-each-ref loop: no branch/ref contains any path under part2/layers'
-        - find /Users/sab-mini/repos/MyAPI -path '*layers*' -> nothing; main repo has no part2/ dir
-        - 'git status: working tree clean in eval worktree'
-        reasoning: 'The required artifact directory part2/layers/git/ does not exist in the committed
-          result, in the eval worktree, in any git branch, or in the main repo checkout. The node''s result
-          commit 40cfdbe (parent fe52852) contains no file changes at all, and neither did the earlier
-          node-06 attempt commit 5d714e9. The deterministic artifacts_present flag (part2/layers/git/:
-          False) is corroborated directly. A commit export covering commits, timestamps, parents, affected
-          files, messages, and change evidence was never produced. Criterion unmet.'
       - criterion_id: reproducible
         judgment: judged_fail
         evidence:
-        - find across eval worktree + main repo for '*build_git_export*' -> no results
-        - git grep 'build_git_export' across all refs -> only hits are part2/contract/*.md (the contract
-          docs describing what node 06 must produce), no script
-        - grep -rl 'change_evidence' in worktree -> only part2/contract/*.md
-        - part2/layers/git/ absent (see export-created) so no recorded sha256 of export output exists
-          anywhere
-        reasoning: No generator script named build_git_export.(py|sh) exists at the required path (or
-          anywhere), so there is nothing to re-run and no recorded sha256 to compare on rebuild. The criterion
-          requires both the saved script and a byte-identical-rebuild property; neither the script nor
-          the output artifact exists. Criterion unmet.
-      - criterion_id: absolute-dates
-        judgment: judged_fail
-        evidence:
-        - 'No export exists to inspect: part2/layers/git/ absent in eval worktree, all branches, main
-          repo (see export-created evidence)'
-        - grep for ISO-8601/date content in any generated artifact -> nothing generated exists
-        - 'Memo GDDPvMyAPI-Part2.md §133-145 confirms node 06 scope: commits+timestamps, parents, affected
-          files, messages, diff info, absolute dates'
-        reasoning: 'The criterion is a property of the export: every date in it must be an absolute ISO-8601
-          date with no relative dates. Since the export itself does not exist anywhere (committed or otherwise),
-          the property cannot be satisfied; absence of the artifact means the criterion is unmet rather
-          than merely unverifiable. The contract (evidence-contract.md §8, SC-04) does require absolute
-          ISO-8601 dates, so the intent is clear, but no deliverable exists to carry those dates.'
-    human_decision: 'manual_status_change: Human graph amendment 2026-08-16: layer halted pending node-01b
-      contract slimming (overengineering review); will re-dispatch against revised contract'
+        - Script saved at part2/layers/git/build_git_export.py (required path, .py extension)
+        - Commit 0fbcb09 records 'sha256 b3ae90b0...' and shipped file's sha256 = b3ae90b02f6cad7d0f02f60fffcb0f8628c123acb2c7652e586131149bf941e1
+          (recorded sha matches artifact)
+        - Faithful rebuild at manifest-pinned head 131a143fa (script logic replicated exactly and cross-checked
+          against direct git calls) yields sha256 2551e0c747aec98006fc07d79a0a65cd14f3b6642dff1e78c6be85021086ab8f
+          — NOT equal to recorded b3ae90b0...
+        - '9 of 164 entries differ on rebuild, all confined to lines_added/lines_deleted (numstat); direct
+          checks: git log -1 --numstat 28d44c6 -> services.py 69/6 vs disk 70/7; git diff-tree 6671b45
+          graph.json -> 1418822/657 vs disk 1418909/744'
+        - 'Root cause: numstat output is git version/config-sensitive (diff algorithm/rename detection);
+          git 2.54.0 in this environment; script does not pin git version/config'
+        - Commit-level fields (sha, parents, dates, author, committer, message, paths, status) are byte-identical
+          on rebuild; only change-evidence counts diverge
+        reasoning: 'The exact script is saved at the required path and the recorded sha256 (b3ae90b0...)
+          matches the shipped artifact bytes, so the artifact is self-consistent with its recorded hash.
+          However, the criterion also requires ''re-running it produces byte-identical output (the recorded
+          sha256 matches on rebuild)'', and a faithful rebuild at the manifest''s pinned head commit does
+          NOT reproduce the file: rebuilt sha256 is 2551e0c7... != recorded b3ae90b0.... Nine of 164 entries
+          diverge, exclusively in numstat lines_added/lines_deleted; direct git invocations confirm this
+          environment''s git (2.54.0) emits different counts than the file records for the same commits.
+          The script does not pin the git binary or diff config, so byte-identical rebuild is not guaranteed
+          across environments; as measured here the ''matches on rebuild'' clause fails. The failure is
+          environment-sensitive (the executor may have verified byte-identical reruns on their own machine),
+          hence confidence 0.8 and a human clarification is warranted.'
+    human_decision: 'manual_status_change: pi_rpc attempt produced empty result (usage-limit/timeout);
+      superseded by hand-built adoption of node-06-git-evidence'
   node-07-graphify-evidence:
-    verdict: fail
-    evaluated_at: '2026-08-16T10:51:36.638144+00:00'
-    executor: pi_rpc
-    job_id: job_20260816T102049887babc0184731
-    result_id: res_ses_20260816T10204988c2a7805aecd8
-    attempts: 2
-    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-07-graphify-evidence/job_20260816T102049887babc0184731-attempt0.json
-    intent_preserved: false
-    graph_integrity_preserved: false
-    evaluator_note: 'The node''s why is to establish precisely what the existing Graphify output knows
-      and preserve both a retrieval-friendly and a deterministic representation, landing part2/layers/graphify/graphify-inventory.md
-      (required_artifacts). The work under review - the result commit for the node-07 attempt - is empty
-      (diff fe52852..4054743 has file_count 0), the artifact and its parent directory are absent, and
-      the attempt''s own session log shows no tool use or subagent dispatch, i.e., the node was never
-      actually executed. All three lane-1 criteria are indeterminate on missing paths, consistent with
-      this. Source data (graphify-out/graph.json, 67MB, tracked, pinned in the evidence contract with
-      built_at_commit=d82a5ea) was available, so the task was feasible and simply unperformed. Graph integrity
-      is also broken: node-08 (pending) depends on node-07 and needs the graphify layer; the graph marks
-      node-07 ready despite the empty result, so dependents would fire against nothing. This is neither
-      a subtle veer (drift) nor an evidence shortage (insufficient) - the deliverable is definitively
-      absent and the dependency chain is unmet, so a human must review (and node-07 must be re-executed)
-      before node-08 proceeds.'
-    evidence_refs:
-    - part2/layers/graphify/graphify-inventory.md absent from working tree (find part2 -type f returns
-      only contract/*)
-    - tip commit 4054743 has empty diff vs base fe52852 (git diff --stat empty; git show --stat 4054743
-      shows no files)
-    - git rev-list --all --objects | grep 'part2/layers/graphify' returns nothing - file never existed
-      in any commit
-    - earlier node-07 attempt 96726e1 also empty (git show --stat shows no files)
-    - 'source data does exist: graphify-out/graph.json (67111631 bytes), .graphify_analysis.json (4 communities,
-      10 gods, cohesion 0.25-0.33), manifest.json with ast_hashes - but no inventory document was written
-      from it'
-    - 'no part2/layers/graphify/ directory exists (find -type d -name ''graphify*'' under part2: none)'
-    - no graph.json copy or sha256 record under part2/ (part2 contains only contract files)
-    - evidence contract SC-05/IN-07 require graph_sha256, built_at_commit, representation ∈ {retrieval_text,
-      deterministic_struct} sharing source_id - none present
-    - graphify-out/graph.json exists at repo root as pre-existing source (tracked, blob 1150c5ec...) but
-      was not preserved/referenced by any layer artifact this node was required to create
-    - graphify-inventory.md absent (see capabilities-inventoried evidence)
-    - governing memo §07 explicitly requires preserving the distinction 'retrieval-friendly Graphify representation
-      vs. deterministic Graphify structural lookup' - nothing documents this
+    verdict: pass
+    evaluated_at: '2026-08-21T09:39:04.127372+00:00'
+    executor: local_subprocess
+    job_id: job_20260821T0932285663d67a265752
+    result_id: res_ses_20260821T093228560e78ca0eab46
+    attempts: 3
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-07-graphify-evidence/job_20260821T0932285663d67a265752-attempt0-rerun1.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Node-07''s intended role is to inventory Graphify structural evidence: establish
+      precisely what graphify-out/ knows (symbols, files, relationships, dependencies, references) and
+      preserve both retrieval-friendly and deterministic representations, keeping the distinction explicit.
+      The deliverable (part2/layers/graphify/graphify-inventory.md, the sole file in commit d890c59) does
+      exactly this, and every measured claim verifies byte-for-byte against the live graph.json in the
+      checkout: node/link counts and full file_type/relation distributions (53,573/73,117), 3,733 communities
+      with 2,701 named, origin split (53,562 AST / 11 unknown), 31 sourceless nodes, source-root coverage,
+      96% corpus share, built_at_commit d82a5eae matching both graph.json''s own field and the evidence-contract
+      §4 pin, and all three sha256/byte pins matching live hashes. The dual-representation requirement
+      is met by referencing the git-tracked graph.json in place with its sha256 recorded (the criterion
+      explicitly allows ''copied or referenced with its sha256 recorded'') plus identifying GRAPH_REPORT.md
+      as the retrieval-friendly text; Section 3''s question-class table documents which representation
+      serves which question, including the scorer/evaluator rule of thumb. Graph integrity is preserved:
+      the diff adds exactly the required artifact under part2/layers/graphify/ with no graph-truth, runtime-DB,
+      or job-state edits; downstream node-08 (depends_on node-07) can consume this layer, and the deterministic
+      structure remains available for Part 3 native lookup. The inventory also honestly records data-quality
+      caveats (noisy community names, non-code hubs like ''Sab'') rather than papering over them, which
+      protects downstream convergence. Lane 1''s indeterminate criteria stem from harness path resolution
+      (''graph.json absent'' despite the artifact being present and read), not actual absence — that is
+      lane 1''s adjudication concern, and it does not undermine the integrity of this work. A prior fresh-eyes
+      integrity review of the same commit (2026-08-21, confidence 0.93) reached the same pass verdict
+      with matching verification.'
+    evidence_refs: []
     acceptance_check:
       verification_status: ok
-      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-07-graphify-evidence/job_20260816T102049887babc0184731-attempt0.json
-      verdict: fail
-      criteria_confidence: 0.050000000000000044
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-07-graphify-evidence/job_20260821T0932285663d67a265752-attempt0-rerun1.json
+      verdict: pass
+      criteria_confidence: 0.9566666666666667
       completeness_status: complete
-      required_next_action: Address semantic failures and re-submit.
-      evaluated_tree_sha: 4cedf877a6bea1d5fcaf3c896a9d5aa82e35873d
-      evaluated_commit_sha: 4054743c017030508c5003e9bc8ba19bc70ce1a9
-      merge_commit_sha: 4054743c017030508c5003e9bc8ba19bc70ce1a9
-      execution_attempt_id: job_20260816T102049887babc0184731:attempt:0
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: a6eb843637c2df8f747ab63f4333c2c6a7131d98
+      evaluated_commit_sha: d890c59b3deb3c9a292f0d065e89e4f31e985117
+      merge_commit_sha: d890c59b3deb3c9a292f0d065e89e4f31e985117
+      execution_attempt_id: job_20260821T0932285663d67a265752:attempt:0
       context_coverage:
         criteria: high
-        integrity: high
-        overall: high
-      criteria_verdict: fail
+        integrity: low
+        overall: low
+      criteria_verdict: pass
       integrity:
-        verdict: block
-        intent_preserved: false
-        graph_integrity_preserved: false
-        required_human_review: true
-        confidence: 0.9
-        findings:
-        - severity: high
-          summary: Node-07's result commit (4054743) contains zero file changes; the required artifact
-            part2/layers/graphify/graphify-inventory.md is absent and the part2/layers/ directory does
-            not exist anywhere in the checkout. The node's entire deliverable - inventory of what graphify-out/
-            knows with real counts from graph.json, dual-representation preservation (graph.json copied/referenced
-            with sha256), and the retrieval-vs-structural distinction documentation - is missing. The
-            attempt session log (job_20260816T102049) shows a single empty prompt turn with no tool calls,
-            no subagent dispatch, and no writes; execution performed no work.
-          affected_node_ids:
-          - node-07-graphify-evidence
-        - severity: high
-          summary: 'Graph dependency contract unfulfilled: node-08-build-source-layers depends on node-07
-            and requires part2/layers/ including the graphify layer, yet project.yaml marks node-07 ''ready''
-            on an empty result. Advancing the frontier would fire node-08 against a missing inventory
-            and missing layer, propagating the gap downstream.'
-          affected_node_ids:
-          - node-08-build-source-layers
-        - severity: medium
-          summary: 'The mandatory closing review pass (parallel deepseek/deepseek-v4-pro reviewer subagents
-            with explicit foci: criteria coverage, evidence integrity, constraint compliance) never ran;
-            the attempt terminated after one empty turn, so constraint compliance was not exercised at
-            all.'
-          affected_node_ids:
-          - node-07-graphify-evidence
-        reasoning: 'The node''s why is to establish precisely what the existing Graphify output knows
-          and preserve both a retrieval-friendly and a deterministic representation, landing part2/layers/graphify/graphify-inventory.md
-          (required_artifacts). The work under review - the result commit for the node-07 attempt - is
-          empty (diff fe52852..4054743 has file_count 0), the artifact and its parent directory are absent,
-          and the attempt''s own session log shows no tool use or subagent dispatch, i.e., the node was
-          never actually executed. All three lane-1 criteria are indeterminate on missing paths, consistent
-          with this. Source data (graphify-out/graph.json, 67MB, tracked, pinned in the evidence contract
-          with built_at_commit=d82a5ea) was available, so the task was feasible and simply unperformed.
-          Graph integrity is also broken: node-08 (pending) depends on node-07 and needs the graphify
-          layer; the graph marks node-07 ready despite the empty result, so dependents would fire against
-          nothing. This is neither a subtle veer (drift) nor an evidence shortage (insufficient) - the
-          deliverable is definitively absent and the dependency chain is unmet, so a human must review
-          (and node-07 must be re-executed) before node-08 proceeds.'
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.95
+        findings: []
+        reasoning: 'Node-07''s intended role is to inventory Graphify structural evidence: establish precisely
+          what graphify-out/ knows (symbols, files, relationships, dependencies, references) and preserve
+          both retrieval-friendly and deterministic representations, keeping the distinction explicit.
+          The deliverable (part2/layers/graphify/graphify-inventory.md, the sole file in commit d890c59)
+          does exactly this, and every measured claim verifies byte-for-byte against the live graph.json
+          in the checkout: node/link counts and full file_type/relation distributions (53,573/73,117),
+          3,733 communities with 2,701 named, origin split (53,562 AST / 11 unknown), 31 sourceless nodes,
+          source-root coverage, 96% corpus share, built_at_commit d82a5eae matching both graph.json''s
+          own field and the evidence-contract §4 pin, and all three sha256/byte pins matching live hashes.
+          The dual-representation requirement is met by referencing the git-tracked graph.json in place
+          with its sha256 recorded (the criterion explicitly allows ''copied or referenced with its sha256
+          recorded'') plus identifying GRAPH_REPORT.md as the retrieval-friendly text; Section 3''s question-class
+          table documents which representation serves which question, including the scorer/evaluator rule
+          of thumb. Graph integrity is preserved: the diff adds exactly the required artifact under part2/layers/graphify/
+          with no graph-truth, runtime-DB, or job-state edits; downstream node-08 (depends_on node-07)
+          can consume this layer, and the deterministic structure remains available for Part 3 native
+          lookup. The inventory also honestly records data-quality caveats (noisy community names, non-code
+          hubs like ''Sab'') rather than papering over them, which protects downstream convergence. Lane
+          1''s indeterminate criteria stem from harness path resolution (''graph.json absent'' despite
+          the artifact being present and read), not actual absence — that is lane 1''s adjudication concern,
+          and it does not undermine the integrity of this work. A prior fresh-eyes integrity review of
+          the same commit (2026-08-21, confidence 0.93) reached the same pass verdict with matching verification.'
         lane_status: completed
         harness_error: null
         graph_observations:
-        - severity: medium
-          summary: node-01b-contract-review remains 'provisional' while node-07 was auto-dispatched and
-            marked ready on top of it; the earlier node-07 attempt (08:33) was cancelled precisely because
-            the layer was rewired behind 01b. Human review/acceptance of 01b should complete before node-08
-            consumes the layer contract.
-          affected_node_ids:
-          - node-01b-contract-review
-          - node-08-build-source-layers
         - severity: low
-          summary: When node-07 is re-executed, the revised evidence contract already pins the graphify
-            facts (graph.json 67111631 bytes, built_at_commit=d82a5ea...) and the layer layout part2/layers/graphify/;
-            the re-run can derive the inventory directly from those pins instead of re-deriving graph.json
-            metadata.
+          summary: Lane 1's deterministic probe reported 'graph.json absent' / 'graphify-inventory.md
+            absent' for the three criteria even though the artifact exists in the checkout and every claim
+            verifies. If lane 1's human-review questions propagate, the resolution should be the harness
+            path-scan artifact (scanned paths not present in the eval worktree), not an actual missing
+            deliverable.
           affected_node_ids:
           - node-07-graphify-evidence
+        - severity: low
+          summary: part2/contract/ (evidence-contract.md, the dependency from node-01b) is not present
+            in this checkout yet — node-01b remains provisional. The graphify inventory already aligns
+            with the contract's §4 pin (d82a5eae, 67,111,631 bytes), which is a good sign; node-08 layer
+            build and treatments will need the contract to land before they can run their mechanical checks.
+          affected_node_ids:
           - node-08-build-source-layers
+          - node-01b-contract-review
       lane_status:
         criteria: completed
         integrity: completed
@@ -457,64 +426,19 @@ evaluations:
         criteria: null
         integrity: null
       evaluation_timing:
-        started_at: '2026-08-16T10:47:46.627734+00:00'
-        finished_at: '2026-08-16T10:51:36.528998+00:00'
-        wall_s: 229.911
+        started_at: '2026-08-21T09:33:47.241050+00:00'
+        finished_at: '2026-08-21T09:39:04.012707+00:00'
+        wall_s: 316.781
         criteria:
           status: completed
-          elapsed_s: 100.947
-          tool_calls: 26
+          elapsed_s: 181.907
+          tool_calls: 30
         integrity:
           status: completed
-          elapsed_s: 128.938
-          tool_calls: 27
-      criteria_findings:
-      - criterion_id: capabilities-inventoried
-        judgment: judged_fail
-        evidence:
-        - part2/layers/graphify/graphify-inventory.md absent from working tree (find part2 -type f returns
-          only contract/*)
-        - tip commit 4054743 has empty diff vs base fe52852 (git diff --stat empty; git show --stat 4054743
-          shows no files)
-        - git rev-list --all --objects | grep 'part2/layers/graphify' returns nothing - file never existed
-          in any commit
-        - earlier node-07 attempt 96726e1 also empty (git show --stat shows no files)
-        - 'source data does exist: graphify-out/graph.json (67111631 bytes), .graphify_analysis.json (4
-          communities, 10 gods, cohesion 0.25-0.33), manifest.json with ast_hashes - but no inventory
-          document was written from it'
-        reasoning: 'The criterion is keyed to a specific artifact stating what graphify-out/ knows with
-          real counts from graph.json. That artifact does not exist anywhere: not in the working tree,
-          not in the node''s attempt commit (which is empty - identical tree to its base), not in any
-          commit in repository history. The deterministic harness''s ''graph.json absent'' note is inaccurate
-          at repo level (graphify-out/graph.json is present and tracked), but the required inventory document
-          was never produced. The path is not stale - it matches the node''s required_artifacts and the
-          governing memo''s part2/layers/{...graphify}/ convention (memo §07, evidence contract §13).
-          The implementation simply has not landed.'
-      - criterion_id: dual-representation
-        judgment: judged_fail
-        evidence:
-        - 'no part2/layers/graphify/ directory exists (find -type d -name ''graphify*'' under part2: none)'
-        - no graph.json copy or sha256 record under part2/ (part2 contains only contract files)
-        - evidence contract SC-05/IN-07 require graph_sha256, built_at_commit, representation ∈ {retrieval_text,
-          deterministic_struct} sharing source_id - none present
-        - graphify-out/graph.json exists at repo root as pre-existing source (tracked, blob 1150c5ec...)
-          but was not preserved/referenced by any layer artifact this node was required to create
-        reasoning: 'The criterion requires the layer to preserve both a retrieval-friendly textual representation
-          and the deterministic structural data (graph.json copied or referenced with recorded sha256)
-          sufficient for native structural lookup in Part 3. No graphify layer was built: no dual representation
-          files, no recorded sha256, no copy or reference to graph.json under part2/. The raw graph.json
-          at graphify-out/ is pre-existing repository state, not this node''s deliverable. Criterion fails.'
-      - criterion_id: distinction-documented
-        judgment: judged_fail
-        evidence:
-        - graphify-inventory.md absent (see capabilities-inventoried evidence)
-        - governing memo §07 explicitly requires preserving the distinction 'retrieval-friendly Graphify
-          representation vs. deterministic Graphify structural lookup' - nothing documents this
-        reasoning: The criterion requires graphify-inventory.md to explicitly record which questions the
-          retrieval-friendly representation serves versus which require deterministic structural lookup.
-          The document does not exist, so the distinction is nowhere recorded. Criterion fails.
-    human_decision: 'manual_status_change: Human graph amendment 2026-08-16 (2nd cancel): race re-dispatch
-      before status flips landed; layer stays halted until node-01b passes'
+          elapsed_s: 134.853
+          tool_calls: 32
+    human_decision: 'manual_status_change: pi_rpc attempt produced empty result (usage-limit/timeout);
+      superseded by hand-built adoption of node-07-graphify-evidence'
   node-01b-contract-review:
     verdict: pass
     evaluated_at: '2026-08-16T09:50:30.838785+00:00'
@@ -870,132 +794,129 @@ evaluations:
     human_decision: 'manual_status_change: Human graph amendment (3rd): reconciler resurrected cancelled
       jobs via plumbing retry; sessions being marked terminal alongside'
   node-03-validate-anchor:
-    verdict: fail
-    evaluated_at: '2026-08-16T10:15:45.574188+00:00'
-    executor: pi_rpc
-    job_id: job_20260816T09553124703af9989839
-    result_id: res_ses_20260816T095531245e17fc445291
-    attempts: 1
-    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-03-validate-anchor/job_20260816T09553124703af9989839-attempt0.json
-    intent_preserved: false
-    graph_integrity_preserved: false
-    evaluator_note: 'Fresh-eyes lane-2 review of node-03-validate-anchor. The node''s intended role (memo
-      §03 + node YAML) is to treat project-docs/REBUILD-CONTEXT-ANCHOR.md as the candidate authority,
-      assess it against the evidence contract across four dimensions (identity/purpose, major components,
-      stable terminology, current orientation), record per-item verdicts at part2/layers/anchor/anchor-assessment.md,
-      mint no competing brief, and extend the anchor only if Part 2 requires dated current-direction info.
-      The work under review contradicts that intent: the required artifact is absent (confirmed by filesystem
-      find across the entire worktree — part2/ contains only node-01b''s contract/ files), the attempt''s
-      result commit 343957a is byte-empty relative to base fe52852c (confirmed via git diff --stat/--name-status,
-      which returned nothing, and git status clean), and no attempt logs or evidence artifacts were left
-      behind. Sibling commits in the same batch (fe52852: +1612 lines; 0502ab1: +373 lines) prove the
-      harness does land artifacts when work occurs — 343957a is an anomaly, not a convention. Graph integrity
-      is compromised in execution terms: node-08-build-source-layers depends on node-03 and must produce
-      the normalized anchor/ layer from this assessment; with frontier_auto_advance enabled, accepting
-      the empty result would let node-08 fire without its required input. (Graph structure YAML is untouched,
-      which is correct, but the dependency edge carries no payload.) Because the evidence decisively contradicts
-      the stated deliverable rather than merely lacking detail, the verdict is ''contradicted'' with required
-      human review: a human must decide whether node-03 is re-run, whether the attempt failed at dispatch,
-      or whether the anchor assessment can be produced before node-08''s layer build consumes it.'
-    evidence_refs:
-    - part2/layers/anchor/anchor-assessment.md absent from worktree, all git refs, and live repo (/Users/sab-mini/repos/MyAPI)
-    - git log --all -- part2/layers and --all for 'anchor-assessment' return no commits (never created)
-    - 'Node-03 result commit 343957a (HEAD of eval worktree) is empty: git diff fe52852..343957a shows
-      0 files; git show --stat 343957a has no file changes'
-    - 'Attempt log gddp-runtime/jobs/local-subprocess-spool/job_20260816T09553124703af9989839-.../events.jsonl:
-      4 turns all stopReason=error, ''Codex error: The usage limit has been reached'''
-    - part2/contract/evidence-contract.md §3 names part2/layers/{anchor,...}/ as the node 03-08 write
-      path, so the criterion path is not stale
-    - 'No extension occurred: git log -- project-docs/REBUILD-CONTEXT-ANCHOR.md last touch is 3b510d9
-      (2026-07-28, pre-Part 2); worktree sha256 matches contract pin 92d21284...'
-    - Boundedness clause therefore holds vacuously (nothing was added, nothing to be non-additive or non-verbatim)
-    - 'Recording clause unmet: part2/layers/anchor/anchor-assessment.md does not exist, so nothing records
-      ''exactly what was added, or that nothing was'''
-    - 'Attempt aborted: events.jsonl shows 4 turns stopReason=error ''usage limit has been reached'';
-      result commit 343957a empty'
+    verdict: pass
+    evaluated_at: '2026-08-21T09:41:40.149767+00:00'
+    executor: local_subprocess
+    job_id: job_20260821T09322816d66fb8e6b719
+    result_id: res_ses_20260821T0932281649f92caacb6c
+    attempts: 2
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-03-validate-anchor/job_20260821T09322816d66fb8e6b719-attempt0-rerun1.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Node-03''s role is to assess the existing candidate authority (REBUILD-CONTEXT-ANCHOR.md)
+      against the evidence contract without minting a competing golden brief, appending dated current-direction
+      context only where Part 2 requires it. The work under review preserves that role and graph integrity:
+
+
+      (1) Intent preserved. The deliverable part2/layers/anchor/anchor-assessment.md is a genuine per-item
+      verdict across exactly the four memo dimensions (identity/purpose, major components, stable terminology,
+      current orientation), with evidence and staleness flags per item and an overall verdict. It assesses
+      rather than rewrites the anchor.
+
+
+      (2) Verbatim preservation proven byte-level. The live anchor file now contains a clearly delimited
+      "## Dated extension — 2026-08-19 (additive; all content above preserved)" section; stripping that
+      section and re-hashing yields exactly 92d212841321dffc9add20c01c9ecb3d832e9ce58fcecce6c652ecd61ea7df7a
+      — the contract''s SC-01/SC-01-P pin for the pre-2026-08-16 body. The extension is additive, dated,
+      and scoped (supersedes the git-exclusion rule only ''for the experiment''s duration''), matching
+      memo §03 and the node''s constraint that appending is permitted only when the assessment finds Part
+      2 requires it — which it did (orientation NOT established: stale repo-role inversion, stale graph
+      numbers, git-exclusion contradicted by Part 2, Khoj location unrecorded).
+
+
+      (3) No rival brief. The diff is exactly two files (the assessment + the anchor extension inside
+      the same anchor file). Pre-existing golden_briefs under project-docs/archive-pre-part2/ predate
+      this node. The assessment explicitly records ''no competing brief minted; anchor content untouched.''
+
+
+      (4) Graph integrity preserved. The contract''s own SC-01-P probe anticipated this exact append (''origin_sha256
+      of the pre-2026-08-16 body equals 92d21284… unless the assessment quotes the exact appended bytes''),
+      so the pin semantics point at the pre-body, which is intact. No GDDP graph truth, runtime DB, or
+      job state was edited; writes are confined to part2/ plus the explicitly-named anchor path. Downstream
+      nodes 08/09 can mechanically recover the pre-body hash by stripping the delimited dated-extension
+      section (verified). This retry also repairs the prior empty-result failure (343957a) that had left
+      node-08 without its input. Lane-1 acceptance nuances (e.g., whether §5''s paraphrase satisfies SC-01-P''s
+      literal ''quotes the exact appended bytes'' wording) are outside this lane and do not threaten intent
+      or graph integrity.'
+    evidence_refs: []
     acceptance_check:
       verification_status: ok
-      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-03-validate-anchor/job_20260816T09553124703af9989839-attempt0.json
-      verdict: fail
-      criteria_confidence: 0.125
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-03-validate-anchor/job_20260821T09322816d66fb8e6b719-attempt0-rerun1.json
+      verdict: pass
+      criteria_confidence: 0.9
       completeness_status: complete
-      required_next_action: Address semantic failures and re-submit.
-      evaluated_tree_sha: 4cedf877a6bea1d5fcaf3c896a9d5aa82e35873d
-      evaluated_commit_sha: 343957a052eab2803f70dd7bc1da163d5242fdef
-      merge_commit_sha: 343957a052eab2803f70dd7bc1da163d5242fdef
-      execution_attempt_id: job_20260816T09553124703af9989839:attempt:0
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: eed56e79a78bcce815e643ddc5b04e3a7dce9622
+      evaluated_commit_sha: ae5ce825beaa54d87d034dd86c0584a61679f2c4
+      merge_commit_sha: ae5ce825beaa54d87d034dd86c0584a61679f2c4
+      execution_attempt_id: job_20260821T09322816d66fb8e6b719:attempt:0
       context_coverage:
         criteria: high
         integrity: high
         overall: high
-      criteria_verdict: fail
+      criteria_verdict: pass
       integrity:
-        verdict: contradicted
-        intent_preserved: false
-        graph_integrity_preserved: false
-        required_human_review: true
-        confidence: 0.9
-        findings:
-        - severity: high
-          summary: Node-03's required artifact part2/layers/anchor/anchor-assessment.md does not exist
-            anywhere in the repo; the attempt's result commit 343957a is empty relative to its base fe52852c
-            (0 files changed, working tree clean). The node's core promise — a per-item verdict on whether
-            REBUILD-CONTEXT-ANCHOR.md establishes identity/purpose, major components, stable terminology,
-            and current orientation — was never recorded, so downstream node-08 has no assessment to build
-            the anchor layer from.
-          affected_node_ids:
-          - node-03-validate-anchor
-          - node-08-build-source-layers
-        - severity: medium
-          summary: 'The criterion path is not stale: the governing memo (§03 ''Validate the existing MyAPI
-            anchor'' and §08) and node-08''s acceptance criteria both locate the assessment under part2/layers/anchor/.
-            The absence is therefore an execution failure (work did not land), not a path/definition problem
-            — a re-run or human decision is required, and lane 1''s ''implementation not landed yet''
-            reading is confirmed.'
-          affected_node_ids:
-          - node-03-validate-anchor
-        reasoning: 'Fresh-eyes lane-2 review of node-03-validate-anchor. The node''s intended role (memo
-          §03 + node YAML) is to treat project-docs/REBUILD-CONTEXT-ANCHOR.md as the candidate authority,
-          assess it against the evidence contract across four dimensions (identity/purpose, major components,
-          stable terminology, current orientation), record per-item verdicts at part2/layers/anchor/anchor-assessment.md,
-          mint no competing brief, and extend the anchor only if Part 2 requires dated current-direction
-          info. The work under review contradicts that intent: the required artifact is absent (confirmed
-          by filesystem find across the entire worktree — part2/ contains only node-01b''s contract/ files),
-          the attempt''s result commit 343957a is byte-empty relative to base fe52852c (confirmed via
-          git diff --stat/--name-status, which returned nothing, and git status clean), and no attempt
-          logs or evidence artifacts were left behind. Sibling commits in the same batch (fe52852: +1612
-          lines; 0502ab1: +373 lines) prove the harness does land artifacts when work occurs — 343957a
-          is an anomaly, not a convention. Graph integrity is compromised in execution terms: node-08-build-source-layers
-          depends on node-03 and must produce the normalized anchor/ layer from this assessment; with
-          frontier_auto_advance enabled, accepting the empty result would let node-08 fire without its
-          required input. (Graph structure YAML is untouched, which is correct, but the dependency edge
-          carries no payload.) Because the evidence decisively contradicts the stated deliverable rather
-          than merely lacking detail, the verdict is ''contradicted'' with required human review: a human
-          must decide whether node-03 is re-run, whether the attempt failed at dispatch, or whether the
-          anchor assessment can be produced before node-08''s layer build consumes it.'
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.85
+        findings: []
+        reasoning: 'Node-03''s role is to assess the existing candidate authority (REBUILD-CONTEXT-ANCHOR.md)
+          against the evidence contract without minting a competing golden brief, appending dated current-direction
+          context only where Part 2 requires it. The work under review preserves that role and graph integrity:
+
+
+          (1) Intent preserved. The deliverable part2/layers/anchor/anchor-assessment.md is a genuine
+          per-item verdict across exactly the four memo dimensions (identity/purpose, major components,
+          stable terminology, current orientation), with evidence and staleness flags per item and an
+          overall verdict. It assesses rather than rewrites the anchor.
+
+
+          (2) Verbatim preservation proven byte-level. The live anchor file now contains a clearly delimited
+          "## Dated extension — 2026-08-19 (additive; all content above preserved)" section; stripping
+          that section and re-hashing yields exactly 92d212841321dffc9add20c01c9ecb3d832e9ce58fcecce6c652ecd61ea7df7a
+          — the contract''s SC-01/SC-01-P pin for the pre-2026-08-16 body. The extension is additive,
+          dated, and scoped (supersedes the git-exclusion rule only ''for the experiment''s duration''),
+          matching memo §03 and the node''s constraint that appending is permitted only when the assessment
+          finds Part 2 requires it — which it did (orientation NOT established: stale repo-role inversion,
+          stale graph numbers, git-exclusion contradicted by Part 2, Khoj location unrecorded).
+
+
+          (3) No rival brief. The diff is exactly two files (the assessment + the anchor extension inside
+          the same anchor file). Pre-existing golden_briefs under project-docs/archive-pre-part2/ predate
+          this node. The assessment explicitly records ''no competing brief minted; anchor content untouched.''
+
+
+          (4) Graph integrity preserved. The contract''s own SC-01-P probe anticipated this exact append
+          (''origin_sha256 of the pre-2026-08-16 body equals 92d21284… unless the assessment quotes the
+          exact appended bytes''), so the pin semantics point at the pre-body, which is intact. No GDDP
+          graph truth, runtime DB, or job state was edited; writes are confined to part2/ plus the explicitly-named
+          anchor path. Downstream nodes 08/09 can mechanically recover the pre-body hash by stripping
+          the delimited dated-extension section (verified). This retry also repairs the prior empty-result
+          failure (343957a) that had left node-08 without its input. Lane-1 acceptance nuances (e.g.,
+          whether §5''s paraphrase satisfies SC-01-P''s literal ''quotes the exact appended bytes'' wording)
+          are outside this lane and do not threaten intent or graph integrity.'
         lane_status: completed
         harness_error: null
         graph_observations:
-        - severity: medium
-          summary: 'Batch-level execution failure pattern in the concurrent source-inventory tier: node-03
-            (343957a), node-06 both attempts (5d714e9, 40cfdbe), and node-07 (96726e1) all produced empty
-            result commits, while only node-02 (0502ab1) landed artifacts. node-08 depends on all of 03-07
-            to build its five layers; if the remaining inventory nodes also land empty, the five-layer
-            build starts with missing inputs. Recommend verifying each inventory node''s required artifacts
-            exist (and re-running empties) before node-08 fires.'
+        - severity: low
+          summary: Contract §4 lists the anchor pin (92d21284…) against the file path, but the live file
+            now hashes to 7513ff1c… after node-03's sanctioned dated append. Node-08/09 must apply SC-01-P's
+            pre-2026-08-16-body pin semantics (strip the delimited '## Dated extension — 2026-08-19' section,
+            hash the remainder) rather than naive whole-file hashing, or they will false-fail P-HASH-8
+            with 'live bytes equal the pin or STOP'.
           affected_node_ids:
           - node-08-build-source-layers
-          - node-03-validate-anchor
-          - node-06-git-evidence
-          - node-07-graphify-evidence
+          - node-09-validate-corpus
         - severity: low
-          summary: node-01b-contract-review remains provisional while node-03 (and node-08) depend on
-            its revised contract; node-03's assessment was supposed to be made 'against the contract',
-            so the anchor assessment should be re-run against the finalized revised contract before the
-            layer build consumes it.
+          summary: SC-01-P says the assessment may append 'unless the assessment quotes the exact appended
+            bytes'; assessment §5 paraphrases the extension content instead of quoting it byte-for-byte.
+            The exact bytes are present in the anchor file itself and recoverable, so verification remains
+            possible, but node-08 should record the anchor item's origin_sha256 as the pre-body hash (92d21284…)
+            and treat the dated extension as recorded additive current-direction context to keep the layer
+            self-describing.
           affected_node_ids:
-          - node-01b-contract-review
-          - node-03-validate-anchor
           - node-08-build-source-layers
       lane_status:
         criteria: completed
@@ -1004,58 +925,19 @@ evaluations:
         criteria: null
         integrity: null
       evaluation_timing:
-        started_at: '2026-08-16T10:10:40.528718+00:00'
-        finished_at: '2026-08-16T10:15:45.454336+00:00'
-        wall_s: 304.935
+        started_at: '2026-08-21T09:33:59.043927+00:00'
+        finished_at: '2026-08-21T09:41:40.030334+00:00'
+        wall_s: 461.0
         criteria:
           status: completed
-          elapsed_s: 172.74
-          tool_calls: 31
+          elapsed_s: 181.87
+          tool_calls: 22
         integrity:
           status: completed
-          elapsed_s: 132.151
-          tool_calls: 22
-      criteria_findings:
-      - criterion_id: anchor-assessed
-        judgment: judged_fail
-        evidence:
-        - part2/layers/anchor/anchor-assessment.md absent from worktree, all git refs, and live repo (/Users/sab-mini/repos/MyAPI)
-        - git log --all -- part2/layers and --all for 'anchor-assessment' return no commits (never created)
-        - 'Node-03 result commit 343957a (HEAD of eval worktree) is empty: git diff fe52852..343957a shows
-          0 files; git show --stat 343957a has no file changes'
-        - 'Attempt log gddp-runtime/jobs/local-subprocess-spool/job_20260816T09553124703af9989839-.../events.jsonl:
-          4 turns all stopReason=error, ''Codex error: The usage limit has been reached'''
-        - part2/contract/evidence-contract.md §3 names part2/layers/{anchor,...}/ as the node 03-08 write
-          path, so the criterion path is not stale
-        reasoning: 'The criterion is the existence and content of part2/layers/anchor/anchor-assessment.md
-          recording a per-item verdict on identity/purpose, major components, stable terminology, and
-          current orientation. The file does not exist anywhere: the worktree has only part2/contract/*,
-          no git commit ever touched part2/layers, and the node''s own result commit is empty. The attempt
-          aborted on provider usage-limit errors before producing anything (exit plumbing returned 0 but
-          the model session errored 4 times). The path is confirmed non-stale because the revised evidence
-          contract explicitly allocates part2/layers/anchor/ to node 03 and pins the anchor hash. Implementation
-          simply never landed.'
-      - criterion_id: extension-bounded
-        judgment: judged_fail
-        evidence:
-        - 'No extension occurred: git log -- project-docs/REBUILD-CONTEXT-ANCHOR.md last touch is 3b510d9
-          (2026-07-28, pre-Part 2); worktree sha256 matches contract pin 92d21284...'
-        - Boundedness clause therefore holds vacuously (nothing was added, nothing to be non-additive
-          or non-verbatim)
-        - 'Recording clause unmet: part2/layers/anchor/anchor-assessment.md does not exist, so nothing
-          records ''exactly what was added, or that nothing was'''
-        - 'Attempt aborted: events.jsonl shows 4 turns stopReason=error ''usage limit has been reached'';
-          result commit 343957a empty'
-        reasoning: 'The criterion has two parts: (a) any extension must be dated/additive/verbatim-preserving,
-          and (b) the assessment must record exactly what was added, or that nothing was. Part (a) is
-          clean - no extension was made; the anchor is byte-identical to the contract pin and last touched
-          before Part 2. Part (b) fails: the parenthetical explicitly requires the record even in the
-          nothing-added case, and the assessment file that would carry that record does not exist. Confidence
-          is not higher because a human could read the parenthetical as conditional on an extension having
-          occurred; but the text''s ''or that nothing was'' covers the no-extension case, and the node''s
-          sole required artifact is absent.'
-    human_decision: 'manual_status_change: Human graph amendment (3rd): reconciler resurrected cancelled
-      jobs via plumbing retry; sessions being marked terminal alongside'
+          elapsed_s: 279.086
+          tool_calls: 31
+    human_decision: 'manual_status_change: pi_rpc attempt produced empty result (usage-limit/timeout);
+      superseded by hand-built adoption of node-03-validate-anchor'
   node-04-inventory-decisions:
     verdict: pass
     evaluated_at: '2026-08-16T10:25:00.512830+00:00'
@@ -1168,138 +1050,214 @@ evaluations:
     human_decision: 'manual_status_change: Human graph amendment (3rd): reconciler resurrected cancelled
       jobs via plumbing retry; sessions being marked terminal alongside'
   node-05-inventory-handoffs:
-    verdict: needs-human-review
-    evaluated_at: '2026-08-16T10:42:42.160896+00:00'
-    executor: pi_rpc
-    job_id: job_20260816T0955312705867d3568cd
-    result_id: res_ses_20260816T095531271cc8b0e3bda2
-    attempts: 1
-    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-05-inventory-handoffs/job_20260816T0955312705867d3568cd-attempt0.json
+    verdict: fail
+    evaluated_at: '2026-08-21T09:40:17.969399+00:00'
+    executor: local_subprocess
+    job_id: job_20260821T0932282911d48a6ff944
+    result_id: res_ses_20260821T09322830382c41411d7b
+    attempts: 2
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-05-inventory-handoffs/job_20260821T0932282911d48a6ff944-attempt0.json
     intent_preserved: false
-    graph_integrity_preserved: false
-    evaluator_note: 'Fresh-eyes review of node-05-inventory-handoffs. Cross-checked three independent
-      sources: (1) the deterministic result and eval checkout at tip 6e4c638 — subject diff fe52852→6e4c638
-      has file_count 0 and part2/layers/handoffs/handoff-manifest.jsonl is absent; (2) the live repo —
-      part2/ contains no layers/ directory anywhere and no handoff-manifest exists on any branch (the
-      only part2/layers commit, be8dbe4, is node-04''s decisions inventory, a different node); (3) the
-      runtime job record — job_20260816T0955312705867d3568cd is confirmed node-05 via the spool dir name,
-      its events.jsonl terminates in a Codex usage-limit error with willRetry:false, yet exit.json reports
-      returncode 0 and an empty result commit was created. The node''s why (''Handoffs are the why-evidence.
-      Resolve the 29 known handoffs plus VM-only, duplicate, moved, superseded, dated, and missing artifacts
-      into a reproducible manifest'') has no deliverable at all — this is not a subtle veer (drift) or
-      an evidence gap (insufficient); the recorded result actively misrepresents an aborted, empty session
-      as a completed node, and downstream node-08 (and handoff treatments 14/16) structurally depend on
-      the missing manifest. Lane 1 owns criterion adjudication; from the integrity standpoint the work
-      must not stand as node-05''s result — a human should decide whether to re-run (with quota/staggering
-      fixes) before dependents fire.'
-    evidence_refs: []
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node-05 (Inventory the MyAPI handoffs) against its why, constraints,
+      upstream contract (node-01 evidence contract as revised by node-01b), and the current repo state
+      at HEAD (53f0ca8). The deliverable is a genuine, deterministic, provenance-preserving inventory:
+      build_handoff_manifest.py regenerates part2/layers/handoffs/handoff-manifest.jsonl purely from .handoffs/
+      contents plus git add-dates; every entry carries sha256, bytes, occurred_at (+ occurred_at_basis),
+      recorded_at, and inclusion state; the census enumerates the 11 missing numbers with a reason; 000-template
+      is excluded. At commit 131a143 (the subject tip) the manifest exactly matched the repo (26 .handoffs
+      files, matching the contract''s pinned live facts: 26 files, missing 001,003-008,016-019), and the
+      node wrote only under part2/layers/handoffs/, so structural graph integrity is preserved. However,
+      the work subtly veers from the node''s intended role in ways that affect downstream consumption:
+      (1) 009-legacy-handoff-template.md (a blank template) is included as a session record — the contract''s
+      SC-03-P explicitly flags treating templates as project history as a FAIL, and the handoff layer
+      node-08 builds will ingest a template as a handoff; (2) the VM-only question is closed (vm_only=false
+      on all rows) with an acknowledgment note rather than the probe-plus-evidence-of-unreachability the
+      constraint mandates, despite .handoffs/030 naming concrete VM paths; (3) missing artifacts are not
+      stubbed as presence=missing rows; (4) the duplicate/moved and current/superseded axes are absent.
+      Separately, the committed manifest is now stale relative to HEAD because merge 53f0ca8 landed 4
+      additional .handoffs files (and duplicate numbers 030/031/032) after the manifest was committed
+      — this is a post-node merge artifact, not an execution error, so it is raised as a forward-looking
+      graph observation (regenerate before node-08 consumes the layer). Because the core inventory is
+      real and reproducible but the resolution of VM-only/duplicate/superseded/missing artifacts — the
+      heart of the node''s why — is only partially and in places incorrectly delivered, the verdict is
+      drift with human review recommended before dependents fire.'
+    evidence_refs:
+    - 'part2/layers/handoffs/handoff-manifest.jsonl (27 lines: census + 26 entries, one per .handoffs/*.md;
+      all 26 files git-tracked per git status)'
+    - 'entry keys: artifact, bytes, exclusion_reason, included, number, occurred_at, occurred_at_basis,
+      recorded_at, sha256, title, vm_only — no duplicate|moved|unique and no current|superseded field'
+    - 'git history: 678b9b7 ''docs: normalize handoffs directory'' renamed HANDOFF-PI-README.md->002,
+      VM-MIGRATION-HANDOFF.md->023, handoff-for-khoj-vm.md->024 (moved artifacts exist, unclassified)'
+    - 'git history: 64e063e ''docs: remove fabricated workflow handoff'' deleted .handoffs/001-agent-workflow-handoff-standard.md
+      on main (added 678b9b7), contradicting census note ''Missing numbers were never committed to this
+      repo on main'''
+    - '009-legacy-handoff-template.md: 230 bytes, empty template skeleton, title ''000 - *Session Name
+      / Stopping Point*'', marked included:true with no exclusion_reason'
+    - 'evidence-contract.md CENSUS-HANDOFF: ''stub missing 000-036; probe VM paths named in AGENTS.md
+      / .handoffs/030 and keep unreachable as inclusion_status=excluded + EX-unreachable-vm; do not redefine
+      29 as 26'''
+    - 'AGENTS.md lines 28-31: ''VM sab-dev (myapi + myapi-corpus): vault at ../myapi-corpus/Corpus v1.0/'''
+    - '.handoffs/030-corpus-vm-semantic-graphify.md: VM-only paths khoj-38:~/corpus-work/**, ~/khoj-data/notes/
+      (no probe recorded in manifest)'
+    - 11 missing numbers appear only in census list; no per-artifact missing stubs
     acceptance_check:
       verification_status: ok
-      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-05-inventory-handoffs/job_20260816T0955312705867d3568cd-attempt0.json
-      verdict: needs-human-review
-      criteria_confidence: 0.16666666666666666
-      completeness_status: partial
-      required_next_action: Integrity verdict 'block' halts progression (criteria verdict was 'needs-more-evidence').
-        Human review required; no dependent node may dispatch on this node.
-      evaluated_tree_sha: 4cedf877a6bea1d5fcaf3c896a9d5aa82e35873d
-      evaluated_commit_sha: 6e4c638f39d809408ccabe301e83144fa1084406
-      merge_commit_sha: 6e4c638f39d809408ccabe301e83144fa1084406
-      execution_attempt_id: job_20260816T0955312705867d3568cd:attempt:0
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/myapi-part2/node-05-inventory-handoffs/job_20260821T0932282911d48a6ff944-attempt0.json
+      verdict: fail
+      criteria_confidence: 0.15000000000000002
+      completeness_status: complete
+      required_next_action: Address semantic failures and re-submit.
+      evaluated_tree_sha: 997a4750610ce4423a7194506a91913dbd59e31e
+      evaluated_commit_sha: 131a143fa0bfa4151645a29fedb80f99c7df1055
+      merge_commit_sha: 131a143fa0bfa4151645a29fedb80f99c7df1055
+      execution_attempt_id: job_20260821T0932282911d48a6ff944:attempt:0
       context_coverage:
-        criteria: medium
-        integrity: high
-        overall: medium
-      criteria_verdict: needs-more-evidence
+        criteria: low
+        integrity: none
+        overall: none
+      criteria_verdict: fail
       integrity:
-        verdict: block
+        verdict: drift
         intent_preserved: false
-        graph_integrity_preserved: false
+        graph_integrity_preserved: true
         required_human_review: true
-        confidence: 0.95
+        confidence: 0.72
         findings:
-        - severity: high
-          summary: Node-05 produced an empty result commit (6e4c638) with zero file changes; the required
-            artifact part2/layers/handoffs/handoff-manifest.jsonl does not exist in the eval checkout,
-            the real repo (part2/layers absent), or any branch. The node's entire purpose — resolving
-            the 29 known handoffs plus VM-only/duplicate/moved/superseded/dated/missing artifacts into
-            a reproducible manifest with the five classification axes and occurred_at/recorded_at clocks
-            — is unfulfilled. Intent is not preserved in any form.
-          affected_node_ids:
-          - node-05-inventory-handoffs
-        - severity: high
-          summary: 'The subject attempt never completed: the session log ends with ''Codex error: The
-            usage limit has been reached'' (stopReason error, willRetry false) after dispatching workers
-            (one worker was flagged stuck scanning /Users/sab-mini for 240s). The harness nonetheless
-            wrapped the aborted session as a returncode-0 result commit with an empty tree — the exact
-            empty-result-tree failure mode node-01b''s constraints flagged (5d714e9). Nothing was measured,
-            classified, or verified; no VM surface check (sab-dev) was recorded.'
+        - severity: medium
+          summary: 009-legacy-handoff-template.md is a blank legacy template (title identical to the 000
+            template placeholder, no session content) yet is classified included=true as a session record.
+            The governing contract (CENSUS-HANDOFF / SC-03-P, node-01b revision) requires templates to
+            default to inclusion_status=excluded with exclusion_reason=EX-template, and explicitly lists
+            'treat templates as project history' as a FAIL condition. This misclassification changes what
+            the downstream handoff source layer will ingest.
           affected_node_ids:
           - node-05-inventory-handoffs
         - severity: medium
-          summary: 'Graph integrity is at risk if this empty result is accepted: node-08-build-source-layers
-            depends_on node-05 and requires part2/layers/ including a normalized handoffs/ layer, and
-            handoff-consuming treatments (node-14, node-16) build on it. Passing an empty node-05 would
-            fire the downstream fan-in against a nonexistent handoff layer, silently dropping the why-evidence
-            source from the corpus experiment.'
+          summary: The VM-only axis is unresolved without evidence. The constraint requires probing the
+            VM surfaces named in AGENTS.md (sab-dev) and .handoffs/030 (khoj-38:~/corpus-work/session-review/
+            with ~35 cleaned UA sessions, from-air/, git-maps/) and marking unreachable artifacts missing
+            with evidence of unreachability. The manifest asserts vm_only=false on all 26 rows with only
+            an acknowledgment note ('not verifiable from this checkout'); no probe attempt or unreachability
+            evidence exists anywhere under part2/. This under-delivers the node's why ('resolve ... VM-only
+            ... artifacts') and skirts the 'never drop silently' constraint.
           affected_node_ids:
-          - node-08-build-source-layers
-          - node-14-treatment-handoffs
-          - node-16-treatment-full-durable
-        reasoning: 'Fresh-eyes review of node-05-inventory-handoffs. Cross-checked three independent sources:
-          (1) the deterministic result and eval checkout at tip 6e4c638 — subject diff fe52852→6e4c638
-          has file_count 0 and part2/layers/handoffs/handoff-manifest.jsonl is absent; (2) the live repo
-          — part2/ contains no layers/ directory anywhere and no handoff-manifest exists on any branch
-          (the only part2/layers commit, be8dbe4, is node-04''s decisions inventory, a different node);
-          (3) the runtime job record — job_20260816T0955312705867d3568cd is confirmed node-05 via the
-          spool dir name, its events.jsonl terminates in a Codex usage-limit error with willRetry:false,
-          yet exit.json reports returncode 0 and an empty result commit was created. The node''s why (''Handoffs
-          are the why-evidence. Resolve the 29 known handoffs plus VM-only, duplicate, moved, superseded,
-          dated, and missing artifacts into a reproducible manifest'') has no deliverable at all — this
-          is not a subtle veer (drift) or an evidence gap (insufficient); the recorded result actively
-          misrepresents an aborted, empty session as a completed node, and downstream node-08 (and handoff
-          treatments 14/16) structurally depend on the missing manifest. Lane 1 owns criterion adjudication;
-          from the integrity standpoint the work must not stand as node-05''s result — a human should
-          decide whether to re-run (with quota/staggering fixes) before dependents fire.'
+          - node-05-inventory-handoffs
+        - severity: low
+          summary: Missing artifacts (001, 003-008, 016-019) exist only as a census-level array, not as
+            per-artifact presence=missing stub rows as the contract's CENSUS-HANDOFF requires ('stub missing
+            000-036'). Exact reproduction of the excluded set is weaker than the contract's 'one row per
+            census hit' design.
+          affected_node_ids:
+          - node-05-inventory-handoffs
+        - severity: low
+          summary: The duplicate|moved|unique and current|superseded classification axes from memo section
+            05 are absent from manifest entries; only git-backed|VM-only (vm_only) and dated|temporally-ambiguous
+            (occurred_at + basis) are implemented, plus census-level present|missing. The five-axis resolution
+            promised by the node's why is only partially delivered.
+          affected_node_ids:
+          - node-05-inventory-handoffs
+        reasoning: 'Fresh-eyes review of node-05 (Inventory the MyAPI handoffs) against its why, constraints,
+          upstream contract (node-01 evidence contract as revised by node-01b), and the current repo state
+          at HEAD (53f0ca8). The deliverable is a genuine, deterministic, provenance-preserving inventory:
+          build_handoff_manifest.py regenerates part2/layers/handoffs/handoff-manifest.jsonl purely from
+          .handoffs/ contents plus git add-dates; every entry carries sha256, bytes, occurred_at (+ occurred_at_basis),
+          recorded_at, and inclusion state; the census enumerates the 11 missing numbers with a reason;
+          000-template is excluded. At commit 131a143 (the subject tip) the manifest exactly matched the
+          repo (26 .handoffs files, matching the contract''s pinned live facts: 26 files, missing 001,003-008,016-019),
+          and the node wrote only under part2/layers/handoffs/, so structural graph integrity is preserved.
+          However, the work subtly veers from the node''s intended role in ways that affect downstream
+          consumption: (1) 009-legacy-handoff-template.md (a blank template) is included as a session
+          record — the contract''s SC-03-P explicitly flags treating templates as project history as a
+          FAIL, and the handoff layer node-08 builds will ingest a template as a handoff; (2) the VM-only
+          question is closed (vm_only=false on all rows) with an acknowledgment note rather than the probe-plus-evidence-of-unreachability
+          the constraint mandates, despite .handoffs/030 naming concrete VM paths; (3) missing artifacts
+          are not stubbed as presence=missing rows; (4) the duplicate/moved and current/superseded axes
+          are absent. Separately, the committed manifest is now stale relative to HEAD because merge 53f0ca8
+          landed 4 additional .handoffs files (and duplicate numbers 030/031/032) after the manifest was
+          committed — this is a post-node merge artifact, not an execution error, so it is raised as a
+          forward-looking graph observation (regenerate before node-08 consumes the layer). Because the
+          core inventory is real and reproducible but the resolution of VM-only/duplicate/superseded/missing
+          artifacts — the heart of the node''s why — is only partially and in places incorrectly delivered,
+          the verdict is drift with human review recommended before dependents fire.'
         lane_status: completed
         harness_error: null
         graph_observations:
         - severity: medium
-          summary: 'Batch-wide execution failure: of the five nodes dispatched at 09:55 on 2026-08-16
-            (02,03,04,05,06), only node-02 (6 files) and node-04 (2 files) produced content; nodes 03,
-            05, and 06 all returned empty result commits. The pattern strongly suggests quota exhaustion
-            from five concurrent codex sessions on one account. Before re-running node-05 (or dispatching
-            03/06 siblings), the operator should address quota headroom or stagger concurrency, otherwise
-            the same empty-result failure will recur across the fan-in.'
+          summary: 'handoff-manifest.jsonl is stale relative to main HEAD: merge 53f0ca8 landed 4 additional
+            .handoffs files (030-decision-graph-implementation-plan, 031-decision-fixtures-grok-f06-f10,
+            032-decision-fixture-review-f01-f10, 037-archive-pre-part2-plan-evals) after the manifest
+            commit 131a143, and numbers 030/031/032 now each have two files (duplicate-number namespace).
+            The build script is deterministic and re-runnable; regenerate the manifest before node-08
+            builds the handoff source layer, and adjudicate whether the decision-fixture/plan docs under
+            .handoffs belong to the handoffs layer or the decisions layer (node-04/05 boundary).'
           affected_node_ids:
           - node-05-inventory-handoffs
-          - node-03-validate-anchor
-          - node-06-git-evidence
+          - node-08-build-source-layers
+          - node-09-validate-corpus
         - severity: low
-          summary: The 2026-08-16 graph rewire (node-05 returned to pending behind node-01b, then auto-dispatched
-            at 09:55 on top of fe52852) was executed coherently — the 09:55 attempt did start from 01b's
-            revised contract (evidence-contract.md at 189 lines, envelope 2.0-part2-prov-min) as intended.
-            Graph structure and gating are sound; only the execution output is missing.
+          summary: Manifest schema uses included(bool) + exclusion_reason where the contract names inclusion_status
+            + EX-* codes. Downstream node-08/node-09 consumers should either adopt the manifest schema
+            explicitly or normalize to the contract field names to avoid mechanical mismatch during layer
+            build and corpus validation.
           affected_node_ids:
-          - node-01b-contract-review
-          - node-05-inventory-handoffs
+          - node-08-build-source-layers
+          - node-09-validate-corpus
       lane_status:
-        criteria: timed-out
+        criteria: completed
         integrity: completed
       harness_error:
-        criteria: 'pi timed out after 1200s (preserved logs: stdout=/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-pi-stdout-lixn99sc
-          stderr=/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-pi-stderr-97iwibp4)'
+        criteria: null
         integrity: null
       evaluation_timing:
-        started_at: '2026-08-16T10:20:51.316961+00:00'
-        finished_at: '2026-08-16T10:42:42.058755+00:00'
-        wall_s: 1310.822
+        started_at: '2026-08-21T09:33:59.104701+00:00'
+        finished_at: '2026-08-21T09:40:17.848229+00:00'
+        wall_s: 378.755
         criteria:
-          status: timed-out
-          elapsed_s: 1200.145
-          tool_calls: 8
+          status: completed
+          elapsed_s: 197.585
+          tool_calls: 28
         integrity:
           status: completed
-          elapsed_s: 110.638
-          tool_calls: 27
-    human_decision: 'manual_status_change: Human graph amendment (3rd): reconciler resurrected cancelled
-      jobs via plumbing retry; sessions being marked terminal alongside'
+          elapsed_s: 181.121
+          tool_calls: 24
+      criteria_findings:
+      - criterion_id: manifest-complete
+        judgment: judged_fail
+        evidence:
+        - 'part2/layers/handoffs/handoff-manifest.jsonl (27 lines: census + 26 entries, one per .handoffs/*.md;
+          all 26 files git-tracked per git status)'
+        - 'entry keys: artifact, bytes, exclusion_reason, included, number, occurred_at, occurred_at_basis,
+          recorded_at, sha256, title, vm_only — no duplicate|moved|unique and no current|superseded field'
+        - 'git history: 678b9b7 ''docs: normalize handoffs directory'' renamed HANDOFF-PI-README.md->002,
+          VM-MIGRATION-HANDOFF.md->023, handoff-for-khoj-vm.md->024 (moved artifacts exist, unclassified)'
+        - 'git history: 64e063e ''docs: remove fabricated workflow handoff'' deleted .handoffs/001-agent-workflow-handoff-standard.md
+          on main (added 678b9b7), contradicting census note ''Missing numbers were never committed to
+          this repo on main'''
+        - '009-legacy-handoff-template.md: 230 bytes, empty template skeleton, title ''000 - *Session
+          Name / Stopping Point*'', marked included:true with no exclusion_reason'
+        - 'evidence-contract.md CENSUS-HANDOFF: ''stub missing 000-036; probe VM paths named in AGENTS.md
+          / .handoffs/030 and keep unreachable as inclusion_status=excluded + EX-unreachable-vm; do not
+          redefine 29 as 26'''
+        - 'AGENTS.md lines 28-31: ''VM sab-dev (myapi + myapi-corpus): vault at ../myapi-corpus/Corpus
+          v1.0/'''
+        - '.handoffs/030-corpus-vm-semantic-graphify.md: VM-only paths khoj-38:~/corpus-work/**, ~/khoj-data/notes/
+          (no probe recorded in manifest)'
+        - 11 missing numbers appear only in census list; no per-artifact missing stubs
+        reasoning: 'The manifest correctly enumerates the 26 found .handoffs/*.md files (one entry each,
+          all git-backed), matching the contract''s live facts. However it does not classify each artifact
+          on every required axis: (a) duplicate|moved|unique axis is entirely absent from the schema although
+          git history proves moved artifacts (002/023/024 renames) and a template duplicate (009) exist;
+          (b) current|superseded axis is entirely absent; (c) present|missing is not per-artifact — the
+          11 missing numbers get no stub entries, contrary to the contract CENSUS-HANDOFF directive ''stub
+          missing 000-036''; (d) git-backed|VM-only is only a boolean vm_only=false for all entries with
+          no VM-surface probe and no EX-unreachable-vm evidence, despite AGENTS.md naming VM sab-dev and
+          .handoffs/030 naming khoj-38 paths; the census note substitutes a soft ''not verifiable from
+          this checkout'' claim for the required probe; (e) the census note is factually wrong for #001
+          (committed then removed as fabricated on main). Additionally 009-legacy-handoff-template.md
+          (an empty template) is marked included though contract §9 defaults templates to excluded/EX-template,
+          and the ''29 known'' memo target is never reconciled. The deterministic keyword scan flagged
+          the file as present but could not judge the axis-level classification, which is exactly what
+          fails here.'
+    human_decision: 'manual_status_change: pi_rpc attempt produced empty result (usage-limit/timeout);
+      superseded by hand-built adoption of node-05-inventory-handoffs'
