@@ -90,7 +90,7 @@ console = Console(soft_wrap=True, highlight=False, width=_PIPE_WIDTH)
 _MENU_BACK = object()
 _MENU_QUIT = object()
 _MENU_REFRESH = object()
-_RUNTIME_JOB_COMMANDS = frozenset({"list", "show", "results", "set", "retry"})
+_RUNTIME_JOB_COMMANDS = frozenset({"list", "show", "results", "set", "retry", "adopt"})
 _CLI_COMMANDS = frozenset(
     {
         "node",
@@ -3503,6 +3503,14 @@ def cmd_jobs(args):
         argv.extend([args.ref, "--reason", args.reason])
         if args.yes:
             argv.append("--yes")
+    elif command == "adopt":
+        argv.extend(["--project", args.project, "--node", args.node, "--commit", args.commit])
+        if args.base:
+            argv.extend(["--base", args.base])
+        if args.executor:
+            argv.extend(["--executor", args.executor])
+        if args.dry_run:
+            argv.append("--dry-run")
     return run_runtime_jobs(argv)
 
 
@@ -6052,6 +6060,17 @@ def main(argv=None):
     )
     jobs_retry.add_argument("--yes", action="store_true", help="Skip confirmation")
     jobs_retry.set_defaults(func=cmd_jobs)
+
+    jobs_adopt = jobs_sub.add_parser(
+        "adopt", help="Record out-of-runtime work as a collected job"
+    )
+    jobs_adopt.add_argument("--project", required=True, help="Graph project id")
+    jobs_adopt.add_argument("--node", required=True, help="Node id to adopt")
+    jobs_adopt.add_argument("--commit", required=True, help="Result commit SHA")
+    jobs_adopt.add_argument("--base", default=None, help="Diff-boundary SHA (ancestor of --commit)")
+    jobs_adopt.add_argument("--executor", default="local_subprocess", help="ADAPTERS key")
+    jobs_adopt.add_argument("--dry-run", action="store_true", help="Print the three rows and exit")
+    jobs_adopt.set_defaults(func=cmd_jobs)
 
     receipt_p = sub.add_parser(
         "receipt",
