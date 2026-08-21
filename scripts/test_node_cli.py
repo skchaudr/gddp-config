@@ -1163,6 +1163,96 @@ class EvaluationPayloadFollowupTests(unittest.TestCase):
         self.assertNotIn("FOLLOWUPS & QUESTIONS", out)
 
 
+class RecommendationItemsTests(unittest.TestCase):
+    def test_receipt_nested_shape_is_primary(self):
+        receipt = {
+            "integrity": {
+                "graph_recommendations": [
+                    {
+                        "action": "create_node",
+                        "affected_node_ids": ["node-13"],
+                        "rationale": "missing work",
+                        "evidence": ["src/foo.py:12"],
+                    }
+                ]
+            }
+        }
+        items = node_cli._recommendation_items(receipt, {})
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]["action"], "create_node")
+
+    def test_acceptance_is_fallback(self):
+        acceptance = {
+            "integrity": {
+                "graph_recommendations": [
+                    {"action": "split", "affected_node_ids": ["n1"]}
+                ]
+            }
+        }
+        items = node_cli._recommendation_items(None, acceptance)
+        self.assertEqual(items[0]["action"], "split")
+
+    def test_absent_returns_empty(self):
+        self.assertEqual(node_cli._recommendation_items({}, {}), [])
+
+
+class EvaluationPayloadRecommendationTests(unittest.TestCase):
+    def _render(self, acceptance, receipt):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            node_cli._print_evaluation_payload(
+                acceptance, receipt, verdict="pass"
+            )
+        return buf.getvalue()
+
+    def test_section_renders_when_present(self):
+        receipt = {
+            "integrity": {
+                "graph_recommendations": [
+                    {
+                        "action": "create_node",
+                        "affected_node_ids": ["node-13"],
+                        "rationale": "Missing continuation.",
+                        "evidence": ["src/foo.py:12"],
+                        "draft_node_yaml": "node_id: node-13\nstatus: proposed\n",
+                    }
+                ]
+            }
+        }
+        out = self._render({}, receipt)
+        self.assertIn("RECOMMENDATIONS", out)
+        self.assertIn("create_node", out)
+        self.assertIn("node-13", out)
+        self.assertIn("Missing continuation.", out)
+        self.assertIn("src/foo.py:12", out)
+        self.assertIn("node_id: node-13", out)
+
+    def test_section_omitted_when_absent(self):
+        out = self._render({}, {})
+        self.assertNotIn("RECOMMENDATIONS", out)
+
+    def test_draft_yaml_capped_at_twenty_lines(self):
+        draft = "\n".join(f"line-{i}" for i in range(25))
+        receipt = {
+            "integrity": {
+                "graph_recommendations": [
+                    {
+                        "action": "insert_prerequisite",
+                        "affected_node_ids": ["n1"],
+                        "rationale": "need a prereq",
+                        "evidence": ["n1.yaml"],
+                        "draft_node_yaml": draft,
+                    }
+                ]
+            }
+        }
+        out = self._render({}, receipt)
+        self.assertIn("line-0", out)
+        self.assertIn("line-19", out)
+        self.assertNotIn("line-20", out)
+        self.assertIn("(see receipt)", out)
+
+
 class ReplaceHelpersTests(unittest.TestCase):
     def test_replace_node_status_only_toplevel(self):
         text = "node_id: x\nstatus: pending\npriority: high\n"

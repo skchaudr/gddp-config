@@ -875,6 +875,16 @@ def _followup_fields(
     return risks, followups, questions
 
 
+def _recommendation_items(
+    receipt: dict | None, acceptance: dict
+) -> list[dict]:
+    """Typed graph recommendations from receipt integrity, acceptance fallback."""
+    rec_i = _as_dict((receipt or {}).get("integrity"))
+    acc_i = _as_dict(acceptance.get("integrity"))
+    items = rec_i.get("graph_recommendations") or acc_i.get("graph_recommendations") or []
+    return [item for item in items if isinstance(item, dict)]
+
+
 def _evaluator_reasoning_parts(
     receipt: dict | None, acceptance: dict
 ) -> tuple[str | None, str | None]:
@@ -1418,6 +1428,30 @@ def _print_evaluation_payload(
                     qid = None
                 bullet = qtext + (f" ({qid})" if qid else "")
                 _print_wrapped_bullet(bullet)
+
+    # ── 5c. Graph recommendations (typed surgery proposals — shown only
+    #        when at least one item is present; never folded into OBSERVATIONS)
+    recs = _recommendation_items(receipt, acceptance)
+    if recs:
+        print()
+        print(f"  {_ansi('1', 'RECOMMENDATIONS')}")
+        for rec in recs:
+            action = rec.get("action") or "?"
+            ids = ", ".join(str(i) for i in (rec.get("affected_node_ids") or []))
+            header = action if not ids else f"{action}  {ids}"
+            print(f"    {_ansi('1', header)}")
+            rationale = rec.get("rationale")
+            if rationale:
+                _print_wrapped_bullet(str(rationale))
+            for ev in rec.get("evidence") or []:
+                print(f"    {_ansi('2', str(ev))}")
+            draft = rec.get("draft_node_yaml")
+            if draft:
+                lines = str(draft).splitlines()
+                for line in lines[:20]:
+                    print(f"    {_ansi('2', line)}")
+                if len(lines) > 20:
+                    print(f"    {_ansi('2', '… (see receipt)')}")
 
     # ── 6. Integrity notes (long secondary prose — after the scan blocks) ─
     if detail_why:
