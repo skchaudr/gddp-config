@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gddp.local/agentos-dashboard/graph.schema.json",
+  "title": "ARMS DAG graph.json",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "vault_root", "nodes", "edges"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "generated_at": { "type": "string", "minLength": 1 },
+    "vault_root": { "type": "string", "minLength": 1 },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "edges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/edge" }
+    }
+  },
+  "$defs": {
+    "nodeType": {
+      "type": "string",
+      "enum": ["root", "hub", "skill", "artifact", "routine", "app"]
+    },
+    "frontmatter": {
+      "type": "object",
+      "required": ["title", "tags", "type", "dates", "model", "path"],
+      "additionalProperties": true,
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "type": { "$ref": "#/$defs/nodeType" },
+        "dates": {
+          "type": "object",
+          "required": ["created", "modified"],
+          "additionalProperties": false,
+          "properties": {
+            "created": { "type": ["string", "null"] },
+            "modified": { "type": ["string", "null"] }
+          }
+        },
+        "model": { "type": ["string", "null"] },
+        "path": { "type": "string", "minLength": 1 }
+      }
+    },
+    "node": {
+      "type": "object",
+      "required": ["id", "type", "label", "frontmatter"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "$ref": "#/$defs/nodeType" },
+        "label": { "type": "string", "minLength": 1 },
+        "frontmatter": { "$ref": "#/$defs/frontmatter" }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": ["from", "to", "kind"],
+      "additionalProperties": false,
+      "properties": {
+        "from": { "type": "string", "minLength": 1 },
+        "to": { "type": "string", "minLength": 1 },
+        "kind": { "type": "string", "enum": ["router_leaf", "parent_child"] }
+      }
+    }
+  }
+}
