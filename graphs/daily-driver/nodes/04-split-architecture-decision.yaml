@@ -1,0 +1,37 @@
+schema_version: "1.0"
+schema_type: node
+node_id: split-architecture-decision
+title: Human decision — the split: what runs on sab-mini (Pi) vs sab-air (dsh)
+type: decision
+why: |
+  Sab: "maybe we run split between there and here." Both hosts run Pi AND
+  aa; sab-air additionally runs the dsh harness. The daily driver's
+  architecture hinges on the formal split: Pi = interactive coding harness
+  here, dsh = agent harness there — or some other division. No executor may
+  resolve this.
+depends_on:
+  - dsh-harness-inventory
+acceptance_criteria:
+  - id: decision-recorded
+    criterion: resolution names the split — what runs on sab-mini (Pi role),
+      what runs on sab-air (dsh role), and whether Pi-on-sab-air stays as-is,
+      consolidates, or syncs.
+  - id: seams-named
+    criterion: Cross-host seams are named: Hermes grok bridge (:8645 on
+      sab-air), shared skills/allowlist, receipt/dispatch cross-points, and any
+      sync of sessions/storages — each with owner host.
+  - id: scope-effect
+    criterion: The decision states the graph's package scope per side; MAP.md
+      updated to match.
+constraints:
+  - Human decision — evidence cites nodes 01+03 inventories.
+allowed_execution_modes:
+  - human
+required_artifacts:
+  - inventory from nodes 01/03
+status: planned
+priority: high
+unlocks:
+  - package-manifest
+  - dsh-daily-driver-config
+  - adapter-twins

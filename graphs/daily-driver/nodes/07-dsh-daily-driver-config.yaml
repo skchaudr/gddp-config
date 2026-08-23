@@ -1,0 +1,37 @@
+schema_version: "1.0"
+schema_type: node
+node_id: dsh-daily-driver-config
+title: Curated dsh daily-driver config on sab-air (diff, unapplied)
+type: capability
+why: |
+  The dsh side of the split needs a curated daily-driver shape: which
+  profiles/patches/presets are active for Sab's daily use (the gddp agent
+  preset exists today), which providers are default, and which patches stay.
+  Hot-reload makes the diff safe to propose.
+depends_on:
+  - dsh-harness-inventory
+  - split-architecture-decision
+acceptance_criteria:
+  - id: config-diff
+    criterion: A proposed ~/.dsh diff exists: profiles/patches/presets to keep,
+      add, or retire, each citing node 03's inventory; agent-default-model and
+      provider set per the split decision.
+  - id: unapplied
+    criterion: The diff is NOT applied to live sab-air; presented with revert
+      instructions for human acceptance.
+  - id: hot-reload-verified
+    criterion: The inventory confirms which of the proposed changes hot-reload
+      vs require restart (verified on sab-air, cited).
+constraints:
+  - Proposal only — human accept applies; no live sab-air mutation.
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - ~/.dsh/settings.yaml (proposed diff, sab-air)
+  - ~/.dsh/profiles/ (sab-air)
+  - ~/.dsh/patches/ (sab-air)
+status: planned
+priority: high
+unlocks:
+  - dogfood-session

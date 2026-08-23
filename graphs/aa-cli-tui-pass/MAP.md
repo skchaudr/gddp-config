@@ -38,5 +38,5 @@ Charted 2026-08-23 from grok-4.6 scout report (scout: e3de9ed7). Arc: **inventor
 
 - Project-local graph lives in aa-cli (mirror of this dir); this gddp-config copy is the dispatch/aggregator chart. Do NOT touch stale aa-cli/gddp/ pilot statuses.
 - Executors: pi subagents (tui-design agent is in-repo at `hub-rs/.agents/skills/tui-design`). Only human ✓✓ releases.
-- dsh is an executor label (deepseek-harness), not a surface — port graph is charted separately at aa-cli-daily-driver.
+- dsh is the deepseek-harness agent loop on sab-air (not an aa-cli surface) — the two-host daily-driver port is charted separately at daily-driver.
 - All nodes start `planned`; charting acceptance (Sab) promotes them to the frontier.

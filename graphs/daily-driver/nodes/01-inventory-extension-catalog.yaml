@@ -1,0 +1,39 @@
+schema_version: "1.0"
+schema_type: node
+node_id: inventory-extension-catalog
+title: Two-host extension/skill/harness catalog (Pi on sab-mini + dsh on sab-air)
+type: capability
+why: |
+  The daily driver spans two hosts. sab-mini runs Pi (settings.json packages,
+  ~/.pi/agent extensions, skills); sab-air runs dsh (deepseek-harness:
+  ~/.dsh settings/profiles/patches/presets/sessions/storages) plus its own Pi.
+  No single catalog covers both sides; everything downstream needs it.
+depends_on: []
+acceptance_criteria:
+  - id: two-host-catalog
+    criterion: A checked-in catalog markdown covers BOTH hosts — Pi side
+      (packages[], local extensions, pi skills, shared skill families, hermes
+      plugins) and dsh side (~/.dsh files, ~/.config/deepseek-harness modules,
+      sab-air pi install) — each item with purpose and exact path.
+  - id: settings-excerpts
+    criterion: Catalog quotes sab-mini settings.json AND sab-air ~/.dsh/settings.yaml
+      excerpts so drift is visible on diff.
+  - id: transitive-flagged
+    criterion: Items in node_modules but not packages[] are flagged possibly-transitive;
+      sab-air items are verified live via ssh, not assumed.
+constraints:
+  - Read-only inventory on both hosts; no config changes.
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - ~/.pi/agent/settings.json (sab-mini)
+  - ~/.dsh/ (sab-air, via ssh)
+status: planned
+priority: high
+unlocks:
+  - classify-extension-tiers
+  - dsh-harness-inventory
+  - mux-stack
+  - skill-curation
+  - aa-cli-boundary

@@ -1,0 +1,39 @@
+schema_version: "1.0"
+schema_type: node
+node_id: dsh-harness-inventory
+title: Inventory the dsh harness on sab-air — seams, plugin surface, config
+type: capability
+why: |
+  dsh is real: a deepseek-harness agent loop on sab-air with its own plugin
+  surface (profiles/, patches/, .agent-presets/, sessions/, storages/) and
+  source at ~/.config/deepseek-harness. The port can't scope "dsh plugins"
+  until the harness's extension model is documented from source, not vibes.
+depends_on:
+  - inventory-extension-catalog
+acceptance_criteria:
+  - id: harness-map
+    criterion: An inventory md documents dsh from source: dsh-agent loop
+      (packages/README.md), reversible-effect registration for tools/providers/
+      prompt sections, hot-reload, structured-output scoped runtime,
+      ctx.subagents.registerProvider() seam, memory model (append-only JSONL,
+      compaction, durable children), orchestration (goals/skills/workflows/
+      agent-bus).
+  - id: plugin-surface
+    criterion: Every ~/.dsh artifact is inventoried with purpose: settings.yaml,
+      profiles/ (acp, web), patches/ (claude-code-grok, subagent-grok,
+      subagent-qwen), .agent-presets/ (gddp), sessions/, storages/, credentials.
+  - id: live-verified
+    criterion: Claims about dsh behavior are verified on sab-air (read source or
+      probe), citing exact paths — no memory/vibe assertions.
+constraints:
+  - Read-only recon of sab-air; no dsh config changes.
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - ~/.dsh/ (sab-air)
+  - ~/.config/deepseek-harness/ (sab-air)
+status: planned
+priority: high
+unlocks:
+  - split-architecture-decision

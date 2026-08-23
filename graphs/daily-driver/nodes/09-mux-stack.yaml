@@ -1,0 +1,33 @@
+schema_version: "1.0"
+schema_type: node
+node_id: mux-stack
+title: Compose the Pi coordination stack without double-binding (sab-mini)
+type: capability
+why: |
+  pi-subagents + pi-intercom + pi-boss/pi-room + herdr mux form the rooms
+  stack on sab-mini, but nothing documents which loads when and which slash
+  commands bind where. Double-bound commands are a daily-driver hazard.
+depends_on:
+  - inventory-extension-catalog
+acceptance_criteria:
+  - id: conflict-matrix
+    criterion: A matrix lists every coordination surface with its commands and
+      highlights double-bound slash commands.
+  - id: load-order
+    criterion: Recommended enable/load order is documented with rationale.
+  - id: recommendation
+    criterion: Binding conflicts get resolution recommendations for Sab's accept
+      (not silently changed).
+constraints:
+  - Documentation/conflict analysis only; no config changes.
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - ~/.pi/agent/settings.json
+  - ~/.pi/agent/npm/node_modules/pi-subagents/
+  - ~/.pi/agent/npm/node_modules/pi-intercom/
+status: planned
+priority: medium
+unlocks:
+  - dogfood-session

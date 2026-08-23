@@ -1,0 +1,48 @@
+schema_version: '1.0'
+schema_type: project_graph
+project_id: daily-driver
+project_name: Daily Driver — Pi (sab-mini) + dsh harness (sab-air) port
+description: >-
+  Cleanly port Pi extensions/skills (sab-mini) and the dsh harness plugin
+  surface (sab-air — ~/.dsh profiles/patches/presets, deepseek-harness
+  source) into one daily driver, run split between the two hosts: Pi stays
+  the interactive coding harness here, dsh stays the agent harness on
+  sab-air, with named cross-host seams. Freeze the two-host inventory,
+  classify tiers, confirm the split, package each side, define policies,
+  name capability twins, then dogfood both hosts.
+repo: local (sab-mini ~/.pi/agent + sab-air ~/.dsh / ~/.config/deepseek-harness)
+blueprint:
+  vision: >-
+    One curated, documented daily-driver environment spanning two hosts.
+    sab-mini runs Pi (interactive coding harness, extensions + skills);
+    sab-air runs dsh (deepseek-harness agent loop with hot-reloadable
+    tools/providers, gddp agent preset, profiles/patches). The split is
+    intentional and written, not an accident: each side curates its own
+    package, the seams between them are named (Hermes grok bridge :8645,
+    shared skills, receipt/dispatch cross-points), and the result is proven
+    by a two-host dogfood session.
+  architecture_notes: >-
+    Settled during re-charting (2026-08-23, after direct sab-air recon):
+    dsh is REAL — an agent harness on sab-air. ~/.dsh holds settings.yaml,
+    profiles/ (acp, web), patches/ (claude-code-grok, subagent-grok,
+    subagent-qwen), .agent-presets/ (gddp), sessions/, storages/. Source at
+    ~/.config/deepseek-harness: dsh-agent loop (packages/README.md), tools/
+    providers/prompt sections register as reversible effects and hot-reload,
+    structured output is a scoped runtime, ctx.subagents.registerProvider()
+    is an open seam, memory is append-only JSONL with compaction and durable
+    children, orchestration via goals/skills/workflows/agent-bus. Pi also
+    exists on sab-air — both hosts have pi and aa. The port = curate/package
+    each side, never merge runtimes. Node 04 (split decision) is human:
+    Sab's "run split between there and here" gets formalized — what runs
+    where and the named seams. Enable-set changes are proposed diffs, never
+    applied by an executor. aa-cli TUI graph is charted separately at
+    aa-cli-tui-pass.
+  major_capabilities:
+    - two-host checked-in catalog (Pi side + dsh side) with tiers
+    - confirmed split architecture with named cross-host seams
+    - one installable Pi daily-driver package (sab-mini)
+    - curated dsh daily-driver config (sab-air, hot-reload verified)
+    - Pi settings.json + dsh settings.yaml policy diffs (unapplied)
+    - capability twins across Pi / dsh / Hermes
+    - two-host dogfood proof
+graph_version: '1.1'
