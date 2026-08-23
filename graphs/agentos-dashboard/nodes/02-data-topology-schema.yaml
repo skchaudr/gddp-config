@@ -1,0 +1,36 @@
+schema_version: "1.0"
+schema_type: node
+node_id: data-topology-schema
+title: ARMS DAG schema — root router, domain hubs, leaf types, frontmatter contract, graph.json
+type: capability
+why: |
+  The whole dashboard renders one DAG. The schema fixes the data model:
+  root router note → domain hubs → leaf nodes (skills, artifacts, routines,
+  apps/connectors), what frontmatter fields carry (title, tags, type,
+  dates, model, path), and the graph.json shape the watcher emits and the
+  frontend consumes.
+depends_on:
+  - scope-contract
+acceptance_criteria:
+  - id: schema
+    criterion: A schema doc defines node types (root/hub/skill/artifact/routine/
+      app), required frontmatter fields, edge semantics (router → leaf, parent →
+      child), and the graph.json JSON schema.
+  - id: sample
+    criterion: A sample graph.json generated from the real data sources listed
+      in node 01 validates against the schema.
+  - id: frontmatter
+    criterion: The frontmatter contract is mechanically checkable (validator
+      script or schema file), not prose-only.
+constraints:
+  - Schema + sample only; no watcher implementation (node 03).
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - graph schema doc
+  - sample graph.json
+status: planned
+priority: high
+unlocks:
+  - workspace-watcher

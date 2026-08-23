@@ -1,0 +1,34 @@
+schema_version: "1.0"
+schema_type: node
+node_id: workspace-watcher
+title: Watcher daemon — parse router markdown + frontmatter into graph.json
+type: capability
+why: |
+  The plan requires a Node/Python daemon that watches the workspace
+  directory, parses router markdown files and YAML/JSON frontmatter, and
+  regenerates the metadata graph dynamically. Without it the dashboard
+  renders stale or mocked topology.
+depends_on:
+  - data-topology-schema
+acceptance_criteria:
+  - id: watcher
+    criterion: A daemon script (Node or Python, per node 01) watches the
+      declared sources and regenerates graph.json on change.
+  - id: parse
+    criterion: Router md + frontmatter parse per the node 02 contract; unparseable
+      files are logged, not dropped silently.
+  - id: live
+    criterion: graph.json is regenerated on a live edit and revalidates against
+      the node 02 schema (verified with a real file edit + cited output).
+constraints:
+  - Watcher only — no API surface here (node 09).
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - watcher script
+  - live graph.json
+status: planned
+priority: high
+unlocks:
+  - live-integration

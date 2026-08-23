@@ -1,0 +1,34 @@
+schema_version: "1.0"
+schema_type: node
+node_id: skills-deck
+title: Floating skills deck — launchpads, model selector, effort sliders, headless run
+type: capability
+why: |
+  The plan's headless-execution surface: floating quick-launch trigger pads
+  for skills (/sprint-planning, /newsletter, /clean-up analogues), modal
+  controls for model selection and effort/reasoning level, executing
+  headlessly (plan example: claude -p "<skill>" --model --effort). In Sab's
+  environment the runnable skills set comes from node 01's scope.
+depends_on:
+  - frontend-shell
+acceptance_criteria:
+  - id: deck
+    criterion: Skills deck renders launch pads from the declared skills set with
+      model selector and effort level controls per the plan.
+  - id: run
+    criterion: Launch invokes the headless run path (via node 09 API once live;
+      a stubbed runner at first) and shows live output streaming.
+  - id: safe
+    criterion: The run path is explicit about the executor (claude -p vs pi vs
+      dsh per node 01 scope); no hidden side effects beyond the skill's own.
+constraints:
+  - Deck UI + run invocation only; executor choice is settled in node 01/09.
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - deck component + tests
+status: planned
+priority: medium
+unlocks:
+  - backend-api

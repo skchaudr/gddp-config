@@ -1,0 +1,36 @@
+schema_version: "1.0"
+schema_type: node
+node_id: live-integration
+title: Swap mock data for real graph.json and real headless runs
+type: capability
+why: |
+  The plan's final build step: the prototype's mock DAG and artifact ring
+  data become the watcher's real graph.json, and the skills deck executes
+  real runs through the API. Integration is where mock-vs-real drift gets
+  found.
+depends_on:
+  - workspace-watcher
+  - artifact-orbit
+  - radial-dag
+  - backend-api
+acceptance_criteria:
+  - id: live-data
+    criterion: Orbit and DAG render from the live watcher graph.json (no mock
+      fixtures in the default path).
+  - id: live-runs
+    criterion: Skills deck launches a real headless run through /api/skills/run
+      with live streaming visible in the UI (one real, low-risk skill run cited).
+  - id: drift
+    criterion: Any schema or behavior gaps found during integration are cited and
+      routed to their owning node or a continuation proposal.
+constraints:
+  - Integration only — no new features invented here; gaps become proposals.
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - live-mode app run
+status: planned
+priority: high
+unlocks:
+  - dogfood-dashboard

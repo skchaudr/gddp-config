@@ -1,0 +1,34 @@
+schema_version: "1.0"
+schema_type: node
+node_id: radial-dag
+title: Mode B — radial second-brain DAG with 4 layouts and physics controls
+type: capability
+why: |
+  The second-brain navigator: a concentric radial graph rooted at the router
+  note (CLAUDE.md analogue — Sab's root hub), radiating to domain hubs
+  (business/content/community/product/personal) and down to leaf skills and
+  reference files, with zoom/pan, layout switching (concentric rings,
+  force-directed, hexagonal cluster), and live physics sliders (line
+  springs, circle/hex size, ring spin).
+depends_on:
+  - frontend-shell
+acceptance_criteria:
+  - id: dag
+    criterion: Radial DAG renders the root → hub → leaf hierarchy from graph.json
+      (mock at first), zoom/pan working.
+  - id: layouts
+    criterion: At least 3 of the 4 plan layouts switch live (concentric, force,
+      circle, hex); layout state persists across mode switches.
+  - id: physics
+    criterion: At least the line-spring slider affects the graph live.
+constraints:
+  - Rendering/navigation only; node content inspection is the HUD's job (node 05).
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - dag component + tests
+status: planned
+priority: high
+unlocks:
+  - live-integration
