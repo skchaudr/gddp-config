@@ -2,31 +2,23 @@ schema_version: '1.0'
 schema_type: project_graph
 project_id: aa-cli-tui-pass
 project_name: AA CLI — TUI Design Pass (full-graph walkthrough)
-description: Run the tui-design skill against every operator surface of aa-cli — Deck,
-  runway, Create, Verify rooms, pickers, keymap — close the backend wiring gaps the
-  frontend needs (deck actions, packet schema alignment, create verb edges, registry-driven
-  dispatch), integrate, then walk the entire graph as an operator session with one
-  receipt per node.
+description: Run the tui-design skill against every operator surface of aa-cli — Deck, runway, Create, Verify rooms, pickers,
+  keymap — close the backend wiring gaps the frontend needs (deck actions, packet schema alignment, create verb edges, registry-driven
+  dispatch), integrate, then walk the entire graph as an operator session with one receipt per node.
 repo: skchaudr/aa-cli
 blueprint:
-  vision: The whole product gets one coherent TUI design pass. aa-cli finished its
-    first foundational pass (verb-first create, verify 3-room grammar, deck-home);
-    the UI/UX has a ways to go and the backend needs wiring to support the frontend.
-    This graph applies the in-repo tui-design skill (hub-rs/.agents/skills/tui-design)
-    to every surface, closes backend gaps, integrates, and proves the result with
-    a full operator walkthrough that replaces the stale AA_TEST_WALKTHROUGH.md.
-  architecture_notes: 'Settled during charting (2026-08-23, from grok-4.6 scout report):
-    operator → aa-hub (ratatui 0.30 + crossterm + nucleo-picker) → exec.rs shells
-    out → bin/aa (zsh) → lib/*.zsh → ledger.tsv / run dirs / packet JSON / targets.conf.
-    Verify rooms invert Create rooms; only human ✓✓ releases. The graph is project-local
-    (aa-cli owns its graph); this gddp-config copy is the mirror/aggregator for dispatch.
-    Do NOT rewrite the stale pilot graph statuses in aa-cli/gddp/ — this graph is
-    a separate chart with its own node IDs. Design pass (nodes 01-06) and backend
-    wiring (07-10) run concurrently after the inventory lands; integration (11) then
-    operator walkthrough (12) then graph-walk verification (13). dsh is an executor
-    label (deepseek harness) in this repo''s vocabulary, NOT a product surface — the
-    daily-driver port graph (pi-extensions + dsh plugins) is charted separately in
-    daily-driver.'
+  vision: The whole product gets one coherent TUI design pass. aa-cli finished its first foundational pass (verb-first create,
+    verify 3-room grammar, deck-home); the UI/UX has a ways to go and the backend needs wiring to support the frontend. This
+    graph applies the in-repo tui-design skill (hub-rs/.agents/skills/tui-design) to every surface, closes backend gaps, integrates,
+    and proves the result with a full operator walkthrough that replaces the stale AA_TEST_WALKTHROUGH.md.
+  architecture_notes: 'Settled during charting (2026-08-23, from grok-4.6 scout report): operator → aa-hub (ratatui 0.30 +
+    crossterm + nucleo-picker) → exec.rs shells out → bin/aa (zsh) → lib/*.zsh → ledger.tsv / run dirs / packet JSON / targets.conf.
+    Verify rooms invert Create rooms; only human ✓✓ releases. The graph is project-local (aa-cli owns its graph); this gddp-config
+    copy is the mirror/aggregator for dispatch. Do NOT rewrite the stale pilot graph statuses in aa-cli/gddp/ — this graph
+    is a separate chart with its own node IDs. Design pass (nodes 01-06) and backend wiring (07-10) run concurrently after
+    the inventory lands; integration (11) then operator walkthrough (12) then graph-walk verification (13). dsh is an executor
+    label (deepseek harness) in this repo''s vocabulary, NOT a product surface — the daily-driver port graph (pi-extensions
+    + dsh plugins) is charted separately in daily-driver.'
   major_capabilities:
   - one coherent visual system across all rooms
   - deck + runway spatial memory with working key actions
@@ -35,6 +27,15 @@ blueprint:
   - picker grammar: nucleo default, fzf only on ';'
   - backend closes deck-action-wiring, schema align, verb edges, registry
   - operator walkthrough proving every surface, one receipt per node
+execution_policy:
+  default_executor: local_subprocess
+  frontier_auto_advance: true
+  retry_budget: 3
+  allowed_repos:
+  - skchaudr/aa-cli
+  max_concurrent_jobs: 1
+  require_human_review_before_overnight: false
+  artifact_gate_enforced: true
 graph_version: '1.0'
 nodes:
 - id: backend-create-verb-edges
@@ -74,8 +75,7 @@ nodes:
   status: pending
   type: capability
 - id: tui-inventory-and-keymap-audit
-  title: Walk every aa-cli surface against the tui-design skill; produce a binding
-    map
+  title: Walk every aa-cli surface against the tui-design skill; produce a binding map
   status: complete
   type: capability
 - id: tui-picker-grammar
