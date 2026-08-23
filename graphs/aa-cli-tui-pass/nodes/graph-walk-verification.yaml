@@ -1,32 +1,36 @@
-schema_version: "1.0"
+schema_version: '1.0'
 schema_type: node
 node_id: graph-walk-verification
 title: Run the entire graph as an operator session; one receipt per node
 type: capability
-why: |
-  The graph's own promise: the tui-design pass is proven by walking the whole
-  product. This node runs every completed node's deliverable through an
+why: 'The graph''s own promise: the tui-design pass is proven by walking the whole
+
+  product. This node runs every completed node''s deliverable through an
+
   operator session and produces one receipt per node, in the project-local
+
   executor-receipts style.
+
+  '
 depends_on:
-  - operator-walkthrough
+- operator-walkthrough
 acceptance_criteria:
-  - id: per-node-receipts
-    criterion: One receipt file per node (1-12) exists under the graph's
-      executor-receipts/ area, each citing its acceptance criteria and evidence.
-  - id: frontier-truth
-    criterion: Receipts reflect actual executed state; no node is marked done
-      without a receipt, and only human acceptance flips node status.
-  - id: open-issues
-    criterion: Any walkthrough failures are classified (blocker vs polish) and
-      cited to their node for a continuation proposal.
+- id: per-node-receipts
+  criterion: One receipt file per node (1-12) exists under the graph's executor-receipts/
+    area, each citing its acceptance criteria and evidence.
+- id: frontier-truth
+  criterion: Receipts reflect actual executed state; no node is marked done without
+    a receipt, and only human acceptance flips node status.
+- id: open-issues
+  criterion: Any walkthrough failures are classified (blocker vs polish) and cited
+    to their node for a continuation proposal.
 constraints:
-  - Receipts/evidence only — no code changes; human acceptance is the release gate.
+- Receipts/evidence only — no code changes; human acceptance is the release gate.
 allowed_execution_modes:
-  - pi
-  - human
+- agent
+- human
 required_artifacts:
-  - executor-receipts/
-status: planned
+- executor-receipts/
+status: pending
 priority: medium
 unlocks: []

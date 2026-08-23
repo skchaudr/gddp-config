@@ -1,35 +1,39 @@
-schema_version: "1.0"
+schema_version: '1.0'
 schema_type: node
 node_id: skill-curation
 title: Daily-driver skill allowlist (both hosts)
 type: capability
-why: |
-  Skills are already shared via ~/.agents/skills on sab-mini; dsh has its own
+why: 'Skills are already shared via ~/.agents/skills on sab-mini; dsh has its own
+
   goals/skills/workflows on sab-air. Port means curating the allowlist per
+
   host — gddp/memory/grill/code families belong; teaching/bailian families
+
   are optional; nothing is rewritten.
+
+  '
 depends_on:
-  - inventory-extension-catalog
+- inventory-extension-catalog
 acceptance_criteria:
-  - id: allowlist
-    criterion: An allowlist file names the daily-driver skill set per host with
-      one-line purpose per skill (sab-mini: ~/.agents/skills + ~/.pi/agent/skills;
-      sab-air: dsh goals/skills/workflows).
-  - id: families
-    criterion: Skills are grouped by family with keep/optional/exclude tags.
-  - id: load-truth
-    criterion: The allowlist matches what each host actually loads after
-      enable-set/config application; mismatches listed.
+- id: allowlist
+  criterion: 'An allowlist file names the daily-driver skill set per host with one-line
+    purpose per skill (sab-mini: ~/.agents/skills + ~/.pi/agent/skills; sab-air: dsh
+    goals/skills/workflows).'
+- id: families
+  criterion: Skills are grouped by family with keep/optional/exclude tags.
+- id: load-truth
+  criterion: The allowlist matches what each host actually loads after enable-set/config
+    application; mismatches listed.
 constraints:
-  - Curate/document only; no skill content changes on either host.
+- Curate/document only; no skill content changes on either host.
 allowed_execution_modes:
-  - pi
-  - human
+- agent
+- human
 required_artifacts:
-  - ~/.agents/skills/ (sab-mini)
-  - ~/.pi/agent/skills/ (sab-mini)
-  - ~/.dsh profiles/skills (sab-air)
-status: planned
+- ~/.agents/skills/ (sab-mini)
+- ~/.pi/agent/skills/ (sab-mini)
+- ~/.dsh profiles/skills (sab-air)
+status: pending
 priority: medium
 unlocks:
-  - dogfood-session
+- dogfood-session

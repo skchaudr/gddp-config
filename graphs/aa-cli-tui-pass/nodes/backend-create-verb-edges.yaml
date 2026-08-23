@@ -1,36 +1,40 @@
-schema_version: "1.0"
+schema_version: '1.0'
 schema_type: node
 node_id: backend-create-verb-edges
 title: Fix create verb edges — Enter-as-call, sticky pathway, blank respond
 type: capability
-why: |
-  The 7.29.26 verb-first plan shipped P0–P3 but left known edge bugs:
+why: 'The 7.29.26 verb-first plan shipped P0–P3 but left known edge bugs:
+
   Enter-as-call while the verb pathway is set, sticky pathway state, and
+
   empty follow-up re-firing. These make the create room unreliable for
+
   dispatch and block the walkthrough.
+
+  '
 depends_on:
-  - tui-create-linear-room
+- tui-create-linear-room
 acceptance_criteria:
-  - id: enter-semantics
-    criterion: Enter behaves per the linear room design (insert vs call context),
-      never misfiring a call with an empty/unchanged prompt.
-  - id: pathway-reset
-    criterion: Pathway state resets after fire/cancel; no sticky verb across sessions.
-  - id: blank-guard
-    criterion: Empty follow-up cannot re-fire a packet; the room shows a
-      disabled/explain state instead.
-  - id: regression-tests
-    criterion: cargo tests cover the three edge cases with cited main.rs/app.rs lines.
+- id: enter-semantics
+  criterion: Enter behaves per the linear room design (insert vs call context), never
+    misfiring a call with an empty/unchanged prompt.
+- id: pathway-reset
+  criterion: Pathway state resets after fire/cancel; no sticky verb across sessions.
+- id: blank-guard
+  criterion: Empty follow-up cannot re-fire a packet; the room shows a disabled/explain
+    state instead.
+- id: regression-tests
+  criterion: cargo tests cover the three edge cases with cited main.rs/app.rs lines.
 constraints:
-  - Backend/dispatch edges only; room chrome belongs to node 04.
+- Backend/dispatch edges only; room chrome belongs to node 04.
 allowed_execution_modes:
-  - pi
-  - human
+- agent
+- human
 required_artifacts:
-  - hub-rs/src/main.rs
-  - hub-rs/src/app.rs
-  - bin/aa
-status: planned
+- hub-rs/src/main.rs
+- hub-rs/src/app.rs
+- bin/aa
+status: pending
 priority: high
 unlocks:
-  - frontend-integration
+- frontend-integration

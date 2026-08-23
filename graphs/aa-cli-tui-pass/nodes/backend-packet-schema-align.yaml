@@ -1,34 +1,38 @@
-schema_version: "1.0"
+schema_version: '1.0'
 schema_type: node
 node_id: backend-packet-schema-align
 title: Reconcile dual packet field models (AGENTS vs hub-authored)
 type: capability
-why: |
-  Packets are authored under two field models (AGENTS.md packet fields vs
+why: 'Packets are authored under two field models (AGENTS.md packet fields vs
+
   hub-authored fields; validated vs verified/verdict dual-write). The pilot
+
   charted packet-schema-align but never closed it — schema drift surfaces as
+
   verify/ledger confusion downstream.
+
+  '
 depends_on:
-  - tui-inventory-and-keymap-audit
+- tui-inventory-and-keymap-audit
 acceptance_criteria:
-  - id: schema-source
-    criterion: One canonical packet schema (schema/packet.schema.json) is the source
-      of truth; AGENTS.md and hub-authored fields reconcile to it.
-  - id: dual-write
-    criterion: validated vs verified/verdict fields are distinct, non-conflicting,
-      and ledger never releases a packet except through human review.
-  - id: no-legacy-drift
-    criterion: Existing packets validate against the reconciled schema (validation
-      run cited).
+- id: schema-source
+  criterion: One canonical packet schema (schema/packet.schema.json) is the source
+    of truth; AGENTS.md and hub-authored fields reconcile to it.
+- id: dual-write
+  criterion: validated vs verified/verdict fields are distinct, non-conflicting, and
+    ledger never releases a packet except through human review.
+- id: no-legacy-drift
+  criterion: Existing packets validate against the reconciled schema (validation run
+    cited).
 constraints:
-  - Schema reconciliation only; no verify authority changes.
+- Schema reconciliation only; no verify authority changes.
 allowed_execution_modes:
-  - pi
-  - human
+- agent
+- human
 required_artifacts:
-  - schema/packet.schema.json
-  - lib/validate.zsh
-status: planned
+- schema/packet.schema.json
+- lib/validate.zsh
+status: pending
 priority: medium
 unlocks:
-  - frontend-integration
+- frontend-integration

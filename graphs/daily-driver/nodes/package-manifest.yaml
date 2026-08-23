@@ -1,34 +1,36 @@
-schema_version: "1.0"
+schema_version: '1.0'
 schema_type: node
 node_id: package-manifest
 title: One installable Pi daily-driver package (sab-mini)
 type: capability
-why: |
-  The Pi side of the split needs one installable package that selects and
+why: 'The Pi side of the split needs one installable package that selects and
+
   documents the interactive extension+skill set, visible in pi list.
+
+  '
 depends_on:
-  - classify-extension-tiers
-  - split-architecture-decision
+- classify-extension-tiers
+- split-architecture-decision
 acceptance_criteria:
-  - id: package-json
-    criterion: A package.json `pi` key exists listing the interactive-core
-      extensions + skills per the split, resolvable as an installable path package.
-  - id: installable
-    criterion: pi install succeeds on a staging copy (not sab-mini live);
-      pi list shows the package.
-  - id: scoped
-    criterion: Package contains interactive-core only — no harness-only, no
-      providers (those stay optional installs documented separately).
+- id: package-json
+  criterion: A package.json `pi` key exists listing the interactive-core extensions
+    + skills per the split, resolvable as an installable path package.
+- id: installable
+  criterion: pi install succeeds on a staging copy (not sab-mini live); pi list shows
+    the package.
+- id: scoped
+  criterion: Package contains interactive-core only — no harness-only, no providers
+    (those stay optional installs documented separately).
 constraints:
-  - Package authored and staged; not applied to live sab-mini settings.
+- Package authored and staged; not applied to live sab-mini settings.
 allowed_execution_modes:
-  - pi
-  - human
+- agent
+- human
 required_artifacts:
-  - package.json
-  - settings.json (staging)
-status: planned
+- package.json
+- settings.json (staging)
+status: pending
 priority: high
 unlocks:
-  - enable-set-policy
-  - dogfood-session
+- enable-set-policy
+- dogfood-session

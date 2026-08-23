@@ -1,44 +1,46 @@
-schema_version: "1.0"
+schema_version: '1.0'
 schema_type: node
 node_id: dogfood-session
 title: Two-host dogfood — apply both sides, one real session each, list breaks
 type: capability
-why: |
-  The graph's proof: the daily driver works on the machines it's for. A real
+why: 'The graph''s proof: the daily driver works on the machines it''s for. A real
+
   session per host exercises the curated set end to end and surfaces broken
+
   commands before Sab depends on it daily.
+
+  '
 depends_on:
-  - package-manifest
-  - enable-set-policy
-  - dsh-daily-driver-config
-  - adapter-twins
-  - mux-stack
-  - skill-curation
-  - aa-cli-boundary
+- package-manifest
+- enable-set-policy
+- dsh-daily-driver-config
+- adapter-twins
+- mux-stack
+- skill-curation
+- aa-cli-boundary
 acceptance_criteria:
-  - id: applied
-    criterion: Sab-accepted diffs applied per host: pi package on sab-mini, dsh
-      config on sab-air; pi list and dsh load confirm.
-  - id: sessions
-    criterion: One real working session per host with a recap of what worked,
-      what broke (broken commands cited to their package/patch), and what was
-      reverted.
-  - id: seams
-    criterion: The named cross-host seam(s) from node 04 work in practice
-      (e.g. shared skill use or the grok bridge), demonstrated in-session.
-  - id: mux-clean
-    criterion: No double-bound slash commands fired unexpectedly during the
-      sab-mini session.
+- id: applied
+  criterion: 'Sab-accepted diffs applied per host: pi package on sab-mini, dsh config
+    on sab-air; pi list and dsh load confirm.'
+- id: sessions
+  criterion: One real working session per host with a recap of what worked, what broke
+    (broken commands cited to their package/patch), and what was reverted.
+- id: seams
+  criterion: The named cross-host seam(s) from node 04 work in practice (e.g. shared
+    skill use or the grok bridge), demonstrated in-session.
+- id: mux-clean
+  criterion: No double-bound slash commands fired unexpectedly during the sab-mini
+    session.
 constraints:
-  - Applied changes follow Sab-accepted diffs only; anything else is reverted,
-    not left half-installed.
+- Applied changes follow Sab-accepted diffs only; anything else is reverted, not left
+  half-installed.
 allowed_execution_modes:
-  - pi
-  - human
+- agent
+- human
 required_artifacts:
-  - ~/.pi/agent/settings.json (sab-mini)
-  - ~/.dsh/ (sab-air)
-  - session recaps (both hosts)
-status: planned
+- ~/.pi/agent/settings.json (sab-mini)
+- ~/.dsh/ (sab-air)
+- session recaps (both hosts)
+status: pending
 priority: high
 unlocks: []

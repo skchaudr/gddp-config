@@ -1,32 +1,35 @@
-schema_version: "1.0"
+schema_version: '1.0'
 schema_type: node
 node_id: enable-set-policy
 title: Pi enable-set policy — settings.json packages[] diff (unapplied)
 type: capability
-why: |
-  The live sab-mini settings.json is the real Pi daily driver. The policy
+why: 'The live sab-mini settings.json is the real Pi daily driver. The policy
+
   says what stays in packages[], what gets uninstalled, what stays local-only.
+
   Never applied by an executor — diffed for Sab.
+
+  '
 depends_on:
-  - package-manifest
+- package-manifest
 acceptance_criteria:
-  - id: policy-diff
-    criterion: A proposed settings.json diff exists: keep / uninstall / local-only
-      per package, each row citing the tier from node 02.
-  - id: unapplied
-    criterion: The diff is NOT applied to live settings; presented with exact
-      revert instructions for human acceptance.
-  - id: telegram-bounded
-    criterion: pi-telegram's presence respects USER.md's Telegram boundary —
-      in the policy or explicitly optional, decided by Sab.
+- id: policy-diff
+  criterion: 'A proposed settings.json diff exists: keep / uninstall / local-only
+    per package, each row citing the tier from node 02.'
+- id: unapplied
+  criterion: The diff is NOT applied to live settings; presented with exact revert
+    instructions for human acceptance.
+- id: telegram-bounded
+  criterion: pi-telegram's presence respects USER.md's Telegram boundary — in the
+    policy or explicitly optional, decided by Sab.
 constraints:
-  - Proposal only — human accept applies the diff.
+- Proposal only — human accept applies the diff.
 allowed_execution_modes:
-  - pi
-  - human
+- agent
+- human
 required_artifacts:
-  - ~/.pi/agent/settings.json (proposed diff, sab-mini)
-status: planned
+- ~/.pi/agent/settings.json (proposed diff, sab-mini)
+status: pending
 priority: high
 unlocks:
-  - dogfood-session
+- dogfood-session

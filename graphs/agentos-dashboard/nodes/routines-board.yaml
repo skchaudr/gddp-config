@@ -1,34 +1,38 @@
-schema_version: "1.0"
+schema_version: '1.0'
 schema_type: node
 node_id: routines-board
 title: Routines firing board — next/queued/fired, local vs cloud worker, sync status
 type: capability
-why: |
-  The plan's 24/7 surface: a status feed showing scheduled automation
+why: 'The plan''s 24/7 surface: a status feed showing scheduled automation
+
   (routines) with chronological schedule, status flags (Next, Queued,
+
   Fired), and local vs cloud worker execution (e.g. remote VPS / Hermes via
-  Syncthing). Which routines are real comes from node 01's scope.
+
+  Syncthing). Which routines are real comes from node 01''s scope.
+
+  '
 depends_on:
-  - frontend-shell
+- frontend-shell
 acceptance_criteria:
-  - id: board
-    criterion: Routines board renders the declared routine schedule with
-      next/queued/fired status flags per the plan.
-  - id: worker
-    criterion: Local vs cloud worker distinction renders from the routine's
-      declared home; sync status shows where the source of truth lives.
-  - id: truth
-    criterion: The board never invents routines — it renders what node 01's scope
-      and node 09's API expose.
+- id: board
+  criterion: Routines board renders the declared routine schedule with next/queued/fired
+    status flags per the plan.
+- id: worker
+  criterion: Local vs cloud worker distinction renders from the routine's declared
+    home; sync status shows where the source of truth lives.
+- id: truth
+  criterion: The board never invents routines — it renders what node 01's scope and
+    node 09's API expose.
 constraints:
-  - Display surface only; actual scheduling execution is out of graph scope
-    unless node 01/09 scope it explicitly.
+- Display surface only; actual scheduling execution is out of graph scope unless node
+  01/09 scope it explicitly.
 allowed_execution_modes:
-  - pi
-  - human
+- agent
+- human
 required_artifacts:
-  - board component + tests
-status: planned
+- board component + tests
+status: pending
 priority: medium
 unlocks:
-  - backend-api
+- backend-api

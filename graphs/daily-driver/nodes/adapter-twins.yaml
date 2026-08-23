@@ -1,37 +1,41 @@
-schema_version: "1.0"
+schema_version: '1.0'
 schema_type: node
 node_id: adapter-twins
 title: One capability, N adapters — twins across Pi / dsh / Hermes
 type: capability
-why: |
-  Policy twins already dual-home (noise-trim, herdr, moshi as Pi TS + Hermes
+why: 'Policy twins already dual-home (noise-trim, herdr, moshi as Pi TS + Hermes
+
   Python). With dsh in the picture, the twin question spans three runtimes:
+
   Pi ExtensionAPI, dsh reversible effects, Hermes plugin.yaml. The daily
+
   driver treats each capability as one behavior with N adapters — never a
+
   fourth runtime.
+
+  '
 depends_on:
-  - split-architecture-decision
+- split-architecture-decision
 acceptance_criteria:
-  - id: twin-contract
-    criterion: A one-page contract per twin capability: shared behavior, adapter
-      per runtime (Pi extension / dsh effect / Hermes plugin), file map, and the
-      behavior-integrity check that keeps them in sync.
-  - id: coverage
-    criterion: noise-trim, herdr-agent-state, moshi-hooks are all mapped across
-      the runtimes that carry them; dsh-side twins found in node 03 are added.
-  - id: no-new-runtime
-    criterion: The spec states no new runtime/plugin file format is introduced
-      for twins.
+- id: twin-contract
+  criterion: 'A one-page contract per twin capability: shared behavior, adapter per
+    runtime (Pi extension / dsh effect / Hermes plugin), file map, and the behavior-integrity
+    check that keeps them in sync.'
+- id: coverage
+  criterion: noise-trim, herdr-agent-state, moshi-hooks are all mapped across the
+    runtimes that carry them; dsh-side twins found in node 03 are added.
+- id: no-new-runtime
+  criterion: The spec states no new runtime/plugin file format is introduced for twins.
 constraints:
-  - Spec/documentation only — no behavior changes.
+- Spec/documentation only — no behavior changes.
 allowed_execution_modes:
-  - pi
-  - human
+- agent
+- human
 required_artifacts:
-  - ~/.pi/agent/extensions/ (sab-mini)
-  - ~/.hermes/plugins/ (sab-mini)
-  - ~/.dsh/ (sab-air)
-status: planned
+- ~/.pi/agent/extensions/ (sab-mini)
+- ~/.hermes/plugins/ (sab-mini)
+- ~/.dsh/ (sab-air)
+status: pending
 priority: medium
 unlocks:
-  - dogfood-session
+- dogfood-session

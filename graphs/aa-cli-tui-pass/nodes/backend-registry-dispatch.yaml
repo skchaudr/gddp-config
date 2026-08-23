@@ -1,32 +1,35 @@
-schema_version: "1.0"
+schema_version: '1.0'
 schema_type: node
 node_id: backend-registry-dispatch
 title: Make every executor registry-driven via targets.conf
 type: capability
-why: |
-  target-dispatch-via-registry is charted but not landed: some executors still
-  bypass the targets.conf registry. Registry-driven dispatch keeps the TUI's
+why: 'target-dispatch-via-registry is charted but not landed: some executors still
+
+  bypass the targets.conf registry. Registry-driven dispatch keeps the TUI''s
+
   target picker truthful with what can actually fire.
+
+  '
 depends_on:
-  - tui-inventory-and-keymap-audit
+- tui-inventory-and-keymap-audit
 acceptance_criteria:
-  - id: registry-only
-    criterion: Every dispatch resolves its executor through targets.conf rows; no
-      hardcoded executor paths remain in lib/fire.zsh.
-  - id: target-truth
-    criterion: The TUI target picker lists exactly the registry's runnable targets.
-  - id: unknown-targets
-    criterion: Targets referenced by packets but absent from the registry surface
-      as explicit errors, not silent falls-through.
+- id: registry-only
+  criterion: Every dispatch resolves its executor through targets.conf rows; no hardcoded
+    executor paths remain in lib/fire.zsh.
+- id: target-truth
+  criterion: The TUI target picker lists exactly the registry's runnable targets.
+- id: unknown-targets
+  criterion: Targets referenced by packets but absent from the registry surface as
+    explicit errors, not silent falls-through.
 constraints:
-  - Registry/dispatch mechanics only; no executor capability changes.
+- Registry/dispatch mechanics only; no executor capability changes.
 allowed_execution_modes:
-  - pi
-  - human
+- agent
+- human
 required_artifacts:
-  - targets.conf
-  - lib/fire.zsh
-status: planned
+- targets.conf
+- lib/fire.zsh
+status: pending
 priority: medium
 unlocks:
-  - frontend-integration
+- frontend-integration

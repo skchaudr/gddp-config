@@ -1,32 +1,35 @@
-schema_version: "1.0"
+schema_version: '1.0'
 schema_type: node
 node_id: classify-extension-tiers
 title: Tag every cataloged item into a tier (per host)
 type: capability
-why: |
-  The port can't start until items are separated per host: interactive-core
+why: 'The port can''t start until items are separated per host: interactive-core
+
   (daily driver), harness-only, provider, mux, skill-only, dead/archived.
+
   Harness-only machinery stays out of the interactive package on both sides.
+
+  '
 depends_on:
-  - inventory-extension-catalog
+- inventory-extension-catalog
 acceptance_criteria:
-  - id: tagged-catalog
-    criterion: Every catalog row carries one tier: interactive-core | harness-only
-      | provider | mux | skill-only | dead/archived, per host.
-  - id: unresolved
-    criterion: Ambiguous items (pi-auto-mode, pi-studio, pi-grok-cli leftovers,
-      dsh patches not in active use) are listed as unresolved with evidence.
-  - id: cross-host
-    criterion: Items present on both hosts are marked; the catalog notes whether
-      they're the same install or divergent versions.
+- id: tagged-catalog
+  criterion: 'Every catalog row carries one tier: interactive-core | harness-only
+    | provider | mux | skill-only | dead/archived, per host.'
+- id: unresolved
+  criterion: Ambiguous items (pi-auto-mode, pi-studio, pi-grok-cli leftovers, dsh
+    patches not in active use) are listed as unresolved with evidence.
+- id: cross-host
+  criterion: Items present on both hosts are marked; the catalog notes whether they're
+    the same install or divergent versions.
 constraints:
-  - Classification only; nothing installed, uninstalled, or applied.
+- Classification only; nothing installed, uninstalled, or applied.
 allowed_execution_modes:
-  - pi
-  - human
+- agent
+- human
 required_artifacts:
-  - catalog from node 01
+- catalog from node 01
 status: complete
 priority: high
 unlocks:
-  - package-manifest
+- package-manifest
