@@ -1,0 +1,32 @@
+schema_version: "1.0"
+schema_type: node
+node_id: tui-picker-grammar
+title: One picker grammar — nucleo default, fzf only as ';' escape hatch
+type: capability
+why: |
+  docs/fzf-face.md defines fzf as the suspend-and-return escape hatch, but
+  the picker grammar is not enforced across rooms (nucleo in-hub vs shell
+  fzf). A single rule set keeps every picker predictable.
+depends_on:
+  - tui-inventory-and-keymap-audit
+acceptance_criteria:
+  - id: picker-rule
+    criterion: All in-hub pickers use nucleo-picker; fzf appears only via ';'
+      suspend-and-return, aligned with docs/fzf-face.md.
+  - id: keymap-safe
+    criterion: ';' is bound to fzf in every room; no room binds fzf to 'f' or
+      other primary keys.
+  - id: escape-return
+    criterion: fzf escape returns focus to the originating room state.
+constraints:
+  - Picker/keybinding grammar only; no backend changes.
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - hub-rs/src/picker.rs
+  - docs/fzf-face.md
+status: planned
+priority: medium
+unlocks:
+  - operator-walkthrough

@@ -1,0 +1,35 @@
+schema_version: "1.0"
+schema_type: node
+node_id: tui-create-linear-room
+title: Collapse create into one linear room
+type: capability
+why: |
+  Create is still multi-surface (command/insert, f/s on-surface, prompt
+  picker lost with p rebound to Pathway) vs the planned one linear room.
+  The pathway door (P1) shipped on feat/create-verb-first; this node finishes
+  the linear chrome the design calls for.
+depends_on:
+  - tui-inventory-and-keymap-audit
+  - tui-visual-system
+acceptance_criteria:
+  - id: one-room
+    criterion: Create flows through a single linear room (command/insert + on-surface
+      f/s) with no dead-end or lost focus states; prompt picker reachable without
+      breaking the pathway.
+  - id: verb-path
+    criterion: `aa <verb>` pathway door stays intact and visible in the room chrome.
+  - id: edge-notes
+    criterion: Known Enter/sticky-pathway bugs are listed as cited edges for
+      backend-create-verb-edges (not fixed here).
+constraints:
+  - UI room shape only; verb dispatch edge fixes belong to node 09.
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - hub-rs/src/ui/create_prepare.rs
+status: planned
+priority: medium
+unlocks:
+  - backend-create-verb-edges
+  - operator-walkthrough

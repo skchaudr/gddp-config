@@ -1,0 +1,33 @@
+schema_version: "1.0"
+schema_type: node
+node_id: skill-curation
+title: Daily-driver skill allowlist from ~/.agents/skills
+type: capability
+why: |
+  Skills are already shared via ~/.agents/skills (Pi + others). Port means
+  curating the allowlist — gddp/memory/grill/code families belong; teaching/
+  bailian families are optional; nothing is rewritten.
+depends_on:
+  - inventory-extension-catalog
+acceptance_criteria:
+  - id: allowlist
+    criterion: An allowlist file names the daily-driver skill set with one-line
+      purpose per skill, sourced from ~/.agents/skills + ~/.pi/agent/skills.
+  - id: families
+    criterion: Skills are grouped by family (gddp, memory, code, communication,
+      teaching, provider-specific) with a keep/optional/exclude tag.
+  - id: load-truth
+    criterion: The allowlist matches what the daily driver actually loads on
+      sab-mini after enable-set; mismatches listed.
+constraints:
+  - Curate/document only; no skill content changes.
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - ~/.agents/skills/
+  - ~/.pi/agent/skills/
+status: planned
+priority: medium
+unlocks:
+  - dogfood-session

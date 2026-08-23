@@ -1,0 +1,35 @@
+schema_version: "1.0"
+schema_type: node
+node_id: tui-deck-runway-pass
+title: Deck + runway spatial memory pass
+type: capability
+why: |
+  Deck is the session home: top list + bottom runway. Its readability and
+  spatial memory (focused packet stays put while runway updates) are the
+  core operator trust surface; the pilot graph still lists deck-baseline-ui
+  and deck-runway as in_progress.
+depends_on:
+  - tui-inventory-and-keymap-audit
+  - tui-visual-system
+acceptance_criteria:
+  - id: deck-readability
+    criterion: Deck list and runway render per the visual system; focused packet
+      identity is unambiguous in dense lists (truncation + selection indicators).
+  - id: fire-stays-tui
+    criterion: Firing a packet keeps the operator in the TUI (toast/receipt inline),
+      never drops to a raw shell without returning.
+  - id: render-tests
+    criterion: Render tests cover deck empty/dense/long-output states.
+constraints:
+  - Deck only; Create/Verify room changes belong to their own nodes.
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - hub-rs/src/ui/dashboard.rs
+  - hub-rs/src/ui/runway.rs
+status: planned
+priority: high
+unlocks:
+  - frontend-integration
+  - operator-walkthrough

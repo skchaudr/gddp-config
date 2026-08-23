@@ -1,0 +1,33 @@
+schema_version: "1.0"
+schema_type: node
+node_id: classify-extension-tiers
+title: Tag every cataloged item into a tier
+type: capability
+why: |
+  The port can't start until items are separated: interactive-core (daily
+  driver), harness-only (ARTIFACT_DIR, cwd-guard, eval-*), provider,
+  mux, skill-only, dead/archived. Harness-only extensions stay out of the
+  interactive package.
+depends_on:
+  - inventory-extension-catalog
+acceptance_criteria:
+  - id: tagged-catalog
+    criterion: Every catalog row carries one tier: interactive-core | harness-only
+      | provider | mux | skill-only | dead/archived.
+  - id: unresolved
+    criterion: Ambiguous items (e.g. pi-auto-mode, pi-studio, pi-grok-cli leftovers)
+      are listed as unresolved with evidence, not guessed.
+  - id: dead-resolved
+    criterion: Any item known dead/archived (e.g. pi-tool-display ARCHIVED) is
+      tagged with its evidence path.
+constraints:
+  - Classification only; nothing installed or uninstalled in this node.
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - catalog from node 01
+status: planned
+priority: high
+unlocks:
+  - package-manifest

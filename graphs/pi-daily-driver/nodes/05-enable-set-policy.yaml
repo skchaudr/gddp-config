@@ -1,0 +1,32 @@
+schema_version: "1.0"
+schema_type: node
+node_id: enable-set-policy
+title: Enable-set policy — which settings.json packages[] stay, go, or stay local-only
+type: capability
+why: |
+  The live settings.json is the real daily driver. The policy says what stays
+  in packages[], what gets uninstalled (leftovers), and what stays local-only
+  (harness extensions). Never applied by an executor — diffed for Sab.
+depends_on:
+  - package-manifest
+acceptance_criteria:
+  - id: policy-diff
+    criterion: A proposed settings.json diff exists: keep / uninstall / local-only
+      per package, each row citing the tier from node 02.
+  - id: unapplied
+    criterion: The diff is NOT applied to live settings; it is presented for human
+      acceptance with exact revert instructions.
+  - id: telegram-bounded
+    criterion: pi-telegram's presence respects USER.md's Telegram boundary —
+      either in the policy or explicitly optional, decided by Sab.
+constraints:
+  - Proposal only — human accept applies the diff.
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - ~/.pi/agent/settings.json (proposed diff)
+status: planned
+priority: high
+unlocks:
+  - dogfood-session

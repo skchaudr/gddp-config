@@ -1,0 +1,38 @@
+schema_version: "1.0"
+schema_type: node
+node_id: inventory-extension-catalog
+title: Freeze the Pi extension/skill inventory as a checked-in catalog
+type: capability
+why: |
+  The scout found the live daily-driver surface is settings.json + ~/.pi/agent
+  extensions, not node_modules alone, and no catalog exists. Everything
+  downstream needs one authoritative inventory.
+depends_on: []
+acceptance_criteria:
+  - id: catalog
+    criterion: A checked-in catalog markdown lists every package (settings.json
+      packages[]), local extension, pi skill, shared skill family, hermes plugin,
+      and aa-cli target, each with a one-line purpose and exact path.
+  - id: settings-excerpt
+    criterion: The catalog quotes the current settings.json packages/extensions
+      excerpt so drift is visible on diff.
+  - id: transitive-flagged
+    criterion: Items present in node_modules but not in packages[] are flagged as
+      possibly-transitive, not silently declared installs.
+constraints:
+  - Read-only inventory; no changes to settings.json or any package.
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - ~/.pi/agent/settings.json
+  - ~/.pi/agent/extensions/
+status: planned
+priority: high
+unlocks:
+  - classify-extension-tiers
+  - dsh-definition-decision
+  - adapter-twins
+  - mux-stack
+  - skill-curation
+  - aa-cli-boundary

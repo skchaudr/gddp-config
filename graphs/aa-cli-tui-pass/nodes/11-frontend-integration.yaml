@@ -1,0 +1,37 @@
+schema_version: "1.0"
+schema_type: node
+node_id: frontend-integration
+title: Hub calls only documented aa subcommands; no parallel fire path
+type: capability
+why: |
+  With the backend nodes closed, the hub's exec.rs/fire.rs must call exactly
+  the documented bin/aa subcommands — one dispatch path, no parallel fire
+  logic living in the frontend.
+depends_on:
+  - backend-deck-actions
+  - backend-packet-schema-align
+  - backend-create-verb-edges
+  - backend-registry-dispatch
+acceptance_criteria:
+  - id: command-table
+    criterion: A command table in exec.rs/fire.rs maps every hub action to one
+      documented `aa` subcommand; no parallel dispatch path exists.
+  - id: receipts
+    criterion: Every hub action consumes the backend receipt/toast contract
+      (success + error) from bin/aa.
+  - id: e2e
+    criterion: An end-to-end run (deck → fire → verify) passes with only documented
+      subcommands, cited by executed commands.
+constraints:
+  - Integration only — no new UI rooms or new subcommands in this node.
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - hub-rs/src/exec.rs
+  - hub-rs/src/fire.rs
+  - bin/aa
+status: planned
+priority: high
+unlocks:
+  - operator-walkthrough
