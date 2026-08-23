@@ -1,0 +1,33 @@
+schema_version: "1.0"
+schema_type: node
+node_id: rollout-decision
+title: Human per-plugin rollout decision — promote / keep-isolated / reject
+type: decision
+why: |
+  The graph's release gate. Evidence from vetting (01), protocol (02),
+  install+smoke (04), and dsh-pi (05) is presented per plugin; only Sab
+  decides what moves into the live ~/.dsh on sab-air, what stays isolated,
+  and what is rejected.
+depends_on:
+  - install-and-smoke
+  - dsh-pi-bridge
+acceptance_criteria:
+  - id: decision-recorded
+    criterion: One decision per candidate: PROMOTE (with install steps into live
+      ~/.dsh) / KEEP-ISOLATED (with reason) / REJECT (with cited evidence).
+  - id: dsh-pi-decided
+    criterion: dsh-pi specifically has a decision that names its role in the
+      daily-driver split (bridge enabled? which direction?).
+  - id: evidence-cited
+    criterion: Every decision cites its evidence file(s) — no memory-only calls.
+constraints:
+  - Human decision only. Promotions are applied as exact, reversible steps by
+    Sab or a Pi executor only after this node resolves.
+allowed_execution_modes:
+  - human
+required_artifacts:
+  - evidence/06-rollout-decision.md
+status: planned
+priority: high
+unlocks:
+  - adoption-runbook

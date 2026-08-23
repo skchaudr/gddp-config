@@ -1,0 +1,48 @@
+schema_version: '1.0'
+schema_type: project_graph
+project_id: dsh-plugin-adoption
+project_name: dsh Plugin Adoption — safe third-party plugin install + implement
+description: >-
+  Safely vet, install, and implement third-party deepseek-harness (dsh)
+  plugins on sab-air. The ecosystem surfaced by Sab's research: TGYD-helige/
+  dsh-pi (the Pi bridge), MaimoryLab/dib, Saktawdi/dsh-ha-orchestrator,
+  awesome-deepseek-harness, ouroboros dsh-plugin integration, and the
+  supply-chain tooling (dsh-poison-guard, dsh-plugin-doctor, dsh-plugin-check,
+  api-relay-audit, DSH-Plugins-Marketplace). Because these are third-party
+  code running inside the agent harness with credential/API access, the
+  graph's spine is a verified safe-install protocol: vet → threat-model →
+  isolated test profile → preflight-scan install + smoke → human rollout
+  decision. dsh-pi gets its own deep-dive node — it may be the bridge that
+  settles the daily-driver split.
+repo: sab-air (~/.dsh + ~/.config/deepseek-harness)
+blueprint:
+  vision: >-
+    Sab gets the plugins that earn their place, without the harness getting
+    poisoned. Every candidate is vetted from source, installed first into a
+    disposable empty macOS user profile with no credentials, smoke-tested,
+    and only a human moves it into the real ~/.dsh. The dsh-pi bridge is
+    implemented and tested in isolation, with its implications fed back to
+    the daily-driver split decision. The graph leaves behind a runbook so
+    future plugin adoption follows the same safe path.
+  architecture_notes: >-
+    Charted 2026-08-23 from Sab's plugin list. dsh harness facts from
+    daily-driver node 03 evidence: plugins live as cordis patch layers /
+    profiles / agent-presets; HMR can recompose live; extensions package
+    (tool-cordis, cordis-host-runner) allows model-facing dynamic packages.
+    Supply-chain risk concentrates in: install scripts, host-shadow
+    dependencies (node_modules shadowing the host's), credential env access,
+    and prompt-injection via plugin code — exactly what poison-guard /
+    plugin-check / plugin-doctor / api-relay-audit defend. Isolation posture:
+    an empty macOS user profile on sab-air (no ~/.dsh credentials, no
+    sessions) OR an equivalent sandbox; nothing from this graph touches the
+    live ~/.dsh until the human rollout node. Executors: grok-4.6 + GLM 5.2
+    route, GLM-77%-off reviewer; only human acceptance promotes plugins.
+  major_capabilities:
+    - vetted candidate table with per-repo verdicts
+    - threat model + safe-install protocol (preflight scan chain)
+    - disposable isolated test profile on sab-air
+    - scanned installs + smoke evidence per plugin
+    - dsh-pi bridge analysis + isolated implementation test
+    - human per-plugin rollout decision
+    - adoption runbook for the future
+graph_version: '1.0'

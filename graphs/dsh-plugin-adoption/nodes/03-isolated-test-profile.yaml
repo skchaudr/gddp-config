@@ -1,0 +1,35 @@
+schema_version: "1.0"
+schema_type: node
+node_id: isolated-test-profile
+title: Disposable empty macOS user profile on sab-air for plugin installs
+type: capability
+why: |
+  The protocol's isolation requirement: a fresh macOS user profile with no
+  ~/.dsh credentials, no sessions, no API keys, disposable after testing.
+  All plugin installs and smoke tests happen here — never in the live
+  profile.
+depends_on:
+  - threat-model-protocol
+acceptance_criteria:
+  - id: profile
+    criterion: An empty test user profile exists on sab-air (or an equivalent
+      sandbox, cited), with node + npm available and NO dsh credentials or
+      session state.
+  - id: no-leak
+    criterion: Verified that the test profile has no access to the live ~/.dsh
+      credentials (env vars, credentials file, providers) — evidence cites the check.
+  - id: disposable
+    criterion: The teardown path is documented (delete profile / restore), and
+      the profile is re-creatable in one command.
+constraints:
+  - Profile creation only — no plugin installs in this node (node 04).
+allowed_execution_modes:
+  - pi
+  - human
+required_artifacts:
+  - evidence/03-isolated-test-profile.md
+status: planned
+priority: high
+unlocks:
+  - install-and-smoke
+  - dsh-pi-bridge
