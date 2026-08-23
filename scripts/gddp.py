@@ -3104,6 +3104,19 @@ def cmd_node_status(args):
     show_status(getattr(args, "project", None))
 
 
+def cmd_node_frontier(args):
+    """Read-only frontier view: ready / in-flight / blocked / unlocks / drift.
+
+    Uses the same derive() + render_text() the dispatch gate and interactive
+    browse rely on, surfaced as a node subcommand so the graph's dependency
+    and frontier state is reviewable non-interactively.
+    """
+    project = getattr(args, "project", None)
+    if not project:
+        raise SystemExit("error: --project required for node frontier")
+    _show_frontier([project])
+
+
 def resolve_runtime_root() -> Path:
     """Resolve the runtime checkout that owns job and evaluator state."""
     configured = os.environ.get("GDDP_RUNTIME_ROOT")
@@ -5899,6 +5912,11 @@ def main(argv=None):
         help="Only graph status pending or ready",
     )
     node_list.set_defaults(func=cmd_node_list)
+
+    node_frontier = node_sub.add_parser(
+        "frontier", help="Read-only frontier view: ready / in-flight / blocked / unlocks / drift")
+    node_frontier.add_argument("--project", default=None, help="Project ID")
+    node_frontier.set_defaults(func=cmd_node_frontier)
 
     node_show = node_sub.add_parser(
         "show", help="Show one node + evaluator summary")
