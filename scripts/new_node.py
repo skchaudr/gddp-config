@@ -42,7 +42,7 @@ from terminal import console, getch, getline
 
 # ── Schema constants (mirror schemas/v1/node.yaml) ─────────────────────────
 
-VALID_TYPES = ["capability", "milestone", "constraint"]
+VALID_TYPES = ["capability", "milestone", "constraint", "audit", "review"]
 VALID_STATUSES = ["pending", "ready", "complete", "deferred"]
 VALID_PRIORITIES = ["low", "medium", "high", "critical"]
 VALID_EXEC_MODES = [

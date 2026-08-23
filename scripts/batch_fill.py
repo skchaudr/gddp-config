@@ -42,7 +42,7 @@ from terminal import console, getch, getline
 SCRIPTS_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPTS_DIR.parent
 
-VALID_TYPES = ["capability", "milestone", "constraint"]
+VALID_TYPES = ["capability", "milestone", "constraint", "audit", "review"]
 VALID_STATUSES = ["pending", "ready", "provisional", "complete", "deferred"]
 VALID_PRIORITIES = ["low", "medium", "high", "critical"]
 VALID_EXEC_MODES = [

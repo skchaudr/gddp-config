@@ -41,7 +41,7 @@ except ImportError:
 
 ROOT = Path(__file__).resolve().parent.parent
 
-VALID_TYPES = {"capability", "milestone", "constraint"}
+VALID_TYPES = {"capability", "milestone", "constraint", "audit", "review"}
 VALID_STATUSES = {"pending", "ready", "provisional", "complete", "deferred"}
 VALID_PRIORITIES = {"low", "medium", "high", "critical"}
 PRIORITY_ALIASES = {"normal": "medium"}

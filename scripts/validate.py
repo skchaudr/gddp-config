@@ -35,7 +35,7 @@ except ImportError:
 
 # ── Schema constants (mirror schemas/v1/node.yaml) ─────────────────────────
 
-VALID_TYPES = {"capability", "milestone", "constraint"}
+VALID_TYPES = {"capability", "milestone", "constraint", "audit", "review"}
 VALID_STATUSES = {"pending", "ready", "provisional", "complete", "deferred"}
 VALID_PRIORITIES = {"low", "medium", "high", "critical"}
 VALID_EXEC_MODES = {
