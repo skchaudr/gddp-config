@@ -1,0 +1,37 @@
+schema_version: '1.0'
+schema_type: node
+node_id: audit-methodology-compliance
+title: Final audit — does aa-cli satisfy the explicit criteria?
+type: capability
+why: 'The last gate: re-run the Phase-1 methodology (and the criteria the design-review
+  named) against the finished, reviewed-and-corrected product, and produce evidence
+  that the claims in this graph actually hold. This is a compliance audit, distinct
+  from the coherence review — it measures against explicit criteria rather than overall
+  quality. It runs only after the product review has corrected what it found, so it
+  never audits a product the reviewer just flagged. Invariant it protects: the graph''s
+  claims are only true when evidenced against the finished state.'
+depends_on:
+- review-product-coherence
+acceptance_criteria:
+- id: criteria-evidence
+  criterion: Each acceptance criterion the design-review and audit named across the
+    graph is re-checked against the finished product with cited evidence — not vibes.
+    The final audit document maps every claim to a file/behavior.
+- id: methodology-rerun
+  criterion: The per-surface methodology audit is re-run on the final product; any
+    surface now violating a named skill section is listed with severity, and each
+    is routed or explicitly deferred with rationale.
+- id: honesty
+  criterion: The audit records what passes AND what does not; a failing criterion
+    is reported as a finding to the human, never silently absorbed.
+constraints:
+- Audit/evidence only — no implementation; human acceptance is the release gate.
+- Runs only after review-product-coherence corrects the product.
+allowed_execution_modes:
+- agent
+- human
+required_artifacts:
+- audits/methodology-compliance.md
+status: pending
+priority: high
+unlocks: []

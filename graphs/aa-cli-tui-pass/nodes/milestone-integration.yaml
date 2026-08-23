@@ -1,0 +1,36 @@
+schema_version: '1.0'
+schema_type: node
+node_id: milestone-integration
+title: Integrated aa-cli TUI — hub calls only documented subcommands
+type: milestone
+why: 'The product is real only when it runs as one coherent whole: the hub''s exec/fire
+  path calls exactly the documented bin/aa subcommands, there is no parallel fire
+  logic, and the invariant holds that every operator action has an observable consequence.
+  This milestone marks the point the parts — the Phase-2 capabilities and the backend
+  — compose into a single dispatch path.'
+depends_on: []
+acceptance_criteria:
+- id: command-table
+  criterion: A command table in hub-rs/src/exec.rs + hub-rs/src/fire.rs maps every
+    hub action to one documented aa subcommand; no parallel fire path exists.
+- id: receipts
+  criterion: Every hub action consumes the backend receipt/toast contract (success
+    + error) from bin/aa — each action provably reaches the documented path.
+- id: e2e
+  criterion: An end-to-end run (deck → fire → return → verify ✓✓) passes using only
+    documented subcommands, cited by executed commands.
+constraints:
+- Integration only — no new UI rooms or new subcommands here.
+- Wired to Phase-2 capabilities in a second pass once design-review resolves their
+  ids.
+allowed_execution_modes:
+- agent
+- human
+required_artifacts:
+- hub-rs/src/exec.rs
+- hub-rs/src/fire.rs
+- bin/aa
+status: pending
+priority: high
+unlocks:
+- review-product-coherence
