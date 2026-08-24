@@ -3677,38 +3677,112 @@ def interactive_graphs():
             return _MENU_QUIT
 
 
-def _heartbeat_loaded(label: str) -> bool:
+def _launchd_status(label: str) -> dict[str, object]:
+    """Return registration, enablement, and live-health as separate facts."""
     try:
-        return subprocess.run(
+        service = subprocess.run(
             ["launchctl", "print", f"gui/{os.getuid()}/{label}"],
             capture_output=True,
-        ).returncode == 0
+            text=True,
+        )
     except OSError:
-        return False
+        service = None
+    registered = service is not None and service.returncode == 0
+    if not registered:
+        return {
+            "registered": False,
+            "enabled": False,
+            "healthy": False,
+            "state": "missing",
+            "runs": 0,
+            "last_exit": None,
+        }
+
+    output = service.stdout or ""
+    state_match = re.search(r"^\s*state = ([^\n]+)$", output, re.MULTILINE)
+    runs_match = re.search(r"^\s*runs = (\d+)$", output, re.MULTILINE)
+    exit_match = re.search(r"^\s*last exit code = (-?\d+)$", output, re.MULTILINE)
+    try:
+        disabled = subprocess.run(
+            ["launchctl", "print-disabled", f"gui/{os.getuid()}"],
+            capture_output=True,
+            text=True,
+        )
+        marker = re.search(
+            rf'"{re.escape(label)}"\s*=>\s*(enabled|disabled)',
+            disabled.stdout or "",
+        )
+    except OSError:
+        marker = None
+
+    enabled = marker is None or marker.group(1) == "enabled"
+    state = state_match.group(1).strip() if state_match else "unknown"
+    runs = int(runs_match.group(1)) if runs_match else 0
+    last_exit = int(exit_match.group(1)) if exit_match else None
+    if label == "com.gddp.heartbeat":
+        healthy = enabled and runs > 0 and last_exit == 0
+    else:
+        healthy = enabled and state == "running"
+    return {
+        "registered": True,
+        "enabled": enabled,
+        "healthy": healthy,
+        "state": state,
+        "runs": runs,
+        "last_exit": last_exit,
+    }
 
 
 def interactive_heartbeat():
-    """Show control-plane state and offer the arm/disarm toggle."""
+    """Show actual control-plane health and offer repair/arm or disarm."""
     kit = resolve_runtime_root() / "deploy" / "mini-heartbeat"
     labels = ("com.gddp.intake", "com.gddp.heartbeat")
     _clear_screen()
-    loaded = {label: _heartbeat_loaded(label) for label in labels}
-    for label, on in loaded.items():
-        state = Text("ARMED", style="bold green") if on else Text("off", style="dim")
-        console.print(f"  {label}  ", state)
-    armed = any(loaded.values())
-    verb = "disarm" if armed else "arm"
-    script = "disarm.sh" if armed else "arm.sh"
+    statuses = {label: _launchd_status(label) for label in labels}
+    for label, status in statuses.items():
+        if status["healthy"]:
+            state = Text("HEALTHY", style="bold green")
+        elif status["enabled"]:
+            state = Text("DEGRADED", style="bold red")
+        else:
+            state = Text("off", style="dim")
+        detail = (
+            f"registered={status['registered']} enabled={status['enabled']} "
+            f"state={status['state']} runs={status['runs']} "
+            f"last_exit={status['last_exit']}"
+        )
+        console.print(f"  {label}  ", state, f"  {detail}")
+
+    operational = all(status["healthy"] for status in statuses.values())
+    any_enabled = any(status["enabled"] for status in statuses.values())
     try:
-        answer = Prompt.ask(
-            f"[cyan]{verb} the control plane?[/] (enter = yes, b = back)", default=""
-        ).strip().lower()
+        if operational:
+            answer = Prompt.ask(
+                "[cyan]disarm the control plane?[/] (enter = yes, b = back)",
+                default="",
+            ).strip().lower()
+            script = "disarm.sh"
+        elif any_enabled:
+            answer = Prompt.ask(
+                "[cyan]degraded:[/] [r]epair/arm, [d]isarm, [b]ack",
+                default="r",
+            ).strip().lower()
+            if answer in ("d", "disarm"):
+                script = "disarm.sh"
+            else:
+                script = "arm.sh"
+        else:
+            answer = Prompt.ask(
+                "[cyan]arm the control plane?[/] (enter = yes, b = back)",
+                default="",
+            ).strip().lower()
+            script = "arm.sh"
     except (EOFError, KeyboardInterrupt):
         return _MENU_BACK
     if answer in ("b", "back", "q"):
         return _MENU_BACK
     env = dict(os.environ)
-    if not armed:
+    if script == "arm.sh":
         env["MINI_HEARTBEAT_ARM"] = "1"
     subprocess.run(["bash", str(kit / "bin" / script)], env=env, check=False)
     _pause()

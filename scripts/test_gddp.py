@@ -82,6 +82,90 @@ def _interpret_menu_screen(blob: str, width: int, height: int = 24) -> list[str]
     return lines
 
 
+class HeartbeatStateTests(unittest.TestCase):
+    def test_registered_but_disabled_is_off(self):
+        calls = [
+            SimpleNamespace(
+                returncode=0,
+                stdout="\tstate = not running\n\truns = 4\n\tlast exit code = 0\n",
+            ),
+            SimpleNamespace(
+                returncode=0,
+                stdout='\t"com.gddp.heartbeat" => disabled\n',
+            ),
+        ]
+        with patch.object(gddp.subprocess, "run", side_effect=calls):
+            status = gddp._launchd_status("com.gddp.heartbeat")
+
+        self.assertTrue(status["registered"])
+        self.assertFalse(status["enabled"])
+        self.assertFalse(status["healthy"])
+
+    def test_enabled_heartbeat_with_successful_tick_is_healthy(self):
+        calls = [
+            SimpleNamespace(
+                returncode=0,
+                stdout="\tstate = not running\n\truns = 4\n\tlast exit code = 0\n",
+            ),
+            SimpleNamespace(
+                returncode=0,
+                stdout='\t"com.gddp.heartbeat" => enabled\n',
+            ),
+        ]
+        with patch.object(gddp.subprocess, "run", side_effect=calls):
+            status = gddp._launchd_status("com.gddp.heartbeat")
+
+        self.assertTrue(status["enabled"])
+        self.assertTrue(status["healthy"])
+        self.assertEqual(status["runs"], 4)
+        self.assertEqual(status["last_exit"], 0)
+
+    def test_enabled_intake_that_is_not_running_is_degraded(self):
+        calls = [
+            SimpleNamespace(returncode=0, stdout="\tstate = not running\n\truns = 1\n"),
+            SimpleNamespace(
+                returncode=0,
+                stdout='\t"com.gddp.intake" => enabled\n',
+            ),
+        ]
+        with patch.object(gddp.subprocess, "run", side_effect=calls):
+            status = gddp._launchd_status("com.gddp.intake")
+
+        self.assertTrue(status["enabled"])
+        self.assertFalse(status["healthy"])
+        self.assertEqual(status["state"], "not running")
+
+    def test_degraded_control_plane_can_be_disarmed(self):
+        intake = {
+            "registered": True,
+            "enabled": True,
+            "healthy": False,
+            "state": "not running",
+            "runs": 1,
+            "last_exit": None,
+        }
+        heartbeat = {
+            "registered": True,
+            "enabled": True,
+            "healthy": True,
+            "state": "not running",
+            "runs": 4,
+            "last_exit": 0,
+        }
+        with patch.object(gddp, "_launchd_status", side_effect=[intake, heartbeat]), \
+                patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp/runtime")), \
+                patch.object(gddp.Prompt, "ask", return_value="d"), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "_pause"), \
+                patch.object(gddp.subprocess, "run") as run:
+            gddp.interactive_heartbeat()
+
+        self.assertEqual(
+            run.call_args.args[0],
+            ["bash", "/tmp/runtime/deploy/mini-heartbeat/bin/disarm.sh"],
+        )
+
+
 class RuntimeJobsForwardingTests(unittest.TestCase):
     def setUp(self):
         self.tempdir = tempfile.TemporaryDirectory()
