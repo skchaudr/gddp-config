@@ -1,0 +1,1295 @@
+{
+  "project_id": "aa-cli-tui-pass",
+  "node_id": "tui-inventory-and-keymap-audit",
+  "verdict": "needs-human-review",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "drift",
+    "intent_preserved": true,
+    "graph_integrity_preserved": false,
+    "required_human_review": true,
+    "confidence": 0.78,
+    "findings": [
+      {
+        "severity": "high",
+        "summary": "Subject-diff misattribution: the reviewed delta (b12fde4..14a79ea) is milestone-integration's wrapper commit (exec.rs HubCmd 'one hub action -> one documented aa subcommand' refactor, picker.rs HubCmd::JulesStatus, Deck 'o' -> 'aa deck --output' wiring, lib/ledger.zsh behavior change, test updates), NOT tui-inventory-and-keymap-audit's work. Lane 1's criteria evaluation for this node scanned hub-rs/.agents/skills/tui-design/SKILL.md, AGENTS.md, keymap.rs, and lib/*.zsh but never the actual deliverables (docs/tui-pass/surface-inventory.md, key-binding-map.md, gap-list.md), which is why all three criteria came back indeterminate. Taken at face value, the diff would falsely appear to violate this node's read-only constraint and to omit its deliverables; the node's acceptance is therefore unverified against the wrong change set.",
+        "affected_node_ids": [
+          "tui-inventory-and-keymap-audit",
+          "milestone-integration"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "Committed e2e scratch junk in the tip wrapper commit (.scratch/milestone-integration/e2e-state/: .toast, ledger.tsv, runs/20260824T225209Z-29953/*, tasksCompleted/*) pollutes repo history (the diff note itself says 'junk is deliberately visible here') and could mislead later walkthrough/graph-walk verification nodes that expect a clean operator session with receipts.",
+        "affected_node_ids": [
+          "milestone-integration",
+          "review-product-coherence"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "Graph-ordering drift: milestone-integration executed (its e2e residue is the tip commit 14a79ea) while design-review is still status=pending. The blueprint (project.yaml:19) sequences 'integration (11) then operator walkthrough (12)' after the design pass (01-06) and backend wiring (07-10), but the mirror config lists milestone-integration depends_on: [] and status: ready, so the dispatch frontier can fire integration before the design pass concludes.",
+        "affected_node_ids": [
+          "milestone-integration",
+          "design-review"
+        ]
+      }
+    ],
+    "reasoning": "Fresh-eyes review of tui-inventory-and-keymap-audit (the graph's root, read-only audit node). The node's intended role IS preserved in the repo: its evidence commit b8c55e0 is docs-only (3 files, 947 insertions; 0 non-docs files), producing docs/tui-pass/surface-inventory.md (21 surfaces walked against the tui-design skill with satisfies/partial/violates verdicts, compatibility checklist, anti-pattern hits), key-binding-map.md (live keys vs hub-rs/src/keymap.rs vs AGENTS.md defaults, 15 numbered conflicts with fzf-must-stay-on-';' flagged as must-keep, plus a tests-locked list for downstream), and gap-list.md (UI/UX + backend gaps with exact paths hub-rs/src/ui/*.rs, bin/aa, lib/*.zsh and downstream node owners). All cited paths exist in the tree, the node's own commit made zero product changes (read-only constraint respected), and the stale pilot graph (aa-cli/gddp/) is untouched by the reviewed diff. So intent_preserved=true. However, graph integrity is compromised in the reviewed change set: the subject diff (b12fde4..14a79ea) is not this node's work at all — it is milestone-integration's wrapper commit (HubCmd 'documented subcommands' refactor in exec.rs/picker.rs, Deck 'o' now live, ledger.zsh return-code change, test updates) plus committed e2e scratch junk. Lane 1 evaluated this node's criteria against that wrong scope and never scanned the actual deliverables, so acceptance is unverified and the diff would read as a read-only violation if misattributed. Additionally milestone-integration ran while design-review is pending, contradicting the blueprint's sequencing. These are verification-trail and ordering problems a human must reconcile before tui-methodology-audit fires on the (now partially stale) inventory snapshot — e.g., the inventory documents Deck 'o' as unbound while tip code makes it live, and the exec/fire path has been refactored since the audit. Verdict: drift (the reviewed change set veers from the node's intended role and muddles graph integrity), needs human review.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-24T23:00:33.019Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_mSPYXPwIO9qhr7OGGoBl2752",
+        "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/ 2>/dev/null; echo \"---\"; cat /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/README.md 2>/dev/null | head -50"
+      },
+      {
+        "ts": "2026-08-24T23:00:33.021Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_kMkc1ZuqXbGiufFQMlVB4771",
+        "command": "cat /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml"
+      },
+      {
+        "ts": "2026-08-24T23:00:33.022Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_ZhFNxslKssIo7OsWwCK88815",
+        "command": "cat /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml"
+      },
+      {
+        "ts": "2026-08-24T23:00:33.044Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_kMkc1ZuqXbGiufFQMlVB4771",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:00:33.045Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_ZhFNxslKssIo7OsWwCK88815",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:00:33.049Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_mSPYXPwIO9qhr7OGGoBl2752",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:00:38.284Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_igvdz7HsLpPuI8RAkHkU7746",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/ && cat .git 2>/dev/null; echo \"---GIT STATUS---\"; git status 2>&1 | head -30; echo \"---LOG---\"; git log --oneline -5 2>&1"
+      },
+      {
+        "ts": "2026-08-24T23:00:38.285Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_5lBKuhPwXnFrUhZFS14R1308",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/ && find . -iname \"*inventor*\" -o -iname \"*binding*\" -o -iname \"*keymap*\" -o -iname \"*gap*\" 2>/dev/null | grep -v \".git/\" | head -40; echo \"---docs---\"; ls docs/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-24T23:00:38.321Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_5lBKuhPwXnFrUhZFS14R1308",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:00:38.441Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_igvdz7HsLpPuI8RAkHkU7746",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:00:57.653Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_8tx2k2c1OZrcA5ZFlwu48319",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/ && git diff b12fde4..14a79ea --stat; echo \"===FULL DIFF SIZE===\"; git diff b12fde4..14a79ea | wc -l"
+      },
+      {
+        "ts": "2026-08-24T23:00:57.654Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_FUJIcaNsMtbbxvUfV7AU7791",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/ && ls -la .gddp/ .handoffs/ .scratch/ 2>/dev/null; echo \"---\"; find .gddp .handoffs -type f | head -30"
+      },
+      {
+        "ts": "2026-08-24T23:00:57.685Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_FUJIcaNsMtbbxvUfV7AU7791",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:00:57.733Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_8tx2k2c1OZrcA5ZFlwu48319",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:01:01.762Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_paRQoeFiMcCzqnno0jsH0633",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/ && cat .gddp/decision.md; echo \"=====RESULT-SUMMARY=====\"; cat .gddp/result-summary.md"
+      },
+      {
+        "ts": "2026-08-24T23:01:01.763Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_5e5vKQg4S0NSgE5B2yqN3884",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/ && git show 14a79ea --format=\"%H%n%s%n%b\" --stat | head -40"
+      },
+      {
+        "ts": "2026-08-24T23:01:01.789Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_paRQoeFiMcCzqnno0jsH0633",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:01:01.818Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_5e5vKQg4S0NSgE5B2yqN3884",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:01:17.412Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_1hBaCMFLFLgzWB9Cr8k45599",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/ && git diff b12fde4..14a79ea -- bin/aa lib/ledger.zsh hub-rs/src/picker.rs | head -120"
+      },
+      {
+        "ts": "2026-08-24T23:01:17.413Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_aFnEjnymVYDWkByeo1we1708",
+        "command": "ls /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/ 2>/dev/null; echo \"---\"; for f in /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/*.yaml; do echo \"=== $f ===\"; grep -E \"node_id|depends_on|unlocks|status|title\" \"$f\" | head -6; done"
+      },
+      {
+        "ts": "2026-08-24T23:01:17.458Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_1hBaCMFLFLgzWB9Cr8k45599",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:01:17.464Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_aFnEjnymVYDWkByeo1we1708",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:01:50.258Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_sBPyaPcgyoMp97rY9VOP3387",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/ && wc -l docs/tui-pass/*.md; echo \"=====SURFACE-INVENTORY=====\"; cat docs/tui-pass/surface-inventory.md"
+      },
+      {
+        "ts": "2026-08-24T23:01:50.284Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_sBPyaPcgyoMp97rY9VOP3387",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:01:53.665Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_U5sGGN95uHSPfAhO6y2T1386",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/ && cat docs/tui-pass/key-binding-map.md"
+      },
+      {
+        "ts": "2026-08-24T23:01:53.685Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_U5sGGN95uHSPfAhO6y2T1386",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:01:56.706Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_a31OjdasJjnQh2PqrDTs5552",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/ && head -120 docs/tui-pass/gap-list.md; echo \"...\"; echo \"===TAIL===\"; tail -60 docs/tui-pass/gap-list.md"
+      },
+      {
+        "ts": "2026-08-24T23:01:56.735Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_a31OjdasJjnQh2PqrDTs5552",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:02:37.081Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_jotkWleNcylqfphQuoXg1551",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/ && echo \"=== b8c55e0 (node 01 evidence) scope ===\"; git show b8c55e0 --stat --format=\"%H %s\" | head -20; echo; echo \"=== hub-rs/src/ui dir ===\"; ls hub-rs/src/ui/ 2>/dev/null | head; echo; echo \"=== pilot graph (gddp/) statuses ===\"; ls gddp/; find gddp -name \"*.yaml\" | head -20"
+      },
+      {
+        "ts": "2026-08-24T23:02:37.082Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_4Y0cNEV1CpuPjorQ70Lt4235",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/ && echo \"=== did reviewed diff touch keymap.rs or docs/tui-pass? ===\"; git diff b12fde4..14a79ea --name-only | grep -E \"keymap|tui-pass|docs\" ; echo \"(end)\"; echo; echo \"=== full diff of tests + app.rs sample ===\"; git diff b12fde4..14a79ea -- hub-rs/tests/render.rs hub-rs/tests/verify_seed.rs | head -80"
+      },
+      {
+        "ts": "2026-08-24T23:02:37.144Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_jotkWleNcylqfphQuoXg1551",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:02:37.152Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_4Y0cNEV1CpuPjorQ70Lt4235",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:03:18.620Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_0mNpi8438Rr1gDle6RxW4640",
+        "command": "cat /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/milestone-integration.yaml; echo \"=====DESIGN-REVIEW=====\"; cat /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/design-review.yaml"
+      },
+      {
+        "ts": "2026-08-24T23:03:18.621Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_XgM8D1DdpYMTszk3jYPF1102",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/ && echo \"=== what does the reviewed diff do to app.rs (o key etc.) ===\"; git diff b12fde4..14a79ea -- hub-rs/src/app.rs | grep -E \"^[+-].*(OpenOutput|deck_key|Screen::|output)\" | head -30; echo; echo \"=== inventory claim about o on deck ===\"; grep -n \"unbound\" docs/tui-pass/key-binding-map.md | head -8; echo; echo \"=== scratch junk committed ===\"; git diff b12fde4..14a79ea --name-only | grep scratch"
+      },
+      {
+        "ts": "2026-08-24T23:03:18.644Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_0mNpi8438Rr1gDle6RxW4640",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:03:18.690Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_XgM8D1DdpYMTszk3jYPF1102",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:04:04.079Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_sKtvB0EdVSK0qZ2Wb63f1436",
+        "command": "ls /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/; echo \"---\"; grep -n \"integration (11)\" /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/project.yaml 2>/dev/null; echo \"---\"; cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/ && git ls-tree 14a79ea --name-only docs/tui-pass/; echo \"--- tip still has docs? ---\"; git ls-tree 14a79ea --name-only | grep -E \"docs/tui-pass|hub-rs/src/keymap.rs\""
+      },
+      {
+        "ts": "2026-08-24T23:04:04.079Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_o9uO6jSrPCLebHgRyuDB3039",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/ && echo \"=== confirm exec.rs HubCmd in reviewed diff ===\"; git diff b12fde4..14a79ea -- hub-rs/src/exec.rs | grep -E \"^\\+.*(HubCmd|fn aa_command|documented)\" | head -12; echo; echo \"=== confirm no gddp/ (pilot) changes in reviewed diff ===\"; git diff b12fde4..14a79ea --name-only | grep -c \"^gddp/\" ; echo \"=== confirm no ui/ changes in node-01 evidence commit ===\"; git show b8c55e0 --name-only --format=\"\" | grep -v \"docs/tui-pass\" | wc -l"
+      },
+      {
+        "ts": "2026-08-24T23:04:04.145Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_sKtvB0EdVSK0qZ2Wb63f1436",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-24T23:04:04.157Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_o9uO6jSrPCLebHgRyuDB3039",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:04:33.994Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_q4KSWa2vmkt7KJdfV8GK1233",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "Snapshot staleness: the node-01 docs are an audit-time snapshot and later nodes (07 deck-actions, 08 packet-schema-align, 11 milestone-integration) have since changed behavior — Deck 'o' is now live (OpenOutput -> aa deck --output per hub-rs/tests/render.rs 'deck o must open output'), exec/fire were refactored to the HubCmd command table, and lib/ledger.zsh changed a return code. tui-methodology-audit must audit the live code and treat the inventory/binding-map as a starting map rather than ground truth, or its per-surface findings will cite stale state.",
+        "affected_node_ids": [
+          "tui-methodology-audit",
+          "tui-inventory-and-keymap-audit"
+        ]
+      }
+    ],
+    "graph_recommendations": [
+      {
+        "action": "rewire",
+        "affected_node_ids": [
+          "milestone-integration",
+          "design-review"
+        ],
+        "rationale": "The dispatch mirror lists milestone-integration as status=ready with depends_on: [], which let the frontier fire integration while design-review is still pending — contrary to the blueprint's stated sequencing (design pass 01-06 and backend wiring 07-10 run after the inventory; integration (11) then operator walkthrough (12) then graph-walk verification (13)). Expressing the dependency would keep the frontier from running integration before the design pass concludes.",
+        "evidence": [
+          "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/project.yaml:19 ('integration (11) then operator walkthrough (12) then graph-walk verification (13)')",
+          "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/milestone-integration.yaml (depends_on: [], status: ready)",
+          "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/design-review.yaml (status: pending) while tip commit 14a79ea contains milestone-integration's e2e/work residue"
+        ],
+        "draft_node_yaml": null
+      }
+    ],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.954,
+  "criteria_confidence": 0.954,
+  "completeness": 1.0,
+  "graph_readiness": 0.954,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "surface-inventory",
+        "criterion": "Every operator surface (Deck, runway, Create, Verify rooms, pickers, root menu) is walked against hub-rs/.agents/skills/tui-design/SKILL.md and listed in one inventory markdown with a tui-design verdict per surface.",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "tui\\-design -> line 2: 'tui-design'",
+          "tui\\-design -> line 2: 'tui-design'"
+        ],
+        "reasoning": "Scanned source files (hub-rs/.agents/skills/tui-design/SKILL.md) for identifiers named in the criterion (hub-rs, tui-design, SKILL, tui-design). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "binding-map",
+        "criterion": "A key-binding map exists — each surface's keys vs hub-rs/src/keymap.rs vs AGENTS.md defaults — with conflicts listed (e.g. fzf must stay on ';', not 'f').",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "hub\\-rs -> line 37: 'hub-rs'",
+          "AGENTS -> line 427: 'AGENTS'"
+        ],
+        "reasoning": "Scanned source files (AGENTS.md, hub-rs/src/keymap.rs) for identifiers named in the criterion (key-binding, hub-rs, AGENTS). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "gap-list",
+        "criterion": "UI/UX gaps and backend-wiring gaps are each enumerated with exact file paths (hub-rs/src/ui/*.rs, bin/aa, lib/*.zsh) for downstream nodes.",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...)"
+        ],
+        "reasoning": "Scanned source files (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...) for identifiers named in the criterion (backend-wiring, hub-rs). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Read-only pass over aa-cli; no behavior changes in this node.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Do not modify the stale pilot graph (aa-cli/gddp/) statuses.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "hub-rs/src/keymap.rs": true,
+      "hub-rs/.agents/skills/tui-design/SKILL.md": true,
+      "bin/aa": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "b12fde4f66540beacc7acb4bde22f389bff06e27",
+      "tip": "14a79eae6f2a2b85545751d7835a1719df1a1e5e",
+      "files": [
+        {
+          "status": "A",
+          "path": ".scratch/milestone-integration/e2e-state/.toast"
+        },
+        {
+          "status": "A",
+          "path": ".scratch/milestone-integration/e2e-state/ledger.tsv"
+        },
+        {
+          "status": "A",
+          "path": ".scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/exit_status"
+        },
+        {
+          "status": "A",
+          "path": ".scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/packet.json"
+        },
+        {
+          "status": "A",
+          "path": ".scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/pid"
+        },
+        {
+          "status": "A",
+          "path": ".scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/prompt.txt"
+        },
+        {
+          "status": "A",
+          "path": ".scratch/milestone-integration/e2e-state/tasksCompleted/2026-08-24/20260824T225209Z-29953.json"
+        },
+        {
+          "status": "M",
+          "path": "bin/aa"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/src/agent.rs"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/src/app.rs"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/src/exec.rs"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/src/fire.rs"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/src/main.rs"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/src/picker.rs"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/tests/create_interact.rs"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/tests/render.rs"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/tests/verify_seed.rs"
+        },
+        {
+          "status": "M",
+          "path": "lib/ledger.zsh"
+        }
+      ],
+      "truncated": false,
+      "file_count": 18,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "surface-inventory",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "docs/tui-pass/surface-inventory.md (21 surfaces, verdicts satisfies/partial/violates per surface)",
+          "hub-rs/.agents/skills/tui-design/SKILL.md sections 1/3/4/Anti-Patterns/9 match the inventory's stated process (L0-L3, anti-patterns 1-10, compatibility checklist)",
+          "commit b8c55e0 'docs(tui-pass): node 01 evidence' adds only the 3 inventory docs",
+          "spot-checks at audit snapshot b8c55e0: app.rs with_workdir screen=Deck (line 424); ui/mod.rs only 'pub mod submenu;' (submenu::render never called); app.rs:3629 Screen::CreateRecon only in #[test]; runway.rs:19-20 'at least half of body'; verify.rs:151 caret '█' always drawn; main.rs:86 EnableMouseCapture"
+        ],
+        "reasoning": "The one inventory markdown exists and lists every required surface (Deck 2-4, runway 5, Create 6-12, Verify rooms 13-17, pickers 18-19, root menu 1, plus submenu 20 and zsh faces 21) with a tui-design verdict per surface. The walk is explicitly grounded in hub-rs/.agents/skills/tui-design/SKILL.md: the inventory's process framing maps 1:1 to the SKILL.md's layout-paradigm selector, interaction model with L0-L3 keyboard layers and three-tier help, color/visual system, anti-patterns 1-10, and compatibility checklist (all verified present in SKILL.md). Multiple load-bearing factual claims were spot-checked against the code at the audit snapshot and all held, so the walk is a real audit, not fabrication. The '21 named surfaces, 3 satisfies / 14 partial / 4 violates' summary is coherent."
+      },
+      {
+        "criterion_id": "binding-map",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "docs/tui-pass/key-binding-map.md (per-surface key tables vs hub-rs/src/keymap.rs vs AGENTS.md defaults; 15 numbered conflicts, #1 'fzf must stay on \";\", never \"f\"')",
+          "AGENTS.md:218-229 'Good TUI key actions' matches the doc's defaults table verbatim",
+          "hub-rs/src/keymap.rs: map_deck 'f'=FirePacket / 'v' / 'a' / 'd' / 'i'|'e'; map_verify 'a'/'e'/'x'/'r' with Agent overrides; Evidence ';'=FzfHub, 'g'/'s'/'d'/'l'; tests b1_deck_f_is_fire_not_fzf, deck_cut_keys_are_dead (o/; unbound), verify_decide_keys_are_a_e_x_r (j/f/v/o unbound asserted)",
+          "keymap.rs unchanged between b8c55e0 and HEAD (git diff --name-only shows no keymap.rs)",
+          "main.rs at b8c55e0 line 787 has Action::OpenJulesPicker handler with no binding"
+        ],
+        "reasoning": "A key-binding map exists covering each surface's keys against keymap.rs and AGENTS.md defaults, and conflicts are explicitly listed with the criterion's example first: fzf must stay on ';' never 'f' (conflict #1, cross-referenced to Deck f=fire + Evidence ;=FzfHub in the code and in keymap.rs tests). The AGENTS.md defaults table is quoted exactly as it appears in AGENTS.md. All keymap.rs claims were directly verified against the source (Deck o/; dead, Verify decide a/e/x/r, Evidence ;=fzf, j unbound, confirm y→ArchivePacket, footers ≤78) — and keymap.rs is unchanged since the audit, so the map is still accurate at HEAD."
+      },
+      {
+        "criterion_id": "gap-list",
+        "judgment": "judged_pass",
+        "confidence": 0.93,
+        "evidence": [
+          "docs/tui-pass/gap-list.md: Section A UI/UX gaps A1-A17, Section B backend-wiring gaps B1-B14, each with severity + exact paths + owning downstream node; pointer map C (gap → node 02-11)",
+          "spot-checks at audit snapshot b8c55e0: A6 create_pathway_label returns '(none — p pick pathway)' (app.rs:1586); A10 evidence caret (verify.rs:151); A12 submenu::render never called (ui/mod.rs); A15 docs/fzf-face.md:9 'f from the interactive deck'; A17 EnableMouseCapture (main.rs:86)",
+          "B5 write_task_packet (app.rs:2544+) writes id/created/title/prompt/target/context_recipe/mutations/workdir/state/source + optional verify/skills — no constraints object, matching the claimed AGENTS.md-vs-hub split (AGENTS.md:58 constraints)",
+          "B9 lib/fire.zsh:54/118/151/237-238 __jules_async/__pi_async/__grok_sync + AA_JULES_DISPATCHER/AA_GROK_BIN; B10 app.rs:457 task_target: \"grok\"; B11 bin/aa:187 'unknown command'; B12 bin/aa:119 'usage: aa fire PACKET_FILE|PACKET_ID'"
+        ],
+        "reasoning": "UI/UX gaps and backend-wiring gaps are each enumerated with exact file paths (hub-rs/src/ui/*.rs, hub-rs/src/app.rs, hub-rs/src/main.rs, hub-rs/src/keymap.rs, hub-rs/src/picker.rs, bin/aa, lib/*.zsh, AGENTS.md, schema/packet.schema.json) and each gap names the downstream node that owns the fix. Ten gap claims were spot-checked against source at the audit snapshot; all were accurate, including the non-obvious backend ones (packet field model mismatch, fire.zsh executor special-cases, aa fire argument shape). The deterministic keyword scan missed this because it scanned source files rather than the doc deliverables."
+      },
+      {
+        "criterion_id": "constraint-readonly",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "git show --stat b8c55e0: only docs/tui-pass/surface-inventory.md, key-binding-map.md, gap-list.md added (947 insertions, 0 deletions, no source changes)",
+          "git diff --name-only b8c55e0..HEAD shows later-node changes (dashboard.rs, visual.rs, app.rs, exec.rs, etc.) but none attributable to node 01"
+        ],
+        "reasoning": "The node's only commit adds the three evidence markdown files; no behavior change was introduced by this node. The 'read-only pass over aa-cli' constraint is satisfied. (Later commits by downstream nodes 02/07/08 legitimately change code, but that is outside this node's scope.)"
+      },
+      {
+        "criterion_id": "constraint-pilot-graph",
+        "judgment": "judged_pass",
+        "confidence": 0.97,
+        "evidence": [
+          "git show --stat b8c55e0 | grep gddp/ → no matches",
+          "git diff --name-only b8c55e0..HEAD | grep gddp/ → no matches"
+        ],
+        "reasoning": "Neither the node's commit nor any change since it touched aa-cli/gddp/ (the stale pilot graph). The 'do not modify stale pilot graph statuses' constraint is satisfied."
+      }
+    ],
+    "overall_reasoning": "Node 01 (tui-inventory-and-keymap-audit) delivered all three required artifacts in a single docs-only commit (b8c55e0): docs/tui-pass/surface-inventory.md (21 surfaces, per-surface tui-design verdicts, explicitly grounded in hub-rs/.agents/skills/tui-design/SKILL.md whose L0-L3 / anti-patterns / compatibility-checklist structure the inventory mirrors 1:1), docs/tui-pass/key-binding-map.md (per-surface keys vs hub-rs/src/keymap.rs vs AGENTS.md:218-229 defaults, 15 numbered conflicts with 'fzf must stay on ; not f' as #1 — verified directly against keymap.rs, which is unchanged since the audit), and docs/tui-pass/gap-list.md (17 UI/UX + 14 backend-wiring gaps, each with severity, exact file paths, and owning downstream node — ten claims spot-checked against source and all accurate). Both constraints hold: the node changed no code, and neither it nor any later commit touched the aa-cli/gddp/ pilot graph. The deterministic scan reported indeterminate because it keyword-scanned source files instead of the doc deliverables; semantic verification confirms the criteria are met. The only substantive caveat is that downstream nodes (b12fde4 nodes 02+07, acd41a6 node 08) have since modified audited code (new visual.rs, dashboard.rs, app.rs, exec.rs, etc.), so some inventory statements describe the audit-time snapshot (b8c55e0) rather than current HEAD — the docs explicitly timestamp themselves ('Live state: aa-cli HEAD at audit time'), so this is expected snapshot semantics, but a human should confirm the verdict is anchored to the snapshot. Additionally, the gap-list's downstream-node table uses the blueprint's phase numbering (02 visual-system … 11 frontend-integration) while the on-disk gddp-config mirror contains only 6 node yamls with different IDs (tui-methodology-audit, design-review, …); the mapping between the doc's owning-node names and the mirror's node IDs is not 1:1 and warrants human reconciliation.",
+    "risks": "1. Snapshot-vs-HEAD staleness: commits b12fde4 (nodes 02+07) and acd41a6 (node 08) modified audited surfaces (hub-rs/src/ui/dashboard.rs, create_prepare.rs, pick.rs, verify.rs, app.rs, exec.rs, main.rs, new ui/visual.rs). Inventory/binding-map/gap-list describe state at b8c55e0 and are explicitly timestamped as such; keymap.rs claims remain accurate at HEAD (file unchanged), but some UI claims (e.g., shared visual system gap A1, deck action wiring B1) may already be partially addressed at HEAD. This is downstream evolution, not a node-01 defect, but a human should confirm the node is judged on its audit snapshot. 2. Downstream node ID mismatch: gap-list.md's 'Downstream nodes (graph aa-cli-tui-pass)' table uses phase numbers 02-11 (visual-system, deck-runway, create-linear-room, verify-rooms-polish, picker-grammar, deck-actions, packet-schema-align, create-verb-edges, registry-dispatch, frontend-integration) which match the blueprint's architecture_notes vocabulary, but /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/ contains only 6 node yamls (tui-inventory-and-keymap-audit, tui-methodology-audit, design-review, milestone-integration, review-product-coherence, audit-methodology-compliance). The doc's owning-node names do not map 1:1 onto mirror node IDs; the blueprint says this copy is a mirror/aggregator of a project-local chart, so the mirror may be partial — needs human reconciliation. 3. The deterministic keyword scan could not resolve the criteria (it scanned source files, not the doc deliverables); this verdict rests on direct reading + spot-verification of the three markdown artifacts, which are the actual deliverables.",
+    "followup_candidates": "1. Human clarification: node 01 is being judged on its audit snapshot (commit b8c55e0). Later nodes (02+07 in b12fde4, 08 in acd41a6) have since modified the audited code (e.g., new hub-rs/src/ui/visual.rs addresses gap A1; deck-action wiring may address B1). Confirm the verdict should stand on the snapshot as delivered; if the criteria instead require the docs to describe current HEAD, update the node criteria and rerun. 2. Human clarification: gap-list.md references downstream owning nodes by phase number (02 visual-system … 11 frontend-integration, matching the blueprint's 'nodes 01-06 / 07-10 / 11' architecture notes), but the on-disk gddp-config graph mirror only contains 6 node yamls with different IDs (tui-methodology-audit, design-review, milestone-integration, review-product-coherence, audit-methodology-compliance). Is the mirror intentionally partial (aggregator of a 13-node project-local chart), or should the gap-list's downstream-node table be re-keyed to the mirror's node IDs? 3. Observed but not in this node's acceptance criteria: hub-rs/src/keymap.rs ships a test suite (b1_deck_f_is_fire_not_fzf, deck_cut_keys_are_dead, verify_decide_keys_are_a_e_x_r, footer ≤78 assertions) that locks the binding-map's claims. Tests are not listed as acceptance evidence for node 01, so they were not counted toward the verdict; they corroborate the binding-map's accuracy. If test locking was intended as criterion evidence, update the node criteria.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-24T22:57:24.916Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_rIu2DHHkVnFtgUeMzc5S7552",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && ls -la && echo \"---\" && git log --oneline -10 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-24T22:57:24.919Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_VxITHPbdVKJ3aou0Rhof5877",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && find . -maxdepth 3 -type d -not -path '*/.git/*' | head -60"
+        },
+        {
+          "ts": "2026-08-24T22:57:24.948Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_VxITHPbdVKJ3aou0Rhof5877",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:57:25.144Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_rIu2DHHkVnFtgUeMzc5S7552",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:57:27.498Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_63zIUsfJIA5umZ8swbKM4079",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && ls -la docs/tui-pass/ && echo \"---\" && find docs -name '*.md' | head -50"
+        },
+        {
+          "ts": "2026-08-24T22:57:27.500Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_MZg41hJwcaHykMzlwgk53250",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && ls -la hub-rs/.agents/skills/tui-design/ && ls -la hub-rs/src/ && ls -la hub-rs/src/ui/"
+        },
+        {
+          "ts": "2026-08-24T22:57:27.534Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_63zIUsfJIA5umZ8swbKM4079",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:57:27.545Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_MZg41hJwcaHykMzlwgk53250",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:57:29.953Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_SX8Gu2lmemrdCNssStxA5222",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/docs/tui-pass/surface-inventory.md"
+        },
+        {
+          "ts": "2026-08-24T22:57:29.960Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_SX8Gu2lmemrdCNssStxA5222",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:57:31.280Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_zdbIxbMsCDxS3w4SUaQd6247",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/docs/tui-pass/key-binding-map.md"
+        },
+        {
+          "ts": "2026-08-24T22:57:31.283Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_zdbIxbMsCDxS3w4SUaQd6247",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:57:32.877Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_0jxeJWm1ZtqxeEIU4r2N8544",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/docs/tui-pass/gap-list.md"
+        },
+        {
+          "ts": "2026-08-24T22:57:32.879Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_0jxeJWm1ZtqxeEIU4r2N8544",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:57:42.281Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_51qTmepqXVEL3Gy6r5jw3417",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && git show --stat b8c55e0 | head -30 && echo \"===PARENTS===\" && git log --format='%h %s' b8c55e0~1..b8c55e0 2>/dev/null | head"
+        },
+        {
+          "ts": "2026-08-24T22:57:42.282Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_roV3lvEYeWNa9DeLIiw74722",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && git show b8c55e0 --stat | tail -20"
+        },
+        {
+          "ts": "2026-08-24T22:57:42.330Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_roV3lvEYeWNa9DeLIiw74722",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:57:42.352Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_51qTmepqXVEL3Gy6r5jw3417",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:57:45.509Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_MR0WDt0fxHdhAS33fair6184",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/hub-rs/src/keymap.rs"
+        },
+        {
+          "ts": "2026-08-24T22:57:45.512Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_MR0WDt0fxHdhAS33fair6184",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:57:53.584Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_vGIbIrfZaUikqbVy0ev25953",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && echo \"=== files changed b8c55e0..HEAD ===\" && git diff --stat b8c55e0..HEAD | tail -30"
+        },
+        {
+          "ts": "2026-08-24T22:57:53.586Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_YYWmdmeeq8MhPXXKfzBf3278",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && git log --oneline b8c55e0..HEAD -- hub-rs/src/keymap.rs hub-rs/src/ui/ && echo \"=== SKILL.md head ===\" && head -60 hub-rs/.agents/skills/tui-design/SKILL.md"
+        },
+        {
+          "ts": "2026-08-24T22:57:53.638Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_YYWmdmeeq8MhPXXKfzBf3278",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:57:53.652Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_vGIbIrfZaUikqbVy0ev25953",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:06.359Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ixupVqIQQ2O2cvuVaXy91374",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && echo \"=== keymap.rs changed since node01? ===\" && git diff --name-only b8c55e0..HEAD | grep -E 'keymap|gddp/' ; echo \"(none if empty)\" ; echo \"=== gddp dir status in node01 commit ===\" && git show --stat b8c55e0 | grep -E 'gddp/' ; echo \"(none if empty)\" ; echo \"=== create_pathway_label at b8c55e0 ===\" && git show b8c55e0:hub-rs/src/app.rs | grep -n \"p pick pathway\" ; echo \"=== task_target at b8c55e0 ===\" && git show b8c55e0:hub-rs/src/app.rs | grep -n 'task_target' | head -5"
+        },
+        {
+          "ts": "2026-08-24T22:58:06.359Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_De7I2TOBMr9n2zqKKFTk0843",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && echo \"=== NO_COLOR at b8c55e0 ===\" && git show b8c55e0:hub-rs/src/main.rs | grep -c 'NO_COLOR' ; echo \"=== submenu render called at b8c55e0? ===\" && git show b8c55e0:hub-rs/src/ui/mod.rs | grep -n 'submenu' ; echo \"=== Screen::CreateRecon set anywhere at b8c55e0? ===\" && git show b8c55e0:hub-rs/src/app.rs | grep -n 'CreateRecon' | head -10"
+        },
+        {
+          "ts": "2026-08-24T22:58:06.440Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_De7I2TOBMr9n2zqKKFTk0843",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:06.457Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ixupVqIQQ2O2cvuVaXy91374",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:11.597Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_jZHmJMgSYNmbCm9GNZjl2705",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && echo \"=== non-test CreateRecon setters at b8c55e0 ===\" && git show b8c55e0:hub-rs/src/app.rs | sed -n '780,845p' | grep -n 'CreateRecon\\|screen =' | head; echo \"---context around 3629 (test?)---\"; git show b8c55e0:hub-rs/src/app.rs | sed -n '3600,3635p' | grep -n 'mod tests\\|#\\[test\\]\\|CreateRecon'"
+        },
+        {
+          "ts": "2026-08-24T22:58:11.598Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_GQ8dXaDRJej84rph7TZ60616",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && echo \"=== AGENTS.md key defaults ===\" && grep -n -A 12 'Good TUI key actions\\|f fire\\|dispatch to Jules\\|summarize result' AGENTS.md | head -40"
+        },
+        {
+          "ts": "2026-08-24T22:58:11.626Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_GQ8dXaDRJej84rph7TZ60616",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:11.667Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_jZHmJMgSYNmbCm9GNZjl2705",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:15.552Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_jJ38WjpFX69pmKsRj8sQ7050",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && echo \"=== all `screen = Screen::CreateRecon` at b8c55e0 ===\" && git show b8c55e0:hub-rs/src/app.rs | grep -n 'screen = Screen::CreateRecon'; echo \"=== in main.rs at b8c55e0 ===\" && git show b8c55e0:hub-rs/src/main.rs | grep -n 'CreateRecon'"
+        },
+        {
+          "ts": "2026-08-24T22:58:15.552Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_6ndG0fivv1EfK0My8lEg1054",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && echo \"=== SKILL.md section headers ===\" && grep -n '^## \\|^### ' hub-rs/.agents/skills/tui-design/SKILL.md | head -40"
+        },
+        {
+          "ts": "2026-08-24T22:58:15.573Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_6ndG0fivv1EfK0My8lEg1054",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:15.639Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_jJ38WjpFX69pmKsRj8sQ7050",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:19.764Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_LrPb7HWPPSvFC7RQlL7x7033",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && sed -n '155,240p' hub-rs/.agents/skills/tui-design/SKILL.md"
+        },
+        {
+          "ts": "2026-08-24T22:58:19.765Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_CKRn0bBPCD9buOeTJsqM0720",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && sed -n '410,447p' hub-rs/.agents/skills/tui-design/SKILL.md"
+        },
+        {
+          "ts": "2026-08-24T22:58:19.786Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_LrPb7HWPPSvFC7RQlL7x7033",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:19.787Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_CKRn0bBPCD9buOeTJsqM0720",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:26.670Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_CcSEYIksk3STPhPdHmnt9446",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && git show b8c55e0:hub-rs/src/app.rs | grep -n 'fn deck_key' && git show b8c55e0:hub-rs/src/app.rs | sed -n \"$(git show b8c55e0:hub-rs/src/app.rs | grep -n 'fn deck_key' | head -1 | cut -d: -f1),+45p\""
+        },
+        {
+          "ts": "2026-08-24T22:58:26.672Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_01_vUZZhp1ot0v71ZvqevN84264",
+          "reason": "command matched blocked pattern",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && echo \"=== create_key_prepare key arms at b8c55e0 ===\" && git show b8c55e0:hub-rs/src/app.rs | awk '/fn create_key_prepare/,/^    }$/' | grep -n \"'[a-z0-9]' =>\" | head -30 && echo \"=== with_workdir screen ===\" && git show b8c55e0:hub-rs/src/app.rs | grep -n 'fn with_workdir' && git show b8c55e0:hub-rs/src/app.rs | sed -n \"$(git show b8c55e0:hub-rs/src/app.rs | grep -n 'fn with_workdir' | head -1 | cut -d: -f1),+12p\"",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-24T22:58:26.672Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_vUZZhp1ot0v71ZvqevN84264",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-24T22:58:26.749Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_CcSEYIksk3STPhPdHmnt9446",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:32.356Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Tn1Zde7DMwIhZATrulbB5621",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && git show b8c55e0:hub-rs/src/app.rs | grep -n 'fn with_workdir' | head -2"
+        },
+        {
+          "ts": "2026-08-24T22:58:32.357Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_o8lszICMFNPptei44sF16310",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && git show b8c55e0:hub-rs/src/main.rs | grep -n \"reconcile_now\\|'r'\" | head -10"
+        },
+        {
+          "ts": "2026-08-24T22:58:32.358Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_r89dLVPRPYymmqip5Dv24972",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && git show b8c55e0:hub-rs/src/app.rs | grep -n \"create_key_prepare\" | head -3"
+        },
+        {
+          "ts": "2026-08-24T22:58:32.404Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_o8lszICMFNPptei44sF16310",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:32.405Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Tn1Zde7DMwIhZATrulbB5621",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:32.405Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_r89dLVPRPYymmqip5Dv24972",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:34.555Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ET_90Ad7ILvESSa3nnqNvA53838",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && git show b8c55e0:hub-rs/src/app.rs | sed -n '422,440p'"
+        },
+        {
+          "ts": "2026-08-24T22:58:34.556Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_01_ET_xb6WRmrUriHbiKr8mE6G7808",
+          "reason": "command matched blocked pattern",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && git show b8c55e0:hub-rs/src/app.rs | sed -n '2137,2230p' | grep -n \"=>\" | head -40",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-24T22:58:34.557Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ET_xb6WRmrUriHbiKr8mE6G7808",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-24T22:58:34.600Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ET_90Ad7ILvESSa3nnqNvA53838",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:38.111Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_CC5wwR4OwHO4RMX71lJo9347",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && git show b8c55e0:hub-rs/src/app.rs | sed -n '2137,2250p' | grep -n \"Char('\" | head -40"
+        },
+        {
+          "ts": "2026-08-24T22:58:38.158Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_CC5wwR4OwHO4RMX71lJo9347",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:39.760Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ET_5gkvhC49xcD8O30wknLN8674",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && git show b8c55e0:hub-rs/src/app.rs | sed -n '2137,2260p'"
+        },
+        {
+          "ts": "2026-08-24T22:58:39.807Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ET_5gkvhC49xcD8O30wknLN8674",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:44.031Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_tbQz6Ci393YIrOBoCHq65989",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && grep -n 'aa_root_menu\\|unknown command' bin/aa | head -8 && echo \"---root menu body---\" && grep -n -A 20 'aa_root_menu()' bin/aa | head -28"
+        },
+        {
+          "ts": "2026-08-24T22:58:44.032Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_WEdbcdoNMBpNsfLSMCGl9564",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && sed -n '605,625p' lib/deck.zsh && echo \"=== fzf-face.md f claim ===\" && grep -n 'f\\b' docs/fzf-face.md | head -5"
+        },
+        {
+          "ts": "2026-08-24T22:58:44.060Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_WEdbcdoNMBpNsfLSMCGl9564",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:44.061Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_tbQz6Ci393YIrOBoCHq65989",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:51.019Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_wTMa9lxfltf5bGL5rWG21469",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && echo \"=== OpenJulesPicker references at b8c55e0 ===\" && git show b8c55e0:hub-rs/src/main.rs | grep -n 'OpenJulesPicker' | head; echo \"=== keymap.rs jules comment ===\" && grep -n 'jules' hub-rs/src/keymap.rs | head; echo \"=== PickerKind enum ===\" && grep -n 'Prompt\\|Pathway\\|Context\\|DeckJump\\|Jules' hub-rs/src/picker.rs | head -20"
+        },
+        {
+          "ts": "2026-08-24T22:58:51.020Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_VmYdN6UYkca4tDWo6xOL1279",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && echo \"=== AGENTS.md packet fields ===\" && grep -n 'slug\\|constraints\\|verify' AGENTS.md | head -12; echo \"=== write_task_packet fields ===\" && grep -n 'write_task_packet' hub-rs/src/app.rs | head -3"
+        },
+        {
+          "ts": "2026-08-24T22:58:51.053Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_VmYdN6UYkca4tDWo6xOL1279",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:51.076Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_wTMa9lxfltf5bGL5rWG21469",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:55.746Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_v4Lp6DGh6Got2JkEfa8v2176",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && sed -n '1010,1090p' hub-rs/src/app.rs | grep -n 'id\\|title\\|prompt\\|target\\|constraints\\|verify\\|skills\\|context_recipe\\|mutations\\|workdir\\|state\\|source' | head -25"
+        },
+        {
+          "ts": "2026-08-24T22:58:55.751Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_loKuodQ8oiiN0bn39QKA3131",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && echo \"=== evidence caret always on (A10) ===\" && grep -n '█\\|evidence_filter_mode' hub-rs/src/ui/verify.rs | head -8; echo \"=== EnableMouseCapture (A17) ===\" && grep -n 'EnableMouseCapture' hub-rs/src/main.rs | head -3; echo \"=== create_pathway_label at HEAD ===\" && grep -n 'p pick pathway' hub-rs/src/app.rs | head -3"
+        },
+        {
+          "ts": "2026-08-24T22:58:55.774Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_v4Lp6DGh6Got2JkEfa8v2176",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:55.790Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_loKuodQ8oiiN0bn39QKA3131",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:58:58.462Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_XH9W4nfOV5XzelBQvrVe2249",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && grep -n 'fn write_task_packet' hub-rs/src/app.rs && sed -n \"$(grep -n 'fn write_task_packet' hub-rs/src/app.rs | head -1 | cut -d: -f1),+60p\" hub-rs/src/app.rs"
+        },
+        {
+          "ts": "2026-08-24T22:58:58.502Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_XH9W4nfOV5XzelBQvrVe2249",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:59:11.247Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_midji19moEg02MPASO0C7902",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && echo \"=== fire.zsh special-cases (B9) ===\" && grep -n '__jules_async\\|__pi_async\\|__grok_sync\\|AA_JULES_DISPATCHER\\|AA_GROK_BIN' lib/fire.zsh | head -8; echo \"=== aa fire usage (B12) ===\" && grep -n 'aa fire\\|PACKET_FILE\\|fire PACKET' bin/aa lib/fire.zsh | head -6"
+        },
+        {
+          "ts": "2026-08-24T22:59:11.248Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_qffZ2qxckXwRWgOeGklC8182",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && echo \"=== HEAD: deck 'o' bound anywhere? ===\" && grep -n \"Char('o')\" hub-rs/src/main.rs hub-rs/src/app.rs | head -6; echo \"=== HEAD: verify/evidence ';' still fzf? ===\" && grep -n \"';'\" hub-rs/src/keymap.rs | head -4"
+        },
+        {
+          "ts": "2026-08-24T22:59:11.279Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_midji19moEg02MPASO0C7902",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:59:11.279Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_qffZ2qxckXwRWgOeGklC8182",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:59:15.343Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_E9fq2Ia18dlLHUn9AvK79269",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && grep -n 'height\\|Length\\|Constraint' hub-rs/src/ui/runway.rs | head -8 && echo \"=== dashboard runway layout ===\" && grep -n 'runway' hub-rs/src/ui/dashboard.rs | head -6"
+        },
+        {
+          "ts": "2026-08-24T22:59:15.371Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_E9fq2Ia18dlLHUn9AvK79269",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:59:32.401Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_mYgWUO4NWKAYBeJ0cox20273",
+          "command": "ls /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/ 2>/dev/null && echo \"===\" && grep -n 'id:' /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/*.yaml 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-24T22:59:32.402Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_QNlvbMCGgVaz0QGrGtTl0161",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && grep -n 'node_id\\|id:' .gddp/* 2>/dev/null | head -20; ls .gddp/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-24T22:59:32.426Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_QNlvbMCGgVaz0QGrGtTl0161",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:59:32.427Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_mYgWUO4NWKAYBeJ0cox20273",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:59:41.291Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_jOmJWhlsYhnqPtggfCwg8043",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/7.29.26-aa-cli-plan.md"
+        },
+        {
+          "ts": "2026-08-24T22:59:41.296Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_jOmJWhlsYhnqPtggfCwg8043",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:59:49.581Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_BdZ4be2hu7jAUsfP7jxg5434",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml"
+        },
+        {
+          "ts": "2026-08-24T22:59:49.582Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_uLFbVZgOfmn9mOCROmwB8483",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq && ls .handoffs/ && echo \"===\" && cat .gddp/result-summary.md 2>/dev/null | head -30"
+        },
+        {
+          "ts": "2026-08-24T22:59:49.585Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_BdZ4be2hu7jAUsfP7jxg5434",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T22:59:49.605Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_uLFbVZgOfmn9mOCROmwB8483",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:00:25.981Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_sZvVTPHyKGmNUBiU1Ybp8894",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ],
+      "prompt_cache_report": {
+        "total_input_tokens": 3438,
+        "protocol_tokens": 812,
+        "project_tokens": 1063,
+        "node_tokens": 383,
+        "attempt_tokens": 1180,
+        "potential_reuse_tokens": 2258,
+        "potential_reuse_ratio": 0.6568,
+        "actual_cached_tokens": 3818624
+      }
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "Node 01 (tui-inventory-and-keymap-audit) delivered all three required artifacts in a single docs-only commit (b8c55e0): docs/tui-pass/surface-inventory.md (21 surfaces, per-surface tui-design verdicts, explicitly grounded in hub-rs/.agents/skills/tui-design/SKILL.md whose L0-L3 / anti-patterns / compatibility-checklist structure the inventory mirrors 1:1), docs/tui-pass/key-binding-map.md (per-surface keys vs hub-rs/src/keymap.rs vs AGENTS.md:218-229 defaults, 15 numbered conflicts with 'fzf must stay on ; not f' as #1 — verified directly against keymap.rs, which is unchanged since the audit), and docs/tui-pass/gap-list.md (17 UI/UX + 14 backend-wiring gaps, each with severity, exact file paths, and owning downstream node — ten claims spot-checked against source and all accurate). Both constraints hold: the node changed no code, and neither it nor any later commit touched the aa-cli/gddp/ pilot graph. The deterministic scan reported indeterminate because it keyword-scanned source files instead of the doc deliverables; semantic verification confirms the criteria are met. The only substantive caveat is that downstream nodes (b12fde4 nodes 02+07, acd41a6 node 08) have since modified audited code (new visual.rs, dashboard.rs, app.rs, exec.rs, etc.), so some inventory statements describe the audit-time snapshot (b8c55e0) rather than current HEAD — the docs explicitly timestamp themselves ('Live state: aa-cli HEAD at audit time'), so this is expected snapshot semantics, but a human should confirm the verdict is anchored to the snapshot. Additionally, the gap-list's downstream-node table uses the blueprint's phase numbering (02 visual-system … 11 frontend-integration) while the on-disk gddp-config mirror contains only 6 node yamls with different IDs (tui-methodology-audit, design-review, …); the mapping between the doc's owning-node names and the mirror's node IDs is not 1:1 and warrants human reconciliation.",
+  "required_next_action": "Integrity verdict 'drift' halts progression (criteria verdict was 'pass'). Human review required; no dependent node may dispatch on this node.",
+  "generated_at": "2026-08-24T23:04:34.180850+00:00",
+  "evaluated_tree_sha": "380ba0df188704ded61d9a5cdc1ae7c5a1606e20",
+  "evaluated_commit_sha": "14a79eae6f2a2b85545751d7835a1719df1a1e5e",
+  "merge_commit_sha": "14a79eae6f2a2b85545751d7835a1719df1a1e5e",
+  "expected_base_commit_sha": "b12fde4f66540beacc7acb4bde22f389bff06e27",
+  "pr_ref": null,
+  "job_id": "job_20260824T221712916c1a993ecc58",
+  "execution_attempt_id": "job_20260824T221712916c1a993ecc58:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/README.md",
+    "project_brief": "UNAVAILABLE: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/PROJECT-BRIEF.md does not exist",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+    "neighbor:tui-methodology-audit": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "low",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "none",
+      "offered": 3,
+      "content_accessed": 0,
+      "not_observed": 3,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-t88ckinq/README.md"
+      ]
+    },
+    "overall": "none"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-24T22:57:20.752018+00:00",
+    "finished_at": "2026-08-24T23:04:34.180625+00:00",
+    "wall_s": 433.444,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 185.357,
+      "tool_calls": 44
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 248.053,
+      "tool_calls": 20
+    }
+  }
+}
