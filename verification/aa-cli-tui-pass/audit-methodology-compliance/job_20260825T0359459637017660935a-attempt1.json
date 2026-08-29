@@ -1,0 +1,666 @@
+{
+  "project_id": "aa-cli-tui-pass",
+  "node_id": "audit-methodology-compliance",
+  "verdict": "fail",
+  "criteria_verdict": "fail",
+  "integrity": {
+    "verdict": "block",
+    "intent_preserved": false,
+    "graph_integrity_preserved": false,
+    "required_human_review": true,
+    "confidence": 0.9,
+    "findings": [
+      {
+        "severity": "high",
+        "summary": "The node's required artifact audits/methodology-compliance.md was never produced. The worktree's audits/ directory contains only design-review.md, and the subject diff (base b12fde4 -> tip eff0c06) lists exactly one added file: audits/design-review.md. The final compliance audit — the node's entire reason to exist (\"The last gate: re-run the Phase-1 methodology... against the finished, reviewed-and-corrected product\") — is absent, so every acceptance criterion is unevidenced (artifacts_present=False; all three CriterionChecks indeterminate).",
+        "affected_node_ids": [
+          "audit-methodology-compliance"
+        ]
+      },
+      {
+        "severity": "high",
+        "summary": "The executor's only content change was editing audits/design-review.md (a different, upstream node's evidence artifact) — 6 line-citation tweaks (e.g., keymap.rs:365-372 -> 416-425, dashboard.rs:296-361 -> 296-328, app.rs:2213-2221 -> 2235-2247) committed in the current job's two result commits (be28bf2, eff0c06). This is cross-node artifact tampering: a node writing into another node's evidence document, the same class of harm that design-review attempt 1 was explicitly blocked for (documented in the audits/design-review.md header, lines 3-8: \"attempt 1 was blocked: it wrote the wrong node's artifact..., and edited the upstream audit's evidence\"). A node must only write its own required artifacts.",
+        "affected_node_ids": [
+          "audit-methodology-compliance",
+          "design-review"
+        ]
+      },
+      {
+        "severity": "high",
+        "summary": "The node executed while its dependency was unresolved: review-product-coherence is still provisional (deps_status={'review-product-coherence': 'provisional'}) and its required artifact reviews/product-coherence.md does not exist (no reviews/ directory in the worktree). This violates the node's own constraint \"Runs only after review-product-coherence corrects the product\" and the deliberate ordering recorded in review-product-coherence.yaml (\"Runs BEFORE audit-methodology-compliance; this ordering is deliberate\", unlocks: audit-methodology-compliance). The audit gate fired before the product review it must follow, so any claim of final compliance would be auditing an unreviewed, uncorrected product.",
+        "affected_node_ids": [
+          "audit-methodology-compliance",
+          "review-product-coherence"
+        ]
+      }
+    ],
+    "reasoning": "The work under review does not preserve the node's intended role in any recognizable form. audit-methodology-compliance exists to be the final compliance gate: re-run the methodology and named criteria against the finished, reviewed-and-corrected product and emit audits/methodology-compliance.md with cited evidence. None of that happened: the required artifact is absent from the worktree (artifacts_present=False), the deterministic scan found no audit content, and the job's only file change was a set of line-citation edits to audits/design-review.md — an upstream node's artifact — not the creation of the audit document. Graph integrity is also harmed in two ways. First, the executor wrote into a different node's evidence document (design-review.md), the exact harm the design-review node's attempt 1 was blocked for; this corrupts the separation of evidence ownership the graph depends on — downstream reviewers can no longer trust that each node's artifacts were written by that node. Second, the node ran while its only dependency (review-product-coherence) is provisional with no artifact present, violating the explicit sequencing constraint and the ordering rationale recorded in the neighbor YAML; the final audit was attempted against a product the reviewer never reviewed. Because audit-methodology-compliance is the terminal node with unlocks: [], a false 'done' here would falsely close the entire graph walkthrough, so this must not proceed without human intervention. The correct path: have review-product-coherence complete and be accepted first, then re-run this node to actually produce audits/methodology-compliance.md — and restore audits/design-review.md to the upstream node's authored state (the citation tweaks, though arguably more accurate against the current worktree, were not this node's to make; any corrections belong to design-review or a review of it). Verdict: block. (Lane-1 acceptance adjudication of the three criteria is moot until the artifact exists; this verdict stands on the missing artifact, cross-node editing, and premature execution regardless.)",
+    "tool_trace": [
+      {
+        "ts": "2026-08-25T04:11:24.502Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_oMJaYLPxYrt99QeRCwzv4433",
+        "command": "ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q/ && echo \"---\" && find /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q -type f | head -100"
+      },
+      {
+        "ts": "2026-08-25T04:11:24.504Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_LaLwVAD2eaUu8PGJ7pkY3863",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/review-product-coherence.yaml"
+      },
+      {
+        "ts": "2026-08-25T04:11:24.516Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_LaLwVAD2eaUu8PGJ7pkY3863",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T04:11:24.544Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_oMJaYLPxYrt99QeRCwzv4433",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T04:11:28.909Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_e6n75LkBu6et3pzbfOHZ8180",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && echo \"=== audits dir ===\" && ls -la audits/ && echo \"=== reviews dir ===\" && ls -la reviews/ 2>/dev/null || echo \"no reviews dir\" && echo \"=== gddp dir ===\" && ls -la gddp/ && echo \"=== git log ===\" && git log --oneline -20 2>/dev/null; echo \"=== git status ===\" && git status --short 2>/dev/null | head -40"
+      },
+      {
+        "ts": "2026-08-25T04:11:28.910Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_n5OSGREC9Hk9ulmoeLGn5244",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q/audits/design-review.md"
+      },
+      {
+        "ts": "2026-08-25T04:11:28.916Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_n5OSGREC9Hk9ulmoeLGn5244",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T04:11:29.057Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_e6n75LkBu6et3pzbfOHZ8180",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T04:11:42.660Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_KThHeHXomgXMBv3O8Zao0400",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && echo \"=== diff a07cc7e..eff0c06 (current job's commits) ===\" && git diff --stat a07cc7e eff0c06 && echo \"=== diff be28bf2..eff0c06 (attempt1) ===\" && git diff --stat be28bf2 eff0c06 && echo \"=== diff b12fde4..eff0c06 full ===\" && git diff --name-status b12fde4 eff0c06"
+      },
+      {
+        "ts": "2026-08-25T04:11:42.661Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_P6MrYKeWcZivjcwLChp15290",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && echo \"=== executor-receipts ===\" && ls -la gddp/executor-receipts/ && find gddp/executor-receipts -type f | head -30 && echo \"=== receipts ===\" && ls -la gddp/receipts/ && find gddp/receipts -type f | head -30 && echo \"=== .gddp ===\" && ls -la .gddp/ && find .gddp -type f | head -30 && echo \"=== .scratch/.zcode ===\" && find .scratch .zcode -type f 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-25T04:11:42.718Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_P6MrYKeWcZivjcwLChp15290",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T04:11:42.739Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_KThHeHXomgXMBv3O8Zao0400",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T04:11:45.328Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_AZyskv6SpLpsdKFMzHo98373",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && echo \"=== what the current job changed in design-review.md ===\" && git diff a07cc7e eff0c06 -- audits/design-review.md | head -60"
+      },
+      {
+        "ts": "2026-08-25T04:11:45.329Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_xTdXtPPgFnebGsG2tKWz5673",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q/.gddp/result-summary.md"
+      },
+      {
+        "ts": "2026-08-25T04:11:45.334Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_xTdXtPPgFnebGsG2tKWz5673",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T04:11:45.376Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_AZyskv6SpLpsdKFMzHo98373",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T04:12:06.087Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_5FdGxo1QNJ8lRTW47nKd6934",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && echo \"=== any methodology-compliance file anywhere? ===\" && find . -iname \"*methodology*\" -not -path \"./.git/*\" 2>/dev/null; echo \"(end)\" && echo \"=== any product-coherence file anywhere? ===\" && find . -iname \"*coherence*\" -not -path \"./.git/*\" 2>/dev/null; echo \"(end)\" && echo \"=== spot-check corrected citations ===\" && grep -n \"OpenOutput\\|cut-key\\|dead\" hub-rs/src/keymap.rs | head -10 && echo \"---\" && grep -n \"agent-shot\" hub-rs/src/keymap.rs | head -6 && echo \"=== verify.rs lines ===\" && sed -n '19p;196p;232p;239p' hub-rs/src/ui/verify.rs 2>/dev/null || find . -name verify.rs -not -path \"./.git/*\""
+      },
+      {
+        "ts": "2026-08-25T04:12:06.141Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_5FdGxo1QNJ8lRTW47nKd6934",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T04:12:32.597Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Im49xLXl5kSXxqFx00wI9304",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "The tail of this graph (milestone-integration -> review-product-coherence -> audit-methodology-compliance) is the release gate, and audit-methodology-compliance unlocks nothing — its completion closes the graph. A provisional-dependency execution that produces no artifact and touches another node's file indicates the dispatch/acceptance plumbing let the terminal node fire early; human acceptance of review-product-coherence should be a hard precondition before this node is dispatched again.",
+        "affected_node_ids": [
+          "audit-methodology-compliance",
+          "review-product-coherence",
+          "milestone-integration"
+        ]
+      }
+    ],
+    "graph_recommendations": [],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.06000000000000002,
+  "criteria_confidence": 0.06000000000000002,
+  "completeness": 0.5,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "criteria-evidence",
+        "criterion": "Each acceptance criterion the design-review and audit named across the graph is re-checked against the finished product with cited evidence — not vibes. The final audit document maps every claim to a file/behavior.",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...)"
+        ],
+        "reasoning": "Scanned source files (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...) for identifiers named in the criterion (design-review, re-checked). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "methodology-rerun",
+        "criterion": "The per-surface methodology audit is re-run on the final product; any surface now violating a named skill section is listed with severity, and each is routed or explicitly deferred with rationale.",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "re\\-run -> line 59: 're-run'"
+        ],
+        "reasoning": "Scanned source files (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...) for identifiers named in the criterion (per-surface, re-run). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "honesty",
+        "criterion": "The audit records what passes AND what does not; a failing criterion is reported as a finding to the human, never silently absorbed.",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Audit/evidence only — no implementation; human acceptance is the release gate.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Runs only after review-product-coherence corrects the product.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "audits/methodology-compliance.md": false
+    },
+    "deps_status": {
+      "review-product-coherence": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "b12fde4f66540beacc7acb4bde22f389bff06e27",
+      "tip": "eff0c06491754dd763f63b054773240f8eb4aaad",
+      "files": [
+        {
+          "status": "A",
+          "path": "audits/design-review.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "criteria-evidence",
+        "judgment": "judged_fail",
+        "confidence": 0.97,
+        "evidence": [
+          "audits/ directory contains only audits/design-review.md; audits/methodology-compliance.md does not exist",
+          "git diff b12fde4..eff0c06 --stat: only audits/design-review.md changed (362 insertions; this job's attempts made only 6/6 line-number edits)",
+          "audits/design-review.md:1-16 (title + 'Attempt: 2 … writes only audits/design-review.md') — this is the design-review node's artifact, not a final audit",
+          "audits/design-review.md:30-33 — 'the upstream tui-methodology-audit node is provisional; its required artifact audits/tui-methodology.md is not present in this worktree'",
+          "No document anywhere in the worktree maps design-review/audit acceptance criteria to finished-product files/behaviors (grep for 'methodology-compliance' across *.md: no hits)"
+        ],
+        "reasoning": "The criterion requires a final audit document that re-checks every acceptance criterion named by design-review and the audits against the finished product with cited evidence. No such document exists: the node's required artifact audits/methodology-compliance.md is absent, and the only file the job touched is the design-review node's artifact, which is explicitly a review of pre-fix code (base b12fde4), not a compliance audit of the finished product. The criterion cannot be satisfied without the audit document, so it fails."
+      },
+      {
+        "criterion_id": "methodology-rerun",
+        "judgment": "judged_fail",
+        "confidence": 0.95,
+        "evidence": [
+          "No per-surface methodology re-run on the final product exists anywhere in the worktree",
+          "lib/vault.zsh:59 — the only 're-run' string hit; it is a code comment about re-running `local` declarations inside a loop, unrelated to methodology audits",
+          "audits/design-review.md contains a must-fix/should-fix/won't-now disposition table with 'Carried by' routing — but that is the design-review node's output against the pre-fix product (base b12fde4), not the compliance audit's re-run on the finished product",
+          "reviews/product-coherence.md (dependency artifact) absent; review-product-coherence still provisional in graph"
+        ],
+        "reasoning": "The criterion requires the per-surface methodology audit to be re-run on the FINAL product, with any violating surface listed by severity and routed or explicitly deferred with rationale. The only severity-bearing document (audits/design-review.md) audits the pre-fix code and is the review node's artifact; no re-run against the finished, corrected product was produced. The deterministic 're-run' hit is an unrelated code comment in lib/vault.zsh:59."
+      },
+      {
+        "criterion_id": "honesty",
+        "judgment": "judged_fail",
+        "confidence": 0.9,
+        "evidence": [
+          "No audit document exists to record passes and failures — nothing reports findings to the human for this node",
+          "Job diff (b12fde4..eff0c06) modifies audits/design-review.md — an upstream node's artifact — rather than producing its own audit record",
+          "audits/design-review.md final reviewer notes: 'It did not edit any upstream audit … The only file written is this one' and 'Pre-writing … gate artifacts (attempt-1's harm)' — the audit job's edit of design-review.md repeats that flagged harm class"
+        ],
+        "reasoning": "The criterion requires the audit to record what passes AND what does not, reporting failures to the human rather than silently absorbing them. With no audit artifact produced at all, there is no record of passes/failures and nothing surfaced to the human — the requirement is unmet. Additionally, the job modified another node's artifact (audits/design-review.md), the same wrong-node/upstream-evidence harm pattern that design-review.md explicitly disclaims, which is an integrity concern rather than honest reporting."
+      }
+    ],
+    "overall_reasoning": "The audit-methodology-compliance node (final compliance audit) was not executed as specified. The required artifact audits/methodology-compliance.md is absent; the only file the job produced/touched is audits/design-review.md (the upstream design-review node's artifact, with minor line-number corrections). No final audit document re-checks the design-review/audit criteria against the finished product with citations (criteria-evidence fails); no per-surface methodology re-run with severity and routing/deferral against the final product exists (methodology-rerun fails — the deterministic 're-run' hit is an unrelated comment in lib/vault.zsh:59); and with no audit record produced, nothing records passes/failures or reports them to the human (honesty fails). The job also violated its own ordering constraint: dependency review-product-coherence is still provisional with no reviews/product-coherence.md, so the audit ran before the review had corrected the product — exactly what the node's 'why' says must never happen ('it never audits a product the reviewer just flagged'). All three acceptance criteria fail on the evidence.",
+    "risks": "1) Ordering violation: the audit ran while review-product-coherence was provisional (no reviews/product-coherence.md; graph config still marks it provisional), violating the node constraint 'Runs only after review-product-coherence corrects the product' and the graph invariant 'never audits a product the reviewer just flagged'. 2) Wrong-artifact editing: this job modified audits/design-review.md (the design-review node's artifact) — the same harm class the design-review.md reviewer notes explicitly disclaim ('It did not edit any upstream audit… The only file written is this one'; 'Pre-writing … gate artifacts (attempt-1's harm)'). 3) Inputs missing: audits/design-review.md itself records that the upstream audits/tui-methodology.md is absent (upstream provisional), so even the material the compliance audit would re-check is not in the tree. 4) The .gddp/decision.md and .gddp/result-summary.md in the worktree belong to the stale 'common-core' pilot graph, not this node — do not treat them as this node's evidence.",
+    "followup_candidates": "Human clarification needed: the audit-methodology-compliance job produced no audits/methodology-compliance.md; it only edited the upstream design-review node's artifact (audits/design-review.md), and its dependency review-product-coherence is still provisional with no reviews/product-coherence.md. Was this node dispatched before its dependency completed (ordering constraint violated), and should it be re-run after review-product-coherence is accepted so the required final audit document can be produced? Also: observed graph status inconsistency — audit-methodology-compliance marked 'ready' while its depends_on node is 'provisional'; please confirm whether the graph config was advanced correctly.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-25T04:09:52.926Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_0tX55D8zw2EJrMuEoY3Z4185",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && ls -la && git log --oneline -10 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-25T04:09:52.928Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_MPP0xwzaY04K3lVQw8Jr7730",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && find . -path ./.git -prune -o -type f -print | head -100"
+        },
+        {
+          "ts": "2026-08-25T04:09:52.957Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_MPP0xwzaY04K3lVQw8Jr7730",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:09:53.056Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_0tX55D8zw2EJrMuEoY3Z4185",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:09:55.670Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_xa6zS424AldLE4UE0JgO7922",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && ls -la audits/ && echo \"---GDDDP---\" && ls -la .gddp/ 2>/dev/null && echo \"---handoffs---\" && ls -la .handoffs/"
+        },
+        {
+          "ts": "2026-08-25T04:09:55.673Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_4XWwj3W3hyVBDirrRFpL2127",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/review-product-coherence.yaml"
+        },
+        {
+          "ts": "2026-08-25T04:09:55.682Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_4XWwj3W3hyVBDirrRFpL2127",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:09:55.714Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_xa6zS424AldLE4UE0JgO7922",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:10:00.243Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_UjTm05pzXIQ8vL4hgyVk5907",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q/.gddp/result-summary.md"
+        },
+        {
+          "ts": "2026-08-25T04:10:00.245Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_AkFhSZF7tOLgB557r16j4348",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && ls -la reviews/ 2>/dev/null; echo \"---\"; ls docs/tui-pass/ 2>/dev/null; echo \"---patch---\"; cat .gddp/patch.diff | head -60"
+        },
+        {
+          "ts": "2026-08-25T04:10:00.251Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_UjTm05pzXIQ8vL4hgyVk5907",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:10:00.277Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_AkFhSZF7tOLgB557r16j4348",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:10:04.797Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_3Gpn2TTSbJHzGFrZqZQw3277",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q/.gddp/decision.md"
+        },
+        {
+          "ts": "2026-08-25T04:10:04.798Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_lmr7icdUsPPjYtu9AtR21538",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && git log --format='%H %s' -5 && echo \"---diff of last commit---\" && git show --stat eff0c06 | head -20 && echo \"---design-review head---\" && head -50 audits/design-review.md"
+        },
+        {
+          "ts": "2026-08-25T04:10:04.802Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_3Gpn2TTSbJHzGFrZqZQw3277",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:10:04.867Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_lmr7icdUsPPjYtu9AtR21538",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:10:10.729Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_t24vr26E5tIPySlO52ie3025",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && echo \"=== be28bf2 (attempt 0) stat ===\" && git show --stat be28bf2 | head -20 && echo \"=== a07cc7e (prev job attempt3) stat ===\" && git show --stat a07cc7e | head -20 && echo \"=== diff between attempts ===\" && git diff be28bf2 eff0c06 -- audits/design-review.md | head -40"
+        },
+        {
+          "ts": "2026-08-25T04:10:10.730Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_RAhg6TzTEUpRR64PVVod9096",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && ls -la .scratch/ .zcode/ 2>/dev/null; echo \"---\"; find . -name \"*methodology*\" -o -name \"*compliance*\" -o -name \"*product-coherence*\" 2>/dev/null | grep -v .git/"
+        },
+        {
+          "ts": "2026-08-25T04:10:10.773Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_RAhg6TzTEUpRR64PVVod9096",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-25T04:10:10.817Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_t24vr26E5tIPySlO52ie3025",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:10:24.390Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_3nVczZfHiHJv44D2ZB5n1780",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && grep -rn \"re-run\" lib/ | head; echo \"---\"; wc -l audits/design-review.md; echo \"---grep methodology/compliance/severity/routed---\"; grep -n -i \"methodology-compliance\\|methodology audit\\|severity\\|routed\\|deferred\" audits/design-review.md | head -30"
+        },
+        {
+          "ts": "2026-08-25T04:10:24.391Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_K6MAVEabY77qwmybjVns3236",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && cat .git 2>/dev/null; echo \"---\"; ls .zcode/plans/ .scratch/verify-pathway/ 2>/dev/null; echo \"---handoffs latest---\"; head -30 .handoffs/006-hub-rs-create-v3-packet-as-document.md"
+        },
+        {
+          "ts": "2026-08-25T04:10:24.424Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_K6MAVEabY77qwmybjVns3236",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:10:24.434Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_3nVczZfHiHJv44D2ZB5n1780",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:10:29.049Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_gNw9eAU3B4w3y3F2I73m0455",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q/audits/design-review.md"
+        },
+        {
+          "ts": "2026-08-25T04:10:29.050Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_qLRjUiALh47NSbXICVx16299",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && ls gddp/ && echo \"---project.yaml---\" && cat gddp/project.yaml 2>/dev/null | head -40; echo \"---graph node file---\"; cat /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/audit-methodology-compliance.yaml 2>/dev/null | head -60"
+        },
+        {
+          "ts": "2026-08-25T04:10:29.054Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_gNw9eAU3B4w3y3F2I73m0455",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:10:29.079Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_qLRjUiALh47NSbXICVx16299",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:10:32.867Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_nRyOAlMoCiskXaQcVg6D8480",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q/audits/design-review.md"
+        },
+        {
+          "ts": "2026-08-25T04:10:32.868Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_DaBE4LkJuZxbmWhdFn458602",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && grep -rn \"methodology-compliance\\|methodology compliance\" --include=\"*.md\" . 2>/dev/null | grep -v \"\\.git/\" | head; echo \"---receipts---\"; ls gddp/executor-receipts/ gddp/receipts/ 2>/dev/null | head -30; echo \"---docs tui-pass---\"; ls docs/tui-pass/"
+        },
+        {
+          "ts": "2026-08-25T04:10:32.872Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_nRyOAlMoCiskXaQcVg6D8480",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:10:32.937Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_DaBE4LkJuZxbmWhdFn458602",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:10:45.585Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_AW58m11SHDCdwdlFHiB04178",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && ls -R gddp/executor-receipts/_archive 2>/dev/null | head; echo \"---plan-sess head---\"; head -40 .zcode/plans/plan-sess_9a45cdb1-2c36-45bd-b52c-b6f66c7305c5.md 2>/dev/null; echo \"---any audit-ish files anywhere---\"; find . -path ./.git -prune -o -type d -name reviews -print -o -type f \\( -iname \"*audit*\" -o -iname \"*compliance*\" -o -iname \"*coherence*\" \\) -print 2>/dev/null | grep -v \".git/\""
+        },
+        {
+          "ts": "2026-08-25T04:10:45.586Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_yldSKAjJebWLlzzSBd5n4096",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q && git status --short | head -20; echo \"---HEAD---\"; git rev-parse HEAD; echo \"---files changed by both attempts of this job---\"; git diff b12fde4 eff0c06 --stat"
+        },
+        {
+          "ts": "2026-08-25T04:10:45.625Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_AW58m11SHDCdwdlFHiB04178",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:10:45.692Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_yldSKAjJebWLlzzSBd5n4096",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T04:11:18.628Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_H6MPEBliJvHWQWtMeOGc4756",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ],
+      "prompt_cache_report": {
+        "total_input_tokens": 3185,
+        "protocol_tokens": 812,
+        "project_tokens": 1069,
+        "node_tokens": 451,
+        "attempt_tokens": 853,
+        "potential_reuse_tokens": 2332,
+        "potential_reuse_ratio": 0.7322,
+        "actual_cached_tokens": 550912
+      }
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "The audit-methodology-compliance node (final compliance audit) was not executed as specified. The required artifact audits/methodology-compliance.md is absent; the only file the job produced/touched is audits/design-review.md (the upstream design-review node's artifact, with minor line-number corrections). No final audit document re-checks the design-review/audit criteria against the finished product with citations (criteria-evidence fails); no per-surface methodology re-run with severity and routing/deferral against the final product exists (methodology-rerun fails — the deterministic 're-run' hit is an unrelated comment in lib/vault.zsh:59); and with no audit record produced, nothing records passes/failures or reports them to the human (honesty fails). The job also violated its own ordering constraint: dependency review-product-coherence is still provisional with no reviews/product-coherence.md, so the audit ran before the review had corrected the product — exactly what the node's 'why' says must never happen ('it never audits a product the reviewer just flagged'). All three acceptance criteria fail on the evidence.",
+  "required_next_action": "Address semantic failures and re-submit.",
+  "generated_at": "2026-08-25T04:12:32.734392+00:00",
+  "evaluated_tree_sha": "28d177f5474df6b1bf95df173fe2e9854a08454b",
+  "evaluated_commit_sha": "eff0c06491754dd763f63b054773240f8eb4aaad",
+  "merge_commit_sha": "eff0c06491754dd763f63b054773240f8eb4aaad",
+  "expected_base_commit_sha": "b12fde4f66540beacc7acb4bde22f389bff06e27",
+  "pr_ref": null,
+  "job_id": "job_20260825T0359459637017660935a",
+  "execution_attempt_id": "job_20260825T0359459637017660935a:attempt:1",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q/README.md",
+    "project_brief": "UNAVAILABLE: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q/PROJECT-BRIEF.md does not exist",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+    "neighbor:review-product-coherence": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/review-product-coherence.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "low",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/review-product-coherence.yaml"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "low",
+      "offered": 3,
+      "content_accessed": 1,
+      "not_observed": 2,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/review-product-coherence.yaml"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-2jsok21q/README.md"
+      ]
+    },
+    "overall": "low"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-25T04:09:50.073702+00:00",
+    "finished_at": "2026-08-25T04:12:32.734079+00:00",
+    "wall_s": 162.667,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 88.817,
+      "tool_calls": 18
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 73.815,
+      "tool_calls": 9
+    }
+  }
+}

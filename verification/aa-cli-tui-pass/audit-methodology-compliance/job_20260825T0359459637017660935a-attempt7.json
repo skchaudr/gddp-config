@@ -1,0 +1,719 @@
+{
+  "project_id": "aa-cli-tui-pass",
+  "node_id": "audit-methodology-compliance",
+  "verdict": "needs-human-review",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "drift",
+    "intent_preserved": false,
+    "graph_integrity_preserved": false,
+    "required_human_review": true,
+    "confidence": 0.72,
+    "findings": [
+      {
+        "severity": "high",
+        "summary": "The audit executed before its deliberate sequencing gate. The node's only unlocker, review-product-coherence, is `provisional` (review-product-coherence.yaml:36) and its required artifact `reviews/product-coherence.md` is absent (no `reviews/` dir in the worktree); milestone-integration is likewise `provisional` (milestone-integration.yaml:33). This violates the node's own constraint 'Runs only after review-product-coherence corrects the product' and its why ('never audits a product the reviewer just flagged'). The deliverable is an honest baseline audit with an open gate (finding G1), not the promised final-compliance certification of a reviewed-and-corrected product. Credit: the audit reports G1 transparently, refuses to certify, and defers disposition to the human — which is why this is drift rather than block — but the node's intended role was not fulfilled.",
+        "affected_node_ids": [
+          "audit-methodology-compliance",
+          "review-product-coherence",
+          "milestone-integration"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "The artifact leaves an open disposition: the human must decide between completing the upstream chain (accept review-product-coherence + milestone-integration, then re-run) or accepting this as a baseline against the current state. Nothing unlocks from this node (unlocks: []), but the release gate is human acceptance and the graph invariant says claims are only true when evidenced against the finished state; this artifact must not be read as a certification of the finished product.",
+        "affected_node_ids": [
+          "audit-methodology-compliance"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Root cause of the gate failure: the charted graph omits the Phase-2 capability nodes design-review authorized (input-grammar, packet-contract, deck-spatial-home, create-linear-dispatch, verify-evidence-surface, deck-attention, action-consequence, operator-proof) — they exist only as names in audits/design-review.md (lines 127-247). With no implementation nodes between design-review and milestone-integration, a 'corrected product' for this audit to measure was structurally unreachable in this chart, so the audit's premise could never be met.",
+        "affected_node_ids": [
+          "audit-methodology-compliance",
+          "design-review",
+          "milestone-integration"
+        ]
+      }
+    ],
+    "reasoning": "Fresh-eyes review of the audit-methodology-compliance node work (finalized by a 4-line citation fix in attempt 7). The diff itself is benign and accurate — I verified `main.rs:724` holds the VerifyPacket toast claim and `visual.rs:205-207` is exactly `toast() -> Style { warn() }` — so the citation corrections improve rather than harm the evidence base. The audit document is substantively excellent on the audit function: it re-checks design-review's five invariant bars (I1-I5), re-runs the per-surface methodology (S1-S10) with named skill sections, severities, and Phase-2 routes, checks milestone-integration criteria (G3), records passes AND fails, cites file:line throughout, and reports its own gate violation as top finding G1 instead of absorbing it (honesty criterion honored). What it cannot do is fulfill the node's intended role: 'the last gate' that 'runs only after review-product-coherence corrects the product' and 'never audits a product the reviewer just flagged.' The graph's deliberate ordering was not honored — the node was marked `ready` while its unlocker chain (milestone-integration, review-product-coherence) is `provisional` with the review artifact absent — and the frontier auto-advanced dispatch anyway. The work's response (honest baseline + G1 + deferred disposition) is the best possible handling of an impossible dispatch, and it protects the 'claims only true when evidenced against the finished state' invariant by refusing to certify; but the deliverable is a baseline audit with an open gate, not the promised final-compliance certification, so intent is not preserved as stated. Graph integrity is also not preserved in execution: the deliberate ordering guarantee (review-product-coherence.yaml: 'Runs BEFORE audit-methodology-compliance; this ordering is deliberate') was violated, and the gddp-config statuses are internally inconsistent (audit `ready` with provisional unlockers). Because the node's own artifact demands a human decision (G1 disposition) and the release gate is human acceptance, required_human_review=true. This is drift, not block: nothing was actively harmed, nothing downstream unlocks from this node, and the work's honesty protects downstream consumers from being misled — but a human must adjudicate the open gate before this artifact can play its intended role as the graph's terminal certification.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-25T06:10:12.741Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_TmtaySx779nEwmCcyTrT4153",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ezsxq39x && pwd && ls -la && git log --oneline -5 2>/dev/null; git status 2>/dev/null | head -20"
+      },
+      {
+        "ts": "2026-08-25T06:10:12.743Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_o3SegW3UJ53Gu3CFCxjz6641",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/review-product-coherence.yaml"
+      },
+      {
+        "ts": "2026-08-25T06:10:12.744Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_orxD5D6aHUSE1xiq3fs33413",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml"
+      },
+      {
+        "ts": "2026-08-25T06:10:12.757Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_o3SegW3UJ53Gu3CFCxjz6641",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T06:10:12.757Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_orxD5D6aHUSE1xiq3fs33413",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T06:10:12.881Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_TmtaySx779nEwmCcyTrT4153",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T06:10:16.097Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_DGmsiOLkmUkxSu9Bl3Ou0803",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ezsxq39x && ls -la audits/ && ls -la audits/* 2>/dev/null | head -40"
+      },
+      {
+        "ts": "2026-08-25T06:10:16.098Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_leFxm8p7Vp2olggEOUXu3292",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ezsxq39x && git show --stat HEAD | head -30 && echo \"=====DIFF=====\" && git diff 9f803b4..HEAD -- audits/ | head -100"
+      },
+      {
+        "ts": "2026-08-25T06:10:16.098Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_PANoOuUjuVAobIvA9GNf1486",
+        "command": "ls /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/ && echo \"---\" && cat /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/audit-methodology-compliance.yaml"
+      },
+      {
+        "ts": "2026-08-25T06:10:16.125Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_PANoOuUjuVAobIvA9GNf1486",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T06:10:16.129Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_DGmsiOLkmUkxSu9Bl3Ou0803",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T06:10:16.162Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_leFxm8p7Vp2olggEOUXu3292",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T06:10:22.654Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_9XalegLPvUZlUebwAaQD7991",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ezsxq39x/audits/methodology-compliance.md"
+      },
+      {
+        "ts": "2026-08-25T06:10:22.655Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_7M9YnE4L6AUdDnzCsQ7D5064",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ezsxq39x && ls -la reviews/ 2>/dev/null; echo \"---handoffs---\"; ls -la .handoffs/ 2>/dev/null; echo \"---gddp---\"; ls -la gddp/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-25T06:10:22.658Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_9XalegLPvUZlUebwAaQD7991",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T06:10:22.687Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_7M9YnE4L6AUdDnzCsQ7D5064",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T06:11:07.861Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_nR0dyKlbW07XHwjV2oaw4298",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ezsxq39x && ls reviews/ 2>&1; echo \"---\"; ls hub-rs/src/main.rs hub-rs/src/ui/visual.rs 2>&1; echo \"---main.rs:724---\"; sed -n '720,728p' hub-rs/src/main.rs; echo \"---visual.rs:205-207---\"; sed -n '203,209p' hub-rs/src/ui/visual.rs; echo \"---main.rs:716---\"; sed -n '714,718p' hub-rs/src/main.rs; echo \"---main.rs:693---\"; sed -n '691,695p' hub-rs/src/main.rs"
+      },
+      {
+        "ts": "2026-08-25T06:11:07.862Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_e6SRdJLh5jC0ulkw9TSj8935",
+        "command": "cd /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes && for f in tui-methodology-audit.yaml design-review.yaml milestone-integration.yaml; do echo \"===== $f =====\"; cat $f; done"
+      },
+      {
+        "ts": "2026-08-25T06:11:07.890Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_e6SRdJLh5jC0ulkw9TSj8935",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T06:11:07.906Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_nR0dyKlbW07XHwjV2oaw4298",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T06:12:13.492Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_gD9ProgLuZkjzMx70TlQ1748",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ezsxq39x && grep -n \"Phase-2\\|input-grammar\\|packet-contract\\|deck-spatial-home\\|create-linear-dispatch\\|verify-evidence-surface\\|deck-attention\\|action-consequence\\|operator-proof\" audits/design-review.md | head -20; echo \"===graph statuses===\"; grep -n \"status:\" /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/*.yaml"
+      },
+      {
+        "ts": "2026-08-25T06:12:13.521Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_gD9ProgLuZkjzMx70TlQ1748",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T06:12:32.369Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_vyyxVzos6AbxBddnrwW01994",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "Frontier auto-advance (execution_policy.frontier_auto_advance: true) dispatched audit-methodology-compliance while its unlocker chain (milestone-integration → review-product-coherence) was uncompleted (both `provisional`; review artifact absent). Future dispatch on this graph should gate on unlocker completion (artifact present + accepted status), not node-level `ready` status, before marking a node runnable.",
+        "affected_node_ids": [
+          "audit-methodology-compliance",
+          "review-product-coherence",
+          "milestone-integration"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The blueprint describes a 13-node full-graph walkthrough (design nodes 01-06, backend 07-10, integration 11, operator walkthrough 12, graph-walk verification 13) but only 6 nodes are charted, ending at audit-methodology-compliance. The Phase-2 capability nodes design-review authorized exist only as names. Any continuation or graph-walk-verification consumer must not treat this audit as the graph's terminal certification; the chain to a corrected product has yet to be charted and executed.",
+        "affected_node_ids": [
+          "audit-methodology-compliance",
+          "design-review"
+        ]
+      }
+    ],
+    "graph_recommendations": [],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9166666666666666,
+  "criteria_confidence": 0.9166666666666666,
+  "completeness": 1.0,
+  "graph_readiness": 0.9166666666666666,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "criteria-evidence",
+        "criterion": "Each acceptance criterion the design-review and audit named across the graph is re-checked against the finished product with cited evidence — not vibes. The final audit document maps every claim to a file/behavior.",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...)"
+        ],
+        "reasoning": "Scanned source files (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...) for identifiers named in the criterion (design-review, re-checked). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "methodology-rerun",
+        "criterion": "The per-surface methodology audit is re-run on the final product; any surface now violating a named skill section is listed with severity, and each is routed or explicitly deferred with rationale.",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "re\\-run -> line 59: 're-run'"
+        ],
+        "reasoning": "Scanned source files (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...) for identifiers named in the criterion (per-surface, re-run). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "honesty",
+        "criterion": "The audit records what passes AND what does not; a failing criterion is reported as a finding to the human, never silently absorbed.",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Audit/evidence only — no implementation; human acceptance is the release gate.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Runs only after review-product-coherence corrects the product.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "audits/methodology-compliance.md": true
+    },
+    "deps_status": {
+      "review-product-coherence": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "9f803b45778a551acd2417170861fa10c6c99725",
+      "tip": "59ac34ac3c3bee353fc89871053785dfba14fbe3",
+      "files": [
+        {
+          "status": "M",
+          "path": "audits/methodology-compliance.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "criteria-evidence",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "audits/methodology-compliance.md:42-51 (what this audit re-checks: design-review invariants, per-surface methodology, milestone-integration criteria)",
+          "audits/methodology-compliance.md:65-83 (I1-I5 invariant bars, each with file:line per-surface evidence)",
+          "audits/methodology-compliance.md:186-293 (S1-S10 per-surface re-run with cited skill sections + file:line)",
+          "audits/methodology-compliance.md:27-39 (G3 milestone criteria re-checked: command-table, receipts, e2e)",
+          "verified citations: hub-rs/src/keymap.rs:41 v→VerifyPacket toast; keymap.rs:416-425 deck_cut_keys_are_dead (o,; unbound); app.rs:1055 open_verify called only from tests (app.rs:3731+); main.rs:724 verify toast; visual.rs:205-207 toast()=warn(); dashboard.rs:17-21 early-return render_detail; app.rs:2826-2831 o bound in deck_key; root.rs:36-47 numeric 0/1"
+        ],
+        "reasoning": "The document re-checks each criterion named by the design-review node (the five concrete invariant acceptance bars, I1-I5), the tui-methodology-audit criteria (per-surface findings, referenced skill sections, traceability — re-run as S1-S10), the milestone-integration criteria (G3), and this node's own honesty criterion (G1). Every claim maps to a file:line or behavior; I spot-checked ~15 citations against the live source (keymap, app.rs, main.rs, visual.rs, dashboard.rs, root.rs, verify.rs, fire.rs, exec.rs, agent.rs) and all were accurate. The review-product-coherence criteria were not re-checked because that review never ran (artifact absent) — disclosed as G1 rather than hidden; that node is a milestone/review, not 'design-review and audit' as the criterion's wording scopes. The one notable imprecision (main.rs:724-746 region cited for OpenOutput spans the VerifyPacket toast at 724 and OpenOutput at 725) is minor and does not affect the substance."
+      },
+      {
+        "criterion_id": "methodology-rerun",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "audits/methodology-compliance.md:186-293 (S1-S10: Deck, runway, Create, Verify Evidence/Agent/Contract, pickers, root, status/footer, keymap each walked against the skill's named sections)",
+          "audits/methodology-compliance.md:295-309 (Deferred with rationale: F16/F17 won't-now, packet-contract deferred)",
+          "audits/methodology-compliance.md:311-331 (cross-surface skill-section roll-up with severity + Phase-2 route)",
+          "verified skill structure: hub-rs/.agents/skills/tui-design/SKILL.md:155 §3 Interaction Model / Keyboard Design Layers, 392 §7 Seven Design Principles, 410 Anti-Patterns; references/visual-catalog.md:133-150 Status Indicators / Check and Cross; references/app-patterns.md:9 lazygit"
+        ],
+        "reasoning": "S1-S10 re-run the per-surface methodology across every operator surface against the TUI-design skill's named sections (§1-§7, visual-catalog, app-patterns), each violation carrying a severity (high/medium/low) and a route ('Routed to: <Phase-2 node>') or an explicit deferral with rationale. The skill sections and reference files cited actually exist and match the named content. Caveat: the audit ran before the product was corrected (G2 — no Phase-2 implementation landed), so it is a re-run against the current, un-corrected state; the document states this plainly rather than pretending the product is finished, which is the honest handling the criterion's sibling (honesty) requires."
+      },
+      {
+        "criterion_id": "honesty",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "audits/methodology-compliance.md:13-25 (honesty disclosure up front: dependency chain unresolved, constraint not met — reported as finding G1)",
+          "audits/methodology-compliance.md:55-82 (G1 gate FAIL, G2 no-correction FAIL, G3 milestone FAIL — each with evidence and disposition)",
+          "audits/methodology-compliance.md:333-364 (Summary verdict: explicit PASSES list and FAILS list)",
+          "audits/methodology-compliance.md:366-369 (honesty statement: failing criteria reported to the human, none silently absorbed)"
+        ],
+        "reasoning": "The document records what passes AND what does not in a dedicated summary verdict, and every failing criterion is reported as a finding with evidence and disposition. Critically, the audit reports its own gate violation — the node was dispatched while review-product-coherence was provisional and its artifact absent, violating the node's 'Runs only after review-product-coherence corrects the product' constraint — as the top finding (G1) rather than absorbing it. This is the strongest possible demonstration of the honesty criterion, and the deterministic gate-state evidence corroborates it (reviews/ dir absent; review-product-coherence.yaml status provisional; milestone-integration.yaml provisional; only audits/methodology-compliance.md changed in this attempt)."
+      }
+    ],
+    "overall_reasoning": "The required artifact audits/methodology-compliance.md exists, is 420 lines, and satisfies all three acceptance criteria with cited, verifiable evidence. (1) criteria-evidence: the doc re-checks the design-review's five invariant bars (I1-I5), the tui-methodology-audit's per-surface criteria (S1-S10), milestone-integration's criteria (G3), and this node's own honesty criterion; every claim carries a file:line citation, and ~15 spot-checks against the live source (keymap.rs, app.rs, main.rs, visual.rs, dashboard.rs, root.rs, verify.rs, fire.rs, exec.rs, agent.rs) confirmed the citations are accurate. (2) methodology-rerun: every operator surface is walked against the skill's real named sections (SKILL.md §1-§7, Anti-Patterns; references/visual-catalog.md Check/Cross; references/app-patterns.md lazygit), with severity per violation and routing or explicit deferral with rationale. (3) honesty: PASSES and FAILS are both recorded; the audit's top finding (G1) is that the node's own sequencing constraint was violated (dependency review-product-coherence provisional, its artifact absent, dispatched anyway) — reported to the human rather than hidden, exactly as the criterion demands. Constraints hold: audit/evidence only (git diff confirms only the audit file changed; no source touched). The notable caveat — the audit ran before the review/correction gate and therefore audits an un-corrected product — is disclosed prominently and routed to the human for the release-gate decision, which is the correct behavior for this node rather than a defect.",
+    "risks": "1. The audit ran before its declared gate (review-product-coherence never executed; its artifact absent). Its FAIL findings therefore describe the pre-correction product; if the human completes the review and Phase-2 corrections, this audit must be re-run against the corrected product — the current document explicitly frames itself as a baseline against the current state. 2. Routing targets (Phase-2 node names: input-grammar, deck-spatial-home, verify-evidence-surface, etc.) exist only as names in audits/design-review.md, not as graph nodes — disclosed in G2, but routes are not executable yet. 3. Minor citation imprecision: main.rs:724-746 cited for OpenOutput spans the VerifyPacket toast (724) and OpenOutput (725); material claims unaffected. 4. e2e criterion was not re-run (reported as part of G3, milestone unevidenced).",
+    "followup_candidates": "Human clarification (release-gate decision, per node constraints): The audit reports G1 — it was dispatched while review-product-coherence was provisional with its artifact absent, violating the 'Runs only after review-product-coherence corrects the product' constraint. Decide: (a) complete and accept review-product-coherence (and milestone-integration) then re-run this audit against the corrected product, or (b) accept this audit as a baseline against the current un-corrected state. Human clarification: once review-product-coherence exists, should its three criteria (coherence-judgment, readability, correction-routing) be explicitly re-checked in this audit document? Currently they are covered only implicitly via G1/G3 since that review never ran. Observed: skill sections and reference files cited by the audit exist and match (SKILL.md §1-§7 + Anti-Patterns; references/visual-catalog.md Check/Cross; references/app-patterns.md lazygit); not part of this node's criteria but confirms the re-run's grounding.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-25T06:08:39.105Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Onxq0VtstLzuiYBCdMGI0734",
+          "command": "pwd && ls -la && find . -maxdepth 3 -type d | head -50"
+        },
+        {
+          "ts": "2026-08-25T06:08:39.106Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_LvtElAJLA3QClP7Mtziz9665",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml"
+        },
+        {
+          "ts": "2026-08-25T06:08:39.107Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_nUnXaDqBwpm4KiGqj4WI8418",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/review-product-coherence.yaml"
+        },
+        {
+          "ts": "2026-08-25T06:08:39.117Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_LvtElAJLA3QClP7Mtziz9665",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:08:39.117Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_nUnXaDqBwpm4KiGqj4WI8418",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:08:39.145Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Onxq0VtstLzuiYBCdMGI0734",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:08:42.487Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_AsA87JnwzdzSDA6nB6Bt5087",
+          "command": "find audits -type f | head -50; echo '---'; ls -la audits/*/ 2>/dev/null | head -40"
+        },
+        {
+          "ts": "2026-08-25T06:08:42.487Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_c0hzvMWQFeDuYsmXmhhZ2700",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/design-review.yaml"
+        },
+        {
+          "ts": "2026-08-25T06:08:42.488Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_7Hi2TGidripP7Smxodgi9653",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml"
+        },
+        {
+          "ts": "2026-08-25T06:08:42.491Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_c0hzvMWQFeDuYsmXmhhZ2700",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:08:42.492Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_7Hi2TGidripP7Smxodgi9653",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:08:42.509Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_AsA87JnwzdzSDA6nB6Bt5087",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:08:45.913Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_wsWCizxQVkmuDZjEudhK0774",
+          "command": "wc -l audits/methodology-compliance.md audits/design-review.md; echo '---'; ls -la reviews/ 2>/dev/null; find . -name 'reviews' -type d 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-25T06:08:45.914Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_bcPQ5zi19XsuNIYqCY7k7678",
+          "path": "audits/methodology-compliance.md"
+        },
+        {
+          "ts": "2026-08-25T06:08:45.917Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_bcPQ5zi19XsuNIYqCY7k7678",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:08:45.951Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_wsWCizxQVkmuDZjEudhK0774",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:09:00.083Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_u6R4CG40zdKdjBvs4wnT9265",
+          "command": "echo '=== reviews dir? ==='; ls -la reviews 2>&1; echo; echo '=== audits dir ==='; ls -la audits/; echo; echo '=== git log ==='; git log --oneline -10 2>&1; echo; echo '=== git diff b12fde4..HEAD (product code) ==='; git diff --name-only b12fde4..HEAD -- hub-rs/src lib bin/aa 2>&1; echo; echo '=== git status ==='; git status --short 2>&1 | head"
+        },
+        {
+          "ts": "2026-08-25T06:09:00.084Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_Yq6wG6YgQBt3EYcaGWB97021",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/milestone-integration.yaml"
+        },
+        {
+          "ts": "2026-08-25T06:09:00.085Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_02_iBU4DGdzCrsXT4v4C9zJ2702",
+          "command": "echo '=== exec.rs aa_bin region ==='; grep -n 'aa_bin\\|run_suspended\\|run_paged' hub-rs/src/exec.rs | head -20; echo; echo '=== fire.rs ==='; sed -n '21,93p' hub-rs/src/fire.rs; echo; echo '=== agent.rs fire ==='; grep -n 'fire' hub-rs/src/agent.rs | head"
+        },
+        {
+          "ts": "2026-08-25T06:09:00.092Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Yq6wG6YgQBt3EYcaGWB97021",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:09:00.115Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_iBU4DGdzCrsXT4v4C9zJ2702",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:09:00.266Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_u6R4CG40zdKdjBvs4wnT9265",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:09:06.047Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_cZoGutphzlF4gaFEAUNk4021",
+          "command": "echo '=== keymap.rs: o bound? ==='; grep -n '\"o\"\\|OpenOutput\\|map_deck' hub-rs/src/keymap.rs | head -20; echo; echo '=== keymap.rs: v ==='; grep -n '\"v\"\\|VerifyPacket' hub-rs/src/keymap.rs | head; echo; echo '=== keymap.rs: ; ==='; grep -n '\";\"\\|fzf\\|Semicolon' hub-rs/src/keymap.rs | head; echo; echo '=== open_verify call sites ==='; grep -rn 'open_verify' hub-rs/src/ | head; echo; echo '=== app.rs:1055 ==='; sed -n '1050,1060p' hub-rs/src/app.rs"
+        },
+        {
+          "ts": "2026-08-25T06:09:06.048Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_XonOUVjOTkCKHgsY4LDx2011",
+          "command": "echo '=== visual.rs toast ==='; grep -n 'toast\\|warn' hub-rs/src/ui/visual.rs | head -20; echo; echo '=== keymap.rs:81-110 (e, /, t, k) ==='; sed -n '76,110p' hub-rs/src/keymap.rs; echo; echo '=== main.rs 724 (v toast) ==='; grep -n '724\\|VerifyPacket\\|open_verify\\|\"v\"' hub-rs/src/main.rs | head"
+        },
+        {
+          "ts": "2026-08-25T06:09:06.082Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_XonOUVjOTkCKHgsY4LDx2011",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:09:06.103Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_cZoGutphzlF4gaFEAUNk4021",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:09:14.028Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_kTEYPMoVSTd0a7n48QdN6297",
+          "command": "echo '=== dashboard.rs early return + render_detail ==='; sed -n '14,52p' hub-rs/src/ui/dashboard.rs; echo '...'; sed -n '290,300p' hub-rs/src/ui/dashboard.rs; echo; echo '=== app.rs o (2826-2831) ==='; sed -n '2820,2835p' hub-rs/src/app.rs; echo; echo '=== main.rs OpenOutput / o ==='; grep -n \"OpenOutput\\|'o'\\|'O'\" hub-rs/src/main.rs | head; echo; echo '=== root.rs numeric ==='; sed -n '30,50p' hub-rs/src/ui/root.rs"
+        },
+        {
+          "ts": "2026-08-25T06:09:14.029Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ekFr9BXhsh4erdmoRu0d8565",
+          "command": "echo '=== verify.rs 140-260 ==='; sed -n '140,200p' hub-rs/src/ui/verify.rs | head -30; echo '---'; sed -n '196,260p' hub-rs/src/ui/verify.rs | head -40; echo; echo '=== keymap.rs b_footer / o test (416-425) ==='; sed -n '410,430p' hub-rs/src/keymap.rs"
+        },
+        {
+          "ts": "2026-08-25T06:09:14.058Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ekFr9BXhsh4erdmoRu0d8565",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:09:14.072Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_kTEYPMoVSTd0a7n48QdN6297",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:09:35.229Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_OuaKjUXcaVT0pJvB5Ggb0099",
+          "command": "echo '=== skill section headings ==='; grep -n '^#\\{1,3\\} ' hub-rs/.agents/skills/tui-design/SKILL.md 2>/dev/null | head -30; echo; echo '=== visual.rs NO_COLOR / selection ==='; sed -n '83,95p' hub-rs/src/ui/visual.rs; grep -n 'pub fn selection' hub-rs/src/ui/visual.rs"
+        },
+        {
+          "ts": "2026-08-25T06:09:35.258Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_OuaKjUXcaVT0pJvB5Ggb0099",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:09:38.684Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ihRPXfkLigwMa1Zo5umf4885",
+          "command": "grep -n '^## ' hub-rs/.agents/skills/tui-design/SKILL.md | sed -n '6,20p'; echo; echo '=== anti-patterns / principles ==='; grep -n 'Anti-pattern\\|Seven Principles\\|Principle' hub-rs/.agents/skills/tui-design/SKILL.md | head -15; echo; echo '=== other skill files ==='; ls hub-rs/.agents/skills/tui-design/"
+        },
+        {
+          "ts": "2026-08-25T06:09:38.715Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ihRPXfkLigwMa1Zo5umf4885",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:09:42.026Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_d2i2PtYNj4OpWPY8L70H7775",
+          "command": "ls hub-rs/.agents/skills/tui-design/references/; echo; grep -n 'Status indicators\\|check-cross\\|Check/Cross\\|glyph' hub-rs/.agents/skills/tui-design/references/*.md 2>/dev/null | head -8"
+        },
+        {
+          "ts": "2026-08-25T06:09:42.050Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_d2i2PtYNj4OpWPY8L70H7775",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:09:45.406Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_jwfS8jN03ImyrbraxTcI1867",
+          "command": "grep -in 'check\\|cross\\|status\\|glyph\\|✓\\|✗' hub-rs/.agents/skills/tui-design/references/visual-catalog.md | head -12; echo '=== app-patterns headings ==='; grep -n '^#' hub-rs/.agents/skills/tui-design/references/app-patterns.md | head -20"
+        },
+        {
+          "ts": "2026-08-25T06:09:45.444Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_jwfS8jN03ImyrbraxTcI1867",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T06:10:08.502Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_4ZmxVlrWOsrykysTMQi00715",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ],
+      "prompt_cache_report": {
+        "total_input_tokens": 3187,
+        "protocol_tokens": 812,
+        "project_tokens": 1069,
+        "node_tokens": 451,
+        "attempt_tokens": 855,
+        "potential_reuse_tokens": 2332,
+        "potential_reuse_ratio": 0.7317,
+        "actual_cached_tokens": 815488
+      }
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "The required artifact audits/methodology-compliance.md exists, is 420 lines, and satisfies all three acceptance criteria with cited, verifiable evidence. (1) criteria-evidence: the doc re-checks the design-review's five invariant bars (I1-I5), the tui-methodology-audit's per-surface criteria (S1-S10), milestone-integration's criteria (G3), and this node's own honesty criterion; every claim carries a file:line citation, and ~15 spot-checks against the live source (keymap.rs, app.rs, main.rs, visual.rs, dashboard.rs, root.rs, verify.rs, fire.rs, exec.rs, agent.rs) confirmed the citations are accurate. (2) methodology-rerun: every operator surface is walked against the skill's real named sections (SKILL.md §1-§7, Anti-Patterns; references/visual-catalog.md Check/Cross; references/app-patterns.md lazygit), with severity per violation and routing or explicit deferral with rationale. (3) honesty: PASSES and FAILS are both recorded; the audit's top finding (G1) is that the node's own sequencing constraint was violated (dependency review-product-coherence provisional, its artifact absent, dispatched anyway) — reported to the human rather than hidden, exactly as the criterion demands. Constraints hold: audit/evidence only (git diff confirms only the audit file changed; no source touched). The notable caveat — the audit ran before the review/correction gate and therefore audits an un-corrected product — is disclosed prominently and routed to the human for the release-gate decision, which is the correct behavior for this node rather than a defect.",
+  "required_next_action": "Integrity verdict 'drift' halts progression (criteria verdict was 'pass'). Human review required; no dependent node may dispatch on this node.",
+  "generated_at": "2026-08-25T06:12:32.463794+00:00",
+  "evaluated_tree_sha": "3e5329d809511b7415568a71fd68d7980955e416",
+  "evaluated_commit_sha": "59ac34ac3c3bee353fc89871053785dfba14fbe3",
+  "merge_commit_sha": "59ac34ac3c3bee353fc89871053785dfba14fbe3",
+  "expected_base_commit_sha": "9f803b45778a551acd2417170861fa10c6c99725",
+  "pr_ref": null,
+  "job_id": "job_20260825T0359459637017660935a",
+  "execution_attempt_id": "job_20260825T0359459637017660935a:attempt:7",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ezsxq39x/README.md",
+    "project_brief": "UNAVAILABLE: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ezsxq39x/PROJECT-BRIEF.md does not exist",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+    "neighbor:review-product-coherence": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/review-product-coherence.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "low",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/review-product-coherence.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml"
+      ],
+      "not_observed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ezsxq39x/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "low",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/review-product-coherence.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml"
+      ],
+      "not_observed_paths": [
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-ezsxq39x/README.md"
+      ]
+    },
+    "overall": "low"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-25T06:08:33.516671+00:00",
+    "finished_at": "2026-08-25T06:12:32.463628+00:00",
+    "wall_s": 238.944,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 95.069,
+      "tool_calls": 19
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 143.84,
+      "tool_calls": 11
+    }
+  }
+}
