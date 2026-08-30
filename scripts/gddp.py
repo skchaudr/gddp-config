@@ -4951,13 +4951,36 @@ def cmd_steer(args) -> int:
     if not message:
         print("empty steer message", file=sys.stderr)
         return 1
+    attempt_dir = info["dir"]
+    capabilities_path = attempt_dir / "capabilities.json"
+    capabilities: dict | None = None
+    if capabilities_path.is_file():
+        try:
+            loaded = json.loads(capabilities_path.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict):
+                capabilities = loaded
+        except (OSError, json.JSONDecodeError):
+            capabilities = None
+    if capabilities is not None:
+        executor = str(capabilities.get("executor") or info.get("executor") or "executor")
+        if capabilities.get("midturn_steering") is not True:
+            print(
+                f"steer refused: executor {executor} does not support mid-turn steering",
+                file=sys.stderr,
+            )
+            return 1
     line = json.dumps(
         {"ts": datetime.now(timezone.utc).isoformat(), "message": message}
     )
-    with (info["dir"] / "steer.jsonl").open("a", encoding="utf-8") as handle:
+    with (attempt_dir / "steer.jsonl").open("a", encoding="utf-8") as handle:
         handle.write(line + "\n")
     print(f"steer queued for {info['node_id'] or info['name']}: {message}")
-    print("delivered on the supervisor's next read cycle (needs the steer-aware runtime)")
+    if capabilities is not None:
+        print("delivered on the supervisor's next read cycle (needs the steer-aware runtime)")
+    else:
+        print(
+            "unknown capability; message queued but the runtime may not consume it"
+        )
     return 0
 
 
