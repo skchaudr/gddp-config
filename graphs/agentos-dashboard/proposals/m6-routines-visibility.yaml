@@ -1,0 +1,61 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: m6-routines-visibility
+title: "Milestone 6 — routines board: real declared routines, next/queued/fired, local vs remote worker, read-only"
+type: milestone
+
+why: >
+  The spec's 24/7 surface is a chronological board of scheduled automation with
+  status flags and a local-versus-cloud worker distinction. The shell today
+  ships two invented routines hardcoded in src/main.jsx ("Daily workspace sync"
+  queued, "Artifact index" fired) and a "Cloud bridge — Hermes worker
+  connected" widget that is connected to nothing. That is exactly the failure
+  the board must not commit: rendering a status no source declared. This
+  milestone replaces the invented entries with the real declared sources from
+  the node-01 scope.
+
+depends_on:
+  - m2-live-topology-slice
+
+acceptance_criteria:
+  - id: real-source
+    criterion: >
+      The board renders only from declared routine sources (the node-01 scope
+      names ~/.hermes/cron and any dsh routines), and no hardcoded routine
+      entries remain anywhere in the shell.
+  - id: status-derivation
+    criterion: >
+      Next, queued and fired are derived from the source's own timing data and
+      the derivation rule is written down, including what happens when a
+      routine has never fired.
+  - id: worker-truth
+    criterion: >
+      Local versus remote worker is shown from the routine's declared home, and
+      where sync or liveness state is not actually known it renders as unknown
+      rather than as a healthy indicator.
+  - id: read-only
+    criterion: >
+      Nothing on this surface schedules, triggers, edits, pauses or cancels a
+      routine, and no write to any cron or routine source occurs during the
+      demonstration.
+
+constraints:
+  - Display surface only; no scheduling engine.
+  - Never render a routine or a status the source does not declare, and never fill a gap with a placeholder that looks like data.
+  - The existing "Cloud bridge / connected" widget must either be backed by a real liveness check or removed.
+
+allowed_execution_modes:
+  - agent
+  - human
+
+required_artifacts:
+  - routines board component + tests
+  - status derivation rules doc
+  - result-summary.md
+
+status: pending
+priority: medium
+
+unlocks:
+  - m7-daily-driver-rollout

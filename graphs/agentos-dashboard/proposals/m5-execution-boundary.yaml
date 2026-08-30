@@ -1,0 +1,67 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: m5-execution-boundary
+title: "Milestone 5 — headless execution boundary: named executor, allowlisted run API, streamed output, skills deck"
+type: milestone
+
+why: >
+  The skills deck and the run API are one decision, not two. The deck is
+  meaningless without the seam, and the seam is the point where a personal
+  dashboard becomes a process-spawning surface on Sab's machine. The node-01
+  scope contract deliberately left the executor identity open (claude -p from
+  the video, or pi, or dsh) and deferred it to the backend node; that choice is
+  human-owned and blocks both halves. Grouping them into one milestone forces
+  the security boundary and the UI that drives it to be reviewed together.
+
+depends_on:
+  - m2-live-topology-slice
+
+acceptance_criteria:
+  - id: executor-named
+    criterion: >
+      The concrete executor invocation is recorded as a human decision before
+      any run path is implemented. The video's claude -p is a candidate, not an
+      assumption; whatever is chosen is written down with its model and effort
+      flag mapping.
+  - id: allowlisted-runs
+    criterion: >
+      /api/skills/run accepts only skill identifiers present in the live
+      graph.json skill leaves or an explicit allowlist file. Arbitrary command
+      strings, path traversal, and shell metacharacters are rejected, with a
+      test per rejection class.
+  - id: streaming-run
+    criterion: >
+      One real low-risk skill run streams its output into the UI over SSE or
+      WebSocket and the stream closes cleanly carrying the process exit status,
+      cited with the run id and the command line actually executed.
+  - id: deck-drives-run
+    criterion: >
+      The skills deck lists real skills from the live graph and its model and
+      effort selections demonstrably reach the executor invocation — the cited
+      command line reflects the selected values.
+  - id: exposure-bounded
+    criterion: >
+      The API binds to localhost by default, and any exposure beyond localhost
+      is a separately recorded human decision rather than a default.
+
+constraints:
+  - No run path may be implemented before the executor decision is recorded.
+  - Never execute a skill name that did not come from the allowlisted set, even if the UI sent it.
+  - Concurrency and resource limits for runs are stated explicitly, even if the stated limit is one at a time.
+
+allowed_execution_modes:
+  - agent
+  - human
+
+required_artifacts:
+  - API server + route tests including rejection cases
+  - skills deck component + tests
+  - transcript of one real streamed run
+  - result-summary.md
+
+status: pending
+priority: high
+
+unlocks:
+  - m7-daily-driver-rollout

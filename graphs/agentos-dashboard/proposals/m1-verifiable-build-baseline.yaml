@@ -1,0 +1,65 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: m1-verifiable-build-baseline
+title: "Milestone 1 — verifiable build baseline: contract in the app repo, one test command"
+type: milestone
+
+why: >
+  Nine of the twelve charted nodes require "component + tests", but
+  /Users/sab-mini/repos/agentos-dashboard has no test runner (package.json
+  declares only dev/build/preview) and no test files. The graph.json contract
+  the app must consume — 02-graph.schema.json and 02-schema-validator.py —
+  lives in the graph's evidence/ directory, not in the app repo, so the app
+  cannot import or enforce it. Until both gaps close, every downstream
+  acceptance criterion is prose-only and the deterministic verification lane
+  has nothing to run.
+
+depends_on:
+  - scope-contract
+
+acceptance_criteria:
+  - id: contract-in-repo
+    criterion: >
+      The graph.json JSON Schema and its validator live inside the app repo as
+      the app's single canonical contract, sourced from and citing
+      graphs/agentos-dashboard/evidence/02-graph.schema.json. Watcher and
+      frontend validate against that one file; no second copy of the schema is
+      created.
+  - id: test-command
+    criterion: >
+      package.json exposes a test script that runs and reports pass/fail, and
+      both it and the production build pass from a clean checkout. Both exact
+      commands are recorded in the app README so any executor and the evaluator
+      can run the same gate.
+  - id: fixture-validates
+    criterion: >
+      A committed fixture graph.json (evidence/02-sample-graph.json is an
+      acceptable starting point) validates against the in-repo schema through
+      the test command, so "renders from graph.json" is mechanically checkable
+      in every downstream milestone.
+  - id: repo-home-decided
+    criterion: >
+      The app repo's push target is a recorded human decision — a named remote
+      or an explicit local-only decision with the reason. Today the repo has no
+      remote and two commits exist only on this machine.
+
+constraints:
+  - No product features in this milestone — verification substrate and contract placement only.
+  - Do not fork the schema; one canonical file, cited from both repos.
+  - Do not add a graph rendering library here; that dependency belongs to the milestone that uses it.
+
+allowed_execution_modes:
+  - agent
+  - human
+
+required_artifacts:
+  - in-repo graph schema + validator
+  - test and build command output
+  - result-summary.md
+
+status: pending
+priority: high
+
+unlocks:
+  - m2-live-topology-slice
