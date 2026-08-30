@@ -1,0 +1,53 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: milestone-02-executor-event-projection
+title: Project the canonical executor event spool into the hub database
+type: milestone
+
+why: "This is the actual missing half of tracing. The existing four nodes projected pi's own observability streams (sessions, subagents, tools, artifacts, instances, hooks) and GDDP verdict receipts, but they never touched the one surface that records what an executor actually did during an attempt: the canonical ExecutorEvent spool. gddp-runtime scripts/adapters/executor_events.py defines a normalized seven-type vocabulary (session_started, turn_started, assistant_message, tool_started, tool_completed, usage, turn_ended) with a stable envelope of v, ts, executor, session_id, turn_id, seq, type, raw_type, plus TurnUsage carrying input/output/cache tokens and cost at message or turn scope. Every attempt under jobs/local-subprocess-spool/ already writes that stream to events.jsonl next to command.json, packet.json, exit.json, result.json, worktree_path, and prompt_cache_report.json — the layout owned by scripts/runtime/local_attempt.py AttemptPaths. That is per-phase status and cost, already executor-neutral, already on disk, and currently invisible to every hub surface. Node-04 ingested verdicts; this node ingests the work that produced them, so a trace becomes possible rather than just a verdict list."
+
+depends_on:
+  - milestone-01-land-projection-plane
+
+acceptance_criteria:
+  - id: events-projected
+    criterion: "the projector reads an attempt's events.jsonl and lands its events in the hub database keyed by executor, session_id, turn_id, and seq, with a monotonic cursor column so a reader can resume"
+  - id: vocabulary-not-reinvented
+    criterion: "the projected schema uses only the canonical event types and field names from gddp-runtime scripts/adapters/executor_events.py; the report shows that no provider-native event name or harness-specific spelling appears in any column or value except where the vocabulary itself preserves it as raw_type"
+  - id: vocabulary-drift-check
+    criterion: "the ingester carries a check that fails loudly when the upstream vocabulary in gddp-runtime changes (for example a recorded set of event types and envelope keys compared against the source file at run time), and the report shows the check passing and shows its output when fed a deliberately altered fixture"
+  - id: usage-scope-preserved
+    criterion: "usage rows preserve the scope field and the report shows that message-scope and turn-scope usage are never summed together; when an attempt reports no usage the projection stores absence, not zero, and the report shows one such case"
+  - id: attempt-metadata-linked
+    criterion: "each projected trace links to its attempt-level facts read from the spool dir (command.json, packet.json, exit.json, result.json, worktree_path) using the AttemptPaths file names, and the report maps each stored field to its source file"
+  - id: counts-reconciled
+    criterion: "the report names at least one real attempt directory under /Users/sab-mini/repos/gddp-runtime/jobs/local-subprocess-spool/ and reconciles projected row counts per event type against a direct count of that attempt's events.jsonl"
+  - id: idempotent
+    criterion: "a second consecutive ingestion of the same attempt inserts zero new rows, and the report shows the rerun evidence"
+  - id: report-exists
+    criterion: "reports/pi-hub-projection/milestone-02-executor-event-projection.md exists with the schema DDL, the source-to-column mapping, the drift-check design, and the count, absence, and idempotency evidence"
+
+constraints:
+  - Create and modify files only inside /Users/sab-mini/.pi
+  - Read the gddp-runtime spool in place and read-only; never write into /Users/sab-mini/repos/gddp-runtime, and never invoke gddp CLI commands or scripts/jobs_status.py
+  - Extend the existing projection database and codebase landed by milestone-01; do not build a parallel pipeline or a second database
+  - python3 stdlib only; no new dependencies and no pip installs
+  - The event vocabulary is authoritative in gddp-runtime scripts/adapters/executor_events.py; if you mirror any of it into ~/.pi, record the source path in a comment and back it with the drift check rather than letting the copy diverge silently
+  - Do not modify harness/pi-hub-rs or harness/tui in this node; this node is projection only, no rendering
+  - Never run git add -A; stage only files this node created or changed
+  - Commit all work on this node's result ref per the executor contract
+
+allowed_execution_modes:
+  - droid
+
+required_artifacts:
+  - reports/pi-hub-projection/milestone-02-executor-event-projection.md
+
+status: pending
+priority: high
+
+unlocks:
+  - milestone-03-one-attempt-trace-view
+  - milestone-04-redaction-boundary
+  - milestone-06-single-refresh-entrypoint

@@ -1,0 +1,48 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: milestone-01-land-projection-plane
+title: Land the evaluator-passed projection plane on a reviewable integration branch
+type: milestone
+
+why: "All four existing nodes (node-01 through node-04) carry evaluator verdict pass, yet none of their code exists on ~/.pi main. project.py, api.py, the receipts ingester, and harness/apps/pi-hub-web live only on unmerged refs/heads/gddp/result-* branches; git cat-file main:agent/observability/project.py fails, and harness/apps does not exist in the worktree. Two compounding facts make this worse than ordinary unmerged work. First, .pi/.gitignore line 81 ignores agent/observability/ wholesale, so project.py and api.py were force-added into a directory that normal staging will never pick up again — code is living inside a runtime-state directory. Second, main has moved on since 2026-08-06 (HEAD d605fab and four later commits), so the merge is no longer trivial. Every milestone after this one builds on those components. Until they are on one branch that a human can read, run, and merge, the projection plane is evidence of past agent work rather than a surface anyone can use. This node produces that branch and the operator's landing decision material; the merge to main remains the human's act."
+
+depends_on: []
+
+acceptance_criteria:
+  - id: refs-inventoried
+    criterion: "the report inventories every refs/heads/gddp/result-* and refs/heads/gddp/attempt-* branch in ~/.pi that carries pi-hub-projection work, mapping each to its node_id, job_id, commit SHA, and the exact file list it contributes"
+  - id: integration-branch-exists
+    criterion: "one integration branch in ~/.pi contains all four components (projector, cursor API, receipts ingester, pi-hub-web fork) together, and the report names the branch and its head SHA"
+  - id: code-out-of-ignored-path
+    criterion: "python code no longer lives under the gitignored agent/observability/ tree; it sits on a tracked path (agent/scripts/ already holds pi-observe.py and is tracked) with agent/observability/ left as pure runtime state, and the report shows git check-ignore proving no component file is ignored and no git add -f is needed"
+  - id: conflict-report
+    criterion: "the report states, per component, what conflicted with current main and how it was resolved, or states explicitly that a component applied cleanly"
+  - id: self-checks-run-on-host
+    criterion: "each component's own self-check is executed on this host from the integration branch and its output is captured verbatim in the report; a component with no self-check is named as such rather than silently skipped"
+  - id: per-component-recommendation
+    criterion: "the report gives one recommendation per component — land, land with the named changes, or drop — each with a reason, so the operator can decide component by component instead of all-or-nothing"
+  - id: report-exists
+    criterion: "reports/pi-hub-projection/milestone-01-land-projection-plane.md exists and contains the ref inventory, branch name and SHA, ignore-path evidence, conflict resolution, and self-check output"
+
+constraints:
+  - Create and modify files only inside /Users/sab-mini/.pi
+  - Do not merge or push to main; the merge into main is the operator's act and this node delivers the integration branch plus the landing report only
+  - Never force-push, rewrite history, or delete any refs/heads/gddp/* branch; those refs are the only copy of the evaluated work
+  - Never run git add -A; stage only files this node moves or changes
+  - Moving code off the gitignored path is a path change only; do not rewrite component behavior in this node, and record any behavior change you were forced to make
+  - python3 stdlib only for anything you touch in the projector or API; do not add dependencies
+  - Commit all work on this node's result ref per the executor contract
+
+allowed_execution_modes:
+  - droid
+  - human
+
+required_artifacts:
+  - reports/pi-hub-projection/milestone-01-land-projection-plane.md
+
+status: pending
+priority: critical
+
+unlocks:
+  - milestone-02-executor-event-projection
