@@ -4687,7 +4687,9 @@ def _render_single(info: dict, now: float) -> None:
         print("\n".join(f"  {e}" for e in events))
     else:
         print("  (none)")
-    print("\n  live stream:  tail -F " + str(info.get("events_path") or (info["dir"] / "events.jsonl")))
+    target_name = info['node_id'] or info['name']
+    print(f"\n  direct stream: gddp watch {target_name} --stream")
+    print("  raw events:    tail -F " + str(info.get("events_path") or (info["dir"] / "events.jsonl")))
 
 
 def cmd_watch(args) -> int:
@@ -4703,6 +4705,38 @@ def cmd_watch(args) -> int:
         print(f"no spool at {spool}; nothing has run yet", file=sys.stderr)
         print("  live needs a local-subprocess spool from gddp-runtime.", file=sys.stderr)
         return 1
+    stream = bool(getattr(args, "stream", False))
+    if stream:
+        attempts = _scan_attempts(spool)
+        if args.target:
+            info = _find_attempt(attempts, args.target)
+            if info is None:
+                info = _find_attempt(_scan_attempts(spool), args.target)
+            if info is None:
+                print(f"no attempt matching {args.target!r}", file=sys.stderr)
+                return 1
+        else:
+            running = [a for a in attempts if a["state"] == "running"]
+            if len(running) == 1:
+                info = running[0]
+            elif len(attempts) == 1:
+                info = attempts[0]
+            elif not attempts:
+                print("no attempts in spool to stream", file=sys.stderr)
+                return 1
+            else:
+                print("multiple runs active; specify target: gddp watch <target> --stream", file=sys.stderr)
+                return 1
+
+        events_path = info.get("events_path") or (info["dir"] / "events.jsonl")
+        events_str = str(events_path)
+        print(f"Streaming events for {info['node_id'] or info['name']} ({events_str}):\n")
+        try:
+            os.execvp("tail", ["tail", "-f", "-n", "+1", events_str])
+        except OSError as exc:
+            print(f"could not exec tail: {exc}", file=sys.stderr)
+            return 1
+
     tty = sys.stdout.isatty()
     running_only = not bool(getattr(args, "all", False))
     project = getattr(args, "project", None) or None
@@ -4907,6 +4941,17 @@ def cmd_runs(args) -> int:
     target = info.get("job_id") or info.get("node_id") or info["name"]
     # Optional action via env or second mode later; default = live watch.
     action = (getattr(args, "action", None) or "watch").strip().lower()
+    if action in {"stream"}:
+        return cmd_watch(
+            argparse.Namespace(
+                target=target,
+                stream=True,
+                interval=float(getattr(args, "interval", 2.0) or 2.0),
+                once=bool(getattr(args, "once", False)),
+                all=True,
+                project=getattr(args, "project", None),
+            )
+        )
     if action in {"events", "tail", "e"}:
         events = info.get("events_path") or str(Path(attempt_dir) / "events.jsonl")
         print(f"tail -F {events}")
@@ -4922,14 +4967,16 @@ def cmd_runs(args) -> int:
         print(info.get("events_path") or "")
         return 0
 
+    is_stream = bool(getattr(args, "stream", False)) or action == "stream"
     # Default: enter live single-target watch (same as agent-runs → open).
     return cmd_watch(
         argparse.Namespace(
             target=target,
+            stream=is_stream,
             interval=float(getattr(args, "interval", 2.0) or 2.0),
             once=bool(getattr(args, "once", False)),
             all=True,  # single target: allow done attempts too
-            project=None,
+            project=getattr(args, "project", None),
         )
     )
 
@@ -6059,6 +6106,12 @@ def main(argv=None):
         help="node id, job id, or attempt-dir prefix; omit for fleet",
     )
     watch_p.add_argument(
+        "-f",
+        "--stream",
+        action="store_true",
+        help="stream events live (tail -f -n +1 events.jsonl) instead of status dashboard",
+    )
+    watch_p.add_argument(
         "--interval", type=float, default=2.0, help="refresh seconds (default 2)"
     )
     watch_p.add_argument("--once", action="store_true", help="render once and exit")
@@ -6075,6 +6128,12 @@ def main(argv=None):
     runs_p = sub.add_parser(
         "runs",
         help="fzf picker over attempts (agent-runs style); Enter → gddp watch",
+    )
+    runs_p.add_argument(
+        "-f",
+        "--stream",
+        action="store_true",
+        help="stream events live after picking (alias for --action stream)",
     )
     runs_p.add_argument(
         "--all",
@@ -6096,7 +6155,7 @@ def main(argv=None):
     runs_p.add_argument(
         "--action",
         default="watch",
-        choices=("watch", "events", "show", "path"),
+        choices=("watch", "events", "stream", "show", "path"),
         help="after pick: watch (default), events (tail -F), show (jobs show), path",
     )
     runs_p.add_argument(

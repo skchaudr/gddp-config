@@ -968,6 +968,35 @@ class OverviewTests(unittest.TestCase):
         self.assertIn("live/watch unavailable", joined)
         self.assertIn("GDDP_RUNTIME_ROOT", joined)
 
+    def test_cmd_watch_stream_execs_tail(self):
+        tmp_runtime = Path(tempfile.mkdtemp())
+        (tmp_runtime / "scripts").mkdir(parents=True)
+        (tmp_runtime / "scripts" / "jobs_status.py").write_text("# mock")
+        spool = tmp_runtime / "jobs" / "local-subprocess-spool"
+        spool.mkdir(parents=True)
+        attempt_dir = spool / "20260329-120000-node-test-attempt"
+        attempt_dir.mkdir(parents=True)
+        (attempt_dir / "packet.json").write_text('{"node_id": "node-test", "job_id": "job-test"}')
+        events_file = attempt_dir / "events.jsonl"
+        events_file.write_text('{"type": "init"}\n')
+
+        ns = argparse.Namespace(
+            target="node-test",
+            stream=True,
+            interval=2.0,
+            once=False,
+            all=False,
+            project=None,
+        )
+
+        with patch.dict(os.environ, {"GDDP_RUNTIME_ROOT": str(tmp_runtime)}, clear=False), \
+                patch("os.execvp") as mock_execvp:
+            rc = gddp.cmd_watch(ns)
+            mock_execvp.assert_called_once_with(
+                "tail",
+                ["tail", "-f", "-n", "+1", str(events_file)],
+            )
+
     def test_cmd_watch_reports_missing_runtime(self):
         missing = Path(tempfile.mkdtemp()) / "missing-runtime"
         ns = argparse.Namespace(
