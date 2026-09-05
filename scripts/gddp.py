@@ -4679,15 +4679,32 @@ def _node_in_project(project: str, node_id: str) -> bool:
         return False
 
 
-def _render_fleet(attempts: list[dict], now: float, *, running_only: bool) -> None:
-    scope = "running" if running_only else "all"
+def _render_fleet(
+    attempts: list[dict],
+    now: float,
+    *,
+    running_only: bool,
+    project: str | None = None,
+    showing_history: bool = False,
+) -> None:
+    if showing_history and project:
+        scope = f"recent · {project}"
+    elif project:
+        scope = f"running · {project}"
+    elif running_only:
+        scope = "running"
+    else:
+        scope = "all"
     print(
         f"gddp watch · {scope} — {len(attempts)} attempt(s)  "
         f"({time.strftime('%H:%M:%S')})"
     )
     if not attempts:
-        print("  (none live right now)")
-        print("  tip: gddp watch --all   ·   gddp jobs live")
+        if project:
+            print(f"  (no attempts recorded for {project})")
+        else:
+            print("  (none live right now)")
+            print("  tip: gddp watch --all   ·   gddp jobs live")
         return
     print(
         f"{'NODE':34} {'STATE':8} {'AGE':>7} {'DIFF':>22} {'QUIET':>6}  JOB"
@@ -4781,11 +4798,13 @@ def cmd_watch(args) -> int:
     tty = sys.stdout.isatty()
     running_only = not bool(getattr(args, "all", False))
     project = getattr(args, "project", None) or None
+    fallback_all = bool(getattr(args, "fallback_all_when_empty", False))
     try:
         while True:
-            attempts = _discover_attempts(runtime_root)
+            all_attempts = _discover_attempts(runtime_root)
+            showing_history = False
             if args.target:
-                info = _find_attempt(attempts, args.target)
+                info = _find_attempt(all_attempts, args.target)
                 if info is None:
                     # Retry against unfiltered spool names even if done.
                     info = _find_attempt(_discover_attempts(runtime_root), args.target)
@@ -4794,15 +4813,31 @@ def cmd_watch(args) -> int:
                     return 1
             else:
                 attempts = _filter_attempts(
-                    attempts, running_only=running_only, project=project
+                    all_attempts, running_only=running_only, project=project
                 )
+                if (
+                    running_only
+                    and project
+                    and fallback_all
+                    and not attempts
+                ):
+                    attempts = _filter_attempts(
+                        all_attempts, running_only=False, project=project
+                    )
+                    showing_history = bool(attempts)
             if tty and not args.once:
                 sys.stdout.write("\033[2J\033[H")
             now = time.time()
             if args.target:
                 _render_single(info, now)
             else:
-                _render_fleet(attempts, now, running_only=running_only)
+                _render_fleet(
+                    attempts,
+                    now,
+                    running_only=running_only,
+                    project=project,
+                    showing_history=showing_history,
+                )
             if args.once or not tty:
                 return 0
             time.sleep(args.interval)
@@ -4826,6 +4861,7 @@ def interactive_watch(project: str | None = None) -> object:
         once=False,
         all=False,
         project=project,
+        fallback_all_when_empty=bool(project),
     )
     try:
         rc = cmd_watch(ns)

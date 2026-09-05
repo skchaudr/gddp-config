@@ -945,6 +945,16 @@ class OverviewTests(unittest.TestCase):
         self.assertFalse(ns.once)
         self.assertFalse(ns.all)
         self.assertIsNone(ns.project)
+        self.assertFalse(ns.fallback_all_when_empty)
+
+    def test_interactive_watch_project_enables_history_fallback(self):
+        with patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "cmd_watch", return_value=0) as watch:
+            gddp.interactive_watch("aa-hub-create")
+        ns = watch.call_args[0][0]
+        self.assertEqual(ns.project, "aa-hub-create")
+        self.assertTrue(ns.fallback_all_when_empty)
+        self.assertFalse(ns.all)
 
     def test_interactive_watch_keeps_failure_visible(self):
         with patch.object(gddp, "_clear_screen"), \
@@ -2426,6 +2436,98 @@ class AttemptDiscoveryTests(unittest.TestCase):
             )
         )
         return directory
+
+    def _attempt_done(self, root: Path, name: str, node_id: str = "nav-input-repair") -> Path:
+        directory = self._attempt(root, name, node_id)
+        (directory / "result.json").write_text("{}")
+        return directory
+
+    def _watch_env(self, runtime: Path) -> dict[str, str]:
+        return {
+            k: v
+            for k, v in os.environ.items()
+            if k
+            not in {
+                "GDDP_CURSOR_CLI_SPOOL_DIR",
+                "GDDP_PI_RPC_SPOOL_DIR",
+                "GDDP_ATTEMPT_SPOOL_DIR",
+                "GDDP_LOCAL_SUBPROCESS_SPOOL_DIR",
+                "GDDP_RUNTIME_ROOT",
+            }
+        } | {"GDDP_RUNTIME_ROOT": str(runtime)}
+
+    def test_cmd_watch_project_fallback_shows_terminal_attempts(self):
+        with tempfile.TemporaryDirectory() as raw:
+            runtime = self._runtime(Path(raw))
+            spool = runtime / "jobs" / "cursor-cli-spool"
+            self._attempt_done(spool, "job_done-attempt-1", node_id="node-a")
+            self._attempt_done(spool, "job_done-attempt-2", node_id="node-b")
+            self._attempt_done(spool, "job_done-attempt-3", node_id="node-c")
+            ns = argparse.Namespace(
+                target=None,
+                interval=2.0,
+                once=True,
+                all=False,
+                project="aa-hub-create",
+                fallback_all_when_empty=True,
+            )
+            out = StringIO()
+            out.isatty = lambda: False
+            with patch.dict(os.environ, self._watch_env(runtime), clear=True), \
+                    patch.object(gddp.sys, "stdout", out):
+                rc = gddp.cmd_watch(ns)
+            body = out.getvalue()
+            self.assertEqual(rc, 0)
+            self.assertIn("recent · aa-hub-create", body)
+            self.assertIn("3 attempt(s)", body)
+            self.assertIn("node-a", body)
+            self.assertIn("node-b", body)
+            self.assertIn("node-c", body)
+
+    def test_cmd_watch_top_level_live_only_hides_terminal(self):
+        with tempfile.TemporaryDirectory() as raw:
+            runtime = self._runtime(Path(raw))
+            spool = runtime / "jobs" / "cursor-cli-spool"
+            self._attempt_done(spool, "job_done-attempt-9", node_id="node-z")
+            ns = argparse.Namespace(
+                target=None,
+                interval=2.0,
+                once=True,
+                all=False,
+                project=None,
+            )
+            out = StringIO()
+            out.isatty = lambda: False
+            with patch.dict(os.environ, self._watch_env(runtime), clear=True), \
+                    patch.object(gddp.sys, "stdout", out):
+                rc = gddp.cmd_watch(ns)
+            body = out.getvalue()
+            self.assertEqual(rc, 0)
+            self.assertIn("none live right now", body)
+            self.assertNotIn("node-z", body)
+
+    def test_cmd_watch_project_empty_state_is_explicit(self):
+        with tempfile.TemporaryDirectory() as raw:
+            runtime = self._runtime(Path(raw))
+            spool = runtime / "jobs" / "cursor-cli-spool"
+            spool.mkdir(parents=True)
+            ns = argparse.Namespace(
+                target=None,
+                interval=2.0,
+                once=True,
+                all=False,
+                project="aa-hub-create",
+                fallback_all_when_empty=True,
+            )
+            out = StringIO()
+            out.isatty = lambda: False
+            with patch.dict(os.environ, self._watch_env(runtime), clear=True), \
+                    patch.object(gddp.sys, "stdout", out):
+                rc = gddp.cmd_watch(ns)
+            body = out.getvalue()
+            self.assertEqual(rc, 0)
+            self.assertIn("no attempts recorded for aa-hub-create", body)
+            self.assertNotIn("none live right now", body)
 
     def test_watch_finds_cursor_attempt_without_cursor_env(self):
         with tempfile.TemporaryDirectory() as raw:
