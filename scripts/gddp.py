@@ -4386,16 +4386,27 @@ def interactive_menu():
 # worktree_path, events.jsonl, result.json. watch never writes; steer appends
 # one line to steer.jsonl, which the steer-aware supervisor drains.
 
-def _spool_root(runtime_root: Path) -> Path:
-    configured = os.environ.get("GDDP_PI_RPC_SPOOL_DIR") or os.environ.get(
-        "GDDP_LOCAL_SUBPROCESS_SPOOL_DIR"
-    )
-    root = (
-        Path(configured).expanduser()
-        if configured
-        else runtime_root / "jobs" / "local-subprocess-spool"
-    )
-    return root.resolve()
+def _spool_roots(runtime_root: Path) -> list[Path]:
+    """Return unique configured attempt spools across executor families."""
+    configured = [
+        os.environ.get("GDDP_PI_RPC_SPOOL_DIR"),
+        os.environ.get("GDDP_CURSOR_CLI_SPOOL_DIR"),
+        os.environ.get("GDDP_LOCAL_SUBPROCESS_SPOOL_DIR"),
+    ]
+    roots: list[Path] = []
+    seen: set[Path] = set()
+    for raw in configured:
+        if not raw:
+            continue
+        path = Path(raw).expanduser().resolve()
+        if path in seen:
+            continue
+        seen.add(path)
+        roots.append(path)
+    default = (runtime_root / "jobs" / "local-subprocess-spool").resolve()
+    if default not in seen:
+        roots.append(default)
+    return roots
 
 
 def _attempt_info(attempt_dir: Path) -> dict | None:
@@ -4472,6 +4483,21 @@ def _scan_attempts(spool: Path) -> list[dict]:
             info = _attempt_info(child)
             if info:
                 found.append(info)
+    order = {"running": 0, "done": 1, "dead": 2}
+    found.sort(key=lambda a: (order[a["state"]], -a["created"]))
+    return found
+
+
+def _scan_attempts_roots(spools: list[Path]) -> list[dict]:
+    found: list[dict] = []
+    seen_dirs: set[str] = set()
+    for spool in spools:
+        for info in _scan_attempts(spool):
+            key = str(info["dir"])
+            if key in seen_dirs:
+                continue
+            seen_dirs.add(key)
+            found.append(info)
     order = {"running": 0, "done": 1, "dead": 2}
     found.sort(key=lambda a: (order[a["state"]], -a["created"]))
     return found
@@ -4698,22 +4724,23 @@ def cmd_watch(args) -> int:
         print(f"ERROR: live/watch unavailable: {exc}", file=sys.stderr)
         print("  Set GDDP_RUNTIME_ROOT to a gddp-runtime checkout.", file=sys.stderr)
         return 2
-    spool = _spool_root(runtime_root)
-    if not spool.is_dir():
-        print(f"no spool at {spool}; nothing has run yet", file=sys.stderr)
-        print("  live needs a local-subprocess spool from gddp-runtime.", file=sys.stderr)
+    spools = _spool_roots(runtime_root)
+    if not any(spool.is_dir() for spool in spools):
+        joined = ", ".join(str(s) for s in spools)
+        print(f"no attempt spools found; checked: {joined}", file=sys.stderr)
+        print("  set executor spool env vars in gddp.env, then rerun.", file=sys.stderr)
         return 1
     tty = sys.stdout.isatty()
     running_only = not bool(getattr(args, "all", False))
     project = getattr(args, "project", None) or None
     try:
         while True:
-            attempts = _scan_attempts(spool)
+            attempts = _scan_attempts_roots(spools)
             if args.target:
                 info = _find_attempt(attempts, args.target)
                 if info is None:
                     # Retry against unfiltered spool names even if done.
-                    info = _find_attempt(_scan_attempts(spool), args.target)
+                    info = _find_attempt(_scan_attempts_roots(spools), args.target)
                 if info is None:
                     print(f"no attempt matching {args.target!r}", file=sys.stderr)
                     return 1
@@ -4841,15 +4868,16 @@ def cmd_runs(args) -> int:
         return _print_attempt_preview(Path(preview_dir))
 
     runtime_root = resolve_runtime_root()
-    spool = _spool_root(runtime_root)
-    if not spool.is_dir():
-        print(f"no spool at {spool}; nothing has run yet", file=sys.stderr)
+    spools = _spool_roots(runtime_root)
+    if not any(spool.is_dir() for spool in spools):
+        joined = ", ".join(str(s) for s in spools)
+        print(f"no attempt spools found; checked: {joined}", file=sys.stderr)
         return 1
 
     running_only = not bool(getattr(args, "all", False))
     project = getattr(args, "project", None) or None
     attempts = _filter_attempts(
-        _scan_attempts(spool),
+        _scan_attempts_roots(spools),
         running_only=running_only,
         project=project,
     )
@@ -4936,7 +4964,7 @@ def cmd_runs(args) -> int:
 
 def cmd_steer(args) -> int:
     runtime_root = resolve_runtime_root()
-    attempts = _scan_attempts(_spool_root(runtime_root))
+    attempts = _scan_attempts_roots(_spool_roots(runtime_root))
     info = _find_attempt(attempts, args.target)
     if info is None:
         print(f"no attempt matching {args.target!r}", file=sys.stderr)
