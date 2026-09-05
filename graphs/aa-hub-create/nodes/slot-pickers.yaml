@@ -1,0 +1,57 @@
+schema_version: '1.0'
+schema_type: node
+node_id: slot-pickers
+title: Per-slot pickers with filter, typed fallback, and live slug
+type: capability
+why: >-
+  PRD §4.4: the stage is the card body; only bracketed spans are pickable.
+  Each blank is a picker with a typed escape. Slug and PACKET task must
+  track fills so brackets clear as slots fill.
+goal: >-
+  Open a dedicated picker per slot; fuzzy-find over presets via `/`; accept
+  typed entry with ctrl+enter; derive slug live; clear [brackets] in the
+  brief and PACKET task as slots fill (PRD §4.3 / §4.4).
+depends_on:
+- verb-and-card
+acceptance_criteria:
+- id: each-slot-own-picker
+  criterion: >-
+    Enter on each bracket opens its overlay: `SLOT · SCOPE` for
+    `[ which subsystem ]`, `SLOT · QUESTION` for `[ how / why ]`,
+    `SLOT · CONTEXT` for `[ extra context ]` (PRD §4.4; hub-rs/examples/aa-slots-template-2.png,
+    hub-rs/examples/aa-slots-template-1.png, hub-rs/examples/aa-slots-template-3.png).
+- id: fuzzy-filter
+  criterion: >-
+    Each slot overlay offers `/ filter, or type your own` over the
+    pre-selected values shown on those frames (PRD §3.5).
+- id: typed-ctrl-enter
+  criterion: >-
+    Overlay chrome includes `ctrl+enter use typed text`; a typed line
+    commits as the slot value (PRD §3.5; same three slot frames).
+- id: live-slug
+  criterion: >-
+    Filling SCOPE with `hub-rs/src` updates PACKET slug to
+    `explain-subsystem-hub-rs-src` (PRD §4.4, §7.C; hub-rs/examples/aa-slots-all-3.png).
+- id: brackets-clear
+  criterion: >-
+    After the three slots are filled, the center brief and PACKET `task`
+    match the filled markdown on hub-rs/examples/aa-slots-all-3.png with
+    leftover `[brackets]` gone (PRD §4.4, §7.C).
+- id: answer-shape-frozen
+  criterion: >-
+    `## Answer shape` stays instructional prose and has no picker
+    (PRD §4.4).
+constraints:
+- Work is in the aa-cli repo, hub-rs crate (Rust / ratatui).
+- Scope is PATH stage slots (PRD §4.4). Dispatch FIELD modals and fire belong to later nodes.
+- Run `cargo test` in hub-rs before claiming the node done.
+- Graph YAML and runtime databases stay unmodified; leave product changes as working-tree edits so the runtime persists results.
+allowed_execution_modes:
+- cursor_cli
+required_artifacts:
+- hub-rs/src/wizard/create.rs
+- hub-rs/src/ui/pick.rs
+status: pending
+priority: high
+unlocks:
+- dispatch-fields

@@ -1,0 +1,47 @@
+schema_version: '1.0'
+schema_type: node
+node_id: nav-input-repair
+title: Repair Create input so the five-stage walk is traversable
+type: capability
+why: >-
+  Operator report: the Create walk renders and only fires; movement and
+  selection are dead. Later nodes cannot be evaluated until the walk is
+  operable. This is the workable baseline — PRD keymap live on every PATH
+  stage — so verb/card/slots/dispatch/fire work has a surface to judge.
+goal: >-
+  Restore end-to-end Create traversal under the PRD keymap (arrows/tab/enter/esc,
+  digits 1-5 stage jump, ? help) so an operator can walk verb → card → slots
+  → dispatch → fire and back. Baseline operability only.
+depends_on: []
+acceptance_criteria:
+- id: create-opens-on-verb
+  criterion: >-
+    Create opens on PATH stage 1 verb with focus in the verb list (PRD §4.1,
+    §7.A; hub-rs/examples/aa-verb-nvim.png). Fire is a later stage reached
+    by walking or jumping, never the landing screen.
+- id: keymap-live
+  criterion: >-
+    On the Create surface, arrows (and j/k), tab, enter, esc, digits 1-5,
+    and ? each produce a visible stage, selection, or help change (PRD §3.7,
+    §7.F). Input is live on every PATH stage; the walk is operable.
+- id: walk-and-back
+  criterion: >-
+    An operator can advance verb → card → slots → dispatch → fire and return
+    via esc (PRD §4 walk, §7.F). Each of the five PATH labels is reachable.
+- id: hub-rs-cargo-test
+  criterion: >-
+    `cargo test` in hub-rs exits 0 after the repair.
+constraints:
+- Work is in the aa-cli repo, hub-rs crate (Rust / ratatui).
+- Repair is scoped to workable baseline only; visual polish and stage-faithful product work belong to later nodes.
+- Run `cargo test` in hub-rs before claiming the node done.
+- Graph YAML and runtime databases stay unmodified; leave product changes as working-tree edits so the runtime persists results.
+allowed_execution_modes:
+- cursor_cli
+required_artifacts:
+- hub-rs/src/keymap.rs
+- hub-rs/src/wizard/create.rs
+status: ready
+priority: high
+unlocks:
+- verb-and-card

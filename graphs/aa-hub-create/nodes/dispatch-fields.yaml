@@ -1,0 +1,53 @@
+schema_version: '1.0'
+schema_type: node
+node_id: dispatch-fields
+title: Dispatch FIELD modals with live PACKET YAML
+type: capability
+why: >-
+  PRD §4.5: dispatch is packet knobs, not extra PATH stops. Each field
+  opens the same overlay family. PACKET column 3 must update on the
+  committing keystroke so the YAML is the contract being built.
+goal: >-
+  Present target, mode, cwd, paths, and verify as FIELD modals; keep
+  PACKET YAML in column 3 in lockstep with each commit (PRD §4.4 / §4.5).
+depends_on:
+- slot-pickers
+acceptance_criteria:
+- id: dispatch-field-list
+  criterion: >-
+    Center is `4 · DISPATCH` with rows for `target`, `mode`, `cwd`,
+    `paths`, and `verify` (PRD §4.5; hub-rs/examples/aa-slots-agents.png).
+    `mutations` is derived from `mode` and is absent as a field (PRD §4.5).
+- id: field-modals
+  criterion: >-
+    Enter on a row opens `FIELD · TARGET` / `FIELD · MODE` / `FIELD · CWD` /
+    `FIELD · PATHS` / `FIELD · VERIFY` with the choice sets in PRD §4.5
+    (hub-rs/examples/aa-slots-agents.png, aa-agents-modes.png,
+    aa-fire-paths.png, aa-verify-option.png). CWD uses the same overlay
+    family; PRD §4.5 lists it even though no CWD frame is in the set.
+- id: live-packet-yaml
+  criterion: >-
+    Committing a change to target, mode, cwd, paths, or verify updates the
+    PACKET YAML in column 3 on that keystroke (PRD §3.4, §4.5, §7.D).
+- id: verify-may-be-empty
+  criterion: >-
+    Selecting `(none — human review)` leaves `verify: []` (PRD §4.5–4.6,
+    §7.D; hub-rs/examples/aa-verify-option.png).
+- id: paths-catalog
+  criterion: >-
+    `FIELD · PATHS` offers the same catalog as `SLOT · SCOPE` (`.`,
+    `hub-rs/src`, `hub-rs/src/app.rs`, `bin/aa, lib/`, `schema/`,
+    `docs/tui-pass`) (PRD §4.5; hub-rs/examples/aa-fire-paths.png).
+constraints:
+- Work is in the aa-cli repo, hub-rs crate (Rust / ratatui).
+- Scope is PATH stage dispatch (PRD §4.5). Fire well-formed recap and ledger write belong to fire-and-ledger.
+- Run `cargo test` in hub-rs before claiming the node done.
+- Graph YAML and runtime databases stay unmodified; leave product changes as working-tree edits so the runtime persists results.
+allowed_execution_modes:
+- cursor_cli
+required_artifacts:
+- hub-rs/src/wizard/create.rs
+status: pending
+priority: high
+unlocks:
+- fire-and-ledger
