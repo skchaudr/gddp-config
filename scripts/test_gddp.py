@@ -755,13 +755,7 @@ class OverviewTests(unittest.TestCase):
         with patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp")), \
                 patch.object(
                     gddp,
-                    "_spool_root",
-                    return_value=Path("/tmp/spool"),
-                ), \
-                patch.object(Path, "is_dir", return_value=True), \
-                patch.object(
-                    gddp,
-                    "_scan_attempts",
+                    "_discover_attempts",
                     return_value=[{
                         "dir": Path("/tmp/spool/a"),
                         "name": "a",
@@ -776,6 +770,9 @@ class OverviewTests(unittest.TestCase):
                         "pid": 1,
                     }],
                 ), \
+                patch.object(gddp, "_spool_roots", return_value=[Path("/tmp/spool")]), \
+                patch.object(gddp, "_recorded_attempt_dirs", return_value=[]), \
+                patch.object(Path, "is_dir", return_value=True), \
                 patch.object(gddp, "_diff_summary", return_value=("0f +0/-0", 0)), \
                 patch("sys.stdout", new_callable=StringIO) as out:
             rc = gddp.cmd_runs(argparse.Namespace(
@@ -2407,6 +2404,108 @@ class PagerPageViewTests(unittest.TestCase):
             gddp.console._force_terminal = None
         self.assertEqual(result, "x")
         self.assertEqual(rendered, [1])
+
+
+class AttemptDiscoveryTests(unittest.TestCase):
+    def _runtime(self, tmp: Path) -> Path:
+        scripts = tmp / "scripts"
+        scripts.mkdir()
+        (scripts / "jobs_status.py").write_text("# stub\n")
+        return tmp
+
+    def _attempt(self, root: Path, name: str, node_id: str = "nav-input-repair") -> Path:
+        directory = root / name
+        directory.mkdir(parents=True)
+        (directory / "packet.json").write_text(
+            json.dumps(
+                {
+                    "job_id": f"job-{name[-8:]}",
+                    "node_id": node_id,
+                    "project_id": "aa-hub-create",
+                }
+            )
+        )
+        return directory
+
+    def test_watch_finds_cursor_attempt_without_cursor_env(self):
+        with tempfile.TemporaryDirectory() as raw:
+            runtime = self._runtime(Path(raw))
+            historical = runtime / "jobs" / "cursor-cli-spool"
+            self._attempt(historical, "job_cursor-attempt-0-deadbeef")
+            env = {
+                k: v
+                for k, v in os.environ.items()
+                if k
+                not in {
+                    "GDDP_CURSOR_CLI_SPOOL_DIR",
+                    "GDDP_PI_RPC_SPOOL_DIR",
+                    "GDDP_ATTEMPT_SPOOL_DIR",
+                    "GDDP_LOCAL_SUBPROCESS_SPOOL_DIR",
+                    "GDDP_RUNTIME_ROOT",
+                }
+            }
+            env["GDDP_RUNTIME_ROOT"] = str(runtime)
+            ns = argparse.Namespace(
+                target=None, interval=2.0, once=True, all=True, project=None,
+            )
+            out = StringIO()
+            out.isatty = lambda: False
+            with patch.dict(os.environ, env, clear=True), \
+                    patch.object(gddp.sys, "stdout", out):
+                rc = gddp.cmd_watch(ns)
+            self.assertEqual(rc, 0)
+            self.assertIn("nav-input-repair", out.getvalue())
+            self.assertNotIn("GDDP_CURSOR_CLI_SPOOL_DIR", env)
+
+    def test_discover_uses_recorded_attempt_dir(self):
+        with tempfile.TemporaryDirectory() as raw:
+            runtime = self._runtime(Path(raw))
+            recorded = runtime / "elsewhere" / "att-recorded"
+            self._attempt(recorded.parent, "att-recorded", node_id="recorded-node")
+            db_path = runtime / "db" / "queue.db"
+            db_path.parent.mkdir()
+            con = __import__("sqlite3").connect(db_path)
+            con.execute(
+                "CREATE TABLE executor_sessions ("
+                "session_db_id TEXT, attempt_dir TEXT)"
+            )
+            con.execute(
+                "INSERT INTO executor_sessions VALUES ('ses-1', ?)",
+                (str(recorded),),
+            )
+            con.commit()
+            con.close()
+            isolated = {
+                k: v
+                for k, v in os.environ.items()
+                if k
+                not in {
+                    "GDDP_ATTEMPT_SPOOL_DIR",
+                    "GDDP_LOCAL_SUBPROCESS_SPOOL_DIR",
+                    "GDDP_CURSOR_CLI_SPOOL_DIR",
+                    "GDDP_PI_RPC_SPOOL_DIR",
+                    "GDDP_RUNTIME_ROOT",
+                }
+            }
+            with patch.dict(os.environ, isolated, clear=True):
+                attempts = gddp._discover_attempts(runtime)
+            dirs = {str(Path(item["dir"]).resolve()) for item in attempts}
+            self.assertEqual(dirs, {str(recorded.resolve())})
+            self.assertEqual([item["node_id"] for item in attempts], ["recorded-node"])
+
+    def test_spool_roots_omit_family_env_names(self):
+        with tempfile.TemporaryDirectory() as raw:
+            runtime = Path(raw)
+            env = {
+                "GDDP_CURSOR_CLI_SPOOL_DIR": str(runtime / "family-cursor"),
+                "GDDP_PI_RPC_SPOOL_DIR": str(runtime / "family-pi"),
+                "GDDP_ATTEMPT_SPOOL_DIR": str(runtime / "canonical"),
+            }
+            with patch.dict(os.environ, env, clear=False):
+                roots = gddp._spool_roots(runtime)
+            self.assertIn((runtime / "canonical").resolve(), roots)
+            self.assertNotIn((runtime / "family-cursor").resolve(), roots)
+            self.assertNotIn((runtime / "family-pi").resolve(), roots)
 
 
 class EditorCommandTests(unittest.TestCase):
