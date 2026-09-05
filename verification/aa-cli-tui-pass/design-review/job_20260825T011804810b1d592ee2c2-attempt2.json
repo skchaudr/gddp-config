@@ -1,0 +1,813 @@
+{
+  "project_id": "aa-cli-tui-pass",
+  "node_id": "design-review",
+  "verdict": "fail",
+  "criteria_verdict": "fail",
+  "integrity": {
+    "verdict": "block",
+    "intent_preserved": false,
+    "graph_integrity_preserved": false,
+    "required_human_review": true,
+    "confidence": 0.92,
+    "findings": [
+      {
+        "severity": "high",
+        "summary": "The node's core deliverable does not exist: required artifact audits/design-review.md is absent (no audits/ directory in the worktree at all), and the subject diff between attempt-1 base dfe96d0 and attempt-2 tip a98d131 contains zero files (both are empty result commits by gddp-local-agent). There is no written review record, no per-finding dispositions, no Phase-2 node set or order, and no invariant concretization to aa-cli's surfaces. The review node's intended role — the judgment step that resolves Phase-2 direction from assessed audit state — is entirely unfulfilled.",
+        "affected_node_ids": [
+          "design-review"
+        ]
+      },
+      {
+        "severity": "high",
+        "summary": "The node executed while its dependency was unfulfilled: tui-methodology-audit is status 'provisional' and its own required artifact audits/tui-methodology.md is also missing, as is the root node's inventory. The graph advanced design-review to 'ready' (frontier_auto_advance) and fired it twice without the audit findings it was designed to weigh, so any claimed completion would be baseless and would poison the milestone/audit nodes that depend on this decision record.",
+        "affected_node_ids": [
+          "design-review",
+          "tui-methodology-audit",
+          "tui-inventory-and-keymap-audit"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "Executor context drift: the harness scratch left behind (.gddp/decision.md, .gddp/result-summary.md, .gddp/patch.diff) is a decision record for a different graph's node — 'common-core' from the aa-cli pilot graph (lib/common.zsh path anchors, aa_validate_packet) — and the deterministic keyword scans likewise cite lib/common.zsh, lib/fire.zsh, etc. rather than any design-review input. The run never engaged with this node's actual subject matter (TUI methodology audit findings over hub-rs/src/ui/*.rs, bin/aa, keymap.rs).",
+        "affected_node_ids": [
+          "design-review"
+        ]
+      }
+    ],
+    "reasoning": "Fresh-eyes review of the design-review node against its stated intent and the graph. The node's why is explicit: it is the judgment step that weighs audit findings and resolves the Phase-2 node set from assessed state, protecting the invariant that implementation direction follows from assessment. Its sole required artifact is audits/design-review.md. Direct inspection of the eval worktree (a git worktree of /Users/sab-mini/repos/aa-cli) shows: (a) no audits/ directory exists; (b) no design-review.md or tui-methodology.md anywhere on disk; (c) the diff between the two attempt commits is empty — the executor produced zero repo changes across both attempts; (d) the upstream tui-methodology-audit node is still 'provisional' in the config graph with its artifact missing, meaning the review ran with no findings to judge; (e) the harness scratch files indicate the run was actually working on a different node (common-core from the pilot graph). Every acceptance criterion is indeterminate with no supporting evidence, and the required artifact is flagged absent. Intent is not preserved (nothing was delivered toward the judgment role), and graph integrity is not preserved (the graph recorded two execution attempts and advanced the frontier for a review whose decision record — the basis for Phase-2 authorizations and downstream milestone/audit nodes — does not exist; dependents firing on this state would build on nothing). This warrants a block with human review before the frontier advances further; lane 1's criteria verdict is not re-adjudicated here, but the absence of any artifact makes the node's role objectively unfulfilled.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-25T03:43:56.790Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_YzzM5qyoZeVkkKixKg8T3367",
+        "command": "pwd && ls -la"
+      },
+      {
+        "ts": "2026-08-25T03:43:56.791Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_hcsA0R3y9GEaWnpUhHWg0224",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/design-review.yaml"
+      },
+      {
+        "ts": "2026-08-25T03:43:56.792Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_nX0mm2BEQWxG32JdgC065985",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml"
+      },
+      {
+        "ts": "2026-08-25T03:43:56.804Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_hcsA0R3y9GEaWnpUhHWg0224",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:43:56.804Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_nX0mm2BEQWxG32JdgC065985",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:43:56.819Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_YzzM5qyoZeVkkKixKg8T3367",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:43:59.564Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_l6W4L15ADVEYYQsRcD1q5341",
+        "command": "ls -la audits/ 2>/dev/null; echo \"---\"; ls -la .gddp/ 2>/dev/null; echo \"---\"; ls -la .handoffs/ 2>/dev/null; echo \"---\"; ls -la .scratch/ .zcode/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-25T03:43:59.565Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_yhx6bw5HirRNVWD6eNvJ9172",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml"
+      },
+      {
+        "ts": "2026-08-25T03:43:59.566Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_DhYpge4IzSZ4uhyDYdWO1671",
+        "path": "README.md"
+      },
+      {
+        "ts": "2026-08-25T03:43:59.573Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_yhx6bw5HirRNVWD6eNvJ9172",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:43:59.574Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_DhYpge4IzSZ4uhyDYdWO1671",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:43:59.612Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_l6W4L15ADVEYYQsRcD1q5341",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:44:03.144Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_jP3WNWAYdSATXuU4yHR51012",
+        "path": "audits/decision.md"
+      },
+      {
+        "ts": "2026-08-25T03:44:03.145Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_6LCptfWyRUwJeTh8XZ6o0081",
+        "path": "audits/result-summary.md"
+      },
+      {
+        "ts": "2026-08-25T03:44:03.145Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_lOQmZiWIvs5RcZ0dFhXu2565",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && git log --oneline -15 2>/dev/null; echo \"---STATUS---\"; git status --short 2>/dev/null | head -30; echo \"---DIFF---\"; git diff dfe96d0c86991be6ea90729a62b753c98e0f1013 a98d131ad128256961d7f962fc2dc673ccca96d7 --stat 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-25T03:44:03.150Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_jP3WNWAYdSATXuU4yHR51012",
+        "tool": "read",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-25T03:44:03.150Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_6LCptfWyRUwJeTh8XZ6o0081",
+        "tool": "read",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-25T03:44:03.295Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_lOQmZiWIvs5RcZ0dFhXu2565",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:44:16.571Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_neDz0yyfgt11fYVK7YJn8731",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && echo \"=== .git ===\"; cat .git; echo; echo \"=== audits ===\"; ls -la audits/; echo \"exit=$?\"; echo \"=== find audits ===\"; find . -maxdepth 3 -name \"*audit*\" -o -maxdepth 3 -name \"*design-review*\" 2>/dev/null | head; echo \"=== find design-review ===\"; find . -name \"design-review*\" 2>/dev/null; find . -path ./node_modules -prune -o -name \"*.md\" -newer .gitignore -print 2>/dev/null | head -40"
+      },
+      {
+        "ts": "2026-08-25T03:44:16.626Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_neDz0yyfgt11fYVK7YJn8731",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:44:39.962Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_utFfzRcGjPhtWEgV2WMo6790",
+        "command": "ls -la /Users/sab-mini/repos/aa-cli/audits/ 2>/dev/null; echo \"exit=$?\"; echo \"===\"; ls -la /Users/sab-mini/repos/aa-cli/gddp/ 2>/dev/null | head -20; echo \"===\"; ls -la /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu/gddp/ 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-25T03:44:39.963Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_axh8e4gbmR2CG6gSz3p31832",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && git show --stat dfe96d0c86991be6ea90729a62b753c98e0f1013 | head -20; echo \"===\"; git show --stat a98d131ad128256961d7f962fc2dc673ccca96d7 | head -20"
+      },
+      {
+        "ts": "2026-08-25T03:44:40.002Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_utFfzRcGjPhtWEgV2WMo6790",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:44:40.027Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_axh8e4gbmR2CG6gSz3p31832",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:44:44.968Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_4Ovop2YChHv2q4FFTRup8002",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && echo \"=== .handoffs ===\"; ls -la .handoffs/; echo \"=== .gddp ===\"; ls -la .gddp/; echo \"=== find decision.md ===\"; find . -name \"decision.md\" -o -name \"patch.diff\" -o -name \"result-summary.md\" 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-25T03:44:45.015Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_4Ovop2YChHv2q4FFTRup8002",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:44:47.951Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_bcsIsn2BsiHcKWicheaY3239",
+        "path": ".gddp/decision.md"
+      },
+      {
+        "ts": "2026-08-25T03:44:47.952Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_1dYjLY1BfNNFitrZurIg8118",
+        "path": ".gddp/result-summary.md"
+      },
+      {
+        "ts": "2026-08-25T03:44:47.952Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_odJUiVrgNVGOoyw1gREk4203",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && head -60 .gddp/patch.diff; echo \"=== receipts ===\"; ls -la gddp/executor-receipts/ gddp/receipts/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-25T03:44:47.956Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_1dYjLY1BfNNFitrZurIg8118",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:44:47.957Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_bcsIsn2BsiHcKWicheaY3239",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:44:47.978Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_odJUiVrgNVGOoyw1gREk4203",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:44:58.262Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_rrnRqIvbYQdEaRxO6ELr6926",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && grep -rl -i \"must-fix\\|should-fix\\|won't-now\\|wont-now\\|phase-2\\|phase 2\" --include=\"*.md\" --include=\"*.zsh\" --include=\"*.rs\" . 2>/dev/null | grep -v \".git/\" | head -20; echo \"=== audits anywhere ===\"; find / -maxdepth 4 -name \"design-review.md\" 2>/dev/null | head; echo \"=== receipts archive ===\"; ls -laR gddp/executor-receipts/_archive/ 2>/dev/null | head; echo \"=== git status ===\"; git status --short; echo \"=== git branch/head ===\"; git log --oneline -3; git branch --show-current 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-25T03:44:59.081Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_rrnRqIvbYQdEaRxO6ELr6926",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:45:20.847Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_XaLmEjaw4NBnODwfp7te2521",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && find . -name \"tui-methodology.md\" 2>/dev/null; echo \"tui-methodology.md found? exit=$?\"; echo \"=== config graph nodes ===\"; ls /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/ 2>/dev/null; echo \"=== config project ===\"; grep -n \"design-review\\|tui-methodology-audit\\|frontier\\|status\" /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/*.yaml 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-25T03:45:20.889Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_XaLmEjaw4NBnODwfp7te2521",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:45:46.088Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_bkNvPnJGgGT2n8eE5mnL7345",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "high",
+        "summary": "Downstream convergence risk: design-review is the single decision gate whose record must ground Phase-2 authorizations plus milestone-integration, review-product-coherence, and audit-methodology-compliance. Since no audit artifacts exist upstream and no review record exists here, the entire execution chain from tui-inventory-and-keymap-audit forward must be re-run in order (inventory → methodology audit → design review) before any of those nodes can legitimately fire.",
+        "affected_node_ids": [
+          "tui-inventory-and-keymap-audit",
+          "tui-methodology-audit",
+          "design-review",
+          "milestone-integration",
+          "review-product-coherence",
+          "audit-methodology-compliance"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Structural note: design-review declares unlocks: [] and its why says it 'authorizes Phase-2 nodes to be created' — the Phase-2 node set is created by this node itself, so the graph's post-review topology is intentionally open until the review record exists; nothing to fix now, but the next review run should actually emit the candidate capability IDs the criteria ask for.",
+        "affected_node_ids": [
+          "design-review"
+        ]
+      }
+    ],
+    "graph_recommendations": [],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.0366666666666667,
+  "criteria_confidence": 0.0366666666666667,
+  "completeness": 0.5,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "decision-recorded",
+        "criterion": "A written review record names, per audit finding, the disposition — must-fix / should-fix / won't-now — with rationale and a reference to the candidate capability that will carry it into Phase 2.",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...)"
+        ],
+        "reasoning": "Scanned source files (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...) for identifiers named in the criterion (must-fix, should-fix, t-now). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "phase2-set",
+        "criterion": "The review names the Phase-2 capability nodes (bounded, invariant- grounded) and their execution order, drawn from candidates plus any new boundaries the findings expose — not committed to the old chart's decomposition.",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...)"
+        ],
+        "reasoning": "Scanned source files (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...) for identifiers named in the criterion (Phase-2, invariant-). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "invariants-concrete",
+        "criterion": "The invariants (one predictable input grammar, no dead-ends/modal-trap, evidence visible in-TUI, semantic color, spatial continuity) are made specific to aa-cli's surfaces as the acceptance bar Phase-2 nodes build toward.",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "aa\\-cli -> line 3: 'aa-cli'"
+        ],
+        "reasoning": "Scanned source files (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...) for identifiers named in the criterion (dead-ends, modal-trap, in-TUI, aa-cli, Phase-2). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Review/judgment only — no implementation in this node.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Decides direction; does not build. Authorizes Phase-2 nodes to be created.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "audits/design-review.md": false
+    },
+    "deps_status": {
+      "tui-methodology-audit": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "dfe96d0c86991be6ea90729a62b753c98e0f1013",
+      "tip": "a98d131ad128256961d7f962fc2dc673ccca96d7",
+      "files": [],
+      "truncated": false,
+      "file_count": 0,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "decision-recorded",
+        "judgment": "judged_fail",
+        "confidence": 0.97,
+        "evidence": [
+          "audits/design-review.md absent from worktree and from all git history (git log --all -- audits/design-review.md → no hits)",
+          "no audits/ path ever added in any commit (git log --all --diff-filter=A -- '**/audits/*' → no hits)",
+          "design-review job commits are empty wrappers: tree hashes identical parent→result for all 3 attempts (69bd65b==2ada522, b12fde4==dfe96d0, dfe96d0==a98d131); git diff --name-only empty",
+          "grep across all *.md for 'must-fix|should-fix|won't-now|disposition|candidate capability' → only unrelated hit docs/verify-pathway-architecture.md:128",
+          "deterministic result artifacts_present={'audits/design-review.md': False}"
+        ],
+        "reasoning": "The criterion requires a written review record naming, per audit finding, a disposition (must-fix/should-fix/won't-now) with rationale and a reference to the candidate capability carrying it into Phase 2. No such record exists anywhere: the required artifact audits/design-review.md was never created, no equivalent review document exists in the repo, and the entire design-review job (all three attempts) changed zero files. There is no review content to evaluate, so the criterion cannot be satisfied."
+      },
+      {
+        "criterion_id": "phase2-set",
+        "judgment": "judged_fail",
+        "confidence": 0.97,
+        "evidence": [
+          "no file in repo names a Phase-2 capability node set or execution order (grep for 'Phase-2|phase 2' across *.md → only docs/aa-cli-v2-implementation-plan.md:140,429 (an unrelated implementation plan) and deck pattern checklists)",
+          "audits/design-review.md absent (see decision-recorded evidence)",
+          "design-review job produced zero file changes across attempts 0-2 (identical tree hashes)",
+          "downstream node milestone-integration.yaml:24 explicitly waits on design-review resolving Phase-2 capability ids ('Wired to Phase-2 capabilities in a second pass once design-review resolves their ids')"
+        ],
+        "reasoning": "The criterion requires the review to name the Phase-2 capability nodes (bounded, invariant-grounded) and their execution order, drawn from candidates plus new boundaries. No review exists and nothing in the repo names a Phase-2 capability set or order. The downstream milestone node confirms this dependency remains unresolved."
+      },
+      {
+        "criterion_id": "invariants-concrete",
+        "judgment": "judged_fail",
+        "confidence": 0.95,
+        "evidence": [
+          "no document concretizes the five invariants (one predictable input grammar, no dead-ends/modal-trap, evidence visible in-TUI, semantic color, spatial continuity) to aa-cli surfaces",
+          "grep for 'modal-trap|dead-end|in-TUI|input grammar|spatial continuity' across *.md → only node-01 inventory (docs/tui-pass/surface-inventory.md), handoffs, and hub-rs design notes; none is a review-authored acceptance bar",
+          "audits/design-review.md absent; design-review job empty",
+          "deterministic scan's single 'aa-cli' hit came from scanning lib/*.zsh source, not any review artifact"
+        ],
+        "reasoning": "The criterion requires the invariants to be made specific to aa-cli's surfaces as the acceptance bar Phase-2 nodes build toward. No review-authored statement of concrete invariants exists. The invariant vocabulary appears only in pre-existing inventory/design documents, not in any review record that would set the Phase-2 acceptance bar."
+      }
+    ],
+    "overall_reasoning": "The design-review node has no deliverable whatsoever. The required artifact audits/design-review.md does not exist in the working tree or anywhere in git history (all refs, including remotes/origin/*). The design-review job ran three attempts, and every attempt's result commit has a tree hash identical to its parent — zero files changed, and the working tree is clean at the tip. No markdown anywhere contains the disposition record, the Phase-2 capability node set/order, or aa-cli-concretized invariants that the three criteria demand. All three criteria therefore fail on the substance: there is no written review to judge. The deterministic scan's 'indeterminate' results are explained by it scanning lib/*.zsh source files, which is the wrong surface for a review node whose deliverable is a markdown record; the correct deliverable space is empty. Additionally, the upstream dependency tui-methodology-audit is itself incomplete (its required audits/tui-methodology.md is also absent, graph status 'provisional'), so the review had no audit findings to adjudicate — but the node's own deliverable is independently absent.",
+    "risks": "1. This evaluation worktree is a mirror of skchaudr/aa-cli; the artifact could conceivably exist in the live upstream remote without being fetched here. Mitigation: git log --all (covering all local + origin refs) shows no audits/ path ever committed, and the three design-review attempt branches are empty wrappers; risk is low but not zero if the executor wrote the file to an unpushed remote. 2. The upstream node tui-methodology-audit also lacks its artifact, so both this node and its dependency are unfulfilled; a retry of design-review alone may still lack audit findings to review. 3. The deterministic scan judged constraints 'clear' via forbidden-pattern scan of lib files — this is vacuous since the job changed nothing; it should not be read as constraint compliance for this node.",
+    "followup_candidates": "Observed: the design-review job (job_20260825T011804810b1d592ee2c2, 3 attempts) produced zero file changes and required artifact audits/design-review.md is absent from the repo and its entire history. Not a partial-compliance question — nothing to grade. Human clarification needed: (a) Was the design-review node actually executed, or did the executor fail/abort before producing the record? If executed, where is the review record expected to live (graph says audits/design-review.md)? (b) Upstream audits/tui-methodology.md (tui-methodology-audit) is also missing and its graph status is 'provisional' — should the audit node be re-run first, or was the design review expected to proceed regardless? (c) The deterministic scan targeted lib/*.zsh instead of the required artifact path; consider aligning the scan method to the node's required_artifacts so future runs report a hard 'artifact missing' rather than keyword-based indeterminate.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-25T03:42:37.416Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_gYxbPX2dpB4GearlwmxA4312",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && ls -la && echo \"---\" && git status 2>/dev/null | head -30"
+        },
+        {
+          "ts": "2026-08-25T03:42:37.418Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_WKz3sMSp33xaWexmag5H4232",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu/README.md"
+        },
+        {
+          "ts": "2026-08-25T03:42:37.429Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_WKz3sMSp33xaWexmag5H4232",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:42:37.562Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_gYxbPX2dpB4GearlwmxA4312",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:42:41.496Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_drTvuaBcIxTsKFotyT0L3066",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && find . -iname \"*design-review*\" 2>/dev/null; echo \"---audits---\"; find . -type d -name \"audits\" 2>/dev/null; echo \"---git log---\"; git log --oneline -20 2>/dev/null; echo \"---git branches---\"; git branch -a 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-25T03:42:41.497Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_4kbGzQpZlGojRDpGHLGQ5360",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && ls -la .gddp .handoffs .scratch .zcode 2>/dev/null; echo \"---\"; cat .git 2>/dev/null; echo \"---gddp dir---\"; ls -la gddp/"
+        },
+        {
+          "ts": "2026-08-25T03:42:41.533Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_4kbGzQpZlGojRDpGHLGQ5360",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:42:41.575Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_drTvuaBcIxTsKFotyT0L3066",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:42:47.803Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_CLo9uLel00IrG9WTpkDX1241",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu/.gddp/result-summary.md"
+        },
+        {
+          "ts": "2026-08-25T03:42:47.804Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_IJ7dkzw42rausEkKAbeo3873",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu/.gddp/decision.md"
+        },
+        {
+          "ts": "2026-08-25T03:42:47.807Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_IJ7dkzw42rausEkKAbeo3873",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:42:47.808Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_CLo9uLel00IrG9WTpkDX1241",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:42:52.630Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_VDXcnyi8nYLWvO0Jjj5v1967",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && echo \"=== a98d131 (tip) ===\" && git show --stat a98d131 | head -40 && echo \"=== dfe96d0 (base) ===\" && git show --stat dfe96d0 | head -40 && echo \"=== diff base..tip ===\" && git diff --stat dfe96d0 a98d131 && echo \"=== parents of a98d131 ===\" && git log --format=\"%H %P %s\" -1 a98d131"
+        },
+        {
+          "ts": "2026-08-25T03:42:52.630Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_hsEOjiUCZYtoGAIQb2Yc8505",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && echo \"=== gddp/executor-receipts ===\" && find gddp/executor-receipts gddp/receipts gddp/docs -type f | head -50"
+        },
+        {
+          "ts": "2026-08-25T03:42:52.652Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_hsEOjiUCZYtoGAIQb2Yc8505",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:42:52.730Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_VDXcnyi8nYLWvO0Jjj5v1967",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:42:56.518Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ZvXfIUpUBQSduPqlnhKI1419",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && echo \"=== parents of dfe96d0 ===\" && git log --format=\"%H %P %s\" -1 dfe96d0 && echo \"=== stat dfe96d0 vs parent ===\" && git diff --stat dfe96d0^ dfe96d0 && echo \"=== files changed by attempt-0 branch (job_20260825T011804810b1d592ee2c2-attempt-0) ===\" && git log --oneline main..gddp/attempt-job_20260825T011804810b1d592ee2c2-attempt-0 2>/dev/null | head && echo \"=== attempt-0 tip diff vs its parent ===\" && git diff --stat gddp/attempt-job_20260825T011804810b1d592ee2c2-attempt-0^ gddp/attempt-job_20260825T011804810b1d592ee2c2-attempt-0 2>/dev/null | head -30"
+        },
+        {
+          "ts": "2026-08-25T03:42:56.519Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_sbTn1wobKYTwRyIk3yxZ8179",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && for b in gddp/attempt-job_20260825T011804810b1d592ee2c2-attempt-0 gddp/attempt-job_20260825T011804810b1d592ee2c2-attempt-1 gddp/attempt-job_20260825T011804810b1d592ee2c2-attempt-2; do echo \"=== $b ===\"; git log --oneline -3 $b 2>/dev/null; git diff --stat $b^ $b 2>/dev/null | tail -5; done"
+        },
+        {
+          "ts": "2026-08-25T03:42:56.616Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ZvXfIUpUBQSduPqlnhKI1419",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:42:56.640Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_sbTn1wobKYTwRyIk3yxZ8179",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:43:06.194Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_IHrMia0f7dpuRwNH4Rlr1101",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && echo \"=== search all history for audits/design-review ===\" && git log --all --oneline -- audits/design-review.md | head && echo \"=== search all history for any 'audits' path ===\" && git log --all --oneline --diff-filter=A -- '**/audits/*' | head && echo \"=== git ls-tree tip for audits ===\" && git ls-tree -r a98d131 --name-only | grep -i audit | head && echo \"=== result branches for design-review ===\" && for b in $(git branch -a | grep \"design-review\"); do echo \"--- $b ---\"; git log --oneline -2 $b; done"
+        },
+        {
+          "ts": "2026-08-25T03:43:06.195Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_bLLNTlMbC4X3y5GpCxg89825",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && echo \"=== grep repo for design-review content markers ===\" && grep -rl \"design-review\" --include=\"*.md\" . 2>/dev/null | grep -v \".git/\" | head -20 && echo \"=== grep for must-fix / should-fix / won't-now ===\" && grep -rn \"must-fix\\|should-fix\\|won't-now\\|wont-now\\|won't fix\" --include=\"*.md\" . 2>/dev/null | grep -v \".git/\" | head -20"
+        },
+        {
+          "ts": "2026-08-25T03:43:06.287Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_bLLNTlMbC4X3y5GpCxg89825",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:43:06.369Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_IHrMia0f7dpuRwNH4Rlr1101",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:43:12.933Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_HiTof35eg7sJhVnkyN4y2441",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml"
+        },
+        {
+          "ts": "2026-08-25T03:43:12.974Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_HEfpOqGi7hnGR90cKG2j9474",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && ls docs/ && echo \"=== search docs for audit/review/phase-2 ===\" && grep -rln \"audit\\|methodology\\|Phase 2\\|phase-2\\|Phase-2\" docs/ gddp/ 2>/dev/null | head -20"
+        },
+        {
+          "ts": "2026-08-25T03:43:12.980Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_HiTof35eg7sJhVnkyN4y2441",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:43:13.309Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_HEfpOqGi7hnGR90cKG2j9474",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:43:16.623Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_oVI8prnvKDGaDOLGR87H4380",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && ls -la docs/tui-pass/ && echo \"=== grep whole repo for phase-2 / invariant / modal-trap / dead-end ===\" && grep -rn \"phase-2\\|phase 2\\|Phase-2\\|Phase 2\" --include=\"*.md\" . 2>/dev/null | grep -v \".git/\" | head -20 && echo \"=== modal-trap / dead-ends ===\" && grep -rn \"modal-trap\\|dead-end\\|dead end\\|input grammar\\|spatial continuity\\|in-TUI\\|in-tui\" --include=\"*.md\" . 2>/dev/null | grep -v \".git/\" | head -20"
+        },
+        {
+          "ts": "2026-08-25T03:43:16.740Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_oVI8prnvKDGaDOLGR87H4380",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:43:23.283Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_8AmMq5cEJJkkv6NxXMYL4567",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && echo \"=== disposition / carries / candidate capability ===\" && grep -rn \"disposition\\|carry it\\|candidate capability\\|won't-now\\|won't now\\|must fix\\|should fix\" --include=\"*.md\" . 2>/dev/null | grep -v \".git/\" | head -20; echo \"=== design review mentions ===\" && grep -rln \"design.review\\|Design Review\\|design-review\" . 2>/dev/null | grep -v \".git/\" | head -20; echo \"=== executor receipts dir ===\" && ls -la gddp/executor-receipts/; echo \"=== .zcode ===\" && find .zcode -type f | head"
+        },
+        {
+          "ts": "2026-08-25T03:43:23.284Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_jcebXC8swDV37BzuikOY3607",
+          "command": "ls /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/ && echo \"=== grep config for design-review evidence/status ===\" && grep -rn \"design-review\" /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/ 2>/dev/null | head -10"
+        },
+        {
+          "ts": "2026-08-25T03:43:23.311Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_jcebXC8swDV37BzuikOY3607",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:43:23.541Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_8AmMq5cEJJkkv6NxXMYL4567",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:43:32.832Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_rcDA3keKFSFpFi7EmSJk9892",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu && echo \"=== tree equality checks ===\" && git rev-parse 69bd65b^{tree} 2ada522^{tree} dfe96d0^{tree} a98d131^{tree} && echo \"=== diff names attempt-0 ===\" && git diff --name-only 69bd65b 2ada522 | head && echo \"=== diff names attempt-1 ===\" && git diff --name-only b12fde4 dfe96d0 | head && echo \"=== diff names attempt-2 ===\" && git diff --name-only dfe96d0 a98d131 | head && echo \"(empty outputs above = no files changed by design-review job)\" && echo \"=== worktree status ===\" && git status --porcelain | head"
+        },
+        {
+          "ts": "2026-08-25T03:43:32.833Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_H9qdLGrCecOnVw163o5W6393",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/milestone-integration.yaml"
+        },
+        {
+          "ts": "2026-08-25T03:43:32.839Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_H9qdLGrCecOnVw163o5W6393",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:43:32.943Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_rcDA3keKFSFpFi7EmSJk9892",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:43:53.096Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_dbuw39YG1YbQiqmxO0nF8354",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ],
+      "prompt_cache_report": {
+        "total_input_tokens": 3233,
+        "protocol_tokens": 812,
+        "project_tokens": 1068,
+        "node_tokens": 434,
+        "attempt_tokens": 919,
+        "potential_reuse_tokens": 2314,
+        "potential_reuse_ratio": 0.7157,
+        "actual_cached_tokens": 790656
+      }
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "The design-review node has no deliverable whatsoever. The required artifact audits/design-review.md does not exist in the working tree or anywhere in git history (all refs, including remotes/origin/*). The design-review job ran three attempts, and every attempt's result commit has a tree hash identical to its parent — zero files changed, and the working tree is clean at the tip. No markdown anywhere contains the disposition record, the Phase-2 capability node set/order, or aa-cli-concretized invariants that the three criteria demand. All three criteria therefore fail on the substance: there is no written review to judge. The deterministic scan's 'indeterminate' results are explained by it scanning lib/*.zsh source files, which is the wrong surface for a review node whose deliverable is a markdown record; the correct deliverable space is empty. Additionally, the upstream dependency tui-methodology-audit is itself incomplete (its required audits/tui-methodology.md is also absent, graph status 'provisional'), so the review had no audit findings to adjudicate — but the node's own deliverable is independently absent.",
+  "required_next_action": "Address semantic failures and re-submit.",
+  "generated_at": "2026-08-25T03:45:46.116773+00:00",
+  "evaluated_tree_sha": "116e5a2f5b87fbca1c3153c22fabb909ce701905",
+  "evaluated_commit_sha": "a98d131ad128256961d7f962fc2dc673ccca96d7",
+  "merge_commit_sha": "a98d131ad128256961d7f962fc2dc673ccca96d7",
+  "expected_base_commit_sha": "dfe96d0c86991be6ea90729a62b753c98e0f1013",
+  "pr_ref": null,
+  "job_id": "job_20260825T011804810b1d592ee2c2",
+  "execution_attempt_id": "job_20260825T011804810b1d592ee2c2:attempt:2",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu/README.md",
+    "project_brief": "UNAVAILABLE: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu/PROJECT-BRIEF.md does not exist",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+    "neighbor:tui-methodology-audit": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 2,
+      "not_observed": 1,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu/README.md"
+      ],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml"
+      ]
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zx8htfpu/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "high"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-25T03:42:32.706151+00:00",
+    "finished_at": "2026-08-25T03:45:46.116642+00:00",
+    "wall_s": 193.416,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 80.469,
+      "tool_calls": 19
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 112.913,
+      "tool_calls": 18
+    }
+  }
+}

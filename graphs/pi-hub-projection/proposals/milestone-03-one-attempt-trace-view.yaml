@@ -1,0 +1,50 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: milestone-03-one-attempt-trace-view
+title: Render one attempt as a phase list with status, cost, logs, and receipt path
+type: milestone
+
+why: "This is the operator's stated minimum and nothing more. The Pi finish move in the software-factory note is one line: on the Pi hub, one job id with a phase list and a pass/fail receipt path, observability before any multi-model roster. Everything needed for that now exists after milestone-02 — turn and tool events with ok, error, and duration; usage with cost where the executor reported it; attempt metadata from the spool; and the envelope and gate_results tables node-04 already built, which carry project_id, node_id, verdict, and the source receipt path. What does not exist is one place that shows them together for a single attempt id. This node builds that one view and deliberately stops there: not a swim-lane product, not a cost dashboard, not live streaming. The surface choice is a real open question the operator has not settled — harness/apps/pi-hub-web (the landed browser fork) and harness/pi-hub-rs (the existing Rust TUI) both exist — so choosing and recording the surface is part of the work rather than an assumption."
+
+depends_on:
+  - milestone-02-executor-event-projection
+
+acceptance_criteria:
+  - id: surface-decision-recorded
+    criterion: "the report records which existing surface was used — the pi-hub-web fork or pi-hub-rs — and why, and confirms no third surface and no new UI framework was introduced"
+  - id: attempt-id-to-phase-list
+    criterion: "given one attempt id, the view lists that attempt's turns in seq order and, within each turn, its tool calls with tool name, ok or error, and duration"
+  - id: cost-shown-or-declared-absent
+    criterion: "per-turn usage and cost are shown when the executor reported them, and are shown as explicitly not reported when it did not; the report captures one attempt of each kind and shows that no zero is fabricated in place of missing usage"
+  - id: log-paths-reachable
+    criterion: "the view exposes the attempt's events.jsonl and raw.jsonl paths so an operator can go straight to the forensic stream, and the report shows the rendered paths resolving to real files"
+  - id: verdict-and-receipt-path
+    criterion: "the node verdict and its source receipt path from the gate_results table are rendered alongside the trace for an attempt whose node has been evaluated, and the report shows the rendered receipt path matching a real file under /Users/sab-mini/repos/gddp-config/verification/"
+  - id: rendered-evidence-captured
+    criterion: "the report includes a captured artifact of the rendered view for one named real attempt id — terminal capture for a TUI surface, saved markup or screenshot for the browser surface — not a description of what it would look like"
+  - id: scope-held
+    criterion: "the report states what was deliberately not built: multi-attempt comparison, model roster views, cost aggregation, and live streaming; and confirms none of them were added"
+  - id: report-exists
+    criterion: "reports/pi-hub-projection/milestone-03-one-attempt-trace-view.md exists with the surface decision, the field-to-source mapping, run instructions, and the captured evidence"
+
+constraints:
+  - Create and modify files only inside /Users/sab-mini/.pi
+  - Add no new runtime dependency beyond what the chosen surface already declares; no new framework, no new UI toolkit, no custom DSL
+  - Until milestone-04-redaction-boundary lands, this view must not render the fields that can carry secrets — assistant_message text, tool_started command, and packet prompt content — render a placeholder plus the file path instead, and show that placeholder behavior in the report
+  - Any server component binds 127.0.0.1 only; preserve the external-interface refusal behavior already proven by the landed components
+  - Read-only against the hub database; this node adds no write path and no mutation endpoint
+  - Do not change the projection schema; if a needed field is missing, record it as a finding rather than extending the schema here
+  - Never run git add -A; stage only files this node created or changed
+  - Commit all work on this node's result ref per the executor contract
+
+allowed_execution_modes:
+  - droid
+
+required_artifacts:
+  - reports/pi-hub-projection/milestone-03-one-attempt-trace-view.md
+
+status: pending
+priority: high
+
+unlocks: []

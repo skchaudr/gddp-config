@@ -1,0 +1,49 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: milestone-05-tui-defect-retirement
+title: Retire the inventoried rendering defects in the existing Rust hub TUI
+type: milestone
+
+why: "This is the literal reading of the operator's framing — convert the bad UI into something usable — and it needs no new surface. harness/pi-hub-rs is roughly four thousand lines of Rust that already reads the pi observability streams and renders dashboard, run detail, instance detail, and subagent detail. Its defects are already inventoried, not speculative: agent/plans/pi-hub-ui-attention-v1.yaml records detail-region and list-cell overflow, broken borders and clipping, misleading queue semantics, attention ordering that truncates actionable work, illegible cost and fleet summaries, and default instance visibility, all at the operator's two real terminal sizes of 80x24 and 140x32. That plan also names its own risk honestly: the findings were captured from a screenshot that may not match the current binary, so reproduction against the current binary comes before any fix. This node exists so that the fix set becomes graph-governed work with human acceptance rather than an eight-packet side plan, and so the answer to a bad TUI is a repaired TUI rather than a third renderer. It runs independently of the projection milestones because pi-hub-rs is already on main and no result branch touches it."
+
+depends_on: []
+
+acceptance_criteria:
+  - id: baseline-reproduced-against-current-binary
+    criterion: "the current binary is captured at 80x24 and 140x32 and the report gives a defect map that separates defects reproduced now from findings that belong only to the earlier screenshot; findings that do not reproduce are recorded as not reproduced rather than fixed"
+  - id: containment-fixed
+    criterion: "every reproduced detail-region and list-cell overflow is fixed: text does not cross a region boundary, borders stay intact, and long identifiers and paths are elided only outside detail views while detail views keep the full value"
+  - id: containment-tested
+    criterion: "terminal-buffer tests render the dashboard and every detail view at both target sizes and assert containment and border integrity, so these defects cannot silently return"
+  - id: attention-ordering
+    criterion: "actionable work survives truncation: failed items rank before blocked or unknown, then running or idle, then newest completed; and selection is preserved by stable identity across a refresh"
+  - id: cost-and-fleet-legible
+    criterion: "the cost and fleet summaries are legible at 80x24, and where a value is unknown the view says so rather than showing a zero or a blank that reads as zero"
+  - id: rust-validation-passes
+    criterion: "cargo test and cargo clippy --all-targets -- -D warnings both pass on the changed tree and the output is captured in the report"
+  - id: captures-committed
+    criterion: "captures at both terminal sizes are produced from the committed tree and the report names the commit they correspond to, so the evidence and the code cannot drift apart"
+  - id: report-exists
+    criterion: "reports/pi-hub-projection/milestone-05-tui-defect-retirement.md exists with the defect map, the not-reproduced list, the fix inventory, and the validation and capture evidence"
+
+constraints:
+  - Create and modify files only inside /Users/sab-mini/.pi, scoped to harness/pi-hub-rs/ and harness/tests/ plus the report path
+  - Preserve the existing multi-pane structure and footer; do not redesign the information architecture and do not port pi-hub-rs to a different toolkit or language
+  - agent/plans/pi-hub-ui-attention-v1.yaml is reference material only; this node is the authority on what is in scope, and any defect in that plan that this node does not cover must be recorded as a finding rather than fixed opportunistically
+  - Do not remove terminal evidence from detail views or from the normalized streams in order to make a view fit
+  - Add no new Rust dependency; work within the crates already in Cargo.toml
+  - Do not modify harness/tui/app.py, harness/apps/, or any projection component in this node
+  - Never run git add -A; stage only files this node created or changed
+  - Commit all work on this node's result ref per the executor contract
+
+allowed_execution_modes:
+  - droid
+
+required_artifacts:
+  - reports/pi-hub-projection/milestone-05-tui-defect-retirement.md
+
+status: pending
+priority: medium
+
+unlocks: []

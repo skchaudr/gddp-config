@@ -1,0 +1,65 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: m4-radial-dag-mode
+title: "Milestone 4 — Mode B complete: radial second-brain DAG with layout switching and physics controls"
+type: milestone
+
+why: >
+  Mode B is the navigator: a concentric hierarchy from the root router out to
+  domain hubs and down to skills, artifacts, routines and connectors, with
+  zoom/pan, layout switching and live physics controls. It is also the surface
+  where the video spec collides hardest with the real vault — the spec's
+  department routers do not exist and the charted radial-dag node still names
+  business/content/community/product/personal hubs that node 02's evidence
+  showed are absent. This milestone builds against the topology milestone 2
+  resolved, and the app repo currently has no graph rendering dependency at
+  all.
+
+depends_on:
+  - m2-live-topology-slice
+
+acceptance_criteria:
+  - id: hierarchy-live
+    criterion: >
+      The DAG renders root, hub and leaf nodes from the live graph.json with
+      working zoom and pan. The root is whatever milestone 2 resolved for the
+      real vault, not the spec's CLAUDE.md.
+  - id: layouts-switch
+    criterion: >
+      At least three of concentric rings, force-directed, circle and hexagonal
+      cluster switch live, and the chosen layout survives a mode switch and a
+      page reload.
+  - id: physics-live
+    criterion: >
+      At least the line-spring control visibly changes the rendered layout
+      while the graph is on screen.
+  - id: dag-integrity
+    criterion: >
+      Nodes with multiple parents render correctly, and a cycle or dangling
+      edge in the input is reported in the UI rather than crashing or silently
+      dropping nodes.
+  - id: dependency-declared
+    criterion: >
+      The graph rendering library is added to package.json with a one-line
+      rationale for the choice, and the production build still passes with it.
+
+constraints:
+  - Rendering and navigation only; per-node inspection belongs to Mode A's HUD.
+  - Do not synthesize department hubs the vault does not contain in order to match the video.
+  - Layout state is UI state; it is never written back into graph.json or the vault.
+
+allowed_execution_modes:
+  - agent
+  - human
+
+required_artifacts:
+  - dag component + tests
+  - screenshots of each implemented layout over live data
+  - result-summary.md
+
+status: pending
+priority: high
+
+unlocks:
+  - m7-daily-driver-rollout

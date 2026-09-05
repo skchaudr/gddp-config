@@ -1,0 +1,51 @@
+schema_version: '1.0'
+schema_type: node
+node_id: fire-and-ledger
+title: Fire well-formed recap, ledger write, and target handoff
+type: capability
+why: >-
+  PRD §4.6: fire is well-formed review, then send. The Lovable mock copies
+  to the clipboard; hub-rs must write the ledger and hand the packet to the
+  target. Fire is a reached stage, never the landing screen.
+goal: >-
+  Show the well-formed check, recap, and ↵ fire action; on fire, write the
+  packet to the hub-rs ledger and hand it to the target (PRD §4.5–4.6).
+depends_on:
+- dispatch-fields
+acceptance_criteria:
+- id: well-formed-line
+  criterion: >-
+    Stage `5 · FIRE` shows a green `✓` and `packet is well-formed. Slug`
+    plus the live slug (PRD §4.6, §7.E; hub-rs/examples/aa-fire.png,
+    hub-rs/examples/aa-FIRE-packet.png).
+- id: recap-rows
+  criterion: >-
+    Recap lists target, mode, cwd, paths, and verify with the packet's
+    current values (PRD §4.6; same two FIRE frames).
+- id: enter-fires
+  criterion: >-
+    Footer ↵ means fire; the gold action is the fire control (PRD §3.7,
+    §4.6, §7.E). `y` still copies the packet (PRD §3.7).
+- id: ledger-and-handoff
+  criterion: >-
+    One ↵ on a well-formed packet writes it to the hub-rs ledger and hands
+    it to the target (PRD §4.6, §7.E). Clipboard-only fire is the Lovable
+    mock; hub-rs behavior is ledger plus handoff.
+- id: human-accept-rule
+  criterion: >-
+    Fire copy states that verified: review / human accept is the release
+    to done (PRD §3.6, §4.6; aa-fire.png rule text).
+constraints:
+- Work is in the aa-cli repo, hub-rs crate (Rust / ratatui).
+- Scope is PATH stage fire (PRD §4.6) plus the existing hub-rs ledger/handoff path. New PATH stages stay forbidden (PRD §3.1).
+- Run `cargo test` in hub-rs before claiming the node done.
+- Graph YAML and runtime databases stay unmodified; leave product changes as working-tree edits so the runtime persists results.
+allowed_execution_modes:
+- cursor_cli
+required_artifacts:
+- hub-rs/src/fire.rs
+- hub-rs/src/data/ledger.rs
+status: pending
+priority: high
+unlocks:
+- prd-coherence-audit

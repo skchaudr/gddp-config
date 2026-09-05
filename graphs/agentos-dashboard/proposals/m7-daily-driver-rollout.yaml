@@ -1,0 +1,62 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: m7-daily-driver-rollout
+title: "Milestone 7 — daily-driver rollout: dogfood session, operating doc, honest gap triage"
+type: milestone
+
+why: >
+  The dashboard's only justification is that Sab actually uses it over his real
+  environment. This milestone is the exit gate: one full session driving the
+  live surfaces, a doc that says how to run and stop the thing and what a
+  regression looks like, and a triage that gives every discovered gap a home.
+  It also carries the one question the rest of the graph cannot answer — is
+  this worth continuing — and it must be able to answer no.
+
+depends_on:
+  - m3-artifact-orbit-mode
+  - m4-radial-dag-mode
+  - m5-execution-boundary
+  - m6-routines-visibility
+
+acceptance_criteria:
+  - id: real-session
+    criterion: >
+      One real session exercises live topology, orbit, DAG, one real skill run
+      and the routines board over Sab's environment, recapped with what
+      rendered correctly, what broke with citations, and what was polished.
+  - id: operating-doc
+    criterion: >
+      A doc covers start and stop, which processes must be running (watcher,
+      API, dev or built frontend), which data sources each depends on, and what
+      a regression looks like for each surface.
+  - id: gap-triage
+    criterion: >
+      Every gap found is classified as blocker or polish and given a home — an
+      existing node, a continuation proposal, or an explicit out-of-scope
+      decision. No gap survives only inside the session recap.
+  - id: adoption-verdict
+    criterion: >
+      An honest statement of whether the dashboard is being used, or what
+      specifically stops it from being used. Acceptance does not require the
+      answer to be yes; it requires the answer to be true and evidenced.
+
+constraints:
+  - New capability ideas become continuation proposals; they are not absorbed into this milestone.
+  - Do not claim daily-driver status from a single successful launch.
+  - Polish stays within charted scope; a redesign is a graph amendment, not a polish item.
+
+allowed_execution_modes:
+  - agent
+  - human
+
+required_artifacts:
+  - dogfood session recap with screenshots or DOM evidence
+  - operating and regression doc
+  - classified gap list
+  - result-summary.md
+
+status: pending
+priority: medium
+
+unlocks: []

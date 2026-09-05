@@ -1,0 +1,64 @@
+schema_version: '1.0'
+schema_type: node
+node_id: prd-coherence-audit
+title: PRD section 7 A-F coherence audit
+type: audit
+why: >-
+  The pathway is only done when PRD §7 A–F and the single keymap can be
+  evidenced on the finished walk. This audit records pass/fail with cites;
+  it leaves graph truth to the human.
+goal: >-
+  Walk PRD §7 A–F end-to-end, confirm one keymap (esc / tab / 1-5 / ?),
+  and write a compliance report that cites each criterion pass/fail with
+  evidence.
+depends_on:
+- fire-and-ledger
+acceptance_criteria:
+- id: criterion-a
+  criterion: >-
+    A. Create opens on verb; PATH shows 1–5; PACKET says no card / six
+    fields (PRD §7.A; hub-rs/examples/aa-verb-nvim.png). Report cites
+    observed chrome or a file:line.
+- id: criterion-b
+  criterion: >-
+    B. explain → card → Explain subsystem yields the bracketed brief and
+    PACKET slug `explain-subsystem` with default target/mode/cwd
+    (PRD §7.B; hub-rs/examples/aa-card.png).
+- id: criterion-c
+  criterion: >-
+    C. Three slots filled via pickers; brackets gone; slug incorporates
+    scope (`…-hub-rs-src`); PACKET task matches the filled brief
+    (PRD §7.C; hub-rs/examples/aa-slots-all-3.png).
+- id: criterion-d
+  criterion: >-
+    D. Dispatch changes target, mode, paths, verify through `FIELD ·`
+    overlays; PACKET updates on the right on the same keystroke; verify
+    may be none (PRD §7.D; aa-slots-agents.png, aa-agents-modes.png,
+    aa-fire-paths.png, aa-verify-option.png).
+- id: criterion-e
+  criterion: >-
+    E. Fire shows well-formed + slug + recap + ↵ fire; one key writes and
+    dispatches (PRD §7.E; hub-rs/examples/aa-fire.png,
+    hub-rs/examples/aa-FIRE-packet.png).
+- id: criterion-f-keymap
+  criterion: >-
+    F. esc backs a stage; tab / 1-5 jump PATH; ? lists the same footer
+    grammar; one keymap only (PRD §3.7, §7.F).
+- id: compliance-report
+  criterion: >-
+    `hub-rs/docs/prd-aa-hub-create-compliance.md` exists with one row per
+    A–F plus the keymap check; each row is pass or fail with a cited
+    screenshot filename and/or repo path:line.
+constraints:
+- Audit and evidence only; implementation stays in the prior five nodes.
+- Work is in the aa-cli repo; the report is written under hub-rs/docs/.
+- Graph YAML and runtime databases stay unmodified; leave the report as a working-tree edit so the runtime persists results.
+- Run `cargo test` in hub-rs as a regression check; this node records findings, including cargo failures, rather than changing product code to chase them.
+allowed_execution_modes:
+- cursor_cli
+required_artifacts:
+- hub-rs/docs/prd-aa-hub-create-compliance.md
+- hub-rs/docs/PRD-aa-hub-create.md
+status: pending
+priority: high
+unlocks: []

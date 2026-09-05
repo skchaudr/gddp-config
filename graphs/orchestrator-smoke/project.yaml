@@ -1,0 +1,47 @@
+schema_version: '1.0'
+schema_type: project_graph
+project_id: orchestrator-smoke
+project_name: Orchestrator Smoke (heartbeat wake trial)
+description: Three independent nodes proving the heartbeat orchestrator wake is what
+  dispatches work. No frontier_auto_advance and no default_executor — the only
+  dispatch source is the orchestrator's decision channel.
+repo: local/gddp-soak-target
+blueprint:
+  vision: Prove the stateless orchestrator wake reads the pack, decides dispatch,
+    and the runtime carries that decision through executor, evaluator, and the
+    human gate.
+  architecture_notes: Three independent ready nodes, capacity 2, one decision per
+    wake — the orchestrator paces fan-out across pulses. cursor_cli for both
+    roles; models pinned per role under execution_policy.models.
+  major_capabilities:
+  - orchestrator-driven dispatch
+graph_version: '1.0'
+created_at: '2026-09-05'
+last_updated: '2026-09-05'
+nodes_dir: nodes/
+nodes:
+- id: smoke-alpha
+  title: 'Smoke: create the alpha marker'
+  status: deferred
+  type: capability
+- id: smoke-beta
+  title: 'Smoke: create the beta marker'
+  status: pending
+  type: capability
+- id: smoke-gamma
+  title: 'Smoke: create the gamma marker'
+  status: pending
+  type: capability
+execution_policy:
+  max_concurrent_jobs: 2
+  retry_budget: 1
+  require_human_review_before_overnight: false
+  artifact_gate_enforced: true
+  allowed_repos:
+  - local/gddp-soak-target
+  models:
+    orchestrator: cursor-grok-4.6-high
+    executor: composer-2.5
+  orchestrator_run_block: Worker budget for this run is 1 executor per node. Three
+    independent smoke nodes are ready; pace dispatches across wakes, and hold when
+    capacity or the human gate says so.

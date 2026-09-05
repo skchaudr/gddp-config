@@ -256,7 +256,7 @@ def ensure_project_shell(root: Path, project_id: str, repo: str,
 
 def main(project: str, repo: str = "", project_name: str | None = None,
          llm_draft: bool = False, dry_run: bool = False,
-         root: Path | None = None) -> int:
+         root: Path | None = None, validate: bool = False) -> int:
     root = root or ROOT
 
     if not ensure_project_shell(root, project, repo, project_name):
@@ -355,6 +355,21 @@ def main(project: str, repo: str = "", project_name: str | None = None,
     for nid in added:
         console.print(f"  [green]✓[/green] {nid}")
     console.print()
+    should_validate = validate
+    if not should_validate and sys.stdout.isatty():
+        try:
+            resp = input(f"Run graph validation for {project} now? [Y/n] ").strip().lower()
+            if resp in ("", "y", "yes"):
+                should_validate = True
+        except (EOFError, KeyboardInterrupt):
+            pass
+
+    if should_validate:
+        console.print(f"\n[dim]Running validation for project {project}...[/dim]")
+        val_script = Path(__file__).resolve().parent / "validate.py"
+        if val_script.exists():
+            subprocess.run([sys.executable, str(val_script)], check=False)
+
     if llm_draft:
         console.print(f"Next: [bold]gddp node validate --project {project}[/bold]")
     else:
@@ -372,6 +387,7 @@ if __name__ == "__main__":
     p.add_argument("--repo", default="")
     p.add_argument("--project-name", default=None)
     p.add_argument("--llm-draft", action="store_true")
+    p.add_argument("--validate", action="store_true", help="run validation after adding nodes")
     p.add_argument("--dry-run", action="store_true")
     sys.exit(main(
         project=p.parse_args().project,
@@ -379,4 +395,5 @@ if __name__ == "__main__":
         project_name=p.parse_args().project_name,
         llm_draft=p.parse_args().llm_draft,
         dry_run=p.parse_args().dry_run,
+        validate=p.parse_args().validate,
     ))

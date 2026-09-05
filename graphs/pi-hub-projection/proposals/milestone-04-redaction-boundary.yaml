@@ -1,0 +1,46 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: milestone-04-redaction-boundary
+title: Put every hub reader behind one redaction boundary
+type: milestone
+
+why: "The existing graph contradicts itself and the evaluator said so. node-02's why states that surfaces read through one API, not raw SQLite, and that API's proven property is secret redaction. node-03's why explicitly permitted reading pi-hub.db directly, and the executor took that permission — so the browser surface bypasses the redaction layer entirely. The node-03 verdict recorded this as a medium-severity graph observation: today it is mitigated because prompts are stubbed null and the bind is loopback-only, but once envelope and receipt content is served, the browser gets unredacted content. Milestone-02 makes that concrete rather than hypothetical, because the canonical event vocabulary carries assistant_message text and tool_started command, which are exactly where credentials leak. This tension was created by the graph's own text, not by executor drift, so the graph is the right place to resolve it. One boundary, one place to audit."
+
+depends_on:
+  - milestone-02-executor-event-projection
+
+acceptance_criteria:
+  - id: boundary-decision-recorded
+    criterion: "the report records the chosen boundary — route every reader through the cursor API, or apply the same redaction inside the direct-read data layer — with the reason, and states which reader surfaces are now covered"
+  - id: secret-bearing-fields-enumerated
+    criterion: "the report enumerates every stored field that can carry a secret, at minimum assistant_message text, tool_started command, packet prompt content, envelope bodies, and receipt bodies, and states for each whether it is redacted, withheld, or deliberately exposed"
+  - id: fixture-secret-redacted-end-to-end
+    criterion: "a fixture secret planted in a projected event is shown redacted in what the reader surface actually returns or renders, not merely redacted at the projector; the report captures the before and after"
+  - id: no-unredacted-path-remains
+    criterion: "the report demonstrates that no reader surface retains an unredacted path to the same data — for example by showing the direct-read code path removed, or showing redaction applied at that path too"
+  - id: bind-guarantees-retained
+    criterion: "loopback-only binding still holds after the change: the report shows listener inspection proving 127.0.0.1 and a refused connection attempt on a non-loopback interface, for every server component involved"
+  - id: report-exists
+    criterion: "reports/pi-hub-projection/milestone-04-redaction-boundary.md exists with the boundary decision, the field inventory, the fixture evidence, and the bind evidence"
+
+constraints:
+  - Create and modify files only inside /Users/sab-mini/.pi
+  - Do not weaken any existing bind guarantee and do not expose any component beyond 127.0.0.1
+  - Do not invent an authentication or authorization system; loopback-only remains the trust boundary for this project
+  - Redaction may withhold or mask content but must never silently drop a row; absence of a field must be distinguishable from absence of a record
+  - python3 stdlib only for any API or projector change; no new dependencies
+  - Do not modify the ingestion schema from milestone-02; this node changes the read path, not the stored shape
+  - Never run git add -A; stage only files this node created or changed
+  - Commit all work on this node's result ref per the executor contract
+
+allowed_execution_modes:
+  - droid
+
+required_artifacts:
+  - reports/pi-hub-projection/milestone-04-redaction-boundary.md
+
+status: pending
+priority: high
+
+unlocks: []

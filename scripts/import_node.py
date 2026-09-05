@@ -47,6 +47,7 @@ VALID_PRIORITIES = {"low", "medium", "high", "critical"}
 PRIORITY_ALIASES = {"normal": "medium"}
 VALID_EXEC_MODES = {
     "agent",
+    "cursor_cli",
     "droid",
     "factory_mission",
     "pi_rpc",

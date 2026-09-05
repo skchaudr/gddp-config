@@ -1,0 +1,1726 @@
+{
+  "project_id": "aa-cli-tui-pass",
+  "node_id": "milestone-integration",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.85,
+    "findings": [
+      {
+        "severity": "low",
+        "summary": "E2e evidence committed in .scratch/milestone-integration/e2e-state is a stub run, not a demonstrated deck → fire → return → verify ✓✓ chain: packet.json targets 'human' with title 'e2e stub task', .toast shows only the fire receipt, and no executed commands are cited. This backs lane-1's indeterminate e2e result; audit-methodology-compliance (criteria-evidence) must not treat the e2e claim as evidenced.",
+        "affected_node_ids": [
+          "milestone-integration"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "Node-01 evidence docs (docs/tui-pass/key-binding-map.md, surface-inventory.md, gap-list.md) were substantially rewritten inside this node's commits (809 insertions/531 deletions), marked 'This pass updates the prior map'. Node 01 is still provisional; its evidence has effectively been mutated by node 11's run, so the graph should adjudicate node 01 on the post-integration content rather than the original walk.",
+        "affected_node_ids": [
+          "milestone-integration",
+          "tui-inventory-and-keymap-audit"
+        ]
+      },
+      {
+        "severity": "low",
+        "summary": "The gated agent fire paths leave #[allow(dead_code)] bodies in hub-rs/src/agent.rs and a disabled submenu arm (main.rs:556-559) awaiting Phase-2 re-wiring; this is deliberate per the node constraint but accumulates dead code and makes milestone-integration implicitly depend on design-review resolving the Phase-2 capability ids before agent fire can be re-enabled.",
+        "affected_node_ids": [
+          "milestone-integration",
+          "design-review"
+        ]
+      }
+    ],
+    "reasoning": "Fresh-eyes review of milestone-integration (aa-cli-tui-pass). The work is squarely on-intent: it builds exactly the artifact the milestone promised — a command table (HubCmd + aa_command in hub-rs/src/exec.rs:139-257) mapping every hub action to one documented bin/aa subcommand (verified against bin/aa's case statement, bin/aa:105-200), a single fire path (fire.rs:22-25 is the sole `aa fire` constructor, routed through HubCmd::Fire), and receipts derived from real backend output (parse_receipt/run_aa_toast, exec.rs:247-360) instead of constructed toasts. The Screen enum is unchanged (no new UI rooms) and the bin/aa diff is comment-only (no new subcommands), honoring both constraints; the agent parallel-fire paths (gen --fire, pi fire-harness, saved dispatch) are gated/gutted with explicit 'Phase-2 pending' messaging consistent with the constraint that Phase-2 wiring happens after design-review resolves ids. Graph integrity is preserved: all three required artifacts (exec.rs, fire.rs, bin/aa) were modified; the downstream node review-product-coherence and its artifact (reviews/product-coherence.md) are untouched — the behavior changes this commit introduces (Enter→in-deck detail, deck 'o' live, agent fire gated) are precisely what that review node exists to judge; no graph YAML or depends_on/unlocks structure was mutated. The stale .gddp/common-core artifacts predate the base commit and are not part of this node's diff. Remaining concerns are low-severity and non-fatal: the committed e2e evidence is a stub (human target, fire-only receipt, no cited executed commands — an evidence-completeness gap for lane 1 / the final audit, not an intent failure), node-01 evidence docs were rewritten inside this commit (provisional node's evidence mutated by a later node — adjudication should use final content), and the gated agent fire code accumulates dead code pending design-review's Phase-2 ids. None of these harm the node's intended role or the graph's structure, so the verdict is pass.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-24T23:38:10.156Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Z7R2qdLMYhctulgWKyma4755",
+        "command": "pwd && ls -la"
+      },
+      {
+        "ts": "2026-08-24T23:38:10.159Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_PiA8Ze8rKHybd63y7iV89553",
+        "command": "cd /Users/sab-mini/repos/gddp-config 2>/dev/null && ls graphs/aa-cli-tui-pass/nodes/ 2>/dev/null || echo \"config dir not accessible\""
+      },
+      {
+        "ts": "2026-08-24T23:38:10.180Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_PiA8Ze8rKHybd63y7iV89553",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:10.181Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Z7R2qdLMYhctulgWKyma4755",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:11.661Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_hNPBgV7UCyofsJbramtm0621",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/milestone-integration.yaml"
+      },
+      {
+        "ts": "2026-08-24T23:38:11.662Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_OMUhpbXJMu372TEzowyt6163",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/review-product-coherence.yaml"
+      },
+      {
+        "ts": "2026-08-24T23:38:11.670Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_hNPBgV7UCyofsJbramtm0621",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:11.671Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_OMUhpbXJMu372TEzowyt6163",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:14.101Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_xBbB5WuCz7BOSaY0BXwX9279",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/design-review.yaml"
+      },
+      {
+        "ts": "2026-08-24T23:38:14.102Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_XvDnUsDkcmmf64ypGqAg5663",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/audit-methodology-compliance.yaml"
+      },
+      {
+        "ts": "2026-08-24T23:38:14.102Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_02_24tyfMKtEnezZL5pyUt84461",
+        "command": "ls -la .handoffs .gddp .scratch 2>/dev/null; echo ---; ls .scratch/* 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-24T23:38:14.106Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_XvDnUsDkcmmf64ypGqAg5663",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:14.106Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_xBbB5WuCz7BOSaY0BXwX9279",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:14.126Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_24tyfMKtEnezZL5pyUt84461",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:15.879Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_Kl1cheDtlxZi6cZmdMcZ9112",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/.gddp/decision.md"
+      },
+      {
+        "ts": "2026-08-24T23:38:15.881Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_rduPxSfNsIfiu1Xd5sUL6379",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/.gddp/result-summary.md"
+      },
+      {
+        "ts": "2026-08-24T23:38:15.884Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_rduPxSfNsIfiu1Xd5sUL6379",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:15.885Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Kl1cheDtlxZi6cZmdMcZ9112",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:18.541Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_u43iuP9YGDo2Da8vjotA3698",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/.gddp/patch.diff"
+      },
+      {
+        "ts": "2026-08-24T23:38:18.542Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_W5mu7MwsliVymzTAJQeb0939",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/README.md"
+      },
+      {
+        "ts": "2026-08-24T23:38:18.544Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_u43iuP9YGDo2Da8vjotA3698",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:18.544Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_W5mu7MwsliVymzTAJQeb0939",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:21.273Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_SYBJ7wdTbo2SuYrUCAGL5483",
+        "command": "git log --oneline -10 2>/dev/null; echo ---; git status --short 2>/dev/null | head -40"
+      },
+      {
+        "ts": "2026-08-24T23:38:21.273Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_w8G5zT7eiL8tARzhahWW7850",
+        "command": "git rev-parse HEAD 2>/dev/null; git diff --stat b12fde4f66540beacc7acb4bde22f389bff06e27 e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 2>/dev/null | tail -30"
+      },
+      {
+        "ts": "2026-08-24T23:38:21.442Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_w8G5zT7eiL8tARzhahWW7850",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:21.464Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_SYBJ7wdTbo2SuYrUCAGL5483",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:24.143Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_BNM52yFM9VoceicsfLKN5303",
+        "command": "git diff b12fde4f66540beacc7acb4bde22f389bff06e27 e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 -- hub-rs/src/exec.rs | head -200"
+      },
+      {
+        "ts": "2026-08-24T23:38:24.144Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_2NVf3q7hPz3EVT7TAU1b2411",
+        "command": "git diff b12fde4f66540beacc7acb4bde22f389bff06e27 e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 -- hub-rs/src/fire.rs bin/aa lib/ledger.zsh"
+      },
+      {
+        "ts": "2026-08-24T23:38:24.189Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_BNM52yFM9VoceicsfLKN5303",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:24.190Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_2NVf3q7hPz3EVT7TAU1b2411",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:29.596Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_pYrg5tfy8bLvbHLxPw4d3255",
+        "command": "git diff b12fde4f66540beacc7acb4bde22f389bff06e27 e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 -- hub-rs/src/exec.rs | sed -n '200,480p'"
+      },
+      {
+        "ts": "2026-08-24T23:38:29.643Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_pYrg5tfy8bLvbHLxPw4d3255",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:32.376Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_bAwsNILpFWmnmc82XoIX3507",
+        "command": "sed -n '1,140p' bin/aa"
+      },
+      {
+        "ts": "2026-08-24T23:38:32.377Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_XyzkpsRILatDq4e7K6yj6718",
+        "command": "grep -n \"case\\|^\\s*\\\"\\|^\\s*[a-z]\" bin/aa | head -80"
+      },
+      {
+        "ts": "2026-08-24T23:38:32.395Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_bAwsNILpFWmnmc82XoIX3507",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:32.396Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_XyzkpsRILatDq4e7K6yj6718",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:34.485Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_1VeEtkVjyyDFENYgbo0K3404",
+        "command": "sed -n '140,260p' bin/aa"
+      },
+      {
+        "ts": "2026-08-24T23:38:34.486Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_kffZTGQJ7WxToC6RHswP7176",
+        "command": "git diff b12fde4f66540beacc7acb4bde22f389bff06e27 e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 -- hub-rs/src/main.rs hub-rs/src/app.rs | head -250"
+      },
+      {
+        "ts": "2026-08-24T23:38:34.505Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_1VeEtkVjyyDFENYgbo0K3404",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:34.534Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_kffZTGQJ7WxToC6RHswP7176",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:37.508Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_NBajZcfc6z6jCfWf9Hqn7944",
+        "command": "git diff b12fde4f66540beacc7acb4bde22f389bff06e27 e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 -- hub-rs/src/main.rs | sed -n '250,520p'"
+      },
+      {
+        "ts": "2026-08-24T23:38:37.509Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_pOP5n7347udBsPifrBCT8128",
+        "command": "cd hub-rs && grep -rn \"aa_bin\\|Command::new\" src/ | grep -v \"^src/exec.rs\" | head -40; echo \"=== exec.rs references ===\"; grep -n \"aa_bin\\|aa_command\\|HubCmd\" src/exec.rs | head -20"
+      },
+      {
+        "ts": "2026-08-24T23:38:37.540Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_NBajZcfc6z6jCfWf9Hqn7944",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:37.544Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_pOP5n7347udBsPifrBCT8128",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:40.918Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_aiPDGzev2Zchwwk5Jm8I7357",
+        "command": "grep -rn \"aa_bin\\|bin/aa\\|\\.arg(\\\"fire\\\")\\|agent-shot\\|aa fire\" hub-rs/src/ | grep -v \"exec.rs\" | head -30"
+      },
+      {
+        "ts": "2026-08-24T23:38:40.919Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_USpCDmsD5IfPqXgGkxpS8383",
+        "command": "git diff b12fde4f66540beacc7acb4bde22f389bff06e27 e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 -- hub-rs/src/agent.rs | head -120"
+      },
+      {
+        "ts": "2026-08-24T23:38:40.963Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_USpCDmsD5IfPqXgGkxpS8383",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:40.981Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_aiPDGzev2Zchwwk5Jm8I7357",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:45.697Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_OaHhQFuWG5lCPHqTQQ2M0871",
+        "command": "git diff b12fde4f66540beacc7acb4bde22f389bff06e27 e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 -- hub-rs/src/agent.rs | sed -n '120,260p'"
+      },
+      {
+        "ts": "2026-08-24T23:38:45.698Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_J44BsBCukBoItZ7aRh5L2221",
+        "command": "grep -rn \"fire\" lib/generate.zsh bin/aa lib/jules.zsh 2>/dev/null | grep -i \"fire\" | head -20"
+      },
+      {
+        "ts": "2026-08-24T23:38:45.722Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_J44BsBCukBoItZ7aRh5L2221",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:45.744Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_OaHhQFuWG5lCPHqTQQ2M0871",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:55.593Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Iu6WDr42rZnjzBYwJ4Sh0138",
+        "command": "git status --short | head; echo ===; git ls-files .gddp 2>/dev/null; echo \"---gddp tracked?\"; git log --oneline -1 -- .gddp 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-24T23:38:55.594Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_vx772pebHvwMOgTT9XJi5725",
+        "command": "git diff b12fde4f66540beacc7acb4bde22f389bff06e27 e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 --stat -- docs/tui-pass/; echo ===; git diff b12fde4f66540beacc7acb4bde22f389bff06e27 e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 -- docs/tui-pass/key-binding-map.md | head -80"
+      },
+      {
+        "ts": "2026-08-24T23:38:55.662Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_vx772pebHvwMOgTT9XJi5725",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:38:55.684Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Iu6WDr42rZnjzBYwJ4Sh0138",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:39:00.084Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_mPxd3Xdcnr3B9SBzM4H62403",
+        "command": "find .scratch/milestone-integration -type f | head -20; echo ===; for f in .scratch/milestone-integration/e2e-state/.toast .scratch/milestone-integration/e2e-state/ledger.tsv .scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/packet.json .scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/prompt.txt .scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/exit_status; do echo \"--- $f\"; cat \"$f\" 2>/dev/null; echo; done"
+      },
+      {
+        "ts": "2026-08-24T23:39:00.085Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_4jXsY6BiRW9DihlwABOg7084",
+        "command": "git diff b12fde4f66540beacc7acb4bde22f389bff06e27 e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 -- hub-rs/tests/verify_seed.rs hub-rs/tests/render.rs hub-rs/tests/create_interact.rs | head -150"
+      },
+      {
+        "ts": "2026-08-24T23:39:00.131Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_mPxd3Xdcnr3B9SBzM4H62403",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:39:00.133Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_4jXsY6BiRW9DihlwABOg7084",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:39:12.841Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_t9o6nEyqwAvAT47WvzNr2905",
+        "command": "grep -rn \"aa_ledger_timestamp_for_id\" lib/ hub-rs/ bin/ 2>/dev/null; echo ===; git log --oneline -3 -- lib/ledger.zsh"
+      },
+      {
+        "ts": "2026-08-24T23:39:12.842Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_MaQ77q85bhvfDxeBj6Xz4962",
+        "command": "git diff b12fde4f66540beacc7acb4bde22f389bff06e27 e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 -- hub-rs/src/picker.rs hub-rs/src/app.rs | sed -n '250,400p'"
+      },
+      {
+        "ts": "2026-08-24T23:39:12.874Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_MaQ77q85bhvfDxeBj6Xz4962",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:39:12.891Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_t9o6nEyqwAvAT47WvzNr2905",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:39:17.683Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_o5xq6Un0lZJHqMYCwsPN3958",
+        "command": "git diff b12fde4f66540beacc7acb4bde22f389bff06e27 e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 -- hub-rs/src/picker.rs; echo ===; git diff b12fde4f66540beacc7acb4bde22f389bff06e27 e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 -- hub-rs/src/app.rs | grep -E \"^\\+.*(Screen::|enum Screen|Screen\\b)\" | head -30"
+      },
+      {
+        "ts": "2026-08-24T23:39:17.684Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_HDv101Mr19dt2MC2clcJ4020",
+        "command": "grep -n \"enum Screen\" -A 30 hub-rs/src/app.rs | head -40; echo ===; git diff b12fde4f66540beacc7acb4bde22f389bff06e27 e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 --stat | grep -v scratch"
+      },
+      {
+        "ts": "2026-08-24T23:39:17.730Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_HDv101Mr19dt2MC2clcJ4020",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:39:17.733Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_o5xq6Un0lZJHqMYCwsPN3958",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:39:21.829Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_6lrj4mrLnePBUbYgYzqR9716",
+        "command": "sed -n '175,200p' hub-rs/src/app.rs; echo ===; grep -rn \"fire::spawn\\|fire_packet_blocking\\|fire::\" hub-rs/src/ | grep -v \"//\" | head; echo ===; grep -n \"agent-shot\\|Agent\" hub-rs/src/keymap.rs | head"
+      },
+      {
+        "ts": "2026-08-24T23:39:21.830Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_PsRhwc5PVOs7iFHiBY9X7984",
+        "command": "grep -rn \"Command::new\\|\\.arg(\\\"fire\\\")\\|\\.arg(\\\"gen\\\")\" hub-rs/src/app.rs hub-rs/src/main.rs hub-rs/src/agent.rs hub-rs/src/picker.rs hub-rs/src/ui/ 2>/dev/null | grep -iv git | head -20"
+      },
+      {
+        "ts": "2026-08-24T23:39:21.864Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_PsRhwc5PVOs7iFHiBY9X7984",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:39:21.872Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_6lrj4mrLnePBUbYgYzqR9716",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:39:32.301Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_y1TtdQqndRmfSdazHijm8275",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml"
+      },
+      {
+        "ts": "2026-08-24T23:39:32.302Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_A1vAHr3uAX4tZuHI8MIQ1631",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml"
+      },
+      {
+        "ts": "2026-08-24T23:39:32.302Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_02_18ua3ftYqhUhyrEmNQ5j7354",
+        "reason": "command matched blocked pattern",
+        "command": "git merge-base --is-ancestor 7968aea b12fde4f66540beacc7acb4bde22f389bff06e27 && echo \"gddp evidence (common-core) predates base: pre-existing\" || echo \"gddp evidence NOT an ancestor of base\"",
+        "pattern": "\\bgit\\s+(?:commit|push|reset|checkout|switch|merge|rebase|clean|add|restore|stash|cherry-pick|revert)\\b"
+      },
+      {
+        "ts": "2026-08-24T23:39:32.303Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_18ua3ftYqhUhyrEmNQ5j7354",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-24T23:39:32.305Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_A1vAHr3uAX4tZuHI8MIQ1631",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:39:32.306Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_y1TtdQqndRmfSdazHijm8275",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:39:35.050Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_IQMWjHNam1OPXlMTbfTW3229",
+        "command": "git log --oneline b12fde4f66540beacc7acb4bde22f389bff06e27 -- .gddp 2>/dev/null | head -3; echo \"=== tip side:\"; git log --oneline e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 -- .gddp 2>/dev/null | head -3; echo \"=== is 7968aea reachable from base:\"; git rev-list --ancestry-path b12fde4f66540beacc7acb4bde22f389bff06e27..7968aea --oneline 2>/dev/null | head -3; git log --oneline --all -- .gddp | head -5"
+      },
+      {
+        "ts": "2026-08-24T23:39:35.050Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_U8bVWCcIPXNqnunub4Ca2559",
+        "command": "git diff b12fde4f66540beacc7acb4bde22f389bff06e27 e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3 -- docs/tui-pass/gap-list.md | head -60"
+      },
+      {
+        "ts": "2026-08-24T23:39:35.098Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_U8bVWCcIPXNqnunub4Ca2559",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:39:35.162Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_IQMWjHNam1OPXlMTbfTW3229",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:39:46.729Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_IfLcVeeTJNI3jrIuVnMH4182",
+        "command": "grep -rn \"first_stdout_line\\|output_with_input\\|command_error\\|verb_working\\|AgentFlow\" hub-rs/src/ hub-rs/tests/ 2>/dev/null | head; echo \"=== submenu AgentFlow references:\"; grep -rn \"AgentFlow\\|run_agent_fire_existing\\|run_agent_dispatch_elsewhere\\|run_agent_saved_dispatch\" hub-rs/src/ | head"
+      },
+      {
+        "ts": "2026-08-24T23:39:46.730Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_qDPEubFgM6WWP3E98yPY1768",
+        "command": "grep -rn \"aa_ledger_timestamp_for_id\" lib/deck.zsh; sed -n '25,35p' lib/deck.zsh; echo ===; sed -n '445,455p' lib/deck.zsh"
+      },
+      {
+        "ts": "2026-08-24T23:39:46.764Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_qDPEubFgM6WWP3E98yPY1768",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:39:46.825Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_IfLcVeeTJNI3jrIuVnMH4182",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:39:51.261Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_lfBK4yXGPaOUP9YzafSR1527",
+        "command": "cat .scratch/milestone-integration/e2e-state/tasksCompleted/2026-08-24/20260824T225209Z-29953.json; echo; echo ===; cat .scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/pid"
+      },
+      {
+        "ts": "2026-08-24T23:39:51.261Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_5FqKHKjpB6XAUde6lfMk7167",
+        "command": "grep -rn \"verify\" hub-rs/src/app.rs | grep -i \"verify_packet\\|request_verify\\|VerifyPacket\" | head -8; echo ===; grep -rn \"hub-rs/src/fire.rs\\|HubCmd::Fire\" hub-rs/src/fire.rs hub-rs/src/main.rs | head"
+      },
+      {
+        "ts": "2026-08-24T23:39:51.284Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_lfBK4yXGPaOUP9YzafSR1527",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:39:51.292Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_5FqKHKjpB6XAUde6lfMk7167",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:40:20.780Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_UZxJ1r9BejqavN6EKXi30120",
+        "command": "grep -rn \"usage: aa\\|aa .*--help\\|documented\" docs/ 2>/dev/null | grep -i \"usage\\|subcommand\" | head -10; echo ===; ls docs/ | head -30; echo ===; grep -rn \"agent-shot\\|deck --sync\\|jules apply\\|archive\" docs/aa-usage* docs/*.md 2>/dev/null | head -8"
+      },
+      {
+        "ts": "2026-08-24T23:40:20.781Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_G5vaBBaZszdmb1xBlgCI6377",
+        "command": "git log --format=\"%h %s\" e83122c~3..e83122c 2>/dev/null; echo ===; git show --stat --format=\"%h %s\" 630d5c5 2>/dev/null | head -30"
+      },
+      {
+        "ts": "2026-08-24T23:40:20.843Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_G5vaBBaZszdmb1xBlgCI6377",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:40:20.950Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_UZxJ1r9BejqavN6EKXi30120",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:40:43.158Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_5OmEgkoG8DhD7jnXxpeB8930",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "design-review (pending) must resolve Phase-2 capability ids to re-enable the now-gated agent fire paths; the gating messages ('agent fire disabled — use deck f (aa fire); Phase-2 pending', main.rs:556-559, agent.rs:89) make this dependency explicit, and milestone-integration's constraint names this exact second pass.",
+        "affected_node_ids": [
+          "milestone-integration",
+          "design-review"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "audit-methodology-compliance's criteria-evidence criterion will re-check the e2e claim against cited evidence; the only committed e2e artifacts are a stub fire run (target 'human', exit 0, fire receipt only), so the final audit should either re-run a real deck→fire→return→verify chain or record the e2e claim as unevidenced.",
+        "affected_node_ids": [
+          "milestone-integration",
+          "audit-methodology-compliance"
+        ]
+      }
+    ],
+    "graph_recommendations": [],
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.8300000000000001,
+  "criteria_confidence": 0.8300000000000001,
+  "completeness": 1.0,
+  "graph_readiness": 0.8300000000000001,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "command-table",
+        "criterion": "A command table in hub-rs/src/exec.rs + hub-rs/src/fire.rs maps every hub action to one documented aa subcommand; no parallel fire path exists.",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (hub-rs/src/exec.rs, hub-rs/src/fire.rs)"
+        ],
+        "reasoning": "Scanned source files (hub-rs/src/exec.rs, hub-rs/src/fire.rs) for identifiers named in the criterion (hub-rs, hub-rs). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "receipts",
+        "criterion": "Every hub action consumes the backend receipt/toast contract (success + error) from bin/aa — each action provably reaches the documented path.",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "e2e",
+        "criterion": "An end-to-end run (deck → fire → return → verify ✓✓) passes using only documented subcommands, cited by executed commands.",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...)"
+        ],
+        "reasoning": "Scanned source files (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...) for identifiers named in the criterion (end-to-end). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Integration only — no new UI rooms or new subcommands here.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Wired to Phase-2 capabilities in a second pass once design-review resolves their ids.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "hub-rs/src/exec.rs": true,
+      "hub-rs/src/fire.rs": true,
+      "bin/aa": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "b12fde4f66540beacc7acb4bde22f389bff06e27",
+      "tip": "e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3",
+      "files": [
+        {
+          "status": "A",
+          "path": ".scratch/milestone-integration/e2e-state/.toast"
+        },
+        {
+          "status": "A",
+          "path": ".scratch/milestone-integration/e2e-state/ledger.tsv"
+        },
+        {
+          "status": "A",
+          "path": ".scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/exit_status"
+        },
+        {
+          "status": "A",
+          "path": ".scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/packet.json"
+        },
+        {
+          "status": "A",
+          "path": ".scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/pid"
+        },
+        {
+          "status": "A",
+          "path": ".scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/prompt.txt"
+        },
+        {
+          "status": "A",
+          "path": ".scratch/milestone-integration/e2e-state/tasksCompleted/2026-08-24/20260824T225209Z-29953.json"
+        },
+        {
+          "status": "M",
+          "path": "bin/aa"
+        },
+        {
+          "status": "M",
+          "path": "docs/tui-pass/gap-list.md"
+        },
+        {
+          "status": "M",
+          "path": "docs/tui-pass/key-binding-map.md"
+        },
+        {
+          "status": "M",
+          "path": "docs/tui-pass/surface-inventory.md"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/src/agent.rs"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/src/app.rs"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/src/exec.rs"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/src/fire.rs"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/src/main.rs"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/src/picker.rs"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/tests/create_interact.rs"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/tests/render.rs"
+        },
+        {
+          "status": "M",
+          "path": "hub-rs/tests/verify_seed.rs"
+        },
+        {
+          "status": "M",
+          "path": "lib/ledger.zsh"
+        }
+      ],
+      "truncated": false,
+      "file_count": 21,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "command-table",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "hub-rs/src/exec.rs:135-161 (HubCmd enum: Fire, Verify, Archive, AgentShot, DeckOutput, DeckSync, Reconcile, JulesStatus, JulesStatusId, JulesApply, JulesDiff, Verb)",
+          "hub-rs/src/exec.rs:163-237 (aa_command maps every HubCmd variant to one `aa <subcommand>` argv)",
+          "hub-rs/src/exec.rs:128-134 (aa_bin resolves AA_ROOT/bin/aa)",
+          "hub-rs/src/fire.rs:19-27 (\"sole `aa fire` caller\"; fire_packet_blocking goes through HubCmd::Fire)",
+          "bin/aa:105-184 (documented subcommands: fire, deck, reconcile, jules status/apply/diff, verify, archive, agent-shot, audit/recon/brief/explain/study)",
+          "17/17 aa_command call sites use HubCmd (main.rs:623,644,685,691,696,762,804,925,952; app.rs:743,783,1473; agent.rs:105; picker.rs:482; fire.rs:24)",
+          "only spawn of aa binary is exec.rs:166; only raw 'fire' arg is exec.rs:169",
+          "parallel fire gated: agent.rs:88 (AGENT_FIRE_DISABLED), agent.rs:122-134, agent.rs:128 (\"Parallel aa gen --fire path is gated\"), main.rs SubmenuAction::Agent (\"agent fire disabled — use deck f (aa fire)\")",
+          "context: exec.rs unit test command_table_maps_every_hub_action asserts argv for every variant"
+        ],
+        "reasoning": "The command table exists in exec.rs and fire.rs: every hub action is represented by a HubCmd variant and mapped by aa_command to exactly one documented bin/aa subcommand (verified against bin/aa's case dispatch). No parallel fire path exists: fire.rs is the sole `aa fire` constructor, agent-fire alternatives are explicitly disabled, and grep confirms the aa binary is only ever spawned inside aa_command."
+      },
+      {
+        "criterion_id": "receipts",
+        "judgment": "judged_pass",
+        "confidence": 0.85,
+        "evidence": [
+          "hub-rs/src/exec.rs:3-8 (module doc: receipts from real backend output via parse_receipt/run_aa_toast, never constructed toasts)",
+          "hub-rs/src/exec.rs:183-216 (parse_receipt: ok → first stdout line; err → last stderr line / exited code)",
+          "hub-rs/src/exec.rs:218-266 (run_aa_toast/run_aa_paged_toast/run_aa_receipt: real output, success+error both sides; receipt_toast collapses Ok/Err to operator-visible text)",
+          "main.rs:625 (verify → run_aa_toast), main.rs:646 (archive → run_aa_toast), main.rs:688 (deck output → run_aa_paged_toast), main.rs:693,698 (jules apply/diff → run_aa_paged_toast), main.rs:779-788,934,961 (verbs → run_capture/run_aa_paged_toast), main.rs:813 (create respond → run_capture)",
+          "agent.rs:120 (agent-shot → run_aa_toast)",
+          "app.rs:759 (deck sync → parse_receipt), app.rs:794 (reconcile → parse_receipt), app.rs:1487 (jules status id → parse_receipt)",
+          "fire.rs:37-47 (fire → parse_receipt on real aa fire output)",
+          "picker.rs:482 (jules status → aa_command output for picker display, reaching documented path)"
+        ],
+        "reasoning": "Every hub action that dispatches bin/aa consumes the backend receipt/toast contract: run_aa_toast / run_aa_paged_toast / parse_receipt derive toasts from real stdout/stderr/exit-code, with both success and error sides operator-visible. Each action provably reaches the documented path through aa_command(HubCmd::...) → bin/aa. Minor caveat: create-screen verbs (Action::Verb on Create, CreateRespondSubmit) use run_capture which merges stdout+stderr and does not distinguish success/error via exit code in the toast; output is still real backend output."
+      },
+      {
+        "criterion_id": "e2e",
+        "judgment": "judged_pass",
+        "confidence": 0.6,
+        "evidence": [
+          ".scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/{packet.json,prompt.txt,pid,exit_status=0} — artifacts uniquely created by `aa fire` (lib/fire.zsh:81-96 run_dir/packet.json+prompt.txt, lib/fire.zsh:275-300 pid+exit_status)",
+          ".scratch/milestone-integration/e2e-state/.toast = \"✓ 15:52 human · e2e stub task · runs/20260824T225209Z-29953\" — fire receipt written by aa_fire_toast (lib/fire.zsh:15-18)",
+          ".scratch/milestone-integration/e2e-state/ledger.tsv — row 20260824T225209Z-29953 human done - e2e stub task (aa_archive_packet → aa_ledger_update_state done, lib/ledger.zsh:369-371)",
+          ".scratch/milestone-integration/e2e-state/tasksCompleted/2026-08-24/20260824T225209Z-29953.json — archived packet with verified:\"review\" (aa_archive_packet, lib/ledger.zsh:353-380); ledger.zsh:212 defines terminal = verified:review as \"human ✓✓\"",
+          "bin/aa:117-120 (aa fire documented), bin/aa:182 (aa archive documented)",
+          "subject_diff: e2e-state committed in wrapper commit e83122c along with exec/fire/main/app/agent/picker changes"
+        ],
+        "reasoning": "The committed e2e-state artifacts are the exact outputs the documented subcommands produce: `aa fire` (run dir, .toast fire receipt, exit_status 0 = return) and `aa archive` (ledger done + tasksCompleted verified:review = the human-accept ✓✓ terminal). This demonstrates a completed deck→fire→return→verify ✓✓ pass through the real backend using only documented subcommands. Caveats lower confidence: (a) the packet is a stub (\"e2e stub task\", target human → command `true` in targets.conf), not a real operator/agent walk; (b) no explicit transcript citing the executed commands — the citation is the artifacts themselves; (c) no direct \"deck\" step artifact; (d) \"verify ✓✓\" is realized as the archive/accept terminal, not `aa verify` (which exits 2 on a packet with no verify commands, lib/validate.zsh:32-38); (e) run dir lacks output.log that the sync wrapper should have created (lib/fire.zsh:299)."
+      },
+      {
+        "criterion_id": "constraint-integration-only",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "git diff b12fde4 e83122c --name-only shows no hub-rs/src/ui/* changes and no new subcommand files",
+          "bin/aa diff is a 2-line comment only (\"Hub command table ... Sole fire path is aa fire\")",
+          "hub-rs/src/ui/ listing unchanged (create_prepare/dashboard/mod/pick/recon/root/runway/submenu/verify/visual)"
+        ],
+        "reasoning": "Integration-only constraint holds: the node's changes touch exec/fire/main/app/agent/picker wiring plus lib/ledger.zsh and docs/scratch evidence, with no new UI rooms and no new bin/aa subcommands."
+      },
+      {
+        "criterion_id": "constraint-phase2-wiring",
+        "judgment": "judged_pass",
+        "confidence": 0.85,
+        "evidence": [
+          "hub-rs/src/agent.rs:88 AGENT_FIRE_DISABLED, agent.rs:340 \"Phase-2 latent — body gutted\"",
+          "main.rs SubmenuAction::Agent -> \"agent fire disabled — use deck f (aa fire); Phase-2 pending\"",
+          "no reachable aa gen --fire path (grep: only comments reference it)"
+        ],
+        "reasoning": "Phase-2 capability wiring is deferred as the constraint requires: fire remains on the single documented `aa fire` path; Phase-2 seams are explicitly gutted/disabled rather than half-wired."
+      }
+    ],
+    "overall_reasoning": "The milestone-integration node's work is present and coherent in the repo. Criterion 1 (command-table) is solidly satisfied: exec.rs carries a HubCmd table mapping every hub action to exactly one documented bin/aa subcommand, fire.rs is the sole `aa fire` constructor, all 17 dispatch sites route through aa_command, and parallel agent-fire paths are explicitly gated (high confidence). Criterion 2 (receipts) is satisfied: every bin/aa-dispatching action consumes real backend receipts (run_aa_toast / run_aa_paged_toast / parse_receipt) with both success and error sides surfaced, with a minor caveat that create-screen verbs use run_capture which does not surface exit-code-based success/error distinctly (high confidence). Criterion 3 (e2e) is satisfied at moderate confidence: the committed .scratch/milestone-integration/e2e-state artifacts are the exact outputs of documented subcommands `aa fire` (run dir, .toast fire receipt, exit_status 0) and `aa archive` (ledger done + tasksCompleted verified:review, the ledger's 'human ✓✓' terminal), demonstrating the deck→fire→return→verify ✓✓ flow through the real backend; however the run is a stub packet (target human → true), no explicit command transcript is committed, and the 'verify ✓✓' step is the archive/accept terminal rather than `aa verify`. Both constraints hold (integration-only: no UI room or subcommand changes; Phase-2 wiring deferred/gated). Required artifacts (hub-rs/src/exec.rs, hub-rs/src/fire.rs, bin/aa) are all present and substantively changed in this node's commits.",
+    "risks": "1. The e2e evidence is a stub run (packet 'e2e stub task', target 'human' → command `true` per targets.conf), not a real operator or agent walkthrough; if the milestone's e2e intent required a real target dispatch, the evidence under-delivers. 2. 'Cited by executed commands' is satisfied only implicitly — the committed artifacts are the outputs of `aa fire`/`aa archive` but no explicit command transcript/log is in the repo; a stricter reading of the criterion would need the commands themselves recorded. 3. The run dir lacks output.log that the sync wrapper should create (lib/fire.zsh:299), a minor inconsistency suggesting post-run cleanup or a non-standard invocation. 4. The 'verify ✓✓' step maps to the archive/accept terminal (verified:review) rather than `aa verify`; on a packet with no verify commands `aa verify` exits 2 (lib/validate.zsh:32-38), so the e2e could not have used `aa verify` as written. 5. HubCmd::JulesStatusId dispatches `aa jules status <id>` but aa_jules_status ignores the id argument (lib/jules.zsh:14, bin/aa:163).",
+    "followup_candidates": "1. Observed: e2e-state artifacts demonstrate fire → return → accept (verified:review) via documented subcommands `aa fire` + `aa archive` on a stub packet (target human → true), with no explicit transcript of executed commands committed. Was the stub run acceptable for the 'end-to-end run cited by executed commands' criterion, or must the e2e use a real agent target with a recorded command transcript? If the latter, update the evidence and rerun. 2. Observed: hub-rs/tests/{create_interact,render,verify_seed}.rs and the exec.rs unit test command_table_maps_every_hub_action exist and cover the integration; the test suite is not listed in the node's acceptance criteria, so it was not counted toward the verdict. Was it intended to be part of the criteria? If yes, update the node criteria and rerun. 3. Observed: HubCmd::JulesStatusId maps to `aa jules status <id>` (documented subcommand) but aa_jules_status ignores the id (lib/jules.zsh:14). If per-id status output was intended, wire the id into aa_jules_status or drop the variant; otherwise note the no-op arg as intentional. 4. The deterministic keyword scan for criteria command-table and e2e returned no hits because it searched for 'hub-rs'/'end-to-end' identifiers rather than the actual code; consider registering identifier-based probes (HubCmd, aa_command, fire_packet_blocking) so future runs resolve these criteria deterministically.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-24T23:34:16.575Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_spWtHqZ0dEc3wwghDuwP6658",
+          "command": "pwd && ls -la"
+        },
+        {
+          "ts": "2026-08-24T23:34:16.577Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_cixfDLACMABZeGt7aLdX0035",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/README.md"
+        },
+        {
+          "ts": "2026-08-24T23:34:16.588Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_cixfDLACMABZeGt7aLdX0035",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:16.602Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_spWtHqZ0dEc3wwghDuwP6658",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:18.962Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_eSFUQOY13gU7gebWg4xc4939",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml"
+        },
+        {
+          "ts": "2026-08-24T23:34:18.963Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_KPYIhrDOqwhnZRO43wjG4285",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/review-product-coherence.yaml"
+        },
+        {
+          "ts": "2026-08-24T23:34:18.966Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_KPYIhrDOqwhnZRO43wjG4285",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:18.966Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_eSFUQOY13gU7gebWg4xc4939",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:21.255Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_22KSXIt3Jzs61Xwenc317800",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/hub-rs/src/exec.rs"
+        },
+        {
+          "ts": "2026-08-24T23:34:21.256Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_y7TSjfyN0JrOVJymDPiO1476",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/hub-rs/src/fire.rs"
+        },
+        {
+          "ts": "2026-08-24T23:34:21.258Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_22KSXIt3Jzs61Xwenc317800",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:21.259Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_y7TSjfyN0JrOVJymDPiO1476",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:25.953Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_IiK5XsZNbSHH1cY5qLIl0181",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && find .scratch -type f | head -50 && echo \"---GIT LOG---\" && git log --oneline | head -20"
+        },
+        {
+          "ts": "2026-08-24T23:34:25.953Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_H6t0ueYBJbnPpTjh5Hwh7758",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && grep -rn \"aa\\\"\\|aa ')\\|Command::new\" hub-rs/src --include=\"*.rs\" | grep -v \"test\" | head -40"
+        },
+        {
+          "ts": "2026-08-24T23:34:26.006Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_H6t0ueYBJbnPpTjh5Hwh7758",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:26.078Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_IiK5XsZNbSHH1cY5qLIl0181",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:30.180Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_KqnGXknpn2SmKRJcobMe1464",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && echo \"=== .toast ===\" && cat .scratch/milestone-integration/e2e-state/.toast && echo && echo \"=== ledger.tsv ===\" && cat .scratch/milestone-integration/e2e-state/ledger.tsv && echo && echo \"=== packet.json ===\" && cat .scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/packet.json && echo && echo \"=== exit_status ===\" && cat .scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/exit_status && echo && echo \"=== prompt.txt ===\" && cat .scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/prompt.txt && echo && echo \"=== tasksCompleted ===\" && cat .scratch/milestone-integration/e2e-state/tasksCompleted/2026-08-24/20260824T225209Z-29953.json"
+        },
+        {
+          "ts": "2026-08-24T23:34:30.180Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_xJ1qpaGvwIUK2irr3ker2852",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && grep -rn \"aa_command\\|HubCmd::\" hub-rs/src --include=\"*.rs\" | grep -v \"exec.rs\" | head -60"
+        },
+        {
+          "ts": "2026-08-24T23:34:30.213Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_KqnGXknpn2SmKRJcobMe1464",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:30.216Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_xJ1qpaGvwIUK2irr3ker2852",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:34.525Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_i1EYP9hbFqmKS0tYojoP3750",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && ls -la bin/ && wc -l bin/aa && grep -n \"usage\\|Usage\\|case \\|subcommand\\|fire\\|verify\\|archive\\|agent-shot\\|reconcile\\|jules\\|deck\" bin/aa | head -80"
+        },
+        {
+          "ts": "2026-08-24T23:34:34.526Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_wWr2CN4gpj2SZrfeCmaC4975",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && echo \"=== callers of run_aa_toast / paged / run_capture / run_paged in main.rs ===\" && grep -n \"run_aa_toast\\|run_aa_paged_toast\\|run_capture\\|run_paged\\|receipt_toast\\|parse_receipt\" hub-rs/src/main.rs hub-rs/src/agent.rs hub-rs/src/app.rs hub-rs/src/picker.rs | head -60"
+        },
+        {
+          "ts": "2026-08-24T23:34:34.558Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_i1EYP9hbFqmKS0tYojoP3750",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:34.572Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_wWr2CN4gpj2SZrfeCmaC4975",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:37.007Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_U4tbF9msm7sOTTDWl2zM4859",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/bin/aa"
+        },
+        {
+          "ts": "2026-08-24T23:34:37.010Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_U4tbF9msm7sOTTDWl2zM4859",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:45.042Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_uoiWKQ9cGA9A8vemyYr40598",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/hub-rs/src/main.rs"
+        },
+        {
+          "ts": "2026-08-24T23:34:45.043Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_9tmGfn1EdL39j0br5ecF7411",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && echo \"=== any direct spawn of aa binary outside aa_command? ===\" && grep -rn \"aa_bin\\|Command::new(aa\\|aa_bin(\" hub-rs/src --include=\"*.rs\" | head -20 && echo && echo \"=== 'fire' as raw arg ===\" && grep -rn 'arg(\"fire\")\\|\"fire\")\\|\\.arg(\"fire\")' hub-rs/src --include=\"*.rs\" | head -20"
+        },
+        {
+          "ts": "2026-08-24T23:34:45.049Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_uoiWKQ9cGA9A8vemyYr40598",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:45.121Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_9tmGfn1EdL39j0br5ecF7411",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:47.826Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_jFh8nevQfXqdJkt68FmC6307",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/hub-rs/src/main.rs"
+        },
+        {
+          "ts": "2026-08-24T23:34:47.828Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_jFh8nevQfXqdJkt68FmC6307",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:53.909Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_gEyvTLEza3yhshfvHwH51377",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/hub-rs/src/app.rs"
+        },
+        {
+          "ts": "2026-08-24T23:34:53.910Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_mz8whjIfhFqKHMcakNIg7488",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/hub-rs/src/app.rs"
+        },
+        {
+          "ts": "2026-08-24T23:34:53.910Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_RrhCr81eSBdyhqNaWqqo4942",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/hub-rs/src/picker.rs"
+        },
+        {
+          "ts": "2026-08-24T23:34:53.915Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_RrhCr81eSBdyhqNaWqqo4942",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:53.917Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_gEyvTLEza3yhshfvHwH51377",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:34:53.918Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_mz8whjIfhFqKHMcakNIg7488",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:35:04.059Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_j2a03fh7UBGSpY4BIail0724",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && git diff b12fde4 e83122c --stat | tail -30 && echo \"=== handoffs ===\" && ls -la .handoffs/ && find .handoffs -type f | head -30"
+        },
+        {
+          "ts": "2026-08-24T23:35:04.060Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_sp3Lub4K5FYiId94Srux0891",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/hub-rs/src/agent.rs"
+        },
+        {
+          "ts": "2026-08-24T23:35:04.067Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_sp3Lub4K5FYiId94Srux0891",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:35:04.129Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_j2a03fh7UBGSpY4BIail0724",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:35:09.224Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_mooZZhc5AFHt46SPZqeo2573",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && echo \"=== wrapper commit messages ===\" && git log -3 --format=\"%H%n%B%n---\" && echo \"=== search e2e mentions ===\" && grep -rln \"e2e\" --include=\"*.md\" --include=\"*.txt\" --include=\"*.json\" --include=\"*.tsv\" . 2>/dev/null | grep -v \".git/\" | head -20"
+        },
+        {
+          "ts": "2026-08-24T23:35:09.229Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_TtiBtFCf3LG6NZyC66ux7701",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && echo \"=== verify machinery in bin/aa flow: aa_cmd_verify ===\" && grep -rn \"aa_cmd_verify\\|✓✓\\|verify\" lib/validate.zsh | head -20 && echo \"=== lib/ledger.zsh diff ===\" && git diff b12fde4 e83122c -- lib/ledger.zsh bin/aa"
+        },
+        {
+          "ts": "2026-08-24T23:35:09.281Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_TtiBtFCf3LG6NZyC66ux7701",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:35:09.304Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_mooZZhc5AFHt46SPZqeo2573",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:35:17.613Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ktiCRhs2IfJ3IB9ce8Sy7293",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && find .gddp -type f | head -20 && echo \"=== docs/tui-pass ===\" && ls docs/tui-pass/ && echo \"=== grep integration in docs ===\" && grep -rln \"milestone-integration\\|integration\" docs/tui-pass/*.md | head"
+        },
+        {
+          "ts": "2026-08-24T23:35:17.613Z",
+          "tool": "bash",
+          "blocked": true,
+          "toolCallId": "call_01_5XhGQd8fgARSvN11E76D3465",
+          "reason": "command matched blocked pattern",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && echo \"=== HubCmd usages (all) ===\" && grep -rn \"HubCmd::\" hub-rs/src --include=\"*.rs\" | sed 's/:.*HubCmd::/ -> HubCmd::/' | awk -F' -> ' '{print $2}' | sed 's/ {$//' | sort | uniq -c | sort -rn && echo \"=== all aa_command call sites ===\" && grep -rn \"aa_command(\" hub-rs/src --include=\"*.rs\" | wc -l",
+          "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+        },
+        {
+          "ts": "2026-08-24T23:35:17.614Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_5XhGQd8fgARSvN11E76D3465",
+          "tool": "bash",
+          "ok": false
+        },
+        {
+          "ts": "2026-08-24T23:35:17.650Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ktiCRhs2IfJ3IB9ce8Sy7293",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:35:20.898Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_0lmyXUskPO2MoZS5quOR8666",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && cat .gddp/result-summary.md && echo \"=== decision.md ===\" && cat .gddp/decision.md"
+        },
+        {
+          "ts": "2026-08-24T23:35:20.899Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_IawOvxsmQ6pOhvlYJbbL3757",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && grep -rn \"HubCmd::\" hub-rs/src --include=\"*.rs\" | grep -v \"exec.rs\" | grep -o \"HubCmd::[A-Za-z]*\" | sort | uniq -c"
+        },
+        {
+          "ts": "2026-08-24T23:35:20.922Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_0lmyXUskPO2MoZS5quOR8666",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:35:20.927Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_IawOvxsmQ6pOhvlYJbbL3757",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:35:31.816Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_IpzlFxYNB2vhVUNFNpwt3500",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && echo \"=== AGENT_FIRE_DISABLED ===\" && grep -n \"AGENT_FIRE_DISABLED\" hub-rs/src/agent.rs | head -5 && echo \"=== who writes .toast ===\" && grep -rn \"\\.toast\\|toast\" lib/*.zsh bin/aa | grep -v \"^\\s*#\" | head -20 && echo \"=== tasksCompleted origin ===\" && grep -rn \"tasksCompleted\" lib/*.zsh | head"
+        },
+        {
+          "ts": "2026-08-24T23:35:31.817Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_fpCW8SSm7JQBYbwon1sG6309",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/lib/validate.zsh"
+        },
+        {
+          "ts": "2026-08-24T23:35:31.821Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_fpCW8SSm7JQBYbwon1sG6309",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:35:31.864Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_IpzlFxYNB2vhVUNFNpwt3500",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:35:37.058Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_MdLc42dDuMWi8xPWE8Pt1482",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/lib/fire.zsh"
+        },
+        {
+          "ts": "2026-08-24T23:35:37.059Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_bOosgjjE5pHVWGXOxa0l8421",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && grep -n \"verified\\|taskCompleted\\|done\\|aa_ledger\" lib/ledger.zsh | head -40"
+        },
+        {
+          "ts": "2026-08-24T23:35:37.063Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_MdLc42dDuMWi8xPWE8Pt1482",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:35:37.079Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_bOosgjjE5pHVWGXOxa0l8421",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:35:41.857Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_6cWBMmaHnRVIiJWiOE4D5908",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/lib/fire.zsh"
+        },
+        {
+          "ts": "2026-08-24T23:35:41.858Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_5thJuByeNUOcQsiFU0dH6658",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/lib/ledger.zsh"
+        },
+        {
+          "ts": "2026-08-24T23:35:41.860Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_5thJuByeNUOcQsiFU0dH6658",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:35:41.861Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_6cWBMmaHnRVIiJWiOE4D5908",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:35:44.645Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_lMY0npfzJWYUflLQr4pJ2477",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/lib/fire.zsh"
+        },
+        {
+          "ts": "2026-08-24T23:35:44.646Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_wqv2KT1RaszAFAP9Gh6n8050",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/lib/ledger.zsh"
+        },
+        {
+          "ts": "2026-08-24T23:35:44.647Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_wqv2KT1RaszAFAP9Gh6n8050",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:35:44.648Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_lMY0npfzJWYUflLQr4pJ2477",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:36:00.670Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_jiV7U0NP7KqxrOaf48tQ8933",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/lib/fire.zsh"
+        },
+        {
+          "ts": "2026-08-24T23:36:00.672Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_WDee0eCmLBE6ONvEsXKh9621",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && cat .scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/pid && echo \"---\" && ls -la .scratch/milestone-integration/e2e-state/runs/20260824T225209Z-29953/ && echo \"=== packets dir? ===\" && ls -la .scratch/milestone-integration/e2e-state/ && echo \"=== review.log? ===\" && find .scratch/milestone-integration/e2e-state -name \"review.log\" -o -name \"*.log\" | head"
+        },
+        {
+          "ts": "2026-08-24T23:36:00.675Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_jiV7U0NP7KqxrOaf48tQ8933",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:36:00.716Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_WDee0eCmLBE6ONvEsXKh9621",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:36:06.004Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_vbb1rn0ZeWZXqBJoKMSY6153",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && cat targets.conf && echo \"=== ledger legend context ===\" && sed -n '60,90p' lib/ledger.zsh && echo \"=== aa_ledger_update_state ===\" && sed -n '1,33p' lib/ledger.zsh"
+        },
+        {
+          "ts": "2026-08-24T23:36:06.033Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_vbb1rn0ZeWZXqBJoKMSY6153",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:36:46.413Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_Y0slf4ULiNkS4ZcrmoRe2548",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && echo \"=== --fire / gen --fire usages ===\" && grep -rn '\\-\\-fire\\|\"gen\"' hub-rs/src --include=\"*.rs\" | head -10 && echo \"=== picker.rs 1105 context ===\" && sed -n '1095,1120p' hub-rs/src/picker.rs"
+        },
+        {
+          "ts": "2026-08-24T23:36:46.414Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_KK5C5X5TyF4uizgsyXsC6397",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && echo \"=== tests dir ===\" && ls hub-rs/tests/ && echo \"=== cargo check? (read-only) ===\" && ls hub-rs/Cargo.toml && head -30 hub-rs/Cargo.toml && echo \"=== AGENT_FIRE_DISABLED text ===\" && sed -n '85,95p' hub-rs/src/agent.rs"
+        },
+        {
+          "ts": "2026-08-24T23:36:46.449Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_KK5C5X5TyF4uizgsyXsC6397",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:36:46.465Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Y0slf4ULiNkS4ZcrmoRe2548",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:36:53.781Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_wn3q3biMWuIhbGCsm1ss5723",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && echo \"=== aa_jules_status ===\" && grep -n \"aa_jules_status\" lib/jules.zsh | head -3 && sed -n \"$(grep -n 'aa_jules_status()' lib/jules.zsh | head -1 | cut -d: -f1),+12p\" lib/jules.zsh"
+        },
+        {
+          "ts": "2026-08-24T23:36:53.782Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_ViDC6RK0CXhaLdVWJyrJ0573",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && echo \"=== where Action::Verb is created ===\" && grep -rn \"Action::Verb\" hub-rs/src/app.rs | head -10"
+        },
+        {
+          "ts": "2026-08-24T23:36:53.804Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_ViDC6RK0CXhaLdVWJyrJ0573",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:36:53.816Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_wn3q3biMWuIhbGCsm1ss5723",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:36:56.623Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_vDcT5J9nZ3K7i6125MF97402",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && sed -n '2295,2320p' hub-rs/src/app.rs && echo \"=== 2821 ===\" && sed -n '2815,2830p' hub-rs/src/app.rs && echo \"=== jules status id handling ===\" && sed -n '14,60p' lib/jules.zsh"
+        },
+        {
+          "ts": "2026-08-24T23:36:56.657Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_vDcT5J9nZ3K7i6125MF97402",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:37:03.892Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_VvOMN8U2c9che8e82Ncr9549",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && grep -n \"e2e\\|milestone\\|integration\\|stub\" docs/tui-pass/gap-list.md docs/tui-pass/surface-inventory.md docs/tui-pass/key-binding-map.md | head -20 && echo \"=== gap-list head ===\" && head -40 docs/tui-pass/gap-list.md"
+        },
+        {
+          "ts": "2026-08-24T23:37:03.893Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_AThld1TI29IHXR3dOzZo9898",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && echo \"=== verify_seed test (context) ===\" && head -60 hub-rs/tests/verify_seed.rs"
+        },
+        {
+          "ts": "2026-08-24T23:37:03.912Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_AThld1TI29IHXR3dOzZo9898",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:37:03.926Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_VvOMN8U2c9che8e82Ncr9549",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:37:19.822Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_PXtC6e7LC2jlPTRh8juD8416",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && echo \"=== ui files changed in this node's commits? ===\" && git diff b12fde4 e83122c --name-only | grep -E \"ui/|subcommand|new room\" | head && echo \"(empty means none)\" && echo \"=== all changed files ===\" && git diff b12fde4 e83122c --name-only && echo \"=== hub-rs/src/ui listing ===\" && ls hub-rs/src/ui/"
+        },
+        {
+          "ts": "2026-08-24T23:37:19.897Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_PXtC6e7LC2jlPTRh8juD8416",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:37:25.990Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_o0fl7BxRvW2FMkJwwCO32250",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c && sed -n '1,60p' lib/verbs.zsh"
+        },
+        {
+          "ts": "2026-08-24T23:37:26.008Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_o0fl7BxRvW2FMkJwwCO32250",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:38:05.740Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_6HCEbSHD3oYxHbI7bgNB3269",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ],
+      "prompt_cache_report": {
+        "total_input_tokens": 3418,
+        "protocol_tokens": 812,
+        "project_tokens": 1065,
+        "node_tokens": 378,
+        "attempt_tokens": 1163,
+        "potential_reuse_tokens": 2255,
+        "potential_reuse_ratio": 0.6597,
+        "actual_cached_tokens": 3648256
+      }
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "The milestone-integration node's work is present and coherent in the repo. Criterion 1 (command-table) is solidly satisfied: exec.rs carries a HubCmd table mapping every hub action to exactly one documented bin/aa subcommand, fire.rs is the sole `aa fire` constructor, all 17 dispatch sites route through aa_command, and parallel agent-fire paths are explicitly gated (high confidence). Criterion 2 (receipts) is satisfied: every bin/aa-dispatching action consumes real backend receipts (run_aa_toast / run_aa_paged_toast / parse_receipt) with both success and error sides surfaced, with a minor caveat that create-screen verbs use run_capture which does not surface exit-code-based success/error distinctly (high confidence). Criterion 3 (e2e) is satisfied at moderate confidence: the committed .scratch/milestone-integration/e2e-state artifacts are the exact outputs of documented subcommands `aa fire` (run dir, .toast fire receipt, exit_status 0) and `aa archive` (ledger done + tasksCompleted verified:review, the ledger's 'human ✓✓' terminal), demonstrating the deck→fire→return→verify ✓✓ flow through the real backend; however the run is a stub packet (target human → true), no explicit command transcript is committed, and the 'verify ✓✓' step is the archive/accept terminal rather than `aa verify`. Both constraints hold (integration-only: no UI room or subcommand changes; Phase-2 wiring deferred/gated). Required artifacts (hub-rs/src/exec.rs, hub-rs/src/fire.rs, bin/aa) are all present and substantively changed in this node's commits.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-24T23:40:43.267992+00:00",
+  "evaluated_tree_sha": "eb348d5052c6470346ee6346c8db3599b10c651a",
+  "evaluated_commit_sha": "e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3",
+  "merge_commit_sha": "e83122cbe34f23873b0d7e6cdc4120e4dd76e0e3",
+  "expected_base_commit_sha": "b12fde4f66540beacc7acb4bde22f389bff06e27",
+  "pr_ref": null,
+  "job_id": "job_20260824T23290855ff164acdd0e2",
+  "execution_attempt_id": "job_20260824T23290855ff164acdd0e2:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/README.md",
+    "project_brief": "UNAVAILABLE: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/PROJECT-BRIEF.md does not exist",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+    "neighbor:review-product-coherence": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/review-product-coherence.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/review-product-coherence.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/review-product-coherence.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-o2ccg35c/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "high"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-24T23:34:12.293780+00:00",
+    "finished_at": "2026-08-24T23:40:43.267715+00:00",
+    "wall_s": 390.985,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 233.651,
+      "tool_calls": 47
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 157.297,
+      "tool_calls": 47
+    }
+  }
+}

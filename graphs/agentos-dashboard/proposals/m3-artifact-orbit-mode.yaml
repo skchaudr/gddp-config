@@ -1,0 +1,65 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: m3-artifact-orbit-mode
+title: "Milestone 3 — Mode A complete: artifact orbit over live artifacts, search filter, inspection HUD"
+type: milestone
+
+why: >
+  The orbit is the spec's signature interaction and the reason the dashboard is
+  wanted at all: a ring of generated outputs where searching a client tag dims
+  the unrelated and illuminates the linked cluster, and clicking opens a HUD
+  with metadata, path and file actions. The shell today renders a static
+  placeholder orb and a search input whose value is held in state and used for
+  nothing. This milestone makes Mode A real against the live graph from
+  milestone 2.
+
+depends_on:
+  - m2-live-topology-slice
+
+acceptance_criteria:
+  - id: orbit-live
+    criterion: >
+      The ring renders artifact-type nodes from the live graph.json and the
+      rendered count matches the watcher's artifact count for the same run.
+  - id: search-filters
+    criterion: >
+      The existing top search bar drives fuzzy keyword and tag filtering across
+      the orbit: unrelated nodes dim, linked nodes and their relations
+      highlight. Filtering with no matches renders a stated empty state.
+  - id: hud-inspection
+    criterion: >
+      Clicking a node opens the HUD card showing title, tags, created/modified
+      dates, model (tolerating the null the vault actually supplies) and the
+      absolute path, with Open File, Remove Ball and Close behaving as
+      specified.
+  - id: non-destructive
+    criterion: >
+      Remove Ball is demonstrated to touch no file: it removes the node from
+      the current view only, a documented reload restores it, and the absence
+      of any filesystem write is cited.
+  - id: real-scale
+    criterion: >
+      Behavior at the real artifact count of Sab's vault is demonstrated, not
+      estimated, including the degenerate cases of zero artifacts and a count
+      large enough that the ring cannot show every node legibly.
+
+constraints:
+  - Remove Ball never deletes, moves, or rewrites a file.
+  - If the orbit needs metadata the schema lacks, that is a schema amendment routed to human review — not an ad-hoc frontend-only field.
+  - No fallback to fixture data when the live graph is empty or unreadable; show the real state.
+
+allowed_execution_modes:
+  - agent
+  - human
+
+required_artifacts:
+  - orbit component + tests
+  - screenshots or DOM evidence at real vault scale
+  - result-summary.md
+
+status: pending
+priority: high
+
+unlocks:
+  - m7-daily-driver-rollout

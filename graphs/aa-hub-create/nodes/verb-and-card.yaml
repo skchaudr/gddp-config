@@ -1,0 +1,59 @@
+schema_version: '1.0'
+schema_type: node
+node_id: verb-and-card
+title: Verb-first entry and verb-filtered card picker
+type: capability
+why: >-
+  PRD §4.1–4.2: verb picks the kind of work; card picks the saved brief.
+  Template-first create is the failure mode the PATH doctrine forbids. Card
+  select must load the brief with [bracket] slots and the six-field packet
+  defaults, including paths: [.].
+goal: >-
+  Land Create on verb-first entry; filter cards by the chosen verb; on card
+  select, load the template with [bracket] placeholders and packet defaults
+  including paths: [.] (PRD §4.1–4.2, §4.3).
+depends_on:
+- nav-input-repair
+acceptance_criteria:
+- id: verb-list-prd
+  criterion: >-
+    Center title is `1 · PATHWAY / VERB` / `what kind of work` with the seven
+    PRD §4.2 verbs and one-liners (recon, audit, explain, lookup, fix, exec,
+    nvim) matching hub-rs/examples/aa-verb-nvim.png. `build` and `session`
+    are absent from this verb list (PRD §4.2).
+- id: packet-empty-at-verb
+  criterion: >-
+    With no card chosen, PACKET shows empty-state copy (`no card selected`
+    plus the six-field line) and invents no body (PRD §3.3, §4.2, §7.A;
+    hub-rs/examples/aa-verb-nvim.png).
+- id: verb-filtered-card-picker
+  criterion: >-
+    Selecting a verb opens one picker of saved cards filtered by that verb;
+    the first card is selectable so the walk continues (PRD §4.3). Catalog
+    roster may be a default set; inventing a public roster beyond the
+    Explain-subsystem walk is out of scope.
+- id: card-loads-bracket-template
+  criterion: >-
+    After explain → Explain subsystem, center is the brief with
+    `[ which subsystem ]`, `[ how / why ]`, and `[ extra context ]`
+    (PRD §4.3–4.4, §7.B; hub-rs/examples/aa-card.png,
+    hub-rs/examples/aa-three-slots-template-filling.png).
+- id: paths-dot-default
+  criterion: >-
+    On that card select, PACKET YAML has slug `explain-subsystem`,
+    `target: pir`, `mode: read-only`, `constraints.cwd` set, `verify: []`,
+    and `constraints.paths` defaulting to `[.]` (PRD §4.3, §7.B).
+constraints:
+- Work is in the aa-cli repo, hub-rs crate (Rust / ratatui).
+- Scope is PATH stages verb and card (PRD §4.1–4.2 / §4.3 card-load). Slot pickers, dispatch FIELD modals, and fire belong to later nodes.
+- Run `cargo test` in hub-rs before claiming the node done.
+- Graph YAML and runtime databases stay unmodified; leave product changes as working-tree edits so the runtime persists results.
+allowed_execution_modes:
+- cursor_cli
+required_artifacts:
+- hub-rs/src/wizard/create.rs
+- hub-rs/src/template.rs
+status: pending
+priority: high
+unlocks:
+- slot-pickers

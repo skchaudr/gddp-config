@@ -1,0 +1,74 @@
+schema_version: "1.0"
+schema_type: node
+
+node_id: m2-live-topology-slice
+title: "Milestone 2 — one live vertical slice: real sources to watcher to graph.json to rendered shell"
+type: milestone
+
+why: >
+  The charted arc defers every contact with real data to live-integration
+  (node 10), nine nodes downstream. Orbit, DAG, deck and board would each be
+  built, reviewed and accepted against mock fixtures, and mock-vs-real drift
+  would surface only at the end, after the review budget is spent. The vault
+  has already contradicted the spec three times in node 02's evidence: the
+  root router is AGENTS.md and not CLAUDE.md, the department routers
+  (content.md, business.md, community.md, apps.md) do not exist, and vault
+  frontmatter carries no model field. This milestone moves reality to the
+  front — one end-to-end path with primitive rendering — so later milestones
+  are shaped by the topology that exists rather than the one the video showed.
+
+depends_on:
+  - m1-verifiable-build-baseline
+
+acceptance_criteria:
+  - id: watcher-emits
+    criterion: >
+      A watcher (Node or Python per the node-01 scope contract) scans the
+      declared sources and emits graph.json that validates against the in-repo
+      schema from milestone 1. A live edit to a watched file regenerates it,
+      cited with before/after output.
+  - id: default-path-live
+    criterion: >
+      The dashboard's default startup path loads the watcher-generated
+      graph.json. Fixtures exist only inside tests; no mock is on the default
+      path.
+  - id: counts-render
+    criterion: >
+      Both center modes render the real node and edge counts by type from that
+      file. Visual fidelity is milestones 3 and 4; what is verified here is
+      that the counts and types shown match the watcher's output.
+  - id: reality-reconciled
+    criterion: >
+      Every place the live sources contradict the video spec is recorded with
+      the resolved topology, and each affected downstream node's text is
+      flagged for human amendment rather than silently reinterpreted by the
+      executor.
+  - id: degradation-visible
+    criterion: >
+      Unparseable, missing or permission-denied sources surface in the UI and
+      in the watcher log. Nothing is dropped silently, and an empty vault
+      renders an empty state rather than an error.
+
+constraints:
+  - The watcher is read-only against every source it scans; it never writes into the vault, ~/.pi, or ~/.hermes.
+  - No mock fixture may remain on the default path once this milestone is claimed.
+  - Visual polish is explicitly out of scope; correctness of the data path is the whole point.
+
+allowed_execution_modes:
+  - agent
+  - human
+
+required_artifacts:
+  - watcher script
+  - live graph.json
+  - reconciliation notes for spec-vs-vault differences
+  - result-summary.md
+
+status: pending
+priority: high
+
+unlocks:
+  - m3-artifact-orbit-mode
+  - m4-radial-dag-mode
+  - m5-execution-boundary
+  - m6-routines-visibility

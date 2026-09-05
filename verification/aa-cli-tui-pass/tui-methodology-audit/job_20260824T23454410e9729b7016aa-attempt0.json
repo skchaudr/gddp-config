@@ -1,0 +1,819 @@
+{
+  "project_id": "aa-cli-tui-pass",
+  "node_id": "tui-methodology-audit",
+  "verdict": "fail",
+  "criteria_verdict": "fail",
+  "integrity": {
+    "verdict": "drift",
+    "intent_preserved": false,
+    "graph_integrity_preserved": false,
+    "required_human_review": true,
+    "confidence": 0.85,
+    "findings": [
+      {
+        "severity": "high",
+        "summary": "Required artifact audits/tui-methodology.md does not exist anywhere in the repo — no audits/ directory, no tui-methodology file, and no per-surface satisfies/violates audit citing the skill sections (design-system Interaction Model/Color/Seven Principles/Anti-patterns, visual-catalog check-cross, app-patterns). The node's sole deliverable is missing; all three acceptance criteria returned indeterminate with zero evidence hits.",
+        "affected_node_ids": [
+          "tui-methodology-audit"
+        ]
+      },
+      {
+        "severity": "high",
+        "summary": "The submitted diff is entirely off-node: it only corrects line references in docs/tui-pass/key-binding-map.md and docs/tui-pass/gap-list.md — artifacts owned by the upstream node tui-inventory-and-keymap-audit (still 'provisional'). The node's own wrapper commit aa5771d is empty vs its parent (git show aa5771d --stat shows no file changes). The executor did upstream-scope maintenance instead of producing the methodology audit.",
+        "affected_node_ids": [
+          "tui-methodology-audit",
+          "tui-inventory-and-keymap-audit"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "Downstream design-review depends on this node's per-surface findings; with the audit absent, the unlock edge tui-methodology-audit -> design-review carries no substance and design-review must not fire until the artifact exists.",
+        "affected_node_ids": [
+          "tui-methodology-audit",
+          "design-review"
+        ]
+      }
+    ],
+    "reasoning": "The node tui-methodology-audit exists to produce audits/tui-methodology.md — a traceable, per-surface audit of every operator surface against the three TUI methodologies, which design-review consumes. That deliverable is entirely absent: no audits/ directory, no tui-methodology file (find/grep across the repo), deterministic result reports artifacts_present=False and all three criteria indeterminate. The only work in the subject diff (630d5c5..aa5771d) re-points keymap.rs line numbers and tweaks path formatting in docs/tui-pass/key-binding-map.md and gap-list.md — both artifacts of the upstream tui-inventory-and-keymap-audit node, which is still 'provisional' in the graph. The tip wrapper commit for this job (aa5771d) is empty vs its parent. So the change under review veers off the node's intended role (audit production) into upstream doc maintenance, and the node cannot legitimately unlock design-review. Constraints were respected (read-only doc edits; gddp/ pilot statuses untouched), and the graph structure itself was not rewired — but the dependency chain's substance is broken: design-review would advance on a phantom audit. This is a drift from role with the core deliverable missing; a human must look before dependents fire. The upstream inventory's own adjudication (provisional) may further shift the line references a future audit would cite, noted as a graph observation.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-24T23:52:59.881Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_2LnjyjPfGvtOjeTLAft10423",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml"
+      },
+      {
+        "ts": "2026-08-24T23:52:59.883Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_jrzbvW3LPEZQ2Jc2dejB5092",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/design-review.yaml"
+      },
+      {
+        "ts": "2026-08-24T23:52:59.883Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_H3B6P0gWTFrTAZCveF1n6571",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw/README.md"
+      },
+      {
+        "ts": "2026-08-24T23:52:59.890Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_jrzbvW3LPEZQ2Jc2dejB5092",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:52:59.891Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_2LnjyjPfGvtOjeTLAft10423",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:52:59.891Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_H3B6P0gWTFrTAZCveF1n6571",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:53:02.650Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_3U1aESpxROA5jprX0Bwu5929",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && ls -la && echo \"---\" && git log --oneline -20 2>/dev/null | head -30 && echo \"---STATUS---\" && git status 2>/dev/null | head -40"
+      },
+      {
+        "ts": "2026-08-24T23:53:02.653Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_gh2UHYmkQOb4S6MA4iJU5986",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && find . -type d -name audits -o -type f -name \"*.md\" 2>/dev/null | head -50"
+      },
+      {
+        "ts": "2026-08-24T23:53:02.684Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_gh2UHYmkQOb4S6MA4iJU5986",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:53:02.784Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_3U1aESpxROA5jprX0Bwu5929",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:53:05.400Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_Q1Dix5TMEE56sIqsQb088193",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"=== audits dir? ===\" && ls -la audits 2>&1; find . -path ./.git -prune -o -name \"*tui-methodology*\" -print 2>/dev/null; echo \"=== docs/tui-pass ===\" && ls -la docs/tui-pass/ 2>&1; echo \"=== diff base..tip ===\" && git diff --stat 630d5c5 aa5771d 2>&1; echo \"=== diff name-status ===\" && git diff --name-status 630d5c5 aa5771d 2>&1"
+      },
+      {
+        "ts": "2026-08-24T23:53:05.401Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_Z2nBezrcBwzaB68ZO1x00892",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"=== commit aa5771d (tip) ===\" && git show --stat aa5771d 2>&1 | head -40; echo \"=== commit e83122c ===\" && git show --stat e83122c 2>&1 | head -40"
+      },
+      {
+        "ts": "2026-08-24T23:53:05.464Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_Z2nBezrcBwzaB68ZO1x00892",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:53:05.478Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_Q1Dix5TMEE56sIqsQb088193",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:53:09.184Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_BBjBIsgVgdlJdWGXdIDU2237",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"=== .gddp ===\" && find .gddp -type f | head -50 && echo \"=== .handoffs ===\" && ls -la .handoffs/ && echo \"=== .scratch ===\" && find .scratch -type f | head"
+      },
+      {
+        "ts": "2026-08-24T23:53:09.185Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_ZLq1WXVBmb7x4ymDXG4k6171",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && git diff 630d5c5 aa5771d -- docs/tui-pass/key-binding-map.md | head -80"
+      },
+      {
+        "ts": "2026-08-24T23:53:09.224Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_BBjBIsgVgdlJdWGXdIDU2237",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:53:09.236Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_ZLq1WXVBmb7x4ymDXG4k6171",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:53:13.067Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_aTA2JHPMTT68bZTgjaLb8222",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw/.gddp/result-summary.md"
+      },
+      {
+        "ts": "2026-08-24T23:53:13.068Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_XnC4I66VJH6N41Mt7i2O8384",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw/.gddp/decision.md"
+      },
+      {
+        "ts": "2026-08-24T23:53:13.071Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_aTA2JHPMTT68bZTgjaLb8222",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:53:13.072Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_XnC4I66VJH6N41Mt7i2O8384",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:53:16.199Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_7IK6wBiRNIGaBpOCb3Xk0381",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && git show aa5771d --stat 2>&1 | head -30; echo \"=== aa5771d vs parent ===\"; git diff aa5771d^ aa5771d --stat 2>&1 | head -20"
+      },
+      {
+        "ts": "2026-08-24T23:53:16.200Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_KbcceoJ38ZyCiH0iDqQe8128",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && head -100 .gddp/patch.diff 2>&1; echo \"=== patch.diff size ===\"; wc -l .gddp/patch.diff"
+      },
+      {
+        "ts": "2026-08-24T23:53:16.225Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_KbcceoJ38ZyCiH0iDqQe8128",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:53:16.263Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_7IK6wBiRNIGaBpOCb3Xk0381",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:53:29.491Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_hF3oGFQJYfYxI9bHypFB2663",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"=== git log graph ===\" && git log --oneline --graph -15 2>&1; echo; echo \"=== parent of e83122c ===\"; git log --format='%H %s' -1 e83122c^ 2>&1; echo \"=== parent of aa5771d ===\"; git log --format='%H %s' -1 aa5771d^ 2>&1"
+      },
+      {
+        "ts": "2026-08-24T23:53:29.492Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_JWXL1QcjoPAX2aYkhNLx1994",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"=== grep methodology keywords ===\" && grep -rl \"Seven Principles\\|visual-catalog\\|Anti-patterns\\|Interaction Model\" --include=\"*.md\" . 2>/dev/null | grep -v \".git/\" | head -20; echo \"=== audits anywhere ===\"; find . -path ./.git -prune -o -type d -name \"audits\" -print 2>/dev/null; find . -path ./.git -prune -o -type f -name \"*.md\" -path \"*audit*\" -print 2>/dev/null | head"
+      },
+      {
+        "ts": "2026-08-24T23:53:29.569Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_hF3oGFQJYfYxI9bHypFB2663",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:53:29.575Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_JWXL1QcjoPAX2aYkhNLx1994",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:53:34.477Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_YSIKJxYTj2bn1i1Y26Wr1989",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && git diff 630d5c5 aa5771d -- docs/tui-pass/gap-list.md"
+      },
+      {
+        "ts": "2026-08-24T23:53:34.478Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_DqBWlGYigJFJqLYRzkgF7845",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"=== keymap.rs:25-29 ===\" && sed -n '25,29p' hub-rs/src/keymap.rs 2>/dev/null; echo \"=== keymap.rs:103-105 ===\"; sed -n '103,105p' hub-rs/src/keymap.rs 2>/dev/null; echo \"=== keymap.rs:413-421 ===\"; sed -n '413,421p' hub-rs/src/keymap.rs 2>/dev/null; echo \"=== keymap.rs:30-42 ===\"; sed -n '30,42p' hub-rs/src/keymap.rs 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-24T23:53:34.514Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_DqBWlGYigJFJqLYRzkgF7845",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:53:34.521Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_YSIKJxYTj2bn1i1Y26Wr1989",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:53:41.103Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_NjcDGxcznt1huyzTAC3i4865",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"=== .zcode ===\" && find .zcode -type f 2>/dev/null | head; echo \"=== all untracked/ignored files ===\" && git status --ignored --short 2>/dev/null | head -30; echo \"=== grep for methodology audit mentions in docs/tui-pass ===\"; grep -l \"methodolog\" docs/tui-pass/*.md 2>/dev/null; echo \"=== surface-inventory head ===\"; head -40 docs/tui-pass/surface-inventory.md"
+      },
+      {
+        "ts": "2026-08-24T23:53:41.104Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_HCzg5Qtbb96h1ERdMZk65990",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"=== SKILL.md sections ===\" && grep -n \"^#\" hub-rs/.agents/skills/tui-design/SKILL.md | head -40; echo \"=== tui-design references ===\" && ls hub-rs/.agents/skills/tui-design/ hub-rs/.agents/skills/tui-design/references/ 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-24T23:53:41.130Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_HCzg5Qtbb96h1ERdMZk65990",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:53:41.166Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_NjcDGxcznt1huyzTAC3i4865",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:54:28.267Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_eoR6tRdml5CiwAH6UtfG1192",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"=== aa5771d changes vs parent (should be empty) ===\" && git show aa5771d --format=\"%H %s\" --stat | tail -5; echo \"=== any audits/ dir or tui-methodology file anywhere ===\" && find . -path ./.git -prune -o \\( -name \"*tui-methodology*\" -o -type d -name \"audits\" \\) -print 2>/dev/null; echo \"(none found if empty)\"; echo \"=== gddp/ pilot graph statuses touched by diff? ===\" && git diff --name-only 630d5c5 aa5771d | grep -c \"^gddp/\" || true"
+      },
+      {
+        "ts": "2026-08-24T23:54:28.342Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_eoR6tRdml5CiwAH6UtfG1192",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-24T23:54:41.466Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_ZvZTurX3hzPly6XD7R7Q1265",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "Upstream tui-inventory-and-keymap-audit remains 'provisional' while later jobs (e83122c) already corrected its artifacts (key-binding-map.rs line refs, gap-list paths) and this node ran against it. When the inventory is finally adjudicated, its cited line references may shift again; any re-produced methodology audit must re-validate every keymap.rs/app.rs citation against the final inventory state to keep its 'traceable' criterion sound.",
+        "affected_node_ids": [
+          "tui-inventory-and-keymap-audit",
+          "tui-methodology-audit"
+        ]
+      }
+    ],
+    "graph_recommendations": null,
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.0366666666666667,
+  "criteria_confidence": 0.0366666666666667,
+  "completeness": 0.5,
+  "graph_readiness": 0.0,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "per-surface-findings",
+        "criterion": "Every operator surface (Deck, runway, Create, Verify Evidence/Agent/ Contract rooms, pickers, root menu, status/footer) is audited against each TUI skill, with per-surface satisfies/violates findings and the exact skill section cited (design-system Interaction Model, Color, Seven Principles, Anti-patterns; visual-catalog Status indicators/ check-cross; app-patterns reference app match).",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...)"
+        ],
+        "reasoning": "Scanned source files (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...) for identifiers named in the criterion (TUI, per-surface, design-system, Anti-patterns, visual-catalog, check-cross, app-patterns). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "referenced-sections",
+        "criterion": "Findings cite the skill sections by name — not vibes — e.g. keyboard layers L0-L3, focus management, three-tier help, semantic color slots, NO_COLOR, anti-pattern IDs 1-10, check/cross glyph semantics.",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...)"
+        ],
+        "reasoning": "Scanned source files (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...) for identifiers named in the criterion (L0-L3, three-tier, NO_COLOR, anti-pattern, IDs). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "traceable",
+        "criterion": "Every finding maps to a live aa-cli file path (hub-rs/src/ui/*.rs, bin/aa, lib/*.zsh, docs/fzf-face.md, keymap.rs) — no summary claims without a cited surface.",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (docs/fzf-face.md)"
+        ],
+        "reasoning": "Scanned source files (docs/fzf-face.md) for identifiers named in the criterion (aa-cli, hub-rs, fzf-face). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Audit only — records findings; draws no conclusion about what aa-cli should become.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Read-only over aa-cli; no behavior changes.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Do not modify the pilot graph (aa-cli/gddp/) statuses.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "audits/tui-methodology.md": false
+    },
+    "deps_status": {
+      "tui-inventory-and-keymap-audit": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "630d5c574715f61b4041857226e620318bfcb02d",
+      "tip": "aa5771d9482218b6f44e9097dcc0adc0e60b45e8",
+      "files": [
+        {
+          "status": "M",
+          "path": "docs/tui-pass/gap-list.md"
+        },
+        {
+          "status": "M",
+          "path": "docs/tui-pass/key-binding-map.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 2,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "per-surface-findings",
+        "judgment": "judged_fail",
+        "confidence": 0.97,
+        "evidence": [
+          "audits/tui-methodology.md: absent (no audits/ dir; ls -d audits -> 'No such file or directory')",
+          "git rev-list --all + ls-tree scan: no commit in any ref ever added an audits/ path",
+          "git show --stat aa5771d (this node's result commit, job_20260824T23454410e9729b7016aa attempt 0): diff vs base 630d5c5 only touches docs/tui-pass/gap-list.md and docs/tui-pass/key-binding-map.md",
+          "grep -rln 'Interaction Model|Seven Principles|visual-catalog|app-patterns|Anti-patterns|check-cross' -> only hub-rs/.agents/skills/tui-design/SKILL.md, docs/tui-pass/surface-inventory.md (node-01 artifact), .scratch/verify-pathway/FACTORY-DROID-HANDOFF.md",
+          "docs/tui-pass/surface-inventory.md:1-3 explicitly labels itself 'node 01 (tui-inventory-and-keymap-audit)' — the predecessor node's artifact, not this audit"
+        ],
+        "reasoning": "The node is an audit node whose entire deliverable is the findings document. That document (audits/tui-methodology.md) does not exist in the worktree or in any commit reachable from any ref. The node's own result commit contains only line-reference corrections to node-01 docs (docs/tui-pass/gap-list.md, docs/tui-pass/key-binding-map.md) — no per-surface satisfies/violates findings against the three TUI skills with exact section citations. No equivalent content exists under any other filename; the only per-surface verdict document is the predecessor node's surface-inventory.md, which is not the required audit. All three criteria therefore fail on the same root cause: the audit was never written."
+      },
+      {
+        "criterion_id": "referenced-sections",
+        "judgment": "judged_fail",
+        "confidence": 0.96,
+        "evidence": [
+          "grep across full tree for 'L0-L3|three-tier|NO_COLOR|anti-pattern|check-cross' finds no audit document; matches only in skill source (SKILL.md), node-01 surface-inventory.md, and unrelated scratch",
+          "no file named tui-methodology anywhere: find -iname '*methodology*' returns nothing outside .git",
+          "git log --all --oneline -S 'tui-methodology' -> no results"
+        ],
+        "reasoning": "There is no findings artifact in which skill sections could be cited by name. The referenced-sections criterion presupposes the audit document from per-surface-findings; since that document was never produced, there are no named section citations (L0-L3, focus management, three-tier help, semantic color slots, NO_COLOR, anti-pattern IDs 1-10, check/cross glyph semantics) attributable to this node. The skill-section identifiers appear only in the skill source itself and in node-01's inventory, neither of which satisfies this node's requirement."
+      },
+      {
+        "criterion_id": "traceable",
+        "judgment": "judged_fail",
+        "confidence": 0.96,
+        "evidence": [
+          "git diff 630d5c5..aa5771d --name-status: only M docs/tui-pass/gap-list.md, M docs/tui-pass/key-binding-map.md — no new findings file mapping surfaces to live paths",
+          "required_artifacts audits/tui-methodology.md absent; no audits/ directory in tree or history",
+          "docs/tui-pass/surface-inventory.md (node-01) does cite hub-rs/src/ui/*.rs paths but is the predecessor artifact, not this node's audit"
+        ],
+        "reasoning": "The traceability criterion requires every finding to map to a live aa-cli file path (hub-rs/src/ui/*.rs, bin/aa, lib/*.zsh, docs/fzf-face.md, keymap.rs). With no findings document produced for this node, there are no findings to map. The node-01 inventory that does cite paths belongs to the dependency node, not this audit, and cannot substitute for the missing required artifact."
+      }
+    ],
+    "overall_reasoning": "The tui-methodology-audit node was not completed. Its required artifact audits/tui-methodology.md does not exist in the worktree (no audits/ directory) nor in any commit across the full git history (verified via rev-list --all tree scans and git log -S). The node's own result commit (aa5771d, the tip, authored by the job for this node, attempt 0) contains a diff against its base 630d5c5 that only edits two node-01 documents — docs/tui-pass/gap-list.md and docs/tui-pass/key-binding-map.md — correcting stale keymap.rs line references (e.g. :32–37 → :25–29) and expanding file paths (dashboard.rs → hub-rs/src/ui/dashboard.rs). None of the three acceptance criteria can be satisfied because the audit document that would carry per-surface findings, named skill-section citations, and file-path mapping was never produced; a repo-wide grep for the criteria's skill-section vocabulary finds it only in the skill source (hub-rs/.agents/skills/tui-design/SKILL.md), the predecessor node's surface-inventory.md (explicitly labeled node 01), and unrelated pilot-graph scratch. The .gddp/ directory at tip holds stale evidence from a different graph's node (common-core), not this audit. Constraints were not violated (deterministic scan cleared all three; the tip diff touches only doc files, not the pilot graph at aa-cli/gddp/). The verdict is fail on all three criteria with high confidence because the absence is confirmed in both the worktree and the entire object store, and the node's own execution result is fully visible.",
+    "risks": "1) The methodology audit may exist out-of-band (e.g. in the executor's run logs or an uncommitted worktree) but was never committed as audits/tui-methodology.md; this verdict is based on the repo state and the node's result commit, which contain no audit. 2) The tip diff shows the executor edited node-01 artifacts (docs/tui-pass/gap-list.md, key-binding-map.md) with line-ref corrections — this resembles node-01 maintenance, not node-02 audit output, and could indicate the executor mis-targeted the node. 3) deps_status shows the dependency tui-inventory-and-keymap-audit is 'provisional' (not confirmed) while this node's job ran anyway (frontier_auto_advance), so the audit was attempted on an unconfirmed baseline.",
+    "followup_candidates": "Human clarification: Observed — the tip commit for this node (aa5771d) modifies only docs/tui-pass/gap-list.md and docs/tui-pass/key-binding-map.md (node-01 artifacts) with line-reference corrections; the required artifact audits/tui-methodology.md is entirely absent from the repo and its full history. Was the methodology audit produced outside the repo (executor run notes / separate worktree), and if so should it be committed as audits/tui-methodology.md and the node re-evaluated? Also confirm whether editing node-01 docs was intended as part of this audit node or indicates the executor conflated node 01 and node 02.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-24T23:50:52.069Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_RUYMLFovhIRANY9PSjdO3399",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && ls -la && echo \"---README---\" && head -100 README.md 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-24T23:50:52.072Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_7FLKag2QNdThT60YNini9328",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && git log --oneline -20 2>/dev/null; echo \"---STATUS---\"; git status 2>/dev/null | head -40"
+        },
+        {
+          "ts": "2026-08-24T23:50:52.101Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_RUYMLFovhIRANY9PSjdO3399",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:50:52.415Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_7FLKag2QNdThT60YNini9328",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:50:56.210Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_KBH8egb67nIHecU5jZiP5177",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && find . -path ./.git -prune -o -name \"*.md\" -print 2>/dev/null | grep -i -E \"audit|methodology|tui-pass\" ; echo \"---audits dir---\"; ls -la audits 2>/dev/null || echo \"NO audits dir\"; echo \"---docs/tui-pass---\"; ls -la docs/tui-pass 2>/dev/null || echo \"NO docs/tui-pass\""
+        },
+        {
+          "ts": "2026-08-24T23:50:56.210Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_RTiCmOtZF62UYj9kmQ8V0715",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && git diff 630d5c574715f61b4041857226e620318bfcb02d aa5771d9482218b6f44e9097dcc0adc0e60b45e8 --stat; echo \"---diff---\"; git diff 630d5c5 aa5771d -- docs/tui-pass/gap-list.md docs/tui-pass/key-binding-map.md | head -150"
+        },
+        {
+          "ts": "2026-08-24T23:50:56.251Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_KBH8egb67nIHecU5jZiP5177",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:50:56.277Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_RTiCmOtZF62UYj9kmQ8V0715",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:51:07.940Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_G6kcCQKnRmClsrD4ZaxG8530",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"===find audits anywhere===\"; find . -iname \"*methodology*\" -o -iname \"*audit*\" 2>/dev/null | grep -v \".git/\" | head -40; echo \"===grep for tui-methodology in whole tree===\"; grep -rl \"tui-methodology\\|tui methodology\\|TUI methodology\\|three TUI methodologies\" . --include=\"*\" 2>/dev/null | grep -v \"^./.git/\" | head -20"
+        },
+        {
+          "ts": "2026-08-24T23:51:07.942Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_JRBcL5AtfmEtzdhVBsx19759",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"===.gddp===\"; find .gddp -type f | head -40; echo \"===.handoffs===\"; find .handoffs -type f | head -20; echo \"===.scratch===\"; find .scratch -type f | head -20; echo \"===.zcode===\"; find .zcode -type f | head -20"
+        },
+        {
+          "ts": "2026-08-24T23:51:07.977Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_JRBcL5AtfmEtzdhVBsx19759",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:51:08.200Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_G6kcCQKnRmClsrD4ZaxG8530",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:51:12.034Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_aYekWO2Sc7jHLgfs0a5W2243",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"===.gddp/result-summary.md===\"; cat .gddp/result-summary.md; echo; echo \"===.gddp/decision.md===\"; cat .gddp/decision.md"
+        },
+        {
+          "ts": "2026-08-24T23:51:12.035Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Zhn6eDvTl7Rb9rCo037g5130",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"===patch.diff head===\"; head -60 .gddp/patch.diff; echo \"===patch.diff stat===\"; git apply --stat .gddp/patch.diff 2>&1 | head -20"
+        },
+        {
+          "ts": "2026-08-24T23:51:12.061Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_aYekWO2Sc7jHLgfs0a5W2243",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:51:12.081Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Zhn6eDvTl7Rb9rCo037g5130",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:51:28.327Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_QRaIqKIxlzpNkC3MTO5V1625",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"===git log all for methodology/audit===\"; git log --all --oneline --name-only 2>/dev/null | grep -i -B2 -A2 \"methodology\\|audits/\" | head -40; echo \"===git log search tui-methodology===\"; git log --all --oneline -S \"tui-methodology\" 2>/dev/null | head; echo \"===branches/refs===\"; git branch -a; git tag | head; echo \"===show tip commit===\"; git show --stat aa5771d | head -30"
+        },
+        {
+          "ts": "2026-08-24T23:51:28.328Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_n5psUBp7j6cCr8zdnc3t8101",
+          "command": "cd /Users/sab-mini/repos/gddp-config && cat graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml 2>/dev/null | head -80; echo \"=====NEIGHBOR: inventory=====\"; cat graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml 2>/dev/null | head -60; echo \"=====NEIGHBOR: design-review=====\"; cat graphs/aa-cli-tui-pass/nodes/design-review.yaml 2>/dev/null | head -60"
+        },
+        {
+          "ts": "2026-08-24T23:51:28.361Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_n5psUBp7j6cCr8zdnc3t8101",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:51:28.584Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_QRaIqKIxlzpNkC3MTO5V1625",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:51:35.785Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ItomGtKVVETWYXiDsDJh6931",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"===diff base..tip (name-status)===\"; git diff 630d5c5 aa5771d --name-status; echo; echo \"===full diff base..tip===\"; git diff 630d5c5 aa5771d; echo \"===files at tip root===\"; git ls-tree -r --name-only aa5771d | grep -i \"audit\\|methodology\" | head"
+        },
+        {
+          "ts": "2026-08-24T23:51:35.785Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_kLaVjrrSWk1M5dsDe6Ym9924",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"===attempt branch (methodology job) files===\"; git ls-tree -r --name-only gddp/attempt-job_20260824T23454410e9729b7016aa-attempt-0 2>/dev/null | head -50; echo \"===result branch files===\"; git ls-tree -r --name-only gddp/result-job_20260824T23454410e9729b7016aa-job_20260824T23454410e9729b7016aa-tui-methodology-audit-attempt-0-3f8ad6dc8ef04baab5a719f54524ac14 2>/dev/null | grep -i \"audit\\|methodology\" | head"
+        },
+        {
+          "ts": "2026-08-24T23:51:35.854Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_kLaVjrrSWk1M5dsDe6Ym9924",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:51:35.872Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ItomGtKVVETWYXiDsDJh6931",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:51:57.422Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ClVDMUQWtipIkd6k11Dk9821",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"===grep skill section names across repo (excluding .git)===\"; grep -rln \"Interaction Model\\|Seven Principles\\|visual-catalog\\|app-patterns\\|Anti-patterns\\|check-cross\\|three-tier help\\|L0-L3\" . 2>/dev/null | grep -v \"^./.git/\" | head -30; echo \"===skills dir===\"; find skills hub-rs/.agents -type f 2>/dev/null | head -30"
+        },
+        {
+          "ts": "2026-08-24T23:51:57.423Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_hqRfgkSKG1G25R3uhESE1384",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"===.gddp files at tip commit===\"; git show aa5771d:.gddp/result-summary.md 2>/dev/null | head -30; echo \"===decision at tip===\"; git show aa5771d:.gddp/decision.md 2>/dev/null | head -20; echo \"===gddp dir at tip===\"; git ls-tree aa5771d .gddp/ 2>/dev/null"
+        },
+        {
+          "ts": "2026-08-24T23:51:57.499Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_hqRfgkSKG1G25R3uhESE1384",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:51:57.808Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ClVDMUQWtipIkd6k11Dk9821",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:52:04.987Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_8tsVdCGDofUX5nQXijVm8242",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"===patch.diff at tip (which files)===\"; git show aa5771d:.gddp/patch.diff 2>/dev/null | grep -E \"^diff --git|^index|^---|^\\+\\+\\+\" | head -20; echo \"===does surface-inventory claim to be methodology audit?===\"; head -40 docs/tui-pass/surface-inventory.md"
+        },
+        {
+          "ts": "2026-08-24T23:52:04.988Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_tKnzvR6uDsk0zijQMzCA7317",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"===search entire git object store for audits/tui-methodology===\"; git log --all --full-history -- \"audits/*\" 2>/dev/null | head; echo \"---\"; git rev-list --all 2>/dev/null | while read c; do git ls-tree -r --name-only \"$c\" 2>/dev/null | grep -q \"^audits/\" && echo \"commit $c has audits/\"; done | head; echo \"===any file named audits anywhere in all history===\"; git log --all --name-only --pretty=format: 2>/dev/null | grep \"^audits/\" | sort -u | head; echo \"===also check untracked/ignored===\"; git status --ignored --short 2>/dev/null | grep -i \"audit\\|method\" | head"
+        },
+        {
+          "ts": "2026-08-24T23:52:05.039Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_8tsVdCGDofUX5nQXijVm8242",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:52:08.753Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_tKnzvR6uDsk0zijQMzCA7317",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:52:29.184Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_bZVSKYy8DceoLCY7ScZ12528",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw && echo \"===milestone-integration attempt branch: any audit/methodology?===\"; git ls-tree -r --name-only gddp/attempt-job_20260824T23290855ff164acdd0e2-attempt-0 2>/dev/null | grep -i \"audit\\|method\" | head; echo \"===worktree HEAD & clean===\"; git rev-parse HEAD; git status --short | head; echo \"===audits dir final check===\"; ls -d audits 2>&1; echo \"===any tui-methodology in git index/history names===\"; git log --all --oneline --diff-filter=A --name-only --pretty=format: 2>/dev/null | grep -i \"tui-methodology\\|audits/\" | head"
+        },
+        {
+          "ts": "2026-08-24T23:52:29.297Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_bZVSKYy8DceoLCY7ScZ12528",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-24T23:52:54.884Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_yahSmqGao3i2AKTPdJBk7698",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ],
+      "prompt_cache_report": {
+        "total_input_tokens": 3460,
+        "protocol_tokens": 812,
+        "project_tokens": 1066,
+        "node_tokens": 482,
+        "attempt_tokens": 1100,
+        "potential_reuse_tokens": 2360,
+        "potential_reuse_ratio": 0.6821,
+        "actual_cached_tokens": 897024
+      }
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "The tui-methodology-audit node was not completed. Its required artifact audits/tui-methodology.md does not exist in the worktree (no audits/ directory) nor in any commit across the full git history (verified via rev-list --all tree scans and git log -S). The node's own result commit (aa5771d, the tip, authored by the job for this node, attempt 0) contains a diff against its base 630d5c5 that only edits two node-01 documents — docs/tui-pass/gap-list.md and docs/tui-pass/key-binding-map.md — correcting stale keymap.rs line references (e.g. :32–37 → :25–29) and expanding file paths (dashboard.rs → hub-rs/src/ui/dashboard.rs). None of the three acceptance criteria can be satisfied because the audit document that would carry per-surface findings, named skill-section citations, and file-path mapping was never produced; a repo-wide grep for the criteria's skill-section vocabulary finds it only in the skill source (hub-rs/.agents/skills/tui-design/SKILL.md), the predecessor node's surface-inventory.md (explicitly labeled node 01), and unrelated pilot-graph scratch. The .gddp/ directory at tip holds stale evidence from a different graph's node (common-core), not this audit. Constraints were not violated (deterministic scan cleared all three; the tip diff touches only doc files, not the pilot graph at aa-cli/gddp/). The verdict is fail on all three criteria with high confidence because the absence is confirmed in both the worktree and the entire object store, and the node's own execution result is fully visible.",
+  "required_next_action": "Address semantic failures and re-submit.",
+  "generated_at": "2026-08-24T23:54:41.651991+00:00",
+  "evaluated_tree_sha": "eb348d5052c6470346ee6346c8db3599b10c651a",
+  "evaluated_commit_sha": "aa5771d9482218b6f44e9097dcc0adc0e60b45e8",
+  "merge_commit_sha": "aa5771d9482218b6f44e9097dcc0adc0e60b45e8",
+  "expected_base_commit_sha": "630d5c574715f61b4041857226e620318bfcb02d",
+  "pr_ref": null,
+  "job_id": "job_20260824T23454410e9729b7016aa",
+  "execution_attempt_id": "job_20260824T23454410e9729b7016aa:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw/README.md",
+    "project_brief": "UNAVAILABLE: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw/PROJECT-BRIEF.md does not exist",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+    "neighbor:tui-inventory-and-keymap-audit": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+    "neighbor:design-review": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/design-review.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "none",
+      "offered": 3,
+      "content_accessed": 0,
+      "not_observed": 3,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/design-review.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/design-review.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-a8o3whqw/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "none"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-24T23:50:48.843290+00:00",
+    "finished_at": "2026-08-24T23:54:41.651717+00:00",
+    "wall_s": 232.815,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 126.35,
+      "tool_calls": 17
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 106.427,
+      "tool_calls": 20
+    }
+  }
+}

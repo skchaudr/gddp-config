@@ -1,0 +1,762 @@
+{
+  "project_id": "aa-cli-tui-pass",
+  "node_id": "design-review",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.85,
+    "findings": [
+      {
+        "severity": "low",
+        "summary": "Minor citation line-drift in the review's evidence: a handful of file:line references are off by 10-50 lines (e.g. dashboard.rs:181-183 vs actual Modifier::REVERSED at dashboard.rs:136; keymap.rs:365-372 'o dead cut-key' vs actual deck_cut_keys_are_dead test at keymap.rs:415-422; pick.rs:591 vs visual::selection() at pick.rs:639; app.rs:2213-2221 vs create '/' overlay at app.rs:2236). Every checked claim resolves to the right file, function, and substance — no fabrication — but downstream Phase-2 executors relying on exact lines could be misdirected.",
+        "affected_node_ids": [
+          "design-review"
+        ]
+      }
+    ],
+    "reasoning": "The design-review node's role is judgment-only: weigh audit findings, decide direction, resolve the Phase-2 node set in order from candidates, grounded in assessed state — and explicitly NOT build or pre-write anything downstream. The delivered work (single artifact audits/design-review.md, per git diff b12fde4..HEAD) matches that role precisely: (1) zero implementation — no source files, no pilot-graph edits, no reviews/product-coherence.md, no pre-written downstream gates, and the doc itself disclaims attempt-1's harms; (2) the Phase-2 set is resolved with 8 new bounded capability ids carrying invariant tags (G/T/E/C/S/K), a concrete execution order, and explicit refusals to route to old-chart IDs 02-11 — exactly what the node's 'why' demands; (3) the five invariants are operationalized per aa-cli surface as the acceptance bar. I verified the review's grounding against live code: ~15 citations spot-checked, all substantively accurate (open_verify exists uncalled at app.rs:1055; deck 'v' toasts via verify_packet_toast; OpenOutput unbound on Deck with the deck_cut_keys_are_dead test; toast()=warn(); f/d dual dispatch; three-room create; submenu keybar render has no call sites; bin/aa numeric lobby). The node's protected invariant — direction follows from assessed state, not pre-imagined decomposition — holds. Graph integrity is preserved: design-review unlocks nothing, so no dependent fired; the Phase-2 nodes are not yet in config; milestone-integration/review-product-coherence/audit-methodology-compliance remain provisional and untouched. The upstream tui-methodology-audit is provisional with its artifact absent; the review handled this honestly (stated the absence, did not fabricate or edit audit content) — a reconciliation obligation for later, not a defect in this node's work. Only blemish is minor line-number drift in a few citations (low severity, lane-1 traceability nit). Verdict: pass.",
+    "tool_trace": [
+      {
+        "ts": "2026-08-25T03:52:16.680Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_UNEtGro1nj8mINpNzPGO9649",
+        "command": "pwd && ls -la && find . -type f -not -path './.git/*' | head -50"
+      },
+      {
+        "ts": "2026-08-25T03:52:16.682Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_f9mP25eEex57kfcI0Iws0054",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml"
+      },
+      {
+        "ts": "2026-08-25T03:52:16.683Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_02_GrKzyv7U4Zvv9CEMqeQn7759",
+        "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml"
+      },
+      {
+        "ts": "2026-08-25T03:52:16.695Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_f9mP25eEex57kfcI0Iws0054",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:52:16.696Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_02_GrKzyv7U4Zvv9CEMqeQn7759",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:52:16.719Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_UNEtGro1nj8mINpNzPGO9649",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:52:18.648Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_00_scRlyl7b8vlXJNuSGxsD4087",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag/audits/design-review.md"
+      },
+      {
+        "ts": "2026-08-25T03:52:18.649Z",
+        "tool": "read",
+        "blocked": false,
+        "toolCallId": "call_01_KoJ4GHaOHOpJhNYewXe67368",
+        "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag/README.md"
+      },
+      {
+        "ts": "2026-08-25T03:52:18.651Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_scRlyl7b8vlXJNuSGxsD4087",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:52:18.652Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_KoJ4GHaOHOpJhNYewXe67368",
+        "tool": "read",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:52:29.818Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_jzmmXVo5Kf7DYVGgEGD69441",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && git log --oneline -10 2>/dev/null; echo \"---STATUS---\"; git status --short 2>/dev/null | head -20; echo \"---DIFF STAT vs base---\"; git diff --stat a98d131ad128256961d7f962fc2dc673ccca96d7 a07cc7e364935fb89f5feedf4724e73519f0503b 2>/dev/null | tail -5"
+      },
+      {
+        "ts": "2026-08-25T03:52:29.819Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_yNReEoeZojAzZ5lyYii77375",
+        "command": "ls /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/ && echo \"---\" && cat /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/milestone-integration.yaml 2>/dev/null && echo \"---\" && cat /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/review-product-coherence.yaml 2>/dev/null && echo \"---\" && cat /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/audit-methodology-compliance.yaml 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-25T03:52:29.863Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_yNReEoeZojAzZ5lyYii77375",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:52:29.986Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_jzmmXVo5Kf7DYVGgEGD69441",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:52:56.127Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_eQQXLh3YFrBTRFUgTLfc8126",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== diff b12fde4..HEAD (full executor footprint) ===\"; git diff --stat b12fde4..a07cc7e; echo; echo \"=== diff b12fde4..a98d131 (attempt 2) ===\"; git diff --stat b12fde4..a98d131; echo; echo \"=== diff a98d131..a07cc7e ===\"; git diff --stat a98d131..a07cc7e; echo; echo \"=== files in audits/ and reviews/ ===\"; ls -la audits/ 2>/dev/null; ls -la reviews/ 2>/dev/null || echo \"no reviews/ dir\""
+      },
+      {
+        "ts": "2026-08-25T03:52:56.129Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_WEqtlNaetzmoXY7zdSFm7404",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== design-review.yaml (config) ===\"; cat /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/design-review.yaml; echo; echo \"=== pilot gddp statuses untouched? ===\"; git diff b12fde4..HEAD -- gddp/ | head -5; echo \"(empty above = untouched)\"; echo; echo \"=== scout report & old-chart in gddp-config? ===\"; ls /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/research/ 2>/dev/null | head; ls /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/research/old-chart/ 2>/dev/null | head -20; ls /Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/MAP.md 2>/dev/null"
+      },
+      {
+        "ts": "2026-08-25T03:52:56.183Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_WEqtlNaetzmoXY7zdSFm7404",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:52:56.210Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_eQQXLh3YFrBTRFUgTLfc8126",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:53:03.525Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_PrHsdwZP08u76Pxr0K0J5289",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== app.rs:1055 open_verify ===\"; sed -n '1050,1060p' hub-rs/src/app.rs; echo \"=== keymap.rs:28-45 ===\"; sed -n '28,45p' hub-rs/src/keymap.rs; echo \"=== keymap.rs:117-144 footer_deck ===\"; sed -n '117,144p' hub-rs/src/keymap.rs; echo \"=== keymap.rs:365-372 ===\"; sed -n '365,372p' hub-rs/src/keymap.rs"
+      },
+      {
+        "ts": "2026-08-25T03:53:03.526Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_wsJHfFKQEDZj4DaOiBx84820",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== main.rs:724 / 637-656 ===\"; sed -n '720,730p' hub-rs/src/main.rs; sed -n '637,656p' hub-rs/src/main.rs; echo \"=== dashboard.rs:181-183 ===\"; sed -n '178,186p' hub-rs/src/ui/dashboard.rs; echo \"=== visual.rs:229-231 ===\"; sed -n '226,234p' hub-rs/src/ui/visual.rs; echo \"=== root.rs:15 ===\"; sed -n '12,18p' hub-rs/src/ui/root.rs"
+      },
+      {
+        "ts": "2026-08-25T03:53:03.566Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_PrHsdwZP08u76Pxr0K0J5289",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:53:03.569Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_wsJHfFKQEDZj4DaOiBx84820",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:53:15.547Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_SFatee7gcVTXbiBkexyJ5943",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== REVERSED in dashboard.rs ===\"; grep -n \"REVERSED\" hub-rs/src/ui/dashboard.rs | head; echo \"=== selection() in pick.rs ===\"; grep -n \"fn selection\\|selection()\" hub-rs/src/ui/pick.rs | head -5; echo \"=== run_paged ===\"; grep -n \"run_paged\" hub-rs/src/main.rs | head; echo \"=== submenu render ===\"; grep -n \"submenu\" hub-rs/src/main.rs hub-rs/src/app.rs | head; echo \"=== pick_hub_item ===\"; grep -n \"pick_hub_item\\|fn pick\" hub-rs/src/main.rs hub-rs/src/picker.rs 2>/dev/null | head; echo \"=== OpenOutput in app.rs ===\"; grep -n \"OpenOutput\" hub-rs/src/app.rs | head"
+      },
+      {
+        "ts": "2026-08-25T03:53:15.548Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_01_vNA0rOg3B9ecOcXGxqJu7302",
+        "reason": "command matched blocked pattern",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== bin/aa lobby 78-99 ===\"; sed -n '70,105p' bin/aa; echo \"=== verify.rs key lines ===\"; grep -n \"Agent\\|Contract\\|Evidence\\|match\\|=>\" hub-rs/src/ui/verify.rs | sed -n '1,25p'; echo \"=== toast in mod.rs ===\"; grep -n \"toast\" hub-rs/src/ui/mod.rs hub-rs/src/ui/visual.rs | head; echo \"=== create f/d dispatch app.rs:2183 ===\"; sed -n '2180,2192p' hub-rs/src/app.rs",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-25T03:53:15.549Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_vNA0rOg3B9ecOcXGxqJu7302",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-25T03:53:15.603Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_SFatee7gcVTXbiBkexyJ5943",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:53:22.552Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_EbPBvBG0KAPDPzAB1KKL9287",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== open_verify call sites ===\"; grep -rn \"open_verify\" hub-rs/src/ | head; echo \"=== bin/aa 70-105 ===\"; sed -n '70,105p' bin/aa; echo \"=== verify.rs lines 15-25,190-240 ===\"; sed -n '15,25p' hub-rs/src/ui/verify.rs; sed -n '190,240p' hub-rs/src/ui/verify.rs"
+      },
+      {
+        "ts": "2026-08-25T03:53:22.552Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_J8bED9BhEtOq8rB0liVQ7263",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== submenu.rs 70-115 ===\"; sed -n '70,115p' hub-rs/src/ui/submenu.rs; echo \"=== visual.rs toast ===\"; grep -n \"toast\" hub-rs/src/ui/visual.rs; echo \"=== mod.rs 70-80 ===\"; sed -n '70,80p' hub-rs/src/ui/mod.rs; echo \"=== create_prepare.rs 50-60 ===\"; sed -n '50,60p' hub-rs/src/ui/create_prepare.rs"
+      },
+      {
+        "ts": "2026-08-25T03:53:22.593Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_J8bED9BhEtOq8rB0liVQ7263",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:53:22.604Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_EbPBvBG0KAPDPzAB1KKL9287",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:53:32.718Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_c1bUXysCSpM5jAgPrrLj4721",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== toast body ===\"; sed -n '200,235p' hub-rs/src/ui/visual.rs; echo \"=== submenu render call sites ===\"; grep -rn \"submenu::render\\|verify_bar_line\\|SubmenuAction::\" hub-rs/src/ | grep -v \"submenu.rs\" | head; echo \"=== create_prepare room tabs ===\"; grep -n \"workdir\\|agent\\|prompts\\|tab\" hub-rs/src/ui/create_prepare.rs | head -20"
+      },
+      {
+        "ts": "2026-08-25T03:53:32.718Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_HyBPKksHSYpIi1ewNYb54727",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== app.rs 2180-2192 (f/d dispatch) ===\"; sed -n '2180,2192p' hub-rs/src/app.rs; echo \"=== app.rs 2283-2292 (v picker) ===\"; sed -n '2283,2292p' hub-rs/src/app.rs; echo \"=== app.rs 2210-2225 (create / overlay) ===\"; sed -n '2210,2225p' hub-rs/src/app.rs; echo \"=== app.rs 2760-2778 (footer table) ===\"; sed -n '2760,2778p' hub-rs/src/app.rs"
+      },
+      {
+        "ts": "2026-08-25T03:53:32.759Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_HyBPKksHSYpIi1ewNYb54727",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:53:32.783Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_c1bUXysCSpM5jAgPrrLj4721",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:53:41.863Z",
+        "tool": "bash",
+        "blocked": true,
+        "toolCallId": "call_00_G5vnXjWDp6KbjBGCzaUy9085",
+        "reason": "command matched blocked pattern",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== map_deck o binding? ===\"; sed -n '20,60p' hub-rs/src/keymap.rs | grep -n \"o'\\|'o'\"; grep -n \"'o'\" hub-rs/src/keymap.rs | head; echo \"=== keymap dead/cut tests ===\"; grep -n \"dead\\|cut\\|unbound\\|never\" hub-rs/src/keymap.rs | head; echo \"=== create '/' handler ===\"; grep -n \"'/' =>\" hub-rs/src/app.rs | head; echo \"=== submenu.rs render fn + callers ===\"; grep -n \"pub fn render\\|fn render\" hub-rs/src/ui/submenu.rs; grep -rn \"submenu::\" hub-rs/src/ui/mod.rs hub-rs/src/main.rs hub-rs/src/app.rs | head; echo \"=== mod.rs:69 ===\"; sed -n '65,72p' hub-rs/src/ui/mod.rs",
+        "pattern": "(?:\\d?>>?|&>)(?!\\s*(?:&\\d|\\/dev\\/null))"
+      },
+      {
+        "ts": "2026-08-25T03:53:41.864Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_G5vnXjWDp6KbjBGCzaUy9085",
+        "tool": "bash",
+        "ok": false
+      },
+      {
+        "ts": "2026-08-25T03:53:44.314Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_mJrCawAyefA5XWyPkCBn3515",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== map_deck o binding ===\"; grep -n \"OpenOutput\" hub-rs/src/keymap.rs; echo \"=== keymap dead/cut tests ===\"; grep -n \"dead\\|cut\\|unbound\\|never\" hub-rs/src/keymap.rs | head; echo \"=== create slash handler ===\"; grep -n \"slash\\|open_overlay_picker(PickerKind::Templates)\\|'/' \" hub-rs/src/app.rs | head; echo \"=== submenu.rs render fns ===\"; grep -n \"fn render\\|fn verify_bar_line\" hub-rs/src/ui/submenu.rs; echo \"=== mod.rs 64-72 ===\"; sed -n '64,72p' hub-rs/src/ui/mod.rs"
+      },
+      {
+        "ts": "2026-08-25T03:53:44.368Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_mJrCawAyefA5XWyPkCBn3515",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:54:17.556Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_jNKOPlwTjGD7EOSeWcnm9424",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== attempt:1 commit contents (dfe96d0) ===\"; git show dfe96d0 --stat | head -25; echo; echo \"=== .gddp ===\"; find .gddp -type f | head; echo; echo \"=== keymap.rs 415-422 (dead cut keys test) ===\"; sed -n '413,424p' hub-rs/src/keymap.rs"
+      },
+      {
+        "ts": "2026-08-25T03:54:17.614Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_jNKOPlwTjGD7EOSeWcnm9424",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:54:20.906Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_j26nEpMKXtmXRiivEYz72710",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== .gddp/decision.md ===\"; head -40 .gddp/decision.md; echo \"=== .gddp/result-summary.md (head) ===\"; head -30 .gddp/result-summary.md"
+      },
+      {
+        "ts": "2026-08-25T03:54:20.932Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_j26nEpMKXtmXRiivEYz72710",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-08-25T03:54:45.188Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_gcTXoGe1pfoLUEMqdoiK3806",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "medium",
+        "summary": "Upstream tui-methodology-audit remains provisional and its required artifact audits/tui-methodology.md is still absent; design-review ran on scout+source evidence and documented this. When that audit lands, its per-surface findings must be reconciled against design-review's F1-F18 dispositions (the review's file:line citations are the hook). The graph should not mark design-review's dependency chain accepted until that reconciliation is possible.",
+        "affected_node_ids": [
+          "design-review",
+          "tui-methodology-audit"
+        ]
+      },
+      {
+        "severity": "medium",
+        "summary": "design-review resolves Phase-2 ids (input-grammar, packet-contract, deck-spatial-home, create-linear-dispatch, verify-evidence-surface, deck-attention, action-consequence, operator-proof) but the graph config has no such nodes and design-review.unlocks=[]; milestone-integration has depends_on:[] with a constraint to wire to Phase-2 capabilities 'once design-review resolves their ids'. The graph will need the Phase-2 nodes created and milestone-integration's depends_on wired (action-consequence is the integration gate per the review) before the provisional downstream nodes can fire.",
+        "affected_node_ids": [
+          "design-review",
+          "milestone-integration"
+        ]
+      }
+    ],
+    "graph_recommendations": null,
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9333333333333332,
+  "criteria_confidence": 0.9333333333333332,
+  "completeness": 1.0,
+  "graph_readiness": 0.9333333333333332,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "decision-recorded",
+        "criterion": "A written review record names, per audit finding, the disposition — must-fix / should-fix / won't-now — with rationale and a reference to the candidate capability that will carry it into Phase 2.",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...)"
+        ],
+        "reasoning": "Scanned source files (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...) for identifiers named in the criterion (must-fix, should-fix, t-now). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "phase2-set",
+        "criterion": "The review names the Phase-2 capability nodes (bounded, invariant- grounded) and their execution order, drawn from candidates plus any new boundaries the findings expose — not committed to the old chart's decomposition.",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...)"
+        ],
+        "reasoning": "Scanned source files (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...) for identifiers named in the criterion (Phase-2, invariant-). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "invariants-concrete",
+        "criterion": "The invariants (one predictable input grammar, no dead-ends/modal-trap, evidence visible in-TUI, semantic color, spatial continuity) are made specific to aa-cli's surfaces as the acceptance bar Phase-2 nodes build toward.",
+        "status": "indeterminate",
+        "confidence": 0.5,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "aa\\-cli -> line 3: 'aa-cli'"
+        ],
+        "reasoning": "Scanned source files (lib/common.zsh, lib/context.zsh, lib/deck.zsh, lib/fire.zsh...) for identifiers named in the criterion (dead-ends, modal-trap, in-TUI, aa-cli, Phase-2). String match found — semantic investigation needed to confirm.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Review/judgment only — no implementation in this node.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Decides direction; does not build. Authorizes Phase-2 nodes to be created.",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "audits/design-review.md": true
+    },
+    "deps_status": {
+      "tui-methodology-audit": "provisional"
+    },
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "a98d131ad128256961d7f962fc2dc673ccca96d7",
+      "tip": "a07cc7e364935fb89f5feedf4724e73519f0503b",
+      "files": [
+        {
+          "status": "A",
+          "path": "audits/design-review.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "decision-recorded",
+        "judgment": "judged_pass",
+        "confidence": 0.9,
+        "evidence": [
+          "audits/design-review.md § Per-finding dispositions (F1–F18): each heading carries must-fix / should-fix / won't-now, with Evidence, Rationale, and 'Carried by' capability references",
+          "audits/design-review.md F1: 'Verify 3-room surface is unreachable from Deck — must-fix … Carried by: verify-evidence-surface + action-consequence'",
+          "audits/design-review.md F16/F17: 'won't-now' dispositions with rationale ('dead code, not operator-visible') and carrying node (input-grammar / operator-proof)",
+          "audits/design-review.md F18: explicitly 'informs the reshape, not a disposition' — meta finding handled via the absorbs/skip column",
+          "Spot-checked citations vs live source: app.rs:1055 open_verify ✓; keymap.rs:31-39 v→Action::VerifyPacket + footer 'v verify' keymap.rs:138 ✓; keymap.rs:107-109 ';' fzf hatch gated on VERIFY_ROOM_EVIDENCE ✓; keymap.rs:76-86 'e' = AgentShot on AGENT vs Editor on Contract ✓; main.rs:747-765 run_paged apply/diff ✓; app.rs deck_key binds 'o'→OpenOutput while keymap.rs map_deck does not ✓; visual.rs:205-206 toast()=warn() ✓; dashboard.rs:136 Modifier::REVERSED ✓"
+        ],
+        "reasoning": "The written review record names a disposition (must-fix / should-fix / won't-now) for every per-surface finding, each with a rationale and a reference to the Phase-2 capability that will carry it. F18 is meta (chart-vs-code drift) and is explicitly excluded from the disposition vocabulary with its own handling, which is a defensible reading of 'audit finding.' Caveats: (a) the upstream tui-methodology-audit artifact is absent (dependency provisional); the review honestly grounds its findings in the inventory scout + live source with file:line citations rather than fabricating the audit — the disposition set is therefore the review's own per-surface findings, not carried-forward audit findings; (b) two citations have minor line drift (dashboard.rs:181-183 vs actual 136; visual.rs:229-231 vs actual 205-206) but the claims are substantively true. Both caveats are disclosed in the record itself."
+      },
+      {
+        "criterion_id": "phase2-set",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "audits/design-review.md § Phase-2 capability set and execution order: table of 8 nodes — input-grammar (G), packet-contract (E), deck-spatial-home (S,C), create-linear-dispatch (T,G), verify-evidence-surface (E,C), deck-attention (S, marked 'New boundary (not in 02–13)'), action-consequence (K), operator-proof — each with carries/absorbs scope",
+          "audits/design-review.md execution-order diagram: input-grammar first, packet-contract parallel, then deck-spatial-home → deck-attention / create-linear-dispatch / verify-evidence-surface, then action-consequence, then operator-proof, with per-edge rationale",
+          "audits/design-review.md 'What this set refuses': 'Routing dispositions to old-chart IDs 02–11 … as owning nodes — the criterion explicitly forbids commitment to the old chart's decomposition'; old-chart IDs appear only in the absorbs column",
+          "audits/design-review.md F7/deck-attention: 'New boundary (not in 02–13). Default list = runnable/needs-attention; dep badges. RECON next slice'"
+        ],
+        "reasoning": "The review names the Phase-2 capability nodes with explicit boundaries (carries scope + absorbs column) and invariant tags (G/T/E/C/S/K), and gives their execution order plus a dependency graph with unblock rationale. It draws them from findings + candidates (deck-attention is a genuinely new boundary the findings expose via F7/RECON's deck-runnable-now-filter) and explicitly refuses the old chart's decomposition as the owning structure. Fully satisfies the criterion."
+      },
+      {
+        "criterion_id": "invariants-concrete",
+        "judgment": "judged_pass",
+        "confidence": 0.95,
+        "evidence": [
+          "audits/design-review.md § Invariants made concrete: each of the five invariants has skill grounding (section citations) plus an 'aa-cli acceptance bar' with surface-specific statements",
+          "Invariant 1 (grammar): 'Deck, runway, Create, each Verify room, pickers, root, and footer share one L0 set (q/Esc/Enter/Tab/arrows). Primaries f v a o do not change meaning… ; is the only fzf suspend-and-return; f never opens a picker. The footer shows only the 3–5 keys valid in the focused room'",
+          "Invariant 2 (no dead-end/modal-trap): 'Esc or q returns to the previous surface (picker→room, room→Deck, Deck→optional root)… Fire/verify confirm overlays show mode in the status/footer and dismiss on Esc… Key-path tests cover each surface → Esc → known parent'",
+          "Invariant 3 (evidence in-TUI): 'Verify Evidence/Agent/Contract render the receipt / verdict / ✓/✗/✓✓ in-hub… Deck + runway show packet state + last fire/verify outcome in the same frame'",
+          "Invariant 4 (semantic color): 'use the shared slot map (not per-room RGB). Pass/fail always paired with ✓/✗/✓✓. NO_COLOR=1 still shows state via glyph + label'",
+          "Invariant 5 (spatial continuity): 'Deck list stays top, runway stays bottom, footer stays last row across Deck → fire overlay → return… Render tests at 80×24 / 120×40 assert the same region order'"
+        ],
+        "reasoning": "All five invariants named in the criterion are made specific to aa-cli surfaces: each names the concrete rooms, keys, glyph conventions, and test assertions that constitute the acceptance bar Phase-2 nodes build toward, and each is grounded in named skill sections. This is exactly the 'specific to aa-cli's surfaces' bar the criterion demands."
+      }
+    ],
+    "overall_reasoning": "The deterministic keyword scan was indeterminate because it scanned the wrong target (lib/*.zsh source) for a review node whose required artifact is a markdown record. Semantic inspection of audits/design-review.md resolves all three criteria in the affirmative. C1: every per-surface finding (F1–F17) carries a must-fix/should-fix/won't-now disposition with rationale and a carrying Phase-2 capability; F18 is meta and explicitly handled outside the disposition vocabulary. C2: the review names 8 bounded, invariant-tagged Phase-2 nodes (input-grammar, packet-contract, deck-spatial-home, create-linear-dispatch, verify-evidence-surface, deck-attention [new boundary], action-consequence, operator-proof) with execution order and a dependency diagram, and refuses old-chart IDs 02–11 as owning nodes. C3: all five invariants are operationalized as aa-cli-specific acceptance bars with skill-section grounding and test assertions. Spot-checks of the review's file:line citations against live source confirm the findings are grounded, not fabricated (minor line drift in two citations only). The diff contains exactly one added file (audits/design-review.md), confirming the review-only / no-implementation constraint. The one material caveat is graph-level, not criteria-level: the upstream tui-methodology-audit dependency is provisional with its artifact absent; the review honestly discloses this and grounds its dispositions in the inventory scout + live source, providing file:line citations for later reconciliation — a human should confirm that substitution is acceptable before this node is marked done.",
+    "risks": "1) Graph integrity: design-review depends_on tui-methodology-audit, whose status is 'provisional' and whose required artifact audits/tui-methodology.md is absent from the worktree (audits/ contains only design-review.md). The review's dispositions therefore apply to its own per-surface findings (F1–F18) grounded in scout + live source, not to carried-forward audit findings; if the methodology audit later lands with a different finding set, dispositions may need reconciliation (the review itself flags this and provides file:line citations for reconciliation). 2) Minor citation drift: dashboard.rs focused-row REVERSED is at line 136 (cited 181-183) and visual.rs toast()=warn() at lines 205-206 (cited 229-231); both claims are substantively true. 3) F18's 'skip — already shipped' row asserts visual.rs/runway/deck-fire wiring shipped; spot-checks confirm visual.rs tokens and deck_key 'o' wiring exist, but full surface completeness was not verified (not required by this node's criteria).",
+    "followup_candidates": "Human clarification 1: design-review was executed while its upstream dependency tui-methodology-audit is provisional and its artifact (audits/tui-methodology.md) is missing; the review explicitly grounds dispositions in inventory scout + live source instead. Should design-review acceptance be gated on the upstream audit being accepted first, or is the review's disclosed substitution acceptable? If the audit later produces a different finding set, the F1–F18 dispositions and their carrying capabilities need reconciliation. Human clarification 2: The review authorizes Phase-2 capability nodes (input-grammar, packet-contract, deck-spatial-home, create-linear-dispatch, verify-evidence-surface, deck-attention, action-consequence, operator-proof). Confirm these are actually created as graph nodes in the continuation (this node 'authorizes Phase-2 nodes to be created' but unlocks nothing in the chart). Human clarification 3 (contextual, not criteria): the deterministic scan looked at lib/*.zsh source rather than the markdown artifact; for review/audit nodes the scan target should be the required artifact path so future runs resolve deterministically.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-08-25T03:50:54.084Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_3v03e89GQu2x5npgSo5r0893",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && ls -la && find . -type f | head -50"
+        },
+        {
+          "ts": "2026-08-25T03:50:54.086Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_dE42MN9ZTxSBMOWsrXbz4160",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/design-review.yaml"
+        },
+        {
+          "ts": "2026-08-25T03:50:54.097Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_dE42MN9ZTxSBMOWsrXbz4160",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:50:54.121Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_3v03e89GQu2x5npgSo5r0893",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:50:56.852Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_TE8WQ5Txx03GFloqtOMV6912",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag/audits/design-review.md"
+        },
+        {
+          "ts": "2026-08-25T03:50:56.853Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_01_Snkc828CdSBtna2ZRLov9730",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml"
+        },
+        {
+          "ts": "2026-08-25T03:50:56.853Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_02_irUf7f53xhwOXDv6QIBb7762",
+          "path": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml"
+        },
+        {
+          "ts": "2026-08-25T03:50:56.856Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Snkc828CdSBtna2ZRLov9730",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:50:56.857Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_02_irUf7f53xhwOXDv6QIBb7762",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:50:56.858Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_TE8WQ5Txx03GFloqtOMV6912",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:51:15.831Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_DTruKYLSUhRk0tz776zW3498",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && git log --oneline -5 2>/dev/null; echo \"---DIFF---\"; git diff a98d131ad128256961d7f962fc2dc673ccca96d7 a07cc7e364935fb89f5feedf4724e73519f0503b --stat 2>/dev/null || git diff HEAD --stat 2>/dev/null | tail -5"
+        },
+        {
+          "ts": "2026-08-25T03:51:15.832Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_oJQHuxH55g8QZwf5sbD46509",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== app.rs open_verify ===\"; grep -n \"open_verify\" hub-rs/src/app.rs | head -5; echo \"=== keymap.rs v binding ===\"; sed -n '25,45p' hub-rs/src/keymap.rs; echo \"=== keymap.rs footer_deck ===\"; sed -n '117,145p' hub-rs/src/keymap.rs"
+        },
+        {
+          "ts": "2026-08-25T03:51:15.867Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_oJQHuxH55g8QZwf5sbD46509",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:51:15.960Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_DTruKYLSUhRk0tz776zW3498",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:51:20.825Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_ne8Qg7kPOe7qKxB9Gy9n3740",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== dashboard.rs 175-190 (focused row style) ===\"; sed -n '175,190p' hub-rs/src/ui/dashboard.rs; echo \"=== visual.rs toast ===\"; sed -n '220,240p' hub-rs/src/ui/visual.rs; echo \"=== app.rs o / OpenOutput ===\"; sed -n '2818,2835p' hub-rs/src/app.rs"
+        },
+        {
+          "ts": "2026-08-25T03:51:20.826Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_Vwb5bU2h9O16lFDxq4V23904",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== main.rs 747-770 (run_paged apply/diff) ===\"; sed -n '747,770p' hub-rs/src/main.rs; echo \"=== pick_hub_item ===\"; grep -rn \"pick_hub_item\" hub-rs/src/*.rs | head -5; echo \"=== root.rs numeric ===\"; sed -n '10,20p' hub-rs/src/ui/root.rs"
+        },
+        {
+          "ts": "2026-08-25T03:51:20.859Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_ne8Qg7kPOe7qKxB9Gy9n3740",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:51:20.867Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_Vwb5bU2h9O16lFDxq4V23904",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:51:27.336Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_T5XGyL5tPkOS8ygMVGqG6430",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== dashboard.rs REVERSED ===\"; grep -n \"REVERSED\\|selection()\" hub-rs/src/ui/dashboard.rs | head; echo \"=== visual.rs toast fn ===\"; grep -n \"pub fn toast\\|warn\\|Color::Yellow\\|Color::DarkYellow\" hub-rs/src/ui/visual.rs | head -12; echo \"=== keymap.rs 100-112 (';' hatch) ===\"; sed -n '100,112p' hub-rs/src/keymap.rs; echo \"=== keymap.rs 360-375 ===\"; sed -n '360,375p' hub-rs/src/keymap.rs"
+        },
+        {
+          "ts": "2026-08-25T03:51:27.337Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_BjgvGDLXz6WZDV3Yx7370902",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && echo \"=== keymap.rs 60-90 (Verify e,/,t,k) ===\"; sed -n '60,90p' hub-rs/src/keymap.rs; echo \"=== audits dir ===\"; ls -la audits/"
+        },
+        {
+          "ts": "2026-08-25T03:51:27.367Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_BjgvGDLXz6WZDV3Yx7370902",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:51:27.375Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_T5XGyL5tPkOS8ygMVGqG6430",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:51:43.851Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_vsFvWculUkdk9Pvxdxt03819",
+          "path": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag/README.md"
+        },
+        {
+          "ts": "2026-08-25T03:51:43.852Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_KKWzHUaN2F1zuAjQqjxA9950",
+          "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag && git diff a98d131ad128256961d7f962fc2dc673ccca96d7 a07cc7e364935fb89f5feedf4724e73519f0503b --name-status; echo \"---\"; ls .handoffs/ audits/ | head -20"
+        },
+        {
+          "ts": "2026-08-25T03:51:43.856Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_vsFvWculUkdk9Pvxdxt03819",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:51:43.903Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_KKWzHUaN2F1zuAjQqjxA9950",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-08-25T03:52:11.913Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Y7r7HhWGk5gI4jAqX5yk3064",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ],
+      "prompt_cache_report": {
+        "total_input_tokens": 3245,
+        "protocol_tokens": 812,
+        "project_tokens": 1068,
+        "node_tokens": 434,
+        "attempt_tokens": 931,
+        "potential_reuse_tokens": 2314,
+        "potential_reuse_ratio": 0.7131,
+        "actual_cached_tokens": 431488
+      }
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "The deterministic keyword scan was indeterminate because it scanned the wrong target (lib/*.zsh source) for a review node whose required artifact is a markdown record. Semantic inspection of audits/design-review.md resolves all three criteria in the affirmative. C1: every per-surface finding (F1–F17) carries a must-fix/should-fix/won't-now disposition with rationale and a carrying Phase-2 capability; F18 is meta and explicitly handled outside the disposition vocabulary. C2: the review names 8 bounded, invariant-tagged Phase-2 nodes (input-grammar, packet-contract, deck-spatial-home, create-linear-dispatch, verify-evidence-surface, deck-attention [new boundary], action-consequence, operator-proof) with execution order and a dependency diagram, and refuses old-chart IDs 02–11 as owning nodes. C3: all five invariants are operationalized as aa-cli-specific acceptance bars with skill-section grounding and test assertions. Spot-checks of the review's file:line citations against live source confirm the findings are grounded, not fabricated (minor line drift in two citations only). The diff contains exactly one added file (audits/design-review.md), confirming the review-only / no-implementation constraint. The one material caveat is graph-level, not criteria-level: the upstream tui-methodology-audit dependency is provisional with its artifact absent; the review honestly discloses this and grounds its dispositions in the inventory scout + live source, providing file:line citations for later reconciliation — a human should confirm that substitution is acceptable before this node is marked done.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-08-25T03:54:45.359362+00:00",
+  "evaluated_tree_sha": "9027e231c49c343bcbfb9f9e1cacefae133d035d",
+  "evaluated_commit_sha": "a07cc7e364935fb89f5feedf4724e73519f0503b",
+  "merge_commit_sha": "a07cc7e364935fb89f5feedf4724e73519f0503b",
+  "expected_base_commit_sha": "a98d131ad128256961d7f962fc2dc673ccca96d7",
+  "pr_ref": null,
+  "job_id": "job_20260825T011804810b1d592ee2c2",
+  "execution_attempt_id": "job_20260825T011804810b1d592ee2c2:attempt:3",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag/README.md",
+    "project_brief": "UNAVAILABLE: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag/PROJECT-BRIEF.md does not exist",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+    "neighbor:tui-methodology-audit": "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "integrity": {
+      "rating": "high",
+      "offered": 3,
+      "content_accessed": 3,
+      "not_observed": 0,
+      "accessed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-inventory-and-keymap-audit.yaml",
+        "/Users/sab-mini/repos/gddp-config/graphs/aa-cli-tui-pass/nodes/tui-methodology-audit.yaml",
+        "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-zqavu9ag/README.md"
+      ],
+      "not_observed_paths": []
+    },
+    "overall": "high"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-08-25T03:50:50.056589+00:00",
+    "finished_at": "2026-08-25T03:54:45.359218+00:00",
+    "wall_s": 235.312,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 82.042,
+      "tool_calls": 13
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 153.235,
+      "tool_calls": 21
+    }
+  }
+}

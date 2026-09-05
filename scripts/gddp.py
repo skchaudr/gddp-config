@@ -4386,16 +4386,27 @@ def interactive_menu():
 # worktree_path, events.jsonl, result.json. watch never writes; steer appends
 # one line to steer.jsonl, which the steer-aware supervisor drains.
 
-def _spool_root(runtime_root: Path) -> Path:
-    configured = os.environ.get("GDDP_PI_RPC_SPOOL_DIR") or os.environ.get(
-        "GDDP_LOCAL_SUBPROCESS_SPOOL_DIR"
-    )
-    root = (
-        Path(configured).expanduser()
-        if configured
-        else runtime_root / "jobs" / "local-subprocess-spool"
-    )
-    return root.resolve()
+def _spool_roots(runtime_root: Path) -> list[Path]:
+    """Return unique configured attempt spools across executor families."""
+    configured = [
+        os.environ.get("GDDP_PI_RPC_SPOOL_DIR"),
+        os.environ.get("GDDP_CURSOR_CLI_SPOOL_DIR"),
+        os.environ.get("GDDP_LOCAL_SUBPROCESS_SPOOL_DIR"),
+    ]
+    roots: list[Path] = []
+    seen: set[Path] = set()
+    for raw in configured:
+        if not raw:
+            continue
+        path = Path(raw).expanduser().resolve()
+        if path in seen:
+            continue
+        seen.add(path)
+        roots.append(path)
+    default = (runtime_root / "jobs" / "local-subprocess-spool").resolve()
+    if default not in seen:
+        roots.append(default)
+    return roots
 
 
 def _attempt_info(attempt_dir: Path) -> dict | None:
@@ -4472,6 +4483,21 @@ def _scan_attempts(spool: Path) -> list[dict]:
             info = _attempt_info(child)
             if info:
                 found.append(info)
+    order = {"running": 0, "done": 1, "dead": 2}
+    found.sort(key=lambda a: (order[a["state"]], -a["created"]))
+    return found
+
+
+def _scan_attempts_roots(spools: list[Path]) -> list[dict]:
+    found: list[dict] = []
+    seen_dirs: set[str] = set()
+    for spool in spools:
+        for info in _scan_attempts(spool):
+            key = str(info["dir"])
+            if key in seen_dirs:
+                continue
+            seen_dirs.add(key)
+            found.append(info)
     order = {"running": 0, "done": 1, "dead": 2}
     found.sort(key=lambda a: (order[a["state"]], -a["created"]))
     return found
@@ -4687,7 +4713,12 @@ def _render_single(info: dict, now: float) -> None:
         print("\n".join(f"  {e}" for e in events))
     else:
         print("  (none)")
-    print("\n  live stream:  tail -F " + str(info.get("events_path") or (info["dir"] / "events.jsonl")))
+    target_name = info['node_id'] or info['name']
+    if sys.stdout.isatty():
+        print("\n  [f] stream events   [v] view result detail   [q/Esc] exit watch")
+    else:
+        print(f"\n  direct stream: gddp watch {target_name} --stream")
+        print("  raw events:    tail -F " + str(info.get("events_path") or (info["dir"] / "events.jsonl")))
 
 
 def cmd_watch(args) -> int:
@@ -4698,22 +4729,23 @@ def cmd_watch(args) -> int:
         print(f"ERROR: live/watch unavailable: {exc}", file=sys.stderr)
         print("  Set GDDP_RUNTIME_ROOT to a gddp-runtime checkout.", file=sys.stderr)
         return 2
-    spool = _spool_root(runtime_root)
-    if not spool.is_dir():
-        print(f"no spool at {spool}; nothing has run yet", file=sys.stderr)
-        print("  live needs a local-subprocess spool from gddp-runtime.", file=sys.stderr)
+    spools = _spool_roots(runtime_root)
+    if not any(spool.is_dir() for spool in spools):
+        joined = ", ".join(str(s) for s in spools)
+        print(f"no attempt spools found; checked: {joined}", file=sys.stderr)
+        print("  set executor spool env vars in gddp.env, then rerun.", file=sys.stderr)
         return 1
     tty = sys.stdout.isatty()
     running_only = not bool(getattr(args, "all", False))
     project = getattr(args, "project", None) or None
     try:
         while True:
-            attempts = _scan_attempts(spool)
+            attempts = _scan_attempts_roots(spools)
             if args.target:
                 info = _find_attempt(attempts, args.target)
                 if info is None:
                     # Retry against unfiltered spool names even if done.
-                    info = _find_attempt(_scan_attempts(spool), args.target)
+                    info = _find_attempt(_scan_attempts_roots(spools), args.target)
                 if info is None:
                     print(f"no attempt matching {args.target!r}", file=sys.stderr)
                     return 1
@@ -4730,7 +4762,41 @@ def cmd_watch(args) -> int:
                 _render_fleet(attempts, now, running_only=running_only)
             if args.once or not tty:
                 return 0
-            time.sleep(args.interval)
+
+            interval = float(getattr(args, "interval", 2.0) or 2.0)
+            end_time = time.time() + interval
+            key = None
+            terminal = _import_module("terminal") if tty else None
+            if terminal and hasattr(terminal, "cbreak"):
+                try:
+                    with terminal.cbreak() as key_fd:
+                        while time.time() < end_time:
+                            r, _, _ = select.select([key_fd], [], [], max(0.05, end_time - time.time()))
+                            if r:
+                                key = terminal.read_key(key_fd)
+                                break
+                except Exception:
+                    time.sleep(interval)
+            else:
+                time.sleep(interval)
+
+            if key in ("q", "\x1b", "\x03"):
+                break
+            elif key == "f" and args.target and info:
+                events_file = str(info.get("events_path") or (info["dir"] / "events.jsonl"))
+                try:
+                    os.execvp("tail", ["tail", "-f", "-n", "+1", events_file])
+                except OSError:
+                    pass
+            elif key == "v" and args.target and info:
+                res_p = info["dir"] / "result.json"
+                if res_p.is_file():
+                    print("\n" + "=" * 60)
+                    print(f"RESULT: {res_p}")
+                    print(res_p.read_text(encoding="utf-8", errors="replace"))
+                    print("=" * 60)
+                    if terminal:
+                        terminal.getline("Press Enter to return to watch...")
     except KeyboardInterrupt:
         print()
         return 0
@@ -4841,15 +4907,16 @@ def cmd_runs(args) -> int:
         return _print_attempt_preview(Path(preview_dir))
 
     runtime_root = resolve_runtime_root()
-    spool = _spool_root(runtime_root)
-    if not spool.is_dir():
-        print(f"no spool at {spool}; nothing has run yet", file=sys.stderr)
+    spools = _spool_roots(runtime_root)
+    if not any(spool.is_dir() for spool in spools):
+        joined = ", ".join(str(s) for s in spools)
+        print(f"no attempt spools found; checked: {joined}", file=sys.stderr)
         return 1
 
     running_only = not bool(getattr(args, "all", False))
     project = getattr(args, "project", None) or None
     attempts = _filter_attempts(
-        _scan_attempts(spool),
+        _scan_attempts_roots(spools),
         running_only=running_only,
         project=project,
     )
@@ -4936,7 +5003,7 @@ def cmd_runs(args) -> int:
 
 def cmd_steer(args) -> int:
     runtime_root = resolve_runtime_root()
-    attempts = _scan_attempts(_spool_root(runtime_root))
+    attempts = _scan_attempts_roots(_spool_roots(runtime_root))
     info = _find_attempt(attempts, args.target)
     if info is None:
         print(f"no attempt matching {args.target!r}", file=sys.stderr)
@@ -4951,13 +5018,36 @@ def cmd_steer(args) -> int:
     if not message:
         print("empty steer message", file=sys.stderr)
         return 1
+    attempt_dir = info["dir"]
+    capabilities_path = attempt_dir / "capabilities.json"
+    capabilities: dict | None = None
+    if capabilities_path.is_file():
+        try:
+            loaded = json.loads(capabilities_path.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict):
+                capabilities = loaded
+        except (OSError, json.JSONDecodeError):
+            capabilities = None
+    if capabilities is not None:
+        executor = str(capabilities.get("executor") or info.get("executor") or "executor")
+        if capabilities.get("midturn_steering") is not True:
+            print(
+                f"steer refused: executor {executor} does not support mid-turn steering",
+                file=sys.stderr,
+            )
+            return 1
     line = json.dumps(
         {"ts": datetime.now(timezone.utc).isoformat(), "message": message}
     )
-    with (info["dir"] / "steer.jsonl").open("a", encoding="utf-8") as handle:
+    with (attempt_dir / "steer.jsonl").open("a", encoding="utf-8") as handle:
         handle.write(line + "\n")
     print(f"steer queued for {info['node_id'] or info['name']}: {message}")
-    print("delivered on the supervisor's next read cycle (needs the steer-aware runtime)")
+    if capabilities is not None:
+        print("delivered on the supervisor's next read cycle (needs the steer-aware runtime)")
+    else:
+        print(
+            "unknown capability; message queued but the runtime may not consume it"
+        )
     return 0
 
 
