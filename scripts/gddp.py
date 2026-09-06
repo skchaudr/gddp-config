@@ -3630,6 +3630,7 @@ def _graph_hub_handlers() -> dict[str, object]:
 
 
 _HUB_RECENT_ENTRIES = 8
+_HUB_MAX_WARNINGS = 6
 
 
 def _print_graph_truth(project: str) -> None:
@@ -3649,34 +3650,52 @@ def _print_graph_truth(project: str) -> None:
     except (FileNotFoundError, KeyError, OSError) as exc:
         console.print(Text(f"  truth unavailable: {exc}", style="red"))
         return
+    # Everything is one line, truncated to the terminal, and the whole block
+    # is budgeted so the action keys stay on screen. Warnings come first.
+    size = shutil.get_terminal_size((100, 40))
+    one = {"overflow": "ellipsis", "no_wrap": True, "width": size.columns}
+    menu_rows = len(_graph_hub_actions()) + 2          # keys + help line
+    available = size.lines - menu_rows - 1             # minus trailing newline
+    skeleton = len(graph["nodes"]) + 7                 # header, label, nodes, blank, wrong-label, blank, events line, blank
+    warn_room = max(1, available - skeleton)
+    warnings = tl.warnings[:min(_HUB_MAX_WARNINGS, warn_room)]
+    hidden_warnings = len(tl.warnings) - len(warnings)
+    if hidden_warnings and len(warnings) == warn_room and len(warnings) > 1:
+        warnings = warnings[:-1]
+        hidden_warnings += 1
+    room = available - skeleton - len(warnings) - (1 if hidden_warnings else 0) - 1
+    show_recent = room >= 2
+    recent = tl.entries[-min(_HUB_RECENT_ENTRIES, room):] if show_recent else []
+    total = len(tl.entries)
+
     console.print(Text("graph says now:", style="bold"))
     for nid, info in graph["nodes"].items():
         row = Text(f"  {nid:<32} ")
         row.append(f"{info['status']:<12}", style=_graph_status_style(info["status"]))
         row.append(info.get("title") or "", style="dim")
-        console.print(row)
-    total = len(tl.entries)
-    recent = tl.entries[-_HUB_RECENT_ENTRIES:]
+        console.print(row, **one)
     console.print()
-    head = "what happened" + (f" (last {len(recent)} of {total})" if total > len(recent) else "")
-    console.print(Text(head + ":", style="bold"))
-    if recent:
+    if warnings:
+        console.print(Text(f"what is wrong ({len(tl.warnings)}):", style="bold red"))
+        for w in warnings:
+            console.print(Text(f"  ! {w}", style="red"), **one)
+        if hidden_warnings:
+            console.print(Text(f"  … {hidden_warnings} more", style="red"), **one)
+    else:
+        console.print(Text("what is wrong: nothing detected from this host", style="bold green"))
+    console.print()
+    if show_recent:
+        head = "what happened" + (f" (last {len(recent)} of {total})" if total > len(recent) else "")
+        console.print(Text(head + ":", style="bold"))
         for e in recent:
             line = Text(f"  {e.ts.strftime('%m-%d %H:%MZ')}  ")
             line.append(f"{e.who:<10}", style="cyan")
             line.append(e.text, style="bold red" if "OUTSIDE GDDP" in e.text else "")
-            console.print(line)
-    else:
-        console.print(Text("  (nothing recorded that this host can see)", style="dim"))
-    console.print()
-    if tl.warnings:
-        console.print(Text(f"what is wrong ({len(tl.warnings)}):", style="bold red"))
-        for w in tl.warnings:
-            console.print(Text(f"  ! {w}", style="red"))
-    else:
-        console.print(Text("what is wrong: nothing detected from this host", style="bold green"))
-    for n in tl.notes:
-        console.print(Text(f"  - {n}", style="dim"))
+            console.print(line, **one)
+        if total == 0:
+            console.print(Text("  (nothing recorded that this host can see)", style="dim"))
+    unseen = f"{len(tl.notes)} thing(s) this host cannot see · " if tl.notes else ""
+    console.print(Text(f"  {total} events · {unseen}full story: gddp timeline {project}", style="dim"), **one)
     console.print()
 
 
