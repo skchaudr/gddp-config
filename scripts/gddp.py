@@ -60,6 +60,8 @@ import importlib.util
 import io
 import json
 import os
+import platform
+import socket
 import re
 import shlex
 import secrets
@@ -3794,12 +3796,122 @@ def _launchd_status(label: str) -> dict[str, object]:
     }
 
 
+_SYSTEMD_TIMER = "gddp-heartbeat.timer"
+_SYSTEMD_SERVICE = "gddp-heartbeat.service"
+
+
+def _sh(cmd: list[str]) -> str:
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=10, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+    return proc.stdout
+
+
+def _systemd_status() -> dict[str, str]:
+    """Facts about the heartbeat timer/service on a systemd host. Read-only."""
+    facts: dict[str, str] = {}
+    for unit in (_SYSTEMD_TIMER, _SYSTEMD_SERVICE):
+        out = _sh(["systemctl", "--user", "show", unit, "-p", "ActiveState", "-p", "UnitFileState",
+                   "-p", "FragmentPath", "-p", "Result", "-p", "ExecMainExitTimestamp", "-p", "NextElapseUSecRealtime"])
+        for line in out.splitlines():
+            if "=" in line:
+                key, value = line.split("=", 1)
+                facts[f"{unit}.{key}"] = value.strip()
+    timers = _sh(["systemctl", "--user", "list-timers", "--all", _SYSTEMD_TIMER, "--no-legend"]).strip()
+    facts["timer_line"] = timers.splitlines()[0] if timers else ""
+    facts["journal"] = _sh(["journalctl", "--user", "-u", _SYSTEMD_SERVICE, "-n", "6", "--no-pager", "-o", "short-iso"]).rstrip()
+    return facts
+
+
+def _heartbeat_env_path() -> Path:
+    return resolve_runtime_root() / "deploy" / "mini-heartbeat" / "env" / "gddp.env"
+
+
+def _interactive_heartbeat_systemd():
+    """Linux: show timer + service facts and arm/disarm through systemctl."""
+    f = _systemd_status()
+    registered = bool(f.get(f"{_SYSTEMD_TIMER}.FragmentPath"))
+    active = f.get(f"{_SYSTEMD_TIMER}.ActiveState") == "active"
+    env_path = _heartbeat_env_path()
+    console.print(Text("heartbeat", style="bold").append(f"  ·  {socket.gethostname()} (systemd)", style="dim"))
+    console.print()
+    if registered is False:
+        console.print(Text(f"  {_SYSTEMD_TIMER} is absent on this host; nothing to arm. See deploy/mini-heartbeat/systemd/.", style="yellow"))
+        _pause()
+        return _MENU_BACK
+    state = Text("ARMED", style="bold green") if active else Text("off", style="dim")
+    console.print(Text("  timer      "), state, Text(f"  enabled={f.get(f'{_SYSTEMD_TIMER}.UnitFileState', '?')}", style="dim"))
+    schedule = f.get("timer_line") or ""
+    for unit in (_SYSTEMD_TIMER, _SYSTEMD_SERVICE):
+        schedule = schedule.replace(unit, "")
+    schedule = " ".join(schedule.split()) or "(never run)"
+    console.print(Text(f"  next/last  {schedule}", style="dim"))
+    result = f.get(f"{_SYSTEMD_SERVICE}.Result", "?")
+    journal = f.get("journal") or ""
+    if "Failed with result" in journal:
+        result = "failed"
+    console.print(
+        Text("  last tick  "),
+        Text(result, style="bold green" if result == "success" else "bold red"),
+        Text(f"  at {f.get(f'{_SYSTEMD_SERVICE}.ExecMainExitTimestamp') or '?'}", style="dim"),
+    )
+    console.print(Text(f"  timer unit {f.get(f'{_SYSTEMD_TIMER}.FragmentPath')}", style="dim"))
+    console.print(Text(f"  service    {f.get(f'{_SYSTEMD_SERVICE}.FragmentPath')}", style="dim"))
+    console.print(Text(f"  env file   {env_path}  {'(present)' if env_path.is_file() else '(MISSING)'}",
+                       style="dim" if env_path.is_file() else "bold red"))
+    console.print()
+    console.print(Text("  last journal lines:", style="bold"))
+    for line in (f.get("journal") or "  (empty)").splitlines():
+        console.print(Text(f"    {line}", style="red" if "Error" in line or "Failed" in line else "dim"),
+                      overflow="ellipsis", no_wrap=True)
+    console.print()
+    if active:
+        action, cmd = "disarm", ["systemctl", "--user", "stop", _SYSTEMD_TIMER]
+        key = "d"
+    else:
+        action, cmd = "arm", ["systemctl", "--user", "start", _SYSTEMD_TIMER]
+        key = "a"
+    console.print(Text(f"  {key}  {action}   runs: {' '.join(cmd)}", style="cyan"))
+    console.print(Text("  b  back", style="dim"))
+    try:
+        choice = _import_module("terminal").getch().lower()
+    except (EOFError, KeyboardInterrupt):
+        return _MENU_BACK
+    if choice != key:
+        return _MENU_BACK
+    proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    if proc.returncode == 0:
+        console.print(Text(f"  {action}ed: {_SYSTEMD_TIMER}", style="bold green"))
+    else:
+        console.print(Text(f"  {action} failed (exit {proc.returncode}): {proc.stderr.strip()}", style="bold red"))
+    _pause()
+    return _MENU_BACK
+
+
 def interactive_heartbeat():
     """Show actual control-plane health and offer repair/arm or disarm."""
+    _clear_screen()
+    if platform.system() == "Linux":
+        return _interactive_heartbeat_systemd()
     kit = resolve_runtime_root() / "deploy" / "mini-heartbeat"
     labels = ("com.gddp.intake", "com.gddp.heartbeat")
-    _clear_screen()
     statuses = {label: _launchd_status(label) for label in labels}
+    console.print(Text("heartbeat", style="bold").append(f"  ·  {socket.gethostname()} (launchd)", style="dim"))
+    console.print(Text(f"  kit      {kit}", style="dim"))
+    console.print(Text(f"  env file {_heartbeat_env_path()}", style="dim"))
+    console.print(Text(f"  logs     ~/Library/Logs/gddp-heartbeat.log · gddp-heartbeat.err.log", style="dim"))
+    for name in ("gddp-heartbeat.err.log", "gddp-heartbeat.log"):
+        log_path = Path.home() / "Library" / "Logs" / name
+        if log_path.is_file():
+            try:
+                tail = log_path.read_text(encoding="utf-8", errors="replace").splitlines()[-4:]
+            except OSError:
+                tail = []
+            for line in tail:
+                console.print(Text(f"    {line}", style="dim"), overflow="ellipsis", no_wrap=True)
+            break
+    console.print()
     for label, status in statuses.items():
         if status["healthy"]:
             state = Text("HEALTHY", style="bold green")
