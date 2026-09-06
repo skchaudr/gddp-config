@@ -20,6 +20,7 @@ Subcommands:
 
     evaluations       List evaluator receipts (verdict + timing)
 
+    timeline <project> [node]  What happened, in order, in words; flags disagreements
     watch [target]    Live running fleet (default); drill-in by node/job id
     runs              fzf picker over attempts (agent-runs style; Enter → watch)
     steer <target>    Send an operator message into a running attempt's session
@@ -106,6 +107,7 @@ _CLI_COMMANDS = frozenset(
         "watch",
         "runs",
         "steer",
+        "timeline",
     }
 )
 _ABSTRACT_EXECUTION_MODES = frozenset({"agent", "human"})
@@ -5098,6 +5100,57 @@ def cmd_steer(args) -> int:
     return 0
 
 
+def cmd_timeline(args) -> int:
+    """What happened to a project (or one node), in order, in words. Read-only."""
+    timeline = _import_module("timeline")
+    try:
+        runtime_root: Path | None = resolve_runtime_root()
+    except RuntimeError:
+        runtime_root = None
+    attempts: list[dict] = []
+    if runtime_root is not None:
+        try:
+            attempts = _discover_attempts(runtime_root)
+        except OSError:
+            attempts = []
+    try:
+        tl = timeline.build(
+            args.project,
+            args.node,
+            config_root=ROOT,
+            runtime_root=runtime_root,
+            repo_path=_resolve_repo_for_project(args.project, args.repo_path),
+            attempts=attempts,
+        )
+    except FileNotFoundError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
+    except KeyError as exc:
+        print(f"ERROR: {exc.args[0]}", file=sys.stderr)
+        return 2
+    if args.json:
+        print(json.dumps(tl.as_dict(), indent=2))
+        return 0
+    graph = timeline.read_graph(ROOT, args.project)
+    text = timeline.render_text(tl, graph["nodes"])
+    for raw in text.splitlines():
+        if raw.startswith("timeline:"):
+            console.print(Text(raw, style="bold"))
+        elif raw.startswith("what is wrong"):
+            console.print(Text(raw, style="bold red" if tl.warnings else "bold green"))
+        elif raw.startswith("  ! "):
+            console.print(Text(raw, style="red"))
+        elif raw.startswith("what this host cannot see"):
+            console.print(Text(raw, style="bold yellow"))
+        elif raw.startswith("  - "):
+            console.print(Text(raw, style="dim"))
+        elif "OUTSIDE GDDP" in raw:
+            console.print(Text(raw, style="bold red"))
+        else:
+            console.print(raw)
+    return 1 if tl.warnings else 0
+
+
 def cmd_overview(_args):
     if sys.stdin.isatty() and sys.stdout.isatty():
         return interactive_menu()
@@ -6230,6 +6283,16 @@ def main(argv=None):
     steer_p.add_argument("target", help="node id, job id, or attempt-dir prefix")
     steer_p.add_argument("message", nargs="+", help="message text")
     steer_p.set_defaults(func=cmd_steer)
+
+    timeline_p = sub.add_parser(
+        "timeline",
+        help="What happened to a project or node, in order, in words (read-only)",
+    )
+    timeline_p.add_argument("project", help="Project ID")
+    timeline_p.add_argument("node", nargs="?", default=None, help="Node ID (optional)")
+    timeline_p.add_argument("--repo-path", default=None, help="Local checkout of the project's repo")
+    timeline_p.add_argument("--json", action="store_true", help="Machine-readable output")
+    timeline_p.set_defaults(func=cmd_timeline)
     jobs_sub = jobs_p.add_subparsers(dest="jobs_command")
 
     jobs_list = jobs_sub.add_parser("list", help="List jobs and queue states")
