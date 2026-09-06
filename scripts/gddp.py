@@ -3541,7 +3541,8 @@ def static_overview():
     table.add_column("group", style="bold cyan", no_wrap=True)
     table.add_column("owns")
     table.add_column("start with", style="dim", no_wrap=True)
-    table.add_row("menu", "dispatch · evaluate · graphs · live · heartbeat · config", "gddp")
+    table.add_row("menu", "pick a graph → its truth → nodes · dispatch · live", "gddp")
+    table.add_row("timeline", "what happened to a graph, in order, in words", "gddp timeline <project>")
     table.add_row("live", "running executors, diffs, events stream", "gddp watch / gddp jobs live")
     table.add_row("node", "graph truth, authoring, runtime/evaluator join", "gddp node list")
     table.add_row("jobs", "runtime queue, results, and audited state changes", "gddp jobs list")
@@ -3550,13 +3551,13 @@ def static_overview():
     table.add_row("project", "project graph creation and validation", "gddp project -h")
     table.add_row("obsidian", "graph export", "gddp obsidian export")
     console.print(table)
-    tty_bits = [
+    controls = " · ".join(
         f"{key} {name}" for key, (name, _desc) in _front_page_actions().items()
-        if key != "q"
-    ]
+        if key in _front_page_handlers()
+    )
     console.print(Text(
-        "TTY: " + " · ".join(tty_bits) + ". "
-        "Shell: `gddp watch`, `gddp jobs live`, `gddp <group> -h`.",
+        f"TTY: graph picker first; Esc for controls ({controls}). "
+        "Shell: `gddp timeline <project>`, `gddp watch`, `gddp <group> -h`.",
         style="dim",
     ))
 
@@ -3628,8 +3629,59 @@ def _graph_hub_handlers() -> dict[str, object]:
     }
 
 
+_HUB_RECENT_ENTRIES = 8
+
+
+def _print_graph_truth(project: str) -> None:
+    """Opening a graph shows what is true and what is wrong before any key."""
+    timeline = _import_module("timeline")
+    try:
+        runtime_root: Path | None = resolve_runtime_root()
+    except RuntimeError:
+        runtime_root = None
+    try:
+        tl = timeline.build(
+            project, None,
+            config_root=ROOT, runtime_root=runtime_root,
+            repo_path=_resolve_repo_for_project(project), attempts=[],
+        )
+        graph = timeline.read_graph(ROOT, project)
+    except (FileNotFoundError, KeyError, OSError) as exc:
+        console.print(Text(f"  truth unavailable: {exc}", style="red"))
+        return
+    console.print(Text("graph says now:", style="bold"))
+    for nid, info in graph["nodes"].items():
+        row = Text(f"  {nid:<32} ")
+        row.append(f"{info['status']:<12}", style=_graph_status_style(info["status"]))
+        row.append(info.get("title") or "", style="dim")
+        console.print(row)
+    total = len(tl.entries)
+    recent = tl.entries[-_HUB_RECENT_ENTRIES:]
+    console.print()
+    head = "what happened" + (f" (last {len(recent)} of {total})" if total > len(recent) else "")
+    console.print(Text(head + ":", style="bold"))
+    if recent:
+        for e in recent:
+            line = Text(f"  {e.ts.strftime('%m-%d %H:%MZ')}  ")
+            line.append(f"{e.who:<10}", style="cyan")
+            line.append(e.text, style="bold red" if "OUTSIDE GDDP" in e.text else "")
+            console.print(line)
+    else:
+        console.print(Text("  (nothing recorded that this host can see)", style="dim"))
+    console.print()
+    if tl.warnings:
+        console.print(Text(f"what is wrong ({len(tl.warnings)}):", style="bold red"))
+        for w in tl.warnings:
+            console.print(Text(f"  ! {w}", style="red"))
+    else:
+        console.print(Text("what is wrong: nothing detected from this host", style="bold green"))
+    for n in tl.notes:
+        console.print(Text(f"  - {n}", style="dim"))
+    console.print()
+
+
 def interactive_graph_hub(project: str):
-    """Primary work for one graph: nodes, dispatch, live. Rest under more."""
+    """One graph: its truth on screen, then nodes, dispatch, live. Rest under more."""
     actions = _graph_hub_actions()
     while True:
         _clear_screen()
@@ -3637,6 +3689,7 @@ def interactive_graph_hub(project: str):
             Text("graph", style="bold")
             .append(f"  ·  {project}", style="bold cyan")
         )
+        _print_graph_truth(project)
         try:
             choice = _menu_choice(actions, default="n")
         except (EOFError, KeyboardInterrupt):
@@ -3664,19 +3717,6 @@ def interactive_graph_hub(project: str):
             pass
         except KeyboardInterrupt:
             return _MENU_BACK
-
-
-def interactive_graphs():
-    """Activity-sorted graphs; idle (>7d) live under archive, not the main list."""
-    while True:
-        picked = _pick_graph("graphs", back_label="main menu")
-        if picked is _MENU_QUIT:
-            return _MENU_QUIT
-        if picked is _MENU_BACK:
-            return _MENU_BACK
-        outcome = interactive_graph_hub(str(picked))
-        if outcome is _MENU_QUIT:
-            return _MENU_QUIT
 
 
 def _launchd_status(label: str) -> dict[str, object]:
@@ -3792,23 +3832,17 @@ def interactive_heartbeat():
 
 
 def _front_page_actions() -> dict[str, tuple[str, str]]:
+    """Controls page, one step back from the graph picker."""
     return {
-        "d": ("dispatch", "send ready work through the event pipeline"),
-        "e": ("evaluate", "evaluator hub — run, inspect, history"),
-        "g": ("graphs", "active graphs first; archive for idle (>7d)"),
-        "w": ("live", "running executors — fleet + drill-in"),
         "h": ("heartbeat", "arm/disarm the control plane (intake + heartbeat)"),
         "c": ("config", "executor & evaluator settings (runtime/settings.env)"),
+        "b": ("graphs", ""),
         "q": ("quit", ""),
     }
 
 
 def _front_page_handlers() -> dict[str, object]:
     return {
-        "d": interactive_dispatch,
-        "e": interactive_evaluate,
-        "g": interactive_graphs,
-        "w": interactive_watch,
         "h": interactive_heartbeat,
         "c": interactive_config,
     }
@@ -4340,45 +4374,58 @@ def interactive_config():
 
 
 def interactive_menu():
-    """Front door: dispatch, graphs, live. Everything else is under a graph."""
-    actions = _front_page_actions()
+    """Front door is the graph picker. Pick a graph, see its truth, act.
+
+    Cross-graph controls (heartbeat, config) sit one step back from the
+    picker so the first screen is always the work, never a menu of menus.
+    """
     while True:
-        _clear_screen()
-        console.print(Text("gddp", style="bold").append("  ·  graph control plane", style="dim"))
         try:
-            choice = _menu_choice(actions, default="g")
+            picked = _pick_graph("graphs", back_label="heartbeat · config · quit")
         except (EOFError, KeyboardInterrupt):
-            console.print()
             break
-        if choice == "q":
+        if picked is _MENU_QUIT:
             break
+        if picked is _MENU_BACK:
+            if interactive_controls() is _MENU_QUIT:
+                break
+            continue
         try:
-            if choice == "d":
-                outcome = interactive_dispatch()
-                if outcome is _MENU_QUIT:
-                    break
-                if outcome is not _MENU_BACK:
-                    _pause()
-            elif choice == "e":
-                outcome = interactive_evaluate()
-                if outcome is _MENU_QUIT:
-                    break
-            elif choice == "g":
-                outcome = interactive_graphs()
-                if outcome is _MENU_QUIT:
-                    break
-            elif choice == "w":
-                interactive_watch()
-            elif choice == "h":
-                interactive_heartbeat()
-            elif choice == "c":
-                interactive_config()
+            outcome = interactive_graph_hub(str(picked))
         except SystemExit:
-            pass
+            continue
         except KeyboardInterrupt:
+            break
+        if outcome is _MENU_QUIT:
             break
     _clear_screen()
     console.print(Text("bye.", style="dim"))
+
+
+def interactive_controls():
+    """Heartbeat and config: the two things that are about the plane, not a graph."""
+    actions = _front_page_actions()
+    handlers = _front_page_handlers()
+    while True:
+        _clear_screen()
+        console.print(Text("gddp", style="bold").append("  ·  controls", style="dim"))
+        try:
+            choice = _menu_choice(actions, default="b")
+        except (EOFError, KeyboardInterrupt):
+            return _MENU_BACK
+        if choice == "q":
+            return _MENU_QUIT
+        if choice == "b":
+            return _MENU_BACK
+        handler = handlers.get(choice)
+        if handler is None:
+            continue
+        try:
+            handler()
+        except SystemExit:
+            pass
+        except KeyboardInterrupt:
+            return _MENU_BACK
 
 
 # ---------------------------------------------------------------------------

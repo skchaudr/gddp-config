@@ -702,34 +702,41 @@ class OverviewTests(unittest.TestCase):
             reason="operator reviewed recovery",
         )
 
-    def test_main_menu_opens_graphs_submenu(self):
-        with patch.object(gddp, "_menu_choice", side_effect=["g", "q"]), \
+    def test_main_menu_opens_on_graph_picker_then_hub(self):
+        with patch.object(
+                    gddp, "_pick_graph", side_effect=["proj-a", gddp._MENU_QUIT]
+                ) as picker, \
                 patch.object(
-                    gddp, "interactive_graphs", return_value=gddp._MENU_BACK
-                ) as graphs, \
+                    gddp, "interactive_graph_hub", return_value=gddp._MENU_BACK
+                ) as hub, \
                 patch.object(gddp, "_clear_screen"):
             gddp.interactive_menu()
 
-        graphs.assert_called_once_with()
+        self.assertEqual(picker.call_count, 2)
+        hub.assert_called_once_with("proj-a")
 
-    def test_main_menu_opens_dispatch(self):
-        with patch.object(gddp, "_menu_choice", side_effect=["d", "q"]), \
+    def test_main_menu_back_from_picker_opens_controls(self):
+        with patch.object(
+                    gddp, "_pick_graph", side_effect=[gddp._MENU_BACK, gddp._MENU_QUIT]
+                ), \
                 patch.object(
-                    gddp, "interactive_dispatch", return_value=gddp._MENU_BACK
-                ) as dispatch, \
+                    gddp, "interactive_controls", return_value=gddp._MENU_BACK
+                ) as controls, \
                 patch.object(gddp, "_clear_screen"):
             gddp.interactive_menu()
 
-        dispatch.assert_called_once_with()
+        controls.assert_called_once_with()
 
-    def test_main_menu_opens_live_watch(self):
-        with patch.object(gddp, "_menu_choice", side_effect=["w", "q"]), \
-                patch.object(
-                    gddp, "interactive_watch", return_value=gddp._MENU_BACK
-                ) as live, \
+    def test_controls_page_routes_heartbeat_and_config(self):
+        with patch.object(gddp, "_menu_choice", side_effect=["h", "c", "b"]), \
+                patch.object(gddp, "interactive_heartbeat") as heartbeat, \
+                patch.object(gddp, "interactive_config") as config, \
                 patch.object(gddp, "_clear_screen"):
-            gddp.interactive_menu()
-        live.assert_called_once_with()
+            outcome = gddp.interactive_controls()
+
+        heartbeat.assert_called_once_with()
+        config.assert_called_once_with()
+        self.assertIs(outcome, gddp._MENU_BACK)
 
     def test_jobs_live_routes_to_watch(self):
         with patch.object(gddp, "cmd_watch", return_value=0) as watch:
@@ -784,7 +791,7 @@ class OverviewTests(unittest.TestCase):
         self.assertIn("job-1", out.getvalue())
 
     def test_main_menu_exits_on_ctrl_c(self):
-        with patch.object(gddp, "_menu_choice", side_effect=KeyboardInterrupt), \
+        with patch.object(gddp, "_pick_graph", side_effect=KeyboardInterrupt), \
                 patch.object(gddp, "_clear_screen"):
             gddp.interactive_menu()
 
@@ -898,12 +905,9 @@ class OverviewTests(unittest.TestCase):
         handled = gddp._handled_letter_keys(
             gddp._front_page_actions(), gddp._front_page_handlers()
         )
-        self.assertIn("w", displayed)
         self.assertEqual(set(displayed), set(handled))
-        self.assertEqual(set(displayed), {"d", "e", "g", "w", "h", "c", "q"})
-        self.assertTrue(
-            {"d", "g", "w", "h"}.issubset(gddp._front_page_handlers())
-        )
+        self.assertEqual(set(displayed), {"h", "c", "b", "q"})
+        self.assertEqual(set(gddp._front_page_handlers()), {"h", "c"})
 
     def test_graph_hub_displayed_letters_are_handled(self):
         displayed = gddp._letter_keys(gddp._graph_hub_actions())
