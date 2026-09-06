@@ -154,7 +154,7 @@ class HeartbeatStateTests(unittest.TestCase):
                 patch.object(gddp, "_import_module", return_value=term), \
                 patch.object(gddp, "_clear_screen"), \
                 patch.object(gddp, "_pause"), \
-                patch.object(gddp.console, "file", out), \
+                patch.object(gddp, "console", Console(file=out, width=160, force_terminal=False)), \
                 patch.object(gddp.subprocess, "run") as run:
             run.return_value = type("P", (), {"returncode": 0, "stderr": ""})()
             gddp.interactive_heartbeat()
