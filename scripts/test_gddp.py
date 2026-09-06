@@ -727,13 +727,15 @@ class OverviewTests(unittest.TestCase):
 
         controls.assert_called_once_with()
 
-    def test_controls_page_routes_heartbeat_and_config(self):
-        with patch.object(gddp, "_menu_choice", side_effect=["h", "c", "b"]), \
+    def test_controls_page_routes_live_heartbeat_and_config(self):
+        with patch.object(gddp, "_menu_choice", side_effect=["w", "h", "c", "b"]), \
+                patch.object(gddp, "interactive_watch") as live, \
                 patch.object(gddp, "interactive_heartbeat") as heartbeat, \
                 patch.object(gddp, "interactive_config") as config, \
                 patch.object(gddp, "_clear_screen"):
             outcome = gddp.interactive_controls()
 
+        live.assert_called_once_with()
         heartbeat.assert_called_once_with()
         config.assert_called_once_with()
         self.assertIs(outcome, gddp._MENU_BACK)
@@ -906,8 +908,8 @@ class OverviewTests(unittest.TestCase):
             gddp._front_page_actions(), gddp._front_page_handlers()
         )
         self.assertEqual(set(displayed), set(handled))
-        self.assertEqual(set(displayed), {"h", "c", "b", "q"})
-        self.assertEqual(set(gddp._front_page_handlers()), {"h", "c"})
+        self.assertEqual(set(displayed), {"w", "h", "c", "b", "q"})
+        self.assertEqual(set(gddp._front_page_handlers()), {"w", "h", "c"})
 
     def test_graph_hub_displayed_letters_are_handled(self):
         displayed = gddp._letter_keys(gddp._graph_hub_actions())

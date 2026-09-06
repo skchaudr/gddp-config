@@ -3556,7 +3556,7 @@ def static_overview():
         if key in _front_page_handlers()
     )
     console.print(Text(
-        f"TTY: graph picker first; Esc for controls ({controls}). "
+        f"TTY: graph picker first; Esc for the plane ({controls}). "
         "Shell: `gddp timeline <project>`, `gddp watch`, `gddp <group> -h`.",
         style="dim",
     ))
@@ -3851,8 +3851,10 @@ def interactive_heartbeat():
 
 
 def _front_page_actions() -> dict[str, tuple[str, str]]:
-    """Controls page, one step back from the graph picker."""
+    """Plane page, one step back from the graph picker: everything that is
+    about the whole plane rather than one graph."""
     return {
+        "w": ("live", "every running executor, across all graphs"),
         "h": ("heartbeat", "arm/disarm the control plane (intake + heartbeat)"),
         "c": ("config", "executor & evaluator settings (runtime/settings.env)"),
         "b": ("graphs", ""),
@@ -3862,6 +3864,7 @@ def _front_page_actions() -> dict[str, tuple[str, str]]:
 
 def _front_page_handlers() -> dict[str, object]:
     return {
+        "w": interactive_watch,
         "h": interactive_heartbeat,
         "c": interactive_config,
     }
@@ -4400,7 +4403,7 @@ def interactive_menu():
     """
     while True:
         try:
-            picked = _pick_graph("graphs", back_label="heartbeat · config · quit")
+            picked = _pick_graph("graphs", back_label="live · heartbeat · config · quit")
         except (EOFError, KeyboardInterrupt):
             break
         if picked is _MENU_QUIT:
@@ -4422,12 +4425,12 @@ def interactive_menu():
 
 
 def interactive_controls():
-    """Heartbeat and config: the two things that are about the plane, not a graph."""
+    """Live fleet, heartbeat, config: the things about the plane, not one graph."""
     actions = _front_page_actions()
     handlers = _front_page_handlers()
     while True:
         _clear_screen()
-        console.print(Text("gddp", style="bold").append("  ·  controls", style="dim"))
+        console.print(Text("gddp", style="bold").append("  ·  plane: live · heartbeat · config", style="dim"))
         try:
             choice = _menu_choice(actions, default="b")
         except (EOFError, KeyboardInterrupt):
