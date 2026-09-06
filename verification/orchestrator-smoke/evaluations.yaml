@@ -1,0 +1,116 @@
+schema_type: node_evaluations
+schema_version: '1.0'
+project_id: orchestrator-smoke
+generated_at: '2026-09-05T11:55:24Z'
+source: gddp-runtime db/queue.db (results + decision_results)
+evaluations:
+  smoke-alpha:
+    verdict: pass
+    evaluated_at: '2026-09-05T10:05:30.454514+00:00'
+    executor: cursor_cli
+    job_id: job_20260905T10020530eb8644bf9846
+    result_id: res_ses_20260905T100205308e0d7bc91341
+    attempts: 1
+    receipt_ref: /Users/sab-mini/repos/gddp-config/verification/orchestrator-smoke/smoke-alpha/job_20260905T10020530eb8644bf9846-attempt0.json
+    intent_preserved: true
+    graph_integrity_preserved: true
+    evaluator_note: 'Fresh-eyes review of node smoke-alpha against its intent and the orchestrator-smoke
+      graph. Node intent: create only smoke/alpha.md (non-empty, containing "alpha" and 2026-09-05) as
+      the first wake-dispatch smoke marker; depends_on/unlocks are both empty. Direct inspection of the
+      worktree confirms smoke/alpha.md exists (141 bytes, ASCII, non-empty) and contains "Marker: alpha"
+      and "Date: 2026-09-05", matching all three criteria in substance. The git diff from base dbb8106
+      to tip d61baf9 adds exactly one file (smoke/alpha.md); no beta/gamma markers, no stray files, and
+      the pre-existing soak/ scaffolding is untouched — the "Create only smoke/alpha.md" constraint is
+      satisfied at the tree level. Graph integrity is preserved: alpha''s artifact name is disjoint from
+      sibling artifacts (smoke/beta.md, smoke/gamma.md per the sibling YAMLs), dependency edges remain
+      empty as declared, and work was confined to the allowed repo (local/gddp-soak-target). Two non-blocking
+      nuances: (1) the lane-1 criteria checks report indeterminate only because their probes were keyword-scan/no-probe;
+      direct file reads resolve the substance, which is within my fresh-eyes remit, not a re-adjudication.
+      (2) The change appears committed in the harness "result" wrapper commit rather than left as uncommitted
+      working-tree edits; the subject_diff note explicitly identifies wrapper commits (git add -A) as
+      verification scaffolding, so whether this trips the literal "uncommitted" constraint is a lane-1
+      acceptance question, and it does not alter what the node was to deliver nor anything a downstream
+      wake depends on. Verdict: pass — intent recognizable and delivered, graph unchanged and coherent.'
+    evidence_refs: []
+    acceptance_check:
+      verification_status: ok
+      receipt_path: /Users/sab-mini/repos/gddp-config/verification/orchestrator-smoke/smoke-alpha/job_20260905T10020530eb8644bf9846-attempt0.json
+      verdict: pass
+      criteria_confidence: 0.9899999999999999
+      completeness_status: complete
+      required_next_action: Proceed to accept_node (open evidence PR).
+      evaluated_tree_sha: c661ae09c45d226a081bf9ea1e2733b143356410
+      evaluated_commit_sha: d61baf97816decad9d591bd5ca7125c8df71e756
+      merge_commit_sha: d61baf97816decad9d591bd5ca7125c8df71e756
+      execution_attempt_id: job_20260905T10020530eb8644bf9846:attempt:0
+      context_coverage:
+        criteria: none
+        integrity: none
+        overall: none
+      criteria_verdict: pass
+      integrity:
+        verdict: pass
+        intent_preserved: true
+        graph_integrity_preserved: true
+        required_human_review: false
+        confidence: 0.92
+        findings: []
+        reasoning: 'Fresh-eyes review of node smoke-alpha against its intent and the orchestrator-smoke
+          graph. Node intent: create only smoke/alpha.md (non-empty, containing "alpha" and 2026-09-05)
+          as the first wake-dispatch smoke marker; depends_on/unlocks are both empty. Direct inspection
+          of the worktree confirms smoke/alpha.md exists (141 bytes, ASCII, non-empty) and contains "Marker:
+          alpha" and "Date: 2026-09-05", matching all three criteria in substance. The git diff from base
+          dbb8106 to tip d61baf9 adds exactly one file (smoke/alpha.md); no beta/gamma markers, no stray
+          files, and the pre-existing soak/ scaffolding is untouched — the "Create only smoke/alpha.md"
+          constraint is satisfied at the tree level. Graph integrity is preserved: alpha''s artifact name
+          is disjoint from sibling artifacts (smoke/beta.md, smoke/gamma.md per the sibling YAMLs), dependency
+          edges remain empty as declared, and work was confined to the allowed repo (local/gddp-soak-target).
+          Two non-blocking nuances: (1) the lane-1 criteria checks report indeterminate only because their
+          probes were keyword-scan/no-probe; direct file reads resolve the substance, which is within
+          my fresh-eyes remit, not a re-adjudication. (2) The change appears committed in the harness
+          "result" wrapper commit rather than left as uncommitted working-tree edits; the subject_diff
+          note explicitly identifies wrapper commits (git add -A) as verification scaffolding, so whether
+          this trips the literal "uncommitted" constraint is a lane-1 acceptance question, and it does
+          not alter what the node was to deliver nor anything a downstream wake depends on. Verdict: pass
+          — intent recognizable and delivered, graph unchanged and coherent.'
+        lane_status: completed
+        harness_error: null
+        graph_observations:
+        - severity: low
+          summary: smoke-alpha, smoke-beta, smoke-gamma are mutually independent ready nodes sharing one
+            repo (local/gddp-soak-target). All three write distinct top-level marker files under smoke/,
+            so parallel dispatches across wakes do not contend on artifacts; the only shared-resource
+            pressure is the capacity-2 pacing in the execution policy, which is the point of the smoke
+            test.
+          affected_node_ids:
+          - smoke-alpha
+          - smoke-beta
+          - smoke-gamma
+      semantic_risks: Low. Residual risk is limited to (1) interpretation of the git add -A wrapper commit
+        d61baf9 relative to the constraint 'Leave changes as uncommitted working-tree edits' — deterministic
+        scan judged this clear and the wrapper is the harness transport pattern, so treated as context
+        not failure; (2) none of the criteria require anything beyond the observed file contents, so no
+        hidden dependence on project brief/README (both absent from the eval dir, and not referenced by
+        any criterion).
+      followup_candidates: 'None required: all criteria were resolvable by direct file read and pass.
+        Optionally note that this node''s three criteria are pure file-content checks, so registering
+        content probes (grep on smoke/alpha.md for ''alpha'' and ''2026-09-05'', non-empty check) would
+        remove the need for human verification in future runs of this smoke graph.'
+      lane_status:
+        criteria: completed
+        integrity: completed
+      harness_error:
+        criteria: null
+        integrity: null
+      evaluation_timing:
+        started_at: '2026-09-05T10:04:24.725013+00:00'
+        finished_at: '2026-09-05T10:05:30.397682+00:00'
+        wall_s: 65.674
+        criteria:
+          status: completed
+          elapsed_s: 28.108
+          tool_calls: 7
+        integrity:
+          status: completed
+          elapsed_s: 37.548
+          tool_calls: 8

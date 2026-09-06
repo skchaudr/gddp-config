@@ -1,0 +1,459 @@
+{
+  "project_id": "orchestrator-smoke",
+  "node_id": "smoke-alpha",
+  "verdict": "pass",
+  "criteria_verdict": "pass",
+  "integrity": {
+    "verdict": "pass",
+    "intent_preserved": true,
+    "graph_integrity_preserved": true,
+    "required_human_review": false,
+    "confidence": 0.92,
+    "findings": [],
+    "reasoning": "Fresh-eyes review of node smoke-alpha against its intent and the orchestrator-smoke graph. Node intent: create only smoke/alpha.md (non-empty, containing \"alpha\" and 2026-09-05) as the first wake-dispatch smoke marker; depends_on/unlocks are both empty. Direct inspection of the worktree confirms smoke/alpha.md exists (141 bytes, ASCII, non-empty) and contains \"Marker: alpha\" and \"Date: 2026-09-05\", matching all three criteria in substance. The git diff from base dbb8106 to tip d61baf9 adds exactly one file (smoke/alpha.md); no beta/gamma markers, no stray files, and the pre-existing soak/ scaffolding is untouched — the \"Create only smoke/alpha.md\" constraint is satisfied at the tree level. Graph integrity is preserved: alpha's artifact name is disjoint from sibling artifacts (smoke/beta.md, smoke/gamma.md per the sibling YAMLs), dependency edges remain empty as declared, and work was confined to the allowed repo (local/gddp-soak-target). Two non-blocking nuances: (1) the lane-1 criteria checks report indeterminate only because their probes were keyword-scan/no-probe; direct file reads resolve the substance, which is within my fresh-eyes remit, not a re-adjudication. (2) The change appears committed in the harness \"result\" wrapper commit rather than left as uncommitted working-tree edits; the subject_diff note explicitly identifies wrapper commits (git add -A) as verification scaffolding, so whether this trips the literal \"uncommitted\" constraint is a lane-1 acceptance question, and it does not alter what the node was to deliver nor anything a downstream wake depends on. Verdict: pass — intent recognizable and delivered, graph unchanged and coherent.",
+    "tool_trace": [
+      {
+        "ts": "2026-09-05T10:04:56.413Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_L0ILlHIX2tXLJsYPjkHA4804",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5smqlczl && pwd && ls -la && find . -maxdepth 3 -not -path './.git/*' | head -50"
+      },
+      {
+        "ts": "2026-09-05T10:04:56.415Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_E550Y4Z9MQmFKTczO8hg1316",
+        "command": "ls -la /Users/sab-mini/repos/gddp-config/graphs/orchestrator-smoke/nodes/ 2>/dev/null && echo \"---\" && cat /Users/sab-mini/repos/gddp-config/graphs/orchestrator-smoke/nodes/smoke-alpha.yaml 2>/dev/null"
+      },
+      {
+        "ts": "2026-09-05T10:04:56.441Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_E550Y4Z9MQmFKTczO8hg1316",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-09-05T10:04:56.441Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_L0ILlHIX2tXLJsYPjkHA4804",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-09-05T10:04:59.210Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_dkBehj1Og8p1qejvzOFm2386",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5smqlczl && echo \"=== cat smoke/alpha.md ===\" && cat smoke/alpha.md && echo \"=== stat ===\" && ls -la smoke/ && wc -c smoke/alpha.md && echo \"=== file type ===\" && file smoke/alpha.md"
+      },
+      {
+        "ts": "2026-09-05T10:04:59.210Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_MWA40l8QSJVneuaGPKAM9371",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5smqlczl && echo \"=== git status ===\" && git status --porcelain=v1 2>&1 | head -30 && echo \"=== git log ===\" && git log --oneline -5 2>&1 && echo \"=== current HEAD ===\" && git rev-parse HEAD 2>&1"
+      },
+      {
+        "ts": "2026-09-05T10:04:59.229Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_dkBehj1Og8p1qejvzOFm2386",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-09-05T10:04:59.235Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_MWA40l8QSJVneuaGPKAM9371",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-09-05T10:05:10.611Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_i6M06Wp3664pzz0Hmasx3435",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5smqlczl && echo \"=== base tree (dbb8106) ===\" && git ls-tree -r --name-only dbb8106 2>&1 && echo \"=== tip tree (d61baf9) ===\" && git ls-tree -r --name-only d61baf9 2>&1 && echo \"=== diff stat base..tip ===\" && git diff --stat dbb8106 d61baf9 2>&1 && echo \"=== diff name-status ===\" && git diff --name-status dbb8106 d61baf9 2>&1"
+      },
+      {
+        "ts": "2026-09-05T10:05:10.611Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_nKT14cYqHAhPAoCGY22p5386",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5smqlczl && echo \"=== HEAD commit contents ===\" && git show --stat HEAD 2>&1 | head -30 && echo \"=== gitdir ===\" && cat .git && echo && git rev-parse --git-dir 2>&1"
+      },
+      {
+        "ts": "2026-09-05T10:05:10.631Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_nKT14cYqHAhPAoCGY22p5386",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-09-05T10:05:10.643Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_i6M06Wp3664pzz0Hmasx3435",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-09-05T10:05:13.435Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_00_wbd5V6HK5arhs5HhLR6z0922",
+        "command": "for f in smoke-beta smoke-gamma; do echo \"=== $f ===\"; cat /Users/sab-mini/repos/gddp-config/graphs/orchestrator-smoke/nodes/$f.yaml 2>/dev/null; echo; done; echo \"=== project graph ===\"; ls /Users/sab-mini/repos/gddp-config/graphs/orchestrator-smoke/ && cat /Users/sab-mini/repos/gddp-config/graphs/orchestrator-smoke/project.yaml 2>/dev/null"
+      },
+      {
+        "ts": "2026-09-05T10:05:13.436Z",
+        "tool": "bash",
+        "blocked": false,
+        "toolCallId": "call_01_o16NJRuYsHuWdSpaZ9v66392",
+        "command": "cd /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5smqlczl && echo \"=== reports ===\" && find reports -type f | head && echo \"=== any stray files in worktree root ===\" && git status --porcelain=v1 --ignored 2>&1 | head -20"
+      },
+      {
+        "ts": "2026-09-05T10:05:13.476Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_01_o16NJRuYsHuWdSpaZ9v66392",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-09-05T10:05:13.483Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_wbd5V6HK5arhs5HhLR6z0922",
+        "tool": "bash",
+        "ok": true
+      },
+      {
+        "ts": "2026-09-05T10:05:30.367Z",
+        "event": "tool_execution_end",
+        "toolCallId": "call_00_9q4uUUEn7tjoAz3O7OT93206",
+        "tool": "submit_integrity_verdict",
+        "ok": true
+      }
+    ],
+    "graph_observations": [
+      {
+        "severity": "low",
+        "summary": "smoke-alpha, smoke-beta, smoke-gamma are mutually independent ready nodes sharing one repo (local/gddp-soak-target). All three write distinct top-level marker files under smoke/, so parallel dispatches across wakes do not contend on artifacts; the only shared-resource pressure is the capacity-2 pacing in the execution policy, which is the point of the smoke test.",
+        "affected_node_ids": [
+          "smoke-alpha",
+          "smoke-beta",
+          "smoke-gamma"
+        ]
+      }
+    ],
+    "graph_recommendations": null,
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "confidence": 0.9899999999999999,
+  "criteria_confidence": 0.9899999999999999,
+  "completeness": 1.0,
+  "graph_readiness": 0.9899999999999999,
+  "completeness_status": "complete",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "alpha-file-exists",
+        "criterion": "smoke/alpha.md exists and is non-empty",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (smoke/alpha.md)"
+        ],
+        "reasoning": "Scanned source files (smoke/alpha.md) for identifiers named in the criterion (non-empty). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "alpha-marker",
+        "criterion": "smoke/alpha.md contains the word alpha",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "alpha-date",
+        "criterion": "smoke/alpha.md contains the date 2026-09-05",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "Create only smoke/alpha.md",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "Leave changes as uncommitted working-tree edits",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "smoke/alpha.md": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": [],
+    "subject_diff": {
+      "status": "ok",
+      "base": "dbb810682d7ae029fa4ba90f483c7b09caafbbed",
+      "tip": "d61baf97816decad9d591bd5ca7125c8df71e756",
+      "files": [
+        {
+          "status": "A",
+          "path": "smoke/alpha.md"
+        }
+      ],
+      "truncated": false,
+      "file_count": 1,
+      "note": "Includes anything untracked the executor left behind (wrapper commits with git add -A) — junk is deliberately visible here."
+    }
+  },
+  "semantic": {
+    "judgments": [
+      {
+        "criterion_id": "alpha-file-exists",
+        "judgment": "judged_pass",
+        "confidence": 0.99,
+        "evidence": [
+          "smoke/alpha.md:1-6 (read: file exists, 141 bytes, 6 non-empty lines)",
+          "bash: ls -la smoke/ shows alpha.md present",
+          "bash: wc -c smoke/alpha.md -> 141"
+        ],
+        "reasoning": "Direct file inspection of the subject repo working tree resolves what the keyword_scan_source probe could not. smoke/alpha.md exists at the repo root and is non-empty (6 lines of content). The deterministic 'indeterminate' status was an artifact of probe absence, not of the actual file state."
+      },
+      {
+        "criterion_id": "alpha-marker",
+        "judgment": "judged_pass",
+        "confidence": 0.99,
+        "evidence": [
+          "smoke/alpha.md:5 \"- Marker: alpha\"",
+          "smoke/alpha.md:3 \"smoke-alpha node\"",
+          "bash: grep -n 'alpha' smoke/alpha.md -> lines 3 and 5"
+        ],
+        "reasoning": "The file contains the word 'alpha' both as lowercase standalone word (line 5, '- Marker: alpha') and embedded in 'smoke-alpha' (line 3); title also has capitalized 'Alpha'. Criterion is a plain content check and is satisfied regardless of case convention."
+      },
+      {
+        "criterion_id": "alpha-date",
+        "judgment": "judged_pass",
+        "confidence": 0.99,
+        "evidence": [
+          "smoke/alpha.md:6 \"- Date: 2026-09-05\"",
+          "bash: grep -n '2026-09-05' smoke/alpha.md -> line 6"
+        ],
+        "reasoning": "The exact date string '2026-09-05' appears verbatim in the file at line 6. Direct read confirms the criterion that deterministic 'no_probe' status left unresolved."
+      }
+    ],
+    "overall_reasoning": "All three acceptance criteria for node smoke-alpha are satisfied and verified by direct inspection of the subject repo at the eval working tree (/private/.../gddp-eval-wt-5smqlczl), whose git history (base dbb8106, tip d61baf9) matches the deterministic_result subject_diff. smoke/alpha.md exists and is non-empty (141 bytes, 6 lines), contains the word alpha (lines 3 and 5), and contains the exact date 2026-09-05 (line 6). The three 'indeterminate' deterministic statuses were purely a consequence of no registered probe / keyword-scan-only method; the file content itself unambiguously satisfies every criterion. Constraints are also consistent: the base→tip diff contains exactly one added file (smoke/alpha.md), and the working tree is clean at the wrapper commit (standard 'uncommitted working-tree edits' transport pattern), matching the deterministic constraint checks already judged 'clear'.",
+    "risks": "Low. Residual risk is limited to (1) interpretation of the git add -A wrapper commit d61baf9 relative to the constraint 'Leave changes as uncommitted working-tree edits' — deterministic scan judged this clear and the wrapper is the harness transport pattern, so treated as context not failure; (2) none of the criteria require anything beyond the observed file contents, so no hidden dependence on project brief/README (both absent from the eval dir, and not referenced by any criterion).",
+    "followup_candidates": "None required: all criteria were resolvable by direct file read and pass. Optionally note that this node's three criteria are pure file-content checks, so registering content probes (grep on smoke/alpha.md for 'alpha' and '2026-09-05', non-empty check) would remove the need for human verification in future runs of this smoke graph.",
+    "budget_exhausted": false,
+    "budget_trace": {
+      "tool_calls": [
+        {
+          "ts": "2026-09-05T10:04:29.571Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_LIEfoe3IREnunfPSooyf9640",
+          "command": "pwd && ls -la && echo \"---\" && git -C . status 2>&1 | head -30"
+        },
+        {
+          "ts": "2026-09-05T10:04:29.573Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_PuGFzvxQMs2Md2PEbpFI0024",
+          "command": "find . -maxdepth 4 -not -path '*/.git/*' | head -100"
+        },
+        {
+          "ts": "2026-09-05T10:04:29.596Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_PuGFzvxQMs2Md2PEbpFI0024",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-09-05T10:04:29.611Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_LIEfoe3IREnunfPSooyf9640",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-09-05T10:04:31.393Z",
+          "tool": "read",
+          "blocked": false,
+          "toolCallId": "call_00_Lbs8koHImjuP3eUduRd80741",
+          "path": "smoke/alpha.md"
+        },
+        {
+          "ts": "2026-09-05T10:04:31.393Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_hnIwiFVZXwOzylix6SfH9637",
+          "command": "cd . && git log --oneline -5 2>&1; echo \"---\"; git status --short 2>&1; echo \"---\"; git diff --stat HEAD 2>&1 | tail -5; echo \"---\"; git show --stat HEAD 2>&1 | head -20"
+        },
+        {
+          "ts": "2026-09-05T10:04:31.396Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_Lbs8koHImjuP3eUduRd80741",
+          "tool": "read",
+          "ok": true
+        },
+        {
+          "ts": "2026-09-05T10:04:31.426Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_hnIwiFVZXwOzylix6SfH9637",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-09-05T10:04:34.885Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_E4tBB07wzeJlIYsX302j1471",
+          "command": "wc -c smoke/alpha.md; echo \"---\"; grep -c \"alpha\" smoke/alpha.md; echo \"---\"; grep -n \"alpha\" smoke/alpha.md; echo \"---\"; grep -n \"2026-09-05\" smoke/alpha.md"
+        },
+        {
+          "ts": "2026-09-05T10:04:34.886Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_01_OKNeXJcA8aZP1w1FOhvu1513",
+          "command": "cd . && git show HEAD --stat --format='' 2>&1; echo \"--- files in worktree vs HEAD ---\"; git status --porcelain 2>&1; echo \"(empty above = clean; the wrapper commit captured the change, consistent with 'leave as uncommitted working-tree edits' interpretation)\"; echo \"---\"; git diff dbb8106 d61baf9 --stat 2>&1"
+        },
+        {
+          "ts": "2026-09-05T10:04:34.917Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_E4tBB07wzeJlIYsX302j1471",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-09-05T10:04:34.932Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_01_OKNeXJcA8aZP1w1FOhvu1513",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-09-05T10:04:41.980Z",
+          "tool": "bash",
+          "blocked": false,
+          "toolCallId": "call_00_z4Ej71DlduR5qXEN98sf7126",
+          "command": "ls -la smoke/ 2>&1; echo \"---\"; git diff dbb8106 d61baf9 --name-status 2>&1; echo \"---\"; git log --format='%h %s' 2>&1"
+        },
+        {
+          "ts": "2026-09-05T10:04:42.030Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_z4Ej71DlduR5qXEN98sf7126",
+          "tool": "bash",
+          "ok": true
+        },
+        {
+          "ts": "2026-09-05T10:04:52.747Z",
+          "event": "tool_execution_end",
+          "toolCallId": "call_00_1soalFrUDWXx4NxsM7bR4190",
+          "tool": "submit_verdict",
+          "ok": true
+        }
+      ],
+      "prompt_cache_report": {
+        "total_input_tokens": 2214,
+        "protocol_tokens": 812,
+        "project_tokens": 598,
+        "node_tokens": 190,
+        "attempt_tokens": 614,
+        "potential_reuse_tokens": 1600,
+        "potential_reuse_ratio": 0.7227,
+        "actual_cached_tokens": 78848
+      }
+    },
+    "lane_status": "completed",
+    "harness_error": null
+  },
+  "decision_reasoning": "All three acceptance criteria for node smoke-alpha are satisfied and verified by direct inspection of the subject repo at the eval working tree (/private/.../gddp-eval-wt-5smqlczl), whose git history (base dbb8106, tip d61baf9) matches the deterministic_result subject_diff. smoke/alpha.md exists and is non-empty (141 bytes, 6 lines), contains the word alpha (lines 3 and 5), and contains the exact date 2026-09-05 (line 6). The three 'indeterminate' deterministic statuses were purely a consequence of no registered probe / keyword-scan-only method; the file content itself unambiguously satisfies every criterion. Constraints are also consistent: the base→tip diff contains exactly one added file (smoke/alpha.md), and the working tree is clean at the wrapper commit (standard 'uncommitted working-tree edits' transport pattern), matching the deterministic constraint checks already judged 'clear'.",
+  "required_next_action": "Proceed to accept_node (open evidence PR).",
+  "generated_at": "2026-09-05T10:05:30.397750+00:00",
+  "evaluated_tree_sha": "c661ae09c45d226a081bf9ea1e2733b143356410",
+  "evaluated_commit_sha": "d61baf97816decad9d591bd5ca7125c8df71e756",
+  "merge_commit_sha": "d61baf97816decad9d591bd5ca7125c8df71e756",
+  "expected_base_commit_sha": "dbb810682d7ae029fa4ba90f483c7b09caafbbed",
+  "pr_ref": null,
+  "job_id": "job_20260905T10020530eb8644bf9846",
+  "execution_attempt_id": "job_20260905T10020530eb8644bf9846:attempt:0",
+  "evidence_manifest_sha256": null,
+  "mission_receipt_id": null,
+  "canonical_context": {
+    "readme": "UNAVAILABLE: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5smqlczl/README.md does not exist",
+    "project_brief": "UNAVAILABLE: /private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-5smqlczl/PROJECT-BRIEF.md does not exist",
+    "foundational_node": "/Users/sab-mini/repos/gddp-config/graphs/orchestrator-smoke/nodes/smoke-alpha.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "none",
+      "offered": 1,
+      "content_accessed": 0,
+      "not_observed": 1,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/orchestrator-smoke/nodes/smoke-alpha.yaml"
+      ]
+    },
+    "integrity": {
+      "rating": "none",
+      "offered": 1,
+      "content_accessed": 0,
+      "not_observed": 1,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/Users/sab-mini/repos/gddp-config/graphs/orchestrator-smoke/nodes/smoke-alpha.yaml"
+      ]
+    },
+    "overall": "none"
+  },
+  "evaluation_timing": {
+    "started_at": "2026-09-05T10:04:24.725013+00:00",
+    "finished_at": "2026-09-05T10:05:30.397682+00:00",
+    "wall_s": 65.674,
+    "criteria": {
+      "status": "completed",
+      "elapsed_s": 28.108,
+      "tool_calls": 7
+    },
+    "integrity": {
+      "status": "completed",
+      "elapsed_s": 37.548,
+      "tool_calls": 8
+    }
+  }
+}
