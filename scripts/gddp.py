@@ -4650,8 +4650,7 @@ def _render_fleet(attempts: list[dict], now: float, *, running_only: bool) -> No
             f"{diff:>22} {quiet:>5}{flag}  {job}"
         )
     print()
-    print("  drill in:  gddp watch <node-id|job-id>")
-    print("  events:    tail -F <spool>/…/events.jsonl  (path in single view)")
+    print("  drill in / stream: gddp watch <node-id|job-id> [--stream]")
 
 
 def _render_single(info: dict, now: float) -> None:
@@ -4687,7 +4686,52 @@ def _render_single(info: dict, now: float) -> None:
         print("\n".join(f"  {e}" for e in events))
     else:
         print("  (none)")
-    print("\n  live stream:  tail -F " + str(info.get("events_path") or (info["dir"] / "events.jsonl")))
+    print("\n  stream events: gddp watch " + str(info["node_id"] or info["name"]) + " --stream")
+
+
+
+def _stream_events(events_path: Path | str) -> int:
+    """Stream events from events.jsonl continuously until interrupted."""
+    path = Path(events_path)
+    if not path.is_file():
+        # Parent directory might exist before file is written
+        parent = path.parent
+        if not parent.is_dir():
+            print(f"events path not found: {path}", file=sys.stderr)
+            return 1
+    print(f"-- streaming events from {path} (Ctrl-C to stop) --")
+    file_obj = None
+    try:
+        lines_printed = 0
+        while True:
+            if file_obj is None and path.is_file():
+                try:
+                    file_obj = open(path, "r", encoding="utf-8", errors="replace")
+                except OSError:
+                    pass
+            if file_obj is not None:
+                line = file_obj.readline()
+                if line:
+                    line_str = line.strip()
+                    if line_str:
+                        try:
+                            evt = json.loads(line_str)
+                            print(f"  {_event_brief(evt)}")
+                        except json.JSONDecodeError:
+                            print(f"  {line_str[:110]}")
+                        lines_printed += 1
+                        sys.stdout.flush()
+                    continue
+            time.sleep(0.3)
+    except KeyboardInterrupt:
+        print("\n-- stream ended --")
+        return 0
+    finally:
+        if file_obj is not None:
+            try:
+                file_obj.close()
+            except OSError:
+                pass
 
 
 def cmd_watch(args) -> int:
@@ -4706,6 +4750,18 @@ def cmd_watch(args) -> int:
     tty = sys.stdout.isatty()
     running_only = not bool(getattr(args, "all", False))
     project = getattr(args, "project", None) or None
+    if getattr(args, "stream", False):
+        attempts = _scan_attempts(spool)
+        info = _find_attempt(attempts, args.target) if args.target else (attempts[0] if attempts else None)
+        if not info and args.target:
+            info = _find_attempt(_scan_attempts(spool), args.target)
+        if not info:
+            target_str = args.target if args.target else "any active attempt"
+            print(f"no attempt matching {target_str!r}", file=sys.stderr)
+            return 1
+        events_p = info.get("events_path") or (info["dir"] / "events.jsonl")
+        return _stream_events(events_p)
+
     try:
         while True:
             attempts = _scan_attempts(spool)
@@ -4909,12 +4965,7 @@ def cmd_runs(args) -> int:
     action = (getattr(args, "action", None) or "watch").strip().lower()
     if action in {"events", "tail", "e"}:
         events = info.get("events_path") or str(Path(attempt_dir) / "events.jsonl")
-        print(f"tail -F {events}")
-        try:
-            os.execvp("tail", ["tail", "-F", events])
-        except OSError as exc:
-            print(f"could not exec tail: {exc}", file=sys.stderr)
-            return 1
+        return _stream_events(events)
     if action in {"show", "job", "j"}:
         return run_runtime_jobs(["show", target])
     if action in {"path", "print"}:
@@ -6034,6 +6085,9 @@ def main(argv=None):
         nargs="?",
         default=None,
         help="node id, job id, or attempt-dir prefix; omit for fleet",
+    )
+    watch_p.add_argument(
+        "--stream", "-s", action="store_true", help="stream events directly from events.jsonl"
     )
     watch_p.add_argument(
         "--interval", type=float, default=2.0, help="refresh seconds (default 2)"

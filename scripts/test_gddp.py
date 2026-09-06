@@ -968,6 +968,44 @@ class OverviewTests(unittest.TestCase):
         self.assertIn("live/watch unavailable", joined)
         self.assertIn("GDDP_RUNTIME_ROOT", joined)
 
+
+    def test_stream_events_reads_jsonl_and_handles_interrupt(self):
+        tmp_dir = Path(tempfile.mkdtemp())
+        events_file = tmp_dir / "events.jsonl"
+        events_file.write_text('{"type": "tool_call", "name": "shell_exec"}\n{"type": "step_finish"}\n')
+
+        out = StringIO()
+        # Mock time.sleep to raise KeyboardInterrupt after reading
+        def fake_sleep(sec):
+            raise KeyboardInterrupt()
+
+        with patch.object(gddp.sys, "stdout", out), patch("time.sleep", side_effect=fake_sleep):
+            rc = gddp._stream_events(events_file)
+
+        self.assertEqual(rc, 0)
+        output = out.getvalue()
+        self.assertIn("streaming events from", output)
+        self.assertIn("tool_call shell_exec", output)
+        self.assertIn("step_finish", output)
+        self.assertIn("stream ended", output)
+
+    def test_cmd_watch_stream_flag_delegates_to_stream_events(self):
+        fake_runtime = Path(tempfile.mkdtemp())
+        spool = fake_runtime / "jobs" / "local-subprocess-spool" / "attempt-001"
+        spool.mkdir(parents=True)
+        (spool / "packet.json").write_text('{"job_id": "job-100", "node_id": "node-alpha"}')
+        (spool / "events.jsonl").write_text('{"type": "run_start"}\n')
+
+        ns = argparse.Namespace(
+            target="node-alpha", interval=2.0, once=True, all=False, project=None, stream=True,
+        )
+        with patch.object(gddp, "resolve_runtime_root", return_value=fake_runtime), \
+             patch.object(gddp, "_stream_events", return_value=0) as mock_stream:
+            rc = gddp.cmd_watch(ns)
+            self.assertEqual(rc, 0)
+            mock_stream.assert_called_once()
+            self.assertIn("events.jsonl", str(mock_stream.call_args[0][0]))
+
     def test_cmd_watch_reports_missing_runtime(self):
         missing = Path(tempfile.mkdtemp()) / "missing-runtime"
         ns = argparse.Namespace(
