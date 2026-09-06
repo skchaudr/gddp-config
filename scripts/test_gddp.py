@@ -135,6 +135,63 @@ class HeartbeatStateTests(unittest.TestCase):
         self.assertFalse(status["healthy"])
         self.assertEqual(status["state"], "not running")
 
+    def test_systemd_page_arms_when_timer_off(self):
+        facts = {
+            "gddp-heartbeat.timer.FragmentPath": "/home/u/.config/systemd/user/gddp-heartbeat.timer",
+            "gddp-heartbeat.timer.ActiveState": "inactive",
+            "gddp-heartbeat.timer.UnitFileState": "enabled",
+            "gddp-heartbeat.service.FragmentPath": "/home/u/.config/systemd/user/gddp-heartbeat.service",
+            "gddp-heartbeat.service.Result": "success",
+            "gddp-heartbeat.service.ExecMainExitTimestamp": "Sun 2026-09-06 07:51:27 UTC",
+            "timer_line": "- - Sun 2026-09-06 07:51:27 UTC 1h ago gddp-heartbeat.timer gddp-heartbeat.service",
+            "journal": "systemd[1]: gddp-heartbeat.service: Failed with result 'exit-code'.",
+        }
+        term = type("T", (), {"getch": staticmethod(lambda: "a")})
+        out = StringIO()
+        with patch.object(gddp.platform, "system", return_value="Linux"), \
+                patch.object(gddp, "_systemd_status", return_value=facts), \
+                patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp/runtime")), \
+                patch.object(gddp, "_import_module", return_value=term), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "_pause"), \
+                patch.object(gddp.console, "file", out), \
+                patch.object(gddp.subprocess, "run") as run:
+            run.return_value = type("P", (), {"returncode": 0, "stderr": ""})()
+            gddp.interactive_heartbeat()
+
+        self.assertEqual(
+            run.call_args.args[0],
+            ["systemctl", "--user", "start", "gddp-heartbeat.timer"],
+        )
+        text = out.getvalue()
+        self.assertIn("failed", text)
+        self.assertIn("gddp-heartbeat.timer", text)
+        self.assertIn("gddp.env", text)
+
+    def test_systemd_page_disarms_when_timer_active(self):
+        facts = {
+            "gddp-heartbeat.timer.FragmentPath": "/x/gddp-heartbeat.timer",
+            "gddp-heartbeat.timer.ActiveState": "active",
+            "gddp-heartbeat.service.Result": "success",
+            "timer_line": "",
+            "journal": "",
+        }
+        term = type("T", (), {"getch": staticmethod(lambda: "d")})
+        with patch.object(gddp.platform, "system", return_value="Linux"), \
+                patch.object(gddp, "_systemd_status", return_value=facts), \
+                patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp/runtime")), \
+                patch.object(gddp, "_import_module", return_value=term), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "_pause"), \
+                patch.object(gddp.subprocess, "run") as run:
+            run.return_value = type("P", (), {"returncode": 0, "stderr": ""})()
+            gddp.interactive_heartbeat()
+
+        self.assertEqual(
+            run.call_args.args[0],
+            ["systemctl", "--user", "stop", "gddp-heartbeat.timer"],
+        )
+
     def test_degraded_control_plane_can_be_disarmed(self):
         intake = {
             "registered": True,
@@ -153,6 +210,7 @@ class HeartbeatStateTests(unittest.TestCase):
             "last_exit": 0,
         }
         with patch.object(gddp, "_launchd_status", side_effect=[intake, heartbeat]), \
+                patch.object(gddp.platform, "system", return_value="Darwin"), \
                 patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp/runtime")), \
                 patch.object(gddp.Prompt, "ask", return_value="d"), \
                 patch.object(gddp, "_clear_screen"), \
