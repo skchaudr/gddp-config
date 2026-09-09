@@ -149,3 +149,17 @@ Do not report completion if any of these are true:
 
 The standard is: the next agent can clone/pull, read this file, run the listed
 commands, and continue without first becoming a repository janitor.
+
+## ByteRover (until 2026-09-30)
+
+Until **2026-09-30**, agents in this repo **must** query ByteRover at the start of non-trivial work and record after durable decisions — no slash invoke required.
+
+From this repo's cwd:
+
+```sh
+node /Users/sab-mini/.agents/skills/byterover/scripts/query.mjs "<question>" --limit 5
+```
+
+Record durable outcomes with `record.mjs` and rich `<bv-topic>` HTML per `~/.agents/skills/byterover/SKILL.md`. Do **not** use `brv curate`. If query fails, continue without blocking.
+
+After **2026-09-30**, drop this obligation (remove or ignore this section).
