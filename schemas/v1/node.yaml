@@ -64,11 +64,17 @@ unlocks:
 # milestone   — a checkpoint that groups capabilities
 # constraint  — a rule that scopes other nodes (not directly executable)
 #
-# Status values (human-owned decision on graph truth — not execution state;
-# "verdict" is reserved for evaluator output)
+# Canonical node status values (includes runtime provisional promotion;
+# human acceptance is recorded as complete; "verdict" is evaluator output)
 # ---------------------------------------------------------------------------
 # pending     — exists but prerequisites not yet met
-# ready       — all dependencies complete, can be issued
+# ready       — dependencies satisfied (complete or provisional), can be issued
+# provisional — runtime recorded a qualifying evaluator pass; dependencies unblock
+#               while human acceptance remains pending. Requires a persisted receipt
+#               bound to the current job/attempt and actual result commit, terminal
+#               criteria and integrity lanes, preserved intent and graph integrity,
+#               and no integrity demand for human review. human_gate: true skips
+#               automatic promotion; complete and deferred statuses are preserved.
 # complete    — human reviewed and accepted, graph truth advanced
 # deferred    — intentionally postponed
 #
