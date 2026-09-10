@@ -30,6 +30,10 @@ graphify-out/
 # 2026-08-14 (operator decision - sole-source-local evidence is discardable
 # evidence). Re-runs append new timestamped files; history is the point.
 *.knobs.json
+# Runtime tests and the return-path bridge overwrite this mock receipt's
+# generated_at on every run. Keep it untracked so timestamp-only churn
+# cannot dirty the working tree. evaluations.yaml stays tracked; the
+# exporter must merge and skip no-op writes rather than gitignoring it.
 verification/**/auth-node.json
 # ByteRover — .brv/context-tree/ contains a nested .git managed by brv vc.
 # Without these entries, `git add .` fails with "does not have a commit checked out".
