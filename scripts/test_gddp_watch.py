@@ -1,6 +1,5 @@
 """Watch → Layer 1 wiring, including a real feed smoke test when installed."""
 
-import argparse
 import json
 import os
 import selectors
@@ -145,14 +144,15 @@ def test_cli_resolution(tmp_path, monkeypatch, route):
         assert gddp._agent_obs_command() == expected[route]
 
 
+@pytest.mark.parametrize("command", [["watch"], ["jobs", "live"]])
 @pytest.mark.parametrize("target", ["job-one", "node-one", "job-one-attempt-2"])
 @pytest.mark.parametrize("tty", [False, True])
-def test_watch_execs_feed_even_when_piped(attempt, index, monkeypatch, target, tty):
+def test_watch_execs_feed_even_when_piped(attempt, index, monkeypatch, command, target, tty):
     monkeypatch.setattr(gddp, "_agent_obs_command", lambda: ["/bin/agent-obs"])
     monkeypatch.setattr(gddp.sys.stdout, "isatty", lambda: tty)
     execute = Mock()
     monkeypatch.setattr(gddp.os, "execvp", execute)
-    assert gddp.main(["watch", target]) == 0
+    assert gddp.main(command + [target]) == 0
     execute.assert_called_once_with("/bin/agent-obs", [
         "/bin/agent-obs", "--db", str(index), "feed", "--watch", "session-one"])
 
