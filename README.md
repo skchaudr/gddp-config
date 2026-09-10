@@ -1,5 +1,7 @@
 # gddp-config
 
+TODO: Update this entire README to accurately relflect the current direction and intended identity of this project 9.9.2026 - Sab 
+
 Source of truth for the Graph-Driven Agentic Development (GDDP) system.
 
 This repo defines the schemas, graphs, and templates that the runtime and
@@ -56,6 +58,9 @@ cp -r graphs/_template graphs/<project-id>
 
 ## Node Tooling
 
+The following information must be updated and is either stale or simply just really old / unused. 
+
+---
 Two scripts under `scripts/` replace hand-typing node YAML. Both standalone,
 stdlib + `rich` + `pyyaml`. See `scripts/README.md` for install + flags.
 
@@ -82,29 +87,8 @@ the cause — pre-existing repo drift surfaces visibly but doesn't block.
 For the prose-heavy fields (`why`, `acceptance_criteria`, `constraints`), see
 `templates/draft-node-prompt.md` — a saved prompt for drafting those fields
 with an LLM in the established voice.
-
----
-
-## Branch Protection
-
-`main` is protected. No agent can push to `main`.
-All changes go through a PR. The human is the only merge authority.
-See `upgrade-strategy.md` for the full rationale.
-
----
+--- 
 
 ## Current Graph State
 
-| Project | Status |
-|---|---|
-| `vault-doctor` | 7/7 nodes complete |
-| `gddp-runtime` | 1/1 nodes complete (`return-router`); OpenClaw expansion pending on `feat/openclaw-nodes` |
-
 See `graphs/<project-id>/project.yaml` for the canonical per-project status.
-
----
-
-## Related
-
-- Obsidian vault: `01 Projects/GDDP/GDD-Control-Center/` — design docs and v1 schema references
-- `gddp-runtime` repo — execution/orchestration layer (separate from this repo)
