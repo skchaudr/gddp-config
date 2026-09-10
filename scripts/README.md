@@ -85,6 +85,28 @@ but are not offered as dispatch targets. Shell dispatch is positional:
 `gddp <graph|node> [executor] [--yes]`. `--yes` skips the `[y/N]` confirm
 (needed when stdin is not a TTY; default remains `n`).
 
+### Live agent events (Layer 1)
+
+`gddp watch <node-id|job-id|attempt-name>` opens `agent-obs feed --watch <session_id>`.
+The `runs` picker's watch/events actions and `jobs live <target>` use the same feed,
+including when stdout is piped. `gddp watch` keeps the fleet dashboard;
+`gddp watch <target> --once` keeps the one-shot attempt/diff/spool-event snapshot.
+
+Session lookup reads Layer 1's SQLite index (`AGENT_OBS_DB`, otherwise
+`$XDG_DATA_HOME/agent-obs/agent-obs.db`, defaulting to `~/.local/share`). It joins
+`worktree_path` from the attempt spool to `sessions.cwd`. If the spool lacks that
+file, it reads `GDDP_WORKTREE_MAP_PATH` (default
+`~/.local/share/droid-observability/gddp-worktree-map.ndjson`), matching both job
+and execution-attempt ID where available. Exact paths take precedence; unique
+`gddp-agent-wt-*` basenames also bridge macOS `/var`/`/private/var` aliases after
+worktree pruning. Ambiguous or missing matches produce an explicit error.
+
+CLI resolution prefers `agent-obs` on PATH, then the sibling
+`../agent-observability/.venv/bin/agent-obs`, then `uv run --project` in that
+checkout. Set `GDDP_AGENT_OBS_ROOT` for a checkout elsewhere. Layer 1 ingestion
+must populate the selected index for the attempt; GDDP opens it read-only for
+lookup and hands stream ownership to agent-obs.
+
 ### Stage 1 operator commands
 
 Graph status, runtime queue state, and evaluator verdict stay **distinct**.

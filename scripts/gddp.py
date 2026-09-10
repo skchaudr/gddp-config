@@ -4682,6 +4682,7 @@ def _attempt_info(attempt_dir: Path) -> dict | None:
         "dir": attempt_dir,
         "name": attempt_dir.name,
         "job_id": str(packet.get("job_id") or ""),
+        "execution_attempt_id": str(packet.get("execution_attempt_id") or ""),
         "node_id": str(packet.get("node_id") or ""),
         "project_id": str(packet.get("project_id") or ""),
         "pid": pid,
@@ -4796,6 +4797,107 @@ def _recent_events(attempt_dir: Path, count: int = 8) -> list[str]:
             continue
         briefs.append(_event_brief(evt))
     return briefs[-count:]
+
+
+def _agent_obs_command() -> list[str]:
+    """Use the installed CLI, or the companion checkout's environment."""
+    installed = shutil.which("agent-obs")
+    if installed:
+        return [installed]
+    root = Path(os.environ.get("GDDP_AGENT_OBS_ROOT") or ROOT.parent / "agent-observability").expanduser().resolve()
+    cli = root / ".venv" / "bin" / "agent-obs"
+    if cli.is_file() and os.access(cli, os.X_OK):
+        return [str(cli)]
+    uv = shutil.which("uv")
+    if uv and (root / "pyproject.toml").is_file():
+        return [uv, "run", "--project", str(root), "agent-obs"]
+    raise RuntimeError(
+        "agent-obs CLI unavailable; install agent-obs on PATH or set "
+        "GDDP_AGENT_OBS_ROOT to its checkout (with uv or a configured .venv)"
+    )
+
+
+def _attempt_worktree(info: dict) -> Path:
+    """Use the spool path, then the executor's durable per-attempt map."""
+    if info.get("worktree"):
+        return Path(info["worktree"]).expanduser().resolve()
+    map_path = Path(os.environ.get("GDDP_WORKTREE_MAP_PATH") or
+                    Path.home() / ".local/share/droid-observability/gddp-worktree-map.ndjson").expanduser()
+    worktrees: set[Path] = set()
+    try:
+        with map_path.open(encoding="utf-8", errors="replace") as handle:
+            for line in handle:
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue  # An append may still be in progress.
+                if not isinstance(row, dict) or not info.get("job_id") or row.get("job_id") != info["job_id"]:
+                    continue
+                if info.get("execution_attempt_id") and row.get("execution_attempt_id") != info["execution_attempt_id"]:
+                    continue
+                raw = row.get("worktree_path") or row.get("worktree_name")
+                if isinstance(raw, str) and raw:
+                    worktrees.add(Path(raw).expanduser().resolve())
+    except FileNotFoundError:
+        pass
+    except OSError as exc:
+        raise RuntimeError(f"could not read worktree map {map_path}: {exc}") from exc
+    if len(worktrees) != 1:
+        raise RuntimeError(
+            f"{'ambiguous' if worktrees else 'missing'} worktree for "
+            f"{info.get('execution_attempt_id') or info.get('job_id') or info['name']}; "
+            f"checked {info['dir']}/worktree_path and {map_path}"
+        )
+    return worktrees.pop()
+
+
+def _agent_obs_session(info: dict, db_path: Path) -> str:
+    """Join worktree → Layer 1 sessions.id without mutating its index."""
+    worktree = _attempt_worktree(info)
+    try:
+        con = sqlite3.connect(db_path.as_uri() + "?mode=ro", uri=True, timeout=5)
+        try:
+            rows = con.execute("SELECT id, cwd FROM sessions WHERE cwd IS NOT NULL").fetchall()
+        finally:
+            con.close()
+    except sqlite3.Error as exc:
+        raise RuntimeError(
+            f"could not read agent-obs index {db_path}: {exc}; "
+            "set AGENT_OBS_DB to the Layer 1 index"
+        ) from exc
+    matches = [sid for sid, cwd in rows if cwd and Path(cwd).expanduser().resolve() == worktree]
+    # The executor records this unique basename for macOS /var ↔ /private/var
+    # aliases, including worktrees already pruned. Never fuzzy-match repo names.
+    if not matches and worktree.name.startswith("gddp-agent-wt-"):
+        matches = [sid for sid, cwd in rows if Path(cwd).name == worktree.name]
+    if not matches:
+        raise RuntimeError(
+            f"no agent-obs session indexed for {worktree} in {db_path}; "
+            "check AGENT_OBS_DB and Layer 1 ingestion for this attempt"
+        )
+    if len(matches) > 1:
+        raise RuntimeError(
+            f"multiple agent-obs sessions for {worktree}: {', '.join(sorted(matches))}; "
+            "select the intended session with agent-obs feed --watch <session_id>"
+        )
+    return matches[0]
+
+
+def _watch_agent_events(info: dict) -> int:
+    """Transfer live-stream ownership to Layer 1, preserving its exit/signal handling."""
+    try:
+        command = _agent_obs_command()
+        data_home = Path(os.environ.get("XDG_DATA_HOME") or Path.home() / ".local/share")
+        db_path = Path(os.environ.get("AGENT_OBS_DB") or data_home / "agent-obs/agent-obs.db").expanduser().resolve()
+        session_id = _agent_obs_session(info, db_path)
+        command += ["--db", str(db_path), "feed", "--watch", session_id]
+        print(shlex.join(command), file=sys.stderr, flush=True)
+        sys.stdout.flush()
+        os.execvp(command[0], command)
+    except (OSError, RuntimeError) as exc:
+        print(f"ERROR: agent-obs live feed unavailable: {exc}", file=sys.stderr)
+        return 1
+    return 0
 
 
 def _find_attempt(attempts: list[dict], target: str) -> dict | None:
@@ -4922,8 +5024,8 @@ def _render_fleet(
             f"{diff:>22} {quiet:>5}{flag}  {job}"
         )
     print()
-    print("  drill in:  gddp watch <node-id|job-id>")
-    print("  events:    tail -F <spool>/…/events.jsonl  (path in single view)")
+    print("  live feed: gddp watch <node-id|job-id>  (agent-obs)")
+    print("  snapshot:  gddp watch <node-id|job-id> --once")
 
 
 def _render_single(info: dict, now: float) -> None:
@@ -4959,7 +5061,7 @@ def _render_single(info: dict, now: float) -> None:
         print("\n".join(f"  {e}" for e in events))
     else:
         print("  (none)")
-    print("\n  live stream:  tail -F " + str(info.get("events_path") or (info["dir"] / "events.jsonl")))
+    print("\n  live stream:  gddp watch " + shlex.quote(info["name"]) + "  (agent-obs)")
 
 
 def cmd_watch(args) -> int:
@@ -4994,6 +5096,8 @@ def cmd_watch(args) -> int:
                 if info is None:
                     print(f"no attempt matching {args.target!r}", file=sys.stderr)
                     return 1
+                if not args.once:
+                    return _watch_agent_events(info)
             else:
                 attempts = _filter_attempts(
                     all_attempts, running_only=running_only, project=project
@@ -5205,13 +5309,7 @@ def cmd_runs(args) -> int:
     # Optional action via env or second mode later; default = live watch.
     action = (getattr(args, "action", None) or "watch").strip().lower()
     if action in {"events", "tail", "e"}:
-        events = info.get("events_path") or str(Path(attempt_dir) / "events.jsonl")
-        print(f"tail -F {events}")
-        try:
-            os.execvp("tail", ["tail", "-F", events])
-        except OSError as exc:
-            print(f"could not exec tail: {exc}", file=sys.stderr)
-            return 1
+        return _watch_agent_events(info)
     if action in {"show", "job", "j"}:
         return run_runtime_jobs(["show", target])
     if action in {"path", "print"}:
@@ -5222,7 +5320,7 @@ def cmd_runs(args) -> int:
     # Default: enter live single-target watch (same as agent-runs → open).
     return cmd_watch(
         argparse.Namespace(
-            target=target,
+            target=info["name"],  # preserve the picked attempt, even across retries
             interval=float(getattr(args, "interval", 2.0) or 2.0),
             once=bool(getattr(args, "once", False)),
             all=True,  # single target: allow done attempts too
@@ -6404,7 +6502,7 @@ def main(argv=None):
         "target",
         nargs="?",
         default=None,
-        help="node id, job id, or attempt-dir prefix; omit for fleet",
+        help="node/job/attempt → agent-obs live feed; omit for fleet; --once for snapshot",
     )
     watch_p.add_argument(
         "--interval", type=float, default=2.0, help="refresh seconds (default 2)"
@@ -6444,8 +6542,8 @@ def main(argv=None):
     runs_p.add_argument(
         "--action",
         default="watch",
-        choices=("watch", "events", "show", "path"),
-        help="after pick: watch (default), events (tail -F), show (jobs show), path",
+        choices=("watch", "events", "tail", "e", "show", "path"),
+        help="after pick: watch (default), events (agent-obs feed), show (jobs show), path",
     )
     runs_p.add_argument(
         "--once", action="store_true", help="with action=watch: one frame then exit"
