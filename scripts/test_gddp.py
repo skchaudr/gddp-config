@@ -1846,6 +1846,9 @@ class ReviewSurfaceTests(unittest.TestCase):
         self._write_receipt(node_dir, "a.json", verdict="fail")
         self._write_receipt(node_dir, "b.json", verdict="pass")
         (node_dir / "broken.json").write_text("{not json")
+        # Fast writes can share a filesystem timestamp; make "newest" explicit.
+        for stamp, name in enumerate(("a.json", "b.json", "broken.json"), start=1):
+            os.utime(node_dir / name, (stamp, stamp))
         with patch.object(gddp, "ROOT", Path(self.tempdir.name)):
             receipt = gddp._latest_receipt("p", "n")
         self.assertIsNotNone(receipt)
