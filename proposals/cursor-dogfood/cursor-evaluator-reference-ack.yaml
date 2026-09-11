@@ -1,0 +1,22 @@
+# Draft node; Sab supplies graph status at materialization.
+schema_version: '1.0'
+schema_type: node
+node_id: cursor-evaluator-reference-ack
+title: Acknowledge typed evaluator references
+type: capability
+why: Close the feedback loop so concrete evaluator findings reach the executor and their receipt is explicit.
+depends_on:
+- cursor-small-batch
+acceptance_criteria:
+- id: cursor-evaluator-reference-ack
+  criterion: An executor acknowledges an evaluator finding using the same typed reference.
+constraints:
+- Inspect the current evaluator-to-executor path and fix only the gaps needed for reference delivery and acknowledgement.
+- Keep receipt acknowledgement distinct from resolving a finding and from human acceptance.
+allowed_execution_modes:
+- cursor_cli
+required_artifacts: []
+human_gate: true
+priority: high
+unlocks:
+- cursor-dogfood-audit
