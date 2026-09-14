@@ -22,15 +22,23 @@ none — verification dirty files untouched
 
 ### Current Git state (2-3 sentences max, anything more must be critically justifiable)
 
-Branch `fix/gddp-tui-dead-ends` off `origin/main`. Changes committed and pushed; PR open for human merge to protected `main`.
+Branch `fix/gddp-tui-dead-ends` off `origin/main`. Code + tests committed and pushed (`aef26d4+`). PR for human merge; vision exit gate pending coordinator live-TUI walkthrough.
 
 ### Artifacts (Filepath - Description, 1 line max per artifact)
 
 scripts/gddp.py — Phase 1a TUI navigation dead-end removal
 
+### Vision checklist (coordinator — live TUI on box desktop)
+
+- [ ] More → **frontier**: after render, no dead-end "press any key" only; can refresh, pick a node, or back
+- [ ] More → **status**: same — navigate onward (pick graph/node) or back without `_pause`-only exit
+- [ ] More → **validate**: failing nodes pickable when errors exist; else refresh/back; no `_pause`-only exit
+- [ ] **Graph hub truth block**: no `gddp timeline …` shell tip in footer
+- [ ] More → **`t` timeline**: opens in-tool timeline pager (`_page_view`); Esc/back returns to hub
+
 ### Resume point (2-3 sentences max, anything more must be critically justifiable)
 
-After merge: Phase 1b pickers (`_eval_knob_picker`, `interactive_config`, heartbeat, reasons) on branch `fix/gddp-tui-pickers`. Do not start Phase 2 file splits.
+Phase 1a code + fake-getch tests done; **vision gate pending** coordinator walkthrough above. Do not mark 1a complete until vision passes. After vision + merge: Phase 1b pickers on `fix/gddp-tui-pickers`. No Phase 2 splits.
 
 ------------------------------------------------ Agent Section END
 
