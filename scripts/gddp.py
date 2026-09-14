@@ -482,8 +482,10 @@ def _confirm_dispatch(count: int) -> bool:
             actions = {
                 "y": ("yes", f"insert {count} event(s) — start heartbeat work"),
                 "n": ("no", "abort — insert nothing"),
+                "b": ("back", "abort — insert nothing"),
             }
-            return _menu_choice(actions, default="y") == "y"
+            choice = _menu_choice(actions, default="y")
+            return choice == "y"
         answer = Prompt.ask(
             f"Dispatch {count} event(s)? [Y/n]",
             default="y",
@@ -639,6 +641,93 @@ def _show_frontier(selected: list[str]) -> None:
     finally:
         if con is not None:
             con.close()
+
+
+def _frontier_pick_items(projects: list[str]) -> list[tuple[str, str | Text]]:
+    """Ready / in-flight / blocked / correction nodes across ``projects``."""
+    frontier = _import_module("frontier")
+    items: list[tuple[str, str | Text]] = []
+    try:
+        con = frontier.connect_readonly(resolve_runtime_root() / "db" / "queue.db")
+    except frontier.FrontierUnavailable:
+        con = None
+    try:
+        for pid in projects:
+            graph = frontier.load_graph(ROOT, pid)
+            runtime: dict = {}
+            if con is not None:
+                try:
+                    runtime = frontier.load_runtime(con, pid)
+                except sqlite3.Error:
+                    runtime = {}
+            derived = frontier.derive(graph, runtime)
+            prefix = f"{pid}/" if len(projects) > 1 else ""
+            for node_id, executor in derived["ready"]:
+                key = f"{pid}\t{node_id}"
+                label = f"{prefix}{node_id} · ready"
+                if executor:
+                    label += f" [{executor}]"
+                items.append((key, label))
+            for node_id, motion in derived["in_flight"]:
+                key = f"{pid}\t{node_id}"
+                items.append((
+                    key,
+                    f"{prefix}{node_id} · in flight · {motion['phase']}",
+                ))
+            for node_id, _motion in derived["correction"]:
+                key = f"{pid}\t{node_id}"
+                items.append((key, f"{prefix}{node_id} · awaiting correction"))
+            for node_id, status, _unsat in derived["blocked"]:
+                key = f"{pid}\t{node_id}"
+                items.append((key, f"{prefix}{node_id} · blocked · {status}"))
+    finally:
+        if con is not None:
+            con.close()
+    return items
+
+
+def _frontier_after_show(projects: list[str], *, back_label: str = "more") -> str:
+    """Refresh/back menu or pick a frontier node for review."""
+    actions = {
+        "p": ("pick node", "ready · in flight · blocked"),
+        "r": ("refresh", "recompute frontier"),
+        "b": ("back", ""),
+        "q": ("quit", ""),
+    }
+    while True:
+        choice = _menu_choice(actions, default="r")
+        if choice == "q":
+            return _MENU_QUIT
+        if choice == "b":
+            return _MENU_BACK
+        if choice == "r":
+            _clear_screen()
+            _show_frontier(projects)
+            continue
+        items = _frontier_pick_items(projects)
+        if not items:
+            console.print(Text("No frontier nodes to open.", style="yellow"))
+            continue
+        picked = _pick_list(
+            "frontier · nodes",
+            items,
+            back_label=back_label,
+        )
+        if picked is _MENU_QUIT:
+            return _MENU_QUIT
+        if picked is _MENU_BACK:
+            continue
+        pid, node_id = str(picked).split("\t", 1)
+        node_cli = _import_module("node_cli")
+        try:
+            siblings = [nid for nid, _, _ in node_cli.iter_nodes(ROOT, pid)]
+        except Exception:
+            siblings = [node_id]
+        outcome = _node_review_menu(pid, node_id, siblings)
+        if outcome is _MENU_QUIT:
+            return _MENU_QUIT
+        _clear_screen()
+        _show_frontier(projects)
 
 
 _GRAPH_ARCHIVE_AFTER = timedelta(days=7)
@@ -843,8 +932,7 @@ def interactive_frontier(project: str | None = None):
     if project:
         _clear_screen()
         _show_frontier([project])
-        _pause()
-        return _MENU_BACK
+        return _frontier_after_show([project], back_label="more")
     frontier = _import_module("frontier")
     projects = frontier.project_ids(ROOT)
     if not projects:
@@ -867,7 +955,9 @@ def interactive_frontier(project: str | None = None):
         if choice == "a":
             _clear_screen()
             _show_frontier(projects)
-            _pause()
+            outcome = _frontier_after_show(projects, back_label="frontier")
+            if outcome is _MENU_QUIT:
+                return _MENU_QUIT
             continue
         picked = _pick_graph("frontier · graphs", back_label="frontier")
         if picked is _MENU_QUIT:
@@ -876,7 +966,9 @@ def interactive_frontier(project: str | None = None):
             continue
         _clear_screen()
         _show_frontier([str(picked)])
-        _pause()
+        outcome = _frontier_after_show([str(picked)], back_label="frontier")
+        if outcome is _MENU_QUIT:
+            return _MENU_QUIT
 
 
 def _dispatch_for_project(project: str, *, back_label: str = "graphs"):
@@ -962,7 +1054,6 @@ def _dispatch_for_project(project: str, *, back_label: str = "graphs"):
             None,
             project_hint=project,
         )
-        _pause()
         return _MENU_BACK
     finally:
         con.close()
@@ -2016,7 +2107,6 @@ def _paged_menu(
     if not items:
         _clear_screen()
         console.print(Text("No items found.", style="yellow"))
-        _pause()
         return _MENU_BACK
 
     terminal = _import_module("terminal")
@@ -2280,9 +2370,11 @@ def _offer_publish_graph_status(
         "p": ("commit + push", "add these files, commit, push to origin"),
         "c": ("commit only", "add + commit; you push later"),
         "s": ("skip", "leave the working tree dirty"),
+        "b": ("back", "leave the working tree dirty"),
+        "n": ("no", "leave the working tree dirty"),
     }
     choice = _menu_choice(actions, default="p")
-    if choice == "s":
+    if choice in {"s", "b", "n"}:
         console.print(Text(
             "Left dirty — remember to commit graphs/ when you're ready.",
             style="yellow",
@@ -2489,10 +2581,11 @@ def _offer_acceptance_merge(project: str, node_id: str) -> bool:
         "y": ("merge", f"ff/merge {tip[:12]} into {branch}, then set complete"),
         "s": ("skip merge", "set graph complete anyway (repo left as-is)"),
         "n": ("abort", "leave repo and graph unchanged"),
+        "b": ("back", "leave repo and graph unchanged"),
     }
     # Cursor starts on default ``y``; letters still jump. No silent Enter-abort.
     choice = _menu_choice(actions, default="y")
-    if choice == "n":
+    if choice in {"n", "b"}:
         console.print(Text("Aborted — graph status not changed.", style="yellow"))
         return False
     if choice == "s":
@@ -3431,12 +3524,7 @@ def interactive_jobs(project: str | None = None):
                 if ref is _MENU_BACK:
                     continue
             else:
-                try:
-                    ref = Prompt.ask(Text("job or node ID", style="cyan")).strip()
-                except EOFError:
-                    continue
-                if not ref:
-                    continue
+                continue
             _clear_screen()
 
             def _show_job():
@@ -3571,6 +3659,7 @@ def _graph_more_menu(project: str):
         "f": ("frontier", "ready / in flight / blocked"),
         "s": ("status", "completion + node phases"),
         "v": ("validate", "check this graph definition"),
+        "t": ("timeline", "what happened on this graph"),
         "e": ("evaluations", "evaluator receipts"),
         "d": ("deliver", "publish review branch / retire transport refs"),
         "b": ("back", ""),
@@ -3596,6 +3685,8 @@ def _graph_more_menu(project: str):
                 outcome = interactive_status(project)
             elif choice == "v":
                 outcome = interactive_validate(project)
+            elif choice == "t":
+                outcome = _interactive_timeline(project)
             elif choice == "e":
                 outcome = interactive_evaluations()
             elif choice == "d":
@@ -3696,8 +3787,11 @@ def _print_graph_truth(project: str) -> None:
             console.print(line, **one)
         if total == 0:
             console.print(Text("  (nothing recorded that this host can see)", style="dim"))
-    unseen = f"{len(tl.notes)} thing(s) this host cannot see · " if tl.notes else ""
-    console.print(Text(f"  {total} events · {unseen}full story: gddp timeline {project}", style="dim"), **one)
+    unseen = f"{len(tl.notes)} thing(s) this host cannot see" if tl.notes else ""
+    footer = f"  {total} events"
+    if unseen:
+        footer += f" · {unseen}"
+    console.print(Text(footer, style="dim"), **one)
     console.print()
 
 
@@ -3724,8 +3818,6 @@ def interactive_graph_hub(project: str):
                 outcome = interactive_nodes(project)
             elif choice == "d":
                 outcome = interactive_dispatch(project)
-                if outcome is not _MENU_QUIT:
-                    _pause()
             elif choice == "w":
                 outcome = interactive_watch(project)
             elif choice == "m":
@@ -4314,7 +4406,6 @@ def _render_eval_runs(project: str, node_id: str):
     rows = _load_receipts_for_node(project, node_id)
     if not rows:
         console.print(Text(f"No evaluator receipts for {project}/{node_id}", style="yellow"))
-        _pause()
         return _MENU_BACK
     items = []
     for index, row in enumerate(rows):
@@ -4337,9 +4428,12 @@ def _render_eval_runs(project: str, node_id: str):
     )
     if picked in {_MENU_BACK, _MENU_QUIT, _MENU_REFRESH}:
         return picked
-    _clear_screen()
-    _render_eval_show(rows[int(picked)])
-    _pause()
+
+    def _show_run():
+        _clear_screen()
+        _render_eval_show(rows[int(picked)])
+
+    _page_view(_show_run, title=f"eval-run-{project}-{node_id}")
     return _MENU_BACK
 
 
@@ -4415,29 +4509,30 @@ def interactive_eval_hub(project: str, node_id: str):
             return _MENU_BACK
         if choice == "r":
             _run_live_eval(project, node_id, base=knobs.get("base"), knobs=knobs)
-            _pause()
         elif choice == "k":
             knobs = _eval_knob_picker(knobs)
         elif choice == "c":
-            _clear_screen()
-            _render_eval_config()
-            _pause()
+            _page_view(_render_eval_config, title=f"eval-config-{project}-{node_id}")
         elif choice == "i":
-            _clear_screen()
             receipt = (latest or {}).get("check") if latest else None
-            _render_eval_instructions(project, node_id, receipt=receipt)
-            _pause()
+
+            def _show_instructions():
+                _clear_screen()
+                _render_eval_instructions(project, node_id, receipt=receipt)
+
+            _page_view(_show_instructions, title=f"eval-instructions-{project}-{node_id}")
         elif choice == "h":
             outcome = _render_eval_runs(project, node_id)
             if outcome is _MENU_QUIT:
                 return _MENU_QUIT
         elif choice == "s":
-            _clear_screen()
             if latest:
-                _render_eval_show(latest)
+                _page_view(
+                    lambda: _render_eval_show(latest),
+                    title=f"eval-show-{project}-{node_id}",
+                )
             else:
                 console.print(Text("No runs yet.", style="yellow"))
-            _pause()
 
 
 def interactive_evaluate():
@@ -5410,23 +5505,7 @@ def cmd_timeline(args) -> int:
     if args.json:
         print(json.dumps(tl.as_dict(), indent=2))
         return 0
-    graph = timeline.read_graph(ROOT, args.project)
-    text = timeline.render_text(tl, graph["nodes"])
-    for raw in text.splitlines():
-        if raw.startswith("timeline:"):
-            console.print(Text(raw, style="bold"))
-        elif raw.startswith("what is wrong"):
-            console.print(Text(raw, style="bold red" if tl.warnings else "bold green"))
-        elif raw.startswith("  ! "):
-            console.print(Text(raw, style="red"))
-        elif raw.startswith("what this host cannot see"):
-            console.print(Text(raw, style="bold yellow"))
-        elif raw.startswith("  - "):
-            console.print(Text(raw, style="dim"))
-        elif "OUTSIDE GDDP" in raw:
-            console.print(Text(raw, style="bold red"))
-        else:
-            console.print(raw)
+    _render_timeline_text(args.project, args.node)
     return 1 if tl.warnings else 0
 
 
@@ -6198,6 +6277,231 @@ def _render_project_status_detail(project_id: str) -> None:
         console.print(ev_scan)
 
 
+def _status_node_items(project_id: str) -> list[tuple[str, dict]]:
+    """Node rows for status drill-in picker."""
+    node_cli = _import_module("node_cli")
+    try:
+        node_rows = node_cli.iter_nodes(ROOT, project_id)
+    except Exception:
+        return []
+    items: list[tuple[str, dict]] = []
+    for node_id, doc, entry in node_rows:
+        graph_status = _node_status_label(doc, entry)
+        queue_state = job_status = verdict = "-"
+        try:
+            ev = node_cli.fetch_runtime_evidence(ROOT, project_id, node_id)
+            queue_state = getattr(ev, "queue_state", "-") or "-"
+            job_status = getattr(ev, "job_status", "-") or "-"
+            verdict = getattr(ev, "verdict", "-") or "-"
+        except Exception:
+            pass
+        title = str(doc.get("title") or (entry or {}).get("title") or "")
+        items.append((
+            node_id,
+            {
+                "graph": graph_status,
+                "runtime": _runtime_label(queue_state, job_status),
+                "verdict": verdict,
+                "title": title,
+            },
+        ))
+    return items
+
+
+def _status_after_show(project_id: str | None, *, back_label: str = "more") -> str:
+    """Refresh/back menu or pick a graph/node after status render."""
+    current = project_id
+    while True:
+        if current:
+            pick_name = "pick node"
+            pick_desc = "open one node in review"
+        else:
+            pick_name = "pick graph"
+            pick_desc = "drill into one project"
+        actions = {
+            "p": (pick_name, pick_desc),
+            "r": ("refresh", "reload status"),
+            "b": ("back", ""),
+            "q": ("quit", ""),
+        }
+        choice = _menu_choice(actions, default="r")
+        if choice == "q":
+            return _MENU_QUIT
+        if choice == "b":
+            return _MENU_BACK
+        if choice == "r":
+            _clear_screen()
+            show_status(current)
+            continue
+        if not current:
+            picked = _pick_graph("status · graphs", back_label=back_label)
+            if picked is _MENU_QUIT:
+                return _MENU_QUIT
+            if picked is _MENU_BACK:
+                continue
+            current = str(picked)
+            _clear_screen()
+            show_status(current)
+            continue
+        items = _status_node_items(current)
+        if not items:
+            console.print(Text("No nodes to open.", style="yellow"))
+            continue
+        picked = _pick_list(
+            f"status · {current}",
+            items,
+            back_label=back_label,
+        )
+        if picked is _MENU_QUIT:
+            return _MENU_QUIT
+        if picked is _MENU_BACK:
+            continue
+        siblings = [value for value, _ in items]
+        outcome = _node_review_menu(current, str(picked), siblings)
+        if outcome is _MENU_QUIT:
+            return _MENU_QUIT
+        _clear_screen()
+        show_status(current)
+
+
+def _collect_validate_failures(
+    projects: list[str],
+) -> list[tuple[str, str]]:
+    """Node-scoped validation failures as pick keys ``project\\tnode_id``."""
+    graphs = ROOT / "graphs"
+    failures: list[tuple[str, str]] = []
+    for pid in projects:
+        proj_yaml = graphs / pid / "project.yaml"
+        with open(proj_yaml) as f:
+            proj = yaml.safe_load(f) or {}
+        node_ids = {
+            n["id"]
+            for n in (proj.get("nodes") or [])
+            if isinstance(n, dict) and n.get("id")
+        }
+        nodes_dir = graphs / pid / "nodes"
+        yaml_ids = {p.stem for p in nodes_dir.glob("*.yaml")} if nodes_dir.exists() else set()
+        for nid in sorted(node_ids - yaml_ids):
+            failures.append((f"{pid}\t{nid}", f"{pid}/{nid} · missing nodes/{nid}.yaml"))
+        for nid in sorted(yaml_ids - node_ids):
+            failures.append((
+                f"{pid}\t{nid}",
+                f"{pid}/{nid} · orphan nodes/{nid}.yaml",
+            ))
+        seen: set[str] = set()
+        for n in proj.get("nodes") or []:
+            if not isinstance(n, dict):
+                continue
+            nid = n.get("id")
+            if not nid or nid in seen:
+                if nid:
+                    failures.append((
+                        f"{pid}\t{nid}",
+                        f"{pid}/{nid} · duplicate in project.yaml",
+                    ))
+                continue
+            seen.add(nid)
+    return failures
+
+
+def _validate_after_show(
+    project_id: str | None,
+    projects: list[str],
+    *,
+    back_label: str = "more",
+) -> str:
+    """Refresh/back menu or pick failing nodes after validate render."""
+    while True:
+        failures = _collect_validate_failures(projects)
+        actions = {
+            "r": ("refresh", "re-run validation"),
+            "b": ("back", ""),
+            "q": ("quit", ""),
+        }
+        if failures:
+            actions = {
+                "p": ("pick node", "open a failing node in review"),
+                **actions,
+            }
+        choice = _menu_choice(actions, default="r")
+        if choice == "q":
+            return _MENU_QUIT
+        if choice == "b":
+            return _MENU_BACK
+        if choice == "r":
+            _clear_screen()
+            validate_project(project_id)
+            continue
+        picked = _pick_list(
+            "validate · failures",
+            [(key, label) for key, label in failures],
+            back_label=back_label,
+        )
+        if picked is _MENU_QUIT:
+            return _MENU_QUIT
+        if picked is _MENU_BACK:
+            continue
+        pid, node_id = str(picked).split("\t", 1)
+        node_cli = _import_module("node_cli")
+        try:
+            siblings = [nid for nid, _, _ in node_cli.iter_nodes(ROOT, pid)]
+        except Exception:
+            siblings = [node_id]
+        outcome = _node_review_menu(pid, node_id, siblings)
+        if outcome is _MENU_QUIT:
+            return _MENU_QUIT
+        _clear_screen()
+        validate_project(project_id)
+
+
+def _render_timeline_text(project: str, node: str | None = None) -> None:
+    """Rich timeline render shared by CLI and in-TUI pager."""
+    timeline = _import_module("timeline")
+    try:
+        runtime_root: Path | None = resolve_runtime_root()
+    except RuntimeError:
+        runtime_root = None
+    attempts: list[dict] = []
+    if runtime_root is not None:
+        try:
+            attempts = _discover_attempts(runtime_root)
+        except OSError:
+            attempts = []
+    tl = timeline.build(
+        project,
+        node,
+        config_root=ROOT,
+        runtime_root=runtime_root,
+        repo_path=_resolve_repo_for_project(project),
+        attempts=attempts,
+    )
+    graph = timeline.read_graph(ROOT, project)
+    for raw in timeline.render_text(tl, graph["nodes"]).splitlines():
+        if raw.startswith("timeline:"):
+            console.print(Text(raw, style="bold"))
+        elif raw.startswith("what is wrong"):
+            console.print(Text(raw, style="bold red" if tl.warnings else "bold green"))
+        elif raw.startswith("  ! "):
+            console.print(Text(raw, style="red"))
+        elif raw.startswith("what this host cannot see"):
+            console.print(Text(raw, style="bold yellow"))
+        elif raw.startswith("  - "):
+            console.print(Text(raw, style="dim"))
+        elif "OUTSIDE GDDP" in raw:
+            console.print(Text(raw, style="bold red"))
+        else:
+            console.print(raw)
+
+
+def _interactive_timeline(project: str) -> str:
+    """In-TUI timeline pager from graph hub more menu."""
+    _page_view(
+        lambda: _render_timeline_text(project),
+        title=f"timeline-{project}",
+    )
+    return _MENU_BACK
+
+
 def interactive_graph_delivery(project: str):
     """Publish this graph's delivery commit, or retire its transport refs.
 
@@ -6242,14 +6546,14 @@ def interactive_status(project: str | None = None):
     if project:
         _clear_screen()
         show_status(project)
-        _pause()
-        return _MENU_BACK
+        return _status_after_show(project, back_label="more")
     actions = {
         "a": ("all", "every project completion summary"),
         "o": ("one", "pick one project — counts + node phases"),
         "b": ("back", ""),
         "q": ("quit", ""),
     }
+    projects = _list_status_projects()
     while True:
         _clear_screen()
         console.print(Text("status", style="bold"))
@@ -6261,7 +6565,9 @@ def interactive_status(project: str | None = None):
         if choice == "a":
             _clear_screen()
             show_status()
-            _pause()
+            outcome = _status_after_show(None, back_label="status")
+            if outcome is _MENU_QUIT:
+                return _MENU_QUIT
             continue
         picked = _pick_graph("status · graphs", back_label="status")
         if picked is _MENU_QUIT:
@@ -6270,7 +6576,9 @@ def interactive_status(project: str | None = None):
             continue
         _clear_screen()
         show_status(str(picked))
-        _pause()
+        outcome = _status_after_show(str(picked), back_label="status")
+        if outcome is _MENU_QUIT:
+            return _MENU_QUIT
 
 
 def interactive_validate(project: str | None = None):
@@ -6278,14 +6586,14 @@ def interactive_validate(project: str | None = None):
     if project:
         _clear_screen()
         validate_project(project)
-        _pause()
-        return _MENU_BACK
+        return _validate_after_show(project, [project], back_label="more")
     actions = {
         "a": ("all", "validate every project"),
         "o": ("one", "pick one project"),
         "b": ("back", ""),
         "q": ("quit", ""),
     }
+    projects = _list_status_projects()
     while True:
         _clear_screen()
         console.print(Text("validate", style="bold"))
@@ -6297,16 +6605,23 @@ def interactive_validate(project: str | None = None):
         if choice == "a":
             _clear_screen()
             validate_project(None)
-            _pause()
+            outcome = _validate_after_show(None, projects, back_label="validate")
+            if outcome is _MENU_QUIT:
+                return _MENU_QUIT
             continue
         picked = _pick_graph("validate · graphs", back_label="validate")
         if picked is _MENU_QUIT:
             return _MENU_QUIT
         if picked is _MENU_BACK:
             continue
+        picked_project = str(picked)
         _clear_screen()
-        validate_project(str(picked))
-        _pause()
+        validate_project(picked_project)
+        outcome = _validate_after_show(
+            picked_project, [picked_project], back_label="validate",
+        )
+        if outcome is _MENU_QUIT:
+            return _MENU_QUIT
 
 
 def validate_project(project_id: str | None):
