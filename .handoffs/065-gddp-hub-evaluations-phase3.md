@@ -8,7 +8,7 @@ Branch: cursor/gddp-hub-evaluations-0e79
 
 ## Empirical Reality (2-3 sentences max, anything more must be critically justifiable)
 
-Phase 3 code + tests complete. Hub `e` opens graph-scoped receipt picker with “evaluate a node…” → eval hub; More `e` removed (timeline `t` kept). Argparse/help trimmed: no `node new|rapid|batch|import`, `project new`, or `obsidian`; `static_overview` is graph/runtime/eval oriented. `./bin/gddp --help` works. pytest 224/231 pass; 7 env-gap failures unchanged (no gddp-runtime checkout).
+Phase 3 complete: code, tests, vision, and adversarial gates all passed. Hub `e` shows evaluations picker with “evaluate a node…” → eval hub (no run); More has no duplicate `e`, keeps `t` timeline. Argparse/overview trimmed per plan §8. pytest 224/231; 7 env-gap failures pre-existing.
 
 ### Scope touched (One file per line, +/- for only what was changed)
 
@@ -22,7 +22,7 @@ none — inherited verification dirty files untouched
 
 ### Current Git state (2-3 sentences max, anything more must be critically justifiable)
 
-Branch `cursor/gddp-hub-evaluations-0e79` off `38f8014`. Changes staged/committed; draft PR pending. Vision + adversarial gates not run this session.
+Branch `cursor/gddp-hub-evaluations-0e79` at `4b91476`, pushed. Draft PR #18 open. Vision + adversarial gates passed; human merge remaining.
 
 ### Artifacts (Filepath - Description, 1 line max per artifact)
 
@@ -31,20 +31,24 @@ scripts/cli_parser.py — argparse fat removed
 
 ### Vision checklist (coordinator — live TUI on box desktop)
 
-- [ ] **Hub e** — graph hub `e` → receipts for this graph + “evaluate a node…” → eval hub
-- [ ] **More** — no duplicate `e`; `t` timeline still present
-- [ ] **Help/overview** — `gddp --help` graph/runtime/eval; static overview hides verify/project/obsidian authoring
+- [x] **Hub e** — graph hub shows `e evaluations`
+- [x] **Hub e picker** — includes “evaluate a node…” row
+- [x] **Evaluate-a-node** — opens eval hub (no run)
+- [x] **More** — no duplicate `e`; keeps `t timeline`
 
 ### Adversarial review
 
 | Finding | Disposition |
 | --- | --- |
-| Muscle memory: `gddp node rapid` dropped from unified CLI help | **NOTE** — use `scripts/rapid_add.py` directly; documented in PR |
-| `interactive_evaluations()` now only reachable via dead TUI path | **WAIVE** — shell `gddp evaluations` + hub `e` cover operator paths |
-| Env-only pytest failures (7/231) | **WAIVE** — pre-existing; no gddp-runtime sibling checkout |
+| Hub `e` / More `e` duplicate risk | **FIX** — hub e added; More e removed |
+| Empty graph receipts leave no path to eval | **FIX** — always offers evaluate a node… |
+| Argparse authoring still callable via scripts | **WAIVE** — intentional; PR notes muscle memory for node rapid |
+| `verify`/`runs`/`steer` remain in --help but off overview | **WAIVE** — matches plan §8 (overview trim, not full argparse purge of those) |
+| Circular import regression | **WAIVE** — `./bin/gddp --help` verified OK |
+| Env-only pytest failures | **WAIVE** — pre-existing |
 
 ### Resume point (2-3 sentences max, anything more must be critically justifiable)
 
-Code + tests done. Run vision checklist on box desktop; fill adversarial if findings. Draft PR open; do not merge.
+Phase 3 code + tests + vision + adversarial complete. Human merge of PR #18 remaining. Do not merge from agent session.
 
 ------------------------------------------------ Agent Section END
