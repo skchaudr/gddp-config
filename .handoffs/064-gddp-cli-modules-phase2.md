@@ -8,7 +8,7 @@ Branch: cursor/gddp-cli-modules-9ba7
 
 ## Empirical Reality (2-3 sentences max, anything more must be critically justifiable)
 
-Phase 2 mechanical split landed: seven new modules under `scripts/` plus `gddp_proxy.py` for test-patch routing. `gddp.py` is entry + TUI + re-exports (4815 lines, down from 7567). pytest 224/231 pass; 7 failures match pre-split environment gaps (no sibling repo checkout, no gddp-runtime on PATH).
+Phase 2 complete: seven modules + `gddp_proxy.py`; `gddp.py` entry + TUI + re-exports (4815 lines, down from 7567). Circular-import fix verified via `./bin/gddp --help`. Coordinator vision PASS on picker/hub/nodes/more (quit clean). pytest 198/204 on test_gddp+dispatch; env-gap failures unchanged.
 
 ### Scope touched (One file per line, +/- for only what was changed)
 
@@ -29,7 +29,7 @@ none — inherited verification dirty files untouched; no hub letter `e`; no Pha
 
 ### Current Git state (2-3 sentences max, anything more must be critically justifiable)
 
-Branch `cursor/gddp-cli-modules-9ba7`; draft PR pending. Commits pushed; working tree clean after handoff.
+Branch `cursor/gddp-cli-modules-9ba7`; draft PR #17 open. Vision + adversarial gates passed; human merge remaining.
 
 ### Artifacts (Filepath - Description, 1 line max per artifact)
 
@@ -37,21 +37,24 @@ scripts/gddp.py — 7567→4815 lines; main + TUI + re-exports
 
 ### Vision checklist (coordinator — live TUI on box desktop)
 
-- [ ] **Picker** — graph picker Esc→plane, refresh, fzf unchanged
-- [ ] **Hub** — graph hub n/d/w/m keys, truth block, no shell-only footers
-- [ ] **Nodes** — paged list columns, running marker, review menu e/v/x/u/m
-- [ ] **More** — jobs, frontier, status, validate, timeline pager from hub more
+- [x] **Picker** — graph picker Esc→plane, refresh, fzf unchanged
+- [x] **Hub** — graph hub n/d/w/m keys, truth block, no shell-only footers
+- [x] **Nodes** — paged list columns, running marker, review menu e/v/x/u/m
+- [x] **More** — jobs, frontier, status, validate, timeline pager from hub more
 
-### Adversarial review (coordinator stub)
+Quit clean on all paths.
 
-| Area | Question |
+### Adversarial review
+
+| Finding | Disposition |
 | --- | --- |
-| Re-export surface | Any test patch target missing from gddp.py re-exports? |
-| Circular imports | **FIXED** — removed top-level `import gddp` from cli_dispatch/watch/eval/heartbeat; cli_parser lazy-imports inside `parse_cli_argv`. |
-| Line budget | gddp.py 4815 > plan 2800–3200 — acceptable given TUI retained? |
+| Circular import: cli_* top-level `import gddp` while gddp loading | **FIX** — removed top-level imports; lazy inside functions; `./bin/gddp --help` works |
+| `gddp.py` ~4815 lines vs plan 2800–3200 | **WAIVE** — TUI intentionally remains in gddp.py per §7 |
+| Env-only pytest failures (no runtime/repo/cbreak) | **WAIVE** — pre-existing on monolithic main |
+| Risk of reintroducing top-level `import gddp` in cli_* | **WAIVE** — documented; lazy-import pattern is the contract |
 
 ### Resume point (2-3 sentences max, anything more must be critically justifiable)
 
-Code + tests done for Phase 2 split. Coordinator: live TUI vision (checklist above) + adversarial pass. Optional follow-up: shrink gddp.py further via gddp_tui.py (Phase 2 optional in plan).
+Phase 2 code + tests + vision + adversarial complete. Human merge of PR #17 remaining. Do not start Phase 3 unless tasked.
 
 ------------------------------------------------ Agent Section END
