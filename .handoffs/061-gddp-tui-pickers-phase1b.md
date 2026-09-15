@@ -8,7 +8,7 @@ Branch: fix/gddp-tui-pickers
 
 ## Empirical Reality (2-3 sentences max, anything more must be critically justifiable)
 
-Phase 1b code + fake-getch tests complete on branch `fix/gddp-tui-pickers` off `origin/main` (post PR #13 / cb45525). Coordinator vision gate **not** run — live TUI walkthrough pending.
+Vision PASS on config, eval knobs (model), and reason pickers on live TUI; launchd heartbeat arm/disarm deferred to unit/fake-getch tests and a macOS host with the launchd kit.
 
 ### Scope touched (One file per line, +/- for only what was changed)
 
@@ -22,7 +22,7 @@ none — verification dirty files untouched
 
 ### Current Git state (2-3 sentences max, anything more must be critically justifiable)
 
-Branch `fix/gddp-tui-pickers` off `cb45525`. Changes committed and pushed; PR open. Same 6 environment-only test failures as main (EvalWiring repo checkout, fzf runtime preview, contract pager key sequence).
+Branch `fix/gddp-tui-pickers` off `cb45525`; PR #14 open. Vision gate recorded in this handoff; human merge remaining.
 
 ### Artifacts (Filepath - Description, 1 line max per artifact)
 
@@ -30,14 +30,14 @@ scripts/gddp.py — Phase 1b known-value pickers (_pick_reason, _config_setting_
 
 ### Vision checklist (coordinator — live TUI on box desktop)
 
-- [ ] **Eval knobs** — cheap/expensive (and thinking/integrity/lanes/base) via pickers; not raw Prompt.ask for those enums
-- [ ] **Config** — executor / integrity / lanes / model ids via pickers
-- [ ] **Heartbeat (launchd)** — arm/disarm via menu; no Prompt.ask
-- [ ] **Reason flow** — at least one path shows recent/canned picker; type-in still available (reject fix-list, custom prose)
+- [x] **Eval knobs (model)** — PASSED: cheap / expensive / keep current / `__other__` raw id on live TUI
+- [x] **Config** — PASSED: executor / model / thinking / lanes / integrity picker menus observed
+- [ ] **Heartbeat (launchd)** — NOT VISIONABLE on Linux box (systemd path; timer absent → info screen). `_menu_choice` arm/disarm covered by unit/fake-getch tests; live launchd needs macOS host with launchd kit
+- [x] **Reason flow** — PASSED: status update → confirm y → `_pick_reason` (canned: accepted, retrying, blocked on dependency, deferred, operator review, fix applied, `__other__`); Esc abort left status provisional unchanged
 
 ### Resume point (2-3 sentences max, anything more must be critically justifiable)
 
-Code + tests done; **vision gate pending** coordinator live TUI walkthrough on box desktop. Merge after vision checklist passes. Do not start Phase 2 unless explicitly tasked.
+Phase 1b code + tests + vision (partial heartbeat note) complete; human merge of PR #14 remaining. Do not start Phase 2 unless explicitly tasked.
 
 ------------------------------------------------ Agent Section END
 
