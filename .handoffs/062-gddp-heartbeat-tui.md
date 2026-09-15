@@ -22,11 +22,21 @@ none — verification dirty files untouched
 
 ### Current Git state (2-3 sentences max, anything more must be critically justifiable)
 
-Branch `fix/gddp-heartbeat-tui`; PR #15 open and pushed. Heartbeat + TuiPicker heartbeat tests 11/11 green; vision PASS recorded here.
+Branch `fix/gddp-heartbeat-tui`; PR #15 pushed post-adversarial fixes. Heartbeat + TuiPicker heartbeat tests 14/14 green.
 
 ### Artifacts (Filepath - Description, 1 line max per artifact)
 
-scripts/gddp.py — `_render_systemd_heartbeat_status`, `_systemd_heartbeat_actions`, launchd menu loop
+scripts/gddp.py — `_render_heartbeat_notice`, `_try_resolve_runtime_root`, guarded `_run_launchd_heartbeat_script`
+
+### Adversarial review (Greptile-class)
+
+| Finding | Disposition |
+| --- | --- |
+| Flash-away inapplicable/already-state notices cleared by `_clear_screen` | **FIX** — sticky `notice` rendered once on next draw |
+| `_run_launchd_heartbeat_script` with no kit/script existence check | **FIX** — yellow sticky notice; no subprocess |
+| `resolve_runtime_root` crash on heartbeat enter | **FIX** — `_try_resolve_runtime_root`; status panel + menu |
+| Esc on post-failure `_pause` after failed systemctl | **WAIVE** — pre-existing pause semantics; hard-failure only |
+| Launchd `r`=repair vs systemd `r`=refresh | **WAIVE** — intentional per-platform |
 
 ### Vision checklist (coordinator — live TUI on box desktop)
 
@@ -36,7 +46,7 @@ scripts/gddp.py — `_render_systemd_heartbeat_status`, `_systemd_heartbeat_acti
 
 ### Resume point (2-3 sentences max, anything more must be critically justifiable)
 
-Code + tests + vision complete; human merge of PR #15 remaining.
+Code + tests + vision + adversarial fixes complete; coordinator may quick-recheck sticky notice; human merge of PR #15 remaining.
 
 ------------------------------------------------ Agent Section END
 
