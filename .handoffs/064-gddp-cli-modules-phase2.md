@@ -47,7 +47,7 @@ scripts/gddp.py — 7567→4815 lines; main + TUI + re-exports
 | Area | Question |
 | --- | --- |
 | Re-export surface | Any test patch target missing from gddp.py re-exports? |
-| Circular imports | cli_* → gddp lazy imports safe at scale? |
+| Circular imports | **FIXED** — removed top-level `import gddp` from cli_dispatch/watch/eval/heartbeat; cli_parser lazy-imports inside `parse_cli_argv`. |
 | Line budget | gddp.py 4815 > plan 2800–3200 — acceptable given TUI retained? |
 
 ### Resume point (2-3 sentences max, anything more must be critically justifiable)

@@ -6,10 +6,12 @@ import json
 import os
 import secrets
 import sqlite3
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
+from rich.prompt import Prompt
 from rich.table import Table
 from rich.text import Text
 
@@ -34,11 +36,6 @@ def resolve_runtime_root() -> Path:
     import gddp
     return gddp.resolve_runtime_root()
 
-
-import gddp as _gddp_host
-
-sys = _gddp_host.sys
-Prompt = _gddp_host.Prompt
 
 from gddp_proxy import console
 

@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
 import shlex
+import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -35,12 +38,6 @@ def runtime_python(runtime_root: Path) -> str:
     import gddp
     return gddp.runtime_python(runtime_root)
 
-
-import gddp as _gddp_host
-
-os = _gddp_host.os
-subprocess = _gddp_host.subprocess
-sys = _gddp_host.sys
 
 from gddp_proxy import console
 

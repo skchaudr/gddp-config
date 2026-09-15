@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
+import os
+import platform
+import re
 import socket
+import subprocess
+import sys
 from pathlib import Path
 
 from rich.text import Text
@@ -25,14 +30,6 @@ def resolve_runtime_root() -> Path:
     import gddp
     return gddp.resolve_runtime_root()
 
-
-import gddp as _gddp_host
-
-os = _gddp_host.os
-platform = _gddp_host.platform
-re = _gddp_host.re
-subprocess = _gddp_host.subprocess
-sys = _gddp_host.sys
 
 from gddp_proxy import console
 

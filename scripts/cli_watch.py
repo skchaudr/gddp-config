@@ -9,6 +9,7 @@ import re
 import shlex
 import shutil
 import sqlite3
+import subprocess
 import sys
 import time
 from datetime import datetime, timezone
@@ -49,10 +50,6 @@ def run_runtime_jobs(*args, **kwargs):
     import gddp
     return gddp.run_runtime_jobs(*args, **kwargs)
 
-
-import gddp as _gddp_host
-
-subprocess = _gddp_host.subprocess
 
 from gddp_proxy import console
 

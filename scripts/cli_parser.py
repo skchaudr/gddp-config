@@ -6,11 +6,10 @@ import argparse
 import sys
 from pathlib import Path
 
-import gddp
-
 
 def parse_cli_argv(argv: list[str]) -> int:
     """Parse argv (post-dispatch routing) and invoke the selected command."""
+    import gddp
     # Positional dispatch: gddp <graph|node> [executor] [--yes]. Anything that
     # is not a known subcommand is an exact graph or node target.
     parser = argparse.ArgumentParser(
