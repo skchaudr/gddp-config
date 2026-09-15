@@ -8,7 +8,7 @@ Branch: fix/gddp-tui-dead-ends
 
 ## Empirical Reality (2-3 sentences max, anything more must be critically justifiable)
 
-Phase 1a usability: frontier/status/validate no longer end on `_pause` only; hub footer drops `gddp timeline` shell tip; More menu adds in-TUI timeline (`t`). Also shipped 1c Esc-on-confirm fixes, eval-hub pause removal, empty jobs no Prompt.ask, single ack after dispatch.
+Coordinator vision gate passed on box desktop live TUI (graph `gddp-dogfood`, PR #13 branch).
 
 ### Scope touched (One file per line, +/- for only what was changed)
 
@@ -22,7 +22,7 @@ none — verification dirty files untouched
 
 ### Current Git state (2-3 sentences max, anything more must be critically justifiable)
 
-Branch `fix/gddp-tui-dead-ends` off `origin/main`. Code + tests committed and pushed (`aef26d4+`). PR for human merge; vision exit gate pending coordinator live-TUI walkthrough.
+Branch `fix/gddp-tui-dead-ends` off `origin/main`. Code + tests + vision gate complete; PR #13 awaiting human merge to protected `main`.
 
 ### Artifacts (Filepath - Description, 1 line max per artifact)
 
@@ -30,15 +30,15 @@ scripts/gddp.py — Phase 1a TUI navigation dead-end removal
 
 ### Vision checklist (coordinator — live TUI on box desktop)
 
-- [ ] More → **frontier**: after render, no dead-end "press any key" only; can refresh, pick a node, or back
-- [ ] More → **status**: same — navigate onward (pick graph/node) or back without `_pause`-only exit
-- [ ] More → **validate**: failing nodes pickable when errors exist; else refresh/back; no `_pause`-only exit
-- [ ] **Graph hub truth block**: no `gddp timeline …` shell tip in footer
-- [ ] More → **`t` timeline**: opens in-tool timeline pager (`_page_view`); Esc/back returns to hub
+- [x] **Graph hub truth block** — PASSED: no `gddp timeline` shell tip; footer is nav chrome only (event count / host-unseen notes)
+- [x] More → **`t` timeline** — PASSED: in-tool timeline pager; lines 1–35/137 observed; Esc/back returns to hub
+- [x] More → **frontier** — PASSED: menu offers `r` refresh / `p` pick node / `b` back / `q` quit; not `_pause`-only
+- [x] More → **status** — PASSED: same menu pattern (`r` / `p` pick node / `b` / `q`); not `_pause`-only
+- [x] More → **validate** — PASSED: menu offers `r` refresh / `b` back / `q` quit; not `_pause`-only
 
 ### Resume point (2-3 sentences max, anything more must be critically justifiable)
 
-Phase 1a code + fake-getch tests done; **vision gate pending** coordinator walkthrough above. Do not mark 1a complete until vision passes. After vision + merge: Phase 1b pickers on `fix/gddp-tui-pickers`. No Phase 2 splits.
+Phase 1a code + tests + vision complete; human merge of PR #13 remaining. Do not start Phase 1b or Phase 2 unless explicitly tasked.
 
 ------------------------------------------------ Agent Section END
 
