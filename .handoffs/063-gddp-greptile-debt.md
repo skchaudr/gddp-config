@@ -4,7 +4,7 @@
 
 Date: 2026-09-15
 Worktree: /workspace
-Branch: fix/gddp-greptile-debt
+Branch: cursor/fix-gddp-greptile-debt-ac7c
 
 ## Empirical Reality (2-3 sentences max, anything more must be critically justifiable)
 
@@ -22,7 +22,7 @@ none — verification dirty files untouched; heartbeat code untouched
 
 ### Current Git state (2-3 sentences max, anything more must be critically justifiable)
 
-Branch `fix/gddp-greptile-debt` off `origin/main` (`8e8b467`). Draft PR open; not merged. `.venv/bin/python -m pytest` on four test modules: 193 passed, 6 failed (pre-existing env: missing runtime root, terminal mock without `cbreak`).
+Branch `cursor/fix-gddp-greptile-debt-ac7c` off `origin/main` (`8e8b467`). Draft PR open; not merged. `.venv/bin/python -m pytest` on four test modules: 193 passed, 6 failed (pre-existing env: missing runtime root, terminal mock without `cbreak`).
 
 ### Artifacts (Filepath - Description, 1 line max per artifact)
 
