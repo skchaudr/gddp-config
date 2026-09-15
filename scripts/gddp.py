@@ -1854,10 +1854,10 @@ def _config_setting_value(key: str, current: str) -> str | object:
             back_label="config",
         )
     elif key == "GDDP_EVAL_MODEL_EXPENSIVE":
-        preset = os.environ.get("GDDP_EVAL_MODEL_EXPENSIVE") or ""
-        choices: list[tuple[str, str]] = [("expensive", "preset expensive")]
+        preset = (os.environ.get("GDDP_EVAL_MODEL_EXPENSIVE") or "").strip()
+        choices: list[tuple[str, str]] = []
         if preset:
-            choices[0] = ("expensive", f"preset expensive → {preset}")
+            choices.append(("expensive", f"preset expensive → {preset}"))
         if current and current not in {preset, "expensive"}:
             choices.append((current, f"keep {current!r}"))
         picked = _pick_enum_or_other(
@@ -4866,8 +4866,10 @@ def _eval_knob_picker(current: dict, *, project: str | None = None) -> dict:
     current_model = str(current.get("preset") or current.get("model") or "")
     model_choices: list[tuple[str, str]] = [
         ("cheap", "cheap preset"),
-        ("expensive", "expensive preset"),
     ]
+    expensive_preset = (os.environ.get("GDDP_EVAL_MODEL_EXPENSIVE") or "").strip()
+    if expensive_preset:
+        model_choices.append(("expensive", f"expensive preset → {expensive_preset}"))
     if current_model and current_model not in {"cheap", "expensive"}:
         model_choices.append((current_model, f"keep {current_model!r}"))
     model = _pick_enum_or_other(
@@ -4976,7 +4978,11 @@ def interactive_eval_hub(project: str, node_id: str):
         elif choice == "k":
             knobs = _eval_knob_picker(knobs, project=project)
         elif choice == "c":
-            _page_view(_render_eval_config, title=f"eval-config-{project}-{node_id}")
+            def _show_config():
+                _clear_screen()
+                _render_eval_config()
+
+            _page_view(_show_config, title=f"eval-config-{project}-{node_id}")
         elif choice == "i":
             receipt = (latest or {}).get("check") if latest else None
 
@@ -4991,8 +4997,12 @@ def interactive_eval_hub(project: str, node_id: str):
                 return _MENU_QUIT
         elif choice == "s":
             if latest:
+                def _show_latest():
+                    _clear_screen()
+                    _render_eval_show(latest)
+
                 _page_view(
-                    lambda: _render_eval_show(latest),
+                    _show_latest,
                     title=f"eval-show-{project}-{node_id}",
                 )
             else:
@@ -5965,7 +5975,8 @@ def cmd_timeline(args) -> int:
     if args.json:
         print(json.dumps(tl.as_dict(), indent=2))
         return 0
-    _render_timeline_text(args.project, args.node)
+    graph = timeline.read_graph(ROOT, args.project)
+    _print_timeline_rich(tl, graph["nodes"])
     return 1 if tl.warnings else 0
 
 
@@ -6914,7 +6925,32 @@ def _validate_after_show(
         validate_project(project_id)
 
 
-def _render_timeline_text(project: str, node: str | None = None) -> None:
+def _print_timeline_rich(tl, graph_nodes: dict) -> None:
+    """Rich timeline lines from an already-built timeline object."""
+    timeline = _import_module("timeline")
+    for raw in timeline.render_text(tl, graph_nodes).splitlines():
+        if raw.startswith("timeline:"):
+            console.print(Text(raw, style="bold"))
+        elif raw.startswith("what is wrong"):
+            console.print(Text(raw, style="bold red" if tl.warnings else "bold green"))
+        elif raw.startswith("  ! "):
+            console.print(Text(raw, style="red"))
+        elif raw.startswith("what this host cannot see"):
+            console.print(Text(raw, style="bold yellow"))
+        elif raw.startswith("  - "):
+            console.print(Text(raw, style="dim"))
+        elif "OUTSIDE GDDP" in raw:
+            console.print(Text(raw, style="bold red"))
+        else:
+            console.print(raw)
+
+
+def _render_timeline_text(
+    project: str,
+    node: str | None = None,
+    *,
+    repo_path: Path | str | None = None,
+) -> None:
     """Rich timeline render shared by CLI and in-TUI pager."""
     timeline = _import_module("timeline")
     try:
@@ -6932,25 +6968,11 @@ def _render_timeline_text(project: str, node: str | None = None) -> None:
         node,
         config_root=ROOT,
         runtime_root=runtime_root,
-        repo_path=_resolve_repo_for_project(project),
+        repo_path=_resolve_repo_for_project(project, repo_path),
         attempts=attempts,
     )
     graph = timeline.read_graph(ROOT, project)
-    for raw in timeline.render_text(tl, graph["nodes"]).splitlines():
-        if raw.startswith("timeline:"):
-            console.print(Text(raw, style="bold"))
-        elif raw.startswith("what is wrong"):
-            console.print(Text(raw, style="bold red" if tl.warnings else "bold green"))
-        elif raw.startswith("  ! "):
-            console.print(Text(raw, style="red"))
-        elif raw.startswith("what this host cannot see"):
-            console.print(Text(raw, style="bold yellow"))
-        elif raw.startswith("  - "):
-            console.print(Text(raw, style="dim"))
-        elif "OUTSIDE GDDP" in raw:
-            console.print(Text(raw, style="bold red"))
-        else:
-            console.print(raw)
+    _print_timeline_rich(tl, graph["nodes"])
 
 
 def _interactive_timeline(project: str) -> str:

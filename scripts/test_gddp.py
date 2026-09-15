@@ -2353,6 +2353,48 @@ class EvalWiringTests(unittest.TestCase):
         pause.assert_not_called()
         self.assertIs(outcome, gddp._MENU_BACK)
 
+    def test_eval_hub_config_and_show_clear_before_pager(self):
+        latest = {
+            "verdict": "pass",
+            "knobs": {"model": "deepseek-v4-flash"},
+            "check": {"verdict": "pass"},
+            "sort_at": "2026-01-01T00:00:00Z",
+        }
+        for action in ("c", "s"):
+            pager_clears: list[str] = []
+            in_pager = {"active": False}
+
+            def fake_page_view(render, title=""):
+                in_pager["active"] = True
+                render()
+                in_pager["active"] = False
+                return "q"
+
+            keys = iter([action, "b"])
+            terminal = SimpleNamespace(
+                getch=lambda: next(keys),
+                clear_lines=lambda n: None,
+            )
+
+            def import_module(name):
+                if name == "terminal":
+                    return terminal
+                return __import__(name)
+
+            def track_clear():
+                if in_pager["active"]:
+                    pager_clears.append("clear")
+
+            with patch.object(gddp, "_import_module", side_effect=import_module), \
+                    patch.object(gddp, "_load_receipts_for_node", return_value=[latest]), \
+                    patch.object(gddp, "_page_view", side_effect=fake_page_view), \
+                    patch.object(gddp, "_clear_screen", side_effect=track_clear), \
+                    patch.object(gddp, "_render_eval_config"), \
+                    patch.object(gddp, "_render_eval_show"), \
+                    patch.object(gddp, "console"):
+                gddp.interactive_eval_hub("demo", "alpha")
+            self.assertEqual(pager_clears, ["clear"], msg=f"action {action!r}")
+
     def test_offered_vs_read_formats_lane_files(self):
         canonical = {
             "readme": "/var/folders/xx/gddp-eval-wt-abc/README.md",
@@ -2909,6 +2951,75 @@ class TuiPickerTests(unittest.TestCase):
             current = {"preset": "cheap", "thinking": "medium"}
             self.assertIs(gddp._eval_knob_picker(current, project="demo"), current)
 
+    def test_eval_knob_picker_omits_expensive_when_unset(self):
+        env = {k: v for k, v in os.environ.items() if k != "GDDP_EVAL_MODEL_EXPENSIVE"}
+        captured: list[tuple[str, list[tuple[str, str]]]] = []
+        picks = iter(["cheap", "medium", "on", "live", ""])
+
+        def capture(heading, choices, **kwargs):
+            captured.append((heading, list(choices)))
+            return next(picks)
+
+        with patch.dict(os.environ, env, clear=True), \
+                patch.object(gddp, "_pick_enum_or_other", side_effect=capture), \
+                patch.object(gddp, "_pick_enum", side_effect=lambda *a, **k: next(picks)), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp.console, "print"):
+            gddp._eval_knob_picker({}, project="demo")
+        model_choices = captured[0][1]
+        self.assertEqual([value for value, _ in model_choices], ["cheap"])
+        self.assertNotIn("expensive", [value for value, _ in model_choices])
+
+    def test_eval_knob_picker_offers_expensive_when_set(self):
+        captured: list[tuple[str, list[tuple[str, str]]]] = []
+        picks = iter(["expensive", "medium", "on", "live", ""])
+
+        def capture(heading, choices, **kwargs):
+            captured.append((heading, list(choices)))
+            return next(picks)
+
+        with patch.dict(os.environ, {"GDDP_EVAL_MODEL_EXPENSIVE": "deepseek-v4"}, clear=False), \
+                patch.object(gddp, "_pick_enum_or_other", side_effect=capture), \
+                patch.object(gddp, "_pick_enum", side_effect=lambda *a, **k: next(picks)), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp.console, "print"):
+            result = gddp._eval_knob_picker({}, project="demo")
+        model_choices = captured[0][1]
+        self.assertIn(
+            ("expensive", "expensive preset → deepseek-v4"),
+            model_choices,
+        )
+        self.assertEqual(result.get("preset"), "expensive")
+        self.assertEqual(result.get("model"), "deepseek-v4")
+
+    def test_config_expensive_omits_preset_when_unset(self):
+        env = {k: v for k, v in os.environ.items() if k != "GDDP_EVAL_MODEL_EXPENSIVE"}
+        captured: list[list[tuple[str, str]]] = []
+
+        def capture(heading, choices, **kwargs):
+            captured.append(list(choices))
+            return gddp._MENU_BACK
+
+        with patch.dict(os.environ, env, clear=True), \
+                patch.object(gddp, "_pick_enum_or_other", side_effect=capture):
+            gddp._config_setting_value("GDDP_EVAL_MODEL_EXPENSIVE", "")
+        self.assertEqual(captured[0], [])
+
+    def test_config_expensive_offers_preset_when_set(self):
+        captured: list[list[tuple[str, str]]] = []
+
+        def capture(heading, choices, **kwargs):
+            captured.append(list(choices))
+            return gddp._MENU_BACK
+
+        with patch.dict(os.environ, {"GDDP_EVAL_MODEL_EXPENSIVE": "deepseek-v4"}, clear=False), \
+                patch.object(gddp, "_pick_enum_or_other", side_effect=capture):
+            gddp._config_setting_value("GDDP_EVAL_MODEL_EXPENSIVE", "")
+        self.assertEqual(
+            captured[0],
+            [("expensive", "preset expensive → deepseek-v4")],
+        )
+
     def test_config_executor_uses_picker_not_prompt(self):
         with patch.object(gddp, "_pick_enum_or_other", return_value="pi_rpc"), \
                 patch.object(gddp.Prompt, "ask") as ask:
@@ -3101,6 +3212,32 @@ class TuiDeadEndTests(unittest.TestCase):
                 patch.object(gddp.console, "print"):
             gddp._offer_publish_graph_status("demo", "alpha", "ready", "x")
         self.assertFalse(any(c and c[0] in {"add", "commit", "push"} for c in calls))
+
+
+class TimelineRepoPathTests(unittest.TestCase):
+    def test_cmd_timeline_text_honors_repo_path(self):
+        custom_repo = Path("/tmp/custom-repo")
+        tl = SimpleNamespace(warnings=[], entries=[], notes=[])
+        timeline_mod = SimpleNamespace(
+            build=Mock(return_value=tl),
+            read_graph=Mock(return_value={"nodes": {"alpha": {"status": "ready", "title": ""}}}),
+            render_text=Mock(return_value="timeline: demo\n"),
+        )
+        args = SimpleNamespace(
+            project="demo",
+            node=None,
+            json=False,
+            repo_path=str(custom_repo),
+        )
+        with patch.object(gddp, "_import_module", return_value=timeline_mod), \
+                patch.object(gddp, "resolve_runtime_root", side_effect=RuntimeError()), \
+                patch.object(gddp, "_resolve_repo_for_project", return_value=custom_repo) as resolve, \
+                patch.object(gddp.console, "print"):
+            rc = gddp.cmd_timeline(args)
+        resolve.assert_called_once_with("demo", str(custom_repo))
+        timeline_mod.build.assert_called_once()
+        self.assertEqual(timeline_mod.build.call_args.kwargs["repo_path"], custom_repo)
+        self.assertEqual(rc, 0)
 
 
 class EditorCommandTests(unittest.TestCase):
