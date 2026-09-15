@@ -223,355 +223,28 @@ def _write_runtime_settings(settings: dict[str, str]) -> None:
 # Positional dispatch: gddp <graph|node> [executor]
 # --------------------------------------------------------------------------- #
 
-class DispatchError(Exception):
-    """Operator-facing dispatch validation failure."""
 
 
-def _graph_projects(config_root: Path) -> list[str]:
-    graphs = Path(config_root) / "graphs"
-    if not graphs.is_dir():
-        return []
-    return sorted(
-        d.name for d in graphs.iterdir()
-        if d.is_dir() and (d / "project.yaml").is_file()
-    )
 
 
-def _executor_allowed(executor: str, modes: list[str]) -> bool:
-    """Treat `agent` as executor-neutral, never as a runnable adapter name."""
-    return executor not in _ABSTRACT_EXECUTION_MODES and (
-        executor in modes or "agent" in modes
-    )
 
 
-def _configured_executor(project_doc: dict, modes: list[str]) -> str:
-    policy = project_doc.get("execution_policy") or {}
-    default = policy.get("default_executor") or "jules"
-    if not modes or _executor_allowed(default, modes):
-        return default
-    concrete_modes = [mode for mode in modes if mode != "agent"]
-    if concrete_modes:
-        return concrete_modes[0]
-    raise DispatchError(
-        "executor-neutral mode 'agent' requires a concrete "
-        "execution_policy.default_executor"
-    )
 
 
-def _node_status_pairs(config_root: Path, project_id: str) -> dict:
-    """node_id -> {summary, yaml, modes} across both graph status surfaces.
-
-    project.yaml summaries are the readiness authority (the same contract
-    GraphReader reads); node YAMLs carry modes. A summary/YAML disagreement
-    is graph drift and must be shown, never silently resolved.
-    """
-    project_doc = _import_module("node_cli").load_project_doc(config_root, project_id)
-    summary = {
-        n.get("id"): n.get("status")
-        for n in project_doc.get("nodes", [])
-        if n.get("id")
-    }
-    out = {}
-    nodes_dir = Path(config_root) / "graphs" / project_id / "nodes"
-    for path in sorted(nodes_dir.glob("*.yaml")):
-        data = yaml.safe_load(path.read_text()) or {}
-        nid = data.get("node_id") or path.stem
-        out[nid] = {
-            "summary": summary.get(nid),
-            "yaml": data.get("status"),
-            "modes": list(data.get("allowed_execution_modes") or []),
-        }
-    for nid in summary:
-        out.setdefault(nid, {"summary": summary[nid], "yaml": None, "modes": []})
-    return out
 
 
-def build_dispatch_plan(config_root, target, executor, project_hint=None):
-    """Resolve target graph-first, validate everything, return a plan dict.
-
-    Exact-node errors refuse that node. Graph dispatch excludes and explains
-    invalid members while preserving the valid frontier. Unknown or ambiguous
-    targets remain hard errors.
-    project_hint (menu path) qualifies a node lookup to one graph. When the
-    target is that same graph ID, the hint came from the graph-wide menu path
-    and the target must remain a graph frontier, not be reinterpreted as a node.
-    """
-    config_root = Path(config_root)
-    projects = _graph_projects(config_root)
-    plan_excluded = []
-    if target in projects and project_hint in (None, target):
-        project_id = target
-        nodes = []
-        pairs = _node_status_pairs(config_root, project_id)
-        for nid, pair in sorted(pairs.items()):
-            if pair["summary"] != "ready":
-                continue
-            node = {"node_id": nid, "modes": pair["modes"]}
-            if pair["yaml"] is None:
-                plan_excluded.append((node, "no — graph drift: node YAML missing"))
-                continue
-            if pair["yaml"] != "ready":
-                plan_excluded.append((
-                    node,
-                    "no — graph drift: summary ready / yaml {}".format(pair["yaml"]),
-                ))
-                continue
-            if executor and not _executor_allowed(executor, pair["modes"]):
-                plan_excluded.append((
-                    node,
-                    "no — executor {!r} not allowed".format(executor),
-                ))
-                continue
-            nodes.append(node)
-        if not nodes and not plan_excluded:
-            raise DispatchError(f"graph {target!r} has no ready nodes")
-    else:
-        if project_hint is not None:
-            matches = [project_hint] if (
-                config_root / "graphs" / project_hint / "nodes" / f"{target}.yaml"
-            ).is_file() else []
-        else:
-            matches = [
-                p for p in projects
-                if (config_root / "graphs" / p / "nodes" / f"{target}.yaml").is_file()
-            ]
-        if not matches:
-            raise DispatchError(
-                f"no graph or node named '{target}' "
-                f"(graphs: {', '.join(projects) or 'none'})"
-            )
-        if len(matches) > 1:
-            raise DispatchError(
-                f"node '{target}' exists in multiple graphs: {', '.join(matches)}; "
-                "dispatch is exact — qualify from the interactive menu"
-            )
-        project_id = matches[0]
-        pair = _node_status_pairs(config_root, project_id).get(
-            target, {"summary": None, "yaml": None, "modes": []}
-        )
-        if pair["summary"] != pair["yaml"]:
-            raise DispatchError(
-                f"graph drift for '{target}': project.yaml summary is "
-                f"'{pair['summary']}', node YAML is '{pair['yaml']}' — "
-                "reconcile before dispatch"
-            )
-        if pair["summary"] != "ready":
-            raise DispatchError(
-                f"node '{target}' is '{pair['summary']}', not ready"
-            )
-        modes = pair["modes"]
-        if executor and not _executor_allowed(executor, modes):
-            raise DispatchError(
-                f"executor '{executor}' not in {target}.allowed_execution_modes: "
-                f"{modes or []}"
-            )
-        nodes = [{"node_id": target, "modes": modes}]
-
-    project_doc = _import_module("node_cli").load_project_doc(config_root, project_id)
-
-    def resolve_item(node):
-        return {
-            "node_id": node["node_id"],
-            "executor": executor or _configured_executor(project_doc, node["modes"]),
-        }
-
-    items = [resolve_item(node) for node in nodes]
-    return {
-        "project_id": project_id,
-        "repo": project_doc.get("repo") or "",
-        "items": items,
-        "excluded": [
-            (resolve_item(node), reason) for node, reason in plan_excluded
-        ],
-    }
 
 
-def insert_dispatch_events(con, project_id, repo, items, *, actor=None):
-    """Insert one schema-valid intake event per node; the heartbeat pipeline
-    claims, classifies (via the node: tag in url), scopes, reserves, and
-    dispatches. Each item already contains the concrete executor resolved by
-    the dispatch plan; persist it so runtime never re-plans operator intent."""
-    now = datetime.now(timezone.utc)
-    event_ids = []
-    for item in items:
-        event_id = (
-            f"evt_dispatch_{now.strftime('%Y%m%dT%H%M%S')}_"
-            f"{item['node_id']}_{secrets.token_hex(3)}"
-        )
-        routing = json.dumps({"selected_executor": item["executor"]})
-        con.execute(
-            "INSERT INTO events (event_id, schema_version, received_at, source, "
-            "event_type, actor, url, project_id, project_node_candidates, "
-            "scope_status, priority, risk_level, routing, status, repo) "
-            "VALUES (?, '1.0', ?, 'manual_inject', 'issue.opened', ?, ?, ?, ?, "
-            "'pending', 'pending', 'pending', ?, 'received', ?)",
-            (
-                event_id,
-                now.isoformat(),
-                actor or os.environ.get("USER") or "operator",
-                f"manual-dispatch://node: {item['node_id']}",
-                project_id,
-                json.dumps([item["node_id"]]),
-                routing,
-                repo,
-            ),
-        )
-        event_ids.append(event_id)
-    con.commit()
-    return event_ids
 
 
-def _connect_events_db(db_path: Path):
-    if not db_path.is_file():
-        raise DispatchError(f"runtime DB not initialized at {db_path}")
-    con = sqlite3.connect(db_path)
-    con.row_factory = sqlite3.Row
-    con.execute("PRAGMA busy_timeout=5000")
-    try:
-        con.execute("SELECT 1 FROM events LIMIT 1")
-    except sqlite3.OperationalError as exc:
-        con.close()
-        raise DispatchError(f"runtime DB missing events table: {exc}") from exc
-    return con
 
 
-def _classify_dispatch_items(con, config_root, plan):
-    """Return the plan's genuinely dispatchable and blocked items.
-
-    This is the single truth path for both the interactive frontier display and
-    the final dispatch gate: graph-ready status alone is never presented as
-    dispatchable when dependencies or live runtime motion still block a node.
-    """
-    frontier = _import_module("frontier")
-    try:
-        blockers = frontier.dispatch_blockers(con, plan["project_id"])
-    except sqlite3.Error as exc:
-        raise DispatchError(
-            f"runtime state unreadable ({exc}); "
-            "refusing to dispatch without duplicate-checking"
-        ) from exc
-    graph = frontier.load_graph(config_root, plan["project_id"])
-    movable, excluded = [], list(plan.get("excluded", []))
-    for item in plan["items"]:
-        if item["node_id"] in blockers:
-            excluded.append((item, "no — in flight"))
-            continue
-        deps = frontier.unsatisfied_deps(graph, item["node_id"])
-        if deps:
-            detail = ", ".join(f"{dep} [{status}]" for dep, status in deps)
-            excluded.append((item, f"no — dep-blocked: {detail}"))
-            continue
-        movable.append(item)
-    return movable, excluded
 
 
-def _confirm_dispatch(count: int) -> bool:
-    """Confirm insert. Enter / y = yes. n = abort. Never default to no.
-
-    TTY uses the same one-key menu as the rest of the control plane. Pipes
-    and tests fall back to a line prompt defaulting to y.
-    """
-    console.print(
-        Text(
-            f"Dispatch {count} event(s) through the heartbeat pipeline?",
-            style="bold",
-        )
-    )
-    try:
-        if sys.stdin.isatty() and sys.stdout.isatty():
-            actions = {
-                "y": ("yes", f"insert {count} event(s) — start heartbeat work"),
-                "n": ("no", "abort — insert nothing"),
-                "b": ("back", "abort — insert nothing"),
-            }
-            choice = _menu_choice(actions, default="y")
-            return choice == "y"
-        answer = Prompt.ask(
-            f"Dispatch {count} event(s)? [Y/n]",
-            default="y",
-        )
-        return answer.strip().lower() in {"", "y", "yes"}
-    except (EOFError, KeyboardInterrupt):
-        console.print("\naborted; no events inserted")
-        return False
 
 
-def _dispatch_flow(con, config_root, target, executor, project_hint=None,
-                   yes=False) -> int:
-    """Shared shell/menu path: validate, exclude in-flight nodes, preview once,
-    confirm once, insert. A node executing, being evaluated, or awaiting
-    review is never offered for duplicate dispatch."""
-    try:
-        plan = build_dispatch_plan(config_root, target, executor, project_hint)
-    except DispatchError as exc:
-        console.print(f"[bold red]ERROR:[/] {exc}")
-        return 2
-    try:
-        movable, excluded = _classify_dispatch_items(con, config_root, plan)
-    except DispatchError as exc:
-        console.print(f"[bold red]ERROR:[/] {exc}")
-        return 2
-    if not movable:
-        console.print(
-            "[bold red]ERROR:[/] nothing dispatchable; requested nodes were excluded:"
-        )
-        for item, reason in excluded:
-            console.print(f"  {item['node_id']}: {reason}", markup=False)
-        return 2
-    table = Table(title=f"dispatch preview — {plan['project_id']}")
-    table.add_column("node", style="bold")
-    table.add_column("executor")
-    table.add_column("dispatch?", style="yellow")
-    for item in movable:
-        table.add_row(item["node_id"], item["executor"], "yes")
-    for item, reason in excluded:
-        table.add_row(item["node_id"], item["executor"], Text(reason))
-    console.print(table)
-    if not yes:
-        if not _confirm_dispatch(len(movable)):
-            console.print("aborted; no events inserted")
-            return 1
-    event_ids = insert_dispatch_events(
-        con,
-        plan["project_id"],
-        plan["repo"],
-        movable,
-    )
-    for event_id in event_ids:
-        console.print(f"  event [cyan]{event_id}[/] → received")
-    console.print("next heartbeat tick claims, scopes, reserves, and dispatches.")
-    return 0
 
 
-def cmd_dispatch(argv, *, config_root=None, db_path=None) -> int:
-    """Positional dispatch: gddp <graph|node> [executor] [--yes]."""
-    yes = False
-    positional = []
-    for arg in argv:
-        if arg == "--yes":
-            yes = True
-            continue
-        if arg.startswith("-"):
-            console.print("[bold red]usage:[/] gddp <graph|node> [executor] [--yes]")
-            return 2
-        positional.append(arg)
-    if len(positional) not in (1, 2):
-        console.print("[bold red]usage:[/] gddp <graph|node> [executor] [--yes]")
-        return 2
-    target = positional[0]
-    executor = positional[1] if len(positional) == 2 else None
-    config_root = Path(config_root) if config_root else ROOT
-    try:
-        con = _connect_events_db(
-            Path(db_path) if db_path else resolve_runtime_root() / "db" / "queue.db"
-        )
-    except DispatchError as exc:
-        console.print(f"[bold red]ERROR:[/] {exc}")
-        return 2
-    try:
-        return _dispatch_flow(con, config_root, target, executor, yes=yes)
-    finally:
-        con.close()
 
 
 def _print_frontier_text(text: str) -> None:
@@ -975,17 +648,17 @@ def _dispatch_for_project(project: str, *, back_label: str = "graphs"):
     """Dispatchability table + target pick for one graph."""
     try:
         con = _connect_events_db(resolve_runtime_root() / "db" / "queue.db")
-    except DispatchError as exc:
+    except cli_dispatch.DispatchError as exc:
         console.print(f"[bold red]ERROR:[/] {exc}")
         _pause()
         return _MENU_BACK
     try:
         try:
-            plan = build_dispatch_plan(
+            plan = cli_dispatch.build_dispatch_plan(
                 ROOT, project, None, project_hint=project
             )
             movable, excluded = _classify_dispatch_items(con, ROOT, plan)
-        except DispatchError as exc:
+        except cli_dispatch.DispatchError as exc:
             console.print(f"[bold red]ERROR:[/] {exc}")
             _pause()
             return _MENU_BACK
@@ -1842,7 +1515,7 @@ def _config_setting_value(key: str, current: str) -> str | object:
             back_label="config",
         )
     elif key == "GDDP_EVAL_MODEL_CHEAP":
-        preset = os.environ.get("GDDP_EVAL_MODEL_CHEAP") or _EVAL_PRESETS["cheap"]
+        preset = os.environ.get("GDDP_EVAL_MODEL_CHEAP") or cli_eval._EVAL_PRESETS["cheap"]
         choices = [("cheap", f"preset cheap → {preset}")]
         if current and current not in {preset, "cheap"}:
             choices.append((current, f"keep {current!r}"))
@@ -1891,7 +1564,7 @@ def _config_setting_value(key: str, current: str) -> str | object:
         return picked
     if key in {"GDDP_EVAL_MODEL_CHEAP", "GDDP_EVAL_MODEL_EXPENSIVE"}:
         if picked == "cheap":
-            return os.environ.get("GDDP_EVAL_MODEL_CHEAP") or _EVAL_PRESETS["cheap"]
+            return os.environ.get("GDDP_EVAL_MODEL_CHEAP") or cli_eval._EVAL_PRESETS["cheap"]
         if picked == "expensive":
             return (os.environ.get("GDDP_EVAL_MODEL_EXPENSIVE") or "").strip()
     return str(picked)
@@ -2658,27 +2331,6 @@ def _latest_receipt(project: str, node_id: str) -> dict | None:
     return best
 
 
-def _resolve_project_repo(project: str, repo_path: str | None = None) -> Path | None:
-    """Same candidate chain as verify node: flag, env root, sibling checkout."""
-    import yaml
-
-    repo_name = ""
-    project_yaml = ROOT / "graphs" / project / "project.yaml"
-    if project_yaml.is_file():
-        with open(project_yaml) as f:
-            repo_name = str((yaml.safe_load(f) or {}).get("repo", "")).split("/")[-1]
-    candidates: list[Path] = []
-    if repo_path:
-        candidates.append(Path(repo_path).expanduser())
-    env_root = os.environ.get("GDDP_REPO_ROOT") or os.environ.get("GDDP_REPOS_ROOT")
-    if env_root and repo_name:
-        candidates.append(Path(env_root).expanduser() / repo_name)
-    if repo_name:
-        candidates.append(ROOT.parent / repo_name)
-    for candidate in candidates:
-        if (candidate / ".git").exists():
-            return candidate
-    return None
 
 
 def _default_branch(repo: Path) -> str:
@@ -3424,7 +3076,7 @@ def cmd_node_show(args):
 
 
 def cmd_node_status(args):
-    show_status(getattr(args, "project", None))
+    cli_status.show_status(getattr(args, "project", None))
 
 
 def cmd_node_frontier(args):
@@ -4057,423 +3709,36 @@ def interactive_graph_hub(project: str):
             return _MENU_BACK
 
 
-def _launchd_status(label: str) -> dict[str, object]:
-    """Return registration, enablement, and live-health as separate facts."""
-    try:
-        service = subprocess.run(
-            ["launchctl", "print", f"gui/{os.getuid()}/{label}"],
-            capture_output=True,
-            text=True,
-        )
-    except OSError:
-        service = None
-    registered = service is not None and service.returncode == 0
-    if not registered:
-        return {
-            "registered": False,
-            "enabled": False,
-            "healthy": False,
-            "state": "missing",
-            "runs": 0,
-            "last_exit": None,
-        }
-
-    output = service.stdout or ""
-    state_match = re.search(r"^\s*state = ([^\n]+)$", output, re.MULTILINE)
-    runs_match = re.search(r"^\s*runs = (\d+)$", output, re.MULTILINE)
-    exit_match = re.search(r"^\s*last exit code = (-?\d+)$", output, re.MULTILINE)
-    try:
-        disabled = subprocess.run(
-            ["launchctl", "print-disabled", f"gui/{os.getuid()}"],
-            capture_output=True,
-            text=True,
-        )
-        marker = re.search(
-            rf'"{re.escape(label)}"\s*=>\s*(enabled|disabled)',
-            disabled.stdout or "",
-        )
-    except OSError:
-        marker = None
-
-    enabled = marker is None or marker.group(1) == "enabled"
-    state = state_match.group(1).strip() if state_match else "unknown"
-    runs = int(runs_match.group(1)) if runs_match else 0
-    last_exit = int(exit_match.group(1)) if exit_match else None
-    if label == "com.gddp.heartbeat":
-        healthy = enabled and runs > 0 and last_exit == 0
-    else:
-        healthy = enabled and state == "running"
-    return {
-        "registered": True,
-        "enabled": enabled,
-        "healthy": healthy,
-        "state": state,
-        "runs": runs,
-        "last_exit": last_exit,
-    }
 
 
-_SYSTEMD_TIMER = "gddp-heartbeat.timer"
-_SYSTEMD_SERVICE = "gddp-heartbeat.service"
 
 
-def _sh(cmd: list[str]) -> str:
-    try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=10, check=False)
-    except (OSError, subprocess.TimeoutExpired):
-        return ""
-    return proc.stdout
 
 
-def _systemd_status() -> dict[str, str]:
-    """Facts about the heartbeat timer/service on a systemd host. Read-only."""
-    facts: dict[str, str] = {}
-    for unit in (_SYSTEMD_TIMER, _SYSTEMD_SERVICE):
-        out = _sh(["systemctl", "--user", "show", unit, "-p", "ActiveState", "-p", "UnitFileState",
-                   "-p", "FragmentPath", "-p", "Result", "-p", "ExecMainExitTimestamp", "-p", "NextElapseUSecRealtime"])
-        for line in out.splitlines():
-            if "=" in line:
-                key, value = line.split("=", 1)
-                facts[f"{unit}.{key}"] = value.strip()
-    timers = _sh(["systemctl", "--user", "list-timers", "--all", _SYSTEMD_TIMER, "--no-legend"]).strip()
-    facts["timer_line"] = timers.splitlines()[0] if timers else ""
-    facts["journal"] = _sh(["journalctl", "--user", "-u", _SYSTEMD_SERVICE, "-n", "6", "--no-pager", "-o", "short-iso"]).rstrip()
-    return facts
 
 
-def _try_resolve_runtime_root() -> tuple[Path | None, str | None]:
-    """Resolve runtime root without blowing out of the heartbeat screen."""
-    try:
-        return resolve_runtime_root(), None
-    except RuntimeError as exc:
-        return None, str(exc)
 
 
-def _heartbeat_env_path(runtime_root: Path | None) -> Path:
-    if runtime_root is None:
-        return Path("(unset — set GDDP_RUNTIME_ROOT)") / "deploy" / "mini-heartbeat" / "env" / "gddp.env"
-    return runtime_root / "deploy" / "mini-heartbeat" / "env" / "gddp.env"
 
 
-def _heartbeat_kit_path(runtime_root: Path | None) -> Path:
-    if runtime_root is None:
-        return Path("(unset — set GDDP_RUNTIME_ROOT)") / "deploy" / "mini-heartbeat"
-    return runtime_root / "deploy" / "mini-heartbeat"
 
 
-def _render_heartbeat_notice(notice: str | None) -> None:
-    """Paint a one-shot operator notice at the top of the status panel."""
-    if not notice:
-        return
-    lowered = notice.lower()
-    if any(token in lowered for token in ("cannot", "missing", "not found", "failed")):
-        style = "yellow"
-    elif "armed" in lowered or "disarmed" in lowered:
-        style = "bold green"
-    elif "already" in lowered or "nothing to repair" in lowered or "operational" in lowered:
-        style = "dim"
-    else:
-        style = "yellow"
-    console.print(Text(f"  {notice}", style=style))
-    console.print()
 
 
-def _systemd_heartbeat_actions() -> dict[str, tuple[str, str]]:
-    return {
-        "a": ("arm", f"start {_SYSTEMD_TIMER}"),
-        "d": ("disarm", f"stop {_SYSTEMD_TIMER}"),
-        "r": ("refresh", "reload status"),
-        "b": ("back", ""),
-    }
 
 
-def _render_systemd_heartbeat_status(
-    f: dict[str, str],
-    env_path: Path,
-    runtime_root: Path | None,
-    runtime_error: str | None,
-) -> tuple[bool, bool]:
-    """Render systemd heartbeat facts. Returns (registered, active)."""
-    registered = bool(f.get(f"{_SYSTEMD_TIMER}.FragmentPath"))
-    active = f.get(f"{_SYSTEMD_TIMER}.ActiveState") == "active"
-    if runtime_root is not None:
-        systemd_dir = runtime_root / "deploy" / "mini-heartbeat" / "systemd"
-    else:
-        systemd_dir = Path("deploy/mini-heartbeat/systemd")
-
-    if runtime_error:
-        console.print(Text(f"  runtime    {runtime_error}", style="yellow"))
-
-    if not registered:
-        console.print(Text(f"  timer      absent  ({_SYSTEMD_TIMER} not installed)", style="yellow"))
-        console.print(Text(f"  service    absent  ({_SYSTEMD_SERVICE} not installed)", style="yellow"))
-        console.print(Text(f"  install    see {systemd_dir}/", style="dim"))
-    else:
-        state = Text("ARMED", style="bold green") if active else Text("off", style="dim")
-        console.print(
-            Text("  timer      "),
-            state,
-            Text(f"  enabled={f.get(f'{_SYSTEMD_TIMER}.UnitFileState', '?')}", style="dim"),
-        )
-        schedule = f.get("timer_line") or ""
-        for unit in (_SYSTEMD_TIMER, _SYSTEMD_SERVICE):
-            schedule = schedule.replace(unit, "")
-        schedule = " ".join(schedule.split()) or "(never run)"
-        console.print(Text(f"  next/last  {schedule}", style="dim"))
-        result = f.get(f"{_SYSTEMD_SERVICE}.Result", "?")
-        journal = f.get("journal") or ""
-        if "Failed with result" in journal:
-            result = "failed"
-        console.print(
-            Text("  last tick  "),
-            Text(result, style="bold green" if result == "success" else "bold red"),
-            Text(f"  at {f.get(f'{_SYSTEMD_SERVICE}.ExecMainExitTimestamp') or '?'}", style="dim"),
-        )
-        console.print(Text(f"  timer unit {f.get(f'{_SYSTEMD_TIMER}.FragmentPath')}", style="dim"))
-        console.print(Text(f"  service    {f.get(f'{_SYSTEMD_SERVICE}.FragmentPath')}", style="dim"))
-
-    env_present = runtime_root is not None and env_path.is_file()
-    console.print(
-        Text(
-            f"  env file   {env_path}  {'(present)' if env_present else '(MISSING)'}",
-            style="dim" if env_present else "bold red",
-        )
-    )
-    console.print()
-    console.print(Text("  last journal lines:", style="bold"))
-    for line in (f.get("journal") or "  (empty)").splitlines():
-        console.print(
-            Text(f"    {line}", style="red" if "Error" in line or "Failed" in line else "dim"),
-            overflow="ellipsis",
-            no_wrap=True,
-        )
-    console.print()
-    return registered, active
 
 
-def _interactive_heartbeat_systemd():
-    """Linux: show timer + service facts and arm/disarm through systemctl."""
-    runtime_root, runtime_error = _try_resolve_runtime_root()
-    env_path = _heartbeat_env_path(runtime_root)
-    actions = _systemd_heartbeat_actions()
-    notice: str | None = None
-
-    while True:
-        _clear_screen()
-        f = _systemd_status()
-        console.print(
-            Text("heartbeat", style="bold").append(
-                f"  ·  {socket.gethostname()} (systemd)", style="dim"
-            )
-        )
-        console.print()
-        _render_heartbeat_notice(notice)
-        notice = None
-        registered, active = _render_systemd_heartbeat_status(
-            f, env_path, runtime_root, runtime_error
-        )
-
-        try:
-            choice = _menu_choice(actions, default="b")
-        except (EOFError, KeyboardInterrupt):
-            return _MENU_BACK
-        if choice == "b":
-            return _MENU_BACK
-        if choice == "r":
-            continue
-
-        if choice == "a":
-            if not registered:
-                notice = (
-                    f"cannot arm: {_SYSTEMD_TIMER} is not installed "
-                    f"(see deploy/mini-heartbeat/systemd/)"
-                )
-                continue
-            if active:
-                notice = f"already armed: {_SYSTEMD_TIMER} is active"
-                continue
-            cmd = ["systemctl", "--user", "start", _SYSTEMD_TIMER]
-            proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
-            if proc.returncode == 0:
-                notice = f"armed: {_SYSTEMD_TIMER}"
-            else:
-                detail = (proc.stderr or proc.stdout or "").strip()
-                console.print(
-                    Text(f"  arm failed (exit {proc.returncode}): {detail}", style="bold red")
-                )
-                _pause()
-            continue
-
-        if choice == "d":
-            if not registered:
-                notice = f"cannot disarm: {_SYSTEMD_TIMER} is not installed"
-                continue
-            if not active:
-                notice = f"already disarmed: {_SYSTEMD_TIMER} is inactive"
-                continue
-            cmd = ["systemctl", "--user", "stop", _SYSTEMD_TIMER]
-            proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
-            if proc.returncode == 0:
-                notice = f"disarmed: {_SYSTEMD_TIMER}"
-            else:
-                detail = (proc.stderr or proc.stdout or "").strip()
-                console.print(
-                    Text(f"  disarm failed (exit {proc.returncode}): {detail}", style="bold red")
-                )
-                _pause()
-            continue
 
 
-def _launchd_heartbeat_actions() -> dict[str, tuple[str, str]]:
-    return {
-        "a": ("arm", "load intake + heartbeat (arm.sh)"),
-        "d": ("disarm", "unload control plane (disarm.sh)"),
-        "r": ("repair", "reload degraded labels (arm.sh)"),
-        "f": ("refresh", "reload status"),
-        "b": ("back", ""),
-    }
 
 
-def _render_launchd_heartbeat_status(
-    kit: Path,
-    statuses: dict[str, dict[str, object]],
-    env_path: Path,
-    runtime_root: Path | None,
-    runtime_error: str | None,
-) -> tuple[bool, bool]:
-    """Render launchd control-plane status. Returns (operational, any_enabled)."""
-    if runtime_error:
-        console.print(Text(f"  runtime    {runtime_error}", style="yellow"))
-    kit_present = runtime_root is not None and kit.is_dir()
-    console.print(
-        Text(
-            f"  kit      {kit}  {'(present)' if kit_present else '(MISSING)'}",
-            style="dim" if kit_present else "bold red",
-        )
-    )
-    env_present = runtime_root is not None and env_path.is_file()
-    console.print(
-        Text(
-            f"  env file {env_path}  {'(present)' if env_present else '(MISSING)'}",
-            style="dim" if env_present else "bold red",
-        )
-    )
-    console.print(
-        Text("  logs     ~/Library/Logs/gddp-heartbeat.log · gddp-heartbeat.err.log", style="dim")
-    )
-    for name in ("gddp-heartbeat.err.log", "gddp-heartbeat.log"):
-        log_path = Path.home() / "Library" / "Logs" / name
-        if log_path.is_file():
-            try:
-                tail = log_path.read_text(encoding="utf-8", errors="replace").splitlines()[-4:]
-            except OSError:
-                tail = []
-            if tail:
-                console.print(Text("  log tail:", style="bold"))
-                for line in tail:
-                    console.print(Text(f"    {line}", style="dim"), overflow="ellipsis", no_wrap=True)
-            break
-    console.print()
-    for label, status in statuses.items():
-        if status["healthy"]:
-            state = Text("HEALTHY", style="bold green")
-        elif status["enabled"]:
-            state = Text("DEGRADED", style="bold red")
-        else:
-            state = Text("off", style="dim")
-        detail = (
-            f"registered={status['registered']} enabled={status['enabled']} "
-            f"state={status['state']} runs={status['runs']} "
-            f"last_exit={status['last_exit']}"
-        )
-        console.print(f"  {label}  ", state, f"  {detail}")
-
-    operational = all(status["healthy"] for status in statuses.values())
-    any_enabled = any(status["enabled"] for status in statuses.values())
-    console.print()
-    return operational, any_enabled
 
 
-def _run_launchd_heartbeat_script(kit: Path, script: str) -> str | None:
-    """Run a launchd kit script. Returns a sticky notice when the script is missing."""
-    script_path = kit / "bin" / script
-    if not kit.is_dir():
-        return f"heartbeat kit missing: {kit} (set GDDP_RUNTIME_ROOT)"
-    if not script_path.is_file():
-        return f"cannot run {script}: missing {script_path} (set GDDP_RUNTIME_ROOT)"
-    env = dict(os.environ)
-    if script == "arm.sh":
-        env["MINI_HEARTBEAT_ARM"] = "1"
-    subprocess.run(["bash", str(script_path)], env=env, check=False)
-    return None
 
 
-def _interactive_heartbeat_launchd():
-    """macOS: show launchd health and arm/disarm/repair through the mini-heartbeat kit."""
-    runtime_root, runtime_error = _try_resolve_runtime_root()
-    kit = _heartbeat_kit_path(runtime_root)
-    env_path = _heartbeat_env_path(runtime_root)
-    labels = ("com.gddp.intake", "com.gddp.heartbeat")
-    actions = _launchd_heartbeat_actions()
-    notice: str | None = None
-
-    while True:
-        _clear_screen()
-        console.print(
-            Text("heartbeat", style="bold").append(
-                f"  ·  {socket.gethostname()} (launchd)", style="dim"
-            )
-        )
-        console.print()
-        _render_heartbeat_notice(notice)
-        notice = None
-        statuses = {label: _launchd_status(label) for label in labels}
-        operational, any_enabled = _render_launchd_heartbeat_status(
-            kit, statuses, env_path, runtime_root, runtime_error
-        )
-
-        try:
-            choice = _menu_choice(actions, default="b")
-        except (EOFError, KeyboardInterrupt):
-            return _MENU_BACK
-        if choice == "b":
-            return _MENU_BACK
-        if choice == "f":
-            continue
-
-        if choice == "a":
-            if operational:
-                notice = "already operational — disarm if you want to stop"
-                continue
-            script_notice = _run_launchd_heartbeat_script(kit, "arm.sh")
-            if script_notice:
-                notice = script_notice
-            continue
-
-        if choice == "d":
-            if not any_enabled and not operational:
-                notice = "cannot disarm: control plane is not enabled"
-                continue
-            script_notice = _run_launchd_heartbeat_script(kit, "disarm.sh")
-            if script_notice:
-                notice = script_notice
-            continue
-
-        if choice == "r":
-            if operational:
-                notice = "nothing to repair: control plane is healthy"
-                continue
-            script_notice = _run_launchd_heartbeat_script(kit, "arm.sh")
-            if script_notice:
-                notice = script_notice
-            continue
 
 
-def interactive_heartbeat():
-    """Show actual control-plane health and offer repair/arm or disarm."""
-    if platform.system() == "Linux":
-        return _interactive_heartbeat_systemd()
-    return _interactive_heartbeat_launchd()
 
 
 def _front_page_actions() -> dict[str, tuple[str, str]]:
@@ -4653,11 +3918,11 @@ def _load_receipts_for_node(project: str, node_id: str) -> list[dict]:
 def _render_eval_config() -> None:
     """Read-only resolved evaluator settings (not the settings writer)."""
     try:
-        knobs = _resolve_eval_knobs()
-    except EvalKnobError as exc:
+        knobs = cli_eval._resolve_eval_knobs()
+    except cli_eval.EvalKnobError as exc:
         console.print(Text(str(exc), style="red"))
         return
-    cheap = (os.environ.get("GDDP_EVAL_MODEL_CHEAP") or _EVAL_PRESETS["cheap"]).strip()
+    cheap = (os.environ.get("GDDP_EVAL_MODEL_CHEAP") or cli_eval._EVAL_PRESETS["cheap"]).strip()
     expensive = (os.environ.get("GDDP_EVAL_MODEL_EXPENSIVE") or "").strip() or "UNSET"
     table = Table(title="evaluator config", box=box.SIMPLE, show_header=False)
     table.add_column("key", style="bold cyan")
@@ -4927,14 +4192,14 @@ def _eval_knob_picker(current: dict, *, project: str | None = None) -> dict:
         return current
 
     try:
-        return _resolve_eval_knobs(
+        return cli_eval._resolve_eval_knobs(
             model=str(model).strip() or None,
             thinking=str(thinking).strip() or None,
             integrity=str(integrity).strip() or None,
             lanes=str(lanes).strip() or None,
             base=str(base).strip() or None,
         )
-    except EvalKnobError as exc:
+    except cli_eval.EvalKnobError as exc:
         console.print(Text(str(exc), style="red"))
         _pause()
         return current
@@ -4943,8 +4208,8 @@ def _eval_knob_picker(current: dict, *, project: str | None = None) -> dict:
 def interactive_eval_hub(project: str, node_id: str):
     """One evaluator surface: run / knobs / config / instructions / history."""
     try:
-        knobs = _resolve_eval_knobs()
-    except EvalKnobError:
+        knobs = cli_eval._resolve_eval_knobs()
+    except cli_eval.EvalKnobError:
         knobs = {"model": "-", "preset": None, "thinking": "medium",
                  "integrity": "on", "lanes": "live", "base": None}
     while True:
@@ -5136,812 +4401,60 @@ def interactive_controls():
 # Discovery uses durable session records and the canonical spool root, plus a
 # transitional scan of leftover jobs/cursor-cli-spool history.
 
-def _recorded_attempt_dirs(runtime_root: Path) -> list[Path]:
-    """Reserved attempt directories persisted on executor_sessions."""
-    db_path = runtime_root / "db" / "queue.db"
-    if not db_path.is_file():
-        return []
-    try:
-        con = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
-    except sqlite3.Error:
-        return []
-    try:
-        columns = {
-            row[1] for row in con.execute("PRAGMA table_info(executor_sessions)")
-        }
-        if "attempt_dir" not in columns:
-            return []
-        rows = con.execute(
-            "SELECT attempt_dir FROM executor_sessions "
-            "WHERE attempt_dir IS NOT NULL AND attempt_dir <> ''"
-        ).fetchall()
-    except sqlite3.Error:
-        return []
-    finally:
-        con.close()
-    found: list[Path] = []
-    for (raw,) in rows:
-        found.append(Path(raw).expanduser())
-    return found
-
-
-def _spool_roots(runtime_root: Path) -> list[Path]:
-    """Canonical attempt root, leftover historical root, recorded parents."""
-    roots: list[Path] = []
-    seen: set[Path] = set()
-
-    def add(raw: str | Path | None) -> None:
-        if not raw:
-            return
-        path = Path(raw).expanduser().resolve()
-        if path in seen:
-            return
-        seen.add(path)
-        roots.append(path)
-
-    add(os.environ.get("GDDP_ATTEMPT_SPOOL_DIR"))
-    add(os.environ.get("GDDP_LOCAL_SUBPROCESS_SPOOL_DIR"))
-    add(runtime_root / "jobs" / "local-subprocess-spool")
-    add(runtime_root / "jobs" / "cursor-cli-spool")
-    for recorded in _recorded_attempt_dirs(runtime_root):
-        add(recorded.parent)
-    return roots
-
-
-def _discover_attempts(runtime_root: Path) -> list[dict]:
-    extras = [path for path in _recorded_attempt_dirs(runtime_root) if path.is_dir()]
-    return _scan_attempts_roots(_spool_roots(runtime_root), extras)
-
-
-def _attempt_info(attempt_dir: Path) -> dict | None:
-    packet_path = attempt_dir / "packet.json"
-    if not packet_path.is_file():
-        return None
-    try:
-        packet = json.loads(packet_path.read_text())
-    except (OSError, json.JSONDecodeError):
-        return None
-    pid = None
-    try:
-        pid = int((attempt_dir / "pid").read_text().strip())
-    except (OSError, ValueError):
-        pass
-    alive = False
-    if pid:
-        try:
-            os.kill(pid, 0)
-            alive = True
-        except OSError:
-            pass
-    # Prefer supervisor.pid when worker pid file is stale/missing.
-    if not alive:
-        try:
-            spid = int((attempt_dir / "supervisor.pid").read_text().strip())
-            os.kill(spid, 0)
-            alive = True
-            pid = pid or spid
-        except (OSError, ValueError):
-            pass
-    done = (attempt_dir / "result.json").is_file() or (
-        attempt_dir / "exit.json"
-    ).is_file()
-    worktree = None
-    try:
-        worktree = (attempt_dir / "worktree_path").read_text().strip() or None
-    except OSError:
-        pass
-    try:
-        last_write = (attempt_dir / "events.jsonl").stat().st_mtime
-    except OSError:
-        last_write = attempt_dir.stat().st_mtime
-    # Done wins even if pid linger; otherwise alive process = running.
-    if done and not alive:
-        state = "done"
-    elif alive:
-        state = "running"
-    elif done:
-        state = "done"
-    else:
-        state = "dead"
-    return {
-        "dir": attempt_dir,
-        "name": attempt_dir.name,
-        "job_id": str(packet.get("job_id") or ""),
-        "execution_attempt_id": str(packet.get("execution_attempt_id") or ""),
-        "node_id": str(packet.get("node_id") or ""),
-        "project_id": str(packet.get("project_id") or ""),
-        "pid": pid,
-        "state": state,
-        "worktree": worktree,
-        "last_write": last_write,
-        "created": attempt_dir.stat().st_ctime,
-        "events_path": str(attempt_dir / "events.jsonl"),
-    }
-
-
-def _scan_attempts(spool: Path) -> list[dict]:
-    if not spool.is_dir():
-        return []
-    found = []
-    for child in sorted(spool.iterdir()):
-        if child.is_dir():
-            info = _attempt_info(child)
-            if info:
-                found.append(info)
-    order = {"running": 0, "done": 1, "dead": 2}
-    found.sort(key=lambda a: (order[a["state"]], -a["created"]))
-    return found
-
-
-def _scan_attempts_roots(
-    spools: list[Path], extra_dirs: list[Path] | None = None
-) -> list[dict]:
-    found: list[dict] = []
-    seen_dirs: set[str] = set()
-
-    def add(info: dict | None) -> None:
-        if info is None:
-            return
-        key = str(Path(info["dir"]).resolve())
-        if key in seen_dirs:
-            return
-        seen_dirs.add(key)
-        found.append(info)
-
-    for spool in spools:
-        for info in _scan_attempts(spool):
-            add(info)
-    for extra in extra_dirs or []:
-        add(_attempt_info(extra))
-    order = {"running": 0, "done": 1, "dead": 2}
-    found.sort(key=lambda a: (order[a["state"]], -a["created"]))
-    return found
-
-
-def _git(worktree: str, *git_args: str) -> str:
-    try:
-        return subprocess.run(
-            ["git", "-C", worktree, *git_args],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        ).stdout
-    except (OSError, subprocess.SubprocessError):
-        return ""
-
-
-def _diff_summary(worktree: str | None) -> tuple[str, int]:
-    """(compact 'Nf +X/-Y', untracked file count) for the attempt worktree."""
-    if not worktree or not Path(worktree).is_dir():
-        return "-", 0
-    shortstat = _git(worktree, "diff", "--shortstat", "HEAD")
-    files = re.search(r"(\d+) file", shortstat)
-    ins = re.search(r"(\d+) insertion", shortstat)
-    dele = re.search(r"(\d+) deletion", shortstat)
-    compact = (
-        f"{files.group(1) if files else 0}f "
-        f"+{ins.group(1) if ins else 0}/-{dele.group(1) if dele else 0}"
-    )
-    untracked = len(
-        _git(worktree, "ls-files", "--others", "--exclude-standard").split()
-    )
-    return compact, untracked
-
-
-def _age(ts: float, now: float) -> str:
-    seconds = max(0, int(now - ts))
-    if seconds < 60:
-        return f"{seconds}s"
-    if seconds < 3600:
-        return f"{seconds // 60}m"
-    return f"{seconds // 3600}h{(seconds % 3600) // 60:02d}m"
-
-
-def _event_brief(evt: dict) -> str:
-    et = evt.get("type") or (evt.get("event") or {}).get("type") or "?"
-    detail = ""
-    for key in ("name", "command", "path", "tool"):
-        value = evt.get(key) or (evt.get("event") or {}).get(key)
-        if isinstance(value, str) and value:
-            detail = value
-            break
-    return f"{et} {detail}".strip()[:110]
-
-
-def _recent_events(attempt_dir: Path, count: int = 8) -> list[str]:
-    events = attempt_dir / "events.jsonl"
-    try:
-        lines = events.read_text(errors="replace").splitlines()
-    except OSError:
-        return []
-    briefs = []
-    for line in lines[-200:]:
-        try:
-            evt = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        briefs.append(_event_brief(evt))
-    return briefs[-count:]
-
-
-def _agent_obs_command() -> list[str]:
-    """Use the installed CLI, or the companion checkout's environment."""
-    installed = shutil.which("agent-obs")
-    if installed:
-        return [installed]
-    root = Path(os.environ.get("GDDP_AGENT_OBS_ROOT") or ROOT.parent / "agent-observability").expanduser().resolve()
-    cli = root / ".venv" / "bin" / "agent-obs"
-    if cli.is_file() and os.access(cli, os.X_OK):
-        return [str(cli)]
-    uv = shutil.which("uv")
-    if uv and (root / "pyproject.toml").is_file():
-        return [uv, "run", "--project", str(root), "agent-obs"]
-    raise RuntimeError(
-        "agent-obs CLI unavailable; install agent-obs on PATH or set "
-        "GDDP_AGENT_OBS_ROOT to its checkout (with uv or a configured .venv)"
-    )
-
-
-def _attempt_worktree(info: dict) -> Path:
-    """Use the spool path, then the executor's durable per-attempt map."""
-    if info.get("worktree"):
-        return Path(info["worktree"]).expanduser().resolve()
-    map_path = Path(os.environ.get("GDDP_WORKTREE_MAP_PATH") or
-                    Path.home() / ".local/share/droid-observability/gddp-worktree-map.ndjson").expanduser()
-    worktrees: set[Path] = set()
-    try:
-        with map_path.open(encoding="utf-8", errors="replace") as handle:
-            for line in handle:
-                try:
-                    row = json.loads(line)
-                except json.JSONDecodeError:
-                    continue  # An append may still be in progress.
-                if not isinstance(row, dict) or not info.get("job_id") or row.get("job_id") != info["job_id"]:
-                    continue
-                if info.get("execution_attempt_id") and row.get("execution_attempt_id") != info["execution_attempt_id"]:
-                    continue
-                raw = row.get("worktree_path") or row.get("worktree_name")
-                if isinstance(raw, str) and raw:
-                    worktrees.add(Path(raw).expanduser().resolve())
-    except FileNotFoundError:
-        pass
-    except OSError as exc:
-        raise RuntimeError(f"could not read worktree map {map_path}: {exc}") from exc
-    if len(worktrees) != 1:
-        raise RuntimeError(
-            f"{'ambiguous' if worktrees else 'missing'} worktree for "
-            f"{info.get('execution_attempt_id') or info.get('job_id') or info['name']}; "
-            f"checked {info['dir']}/worktree_path and {map_path}"
-        )
-    return worktrees.pop()
-
-
-def _agent_obs_session(info: dict, db_path: Path) -> str:
-    """Join worktree → Layer 1 sessions.id without mutating its index."""
-    worktree = _attempt_worktree(info)
-    try:
-        con = sqlite3.connect(db_path.as_uri() + "?mode=ro", uri=True, timeout=5)
-        try:
-            rows = con.execute("SELECT id, cwd FROM sessions WHERE cwd IS NOT NULL").fetchall()
-        finally:
-            con.close()
-    except sqlite3.Error as exc:
-        raise RuntimeError(
-            f"could not read agent-obs index {db_path}: {exc}; "
-            "set AGENT_OBS_DB to the Layer 1 index"
-        ) from exc
-    matches = [sid for sid, cwd in rows if cwd and Path(cwd).expanduser().resolve() == worktree]
-    # The executor records this unique basename for macOS /var ↔ /private/var
-    # aliases, including worktrees already pruned. Never fuzzy-match repo names.
-    if not matches and worktree.name.startswith("gddp-agent-wt-"):
-        matches = [sid for sid, cwd in rows if Path(cwd).name == worktree.name]
-    if not matches:
-        raise RuntimeError(
-            f"no agent-obs session indexed for {worktree} in {db_path}; "
-            "check AGENT_OBS_DB and Layer 1 ingestion for this attempt"
-        )
-    if len(matches) > 1:
-        raise RuntimeError(
-            f"multiple agent-obs sessions for {worktree}: {', '.join(sorted(matches))}; "
-            "select the intended session with agent-obs feed --watch <session_id>"
-        )
-    return matches[0]
-
-
-def _watch_agent_events(info: dict) -> int:
-    """Transfer live-stream ownership to Layer 1, preserving its exit/signal handling."""
-    try:
-        command = _agent_obs_command()
-        data_home = Path(os.environ.get("XDG_DATA_HOME") or Path.home() / ".local/share")
-        db_path = Path(os.environ.get("AGENT_OBS_DB") or data_home / "agent-obs/agent-obs.db").expanduser().resolve()
-        session_id = _agent_obs_session(info, db_path)
-        command += ["--db", str(db_path), "feed", "--watch", session_id]
-        print(shlex.join(command), file=sys.stderr, flush=True)
-        sys.stdout.flush()
-        os.execvp(command[0], command)
-    except (OSError, RuntimeError) as exc:
-        print(f"ERROR: agent-obs live feed unavailable: {exc}", file=sys.stderr)
-        return 1
-    return 0
-
-
-def _find_attempt(attempts: list[dict], target: str) -> dict | None:
-    for info in attempts:
-        if target in (info["job_id"], info["node_id"], info["name"]):
-            return info
-    matches = [a for a in attempts if a["name"].startswith(target)]
-    return matches[0] if len(matches) == 1 else None
-
-
-def _filter_attempts(
-    attempts: list[dict],
-    *,
-    running_only: bool = True,
-    project: str | None = None,
-) -> list[dict]:
-    """Default view is live work only; --all and project filters apply here."""
-    out = attempts
-    if running_only:
-        out = [a for a in out if a["state"] == "running"]
-    if project:
-        # Prefer packet project_id; fall back to DB job→project map.
-        job_projects = _job_project_map()
-        filtered = []
-        for a in out:
-            pid = a.get("project_id") or job_projects.get(a.get("job_id") or "", "")
-            if pid == project or (
-                not pid and a.get("node_id") and _node_in_project(project, a["node_id"])
-            ):
-                filtered.append(a)
-        out = filtered
-    return out
-
-
-def _job_project_map() -> dict[str, str]:
-    try:
-        jobs_status = load_runtime_jobs_module()
-        con = jobs_status.connect()
-    except Exception:
-        return {}
-    try:
-        rows = con.execute(
-            "SELECT job_id, project_id FROM jobs WHERE project_id IS NOT NULL"
-        ).fetchall()
-        return {
-            str(r["job_id"]): str(r["project_id"])
-            for r in rows
-            if r["job_id"] and r["project_id"]
-        }
-    except Exception:
-        return {}
-    finally:
-        try:
-            con.close()
-        except Exception:
-            pass
-
-
-def _node_in_project(project: str, node_id: str) -> bool:
-    try:
-        path = ROOT / "graphs" / project / "nodes" / f"{node_id}.yaml"
-        return path.is_file()
-    except OSError:
-        return False
-
-
-def _render_fleet(
-    attempts: list[dict],
-    now: float,
-    *,
-    running_only: bool,
-    project: str | None = None,
-    showing_history: bool = False,
-) -> None:
-    if showing_history and project:
-        scope = f"recent · {project}"
-    elif project:
-        scope = f"running · {project}"
-    elif running_only:
-        scope = "running"
-    else:
-        scope = "all"
-    print(
-        f"gddp watch · {scope} — {len(attempts)} attempt(s)  "
-        f"({time.strftime('%H:%M:%S')})"
-    )
-    if not attempts:
-        if project:
-            print(f"  (no attempts recorded for {project})")
-        else:
-            print("  (none live right now)")
-            print("  tip: gddp watch --all   ·   gddp jobs live")
-        return
-    print(
-        f"{'NODE':34} {'STATE':8} {'AGE':>7} {'DIFF':>22} {'QUIET':>6}  JOB"
-    )
-    for info in attempts:
-        shortstat, untracked = _diff_summary(info["worktree"])
-        diff = shortstat
-        if untracked:
-            diff = f"{diff} +{untracked}new"
-        quiet = _age(info["last_write"], now)
-        flag = (
-            " !"
-            if info["state"] == "running" and now - info["last_write"] > 180
-            else ""
-        )
-        node = (info["node_id"] or info["name"])[:34]
-        job = (info["job_id"] or "")[-14:]
-        state = info["state"]
-        # Color only when TTY — keep columns stable with plain tokens.
-        if sys.stdout.isatty():
-            color = {
-                "running": "\033[1;35m",
-                "done": "\033[1;32m",
-                "dead": "\033[1;31m",
-            }.get(state, "")
-            reset = "\033[0m" if color else ""
-            state_s = f"{color}{state:8}{reset}"
-        else:
-            state_s = f"{state:8}"
-        print(
-            f"{node:34} {state_s} {_age(info['created'], now):>7} "
-            f"{diff:>22} {quiet:>5}{flag}  {job}"
-        )
-    print()
-    print("  live feed: gddp watch <node-id|job-id>  (agent-obs)")
-    print("  snapshot:  gddp watch <node-id|job-id> --once")
-
-
-def _render_single(info: dict, now: float) -> None:
-    print(
-        f"gddp watch {info['node_id'] or info['name']} — {info['state']}  "
-        f"age {_age(info['created'], now)}  pid {info['pid']}  "
-        f"({time.strftime('%H:%M:%S')})"
-    )
-    print(f"  job:      {info['job_id'] or '-'}")
-    print(f"  worktree: {info['worktree'] or '-'}")
-    print(f"  spool:    {info['dir']}")
-    print(f"  events:   {info.get('events_path') or (info['dir'] / 'events.jsonl')}")
-    if (info["dir"] / "result.json").is_file():
-        print(
-            "  ** turn complete — verdict pending; "
-            "review: gddp review / gddp node browse"
-        )
-    print("\n-- diff vs HEAD " + "-" * 50)
-    if info["worktree"] and Path(info["worktree"]).is_dir():
-        stat = _git(info["worktree"], "diff", "--stat", "HEAD").strip()
-        lines = stat.splitlines()
-        print("\n".join(lines[-25:]) if lines else "  (clean)")
-        untracked = _git(
-            info["worktree"], "ls-files", "--others", "--exclude-standard"
-        ).split()
-        for path in untracked[:10]:
-            print(f"  [new] {path}")
-    else:
-        print("  (no worktree recorded yet)")
-    print("\n-- recent events " + "-" * 49)
-    events = _recent_events(info["dir"], count=12)
-    if events:
-        print("\n".join(f"  {e}" for e in events))
-    else:
-        print("  (none)")
-    print("\n  live stream:  gddp watch " + shlex.quote(info["name"]) + "  (agent-obs)")
-
-
-def cmd_watch(args) -> int:
-    """Live execution view. Default fleet = running only (`--all` for history)."""
-    try:
-        runtime_root = resolve_runtime_root()
-    except RuntimeError as exc:
-        print(f"ERROR: live/watch unavailable: {exc}", file=sys.stderr)
-        print("  Set GDDP_RUNTIME_ROOT to a gddp-runtime checkout.", file=sys.stderr)
-        return 2
-    roots = _spool_roots(runtime_root)
-    if not any(spool.is_dir() for spool in roots) and not _recorded_attempt_dirs(
-        runtime_root
-    ):
-        joined = ", ".join(str(s) for s in roots)
-        print(f"no attempt spools found; checked: {joined}", file=sys.stderr)
-        print("  set GDDP_ATTEMPT_SPOOL_DIR in gddp.env, then rerun.", file=sys.stderr)
-        return 1
-    tty = sys.stdout.isatty()
-    running_only = not bool(getattr(args, "all", False))
-    project = getattr(args, "project", None) or None
-    fallback_all = bool(getattr(args, "fallback_all_when_empty", False))
-    try:
-        while True:
-            all_attempts = _discover_attempts(runtime_root)
-            showing_history = False
-            if args.target:
-                info = _find_attempt(all_attempts, args.target)
-                if info is None:
-                    # Retry against unfiltered spool names even if done.
-                    info = _find_attempt(_discover_attempts(runtime_root), args.target)
-                if info is None:
-                    print(f"no attempt matching {args.target!r}", file=sys.stderr)
-                    return 1
-                if not args.once:
-                    return _watch_agent_events(info)
-            else:
-                attempts = _filter_attempts(
-                    all_attempts, running_only=running_only, project=project
-                )
-                if (
-                    running_only
-                    and project
-                    and fallback_all
-                    and not attempts
-                ):
-                    attempts = _filter_attempts(
-                        all_attempts, running_only=False, project=project
-                    )
-                    showing_history = bool(attempts)
-            if tty and not args.once:
-                sys.stdout.write("\033[2J\033[H")
-            now = time.time()
-            if args.target:
-                _render_single(info, now)
-            else:
-                _render_fleet(
-                    attempts,
-                    now,
-                    running_only=running_only,
-                    project=project,
-                    showing_history=showing_history,
-                )
-            if args.once or not tty:
-                return 0
-            time.sleep(args.interval)
-    except KeyboardInterrupt:
-        print()
-        return 0
-
-
-def interactive_watch(project: str | None = None) -> object:
-    """Front-page ``w``: the same live/watch surface as ``gddp watch``."""
-    _clear_screen()
-    console.print(Text("live", style="bold").append(
-        f"  ·  {project}" if project else "  ·  running executors",
-        style="dim",
-    ))
-    console.print(Text("ctrl-c returns to menu", style="dim"))
-    console.print()
-    ns = argparse.Namespace(
-        target=None,
-        interval=2.0,
-        once=False,
-        all=False,
-        project=project,
-        fallback_all_when_empty=bool(project),
-    )
-    try:
-        rc = cmd_watch(ns)
-    except KeyboardInterrupt:
-        print()
-        return _MENU_BACK
-    except RuntimeError as exc:
-        console.print(Text(f"ERROR: live/watch unavailable: {exc}", style="bold red"))
-        console.print(Text("Set GDDP_RUNTIME_ROOT to a gddp-runtime checkout.", style="dim"))
-        _pause()
-        return _MENU_BACK
-    if rc != 0:
-        _pause("live/watch could not start — press any key to return")
-    return _MENU_BACK
-
-
-def _runs_catalog_rows(
-    attempts: list[dict],
-    *,
-    now: float | None = None,
-) -> list[tuple[str, str, dict]]:
-    """(value=spool_dir, display_label, info) for fzf / --list."""
-    now = now if now is not None else time.time()
-    rows: list[tuple[str, str, dict]] = []
-    for info in attempts:
-        node = info.get("node_id") or info["name"][:40]
-        job = info.get("job_id") or "-"
-        state = info["state"]
-        age = _age(info["created"], now)
-        quiet = _age(info["last_write"], now)
-        shortstat, untracked = _diff_summary(info.get("worktree"))
-        diff = shortstat
-        if untracked:
-            diff = f"{diff}+{untracked}n"
-        # Fixed-ish columns for scanning (like agent-runs labels).
-        label = (
-            f"{state:<8}  {node:<36}  age {age:>6}  quiet {quiet:>5}  "
-            f"{diff:<18}  {job[-16:]}"
-        )
-        rows.append((str(info["dir"]), label, info))
-    return rows
-
-
-def _print_attempt_preview(attempt_dir: Path, *, event_count: int = 40) -> int:
-    """Render a compact card for fzf --preview (one attempt spool dir)."""
-    info = _attempt_info(attempt_dir)
-    if info is None:
-        print(f"(not an attempt dir: {attempt_dir})")
-        return 1
-    now = time.time()
-    print(f"state:  {info['state']}   age {_age(info['created'], now)}   quiet {_age(info['last_write'], now)}")
-    print(f"node:   {info.get('node_id') or '-'}")
-    print(f"job:    {info.get('job_id') or '-'}")
-    print(f"pid:    {info.get('pid') or '-'}")
-    print(f"tree:   {info.get('worktree') or '-'}")
-    print(f"spool:  {info['dir']}")
-    print(f"events: {info.get('events_path')}")
-    print()
-    print("-- recent events --")
-    briefs = _recent_events(info["dir"], count=event_count)
-    if briefs:
-        for line in briefs:
-            print(f"  {line}")
-    else:
-        print("  (none yet)")
-    return 0
-
-
-def _runs_preview_script() -> str:
-    """Shell preview for fzf: call back into this CLI (escaped path via {1})."""
-    # Prefer the same interpreter running this process.
-    py = sys.executable or "python3"
-    # Locate gddp.py next to this file.
-    gddp_py = str(Path(__file__).resolve())
-    # fzf shell-escapes {1}; do not wrap in extra quotes.
-    return f"{py} {gddp_py} runs --preview {{1}}"
-
-
-def cmd_runs(args) -> int:
-    """agent-runs-style fzf over executor attempts; Enter → live watch.
-
-    Shell aliases: ``gddp-runs``, espanso ``;gdr``. Default list is running
-    only (``--all`` for done/dead history).
-    """
-    # fzf --preview callback (must be first — no spool scan needed beyond dir).
-    preview_dir = getattr(args, "preview", None)
-    if preview_dir:
-        return _print_attempt_preview(Path(preview_dir))
-
-    runtime_root = resolve_runtime_root()
-    roots = _spool_roots(runtime_root)
-    if not any(spool.is_dir() for spool in roots) and not _recorded_attempt_dirs(
-        runtime_root
-    ):
-        joined = ", ".join(str(s) for s in roots)
-        print(f"no attempt spools found; checked: {joined}", file=sys.stderr)
-        return 1
-
-    running_only = not bool(getattr(args, "all", False))
-    project = getattr(args, "project", None) or None
-    attempts = _filter_attempts(
-        _discover_attempts(runtime_root),
-        running_only=running_only,
-        project=project,
-    )
-    rows = _runs_catalog_rows(attempts)
-    if getattr(args, "list", False):
-        if not rows:
-            print("no attempts")
-            return 0
-        for value, label, _info in rows:
-            print(f"{label}\t{value}")
-        return 0
-
-    if not rows:
-        scope = "running" if running_only else "all"
-        print(f"no {scope} attempts" + (f" for {project}" if project else ""))
-        print("  tip: gddp runs --all   ·   gddp watch --once")
-        return 0
-
-    fzf = _import_module("fzf_pick")
-    items = [(value, label) for value, label, _ in rows]
-    by_dir = {value: info for value, _label, info in rows}
-
-    if not fzf.available():
-        # Non-TTY / no fzf: print catalog + suggest watch.
-        print(f"gddp runs · {'running' if running_only else 'all'} ({len(rows)})")
-        for i, (_v, label, info) in enumerate(rows, 1):
-            print(f"  {i:>2}  {label}")
-        print()
-        print("  drill in: gddp watch <node-id|job-id>")
-        print("  install fzf for the picker (agent-runs style)")
-        return 0
-
-    height = str(getattr(args, "height", None) or "90%")
-    selected = fzf.pick(
-        items,
-        prompt="gddp-runs> ",
-        header=(
-            "Enter watch  ·  esc cancel  ·  "
-            f"{'running only' if running_only else 'all history'}"
-            + (f"  ·  project={project}" if project else "")
-        ),
-        preview_cmd=_runs_preview_script(),
-        preview_window="right:55%:wrap:border-left",
-        multi=False,
-        height=height,
-    )
-    if not selected:
-        return 0
-    attempt_dir = selected[0]
-    info = by_dir.get(attempt_dir)
-    if info is None:
-        print(f"unknown selection: {attempt_dir}", file=sys.stderr)
-        return 1
-
-    target = info.get("job_id") or info.get("node_id") or info["name"]
-    # Optional action via env or second mode later; default = live watch.
-    action = (getattr(args, "action", None) or "watch").strip().lower()
-    if action in {"events", "tail", "e"}:
-        return _watch_agent_events(info)
-    if action in {"show", "job", "j"}:
-        return run_runtime_jobs(["show", target])
-    if action in {"path", "print"}:
-        print(attempt_dir)
-        print(info.get("events_path") or "")
-        return 0
-
-    # Default: enter live single-target watch (same as agent-runs → open).
-    return cmd_watch(
-        argparse.Namespace(
-            target=info["name"],  # preserve the picked attempt, even across retries
-            interval=float(getattr(args, "interval", 2.0) or 2.0),
-            once=bool(getattr(args, "once", False)),
-            all=True,  # single target: allow done attempts too
-            project=None,
-        )
-    )
-
-
-def cmd_steer(args) -> int:
-    runtime_root = resolve_runtime_root()
-    attempts = _discover_attempts(runtime_root)
-    info = _find_attempt(attempts, args.target)
-    if info is None:
-        print(f"no attempt matching {args.target!r}", file=sys.stderr)
-        return 1
-    if info["state"] != "running":
-        print(
-            f"{info['name']} is {info['state']}; steer only delivers to a running attempt",
-            file=sys.stderr,
-        )
-        return 1
-    message = " ".join(args.message).strip()
-    if not message:
-        print("empty steer message", file=sys.stderr)
-        return 1
-    attempt_dir = info["dir"]
-    capabilities_path = attempt_dir / "capabilities.json"
-    capabilities: dict | None = None
-    if capabilities_path.is_file():
-        try:
-            loaded = json.loads(capabilities_path.read_text(encoding="utf-8"))
-            if isinstance(loaded, dict):
-                capabilities = loaded
-        except (OSError, json.JSONDecodeError):
-            capabilities = None
-    if capabilities is not None:
-        executor = str(capabilities.get("executor") or info.get("executor") or "executor")
-        if capabilities.get("midturn_steering") is not True:
-            print(
-                f"steer refused: executor {executor} does not support mid-turn steering",
-                file=sys.stderr,
-            )
-            return 1
-    line = json.dumps(
-        {"ts": datetime.now(timezone.utc).isoformat(), "message": message}
-    )
-    with (attempt_dir / "steer.jsonl").open("a", encoding="utf-8") as handle:
-        handle.write(line + "\n")
-    print(f"steer queued for {info['node_id'] or info['name']}: {message}")
-    if capabilities is not None:
-        print("delivered on the supervisor's next read cycle (needs the steer-aware runtime)")
-    else:
-        print(
-            "unknown capability; message queued but the runtime may not consume it"
-        )
-    return 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def cmd_timeline(args) -> int:
@@ -5954,7 +4467,7 @@ def cmd_timeline(args) -> int:
     attempts: list[dict] = []
     if runtime_root is not None:
         try:
-            attempts = _discover_attempts(runtime_root)
+            attempts = cli_watch._discover_attempts(runtime_root)
         except OSError:
             attempts = []
     try:
@@ -6013,531 +4526,38 @@ def cmd_receipt(args) -> int:
     return subprocess.run(command, env=env, check=False).returncode
 
 
-def cmd_verify_node(args):
-    """Delegate node verification to the runtime evaluator — the single judge.
-
-    Default runs the deterministic lane (offline, fast — the verb's original
-    contract). --live delegates to `_run_live_eval` so knobs and the sidecar
-    match `gddp eval`.
-    """
-    if bool(getattr(args, "live", False)):
-        verdict = _run_live_eval(
-            args.project,
-            args.node,
-            base=getattr(args, "base", None),
-        )
-        sys.exit(0 if verdict else 1)
-    try:
-        runtime_root = resolve_runtime_root()
-    except RuntimeError as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
-        sys.exit(2)
-    node_yaml = ROOT / "graphs" / args.project / "nodes" / f"{args.node}.yaml"
-    project_yaml = ROOT / "graphs" / args.project / "project.yaml"
-    for path, label in ((node_yaml, "node yaml"), (project_yaml, "project yaml")):
-        if not path.is_file():
-            print(f"ERROR: {label} not found at {path}", file=sys.stderr)
-            sys.exit(2)
-
-    with open(project_yaml) as f:
-        proj = yaml.safe_load(f) or {}
-    repo_name = str(proj.get("repo", "")).split("/")[-1]
-    repo = None
-    candidates = []
-    if args.repo_path:
-        candidates.append(Path(args.repo_path).expanduser())
-    env_root = os.environ.get("GDDP_REPO_ROOT") or os.environ.get("GDDP_REPOS_ROOT")
-    if env_root and repo_name:
-        candidates.append(Path(env_root).expanduser() / repo_name)
-    if repo_name:
-        candidates.append(ROOT.parent / repo_name)
-    for c in candidates:
-        if c.is_dir():
-            repo = c
-            break
-    if repo is None:
-        print(f"ERROR: could not resolve repo checkout for '{proj.get('repo', '')}' "
-              "(pass --repo-path)", file=sys.stderr)
-        sys.exit(2)
-
-    receipt_dir = ROOT / "verification"
-    receipt_dir.mkdir(parents=True, exist_ok=True)
-    live = bool(getattr(args, "live", False))
-    manual_job_id = "manual-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    cmd = [
-        runtime_python(runtime_root),
-        str(runtime_root / "scripts" / "runtime" / "verification" / "cli.py"),
-        "--node-yaml", str(node_yaml),
-        "--project-yaml", str(project_yaml),
-        "--repo", str(repo),
-        "--config-root", str(ROOT),
-        "--receipt-dir", str(receipt_dir),
-        "--job-id", manual_job_id,
-        "--attempt", "0",
-        *(["--base", args.base] if getattr(args, "base", None) else []),
-        "--semantic-mode", "live" if live else "offline",
-        # --live must select the Pi harness explicitly: auto resolves to the
-        # removed built-in runner and the evaluator refuses to start.
-        *(["--semantic-harness", "pi"] if live else []),
-        "--integrity", "on" if live else "off",
-    ]
-    env = os.environ.copy()
-    env["PYTHONPATH"] = str(runtime_root)
-    env["GDDP_RUNTIME_ROOT"] = str(runtime_root)
-    sys.exit(subprocess.run(cmd, env=env, check=False).returncode)
 
 
-def _resolve_repo_for_project(project: str, repo_path: str | None = None) -> Path | None:
-    """Resolve a project's source checkout: --repo-path > env root > sibling."""
-    project_yaml = ROOT / "graphs" / project / "project.yaml"
-    if not project_yaml.is_file():
-        return None
-    try:
-        with open(project_yaml) as f:
-            proj = yaml.safe_load(f) or {}
-    except Exception:
-        return None
-    repo_name = str(proj.get("repo", "")).split("/")[-1]
-    candidates: list[Path] = []
-    if repo_path:
-        candidates.append(Path(repo_path).expanduser())
-    env_root = os.environ.get("GDDP_REPO_ROOT") or os.environ.get("GDDP_REPOS_ROOT")
-    if env_root and repo_name:
-        candidates.append(Path(env_root).expanduser() / repo_name)
-    if repo_name:
-        candidates.append(ROOT.parent / repo_name)
-    for c in candidates:
-        if c.is_dir():
-            return c
-    return None
 
 
-def _auto_base_commit(repo: Path) -> str | None:
-    """Best-effort base for subject-diff evidence: HEAD~1, else HEAD."""
-    for ref in ("HEAD~1", "HEAD"):
-        proc = subprocess.run(
-            ["git", "-C", str(repo), "rev-parse", ref],
-            capture_output=True, text=True, check=False,
-        )
-        if proc.returncode == 0 and proc.stdout.strip():
-            return proc.stdout.strip()
-    return None
 
 
-_EVAL_PRESETS = {"cheap": "deepseek-v4-flash"}
-_EVAL_LENSES = frozenset({"config", "instructions", "runs", "show"})
 
 
-class EvalKnobError(ValueError):
-    """Operator-facing failure resolving evaluator knobs."""
 
 
-def _parse_semantic_flag(args_str: str, flag: str) -> str | None:
-    try:
-        tokens = shlex.split(args_str or "")
-    except ValueError:
-        return None
-    try:
-        idx = tokens.index(flag)
-    except ValueError:
-        return None
-    if idx + 1 >= len(tokens):
-        return None
-    return tokens[idx + 1]
 
 
-def _resolve_eval_knobs(
-    *,
-    model: str | None = None,
-    thinking: str | None = None,
-    integrity: str | None = None,
-    lanes: str | None = None,
-    base: str | None = None,
-) -> dict:
-    """Resolve evaluator knobs: explicit args → env/settings → defaults."""
-    env_args = os.environ.get("GDDP_VERIFY_SEMANTIC_ARGS", DEFAULT_SEMANTIC_ARGS)
-    env_model = (
-        os.environ.get("GDDP_EVAL_MODEL_CHEAP")
-        or _parse_semantic_flag(env_args, "--semantic-pi-model")
-        or _EVAL_PRESETS["cheap"]
-    )
-    env_thinking = (
-        os.environ.get("GDDP_SEMANTIC_THINKING")
-        or os.environ.get("GDDP_EVAL_THINKING_DEFAULT")
-        or _parse_semantic_flag(env_args, "--semantic-thinking")
-        or "medium"
-    )
-    env_integrity = (os.environ.get("GDDP_INTEGRITY_MODE") or "on").strip().lower()
-    env_lanes = (os.environ.get("GDDP_EVAL_LANES_DEFAULT") or "").strip().lower()
-    if not env_lanes:
-        mode = _parse_semantic_flag(env_args, "--semantic-mode")
-        env_lanes = "deterministic" if mode == "offline" else "live"
-
-    preset: str | None = None
-    raw_model = (model or "").strip()
-    if not raw_model:
-        resolved_model = env_model
-    elif raw_model == "cheap" or raw_model in _EVAL_PRESETS:
-        preset = "cheap"
-        resolved_model = (
-            os.environ.get("GDDP_EVAL_MODEL_CHEAP") or _EVAL_PRESETS["cheap"]
-        ).strip() or _EVAL_PRESETS["cheap"]
-    elif raw_model == "expensive":
-        preset = "expensive"
-        resolved_model = (os.environ.get("GDDP_EVAL_MODEL_EXPENSIVE") or "").strip()
-        if not resolved_model:
-            raise EvalKnobError(
-                "expensive preset is unset — set GDDP_EVAL_MODEL_EXPENSIVE"
-            )
-    else:
-        resolved_model = raw_model
-
-    resolved_thinking = (thinking or env_thinking).strip() or "medium"
-    explicit_integrity = integrity is not None and str(integrity).strip() != ""
-    resolved_integrity = (
-        str(integrity).strip().lower() if explicit_integrity else env_integrity
-    )
-    if resolved_integrity not in {"on", "off"}:
-        raise EvalKnobError(f"integrity must be on or off, got {resolved_integrity!r}")
-    resolved_lanes = (lanes or env_lanes).strip().lower() or "live"
-    if resolved_lanes not in {"live", "deterministic"}:
-        raise EvalKnobError(
-            f"lanes must be live or deterministic, got {resolved_lanes!r}"
-        )
-    if resolved_lanes == "deterministic" and not explicit_integrity:
-        resolved_integrity = "off"
-
-    if resolved_lanes == "deterministic":
-        semantic_args = "--semantic-mode offline"
-    else:
-        semantic_args = (
-            "--semantic-mode live --semantic-harness pi --semantic-provider deepseek "
-            f"--semantic-pi-model {resolved_model} --semantic-thinking {resolved_thinking}"
-        )
-    return {
-        "model": resolved_model,
-        "preset": preset,
-        "thinking": resolved_thinking,
-        "integrity": resolved_integrity,
-        "lanes": resolved_lanes,
-        "semantic_args": semantic_args,
-        "base": base,
-    }
 
 
-def _write_eval_knobs_sidecar(
-    receipt_dir: Path,
-    project: str,
-    node_id: str,
-    job_id: str,
-    attempt: int,
-    knobs: dict,
-) -> Path | None:
-    """Best-effort sidecar next to the receipt. Never fails the eval."""
-    path = Path(receipt_dir) / project / node_id / f"{job_id}-attempt{attempt}.knobs.json"
-    payload = {
-        "model": knobs.get("model"),
-        "preset": knobs.get("preset"),
-        "thinking": knobs.get("thinking"),
-        "integrity": knobs.get("integrity"),
-        "lanes": knobs.get("lanes"),
-        "base": knobs.get("base"),
-        "semantic_args": knobs.get("semantic_args"),
-        "job_id": job_id,
-        "written_at": datetime.now(timezone.utc).isoformat(),
-    }
-    try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-        return path
-    except OSError as exc:
-        print(f"warning: could not write knobs sidecar {path}: {exc}", file=sys.stderr)
-        return None
 
 
-def _load_eval_knobs_sidecar(receipt_path: str | Path) -> dict:
-    """Load sibling *.knobs.json next to a receipt; empty dict if missing."""
-    sidecar = Path(receipt_path).with_suffix(".knobs.json")
-    if not sidecar.is_file():
-        return {}
-    try:
-        data = json.loads(sidecar.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
-    return data if isinstance(data, dict) else {}
 
 
-def _run_live_eval(
-    project: str,
-    node_id: str,
-    base: str | None = None,
-    knobs: dict | None = None,
-) -> str:
-    """Run the live two-lane judge on one node; print a compact summary.
-
-    Single code path for the interactive menu (`evaluate` front-page action,
-    `v` in the node review menu) and the `gddp eval <node>` shell command.
-    Auto-resolves the repo and base commit. Returns the verdict string
-    ("pass"/"fail"/...) or "" on error.
-    """
-    try:
-        resolved = knobs or _resolve_eval_knobs(base=base)
-    except EvalKnobError as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
-        return ""
-    try:
-        runtime_root = resolve_runtime_root()
-    except RuntimeError as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
-        return ""
-    node_yaml = ROOT / "graphs" / project / "nodes" / f"{node_id}.yaml"
-    project_yaml = ROOT / "graphs" / project / "project.yaml"
-    for path, label in ((node_yaml, "node yaml"), (project_yaml, "project yaml")):
-        if not path.is_file():
-            print(f"ERROR: {label} not found at {path}", file=sys.stderr)
-            return ""
-    repo = _resolve_repo_for_project(project)
-    if repo is None:
-        print(
-            f"ERROR: could not resolve repo checkout for project '{project}' "
-            f"(pass --repo-path)",
-            file=sys.stderr,
-        )
-        return ""
-    base_sha = base or resolved.get("base") or _auto_base_commit(repo)
-    resolved = {**resolved, "base": base_sha}
-    receipt_dir = ROOT / "verification"
-    receipt_dir.mkdir(parents=True, exist_ok=True)
-    job_id = "manual-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    attempt = 0
-
-    cmd = [
-        runtime_python(runtime_root),
-        str(runtime_root / "scripts" / "runtime" / "verification" / "cli.py"),
-        "--node-yaml", str(node_yaml),
-        "--project-yaml", str(project_yaml),
-        "--repo", str(repo),
-        "--config-root", str(ROOT),
-        "--receipt-dir", str(receipt_dir),
-        "--job-id", job_id,
-        "--attempt", str(attempt),
-    ]
-    if base_sha:
-        cmd += ["--base", base_sha]
-    cmd += shlex.split(str(resolved.get("semantic_args") or DEFAULT_SEMANTIC_ARGS))
-    cmd += ["--integrity", "off" if str(resolved.get("integrity") or "on").lower() == "off" else "on"]
-
-    env = os.environ.copy()
-    env["PYTHONPATH"] = str(runtime_root)
-    env["GDDP_RUNTIME_ROOT"] = str(runtime_root)
-
-    print(f"  evaluating {project}/{node_id}  (base {base_sha[:8] if base_sha else 'n/a'})")
-    proc = subprocess.run(cmd, env=env, text=True, capture_output=True, check=False)
-    _write_eval_knobs_sidecar(receipt_dir, project, node_id, job_id, attempt, resolved)
-    receipt_summary: dict = {}
-    if proc.stdout.strip():
-        try:
-            receipt_summary = json.loads(proc.stdout.strip())
-        except json.JSONDecodeError:
-            receipt_summary = {}
-    if proc.returncode != 0 and not receipt_summary:
-        print(proc.stderr or proc.stdout, file=sys.stderr)
-        return ""
-
-    verdict = str(receipt_summary.get("verdict", ""))
-    confidence = receipt_summary.get("criteria_confidence", "")
-    action = receipt_summary.get("required_next_action", "")
-    lane = receipt_summary.get("lane_status", {})
-    print()
-    chip = Text(f"  VERDICT  {verdict.upper()}", style=("bold green" if verdict == "pass" else "bold red"))
-    console.print(chip)
-    preset = resolved.get("preset")
-    model = resolved.get("model") or "-"
-    print(f"  model      : {preset}/{model}" if preset else f"  model      : {model}")
-    if confidence:
-        print(f"  confidence : {confidence}")
-    if lane:
-        crit = (lane.get("criteria") or "").replace("_", " ")
-        integ = (lane.get("integrity") or "").replace("_", " ")
-        print(f"  lanes     : criteria {crit} · integrity {integ}")
-    if action:
-        print(f"  next      : {action}")
-    print(f"  receipts  : {ROOT / 'verification' / project / node_id}/")
-    return verdict
 
 
-def _resolve_eval_node(project: str | None, node_id: str) -> tuple[str, str] | int:
-    """Fuzzy-resolve (project, node_id). Returns an exit code on failure."""
-    def _match_in(proj_name: str) -> list[str]:
-        nodes_dir = ROOT / "graphs" / proj_name / "nodes"
-        if not nodes_dir.is_dir():
-            return []
-        return [
-            f.stem for f in nodes_dir.glob("*.yaml")
-            if f.stem == node_id or f.stem.startswith(f"{node_id}-") or node_id in f.stem
-        ]
-
-    if project:
-        stems = _match_in(project)
-        if len(stems) == 1:
-            return project, stems[0]
-        if len(stems) > 1:
-            print(f"Ambiguous node '{node_id}' in project '{project}' — matches: {stems}", file=sys.stderr)
-            return 2
-        print(f"ERROR: node '{node_id}' not found in graph '{project}'", file=sys.stderr)
-        return 2
-    matches = []
-    graphs = ROOT / "graphs"
-    if graphs.is_dir():
-        for proj_dir in graphs.iterdir():
-            if not proj_dir.is_dir() or proj_dir.name.startswith(("_", ".")):
-                continue
-            for stem in _match_in(proj_dir.name):
-                matches.append((proj_dir.name, stem))
-    if len(matches) == 1:
-        return matches[0]
-    if len(matches) > 1:
-        print(f"Ambiguous node '{node_id}' — matches:", file=sys.stderr)
-        for proj_name, stem in matches:
-            print(f"  {proj_name}/{stem}", file=sys.stderr)
-        print("Pass --project <id>", file=sys.stderr)
-        return 2
-    print(f"ERROR: node '{node_id}' not found in any graph", file=sys.stderr)
-    return 2
 
 
-def cmd_eval(args):
-    """Human-friendly live evaluation: gddp eval <node> [--project p].
-
-    First token in {config,instructions,runs,show} is a lens; otherwise a node
-    id. Auto-resolves project/node, repo, and base commit.
-    """
-    token = getattr(args, "node", None)
-    if token in _EVAL_LENSES:
-        handler = globals().get(f"cmd_eval_{token}")
-        if handler is None:
-            print(f"ERROR: eval {token} is not available", file=sys.stderr)
-            return 2
-        return handler(args)
-    if not token:
-        print("ERROR: gddp eval needs a node id (or config|instructions|runs|show)", file=sys.stderr)
-        return 2
-    resolved = _resolve_eval_node(getattr(args, "project", None), token)
-    if isinstance(resolved, int):
-        return resolved
-    project, node_id = resolved
-    try:
-        knobs = _resolve_eval_knobs(
-            model=getattr(args, "model", None),
-            thinking=getattr(args, "thinking", None),
-            integrity=getattr(args, "integrity", None),
-            lanes=getattr(args, "lanes", None),
-            base=getattr(args, "base", None),
-        )
-    except EvalKnobError as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
-        return 2
-    verdict = _run_live_eval(project, node_id, base=knobs.get("base"), knobs=knobs)
-    if not verdict:
-        return 1
-    return 0
 
 
-def _eval_lens_node(args) -> tuple[str, str] | int:
-    token = getattr(args, "lens_node", None)
-    if not token:
-        print("ERROR: this eval lens needs a node id", file=sys.stderr)
-        return 2
-    return _resolve_eval_node(getattr(args, "project", None), token)
 
 
-def cmd_eval_config(_args) -> int:
-    _render_eval_config()
-    return 0
 
 
-def cmd_eval_instructions(args) -> int:
-    resolved = _eval_lens_node(args)
-    if isinstance(resolved, int):
-        return resolved
-    project, node_id = resolved
-    receipt = None
-    if not getattr(args, "preflight", False):
-        rows = _load_receipts_for_node(project, node_id)
-        run_id = getattr(args, "run", None)
-        if run_id:
-            rows = [row for row in rows if row.get("job_id") == run_id]
-        if rows:
-            receipt = rows[0].get("check") if isinstance(rows[0].get("check"), dict) else None
-    _render_eval_instructions(project, node_id, receipt=receipt)
-    return 0
 
 
-def cmd_eval_runs(args) -> int:
-    resolved = _eval_lens_node(args)
-    if isinstance(resolved, int):
-        return resolved
-    project, node_id = resolved
-    rows = _load_receipts_for_node(project, node_id)
-    if not rows:
-        print(f"No evaluator receipts for {project}/{node_id}")
-        return 0
-    for row in rows:
-        model = ((row.get("knobs") or {}).get("model") or "-")
-        when = str(row.get("sort_at") or "-")[:19].replace("T", " ")
-        check = row.get("check") if isinstance(row.get("check"), dict) else {}
-        timing = check.get("evaluation_timing") if isinstance(check.get("evaluation_timing"), dict) else {}
-        crit = timing.get("criteria") if isinstance(timing.get("criteria"), dict) else {}
-        integ = timing.get("integrity") if isinstance(timing.get("integrity"), dict) else {}
-        tools = f"c={crit.get('tool_calls', 0)} i={integ.get('tool_calls', 0)}"
-        print(
-            f"{when}  {row.get('verdict') or '-':<8}  {model:<22}  {tools:<14}  "
-            f"{project}/{node_id}  {row.get('job_id') or '-'}"
-        )
-    print(f"{len(rows)} run(s)")
-    return 0
 
 
-def cmd_eval_show(args) -> int:
-    token = getattr(args, "lens_node", None) or getattr(args, "run", None)
-    if not token:
-        print("ERROR: gddp eval show needs a job id or receipt path", file=sys.stderr)
-        return 2
-    path = Path(token).expanduser()
-    if path.is_file():
-        try:
-            check = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
-            print(f"ERROR: could not read {path}: {exc}", file=sys.stderr)
-            return 2
-        if not isinstance(check, dict):
-            print(f"ERROR: {path} is not a receipt object", file=sys.stderr)
-            return 2
-        row = {
-            "project_id": check.get("project_id"),
-            "node_id": check.get("node_id"),
-            "job_id": check.get("job_id"),
-            "verdict": check.get("verdict"),
-            "sort_at": (check.get("evaluation_timing") or {}).get("finished_at")
-            if isinstance(check.get("evaluation_timing"), dict) else check.get("generated_at"),
-            "receipt_path": str(path),
-            "check": check,
-            "knobs": _load_eval_knobs_sidecar(path),
-        }
-        _render_eval_show(row)
-        return 0
-    evaluations = _import_module("evaluations")
-    db_path, receipt_root = _evaluation_sources()
-    rows = evaluations.load_evaluation_rows(db_path=db_path, receipt_root=receipt_root)
-    matches = [row for row in rows if row.get("job_id") == token]
-    if not matches:
-        print(f"ERROR: no receipt with job_id {token!r}", file=sys.stderr)
-        return 2
-    row = matches[0]
-    receipt_path = row.get("receipt_path")
-    row = {**row, "knobs": _load_eval_knobs_sidecar(receipt_path) if receipt_path else {}}
-    _render_eval_show(_hydrate_eval_row(row))
-    return 0
 
 
 def cmd_obsidian_export(args):
@@ -6595,334 +4615,31 @@ def cmd_project_new(args):
 
 
 def cmd_project_validate(args):
-    validate_project(args.project)
+    cli_status.validate_project(args.project)
 
 
-def _list_status_projects() -> list[str]:
-    graphs = ROOT / "graphs"
-    if not graphs.exists():
-        return []
-    return sorted(
-        p.name for p in graphs.iterdir()
-        if p.is_dir() and p.name != "_template" and (p / "project.yaml").exists()
-    )
 
 
-def _load_project_doc(project_id: str) -> dict:
-    with open(ROOT / "graphs" / project_id / "project.yaml") as f:
-        return yaml.safe_load(f) or {}
 
 
-def _graph_status_counts(nodes: list) -> dict[str, int]:
-    counts: dict[str, int] = {}
-    for n in nodes:
-        if not isinstance(n, dict):
-            continue
-        s = str(n.get("status") or "unknown")
-        counts[s] = counts.get(s, 0) + 1
-    return counts
 
 
-def _pct_style(pct: int) -> str:
-    if pct >= 100:
-        return "bold green"
-    if pct > 0:
-        return "bold yellow"
-    return "dim"
 
 
-def _status_counts_text(counts: dict[str, int]) -> Text:
-    out = Text()
-    for i, (status, count) in enumerate(sorted(counts.items())):
-        if i:
-            out.append(", ", style="dim")
-        out.append(status, style=_graph_status_style(status))
-        out.append(f"={count}")
-    return out
 
 
-def _print_status_project_row(project_id: str, nodes: list, *, indent: str = "") -> tuple[int, int]:
-    """Print one project summary line. Returns (complete, total)."""
-    counts = _graph_status_counts(nodes)
-    total = sum(counts.values())
-    complete = counts.get("complete", 0)
-    pct = int(complete / total * 100) if total else 0
-    row = Text(indent)
-    row.append(f"{project_id:<25}", style="bold")
-    row.append(f" {total:>3} nodes  ", style="dim")
-    row.append(f"{pct:>3}% done", style=_pct_style(pct))
-    row.append("  (", style="dim")
-    row.append_text(_status_counts_text(counts))
-    row.append(")", style="dim")
-    console.print(row)
-    return complete, total
 
 
-def show_status(project_id: str | None = None) -> None:
-    """Rich graph completion summary — all projects or one project with nodes."""
-    projects = _list_status_projects()
-    if not projects:
-        console.print(Text("No graphs/ directory found", style="yellow"))
-        return
-    if project_id:
-        if project_id not in projects:
-            console.print(Text(f"Project '{project_id}' not found", style="red"))
-            return
-        _render_project_status_detail(project_id)
-        return
-
-    console.print(Text("status · all projects", style="bold"))
-    total_complete = 0
-    grand = 0
-    for pid in projects:
-        proj = _load_project_doc(pid)
-        complete, total = _print_status_project_row(pid, proj.get("nodes") or [])
-        total_complete += complete
-        grand += total
-    gpct = int(total_complete / grand * 100) if grand else 0
-    footer = Text()
-    footer.append(f"{'TOTAL':<25}", style="bold")
-    footer.append(f" {grand:>3} nodes  ", style="dim")
-    footer.append(f"{gpct:>3}% done", style=_pct_style(gpct))
-    console.print()
-    console.print(footer)
 
 
-def _render_project_status_detail(project_id: str) -> None:
-    """One project: colored counts + each node with runtime phase."""
-    node_cli = _import_module("node_cli")
-    proj = _load_project_doc(project_id)
-    nodes_index = proj.get("nodes") or []
-    console.print(Text(f"status · {project_id}", style="bold"))
-    _print_status_project_row(project_id, nodes_index)
-    console.print()
-
-    try:
-        node_rows = node_cli.iter_nodes(ROOT, project_id)
-    except Exception as exc:
-        console.print(Text(f"Could not load nodes: {exc}", style="red"))
-        return
-    if not node_rows:
-        console.print(Text("(no nodes)", style="dim"))
-        return
-
-    phase_counts: dict[str, int] = {}
-    verdict_counts: dict[str, int] = {}
-    for node_id, doc, entry in node_rows:
-        graph_status = _node_status_label(doc, entry)
-        queue_state = "-"
-        job_status = "-"
-        verdict = "-"
-        try:
-            ev = node_cli.fetch_runtime_evidence(ROOT, project_id, node_id)
-            queue_state = getattr(ev, "queue_state", "-") or "-"
-            job_status = getattr(ev, "job_status", "-") or "-"
-            verdict = getattr(ev, "verdict", "-") or "-"
-        except Exception:
-            pass
-        phase = _node_menu_phase(graph_status, queue_state, job_status)
-        phase_counts[phase] = phase_counts.get(phase, 0) + 1
-        chip = _verdict_chip(verdict)
-        if chip:
-            key = chip.lower()
-            verdict_counts[key] = verdict_counts.get(key, 0) + 1
-        title = str(doc.get("title") or (entry or {}).get("title") or "")
-        line = Text()
-        line.append(f"  {node_id:<36}", style="bold")
-        line.append_text(_format_node_columns(
-            graph=graph_status,
-            runtime=_runtime_label(queue_state, job_status),
-            verdict=verdict,
-            title=title,
-            room=max(24, (console.width or 80) - 40),
-        ))
-        console.print(line)
-
-    console.print()
-    scan = Text("  operator scan  ")
-    scan.append_text(_status_counts_text(phase_counts))
-    console.print(scan)
-    if verdict_counts:
-        ev_scan = Text("  evaluator       ")
-        ev_scan.append_text(_status_counts_text(verdict_counts))
-        console.print(ev_scan)
 
 
-def _status_node_items(project_id: str) -> list[tuple[str, dict]]:
-    """Node rows for status drill-in picker."""
-    node_cli = _import_module("node_cli")
-    try:
-        node_rows = node_cli.iter_nodes(ROOT, project_id)
-    except Exception:
-        return []
-    items: list[tuple[str, dict]] = []
-    for node_id, doc, entry in node_rows:
-        graph_status = _node_status_label(doc, entry)
-        queue_state = job_status = verdict = "-"
-        try:
-            ev = node_cli.fetch_runtime_evidence(ROOT, project_id, node_id)
-            queue_state = getattr(ev, "queue_state", "-") or "-"
-            job_status = getattr(ev, "job_status", "-") or "-"
-            verdict = getattr(ev, "verdict", "-") or "-"
-        except Exception:
-            pass
-        title = str(doc.get("title") or (entry or {}).get("title") or "")
-        items.append((
-            node_id,
-            {
-                "graph": graph_status,
-                "runtime": _runtime_label(queue_state, job_status),
-                "verdict": verdict,
-                "title": title,
-            },
-        ))
-    return items
 
 
-def _status_after_show(project_id: str | None, *, back_label: str = "more") -> str:
-    """Refresh/back menu or pick a graph/node after status render."""
-    current = project_id
-    while True:
-        if current:
-            pick_name = "pick node"
-            pick_desc = "open one node in review"
-        else:
-            pick_name = "pick graph"
-            pick_desc = "drill into one project"
-        actions = {
-            "p": (pick_name, pick_desc),
-            "r": ("refresh", "reload status"),
-            "b": ("back", ""),
-            "q": ("quit", ""),
-        }
-        choice = _menu_choice(actions, default="r")
-        if choice == "q":
-            return _MENU_QUIT
-        if choice == "b":
-            return _MENU_BACK
-        if choice == "r":
-            _clear_screen()
-            show_status(current)
-            continue
-        if not current:
-            picked = _pick_graph("status · graphs", back_label=back_label)
-            if picked is _MENU_QUIT:
-                return _MENU_QUIT
-            if picked is _MENU_BACK:
-                continue
-            current = str(picked)
-            _clear_screen()
-            show_status(current)
-            continue
-        items = _status_node_items(current)
-        if not items:
-            console.print(Text("No nodes to open.", style="yellow"))
-            continue
-        picked = _pick_list(
-            f"status · {current}",
-            items,
-            back_label=back_label,
-        )
-        if picked is _MENU_QUIT:
-            return _MENU_QUIT
-        if picked is _MENU_BACK:
-            continue
-        siblings = [value for value, _ in items]
-        outcome = _node_review_menu(current, str(picked), siblings)
-        if outcome is _MENU_QUIT:
-            return _MENU_QUIT
-        _clear_screen()
-        show_status(current)
 
 
-def _collect_validate_failures(
-    projects: list[str],
-) -> list[tuple[str, str]]:
-    """Node-scoped validation failures as pick keys ``project\\tnode_id``."""
-    graphs = ROOT / "graphs"
-    failures: list[tuple[str, str]] = []
-    for pid in projects:
-        proj_yaml = graphs / pid / "project.yaml"
-        with open(proj_yaml) as f:
-            proj = yaml.safe_load(f) or {}
-        node_ids = {
-            n["id"]
-            for n in (proj.get("nodes") or [])
-            if isinstance(n, dict) and n.get("id")
-        }
-        nodes_dir = graphs / pid / "nodes"
-        yaml_ids = {p.stem for p in nodes_dir.glob("*.yaml")} if nodes_dir.exists() else set()
-        for nid in sorted(node_ids - yaml_ids):
-            failures.append((f"{pid}\t{nid}", f"{pid}/{nid} · missing nodes/{nid}.yaml"))
-        for nid in sorted(yaml_ids - node_ids):
-            failures.append((
-                f"{pid}\t{nid}",
-                f"{pid}/{nid} · orphan nodes/{nid}.yaml",
-            ))
-        seen: set[str] = set()
-        for n in proj.get("nodes") or []:
-            if not isinstance(n, dict):
-                continue
-            nid = n.get("id")
-            if not nid or nid in seen:
-                if nid:
-                    failures.append((
-                        f"{pid}\t{nid}",
-                        f"{pid}/{nid} · duplicate in project.yaml",
-                    ))
-                continue
-            seen.add(nid)
-    return failures
 
 
-def _validate_after_show(
-    project_id: str | None,
-    projects: list[str],
-    *,
-    back_label: str = "more",
-) -> str:
-    """Refresh/back menu or pick failing nodes after validate render."""
-    while True:
-        failures = _collect_validate_failures(projects)
-        actions = {
-            "r": ("refresh", "re-run validation"),
-            "b": ("back", ""),
-            "q": ("quit", ""),
-        }
-        if failures:
-            actions = {
-                "p": ("pick node", "open a failing node in review"),
-                **actions,
-            }
-        choice = _menu_choice(actions, default="r")
-        if choice == "q":
-            return _MENU_QUIT
-        if choice == "b":
-            return _MENU_BACK
-        if choice == "r":
-            _clear_screen()
-            validate_project(project_id)
-            continue
-        picked = _pick_list(
-            "validate · failures",
-            [(key, label) for key, label in failures],
-            back_label=back_label,
-        )
-        if picked is _MENU_QUIT:
-            return _MENU_QUIT
-        if picked is _MENU_BACK:
-            continue
-        pid, node_id = str(picked).split("\t", 1)
-        node_cli = _import_module("node_cli")
-        try:
-            siblings = [nid for nid, _, _ in node_cli.iter_nodes(ROOT, pid)]
-        except Exception:
-            siblings = [node_id]
-        outcome = _node_review_menu(pid, node_id, siblings)
-        if outcome is _MENU_QUIT:
-            return _MENU_QUIT
-        _clear_screen()
-        validate_project(project_id)
 
 
 def _print_timeline_rich(tl, graph_nodes: dict) -> None:
@@ -6960,7 +4677,7 @@ def _render_timeline_text(
     attempts: list[dict] = []
     if runtime_root is not None:
         try:
-            attempts = _discover_attempts(runtime_root)
+            attempts = cli_watch._discover_attempts(runtime_root)
         except OSError:
             attempts = []
     tl = timeline.build(
@@ -7023,545 +4740,76 @@ def interactive_graph_delivery(project: str):
             _pause()
 
 
-def interactive_status(project: str | None = None):
-    """Status for one graph, or all/one picker when no project is fixed."""
-    if project:
-        _clear_screen()
-        show_status(project)
-        return _status_after_show(project, back_label="more")
-    actions = {
-        "a": ("all", "every project completion summary"),
-        "o": ("one", "pick one project — counts + node phases"),
-        "b": ("back", ""),
-        "q": ("quit", ""),
-    }
-    projects = _list_status_projects()
-    while True:
-        _clear_screen()
-        console.print(Text("status", style="bold"))
-        choice = _menu_choice(actions, default="a")
-        if choice == "q":
-            return _MENU_QUIT
-        if choice == "b":
-            return _MENU_BACK
-        if choice == "a":
-            _clear_screen()
-            show_status()
-            outcome = _status_after_show(None, back_label="status")
-            if outcome is _MENU_QUIT:
-                return _MENU_QUIT
-            continue
-        picked = _pick_graph("status · graphs", back_label="status")
-        if picked is _MENU_QUIT:
-            return _MENU_QUIT
-        if picked is _MENU_BACK:
-            continue
-        _clear_screen()
-        show_status(str(picked))
-        outcome = _status_after_show(str(picked), back_label="status")
-        if outcome is _MENU_QUIT:
-            return _MENU_QUIT
 
 
-def interactive_validate(project: str | None = None):
-    """Validate one graph, or all/one picker when no project is fixed."""
-    if project:
-        _clear_screen()
-        validate_project(project)
-        return _validate_after_show(project, [project], back_label="more")
-    actions = {
-        "a": ("all", "validate every project"),
-        "o": ("one", "pick one project"),
-        "b": ("back", ""),
-        "q": ("quit", ""),
-    }
-    projects = _list_status_projects()
-    while True:
-        _clear_screen()
-        console.print(Text("validate", style="bold"))
-        choice = _menu_choice(actions, default="a")
-        if choice == "q":
-            return _MENU_QUIT
-        if choice == "b":
-            return _MENU_BACK
-        if choice == "a":
-            _clear_screen()
-            validate_project(None)
-            outcome = _validate_after_show(None, projects, back_label="validate")
-            if outcome is _MENU_QUIT:
-                return _MENU_QUIT
-            continue
-        picked = _pick_graph("validate · graphs", back_label="validate")
-        if picked is _MENU_QUIT:
-            return _MENU_QUIT
-        if picked is _MENU_BACK:
-            continue
-        picked_project = str(picked)
-        _clear_screen()
-        validate_project(picked_project)
-        outcome = _validate_after_show(
-            picked_project, [picked_project], back_label="validate",
-        )
-        if outcome is _MENU_QUIT:
-            return _MENU_QUIT
 
 
-def validate_project(project_id: str | None):
-    graphs = ROOT / "graphs"
-    if not graphs.exists():
-        console.print(Text("No graphs/ directory found", style="yellow"))
-        return
 
-    projects = _list_status_projects()
-    if project_id:
-        if project_id not in projects:
-            console.print(Text(f"Project '{project_id}' not found", style="red"))
-            return
-        projects = [project_id]
-
-    errors = 0
-    for pid in projects:
-        proj_yaml = graphs / pid / "project.yaml"
-        with open(proj_yaml) as f:
-            proj = yaml.safe_load(f) or {}
-
-        pid_errors = []
-
-        if proj.get("schema_version") != "1.0":
-            pid_errors.append("schema_version != 1.0")
-        if not proj.get("project_id"):
-            pid_errors.append("missing project_id")
-        if proj.get("project_id") != pid:
-            pid_errors.append(f"project_id '{proj.get('project_id')}' != directory '{pid}'")
-        if not proj.get("repo"):
-            pid_errors.append("missing repo")
-        nodes = proj.get("nodes")
-        if not isinstance(nodes, list):
-            pid_errors.append("nodes is not a list")
-        else:
-            node_ids = set()
-            for n in nodes:
-                if not isinstance(n, dict):
-                    pid_errors.append(f"nodes entry is not a dict: {n}")
-                    continue
-                nid = n.get("id")
-                if not nid:
-                    pid_errors.append("nodes entry missing id")
-                    continue
-                if nid in node_ids:
-                    pid_errors.append(f"duplicate node id in project.yaml: {nid}")
-                node_ids.add(nid)
-
-            nodes_dir = graphs / pid / "nodes"
-            yaml_ids = set()
-            if nodes_dir.exists():
-                yaml_ids = {p.stem for p in nodes_dir.glob("*.yaml")}
-
-            missing_yaml = node_ids - yaml_ids
-            orphan_yaml = yaml_ids - node_ids
-            if missing_yaml:
-                for nid in sorted(missing_yaml):
-                    pid_errors.append(f"project.yaml lists {nid} but no nodes/{nid}.yaml exists")
-            if orphan_yaml:
-                for nid in sorted(orphan_yaml):
-                    pid_errors.append(f"nodes/{nid}.yaml exists but not listed in project.yaml")
-
-        if pid_errors:
-            console.print(Text(pid, style="bold red"))
-            for e in pid_errors:
-                console.print(Text(f"  ERROR: {e}", style="red"))
-            errors += len(pid_errors)
-        else:
-            line = Text()
-            line.append(pid, style="bold green")
-            line.append(" OK", style="green")
-            console.print(line)
-
-    summary = Text()
-    summary.append(f"\n{errors} error(s)", style="bold red" if errors else "bold green")
-    summary.append(f" across {len(projects)} project(s)", style="dim")
-    console.print(summary)
-    return 1 if errors else 0
 
 
 def main(argv=None):
     _load_runtime_settings()
     argv = list(sys.argv[1:] if argv is None else argv)
-    # Positional dispatch: gddp <graph|node> [executor] [--yes]. Anything that
-    # is not a known subcommand is an exact graph or node target.
     if argv and argv[0] not in _CLI_COMMANDS and not argv[0].startswith("-"):
-        return cmd_dispatch(argv)
-    parser = argparse.ArgumentParser(
-        description="gddp — graph truth and runtime evidence CLI",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    parser.set_defaults(func=cmd_overview)
-    sub = parser.add_subparsers(dest="command")
+        return cli_dispatch.cmd_dispatch(argv)
+    return parse_cli_argv(argv)
 
-    node_p = sub.add_parser("node", help="Node operations")
-    node_sub = node_p.add_subparsers(dest="subcommand")
 
-    node_browse = node_sub.add_parser(
-        "browse", help="Interactive node review and graph-status menu")
-    node_browse.add_argument(
-        "--project", default=None, help="Open this project directly")
-    node_browse.set_defaults(func=cmd_node_browse)
 
-    node_new = node_sub.add_parser("new", help="Interactive TUI node scaffold (full editor)")
-    node_new.set_defaults(func=cmd_node_new)
+# Phase 2 module imports (behavior unchanged; names re-exported below)
+import graph_io
+import cli_dispatch
+import cli_watch
+import cli_heartbeat
+import cli_eval
+import cli_status
+from cli_parser import parse_cli_argv
 
-    node_rapid = node_sub.add_parser("rapid", help="Minimal-keystroke rapid node adder")
-    node_rapid.add_argument("--project", required=True, help="Project ID")
-    node_rapid.add_argument("--repo", default="")
-    node_rapid.add_argument("--project-name", default=None)
-    node_rapid.add_argument("--llm-draft", action="store_true",
-                            help="Use LLM to draft why/acceptance/constraints")
-    node_rapid.add_argument("--dry-run", action="store_true")
-    node_rapid.set_defaults(func=cmd_node_rapid)
 
-    node_batch = node_sub.add_parser("batch", help="Walk through REPLACE_ME nodes in a project")
-    node_batch.add_argument("--project", required=True, help="Project ID")
-    node_batch.set_defaults(func=cmd_node_batch)
+# --- Phase 2 re-exports (test_gddp.py patches these on the gddp module) ---
+build_dispatch_plan = cli_dispatch.build_dispatch_plan
+DispatchError = cli_dispatch.DispatchError
+cmd_dispatch = cli_dispatch.cmd_dispatch
 
-    node_import = node_sub.add_parser("import", help="Import node YAML from file or stdin")
-    node_import.add_argument("--file", type=Path, default=None, help="YAML file to import")
-    node_import.add_argument("--stdin", action="store_true", help="Read YAML from stdin")
-    node_import.add_argument("--project", required=True, help="Project ID")
-    node_import.add_argument("--auto-approve", action="store_true")
-    node_import.add_argument("--dry-run", action="store_true")
-    node_import.add_argument(
-        "--update", action="store_true",
-        help="Replace an existing node; preserve its status",
-    )
-    node_import.set_defaults(func=cmd_node_import)
-
-    node_val = node_sub.add_parser("validate", help="Validate nodes")
-    node_val.add_argument("--project", default=None, help="Only check this project")
-    node_val.add_argument("--json", action="store_true", help="Machine-readable output")
-    node_val.add_argument("--strict", action="store_true", help="Warnings count as errors")
-    node_val.add_argument("--quiet", action="store_true", help="Only summary line")
-    node_val.add_argument("--root", type=Path, default=None)
-    node_val.set_defaults(func=cmd_node_validate)
-
-    node_list = node_sub.add_parser(
-        "list", help="List nodes (ID | GRAPH | RUNTIME | VERDICT)")
-    node_list.add_argument("--project", default=None, help="Project ID (omit for all)")
-    node_list.add_argument("--status", default=None, help="Filter by graph status")
-    node_list.add_argument(
-        "--active", action="store_true",
-        help="Only graph status pending or ready",
-    )
-    node_list.set_defaults(func=cmd_node_list)
-
-    node_frontier = node_sub.add_parser(
-        "frontier", help="Read-only frontier view: ready / in-flight / blocked / unlocks / drift")
-    node_frontier.add_argument("--project", default=None, help="Project ID")
-    node_frontier.set_defaults(func=cmd_node_frontier)
-
-    node_show = node_sub.add_parser(
-        "show", help="Show one node + evaluator summary")
-    node_show.add_argument("--project", required=True, help="Project ID")
-    node_show.add_argument("node_id", help="Node ID")
-    node_show.add_argument(
-        "--trace", action="store_true",
-        help="Expand tool traces and result/job history",
-    )
-    node_show.add_argument(
-        "--view",
-        choices=("all", "summary", "evaluation", "contract"),
-        default="all",
-        help="Limit output to one operator view",
-    )
-    node_show.set_defaults(func=cmd_node_show)
-
-    node_status = node_sub.add_parser(
-        "status", help="Status summary (all projects, or one with --project)"
-    )
-    node_status.add_argument(
-        "--project", default=None, help="One project — counts + node phases"
-    )
-    node_status.set_defaults(func=cmd_node_status)
-
-    evals_p = sub.add_parser(
-        "evaluations",
-        help="List evaluator receipts with verdict and timing",
-    )
-    evals_p.set_defaults(func=cmd_evaluations)
-
-    jobs_p = sub.add_parser("jobs", help="Runtime jobs and evaluator evidence")
-    jobs_p.set_defaults(func=cmd_jobs)
-
-    watch_p = sub.add_parser(
-        "watch",
-        help="Live running executors (default: running only; drill-in by node/job)",
-    )
-    watch_p.add_argument(
-        "target",
-        nargs="?",
-        default=None,
-        help="node/job/attempt → agent-obs live feed; omit for fleet; --once for snapshot",
-    )
-    watch_p.add_argument(
-        "--interval", type=float, default=2.0, help="refresh seconds (default 2)"
-    )
-    watch_p.add_argument("--once", action="store_true", help="render once and exit")
-    watch_p.add_argument(
-        "--all",
-        action="store_true",
-        help="include done/dead spool history (default: running only)",
-    )
-    watch_p.add_argument(
-        "--project", default=None, help="limit fleet to one graph/project id"
-    )
-    watch_p.set_defaults(func=cmd_watch)
-
-    runs_p = sub.add_parser(
-        "runs",
-        help="fzf picker over attempts (agent-runs style); Enter → gddp watch",
-    )
-    runs_p.add_argument(
-        "--all",
-        action="store_true",
-        help="include done/dead history (default: running only)",
-    )
-    runs_p.add_argument(
-        "--project", default=None, help="limit to one graph/project id"
-    )
-    runs_p.add_argument(
-        "--list", action="store_true", help="print catalog (no fzf)"
-    )
-    runs_p.add_argument(
-        "--preview",
-        default=None,
-        metavar="DIR",
-        help=argparse.SUPPRESS,  # fzf --preview callback
-    )
-    runs_p.add_argument(
-        "--action",
-        default="watch",
-        choices=("watch", "events", "tail", "e", "show", "path"),
-        help="after pick: watch (default), events (agent-obs feed), show (jobs show), path",
-    )
-    runs_p.add_argument(
-        "--once", action="store_true", help="with action=watch: one frame then exit"
-    )
-    runs_p.add_argument(
-        "--interval", type=float, default=2.0, help="watch refresh seconds"
-    )
-    runs_p.add_argument(
-        "--height", default="90%", help="fzf height (default 90%%)"
-    )
-    runs_p.set_defaults(func=cmd_runs)
-
-    steer_p = sub.add_parser(
-        "steer", help="Send an operator message into a running attempt's session"
-    )
-    steer_p.add_argument("target", help="node id, job id, or attempt-dir prefix")
-    steer_p.add_argument("message", nargs="+", help="message text")
-    steer_p.set_defaults(func=cmd_steer)
-
-    timeline_p = sub.add_parser(
-        "timeline",
-        help="What happened to a project or node, in order, in words (read-only)",
-    )
-    timeline_p.add_argument("project", help="Project ID")
-    timeline_p.add_argument("node", nargs="?", default=None, help="Node ID (optional)")
-    timeline_p.add_argument("--repo-path", default=None, help="Local checkout of the project's repo")
-    timeline_p.add_argument("--json", action="store_true", help="Machine-readable output")
-    timeline_p.set_defaults(func=cmd_timeline)
-    jobs_sub = jobs_p.add_subparsers(dest="jobs_command")
-
-    jobs_list = jobs_sub.add_parser("list", help="List jobs and queue states")
-    jobs_list.add_argument("--state", default=None, help="Filter by queue state")
-    jobs_list.set_defaults(func=cmd_jobs)
-
-    jobs_show = jobs_sub.add_parser("show", help="Show one job by job ID or node ID")
-    jobs_show.add_argument("ref", help="Job ID or uniquely matching node ID")
-    jobs_show.add_argument(
-        "--full", action="store_true", help="Include criterion-level reasoning"
-    )
-    jobs_show.set_defaults(func=cmd_jobs)
-
-    jobs_live = jobs_sub.add_parser(
-        "live",
-        help="Live running executors (alias for gddp watch)",
-    )
-    jobs_live.add_argument(
-        "target",
-        nargs="?",
-        default=None,
-        help="node id, job id, or attempt prefix; omit for fleet",
-    )
-    jobs_live.add_argument(
-        "--interval", type=float, default=2.0, help="refresh seconds (default 2)"
-    )
-    jobs_live.add_argument("--once", action="store_true", help="render once and exit")
-    jobs_live.add_argument(
-        "--all", action="store_true", help="include done/dead history"
-    )
-    jobs_live.add_argument(
-        "--project", default=None, help="limit fleet to one graph/project id"
-    )
-    jobs_live.set_defaults(func=cmd_jobs, jobs_command="live")
-
-    jobs_results = jobs_sub.add_parser("results", help="Summarize evaluator output")
-    jobs_results.add_argument("--all", action="store_true", help="List every result row")
-    jobs_results.set_defaults(func=cmd_jobs)
-
-    jobs_set = jobs_sub.add_parser("set", help="Change runtime job state")
-    jobs_set.add_argument("ref", help="Job ID or uniquely matching node ID")
-    jobs_set.add_argument("state", help="New runtime job state")
-    jobs_set.add_argument(
-        "--reason",
-        required=True,
-        help="Why; stored in the runtime audit row",
-    )
-    jobs_set.add_argument("--yes", action="store_true", help="Skip confirmation")
-    jobs_set.set_defaults(func=cmd_jobs)
-
-    jobs_retry = jobs_sub.add_parser(
-        "retry", help="Reject a reviewed result and retry the same node"
-    )
-    jobs_retry.add_argument("ref", help="Job ID or uniquely matching node ID")
-    jobs_retry.add_argument(
-        "--reason", required=True, help="Human fix-list injected into the retry"
-    )
-    jobs_retry.add_argument("--yes", action="store_true", help="Skip confirmation")
-    jobs_retry.set_defaults(func=cmd_jobs)
-
-    jobs_adopt = jobs_sub.add_parser(
-        "adopt", help="Record out-of-runtime work as a collected job"
-    )
-    jobs_adopt.add_argument("--project", required=True, help="Graph project id")
-    jobs_adopt.add_argument("--node", required=True, help="Node id to adopt")
-    jobs_adopt.add_argument("--commit", required=True, help="Result commit SHA")
-    jobs_adopt.add_argument("--base", default=None, help="Diff-boundary SHA (ancestor of --commit)")
-    jobs_adopt.add_argument("--executor", default="local_subprocess", help="ADAPTERS key")
-    jobs_adopt.add_argument("--dry-run", action="store_true", help="Print the three rows and exit")
-    jobs_adopt.set_defaults(func=cmd_jobs)
-
-    receipt_p = sub.add_parser(
-        "receipt",
-        help="Append a mission worker node receipt (requires GDDP_RECEIPTS_PATH)",
-    )
-    receipt_p.add_argument("--node-id", required=True, help="Graph/feature node id")
-    receipt_p.add_argument("--base", required=True, help="Starting commit SHA")
-    receipt_p.add_argument("--result", required=True, help="Result commit SHA")
-    receipt_p.set_defaults(func=cmd_receipt)
-
-    verify_p = sub.add_parser("verify", help="Node evaluation harness")
-    verify_sub = verify_p.add_subparsers(dest="subcommand")
-
-    verify_node = verify_sub.add_parser(
-        "node", help="Run the runtime evaluator on a node; emit a receipt")
-    verify_node.add_argument("--project", required=True, help="Project ID")
-    verify_node.add_argument("--node", required=True, help="Node ID")
-    verify_node.add_argument("--repo-path", default=None,
-                             help="Path to the source repo checkout "
-                                  "(overrides auto-resolve)")
-    verify_node.add_argument("--live", action="store_true",
-                             help="Full two-lane evaluation (deterministic + semantic + integrity); default is the fast deterministic lane")
-    verify_node.add_argument("--base", default=None,
-                             help="Base commit the subject was built on; enables "
-                                  "subject-diff evidence (pipeline runs get this "
-                                  "from the session row automatically)")
-    verify_node.set_defaults(func=cmd_verify_node)
-
-    eval_p = sub.add_parser(
-        "eval", help="Live two-lane evaluation on a node (human-friendly)")
-    eval_p.add_argument(
-        "node",
-        nargs="?",
-        help="Node ID, or a lens: config | instructions | runs | show",
-    )
-    eval_p.add_argument(
-        "lens_node",
-        nargs="?",
-        default=None,
-        help="Node ID when the first token is a lens",
-    )
-    eval_p.add_argument("--project", default=None,
-                        help="Project ID (auto-resolved when unambiguous)")
-    eval_p.add_argument("--base", default=None,
-                        help="Base commit for subject-diff evidence "
-                             "(default: HEAD~1)")
-    eval_p.add_argument("--model", default=None,
-                        help="Preset (cheap|expensive) or raw model id")
-    eval_p.add_argument("--thinking", default=None,
-                        help="Semantic thinking level (e.g. medium, high)")
-    eval_p.add_argument("--integrity", choices=("on", "off"), default=None,
-                        help="Integrity lane (default: on for live)")
-    eval_p.add_argument("--lanes", choices=("live", "deterministic"), default=None,
-                        help="Evaluator lanes (default: live)")
-    eval_p.add_argument("--run", default=None,
-                        help="Receipt job_id for instructions/show")
-    eval_p.add_argument("--preflight", action="store_true",
-                        help="Instructions lens: offered pointers only, no receipt")
-    eval_p.set_defaults(func=cmd_eval)
-
-    review_p = sub.add_parser(
-        "review",
-        help="Human-gate review surface: latest verdict, subject diff, merge state",
-    )
-    review_p.add_argument("--project", required=True, help="Project ID")
-    review_p.add_argument("--node", required=True, help="Node ID")
-    review_p.add_argument("--repo-path", default=None,
-                          help="Path to the source repo checkout (overrides auto-resolve)")
-    review_p.add_argument("--full", action="store_true",
-                          help="Full patch instead of --stat")
-    review_p.set_defaults(func=cmd_review)
-
-    obs_p = sub.add_parser("obsidian", help="Obsidian vault export")
-    obs_sub = obs_p.add_subparsers(dest="subcommand")
-
-    obs_export = obs_sub.add_parser(
-        "export", help="Export one graph to an Obsidian vault folder")
-    obs_export.add_argument("--project", required=True,
-                            help="Graph to export (graphs/<project>/)")
-    obs_export.add_argument("--vault", type=Path, default=None,
-                            help="Destination vault (default: ~/Obsidian/gdd-<project>)")
-    obs_export.add_argument("--dry-run", action="store_true")
-    obs_export.set_defaults(func=cmd_obsidian_export)
-
-    deliver_p = sub.add_parser(
-        "deliver", help="Publish a graph's delivery commit / retire transport refs")
-    deliver_sub = deliver_p.add_subparsers(dest="subcommand")
-
-    deliver_publish = deliver_sub.add_parser(
-        "publish", help="Push the graph's unique delivery commit to review/<project>")
-    deliver_publish.add_argument("project", help="Project ID")
-    deliver_publish.set_defaults(func=cmd_deliver)
-
-    deliver_cleanup = deliver_sub.add_parser(
-        "cleanup", help="List (default) or delete this graph's gddp/attempt-*/result-* refs")
-    deliver_cleanup.add_argument("project", help="Project ID")
-    deliver_cleanup.add_argument(
-        "--delete", action="store_true",
-        help="Actually delete the refs (default: dry run, list only)",
-    )
-    deliver_cleanup.set_defaults(func=cmd_deliver)
-
-    proj_p = sub.add_parser("project", help="Project operations")
-    proj_sub = proj_p.add_subparsers(dest="subcommand")
-
-    proj_new = proj_sub.add_parser("new", help="Create project skeleton")
-    proj_new.add_argument("--project-id", required=True, help="kebab-case project id")
-    proj_new.add_argument("--project-name", default=None, help="Display name")
-    proj_new.add_argument("--repo", default="")
-    source = proj_new.add_mutually_exclusive_group(required=False)
-    source.add_argument("--from-outline", type=Path, default=None, help="Markdown outline file")
-    source.add_argument("--from-graphify", type=Path, default=None, help="graphify-out/graph.json file")
-    proj_new.add_argument("--dry-run", action="store_true")
-    proj_new.add_argument("--force", action="store_true")
-    proj_new.set_defaults(func=cmd_project_new)
-
-    proj_val = proj_sub.add_parser("validate", help="Validate project.yaml files")
-    proj_val.add_argument("--project", default=None, help="Project ID (omit for all)")
-    proj_val.set_defaults(func=cmd_project_validate)
-
-    args = parser.parse_args(argv)
-    return args.func(args)
-
+insert_dispatch_events = cli_dispatch.insert_dispatch_events
+_dispatch_flow = cli_dispatch._dispatch_flow
+_confirm_dispatch = cli_dispatch._confirm_dispatch
+_connect_events_db = cli_dispatch._connect_events_db
+_classify_dispatch_items = cli_dispatch._classify_dispatch_items
+_systemd_status = cli_heartbeat._systemd_status
+_spool_roots = cli_watch._spool_roots
+_discover_attempts = cli_watch._discover_attempts
+_diff_summary = cli_watch._diff_summary
+_write_eval_knobs_sidecar = cli_eval._write_eval_knobs_sidecar
+_launchd_status = cli_heartbeat._launchd_status
+interactive_heartbeat = cli_heartbeat.interactive_heartbeat
+_recorded_attempt_dirs = cli_watch._recorded_attempt_dirs
+_filter_attempts = cli_watch._filter_attempts
+cmd_watch = cli_watch.cmd_watch
+cmd_runs = cli_watch.cmd_runs
+cmd_steer = cli_watch.cmd_steer
+interactive_watch = cli_watch.interactive_watch
+_run_live_eval = cli_eval._run_live_eval
+_resolve_eval_knobs = cli_eval._resolve_eval_knobs
+_load_eval_knobs_sidecar = cli_eval._load_eval_knobs_sidecar
+EvalKnobError = cli_eval.EvalKnobError
+cmd_eval = cli_eval.cmd_eval
+cmd_eval_config = cli_eval.cmd_eval_config
+cmd_eval_instructions = cli_eval.cmd_eval_instructions
+cmd_eval_runs = cli_eval.cmd_eval_runs
+cmd_eval_show = cli_eval.cmd_eval_show
+cmd_verify_node = cli_eval.cmd_verify_node
+show_status = cli_status.show_status
+interactive_status = cli_status.interactive_status
+interactive_validate = cli_status.interactive_validate
+validate_project = cli_status.validate_project
+_list_status_projects = cli_status._list_status_projects
+_collect_validate_failures = cli_status._collect_validate_failures
+_graph_projects = graph_io._graph_projects
+_resolve_project_repo = graph_io._resolve_project_repo
+_resolve_repo_for_project = graph_io._resolve_repo_for_project
+_auto_base_commit = graph_io._auto_base_commit
+_load_project_doc = graph_io._load_project_doc
 
 if __name__ == "__main__":
     sys.exit(main())
