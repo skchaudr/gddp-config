@@ -28,34 +28,6 @@ def parse_cli_argv(argv: list[str]) -> int:
         "--project", default=None, help="Open this project directly")
     node_browse.set_defaults(func=gddp.cmd_node_browse)
 
-    node_new = node_sub.add_parser("new", help="Interactive TUI node scaffold (full editor)")
-    node_new.set_defaults(func=gddp.cmd_node_new)
-
-    node_rapid = node_sub.add_parser("rapid", help="Minimal-keystroke rapid node adder")
-    node_rapid.add_argument("--project", required=True, help="Project ID")
-    node_rapid.add_argument("--repo", default="")
-    node_rapid.add_argument("--project-name", default=None)
-    node_rapid.add_argument("--llm-draft", action="store_true",
-                            help="Use LLM to draft why/acceptance/constraints")
-    node_rapid.add_argument("--dry-run", action="store_true")
-    node_rapid.set_defaults(func=gddp.cmd_node_rapid)
-
-    node_batch = node_sub.add_parser("batch", help="Walk through REPLACE_ME nodes in a project")
-    node_batch.add_argument("--project", required=True, help="Project ID")
-    node_batch.set_defaults(func=gddp.cmd_node_batch)
-
-    node_import = node_sub.add_parser("import", help="Import node YAML from file or stdin")
-    node_import.add_argument("--file", type=Path, default=None, help="YAML file to import")
-    node_import.add_argument("--stdin", action="store_true", help="Read YAML from stdin")
-    node_import.add_argument("--project", required=True, help="Project ID")
-    node_import.add_argument("--auto-approve", action="store_true")
-    node_import.add_argument("--dry-run", action="store_true")
-    node_import.add_argument(
-        "--update", action="store_true",
-        help="Replace an existing node; preserve its status",
-    )
-    node_import.set_defaults(func=gddp.cmd_node_import)
-
     node_val = node_sub.add_parser("validate", help="Validate nodes")
     node_val.add_argument("--project", default=None, help="Only check this project")
     node_val.add_argument("--json", action="store_true", help="Machine-readable output")
@@ -332,18 +304,6 @@ def parse_cli_argv(argv: list[str]) -> int:
                           help="Full patch instead of --stat")
     review_p.set_defaults(func=gddp.cmd_review)
 
-    obs_p = sub.add_parser("obsidian", help="Obsidian vault export")
-    obs_sub = obs_p.add_subparsers(dest="subcommand")
-
-    obs_export = obs_sub.add_parser(
-        "export", help="Export one graph to an Obsidian vault folder")
-    obs_export.add_argument("--project", required=True,
-                            help="Graph to export (graphs/<project>/)")
-    obs_export.add_argument("--vault", type=Path, default=None,
-                            help="Destination vault (default: ~/Obsidian/gdd-<project>)")
-    obs_export.add_argument("--dry-run", action="store_true")
-    obs_export.set_defaults(func=gddp.cmd_obsidian_export)
-
     deliver_p = sub.add_parser(
         "deliver", help="Publish a graph's delivery commit / retire transport refs")
     deliver_sub = deliver_p.add_subparsers(dest="subcommand")
@@ -364,17 +324,6 @@ def parse_cli_argv(argv: list[str]) -> int:
 
     proj_p = sub.add_parser("project", help="Project operations")
     proj_sub = proj_p.add_subparsers(dest="subcommand")
-
-    proj_new = proj_sub.add_parser("new", help="Create project skeleton")
-    proj_new.add_argument("--project-id", required=True, help="kebab-case project id")
-    proj_new.add_argument("--project-name", default=None, help="Display name")
-    proj_new.add_argument("--repo", default="")
-    source = proj_new.add_mutually_exclusive_group(required=False)
-    source.add_argument("--from-outline", type=Path, default=None, help="Markdown outline file")
-    source.add_argument("--from-graphify", type=Path, default=None, help="graphify-out/graph.json file")
-    proj_new.add_argument("--dry-run", action="store_true")
-    proj_new.add_argument("--force", action="store_true")
-    proj_new.set_defaults(func=gddp.cmd_project_new)
 
     proj_val = proj_sub.add_parser("validate", help="Validate project.yaml files")
     proj_val.add_argument("--project", default=None, help="Project ID (omit for all)")
