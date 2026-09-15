@@ -1677,6 +1677,226 @@ def _pick_list(
     )
 
 
+_PICK_OTHER = "__other__"
+_EXECUTOR_CHOICES = (
+    "",
+    "pi_rpc",
+    "local_subprocess",
+    "jules",
+    "droid",
+    "factory_mission",
+)
+_EVAL_THINKING_LEVELS = ("none", "low", "medium", "high", "xhigh")
+_CANNED_REASONS = (
+    "accepted",
+    "retrying",
+    "blocked on dependency",
+    "deferred",
+    "operator review",
+    "fix applied",
+)
+def _pick_other_value(heading: str, *, current: str = "") -> str | object:
+    """Type-in escape hatch after a picker row."""
+    try:
+        typed = Prompt.ask(
+            Text(heading, style="cyan"),
+            default=current,
+        ).strip()
+    except (EOFError, KeyboardInterrupt):
+        return _MENU_BACK
+    return typed
+
+
+def _pick_enum(
+    heading: str,
+    choices: list[tuple[str, str]],
+    *,
+    back_label: str = "back",
+) -> str | object:
+    """Single-value picker; Esc/q map to back/quit via ``_pick_list``."""
+    return _pick_list(heading, choices, back_label=back_label)
+
+
+def _pick_enum_or_other(
+    heading: str,
+    choices: list[tuple[str, str]],
+    *,
+    current: str = "",
+    other_label: str = "type custom value…",
+    back_label: str = "back",
+) -> str | object:
+    """Known values first; last row opens a type-in prompt."""
+    items = list(choices)
+    if other_label:
+        items.append((_PICK_OTHER, other_label))
+    picked = _pick_list(heading, items, back_label=back_label)
+    if picked in {_MENU_BACK, _MENU_QUIT, _MENU_REFRESH}:
+        return picked
+    if picked == _PICK_OTHER:
+        return _pick_other_value(heading, current=current)
+    return picked
+
+
+def _recent_commit_shas(repo: Path | None, *, count: int = 8) -> list[str]:
+    if repo is None or not repo.is_dir():
+        return []
+    proc = subprocess.run(
+        ["git", "-C", str(repo), "log", "--format=%H", f"-{count}"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if proc.returncode != 0:
+        return []
+    return [line.strip() for line in proc.stdout.splitlines() if line.strip()]
+
+
+def _collect_recent_reasons(
+    *,
+    project: str | None = None,
+    node_id: str | None = None,
+    limit: int = 8,
+) -> list[str]:
+    """Recent operator reasons from node status history when available."""
+    if not project or not node_id:
+        return []
+    node_cli = _import_module("node_cli")
+    hist_mod = getattr(node_cli, "_load_status_history_mod", lambda: None)()
+    if hist_mod is None:
+        return []
+    try:
+        runtime_root = resolve_runtime_root()
+    except RuntimeError:
+        runtime_root = None
+    try:
+        rows = hist_mod.load_history(
+            project,
+            node_id,
+            runtime_root=runtime_root,
+            strict=False,
+        )
+    except (OSError, ValueError):
+        return []
+    reasons: list[str] = []
+    for row in reversed(rows):
+        reason = str(row.get("reason") or "").strip()
+        if not reason or reason in reasons:
+            continue
+        reasons.append(reason)
+        if len(reasons) >= limit:
+            break
+    return reasons
+
+
+def _pick_reason(
+    heading: str = "reason",
+    *,
+    project: str | None = None,
+    node_id: str | None = None,
+    back_label: str = "back",
+) -> str | object:
+    """Recent + canned reasons; last row allows operator prose."""
+    items: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    for reason in _collect_recent_reasons(project=project, node_id=node_id):
+        if reason not in seen:
+            seen.add(reason)
+            items.append((reason, "recent"))
+    for reason in _CANNED_REASONS:
+        if reason not in seen:
+            seen.add(reason)
+            items.append((reason, "canned"))
+    items.append((_PICK_OTHER, "type custom reason…"))
+    picked = _pick_list(heading, items, back_label=back_label)
+    if picked in {_MENU_BACK, _MENU_QUIT, _MENU_REFRESH}:
+        return picked
+    if picked == _PICK_OTHER:
+        return _pick_other_value(heading)
+    return str(picked)
+
+
+def _config_setting_value(key: str, current: str) -> str | object:
+    """Picker for known settings; Prompt.ask for the rest."""
+    if key == "GDDP_EXECUTOR_OVERRIDE":
+        choices = [
+            ("", "default (per-project)"),
+            *[(value, value or "default") for value in _EXECUTOR_CHOICES if value],
+        ]
+        picked = _pick_enum_or_other(
+            "executor override",
+            choices,
+            current=current,
+            other_label="type custom executor…",
+            back_label="config",
+        )
+    elif key == "GDDP_INTEGRITY_MODE":
+        picked = _pick_enum(
+            "integrity lane",
+            [("on", "on"), ("off", "off")],
+            back_label="config",
+        )
+    elif key == "GDDP_EVAL_LANES_DEFAULT":
+        picked = _pick_enum(
+            "eval lanes default",
+            [("live", "live"), ("deterministic", "deterministic")],
+            back_label="config",
+        )
+    elif key == "GDDP_EVAL_MODEL_CHEAP":
+        preset = os.environ.get("GDDP_EVAL_MODEL_CHEAP") or _EVAL_PRESETS["cheap"]
+        choices = [("cheap", f"preset cheap → {preset}")]
+        if current and current not in {preset, "cheap"}:
+            choices.append((current, f"keep {current!r}"))
+        picked = _pick_enum_or_other(
+            "eval cheap model",
+            choices,
+            current=current or preset,
+            other_label="type raw model id…",
+            back_label="config",
+        )
+    elif key == "GDDP_EVAL_MODEL_EXPENSIVE":
+        preset = os.environ.get("GDDP_EVAL_MODEL_EXPENSIVE") or ""
+        choices: list[tuple[str, str]] = [("expensive", "preset expensive")]
+        if preset:
+            choices[0] = ("expensive", f"preset expensive → {preset}")
+        if current and current not in {preset, "expensive"}:
+            choices.append((current, f"keep {current!r}"))
+        picked = _pick_enum_or_other(
+            "eval expensive model",
+            choices,
+            current=current or preset,
+            other_label="type raw model id…",
+            back_label="config",
+        )
+    elif key == "GDDP_EVAL_THINKING_DEFAULT":
+        picked = _pick_enum_or_other(
+            "eval thinking default",
+            [(level, level) for level in _EVAL_THINKING_LEVELS],
+            current=current or "medium",
+            other_label="type custom thinking level…",
+            back_label="config",
+        )
+    else:
+        try:
+            picked = Prompt.ask(
+                f"    [{key}] (enter = keep {current!r}, x = clear)",
+                default=current,
+            ).strip()
+        except (EOFError, KeyboardInterrupt):
+            return _MENU_BACK
+        if picked == "x":
+            return ""
+        return picked
+
+    if picked in {_MENU_BACK, _MENU_QUIT, _MENU_REFRESH}:
+        return picked
+    if key in {"GDDP_EVAL_MODEL_CHEAP", "GDDP_EVAL_MODEL_EXPENSIVE"}:
+        if picked == "cheap":
+            return os.environ.get("GDDP_EVAL_MODEL_CHEAP") or _EVAL_PRESETS["cheap"]
+        if picked == "expensive":
+            return (os.environ.get("GDDP_EVAL_MODEL_EXPENSIVE") or "").strip()
+    return str(picked)
+
+
 def _batch_node_status(project: str, node_ids: list[str]):
     """One target status + shared reason → dual-write each selected node."""
     node_cli = _import_module("node_cli")
@@ -1697,12 +1917,14 @@ def _batch_node_status(project: str, node_ids: list[str]):
     if status in {_MENU_BACK, _MENU_QUIT}:
         return status
 
-    try:
-        reason = Prompt.ask(Text("shared reason", style="cyan")).strip()
-    except EOFError:
-        console.print(Text("Unchanged — reason required.", style="dim"))
-        return _MENU_BACK
-    if not reason:
+    reason = _pick_reason(
+        "shared reason",
+        project=project,
+        back_label="nodes",
+    )
+    if reason in {_MENU_BACK, _MENU_QUIT}:
+        return reason
+    if not str(reason).strip():
         console.print(Text("Unchanged — need a short reason.", style="yellow"))
         return _MENU_BACK
 
@@ -1797,12 +2019,10 @@ def _batch_job_state(job_ids: list[str], states: list[tuple[str, str | Text]]):
     state = _pick_list("job state", states, multi=False, back_label="jobs")
     if state in {_MENU_BACK, _MENU_QUIT}:
         return state
-    try:
-        reason = Prompt.ask(Text("shared reason", style="cyan")).strip()
-    except EOFError:
-        console.print(Text("Unchanged — reason required.", style="dim"))
-        return _MENU_BACK
-    if not reason:
+    reason = _pick_reason("shared reason", back_label="jobs")
+    if reason in {_MENU_BACK, _MENU_QUIT}:
+        return reason
+    if not str(reason).strip():
         console.print(Text("Unchanged — need a short reason.", style="yellow"))
         return _MENU_BACK
     actions = {
@@ -2278,15 +2498,17 @@ def _confirm_status_change(project: str, node_id: str, status: str) -> int:
     if choice != "y":
         console.print(Text("Unchanged.", style="dim"))
         return 1
-    try:
-        reason = Prompt.ask(
-            Text("reason", style="cyan"),
-        ).strip()
-    except EOFError:
+    reason = _pick_reason(
+        "reason",
+        project=project,
+        node_id=node_id,
+        back_label="review",
+    )
+    if reason in {_MENU_BACK, _MENU_QUIT}:
         console.print()
         console.print(Text("Unchanged — reason required.", style="dim"))
         return 1
-    if not reason:
+    if not str(reason).strip():
         console.print(Text("Unchanged — need a short reason for the history trail.", style="yellow"))
         return 1
     if status == "complete" and not _offer_acceptance_merge(project, node_id):
@@ -2758,11 +2980,15 @@ def _confirm_reject_and_retry(project: str, node_id: str) -> int:
     if _menu_choice(actions, default="n") != "y":
         console.print(Text("Unchanged.", style="dim"))
         return 1
-    try:
-        reason = Prompt.ask(Text("fix-list / reason", style="cyan")).strip()
-    except EOFError:
+    reason = _pick_reason(
+        "fix-list / reason",
+        project=project,
+        node_id=node_id,
+        back_label="review",
+    )
+    if reason in {_MENU_BACK, _MENU_QUIT}:
         reason = ""
-    if not reason:
+    if not str(reason).strip():
         console.print(Text("Unchanged — a retry fix-list is required.", style="yellow"))
         return 1
 
@@ -2771,7 +2997,7 @@ def _confirm_reject_and_retry(project: str, node_id: str) -> int:
         node_id=node_id,
         status="ready",
         yes=True,
-        reason=reason,
+        reason=str(reason),
     )
     if rc != 0:
         return rc
@@ -3325,18 +3551,17 @@ def _confirm_job_state_change(ref: str, state: str) -> int:
     if _menu_choice(actions, default="n") != "y":
         console.print(Text("Unchanged.", style="dim"))
         return 1
-    try:
-        reason = Prompt.ask(Text("reason", style="cyan")).strip()
-    except EOFError:
+    reason = _pick_reason("reason", back_label="jobs")
+    if reason in {_MENU_BACK, _MENU_QUIT}:
         console.print()
         console.print(Text("Unchanged — reason required.", style="dim"))
         return 1
-    if not reason:
+    if not str(reason).strip():
         console.print(Text("Unchanged — reason required.", style="yellow"))
         return 1
     try:
         jobs_status = load_runtime_jobs_module()
-        return jobs_status.apply_state_change(ref=ref, state=state, reason=reason)
+        return jobs_status.apply_state_change(ref=ref, state=state, reason=str(reason))
     except (RuntimeError, ValueError) as exc:
         console.print(Text(f"ERROR: {exc}", style="red"))
         return 1
@@ -4020,32 +4245,34 @@ def interactive_heartbeat():
 
     operational = all(status["healthy"] for status in statuses.values())
     any_enabled = any(status["enabled"] for status in statuses.values())
-    try:
-        if operational:
-            answer = Prompt.ask(
-                "[cyan]disarm the control plane?[/] (enter = yes, b = back)",
-                default="",
-            ).strip().lower()
-            script = "disarm.sh"
-        elif any_enabled:
-            answer = Prompt.ask(
-                "[cyan]degraded:[/] [r]epair/arm, [d]isarm, [b]ack",
-                default="r",
-            ).strip().lower()
-            if answer in ("d", "disarm"):
-                script = "disarm.sh"
-            else:
-                script = "arm.sh"
-        else:
-            answer = Prompt.ask(
-                "[cyan]arm the control plane?[/] (enter = yes, b = back)",
-                default="",
-            ).strip().lower()
-            script = "arm.sh"
-    except (EOFError, KeyboardInterrupt):
-        return _MENU_BACK
-    if answer in ("b", "back", "q"):
-        return _MENU_BACK
+    if operational:
+        actions = {
+            "d": ("disarm", "stop the control plane"),
+            "b": ("back", ""),
+        }
+        choice = _menu_choice(actions, default="b")
+        if choice != "d":
+            return _MENU_BACK
+        script = "disarm.sh"
+    elif any_enabled:
+        actions = {
+            "r": ("repair / arm", "run arm.sh to repair"),
+            "d": ("disarm", "run disarm.sh"),
+            "b": ("back", ""),
+        }
+        choice = _menu_choice(actions, default="r")
+        if choice == "b":
+            return _MENU_BACK
+        script = "disarm.sh" if choice == "d" else "arm.sh"
+    else:
+        actions = {
+            "a": ("arm", "start the control plane"),
+            "b": ("back", ""),
+        }
+        choice = _menu_choice(actions, default="b")
+        if choice != "a":
+            return _MENU_BACK
+        script = "arm.sh"
     env = dict(os.environ)
     if script == "arm.sh":
         env["MINI_HEARTBEAT_ARM"] = "1"
@@ -4437,36 +4664,78 @@ def _render_eval_runs(project: str, node_id: str):
     return _MENU_BACK
 
 
-def _eval_knob_picker(current: dict) -> dict:
+def _eval_knob_picker(current: dict, *, project: str | None = None) -> dict:
     """Per-run overrides for the next hub run. Not persisted to settings.env."""
     _clear_screen()
     console.print(Text("eval knobs · next run only", style="bold"))
-    try:
-        model = Prompt.ask(
-            "model (cheap|expensive|raw id)",
-            default=str(current.get("preset") or current.get("model") or ""),
-        ).strip()
-        thinking = Prompt.ask(
-            "thinking", default=str(current.get("thinking") or "medium"),
-        ).strip()
-        integrity = Prompt.ask(
-            "integrity (on|off)", default=str(current.get("integrity") or "on"),
-        ).strip()
-        lanes = Prompt.ask(
-            "lanes (live|deterministic)", default=str(current.get("lanes") or "live"),
-        ).strip()
-        base = Prompt.ask(
-            "base sha (empty = auto)", default=str(current.get("base") or ""),
-        ).strip()
-    except (EOFError, KeyboardInterrupt):
+    current_model = str(current.get("preset") or current.get("model") or "")
+    model_choices: list[tuple[str, str]] = [
+        ("cheap", "cheap preset"),
+        ("expensive", "expensive preset"),
+    ]
+    if current_model and current_model not in {"cheap", "expensive"}:
+        model_choices.append((current_model, f"keep {current_model!r}"))
+    model = _pick_enum_or_other(
+        "model",
+        model_choices,
+        current=current_model,
+        other_label="type raw model id…",
+        back_label="hub",
+    )
+    if model in {_MENU_BACK, _MENU_QUIT, _MENU_REFRESH}:
         return current
+
+    thinking = _pick_enum_or_other(
+        "thinking",
+        [(level, level) for level in _EVAL_THINKING_LEVELS],
+        current=str(current.get("thinking") or "medium"),
+        other_label="type custom thinking level…",
+        back_label="hub",
+    )
+    if thinking in {_MENU_BACK, _MENU_QUIT, _MENU_REFRESH}:
+        return current
+
+    integrity = _pick_enum(
+        "integrity",
+        [("on", "on"), ("off", "off")],
+        back_label="hub",
+    )
+    if integrity in {_MENU_BACK, _MENU_QUIT, _MENU_REFRESH}:
+        return current
+
+    lanes = _pick_enum(
+        "lanes",
+        [("live", "live"), ("deterministic", "deterministic")],
+        back_label="hub",
+    )
+    if lanes in {_MENU_BACK, _MENU_QUIT, _MENU_REFRESH}:
+        return current
+
+    repo = _resolve_repo_for_project(project) if project else None
+    base_choices: list[tuple[str, str]] = [("", "auto")]
+    for sha in _recent_commit_shas(repo):
+        short = sha[:12]
+        base_choices.append((sha, f"recent {short}"))
+    current_base = str(current.get("base") or "")
+    if current_base and all(value != current_base for value, _ in base_choices):
+        base_choices.append((current_base, f"keep {current_base[:12]}…"))
+    base = _pick_enum_or_other(
+        "base sha",
+        base_choices,
+        current=current_base,
+        other_label="type custom sha…",
+        back_label="hub",
+    )
+    if base in {_MENU_BACK, _MENU_QUIT, _MENU_REFRESH}:
+        return current
+
     try:
         return _resolve_eval_knobs(
-            model=model or None,
-            thinking=thinking or None,
-            integrity=integrity or None,
-            lanes=lanes or None,
-            base=base or None,
+            model=str(model).strip() or None,
+            thinking=str(thinking).strip() or None,
+            integrity=str(integrity).strip() or None,
+            lanes=str(lanes).strip() or None,
+            base=str(base).strip() or None,
         )
     except EvalKnobError as exc:
         console.print(Text(str(exc), style="red"))
@@ -4510,7 +4779,7 @@ def interactive_eval_hub(project: str, node_id: str):
         if choice == "r":
             _run_live_eval(project, node_id, base=knobs.get("base"), knobs=knobs)
         elif choice == "k":
-            knobs = _eval_knob_picker(knobs)
+            knobs = _eval_knob_picker(knobs, project=project)
         elif choice == "c":
             _page_view(_render_eval_config, title=f"eval-config-{project}-{node_id}")
         elif choice == "i":
@@ -4582,17 +4851,13 @@ def interactive_config():
         current = os.environ.get(key, "")
         console.print(Text(f"  {label}", style="bold cyan"))
         console.print(Text(f"    {hint}", style="dim"))
-        try:
-            answer = Prompt.ask(
-                f"    [{key}] (enter = keep {current!r}, x = clear)",
-                default=current,
-            ).strip()
-        except (EOFError, KeyboardInterrupt):
+        answer = _config_setting_value(key, current)
+        if answer in {_MENU_BACK, _MENU_QUIT, _MENU_REFRESH}:
             return _MENU_BACK
         if answer == "x":
             settings[key] = ""
         elif answer != current or answer:
-            settings[key] = answer
+            settings[key] = str(answer)
         else:
             settings[key] = current
         console.print()

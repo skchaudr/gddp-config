@@ -212,7 +212,7 @@ class HeartbeatStateTests(unittest.TestCase):
         with patch.object(gddp, "_launchd_status", side_effect=[intake, heartbeat]), \
                 patch.object(gddp.platform, "system", return_value="Darwin"), \
                 patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp/runtime")), \
-                patch.object(gddp.Prompt, "ask", return_value="d"), \
+                patch.object(gddp, "_menu_choice", return_value="d"), \
                 patch.object(gddp, "_clear_screen"), \
                 patch.object(gddp, "_pause"), \
                 patch.object(gddp.subprocess, "run") as run:
@@ -745,8 +745,8 @@ class OverviewTests(unittest.TestCase):
                 patch.object(gddp, "run_runtime_jobs", return_value=0) as run, \
                 patch.object(gddp, "load_runtime_jobs_module", return_value=operator), \
                 patch.object(
-                    gddp.Prompt,
-                    "ask",
+                    gddp,
+                    "_pick_reason",
                     return_value="operator reviewed recovery",
                 ), \
                 patch.object(gddp, "_clear_screen"):
@@ -1332,7 +1332,7 @@ class OverviewTests(unittest.TestCase):
             return node_cli
 
         with patch.object(gddp, "_import_module", side_effect=import_module), \
-                patch.object(gddp.Prompt, "ask", return_value="accepted after review"), \
+                patch.object(gddp, "_pick_reason", return_value="accepted after review"), \
                 patch.object(node_cli, "cmd_show", wraps=node_cli.cmd_show) as show, \
                 patch.object(
                     node_cli, "cmd_set_status", wraps=node_cli.cmd_set_status
@@ -1405,7 +1405,7 @@ class OverviewTests(unittest.TestCase):
         )
         with patch.object(gddp, "_import_module", return_value=node_cli), \
                 patch.object(gddp, "_menu_choice", return_value="y"), \
-                patch.object(gddp.Prompt, "ask", return_value="new clean user"), \
+                patch.object(gddp, "_pick_reason", return_value="new clean user"), \
                 patch.object(gddp, "_offer_publish_graph_status") as publish, \
                 patch.object(gddp, "run_runtime_jobs", return_value=0) as retry, \
                 patch.object(gddp, "_clear_screen"):
@@ -1636,8 +1636,8 @@ class OverviewTests(unittest.TestCase):
 
         with patch.object(gddp, "_import_module", side_effect=import_module), \
                 patch.object(
-                    gddp.Prompt,
-                    "ask",
+                    gddp,
+                    "_pick_reason",
                     return_value="operator reviewed missing evidence",
                 ), \
                 patch.object(gddp, "_clear_screen"), \
@@ -1676,7 +1676,7 @@ class OverviewTests(unittest.TestCase):
             return terminal if name == "terminal" else node_cli
 
         with patch.object(gddp, "_import_module", side_effect=import_module), \
-                patch.object(gddp.Prompt, "ask", return_value="looks good"), \
+                patch.object(gddp, "_pick_reason", return_value="looks good"), \
                 patch.object(gddp, "_offer_acceptance_merge", return_value=False), \
                 patch.object(node_cli, "cmd_set_status") as set_status:
             rc = gddp._confirm_status_change("demo", "alpha", "complete")
@@ -1719,7 +1719,7 @@ class OverviewTests(unittest.TestCase):
             return terminal if name == "terminal" else node_cli
 
         with patch.object(gddp, "_import_module", side_effect=import_module), \
-                patch.object(gddp.Prompt, "ask", return_value="ship it"), \
+                patch.object(gddp, "_pick_reason", return_value="ship it"), \
                 patch.object(
                     gddp, "_offer_publish_graph_status"
                 ) as publish, \
@@ -1820,7 +1820,7 @@ class OverviewTests(unittest.TestCase):
             return terminal if name == "terminal" else node_cli
 
         with patch.object(gddp, "_import_module", side_effect=import_module), \
-                patch.object(gddp.Prompt, "ask", return_value="  "), \
+                patch.object(gddp, "_pick_reason", return_value="  "), \
                 patch.object(node_cli, "cmd_set_status") as set_status:
             rc = gddp._confirm_status_change("demo", "alpha", "deferred")
 
@@ -2675,6 +2675,101 @@ class AttemptDiscoveryTests(unittest.TestCase):
             self.assertIn((runtime / "canonical").resolve(), roots)
             self.assertNotIn((runtime / "family-cursor").resolve(), roots)
             self.assertNotIn((runtime / "family-pi").resolve(), roots)
+
+
+class TuiPickerTests(unittest.TestCase):
+    def _menu_terminal(self, keys: list[str]):
+        key_iter = iter(keys)
+        return SimpleNamespace(
+            getch=lambda: next(key_iter),
+            clear_lines=lambda n: None,
+        )
+
+    def test_eval_knob_picker_uses_list_not_prompt_for_model(self):
+        picks = iter(["cheap", "medium", "on", "live", ""])
+        next_pick = lambda *a, **k: next(picks)
+        with patch.object(gddp, "_pick_enum_or_other", side_effect=next_pick), \
+                patch.object(gddp, "_pick_enum", side_effect=next_pick), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp.Prompt, "ask") as ask, \
+                patch.object(gddp.console, "print"):
+            result = gddp._eval_knob_picker({}, project="demo")
+        ask.assert_not_called()
+        self.assertEqual(result.get("preset"), "cheap")
+
+    def test_eval_knob_picker_back_keeps_current(self):
+        with patch.object(gddp, "_pick_enum_or_other", return_value=gddp._MENU_BACK), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp.console, "print"):
+            current = {"preset": "cheap", "thinking": "medium"}
+            self.assertIs(gddp._eval_knob_picker(current, project="demo"), current)
+
+    def test_config_executor_uses_picker_not_prompt(self):
+        with patch.object(gddp, "_pick_enum_or_other", return_value="pi_rpc"), \
+                patch.object(gddp.Prompt, "ask") as ask:
+            value = gddp._config_setting_value("GDDP_EXECUTOR_OVERRIDE", "")
+        ask.assert_not_called()
+        self.assertEqual(value, "pi_rpc")
+
+    def test_config_free_text_field_still_prompts(self):
+        with patch.object(gddp.Prompt, "ask", return_value="900") as ask:
+            value = gddp._config_setting_value("GDDP_PI_RPC_TURN_TIMEOUT_S", "600")
+        ask.assert_called_once()
+        self.assertEqual(value, "900")
+
+    def test_interactive_heartbeat_launchd_arm_via_menu_not_prompt(self):
+        terminal = self._menu_terminal(["a"])
+        degraded = {
+            "registered": True,
+            "enabled": False,
+            "healthy": False,
+            "state": "missing",
+            "runs": 0,
+            "last_exit": None,
+        }
+        with patch.object(gddp.platform, "system", return_value="Darwin"), \
+                patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "_launchd_status", return_value=degraded), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "_pause"), \
+                patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp/runtime")), \
+                patch.object(gddp.subprocess, "run") as run, \
+                patch.object(gddp.Prompt, "ask") as ask, \
+                patch.object(gddp.console, "print"):
+            gddp.interactive_heartbeat()
+        ask.assert_not_called()
+        run.assert_called()
+
+    def test_confirm_status_change_reason_picker_path(self):
+        terminal = SimpleNamespace(getch=lambda: "y")
+        node_cli = SimpleNamespace(cmd_set_status=lambda **kwargs: 0)
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp, "_pick_reason", return_value="accepted") as pick, \
+                patch.object(gddp, "_offer_publish_graph_status"), \
+                patch.object(gddp.Prompt, "ask") as ask, \
+                patch.object(gddp.console, "print"):
+            rc = gddp._confirm_status_change("demo", "alpha", "ready")
+        pick.assert_called_once()
+        ask.assert_not_called()
+        self.assertEqual(rc, 0)
+
+    def test_confirm_status_change_reason_custom_type_in(self):
+        terminal = SimpleNamespace(getch=lambda: "y")
+        node_cli = SimpleNamespace(cmd_set_status=lambda **kwargs: 0)
+
+        def import_module(name):
+            return terminal if name == "terminal" else node_cli
+
+        with patch.object(gddp, "_import_module", side_effect=import_module), \
+                patch.object(gddp, "_pick_reason", return_value="operator prose fix"), \
+                patch.object(gddp, "_offer_publish_graph_status"), \
+                patch.object(gddp.console, "print"):
+            rc = gddp._confirm_status_change("demo", "alpha", "ready")
+        self.assertEqual(rc, 0)
 
 
 class TuiDeadEndTests(unittest.TestCase):
