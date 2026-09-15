@@ -8,13 +8,13 @@ Branch: fix/gddp-heartbeat-tui
 
 ## Empirical Reality (2-3 sentences max, anything more must be critically justifiable)
 
-Vision passed on box desktop systemd path (timer-absent host): status panel, arm/disarm/refresh/back menu, clean exit via `b`/`q`.
+Vision passed on box desktop systemd path; adversarial review fixes landed (sticky notices, missing-kit guard, runtime-root soft-fail).
 
 ### Scope touched (One file per line, +/- for only what was changed)
 
-+ scripts/gddp.py — systemd/launchd heartbeat status renderers and menu loop
-+ scripts/test_gddp.py — absent/inactive/active menu coverage + launchd arm-via-menu
-+ .handoffs/062-gddp-heartbeat-tui.md — this handoff
++ scripts/gddp.py — sticky notices, `_try_resolve_runtime_root`, launchd script guard
++ scripts/test_gddp.py — sticky-notice + missing-kit + runtime-unresolved tests
++ .handoffs/062-gddp-heartbeat-tui.md — adversarial findings + vision record
 
 ### Constrained areas touched (none / list + justification)
 
