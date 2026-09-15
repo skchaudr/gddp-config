@@ -1132,7 +1132,7 @@ class OverviewTests(unittest.TestCase):
                 self.assertIn("RUNTIME", output.getvalue())
 
     def test_interactive_status_all_and_one(self):
-        keys = iter(["a", "x", "o", "x", "b"])
+        keys = iter(["a", "b", "o", "b", "b"])
         terminal = SimpleNamespace(
             getch=lambda: next(keys),
             clear_lines=lambda n: None,
@@ -2145,7 +2145,7 @@ class EvalWiringTests(unittest.TestCase):
             outcome = gddp.interactive_eval_hub("demo", "alpha")
         live.assert_called_once()
         self.assertEqual(live.call_args.args[:2], ("demo", "alpha"))
-        pause.assert_called()
+        pause.assert_not_called()
         self.assertIs(outcome, gddp._MENU_BACK)
 
     def test_offered_vs_read_formats_lane_files(self):
@@ -2675,6 +2675,125 @@ class AttemptDiscoveryTests(unittest.TestCase):
             self.assertIn((runtime / "canonical").resolve(), roots)
             self.assertNotIn((runtime / "family-cursor").resolve(), roots)
             self.assertNotIn((runtime / "family-pi").resolve(), roots)
+
+
+class TuiDeadEndTests(unittest.TestCase):
+    def _menu_terminal(self, keys: list[str]):
+        key_iter = iter(keys)
+        return SimpleNamespace(
+            getch=lambda: next(key_iter),
+            clear_lines=lambda n: None,
+        )
+
+    def test_interactive_frontier_project_back_without_pause(self):
+        terminal = self._menu_terminal(["b"])
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "_show_frontier"), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "_pause") as pause, \
+                patch.object(gddp.console, "print"):
+            outcome = gddp.interactive_frontier("demo")
+        pause.assert_not_called()
+        self.assertIs(outcome, gddp._MENU_BACK)
+
+    def test_interactive_validate_project_back_without_pause(self):
+        terminal = self._menu_terminal(["b"])
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "validate_project"), \
+                patch.object(gddp, "_collect_validate_failures", return_value=[]), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "_pause") as pause, \
+                patch.object(gddp.console, "print"):
+            outcome = gddp.interactive_validate("demo")
+        pause.assert_not_called()
+        self.assertIs(outcome, gddp._MENU_BACK)
+
+    def test_print_graph_truth_omits_shell_timeline_tip(self):
+        timeline_mod = SimpleNamespace(
+            build=lambda *a, **k: SimpleNamespace(
+                warnings=[],
+                entries=[SimpleNamespace(
+                    ts=datetime(2026, 1, 1, tzinfo=timezone.utc),
+                    who="test",
+                    text="event",
+                )],
+                notes=[],
+            ),
+            read_graph=lambda *a, **k: {"nodes": {"alpha": {"status": "ready", "title": "A"}}},
+        )
+        with patch.object(gddp, "_import_module", return_value=timeline_mod), \
+                patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp/runtime")), \
+                patch.object(gddp, "_resolve_repo_for_project", return_value=Path("/tmp/repo")), \
+                patch.object(gddp.console, "print") as printed:
+            gddp._print_graph_truth("demo")
+        rendered = " ".join(
+            str(getattr(c.args[0], "plain", c.args[0]))
+            for c in printed.call_args_list
+            if c.args
+        )
+        self.assertNotIn("gddp timeline", rendered)
+
+    def test_interactive_jobs_empty_open_skips_prompt(self):
+        terminal = self._menu_terminal(["o", "b"])
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "_runtime_job_items", return_value=[]), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp.Prompt, "ask") as ask, \
+                patch.object(gddp.console, "print"):
+            outcome = gddp.interactive_jobs("demo")
+        ask.assert_not_called()
+        self.assertIs(outcome, gddp._MENU_BACK)
+
+    def test_confirm_dispatch_escape_does_not_dispatch(self):
+        terminal = self._menu_terminal(["\x1b"])
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(sys.stdin, "isatty", return_value=True), \
+                patch.object(sys.stdout, "isatty", return_value=True), \
+                patch.object(gddp.console, "print"):
+            self.assertFalse(gddp._confirm_dispatch(2))
+
+    def test_offer_acceptance_merge_escape_aborts(self):
+        terminal = self._menu_terminal(["\x1b"])
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(
+                    gddp,
+                    "_latest_receipt",
+                    return_value={"merge_commit_sha": "abc123def456"},
+                ), \
+                patch.object(
+                    gddp, "_resolve_project_repo", return_value=Path("/tmp/repo")
+                ), \
+                patch.object(gddp, "_acceptance_merge_state", return_value="pending"), \
+                patch.object(gddp, "_default_branch", return_value="main"), \
+                patch.object(
+                    gddp.subprocess,
+                    "run",
+                    return_value=SimpleNamespace(
+                        returncode=0, stdout="abc123d tip\n", stderr=""
+                    ),
+                ), \
+                patch.object(gddp.console, "print"):
+            self.assertFalse(gddp._offer_acceptance_merge("demo", "alpha"))
+
+    def test_offer_publish_escape_skips_git_write(self):
+        calls: list[tuple] = []
+
+        def fake_git(*args, timeout=60):
+            calls.append(args)
+            if args[:2] == ("status", "--porcelain"):
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout=" M graphs/demo/nodes/alpha.yaml\n",
+                    stderr="",
+                )
+            return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+        terminal = self._menu_terminal(["\x1b"])
+        with patch.object(gddp, "_import_module", return_value=terminal), \
+                patch.object(gddp, "_config_git", side_effect=fake_git), \
+                patch.object(gddp.console, "print"):
+            gddp._offer_publish_graph_status("demo", "alpha", "ready", "x")
+        self.assertFalse(any(c and c[0] in {"add", "commit", "push"} for c in calls))
 
 
 class EditorCommandTests(unittest.TestCase):
