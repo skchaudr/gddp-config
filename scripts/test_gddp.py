@@ -1182,7 +1182,7 @@ class OverviewTests(unittest.TestCase):
         self.assertIn("w", displayed)
         self.assertEqual(set(displayed), set(handled))
         self.assertTrue(
-            {"n", "d", "w", "m"}.issubset(gddp._graph_hub_handlers())
+            {"n", "d", "w", "e", "m"}.issubset(gddp._graph_hub_handlers())
         )
 
     def test_paged_help_letters_stay_in_handled_set(self):
@@ -2134,10 +2134,10 @@ class ReviewRoutingTests(unittest.TestCase):
             "evaluations",
             "verify",
             "review",
-            "obsidian",
             "project",
         ):
             self.assertIn(name, gddp._CLI_COMMANDS)
+        self.assertNotIn("obsidian", gddp._CLI_COMMANDS)
 
 
 class EvalWiringTests(unittest.TestCase):
@@ -2312,19 +2312,27 @@ class EvalWiringTests(unittest.TestCase):
         live.assert_not_called()
         self.assertIs(outcome, gddp._MENU_BACK)
 
-    def test_interactive_evaluate_opens_hub(self):
+    def test_hub_e_evaluate_node_opens_hub(self):
         node_cli = SimpleNamespace(
             iter_nodes=lambda *a, **k: [("node-05-validate-decision-set", {"title": "x"}, {})],
         )
-        graphs = iter(["myapi-part1", gddp._MENU_BACK])
-        nodes = iter(["node-05-validate-decision-set", gddp._MENU_BACK])
-        with patch.object(gddp, "_pick_graph", side_effect=lambda *a, **k: next(graphs)), \
-                patch.object(gddp, "_pick_list", side_effect=lambda *a, **k: next(nodes)), \
-                patch.object(gddp, "_import_module", return_value=node_cli), \
+        evaluations = SimpleNamespace(
+            load_evaluation_rows=lambda **k: [],
+            format_evaluation_row=lambda row: str(row),
+        )
+        picks = iter([
+            gddp._PICK_EVAL_NODE,
+            "node-05-validate-decision-set",
+            gddp._MENU_BACK,
+            gddp._MENU_BACK,
+        ])
+        with patch.object(gddp, "_pick_list", side_effect=lambda *a, **k: next(picks)), \
+                patch.object(gddp, "_import_module", side_effect=lambda name: evaluations if name == "evaluations" else node_cli), \
                 patch.object(gddp, "interactive_eval_hub", return_value=gddp._MENU_BACK) as hub, \
                 patch.object(gddp, "_run_live_eval") as live, \
-                patch.object(gddp, "_clear_screen"):
-            outcome = gddp.interactive_evaluate()
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "console"):
+            outcome = gddp.interactive_graph_evaluations("myapi-part1")
         hub.assert_called_once_with("myapi-part1", "node-05-validate-decision-set")
         live.assert_not_called()
         self.assertIs(outcome, gddp._MENU_BACK)

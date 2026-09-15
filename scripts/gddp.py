@@ -103,7 +103,6 @@ _CLI_COMMANDS = frozenset(
         "eval",
         "review",
         "receipt",
-        "obsidian",
         "deliver",
         "project",
         "watch",
@@ -3289,6 +3288,99 @@ def interactive_evaluations():
         _page_view(_show_evaluation, title=f"evaluation-{row.get('job_id') or row.get('node_id') or 'detail'}")
 
 
+_PICK_EVAL_NODE = "__eval_node__"
+
+
+def _show_evaluation_row(row: dict) -> None:
+    """Pager for one evaluator receipt row."""
+    evaluations = _import_module("evaluations")
+
+    def _show_evaluation():
+        console.print(Text("evaluation", style="bold"))
+        if row.get("job_id") and row.get("source") == "result":
+            return run_runtime_jobs(["show", str(row["job_id"])], capture=True)
+        evaluations.print_evaluation_detail(row)
+        return None
+
+    _page_view(
+        _show_evaluation,
+        title=f"evaluation-{row.get('job_id') or row.get('node_id') or 'detail'}",
+    )
+
+
+def _interactive_eval_node_picker(project: str):
+    """Pick a node on this graph and open the evaluator hub."""
+    node_cli = _import_module("node_cli")
+    try:
+        nodes = list(node_cli.iter_nodes(ROOT, project))
+    except Exception as exc:
+        console.print(Text(f"Could not load {project}: {exc}", style="red"))
+        _pause()
+        return _MENU_BACK
+    node_items = [(node_id, str(doc.get("title") or "")) for node_id, doc, _ in nodes]
+    while True:
+        node_picked = _pick_list(
+            f"evaluate · nodes · {project}",
+            node_items,
+            preview_cmd=_node_preview_cmd(project),
+            back_label="evaluations",
+        )
+        if node_picked is _MENU_QUIT:
+            return _MENU_QUIT
+        if node_picked is _MENU_BACK:
+            return _MENU_BACK
+        node_id = node_picked[0] if isinstance(node_picked, list) else node_picked
+        outcome = interactive_eval_hub(project, node_id)
+        if outcome is _MENU_QUIT:
+            return _MENU_QUIT
+
+
+def interactive_graph_evaluations(project: str):
+    """Graph-scoped evaluator receipts; view one or open the eval hub for a node."""
+    evaluations = _import_module("evaluations")
+    while True:
+        db_path, receipt_root = _evaluation_sources()
+        rows = evaluations.load_evaluation_rows(db_path=db_path, receipt_root=receipt_root)
+        graph_rows = [row for row in rows if row.get("project_id") == project]
+        _clear_screen()
+        console.print(
+            Text("evaluations", style="bold")
+            .append(f"  ·  {project}", style="bold cyan")
+            .append("  ·  evidence only — does not change graph status", style="dim")
+        )
+        if graph_rows:
+            for row in graph_rows:
+                print(evaluations.format_evaluation_row(row))
+            print(f"\n{len(graph_rows)} evaluation(s) on this graph")
+        else:
+            print("No evaluator receipts yet for this graph.")
+        console.print()
+        items: list[tuple[str, str]] = [
+            (str(index), evaluations.format_evaluation_row(row))
+            for index, row in enumerate(graph_rows)
+        ]
+        items.append((_PICK_EVAL_NODE, "evaluate a node… — open evaluator hub"))
+        picked = _pick_list(
+            f"evaluations · {project}",
+            items,
+            multi=False,
+            back_label="graph",
+            refreshable=True,
+        )
+        if picked is _MENU_REFRESH:
+            continue
+        if picked is _MENU_QUIT:
+            return _MENU_QUIT
+        if picked is _MENU_BACK:
+            return _MENU_BACK
+        if picked == _PICK_EVAL_NODE:
+            outcome = _interactive_eval_node_picker(project)
+            if outcome is _MENU_QUIT:
+                return _MENU_QUIT
+            continue
+        _show_evaluation_row(graph_rows[int(picked)])
+
+
 def cmd_evaluations(_args) -> int:
     """Print the evaluator receipt list for non-interactive use and tests."""
     evaluations = _import_module("evaluations")
@@ -3508,15 +3600,17 @@ def static_overview():
     table.add_column("group", style="bold cyan", no_wrap=True)
     table.add_column("owns")
     table.add_column("start with", style="dim", no_wrap=True)
-    table.add_row("menu", "pick a graph → its truth → nodes · dispatch · live", "gddp")
+    table.add_row(
+        "menu",
+        "pick a graph → truth → nodes · dispatch · live · evaluations",
+        "gddp",
+    )
     table.add_row("timeline", "what happened to a graph, in order, in words", "gddp timeline <project>")
     table.add_row("live", "running executors, diffs, events stream", "gddp watch / gddp jobs live")
-    table.add_row("node", "graph truth, authoring, runtime/evaluator join", "gddp node list")
+    table.add_row("node", "graph truth and runtime/evaluator join", "gddp node list")
     table.add_row("jobs", "runtime queue, results, and audited state changes", "gddp jobs list")
     table.add_row("evaluations", "evaluator receipts, verdicts, and timing", "gddp evaluations")
-    table.add_row("verify", "node evaluation", "gddp verify node")
-    table.add_row("project", "project graph creation and validation", "gddp project -h")
-    table.add_row("obsidian", "graph export", "gddp obsidian export")
+    table.add_row("eval", "live two-lane evaluation on a node", "gddp eval")
     console.print(table)
     controls = " · ".join(
         f"{key} {name}" for key, (name, _desc) in _front_page_actions().items()
@@ -3537,7 +3631,6 @@ def _graph_more_menu(project: str):
         "s": ("status", "completion + node phases"),
         "v": ("validate", "check this graph definition"),
         "t": ("timeline", "what happened on this graph"),
-        "e": ("evaluations", "evaluator receipts"),
         "d": ("deliver", "publish review branch / retire transport refs"),
         "b": ("back", ""),
         "q": ("quit", ""),
@@ -3564,8 +3657,6 @@ def _graph_more_menu(project: str):
                 outcome = interactive_validate(project)
             elif choice == "t":
                 outcome = _interactive_timeline(project)
-            elif choice == "e":
-                outcome = interactive_evaluations()
             elif choice == "d":
                 outcome = interactive_graph_delivery(project)
             else:
@@ -3584,7 +3675,8 @@ def _graph_hub_actions() -> dict[str, tuple[str, str]]:
         "n": ("nodes", "review evidence and update graph truth"),
         "d": ("dispatch", "send ready work on this graph"),
         "w": ("live", "running executors for this graph"),
-        "m": ("more", "jobs · frontier · status · validate · evaluations"),
+        "e": ("evaluations", "receipts · evaluate a node"),
+        "m": ("more", "jobs · frontier · status · validate · timeline · deliver"),
         "b": ("graphs", ""),
         "q": ("quit", ""),
     }
@@ -3595,6 +3687,7 @@ def _graph_hub_handlers() -> dict[str, object]:
         "n": interactive_nodes,
         "d": interactive_dispatch,
         "w": interactive_watch,
+        "e": interactive_graph_evaluations,
         "m": _graph_more_menu,
     }
 
@@ -3697,6 +3790,8 @@ def interactive_graph_hub(project: str):
                 outcome = interactive_dispatch(project)
             elif choice == "w":
                 outcome = interactive_watch(project)
+            elif choice == "e":
+                outcome = interactive_graph_evaluations(project)
             elif choice == "m":
                 outcome = _graph_more_menu(project)
             else:
@@ -4272,39 +4367,6 @@ def interactive_eval_hub(project: str, node_id: str):
                 )
             else:
                 console.print(Text("No runs yet.", style="yellow"))
-
-
-def interactive_evaluate():
-    """Pick a graph → node → open the evaluator hub."""
-    while True:
-        picked = _pick_graph("evaluate · graphs", back_label="main menu")
-        if picked is _MENU_QUIT:
-            return _MENU_QUIT
-        if picked is _MENU_BACK:
-            return _MENU_BACK
-        project = str(picked)
-        try:
-            nodes = list(_import_module("node_cli").iter_nodes(ROOT, project))
-        except Exception as exc:
-            console.print(Text(f"Could not load {project}: {exc}", style="red"))
-            _pause()
-            continue
-        node_items = [(node_id, str(doc.get("title") or "")) for node_id, doc, _ in nodes]
-        while True:
-            node_picked = _pick_list(
-                f"evaluate · nodes · {project}",
-                node_items,
-                preview_cmd=_node_preview_cmd(project),
-                back_label="graphs",
-            )
-            if node_picked is _MENU_QUIT:
-                return _MENU_QUIT
-            if node_picked is _MENU_BACK:
-                break
-            node_id = node_picked[0] if isinstance(node_picked, list) else node_picked
-            outcome = interactive_eval_hub(project, node_id)
-            if outcome is _MENU_QUIT:
-                return _MENU_QUIT
 
 
 def interactive_config():
