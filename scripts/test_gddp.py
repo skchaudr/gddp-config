@@ -2847,7 +2847,8 @@ class TuiPickerTests(unittest.TestCase):
         self.assertEqual(value, "900")
 
     def test_interactive_heartbeat_launchd_arm_via_menu_not_prompt(self):
-        terminal = self._menu_terminal(["a"])
+        # arm then back — menu loop redraws after mutating actions
+        terminal = self._menu_terminal(["a", "b"])
         degraded = {
             "registered": True,
             "enabled": False,
@@ -2867,7 +2868,11 @@ class TuiPickerTests(unittest.TestCase):
                 patch.object(gddp.console, "print"):
             gddp.interactive_heartbeat()
         ask.assert_not_called()
-        run.assert_called()
+        run.assert_called_once()
+        self.assertEqual(
+            run.call_args.args[0],
+            ["bash", "/tmp/runtime/deploy/mini-heartbeat/bin/arm.sh"],
+        )
 
     def test_confirm_status_change_reason_picker_path(self):
         terminal = SimpleNamespace(getch=lambda: "y")
