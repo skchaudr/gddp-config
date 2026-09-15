@@ -82,6 +82,14 @@ def _interpret_menu_screen(blob: str, width: int, height: int = 24) -> list[str]
     return lines
 
 
+def _stub_heartbeat_kit(runtime_root: Path) -> Path:
+    kit = runtime_root / "deploy" / "mini-heartbeat"
+    (kit / "bin").mkdir(parents=True, exist_ok=True)
+    (kit / "bin" / "arm.sh").write_text("#!/bin/bash\n")
+    (kit / "bin" / "disarm.sh").write_text("#!/bin/bash\n")
+    return kit
+
+
 class HeartbeatStateTests(unittest.TestCase):
     def test_registered_but_disabled_is_off(self):
         calls = [
@@ -146,17 +154,16 @@ class HeartbeatStateTests(unittest.TestCase):
             "timer_line": "- - Sun 2026-09-06 07:51:27 UTC 1h ago gddp-heartbeat.timer gddp-heartbeat.service",
             "journal": "systemd[1]: gddp-heartbeat.service: Failed with result 'exit-code'.",
         }
-        term = type("T", (), {"getch": staticmethod(lambda: "a")})
         out = StringIO()
         with patch.object(gddp.platform, "system", return_value="Linux"), \
                 patch.object(gddp, "_systemd_status", return_value=facts), \
                 patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp/runtime")), \
-                patch.object(gddp, "_import_module", return_value=term), \
+                patch.object(gddp, "_menu_choice", side_effect=["a", "b"]), \
                 patch.object(gddp, "_clear_screen"), \
                 patch.object(gddp, "_pause"), \
                 patch.object(gddp, "console", Console(file=out, width=160, force_terminal=False)), \
                 patch.object(gddp.subprocess, "run") as run:
-            run.return_value = type("P", (), {"returncode": 0, "stderr": ""})()
+            run.return_value = type("P", (), {"returncode": 0, "stderr": "", "stdout": ""})()
             gddp.interactive_heartbeat()
 
         self.assertEqual(
@@ -176,21 +183,110 @@ class HeartbeatStateTests(unittest.TestCase):
             "timer_line": "",
             "journal": "",
         }
-        term = type("T", (), {"getch": staticmethod(lambda: "d")})
         with patch.object(gddp.platform, "system", return_value="Linux"), \
                 patch.object(gddp, "_systemd_status", return_value=facts), \
                 patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp/runtime")), \
-                patch.object(gddp, "_import_module", return_value=term), \
+                patch.object(gddp, "_menu_choice", side_effect=["d", "b"]), \
                 patch.object(gddp, "_clear_screen"), \
                 patch.object(gddp, "_pause"), \
                 patch.object(gddp.subprocess, "run") as run:
-            run.return_value = type("P", (), {"returncode": 0, "stderr": ""})()
+            run.return_value = type("P", (), {"returncode": 0, "stderr": "", "stdout": ""})()
             gddp.interactive_heartbeat()
 
         self.assertEqual(
             run.call_args.args[0],
             ["systemctl", "--user", "stop", "gddp-heartbeat.timer"],
         )
+
+    def test_systemd_absent_timer_shows_status_and_menu_not_pause_only(self):
+        facts = {"journal": "", "timer_line": ""}
+        menu_calls: list[dict[str, tuple[str, str]]] = []
+        out = StringIO()
+
+        def capture_menu(actions, default):
+            menu_calls.append(dict(actions))
+            return "b"
+
+        with patch.object(gddp.platform, "system", return_value="Linux"), \
+                patch.object(gddp, "_systemd_status", return_value=facts), \
+                patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp/runtime")), \
+                patch.object(gddp, "_menu_choice", side_effect=capture_menu), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "_pause") as pause, \
+                patch.object(gddp, "console", Console(file=out, width=160, force_terminal=False)), \
+                patch.object(gddp.subprocess, "run") as run:
+            gddp.interactive_heartbeat()
+
+        self.assertEqual(len(menu_calls), 1)
+        self.assertIn("a", menu_calls[0])
+        self.assertIn("d", menu_calls[0])
+        self.assertIn("b", menu_calls[0])
+        pause.assert_not_called()
+        run.assert_not_called()
+        text = out.getvalue()
+        self.assertIn("absent", text.lower())
+        self.assertIn("gddp-heartbeat.timer", text)
+        self.assertIn("mini-heartbeat/systemd", text)
+
+    def test_systemd_inactive_timer_menu_offers_arm_and_disarm(self):
+        facts = {
+            "gddp-heartbeat.timer.FragmentPath": "/x/gddp-heartbeat.timer",
+            "gddp-heartbeat.timer.ActiveState": "inactive",
+            "gddp-heartbeat.timer.UnitFileState": "enabled",
+            "gddp-heartbeat.service.FragmentPath": "/x/gddp-heartbeat.service",
+            "gddp-heartbeat.service.Result": "success",
+            "timer_line": "",
+            "journal": "",
+        }
+        menu_calls: list[dict[str, tuple[str, str]]] = []
+
+        def capture_menu(actions, default):
+            menu_calls.append(dict(actions))
+            return "b"
+
+        with patch.object(gddp.platform, "system", return_value="Linux"), \
+                patch.object(gddp, "_systemd_status", return_value=facts), \
+                patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp/runtime")), \
+                patch.object(gddp, "_menu_choice", side_effect=capture_menu), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "_pause"), \
+                patch.object(gddp.subprocess, "run"):
+            gddp.interactive_heartbeat()
+
+        self.assertEqual(len(menu_calls), 1)
+        self.assertIn("a", menu_calls[0])
+        self.assertIn("d", menu_calls[0])
+        self.assertIn("b", menu_calls[0])
+
+    def test_systemd_active_timer_menu_offers_arm_and_disarm(self):
+        facts = {
+            "gddp-heartbeat.timer.FragmentPath": "/x/gddp-heartbeat.timer",
+            "gddp-heartbeat.timer.ActiveState": "active",
+            "gddp-heartbeat.timer.UnitFileState": "enabled",
+            "gddp-heartbeat.service.FragmentPath": "/x/gddp-heartbeat.service",
+            "gddp-heartbeat.service.Result": "success",
+            "timer_line": "",
+            "journal": "",
+        }
+        menu_calls: list[dict[str, tuple[str, str]]] = []
+
+        def capture_menu(actions, default):
+            menu_calls.append(dict(actions))
+            return "b"
+
+        with patch.object(gddp.platform, "system", return_value="Linux"), \
+                patch.object(gddp, "_systemd_status", return_value=facts), \
+                patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp/runtime")), \
+                patch.object(gddp, "_menu_choice", side_effect=capture_menu), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "_pause"), \
+                patch.object(gddp.subprocess, "run"):
+            gddp.interactive_heartbeat()
+
+        self.assertEqual(len(menu_calls), 1)
+        self.assertIn("a", menu_calls[0])
+        self.assertIn("d", menu_calls[0])
+        self.assertIn("b", menu_calls[0])
 
     def test_degraded_control_plane_can_be_disarmed(self):
         intake = {
@@ -209,10 +305,16 @@ class HeartbeatStateTests(unittest.TestCase):
             "runs": 4,
             "last_exit": 0,
         }
-        with patch.object(gddp, "_launchd_status", side_effect=[intake, heartbeat]), \
+
+        def launchd_side_effect(label):
+            return intake if label == "com.gddp.intake" else heartbeat
+
+        runtime = Path("/tmp/runtime")
+        _stub_heartbeat_kit(runtime)
+        with patch.object(gddp, "_launchd_status", side_effect=launchd_side_effect), \
                 patch.object(gddp.platform, "system", return_value="Darwin"), \
-                patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp/runtime")), \
-                patch.object(gddp, "_menu_choice", return_value="d"), \
+                patch.object(gddp, "resolve_runtime_root", return_value=runtime), \
+                patch.object(gddp, "_menu_choice", side_effect=["d", "b"]), \
                 patch.object(gddp, "_clear_screen"), \
                 patch.object(gddp, "_pause"), \
                 patch.object(gddp.subprocess, "run") as run:
@@ -222,6 +324,109 @@ class HeartbeatStateTests(unittest.TestCase):
             run.call_args.args[0],
             ["bash", "/tmp/runtime/deploy/mini-heartbeat/bin/disarm.sh"],
         )
+
+    def test_launchd_arm_via_menu_when_control_plane_off(self):
+        off = {
+            "registered": False,
+            "enabled": False,
+            "healthy": False,
+            "state": "missing",
+            "runs": 0,
+            "last_exit": None,
+        }
+
+        def launchd_side_effect(label):
+            return off
+
+        menu_calls: list[dict[str, tuple[str, str]]] = []
+        choices = iter(["a", "b"])
+
+        def capture_menu(actions, default):
+            menu_calls.append(dict(actions))
+            return next(choices)
+
+        runtime = Path("/tmp/runtime")
+        _stub_heartbeat_kit(runtime)
+        with patch.object(gddp, "_launchd_status", side_effect=launchd_side_effect), \
+                patch.object(gddp.platform, "system", return_value="Darwin"), \
+                patch.object(gddp, "resolve_runtime_root", return_value=runtime), \
+                patch.object(gddp, "_menu_choice", side_effect=capture_menu), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "_pause"), \
+                patch.object(gddp.subprocess, "run") as run:
+            gddp.interactive_heartbeat()
+
+        self.assertIn("a", menu_calls[0])
+        self.assertIn("d", menu_calls[0])
+        self.assertIn("r", menu_calls[0])
+        self.assertEqual(
+            run.call_args.args[0],
+            ["bash", "/tmp/runtime/deploy/mini-heartbeat/bin/arm.sh"],
+        )
+
+    def test_systemd_absent_timer_arm_shows_sticky_cannot_arm_notice(self):
+        facts = {"journal": "", "timer_line": ""}
+        out = StringIO()
+        with patch.object(gddp.platform, "system", return_value="Linux"), \
+                patch.object(gddp, "_systemd_status", return_value=facts), \
+                patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp/runtime")), \
+                patch.object(gddp, "_menu_choice", side_effect=["a", "b"]), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "_pause"), \
+                patch.object(gddp, "console", Console(file=out, width=160, force_terminal=False)), \
+                patch.object(gddp.subprocess, "run") as run:
+            gddp.interactive_heartbeat()
+
+        run.assert_not_called()
+        self.assertIn("cannot arm", out.getvalue())
+
+    def test_launchd_missing_kit_does_not_subprocess(self):
+        off = {
+            "registered": False,
+            "enabled": False,
+            "healthy": False,
+            "state": "missing",
+            "runs": 0,
+            "last_exit": None,
+        }
+        out = StringIO()
+        runtime = Path("/tmp/runtime-missing-kit")
+
+        def launchd_side_effect(label):
+            return off
+
+        with patch.object(gddp, "_launchd_status", side_effect=launchd_side_effect), \
+                patch.object(gddp.platform, "system", return_value="Darwin"), \
+                patch.object(gddp, "resolve_runtime_root", return_value=runtime), \
+                patch.object(gddp, "_menu_choice", side_effect=["a", "b"]), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "_pause"), \
+                patch.object(gddp, "console", Console(file=out, width=160, force_terminal=False)), \
+                patch.object(gddp.subprocess, "run") as run:
+            gddp.interactive_heartbeat()
+
+        run.assert_not_called()
+        text = out.getvalue()
+        self.assertIn("missing", text.lower())
+        self.assertIn("GDDP_RUNTIME_ROOT", text)
+
+    def test_heartbeat_survives_unresolved_runtime_root(self):
+        out = StringIO()
+        with patch.object(gddp.platform, "system", return_value="Linux"), \
+                patch.object(gddp, "_systemd_status", return_value={"journal": "", "timer_line": ""}), \
+                patch.object(
+                    gddp,
+                    "resolve_runtime_root",
+                    side_effect=RuntimeError("gddp-runtime not found; set GDDP_RUNTIME_ROOT"),
+                ), \
+                patch.object(gddp, "_menu_choice", return_value="b"), \
+                patch.object(gddp, "_clear_screen"), \
+                patch.object(gddp, "console", Console(file=out, width=160, force_terminal=False)):
+            gddp.interactive_heartbeat()
+
+        text = out.getvalue()
+        self.assertIn("GDDP_RUNTIME_ROOT", text)
+        self.assertIn("absent", text.lower())
 
 
 class RuntimeJobsForwardingTests(unittest.TestCase):
@@ -2718,7 +2923,10 @@ class TuiPickerTests(unittest.TestCase):
         self.assertEqual(value, "900")
 
     def test_interactive_heartbeat_launchd_arm_via_menu_not_prompt(self):
-        terminal = self._menu_terminal(["a"])
+        # arm then back — menu loop redraws after mutating actions
+        terminal = self._menu_terminal(["a", "b"])
+        runtime = Path("/tmp/runtime")
+        _stub_heartbeat_kit(runtime)
         degraded = {
             "registered": True,
             "enabled": False,
@@ -2732,13 +2940,17 @@ class TuiPickerTests(unittest.TestCase):
                 patch.object(gddp, "_launchd_status", return_value=degraded), \
                 patch.object(gddp, "_clear_screen"), \
                 patch.object(gddp, "_pause"), \
-                patch.object(gddp, "resolve_runtime_root", return_value=Path("/tmp/runtime")), \
+                patch.object(gddp, "resolve_runtime_root", return_value=runtime), \
                 patch.object(gddp.subprocess, "run") as run, \
                 patch.object(gddp.Prompt, "ask") as ask, \
                 patch.object(gddp.console, "print"):
             gddp.interactive_heartbeat()
         ask.assert_not_called()
-        run.assert_called()
+        run.assert_called_once()
+        self.assertEqual(
+            run.call_args.args[0],
+            ["bash", "/tmp/runtime/deploy/mini-heartbeat/bin/arm.sh"],
+        )
 
     def test_confirm_status_change_reason_picker_path(self):
         terminal = SimpleNamespace(getch=lambda: "y")

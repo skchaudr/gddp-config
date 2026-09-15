@@ -4141,83 +4141,226 @@ def _systemd_status() -> dict[str, str]:
     return facts
 
 
-def _heartbeat_env_path() -> Path:
-    return resolve_runtime_root() / "deploy" / "mini-heartbeat" / "env" / "gddp.env"
+def _try_resolve_runtime_root() -> tuple[Path | None, str | None]:
+    """Resolve runtime root without blowing out of the heartbeat screen."""
+    try:
+        return resolve_runtime_root(), None
+    except RuntimeError as exc:
+        return None, str(exc)
+
+
+def _heartbeat_env_path(runtime_root: Path | None) -> Path:
+    if runtime_root is None:
+        return Path("(unset — set GDDP_RUNTIME_ROOT)") / "deploy" / "mini-heartbeat" / "env" / "gddp.env"
+    return runtime_root / "deploy" / "mini-heartbeat" / "env" / "gddp.env"
+
+
+def _heartbeat_kit_path(runtime_root: Path | None) -> Path:
+    if runtime_root is None:
+        return Path("(unset — set GDDP_RUNTIME_ROOT)") / "deploy" / "mini-heartbeat"
+    return runtime_root / "deploy" / "mini-heartbeat"
+
+
+def _render_heartbeat_notice(notice: str | None) -> None:
+    """Paint a one-shot operator notice at the top of the status panel."""
+    if not notice:
+        return
+    lowered = notice.lower()
+    if any(token in lowered for token in ("cannot", "missing", "not found", "failed")):
+        style = "yellow"
+    elif "armed" in lowered or "disarmed" in lowered:
+        style = "bold green"
+    elif "already" in lowered or "nothing to repair" in lowered or "operational" in lowered:
+        style = "dim"
+    else:
+        style = "yellow"
+    console.print(Text(f"  {notice}", style=style))
+    console.print()
+
+
+def _systemd_heartbeat_actions() -> dict[str, tuple[str, str]]:
+    return {
+        "a": ("arm", f"start {_SYSTEMD_TIMER}"),
+        "d": ("disarm", f"stop {_SYSTEMD_TIMER}"),
+        "r": ("refresh", "reload status"),
+        "b": ("back", ""),
+    }
+
+
+def _render_systemd_heartbeat_status(
+    f: dict[str, str],
+    env_path: Path,
+    runtime_root: Path | None,
+    runtime_error: str | None,
+) -> tuple[bool, bool]:
+    """Render systemd heartbeat facts. Returns (registered, active)."""
+    registered = bool(f.get(f"{_SYSTEMD_TIMER}.FragmentPath"))
+    active = f.get(f"{_SYSTEMD_TIMER}.ActiveState") == "active"
+    if runtime_root is not None:
+        systemd_dir = runtime_root / "deploy" / "mini-heartbeat" / "systemd"
+    else:
+        systemd_dir = Path("deploy/mini-heartbeat/systemd")
+
+    if runtime_error:
+        console.print(Text(f"  runtime    {runtime_error}", style="yellow"))
+
+    if not registered:
+        console.print(Text(f"  timer      absent  ({_SYSTEMD_TIMER} not installed)", style="yellow"))
+        console.print(Text(f"  service    absent  ({_SYSTEMD_SERVICE} not installed)", style="yellow"))
+        console.print(Text(f"  install    see {systemd_dir}/", style="dim"))
+    else:
+        state = Text("ARMED", style="bold green") if active else Text("off", style="dim")
+        console.print(
+            Text("  timer      "),
+            state,
+            Text(f"  enabled={f.get(f'{_SYSTEMD_TIMER}.UnitFileState', '?')}", style="dim"),
+        )
+        schedule = f.get("timer_line") or ""
+        for unit in (_SYSTEMD_TIMER, _SYSTEMD_SERVICE):
+            schedule = schedule.replace(unit, "")
+        schedule = " ".join(schedule.split()) or "(never run)"
+        console.print(Text(f"  next/last  {schedule}", style="dim"))
+        result = f.get(f"{_SYSTEMD_SERVICE}.Result", "?")
+        journal = f.get("journal") or ""
+        if "Failed with result" in journal:
+            result = "failed"
+        console.print(
+            Text("  last tick  "),
+            Text(result, style="bold green" if result == "success" else "bold red"),
+            Text(f"  at {f.get(f'{_SYSTEMD_SERVICE}.ExecMainExitTimestamp') or '?'}", style="dim"),
+        )
+        console.print(Text(f"  timer unit {f.get(f'{_SYSTEMD_TIMER}.FragmentPath')}", style="dim"))
+        console.print(Text(f"  service    {f.get(f'{_SYSTEMD_SERVICE}.FragmentPath')}", style="dim"))
+
+    env_present = runtime_root is not None and env_path.is_file()
+    console.print(
+        Text(
+            f"  env file   {env_path}  {'(present)' if env_present else '(MISSING)'}",
+            style="dim" if env_present else "bold red",
+        )
+    )
+    console.print()
+    console.print(Text("  last journal lines:", style="bold"))
+    for line in (f.get("journal") or "  (empty)").splitlines():
+        console.print(
+            Text(f"    {line}", style="red" if "Error" in line or "Failed" in line else "dim"),
+            overflow="ellipsis",
+            no_wrap=True,
+        )
+    console.print()
+    return registered, active
 
 
 def _interactive_heartbeat_systemd():
     """Linux: show timer + service facts and arm/disarm through systemctl."""
-    f = _systemd_status()
-    registered = bool(f.get(f"{_SYSTEMD_TIMER}.FragmentPath"))
-    active = f.get(f"{_SYSTEMD_TIMER}.ActiveState") == "active"
-    env_path = _heartbeat_env_path()
-    console.print(Text("heartbeat", style="bold").append(f"  ·  {socket.gethostname()} (systemd)", style="dim"))
-    console.print()
-    if registered is False:
-        console.print(Text(f"  {_SYSTEMD_TIMER} is absent on this host; nothing to arm. See deploy/mini-heartbeat/systemd/.", style="yellow"))
-        _pause()
-        return _MENU_BACK
-    state = Text("ARMED", style="bold green") if active else Text("off", style="dim")
-    console.print(Text("  timer      "), state, Text(f"  enabled={f.get(f'{_SYSTEMD_TIMER}.UnitFileState', '?')}", style="dim"))
-    schedule = f.get("timer_line") or ""
-    for unit in (_SYSTEMD_TIMER, _SYSTEMD_SERVICE):
-        schedule = schedule.replace(unit, "")
-    schedule = " ".join(schedule.split()) or "(never run)"
-    console.print(Text(f"  next/last  {schedule}", style="dim"))
-    result = f.get(f"{_SYSTEMD_SERVICE}.Result", "?")
-    journal = f.get("journal") or ""
-    if "Failed with result" in journal:
-        result = "failed"
+    runtime_root, runtime_error = _try_resolve_runtime_root()
+    env_path = _heartbeat_env_path(runtime_root)
+    actions = _systemd_heartbeat_actions()
+    notice: str | None = None
+
+    while True:
+        _clear_screen()
+        f = _systemd_status()
+        console.print(
+            Text("heartbeat", style="bold").append(
+                f"  ·  {socket.gethostname()} (systemd)", style="dim"
+            )
+        )
+        console.print()
+        _render_heartbeat_notice(notice)
+        notice = None
+        registered, active = _render_systemd_heartbeat_status(
+            f, env_path, runtime_root, runtime_error
+        )
+
+        try:
+            choice = _menu_choice(actions, default="b")
+        except (EOFError, KeyboardInterrupt):
+            return _MENU_BACK
+        if choice == "b":
+            return _MENU_BACK
+        if choice == "r":
+            continue
+
+        if choice == "a":
+            if not registered:
+                notice = (
+                    f"cannot arm: {_SYSTEMD_TIMER} is not installed "
+                    f"(see deploy/mini-heartbeat/systemd/)"
+                )
+                continue
+            if active:
+                notice = f"already armed: {_SYSTEMD_TIMER} is active"
+                continue
+            cmd = ["systemctl", "--user", "start", _SYSTEMD_TIMER]
+            proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+            if proc.returncode == 0:
+                notice = f"armed: {_SYSTEMD_TIMER}"
+            else:
+                detail = (proc.stderr or proc.stdout or "").strip()
+                console.print(
+                    Text(f"  arm failed (exit {proc.returncode}): {detail}", style="bold red")
+                )
+                _pause()
+            continue
+
+        if choice == "d":
+            if not registered:
+                notice = f"cannot disarm: {_SYSTEMD_TIMER} is not installed"
+                continue
+            if not active:
+                notice = f"already disarmed: {_SYSTEMD_TIMER} is inactive"
+                continue
+            cmd = ["systemctl", "--user", "stop", _SYSTEMD_TIMER]
+            proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+            if proc.returncode == 0:
+                notice = f"disarmed: {_SYSTEMD_TIMER}"
+            else:
+                detail = (proc.stderr or proc.stdout or "").strip()
+                console.print(
+                    Text(f"  disarm failed (exit {proc.returncode}): {detail}", style="bold red")
+                )
+                _pause()
+            continue
+
+
+def _launchd_heartbeat_actions() -> dict[str, tuple[str, str]]:
+    return {
+        "a": ("arm", "load intake + heartbeat (arm.sh)"),
+        "d": ("disarm", "unload control plane (disarm.sh)"),
+        "r": ("repair", "reload degraded labels (arm.sh)"),
+        "f": ("refresh", "reload status"),
+        "b": ("back", ""),
+    }
+
+
+def _render_launchd_heartbeat_status(
+    kit: Path,
+    statuses: dict[str, dict[str, object]],
+    env_path: Path,
+    runtime_root: Path | None,
+    runtime_error: str | None,
+) -> tuple[bool, bool]:
+    """Render launchd control-plane status. Returns (operational, any_enabled)."""
+    if runtime_error:
+        console.print(Text(f"  runtime    {runtime_error}", style="yellow"))
+    kit_present = runtime_root is not None and kit.is_dir()
     console.print(
-        Text("  last tick  "),
-        Text(result, style="bold green" if result == "success" else "bold red"),
-        Text(f"  at {f.get(f'{_SYSTEMD_SERVICE}.ExecMainExitTimestamp') or '?'}", style="dim"),
+        Text(
+            f"  kit      {kit}  {'(present)' if kit_present else '(MISSING)'}",
+            style="dim" if kit_present else "bold red",
+        )
     )
-    console.print(Text(f"  timer unit {f.get(f'{_SYSTEMD_TIMER}.FragmentPath')}", style="dim"))
-    console.print(Text(f"  service    {f.get(f'{_SYSTEMD_SERVICE}.FragmentPath')}", style="dim"))
-    console.print(Text(f"  env file   {env_path}  {'(present)' if env_path.is_file() else '(MISSING)'}",
-                       style="dim" if env_path.is_file() else "bold red"))
-    console.print()
-    console.print(Text("  last journal lines:", style="bold"))
-    for line in (f.get("journal") or "  (empty)").splitlines():
-        console.print(Text(f"    {line}", style="red" if "Error" in line or "Failed" in line else "dim"),
-                      overflow="ellipsis", no_wrap=True)
-    console.print()
-    if active:
-        action, cmd = "disarm", ["systemctl", "--user", "stop", _SYSTEMD_TIMER]
-        key = "d"
-    else:
-        action, cmd = "arm", ["systemctl", "--user", "start", _SYSTEMD_TIMER]
-        key = "a"
-    console.print(Text(f"  {key}  {action}   runs: {' '.join(cmd)}", style="cyan"))
-    console.print(Text("  b  back", style="dim"))
-    try:
-        choice = _import_module("terminal").getch().lower()
-    except (EOFError, KeyboardInterrupt):
-        return _MENU_BACK
-    if choice != key:
-        return _MENU_BACK
-    proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
-    if proc.returncode == 0:
-        console.print(Text(f"  {action}ed: {_SYSTEMD_TIMER}", style="bold green"))
-    else:
-        console.print(Text(f"  {action} failed (exit {proc.returncode}): {proc.stderr.strip()}", style="bold red"))
-    _pause()
-    return _MENU_BACK
-
-
-def interactive_heartbeat():
-    """Show actual control-plane health and offer repair/arm or disarm."""
-    _clear_screen()
-    if platform.system() == "Linux":
-        return _interactive_heartbeat_systemd()
-    kit = resolve_runtime_root() / "deploy" / "mini-heartbeat"
-    labels = ("com.gddp.intake", "com.gddp.heartbeat")
-    statuses = {label: _launchd_status(label) for label in labels}
-    console.print(Text("heartbeat", style="bold").append(f"  ·  {socket.gethostname()} (launchd)", style="dim"))
-    console.print(Text(f"  kit      {kit}", style="dim"))
-    console.print(Text(f"  env file {_heartbeat_env_path()}", style="dim"))
-    console.print(Text(f"  logs     ~/Library/Logs/gddp-heartbeat.log · gddp-heartbeat.err.log", style="dim"))
+    env_present = runtime_root is not None and env_path.is_file()
+    console.print(
+        Text(
+            f"  env file {env_path}  {'(present)' if env_present else '(MISSING)'}",
+            style="dim" if env_present else "bold red",
+        )
+    )
+    console.print(
+        Text("  logs     ~/Library/Logs/gddp-heartbeat.log · gddp-heartbeat.err.log", style="dim")
+    )
     for name in ("gddp-heartbeat.err.log", "gddp-heartbeat.log"):
         log_path = Path.home() / "Library" / "Logs" / name
         if log_path.is_file():
@@ -4225,8 +4368,10 @@ def interactive_heartbeat():
                 tail = log_path.read_text(encoding="utf-8", errors="replace").splitlines()[-4:]
             except OSError:
                 tail = []
-            for line in tail:
-                console.print(Text(f"    {line}", style="dim"), overflow="ellipsis", no_wrap=True)
+            if tail:
+                console.print(Text("  log tail:", style="bold"))
+                for line in tail:
+                    console.print(Text(f"    {line}", style="dim"), overflow="ellipsis", no_wrap=True)
             break
     console.print()
     for label, status in statuses.items():
@@ -4245,40 +4390,90 @@ def interactive_heartbeat():
 
     operational = all(status["healthy"] for status in statuses.values())
     any_enabled = any(status["enabled"] for status in statuses.values())
-    if operational:
-        actions = {
-            "d": ("disarm", "stop the control plane"),
-            "b": ("back", ""),
-        }
-        choice = _menu_choice(actions, default="b")
-        if choice != "d":
-            return _MENU_BACK
-        script = "disarm.sh"
-    elif any_enabled:
-        actions = {
-            "r": ("repair / arm", "run arm.sh to repair"),
-            "d": ("disarm", "run disarm.sh"),
-            "b": ("back", ""),
-        }
-        choice = _menu_choice(actions, default="r")
-        if choice == "b":
-            return _MENU_BACK
-        script = "disarm.sh" if choice == "d" else "arm.sh"
-    else:
-        actions = {
-            "a": ("arm", "start the control plane"),
-            "b": ("back", ""),
-        }
-        choice = _menu_choice(actions, default="b")
-        if choice != "a":
-            return _MENU_BACK
-        script = "arm.sh"
+    console.print()
+    return operational, any_enabled
+
+
+def _run_launchd_heartbeat_script(kit: Path, script: str) -> str | None:
+    """Run a launchd kit script. Returns a sticky notice when the script is missing."""
+    script_path = kit / "bin" / script
+    if not kit.is_dir():
+        return f"heartbeat kit missing: {kit} (set GDDP_RUNTIME_ROOT)"
+    if not script_path.is_file():
+        return f"cannot run {script}: missing {script_path} (set GDDP_RUNTIME_ROOT)"
     env = dict(os.environ)
     if script == "arm.sh":
         env["MINI_HEARTBEAT_ARM"] = "1"
-    subprocess.run(["bash", str(kit / "bin" / script)], env=env, check=False)
-    _pause()
-    return _MENU_BACK
+    subprocess.run(["bash", str(script_path)], env=env, check=False)
+    return None
+
+
+def _interactive_heartbeat_launchd():
+    """macOS: show launchd health and arm/disarm/repair through the mini-heartbeat kit."""
+    runtime_root, runtime_error = _try_resolve_runtime_root()
+    kit = _heartbeat_kit_path(runtime_root)
+    env_path = _heartbeat_env_path(runtime_root)
+    labels = ("com.gddp.intake", "com.gddp.heartbeat")
+    actions = _launchd_heartbeat_actions()
+    notice: str | None = None
+
+    while True:
+        _clear_screen()
+        console.print(
+            Text("heartbeat", style="bold").append(
+                f"  ·  {socket.gethostname()} (launchd)", style="dim"
+            )
+        )
+        console.print()
+        _render_heartbeat_notice(notice)
+        notice = None
+        statuses = {label: _launchd_status(label) for label in labels}
+        operational, any_enabled = _render_launchd_heartbeat_status(
+            kit, statuses, env_path, runtime_root, runtime_error
+        )
+
+        try:
+            choice = _menu_choice(actions, default="b")
+        except (EOFError, KeyboardInterrupt):
+            return _MENU_BACK
+        if choice == "b":
+            return _MENU_BACK
+        if choice == "f":
+            continue
+
+        if choice == "a":
+            if operational:
+                notice = "already operational — disarm if you want to stop"
+                continue
+            script_notice = _run_launchd_heartbeat_script(kit, "arm.sh")
+            if script_notice:
+                notice = script_notice
+            continue
+
+        if choice == "d":
+            if not any_enabled and not operational:
+                notice = "cannot disarm: control plane is not enabled"
+                continue
+            script_notice = _run_launchd_heartbeat_script(kit, "disarm.sh")
+            if script_notice:
+                notice = script_notice
+            continue
+
+        if choice == "r":
+            if operational:
+                notice = "nothing to repair: control plane is healthy"
+                continue
+            script_notice = _run_launchd_heartbeat_script(kit, "arm.sh")
+            if script_notice:
+                notice = script_notice
+            continue
+
+
+def interactive_heartbeat():
+    """Show actual control-plane health and offer repair/arm or disarm."""
+    if platform.system() == "Linux":
+        return _interactive_heartbeat_systemd()
+    return _interactive_heartbeat_launchd()
 
 
 def _front_page_actions() -> dict[str, tuple[str, str]]:
