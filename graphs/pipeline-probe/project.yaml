@@ -1,0 +1,37 @@
+schema_version: '1.0'
+schema_type: project_graph
+project_id: pipeline-probe
+project_name: Pipeline probe
+description: Three independent one-file nodes to see cursor_cli dispatch with max_concurrent_jobs 3.
+repo: local/gddp-pipeline-probe
+blueprint:
+  vision: Prove one heartbeat tick can reserve three cursor_cli jobs.
+  architecture_notes: Cap 3 is the probe. agentos-core stays at its template cap of 1.
+  major_capabilities:
+  - three parallel one-file probes
+graph_version: '1.0'
+created_at: '2026-09-28'
+last_updated: '2026-09-28'
+nodes_dir: nodes/
+nodes:
+- id: probe-alpha
+  title: 'Probe: write probes/alpha.md'
+  status: deferred
+  type: capability
+- id: probe-beta
+  title: 'Probe: write probes/beta.md'
+  status: deferred
+  type: capability
+- id: probe-gamma
+  title: 'Probe: write probes/gamma.md'
+  status: deferred
+  type: capability
+execution_policy:
+  default_executor: cursor_cli
+  max_concurrent_jobs: 3
+  frontier_auto_advance: true
+  retry_budget: 0
+  require_human_review_before_overnight: false
+  artifact_gate_enforced: false
+  allowed_repos:
+  - local/gddp-pipeline-probe
