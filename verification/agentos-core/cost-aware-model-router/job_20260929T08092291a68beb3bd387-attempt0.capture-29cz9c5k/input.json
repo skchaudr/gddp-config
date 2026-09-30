@@ -1,0 +1,127 @@
+{
+  "node": {
+    "schema_version": "1.0",
+    "schema_type": "node",
+    "node_id": "cost-aware-model-router",
+    "title": "Eval: Router enforces budget and escalation criteria to dynamically select the most cost-effective model/agent (logs decisions for Laya)",
+    "type": "capability",
+    "why": "A request lands on an instant action, a fast model, or a full agent, and the choice is logged.",
+    "depends_on": [],
+    "acceptance_criteria": [
+      {
+        "id": "cost-aware-model-router-1",
+        "criterion": "A simple lookup ('Bring up the morning brief') stays under the minimum budget threshold and executes as an instant action."
+      },
+      {
+        "id": "cost-aware-model-router-2",
+        "criterion": "A generative request ('What was the biggest news?') triggers the fast-model budget criteria and returns a cheap, fast answer."
+      },
+      {
+        "id": "cost-aware-model-router-3",
+        "criterion": "A complex request ('Write me an explainer') hits the escalation criteria, routes to a full agent, and logs the decision for Laya's shadow training."
+      }
+    ],
+    "constraints": [
+      "At most 6 grep calls and 15 read calls."
+    ],
+    "allowed_execution_modes": [
+      "cursor_cli"
+    ],
+    "required_artifacts": [],
+    "status": "ready",
+    "priority": "high",
+    "unlocks": []
+  },
+  "project": {
+    "schema_version": "1.0",
+    "schema_type": "project_graph",
+    "project_id": "agentos-core",
+    "project_name": "AgentOS Core Loop",
+    "description": "A milestone metric graph focused on basic evals and honest goals for the  AgentOS core loop, bridging multiple interfaces (Obsidian, Taskdog, Zed, Terminal) into a transparently simple 3-layer system (Visual, Memory, Skills).\n",
+    "repo": "local/agentos",
+    "blueprint": {
+      "vision": "Implement the 5-part spine of the Jev + Claude OS walkthrough: Three layers,  request routing, skill backbone, organized memory, and a shared interface.\n",
+      "architecture_notes": "Nodes represent behavioral milestones and evals rather than technical specs.  Focus on proving the core loop works from request -> routing -> skill execution -> memory write-back.\n",
+      "major_capabilities": [
+        "Multi-client portability (Bridge)",
+        "Jev 3-tier request routing",
+        "Memory classification against the established destination map",
+        "Automated skill execution",
+        "Visual layer consolidation"
+      ]
+    },
+    "graph_version": "1.0",
+    "created_at": "2026-09-28",
+    "last_updated": "2026-09-28",
+    "nodes_dir": "nodes/",
+    "nodes": [
+      {
+        "id": "bridge-multi-client",
+        "title": "Eval: Bridge accepts requests from multiple interfaces (Obsidian, Taskdog, Zed, Terminal)",
+        "status": "ready",
+        "type": "capability",
+        "milestones": [
+          "A request sent from Obsidian is recorded once by the bridge.",
+          "The same request sent from a second client (Zed, Taskdog, or the terminal) is recorded by that same bridge.",
+          "Both submissions are routed to the same outcome."
+        ]
+      },
+      {
+        "id": "cost-aware-model-router",
+        "title": "Eval: Router enforces budget and escalation criteria to dynamically select the most cost-effective model/agent (logs decisions for Laya)",
+        "status": "ready",
+        "type": "capability",
+        "milestones": [
+          "A simple lookup ('Bring up the morning brief') stays under the minimum budget threshold and executes as an instant action.",
+          "A generative request ('What was the biggest news?') triggers the fast-model budget criteria and returns a cheap, fast answer.",
+          "A complex request ('Write me an explainer') hits the escalation criteria, routes to a full agent, and logs the decision for Laya's shadow training."
+        ]
+      },
+      {
+        "id": "memory-layer-discipline",
+        "title": "Eval: Classification uses the destination map already established for this product",
+        "status": "ready",
+        "type": "capability",
+        "milestones": [
+          "Classification uses the destination map already present for this product.",
+          "The agent writes its synthesis to the agent destination that map already names.",
+          "A person can open that result from the location the map already gives."
+        ]
+      },
+      {
+        "id": "skill-backbone-automation",
+        "title": "Goal: Convert at least one manual conversational workflow into an automated, headless skill",
+        "status": "pending",
+        "type": "capability",
+        "milestones": [
+          "One recurring workflow (a presence brief over social accounts, Taskdog, and daily notes) is documented so a human could follow it manually.",
+          "That same skill runs headlessly and writes its finished deliverable to the agent destination the existing map already names.",
+          "Running the skill a second time produces a new deliverable without requiring any code rewrites to the skill."
+        ]
+      },
+      {
+        "id": "visual-layer-consolidation",
+        "title": "Goal: The shared interface displays deliverables (metrics, schedules) driven by the headless skills",
+        "status": "pending",
+        "type": "capability",
+        "milestones": [
+          "The presence-brief deliverable is visible on Obsidian or a lean desktop app without opening the background run.",
+          "The metrics inside the deliverable, including social accounts and GitHub commits, are fully rendered and visible.",
+          "Asking a question about the deliverable from that display reads the persistent copy the skill wrote."
+        ]
+      }
+    ],
+    "execution_policy": {
+      "default_executor": "cursor_cli",
+      "max_concurrent_jobs": 3,
+      "frontier_auto_advance": true
+    }
+  },
+  "repo": "/private/var/folders/5p/ll5gds4n5k3_x7kbrfp25pkw0000gn/T/gddp-eval-wt-eviloprf",
+  "evaluated_commit_sha": "9d92abcdb671726fd7acce16341d4f9d9120f133",
+  "merge_commit_sha": "9d92abcdb671726fd7acce16341d4f9d9120f133",
+  "expected_base_commit_sha": "ffee6a76015bd6a672ef0d2b8fdfe0cbc567957d",
+  "job_id": "job_20260929T08092291a68beb3bd387",
+  "attempt": 0,
+  "execution_attempt_id": "job_20260929T08092291a68beb3bd387:attempt:0"
+}
