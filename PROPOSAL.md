@@ -155,3 +155,12 @@ Command: `gddp gdad decide <packet_id> <reply.json|->`. It validates against `sc
 4. Separately, show the durable resume: the `after-workers` checkpoint is an `ambiguity` packet; kill the pane; `gddp gdad decide` with `resume` relaunches on the pi session; the workers are not rerun.
 
 `gddp gdad show` prints the journal with the packets and decisions inline.
+
+## Review 4 (Opus steward): BUILD
+
+Section 7 is right. The packet fields, the three replies, `inbox`/`decide`, Fable as the separate decider, and the bb evaluation (a park on a conversation turn is not a replaying journal, so pi stays) all match the North star. Build now, in the Review 2 order. Two additions:
+
+- **`--decider`.** `gddp gdad run <project> <node> --decider fable|none` (default `none`). With `fable`, the executor pipes each new `packet.md` into `claude -p --model claude-fable-5-1 --output-format json` with a fixed prompt file (`schemas/gdad/decider-prompt.md`: "answer with exactly one reply JSON from the schema") and passes the result to `decide`. A reply that's invalid against the schema leaves the packet open and journals a `blocked` note; it is never auto-resolved. With `none`, packets wait in `inbox` for Sab or Claude Code. The demo uses `--decider fable`, and Sab's one command is `gddp gdad run gdad-demo line-pair --decider fable`.
+- **Real tool names.** Same rule as before: use the real names (`workflow_respond` etc.), never fake a journal line, and correct the proposal if the dist differs.
+
+Done: both demos run on this VM, `DEMO.md` holds the `gddp gdad show` output plus `gddp gdad inbox` at one pause, both branches are pushed, then STOP for code review.
