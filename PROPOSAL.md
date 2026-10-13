@@ -38,11 +38,11 @@ Schemas: `schemas/gdad/node.md`, `journal.schema.json`, `reply.schema.json`.
 
 ## 3. Package, launch, pause, resume, steer
 
-**pi-extensible-workflows@6.2.0.** `parallel()` fans out. On pi 0.87.1, `agent()` fails with `createCodemodeExtension is not a function`, so each worker is `parallel()` of `shell("pi -ne --no-session -p")` via `worker.sh`. The package still ships `subagents_steer`. `@osolmaz/pi-workflows@0.17.7` has no parallel fan-out, and its Herdr viewer needs `piw`, which is not installed. Headless `checkpoint` throws `RESUME_INCOMPATIBLE`, so the slice uses a pi TUI. bb is not the host (section 7).
+The substrate is pinned **pi 1.0.4** at `~/.local/pi-1.0.4` plus **pi-durable-subagents 1.0.39**. `GDAD_PI_BIN` in `runtime/settings.env` is that prefix's `bin`. `~/.local/bin/pi` stays 0.87.1. pi-extensible-workflows 6.2.0 does not run here: `agent()` dies with `createCodemodeExtension is not a function` on 0.87.1, and a model asked to pass `scriptPath` inlines its own script instead. That is why the slice switches. The herdr pane runs `pi -ne -e <pi-durable-subagents>/index.js` from that prefix, `--no-focus`.
 
-`GDAD_PI_EXTENSIONS` in `gddp-config/runtime/settings.env` is the only extension-path setting. Launch is `pi -ne` plus one `-e` per path, `--session-id` chosen before start. Verified 2026-10-13: that form with `--mode rpc` accepted `get_state`. This VM's `piewf-rename-patch.mjs` renames the installed tool to `piewf_workflow`; the slice reads the name from the loaded dist and does not depend on the patch.
+Dispatch is `pi-durable-subagents run --request <run_id> --spec <spec> --session <id> --json`. The spec is two `worker` tasks (`a` writes `hello-a.txt` then calls `ask`; `b` writes `hello-b.txt`). The dispatch journal line stores `request_id` and `wid`. `onQuit` stays `"pause"`. A live `resume` reply is `send --kind answer --qid <qid> --rev <rev>`. `steer` is `send --kind steer`. A dead pane is `resume <wid>`, which continues the same sessions; a sealed worker is not started again. `gddp gdad watch` tails `events --all --since`. `show` prints `describe`.
 
-`workflow.js` journals `pause`, writes the ambiguity packet, then `checkpoint({name:"after-workers"})`. A live `resume` reply is `herdr agent prompt <pane>` calling dist tool `workflow_respond` with `{runId, name:"after-workers", approved:true}`. Dist `workflow_resume` is only for `budget_exhausted`. A live mid-run park uses trajectory actions `pause` and `resume` the same way. `steer` journals, then `herdr agent prompt` calls `subagents_steer` with `{id, message}`. A dead pane relaunches `pi --session-id` for that `listRunIds(cwd, sessionId)` run and then `workflow_respond`. Finished `parallel` calls stay done.
+`@earendil-works/pi-durable` 1.2.0 is the later home, not this slice. Its README says one process owns a storage, there is no cross-process lock, and the spec has no human-wait primitive. Issue #313 (open, no comments) would add a `pi-extensible-workflows/durable` task that recovers a run from the existing journal. Until that exists, an outside decider cannot `send --kind answer` or `resume <wid>` against it.
 
 ## 4. Reviewer and gate
 
@@ -75,11 +75,11 @@ Sab's command is `gddp gdad run <project> <node>`: dispatch, unfocused pane, fol
 
 ## 7. Decision packet
 
-**Packet.** On each durable pause (verdict, ambiguity checkpoint, acceptance) the workflow writes one `gdad/<project>/<node>/packets/<packet_id>.json` and a rendered `<packet_id>.md`, and journals `packet`. Fields: `packet_id`, `project`, `node`, `run_id`; `kind` of `verdict|ambiguity|acceptance`; `done` (at most 5 bullets); `question` (one sentence); `options` as `[{id, label, consequence}]`; `evidence` (verdict reasons, or the checkpoint prompt); `artifacts` (paths only); `resume_handle` `{pi_session_id, workflow_run_id, checkpoint}`; optional `expires`. The `.md` is capped at about 2 KB.
+**Packet.** On each durable pause (verdict, ambiguity checkpoint, acceptance) the workflow writes one `gdad/<project>/<node>/packets/<packet_id>.json` and a rendered `<packet_id>.md`, and journals `packet`. Fields: `packet_id`, `project`, `node`, `run_id`; `kind` of `verdict|ambiguity|acceptance`; `done` (at most 5 bullets); `question` (one sentence); `options` as `[{id, label, consequence}]`; `evidence` (verdict reasons, or the checkpoint prompt); `artifacts` (paths only); `resume_handle` `{wid, qid, rev}`; optional `expires`. The `.md` is capped at about 2 KB.
 
 **Replies.** Only three, validated by `schemas/gdad/reply.schema.json`. `gddp gdad decide <packet_id> <reply.json|->` journals `decision` and performs it. `gddp gdad inbox [--json]` lists open packets. The main agent reads only inbox and the packet.
 
-- `{"reply":"resume","packet_id":"...","option_id":"..."}` or the same with `"decision":"<text>"` instead of `option_id`: `workflow_respond` on the resume handle, and the workflow continues.
+- `{"reply":"resume","packet_id":"...","option_id":"..."}` or the same with `"decision":"<text>"` instead of `option_id`: `pi-durable-subagents send --kind answer --qid <qid> --rev <rev>`, then `resume <wid>` if the pane is gone. A waiting subagent resumes exactly once.
 - `{"reply":"redispatch","packet_id","changes":"<text>"}`: new `run_id`. `changes` are what the next workers read. A later `dispatch` line starts that run.
 - `{"reply":"next","packet_id","workflow":"<project>/<node>"|null}`: close this node. If the verdict was accept, journal `gate` and set `accepted`. `workflow` names what runs next, or `null`.
 
