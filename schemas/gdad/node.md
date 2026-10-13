@@ -3,7 +3,7 @@
 Definition lives in gddp-config at `graphs/<project>/gdad/<node-id>/`.
 
 `BRIEF.md` headings, in order: Goal, Scope, Acceptance, Constraints, Sab's words.
-`Sab's words` is verbatim. `workflow.js` is the pi-extensible-workflows script.
+`Sab's words` is verbatim.
 
 Runtime state lives in gddp-runtime, gitignored, at `gdad/<project>/<node-id>/`:
 
@@ -12,7 +12,7 @@ Runtime state lives in gddp-runtime, gitignored, at `gdad/<project>/<node-id>/`:
 - `runs/<run_id>/artifacts/` — worker output
 - `packets/<packet_id>.json` and `<packet_id>.md` — the decision packet
 
-`status` fields: `state`, `who`, `when`, `run_id`, `pi_session_id`, `workflow_run_id`.
+`status` fields: `state`, `who`, `when`, `run_id`, `request_id`, `wid`.
 
 States: `pending`, `running`, `paused`, `review`, `awaiting-decision`, `accepted`, `rejected`, `blocked`.
 Only `accepted` is terminal. `awaiting-decision` is entered by a `packet` line.
