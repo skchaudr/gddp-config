@@ -38,7 +38,7 @@ Schemas: `schemas/gdad/node.md`, `journal.schema.json`, `reply.schema.json`.
 
 ## 3. Package, launch, pause, resume, steer
 
-**pi-extensible-workflows@6.2.0.** `parallel()` fans out and the package ships `subagents_steer`. `@osolmaz/pi-workflows@0.17.7` has no parallel fan-out, and its Herdr viewer needs `piw`, which is not installed. Headless `checkpoint` throws `RESUME_INCOMPATIBLE`, so the slice uses a pi TUI. bb is not the host (section 7).
+**pi-extensible-workflows@6.2.0.** `parallel()` fans out. On pi 0.87.1, `agent()` fails with `createCodemodeExtension is not a function`, so each worker is `parallel()` of `shell("pi -ne --no-session -p")` via `worker.sh`. The package still ships `subagents_steer`. `@osolmaz/pi-workflows@0.17.7` has no parallel fan-out, and its Herdr viewer needs `piw`, which is not installed. Headless `checkpoint` throws `RESUME_INCOMPATIBLE`, so the slice uses a pi TUI. bb is not the host (section 7).
 
 `GDAD_PI_EXTENSIONS` in `gddp-config/runtime/settings.env` is the only extension-path setting. Launch is `pi -ne` plus one `-e` per path, `--session-id` chosen before start. Verified 2026-10-13: that form with `--mode rpc` accepted `get_state`. This VM's `piewf-rename-patch.mjs` renames the installed tool to `piewf_workflow`; the slice reads the name from the loaded dist and does not depend on the patch.
 
