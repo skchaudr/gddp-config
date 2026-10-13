@@ -1,106 +1,94 @@
-# GDAD vertical slice — proposal (round 1)
+# GDAD vertical slice — proposal (round 2)
 
-## 1. Node contract
+## 1. Contract and where files live
 
-A GDAD node is a directory next to v1 graph truth:
+Definition stays in gddp-config, and git tracks it: `graphs/<project>/gdad/<node-id>/BRIEF.md` and `workflow.js`. BRIEF.md headings, in order: `Goal`, `Scope`, `Acceptance`, `Constraints`, `Sab's words` (verbatim).
 
-`graphs/<project>/gdad/<node-id>/BRIEF.md`
-`graphs/<project>/gdad/<node-id>/status`
-`graphs/<project>/gdad/<node-id>/journal.jsonl`
-`graphs/<project>/gdad/<node-id>/workflow.js`
-`graphs/<project>/gdad/<node-id>/artifacts/`
+Runtime state lives in gddp-runtime beside `jobs/`, gitignored like `jobs/*`:
 
-`graphs/<project>/nodes/<node-id>.yaml` stays the v1 node. GraphReader and `gddp node validate` open that file. A directory at that path would break the graph.
+`gdad/<project>/<node-id>/status`
+`gdad/<project>/<node-id>/journal.jsonl`
+`gdad/<project>/<node-id>/runs/<run_id>/artifacts/`
 
-**BRIEF.md** headings, in order: `Goal`, `Scope`, `Acceptance`, `Constraints`, `Sab's words`. `Sab's words` is verbatim. One `cat` shows the whole contract.
+`gddp gdad show <project> <node>` prints BRIEF.md, `status`, the journal, and the current run's artifact paths in one call. `graphs/<project>/nodes/<node-id>.yaml` stays the v1 node (`pending|ready|provisional|complete|deferred`). The executor never writes it. `schemas/v1/event.yaml` stays the webhook record. This slice creates no job.
 
-**status** is four lines, overwritten in place. The journal is the history.
+## 2. One writer
 
-```
-state: running
-who: gdad-executor
-when: 2026-10-13T09:30:00Z
-run_id: line-pair-1
-```
+Every change goes through `python3 -m gdad_run journal <project> <node> <type> [--note] [--artifact]` (`gddp-runtime/scripts/gdad_run.py`). One flock covers the append and the status rewrite. `status` is the last journal line, rendered as four fields (`state`, `who`, `when`, `run_id`) plus `pi_session_id` and `workflow_run_id` copied from the open dispatch. Callers do not pass `state`. The helper rejects an illegal type and writes nothing.
 
-`state` is `pending | running | paused | review | accepted | rejected | blocked`.
+`state`: `pending|running|paused|review|accepted|rejected|blocked`. Only `accepted` is terminal.
 
-| from | to | who |
+| type | who | resulting state |
 | --- | --- | --- |
-| pending | running | gdad-executor, on dispatch |
-| pending | blocked | gdad-executor, when a dependency gate is missing |
-| running | paused | sab, or pi-workflow when `checkpoint` parks |
-| paused | running | sab, on resume |
-| running | review | gdad-executor, when `claude -p` starts |
-| review | accepted | claude-opus, verdict `accept` |
-| review | rejected | claude-opus, verdict `reject` |
-| running, paused, review | blocked | gdad-executor, when pi will not start or BRIEF.md is missing |
-| blocked | pending | sab |
+| dispatch | gdad-executor | running |
+| pause | pi-workflow | paused |
+| resume | sab | running |
+| review | gdad-executor | review |
+| steer | sab | unchanged |
+| verdict | claude-opus | accepted or rejected |
+| redispatch | sab or claude-opus | pending, new `run_id`, `note` holds the prior `reasons` |
+| gate | gdad-executor | accepted |
+| blocked | gdad-executor | blocked |
 
-`accepted` and `rejected` are terminal.
+A missing dependency gate journals `blocked`. `gddp gdad run` from `blocked` journals `dispatch` only after that preflight passes.
 
-**journal.jsonl** is append-only. Every line is one JSON object: `v` (1), `ts` (ISO-8601 UTC), `type`, `who`, `state`, `run_id`, `artifacts` (array). `note` is optional. `type` is `dispatch | review | steer | pause | resume | verdict | gate`.
+Each line: `v` (1), `ts`, `type`, `who`, `state`, `run_id`, `artifacts`. Dispatch also stores `pi_session_id` and `workflow_run_id`. `note` is optional.
 
 ```json
-{"v":1,"ts":"2026-10-13T09:30:00Z","type":"dispatch","who":"gdad-executor","state":"running","run_id":"line-pair-1","artifacts":["graphs/gdad-demo/gdad/line-pair/BRIEF.md"]}
-{"v":1,"ts":"2026-10-13T09:31:00Z","type":"review","who":"gdad-executor","state":"review","run_id":"line-pair-1","artifacts":["graphs/gdad-demo/gdad/line-pair/artifacts/hello.txt"]}
-{"v":1,"ts":"2026-10-13T09:31:10Z","type":"steer","who":"sab","state":"running","run_id":"line-pair-1","artifacts":[],"note":"keep each worker to one line"}
+{"v":1,"ts":"2026-10-13T09:30:00Z","type":"dispatch","who":"gdad-executor","state":"running","run_id":"line-pair-1","pi_session_id":"01a1","workflow_run_id":"wf-1","artifacts":["graphs/gdad-demo/gdad/line-pair/BRIEF.md"]}
+{"v":1,"ts":"2026-10-13T09:31:00Z","type":"steer","who":"sab","state":"running","run_id":"line-pair-1","artifacts":[],"note":"keep each worker to one line"}
 {"v":1,"ts":"2026-10-13T09:32:00Z","type":"pause","who":"pi-workflow","state":"paused","run_id":"line-pair-1","artifacts":[],"note":"checkpoint after-workers"}
 {"v":1,"ts":"2026-10-13T09:33:00Z","type":"resume","who":"sab","state":"running","run_id":"line-pair-1","artifacts":[]}
-{"v":1,"ts":"2026-10-13T09:34:00Z","type":"verdict","who":"claude-opus","state":"accepted","run_id":"line-pair-1","artifacts":["graphs/gdad-demo/gdad/line-pair/artifacts/verdict.json"],"note":"accept"}
-{"v":1,"ts":"2026-10-13T09:34:01Z","type":"gate","who":"gdad-executor","state":"accepted","run_id":"line-pair-1","artifacts":[".gddp/gates/line-pair.token"]}
+{"v":1,"ts":"2026-10-13T09:33:30Z","type":"review","who":"gdad-executor","state":"review","run_id":"line-pair-1","artifacts":["gdad/gdad-demo/line-pair/runs/line-pair-1/artifacts/hello.txt"]}
+{"v":1,"ts":"2026-10-13T09:34:00Z","type":"verdict","who":"claude-opus","state":"rejected","run_id":"line-pair-1","artifacts":["gdad/gdad-demo/line-pair/runs/line-pair-1/artifacts/verdict.json"],"note":"three lines"}
+{"v":1,"ts":"2026-10-13T09:35:00Z","type":"redispatch","who":"sab","state":"pending","run_id":"line-pair-2","artifacts":["gdad/gdad-demo/line-pair/runs/line-pair-1/artifacts/verdict.json"],"note":"Acceptance is exactly two non-empty lines"}
+{"v":1,"ts":"2026-10-13T09:40:00Z","type":"gate","who":"gdad-executor","state":"accepted","run_id":"line-pair-2","artifacts":[".gddp/gates/line-pair.token"]}
 ```
 
-Schema files to add when building: `schemas/gdad/node.md` (this contract) and `schemas/gdad/journal.schema.json`.
+Schema when building: `schemas/gdad/node.md`, `schemas/gdad/journal.schema.json`.
 
-**v1 map.** `schemas/v1/node.yaml` status is `pending | ready | provisional | complete | deferred`. Execution state lives on the job. GDAD's seven states go in the `status` file. The executor does not write node YAML. `schemas/v1/event.yaml` is a GitHub webhook record. The journal is a new file. `schemas/v1/job.yaml` stays the heartbeat's work packet. This slice does not create a job.
+## 3. Package, launch, pause, resume, steer
 
-**Gates.** `gddp-runtime/scripts/runtime/gate_tokens.py` `write_gate` atomically writes `.gddp/gates/<node-id>.token` with `node_id`, `issued_at`, and `verdict_receipt_sha256` of the receipt file. `read_gate` / `gate_satisfied` check it. Today `provisional_status.py` calls `write_gate` when it marks a node provisional, and `frontier.py` rewrites a missing token. `scripts/node_cli.py` calls `revoke_gate` when a human moves a node off `provisional` to anything other than `complete`. `gddp.py` does not write tokens. On GDAD `accepted`, the slice calls `write_gate(repo, node_id, verdict_path)` and leaves node YAML alone.
+**pi-extensible-workflows@6.2.0.** `parallel()` fans out and the package ships `subagents_steer`. `@osolmaz/pi-workflows@0.17.7` has no parallel fan-out, and its Herdr viewer needs `piw`, which is not installed. `shell()` runs the reviewer. Headless `checkpoint` throws `RESUME_INCOMPATIBLE`, so the slice uses a pi TUI.
 
-## 2. Workflow package
+Extension paths are one setting, `GDAD_PI_EXTENSIONS` in `gddp-config/runtime/settings.env` (comma-separated). The default is the 6.2.0 `dist/src/index.js` and `dist/subagents/index.js`. Task 3 changes that value.
 
-**pi-extensible-workflows@6.2.0.**
+Launch: `pi -ne` plus one `-e` per path, `--session-id <pi_session_id>` chosen by the executor before start. Verified 2026-10-13: that `-ne -e` form with `--mode rpc` accepted `get_state`. On this VM plain `pi --mode rpc` also starts because `piewf-rename-patch.mjs` renamed the installed tool to `piewf_workflow` and the slash command to `/piewf`. The slice reads the tool name from the loaded dist and does not depend on the patch. Stock source still registers `workflow` in both packages.
 
-`parallel(name, { a: () => agent(...), b: () => agent(...) })` in `src/execution.ts` fans out and waits. The same package ships `subagents_run / inspect / steer / stop / retry`. `@osolmaz/pi-workflows@0.17.7` exports `agent`, `shell`, `checkpoint`, and `compute`. Its engine has no parallel fan-out.
+`workflow.js` calls the journal helper via `shell` before and after `checkpoint({name:"after-workers"})`. While the process is alive, `gddp gdad resume` runs `herdr agent prompt <pane>` telling pi to call dist tool `workflow_respond` with `{runId, name:"after-workers", approved:true}`. Dist tool `workflow_resume` is only for `budget_exhausted`; this slice does not use it for pause. A live mid-run park uses trajectory action `pause` (`lifecycle.pause()`) and action `resume` (`lifecycle.resume()` when state is `paused`), reached the same way: `herdr agent prompt`. `gddp gdad steer "<text>"` journals `steer`, then `herdr agent prompt` to call `subagents_steer` with `{id, message}`.
 
-Pause is `checkpoint({ name, prompt })`, journaled. Host action `pause` calls `lifecycle.pause()`. Resume replays by structural path plus occurrence, so finished `parallel` and `agent` calls stay done. osolmaz `/workflow pause` into `~/.pi/agent/workflows/state.sqlite` is a clean park, and it also has `shell()`. Its Herdr plugin (`plugins/herdr/viewer.mjs`) starts `piw`. `piw` is not on this VM. extensible `src/herdr.ts` `openHerdrPane` uses the `herdr` CLI, which is installed.
+If the pane is dead, `gddp gdad resume` reads `pi_session_id` and `workflow_run_id` from the journal, opens a new unfocused tab, and relaunches `pi --session-id <pi_session_id>` with the same cwd. Runs for that pair are `listRunIds(cwd, sessionId)` in the dist. The new prompt cold-resumes that `workflow_run_id` and, if the checkpoint is still pending, calls `workflow_respond`. Finished `parallel` calls stay done.
 
-`shell(command)` is the review step: `claude -p --model opus` reads BRIEF.md plus `artifacts/`, prints `{"verdict":"accept"|"reject","reasons":[...]}` to stdout, and the script returns that JSON. Headless checkpoints throw `RESUME_INCOMPATIBLE`, so the slice runs a pi TUI in the Herdr pane.
+## 4. Reviewer and gate
 
-**Launch until Task 3.** Both packages register a tool named `workflow` (`src/host.ts`, `@osolmaz/pi-workflows/src/extension/index.ts`). Settings load both. The slice runs:
+Prompt file: `schemas/gdad/review-prompt.md`. It includes BRIEF.md, with Acceptance called out, plus the artifact listing. The step is `claude -p --model opus --output-format json`. Verified 2026-10-13 on this VM: exit 0, envelope `type=result`, `is_error=false`, model `claude-opus-5-5`. The prompt tells the reviewer to write `runs/<run_id>/artifacts/verdict.json` (`verdict`: `accept|reject`, `reasons`: non-empty string array) and to print that same object. The wrapper accepts only when the process exits 0, the envelope parses, and the file matches the object. Anything else journals `blocked` and saves the raw stdout as an artifact. `accepted` is never that path.
 
-`pi -ne -e ~/.pi/agent/npm/node_modules/pi-extensible-workflows/dist/src/index.js -e ~/.pi/agent/npm/node_modules/pi-extensible-workflows/dist/subagents/index.js`
+On `accept`, `gate` calls `gate_tokens.write_gate(repo, node_id, verdict.json)`. The token's `verdict_receipt_sha256` is that file. `provisional_status.py` and `frontier.py` call `write_gate` when they mark a node provisional; this slice does not enter that loop. `node_cli.py` still `revoke_gate`s when a human leaves `provisional` for anything other than `complete`.
 
-Verified 2026-10-13: that command with `--offline --no-session --mode rpc` accepted `{"type":"get_state"}` and returned a session id. On this VM, plain `pi --mode rpc` also starts, because `~/.pi/agent/bin/piewf-rename-patch.mjs` has rewritten the installed dist tool to `piewf_workflow` and the slash command to `/piewf`. The slice does not depend on that patch. The launch prompt calls the tool name actually registered in the loaded dist.
+On `reject`, the next `gddp gdad run` journals `redispatch` with a new `run_id` and puts `reasons` into `runs/<new>/prompt.txt`. `workflow.js` feeds that file to both `agent()` calls.
 
-## 3. Executor path
+## 5. Commands, Herdr, files
 
-`gddp gdad watch gdad-demo line-pair` reads BRIEF.md, sets `status` to `running`, appends `dispatch`, and splits a Herdr pane running the pi command above with an initial message: call the workflow tool, `scriptPath` = `workflow.js`, `name` = `line-pair`, `foreground` = true.
+Sab's command is `gddp gdad run <project> <node>`. It dispatches, opens the pane, then follows the journal. `gddp gdad watch` only tails the journal: read-only, repeatable, re-attachable. Also `pause`, `resume`, `steer "<text>"`, and `show`.
 
-`workflow.js`: `parallel("workers", …)` writes `artifacts/hello.txt` (one line per worker); `checkpoint({ name: "after-workers" })` parks (status `paused`, journal `pause`); resume appends `resume` and continues; `shell` runs `claude -p --model opus`; the wrapper sets `review` then `accepted` or `rejected`, appends `review` and `verdict`. On accept it writes `artifacts/verdict.json` and calls `write_gate` with that path, then appends `gate`. Steer appends a `steer` line Sab typed into the watch command; the wrapper forwards it with `subagents_steer` while workers run.
+The pane is `herdr tab create --cwd <runtime node dir> --label gdad-<node> --no-focus`, then `herdr pane run` of pi in that tab's root pane. No `herdr tab focus`, `herdr pane focus`, or `herdr agent focus`.
 
-## 4. Observability
+**gddp-config:** `schemas/gdad/node.md`, `journal.schema.json`, `review-prompt.md`, `runtime/settings.env` (`GDAD_PI_EXTENSIONS`), `graphs/gdad-demo/project.yaml`, `graphs/gdad-demo/nodes/line-pair.yaml` (`status: pending`), `graphs/gdad-demo/gdad/line-pair/{BRIEF.md,workflow.js}`, `scripts/cli_gdad.py`, `scripts/gddp.py` (`gdad` in `_CLI_COMMANDS` only), `scripts/timeline.py` (reads the runtime journal).
 
-The Herdr pane is the pi TUI, so the workflow widget is live. `gddp timeline` reads git, `node_status_history`, `queue.db`, attempt `events.jsonl`, and receipts. `gddp watch` reads attempt `events.jsonl` (`session_started`, `tool_started`, …). This run has a GDAD journal, so those commands stay as they are. `gddp gdad watch <project> <node>` follows `journal.jsonl`. `timeline.py` gains one reader so `gddp timeline gdad-demo --node line-pair` prints the same lines.
+**gddp-runtime:** `scripts/gdad_run.py`, `.gitignore` line `gdad/*`.
 
-## 5. Files
+**Unchanged:** `runner.py`, `reconciler.py`, `pi_rpc_adapter.py`, `provisional_status.py`, `frontier.py`, `gate_tokens.py`, `node_cli.py`, jobs / evaluations / receipt / watch.
 
-**gddp-config:** `schemas/gdad/node.md`, `schemas/gdad/journal.schema.json`, `graphs/gdad-demo/project.yaml`, `graphs/gdad-demo/nodes/line-pair.yaml` (v1, `status: pending`), `graphs/gdad-demo/gdad/line-pair/{BRIEF.md,workflow.js}`, `scripts/cli_gdad.py`, `scripts/gddp.py` (`gdad` in `_CLI_COMMANDS` and argparse only), `scripts/timeline.py` (journal reader).
-
-**gddp-runtime:** `scripts/runtime/gdad_run.py` (pane, status, journal, `write_gate`).
-
-**Unchanged:** `runner.py`, `reconciler.py`, `pi_rpc_adapter.py`, `provisional_status.py`, `frontier.py`, `gate_tokens.py`, `node_cli.py`, and `gddp` jobs / evaluations / receipt / watch.
-
-**In the way:** `pi_rpc_adapter.py` spawns `pi --mode rpc` under settings discovery, with a built-in `subagent` preamble. That is the wrong transport for this slice. `runner.py`, `reconciler.py`, and `provisional_status.py` write node YAML to `provisional` and issue the gate on an evaluator pass, before accept. This slice does not enter that loop.
+**In the way:** `pi_rpc_adapter.py` spawns `pi --mode rpc` under settings discovery. `runner.py`, `reconciler.py`, and `provisional_status.py` write node YAML to `provisional` and issue the gate before accept.
 
 ## 6. Demo
 
-Node `line-pair` in project `gdad-demo`. Goal: two workers, two lines in `artifacts/hello.txt`. Acceptance: the file exists and has exactly two non-empty lines. Constraints: no other files, no graph YAML edits. `Sab's words` is that goal sentence.
+Node `line-pair`, project `gdad-demo`. Acceptance: `hello.txt` has exactly two non-empty lines. Constraints: no other files, no graph YAML edits. First `prompt.txt` tells the workers to write three lines, so the reviewer rejects. `gddp gdad run` again redispatches with those `reasons`, the workers write two lines, the reviewer accepts, and the gate is issued.
 
-Sab runs:
+Demo of durable resume: `run` until `pause` at `after-workers`, kill the pane, `gddp gdad resume gdad-demo line-pair`. The journal shows `pause` then `resume`, and the finished `parallel` workers do not run again.
 
 ```
-gddp gdad watch gdad-demo line-pair
+gddp gdad run gdad-demo line-pair
 ```
 
 ## Review 1 (Opus steward, 2026-10-13): REVISE, then build after round 2 if these are closed
