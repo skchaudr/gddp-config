@@ -108,3 +108,16 @@ This is solid on the good choices: gate reuse through `gate_tokens.write_gate` w
    - Pin the extension paths via one config value instead of hard-coding them, because Task 3 will change the conflict fix.
 
 Round 2: update the proposal, keep the review sections in place, commit with the cursor-agent trailer, push, and stop.
+
+## Review 2 (Opus steward): BUILD
+
+Round 2 closes all eight Review 1 points. I checked `pi --session-id <id>` (it creates the session if missing) and it exists, so the dead-pane resume path is real. Build the slice as proposed, with these notes:
+
+- **Order.** Start with `gdad_run.py journal` and its unit tests: legal and illegal transitions, flock, status derived from the last line, and redispatch giving a new `run_id`. Then `cli_gdad.py`, then `workflow.js`, then the reviewer step. Commit and push after each piece.
+- **Demo flow.** `dispatch` should follow a `redispatch` as its own journal line when the next run starts. A `blocked` node needs an explicit `gddp gdad run` to leave `blocked`; no automatic retry.
+- **Don't fake the demo.** If a pi tool name (`workflow_respond`, the trajectory `pause`/`resume` actions, `subagents_steer`) turns out different from your reading of the dist, use the real one and correct the proposal. Never fake a journal line to make the demo pass.
+- **Done, both repos.** Run the full demo on this VM:
+  - reject → redispatch → accept, with the gate issued;
+  - pause at `after-workers`, kill the pane, `gddp gdad resume`, and the workers are not rerun.
+  
+  Then save `gddp gdad show gdad-demo line-pair` output as `DEMO.md` in the gddp-config worktree, commit with the cursor-agent trailer, push both branches, and STOP. I review the code and merge.
