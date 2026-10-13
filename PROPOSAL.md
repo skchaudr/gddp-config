@@ -121,3 +121,41 @@ Round 2 closes all eight Review 1 points. I checked `pi --session-id <id>` (it c
   - pause at `after-workers`, kill the pane, `gddp gdad resume`, and the workers are not rerun.
   
   Then save `gddp gdad show gdad-demo line-pair` output as `DEMO.md` in the gddp-config worktree, commit with the cursor-agent trailer, push both branches, and STOP. I review the code and merge.
+
+## Review 3 (Opus steward, 2026-10-13 09:41Z): NORTH STAR. Hold the build; add the decision packet first
+
+The brief gained a North star section from Sab. Read it in full: ~/.dsh/briefs/task-1-gdad.md, "North star". Sab: "workflows pause it from working or running and returning to it the exact work it needs to make decisions on and re-dispatching OR choosing which workflows to run next". This changes the center of the contract. The journal and status stay as designed in round 2, but they become plumbing. The product is the **decision packet**, and the main agent (Fable in Claude Code, or `grok claude`) sees nothing except packets.
+
+Add section 7 (decision packet), adjust sections 2, 4 and 6 to fit, stay within 2.5 pages, commit, push, and STOP for a quick Review 4. Then build.
+
+7a. **Packet.** On every durable pause (review verdict, ambiguity checkpoint, acceptance), the workflow writes exactly one packet: `gdad/<project>/<node>/packets/<packet_id>.json` plus a rendered `<packet_id>.md`, and journals `packet`. Fields:
+- `packet_id`, `project`, `node`, `run_id`;
+- `kind`: `verdict | ambiguity | acceptance`;
+- `done`: at most 5 bullets of what happened;
+- `question`: one sentence;
+- `options`: `[{id, label, consequence}]`;
+- `evidence`: the reviewer's verdict.json reasons, or the checkpoint prompt;
+- `artifacts`: paths only;
+- `resume_handle`: `{pi_session_id, workflow_run_id, checkpoint}`;
+- `expires`: optional.
+
+Cap the rendered `.md` at about 2 KB. That cap is the "least amount of work" contract. Add a state between running and resolution, `awaiting-decision`, entered when a packet is written.
+
+7b. **The three replies, and only these:**
+- `{"reply":"resume","packet_id","option_id"|"decision":"<text>"}`: answer the checkpoint, and the workflow continues;
+- `{"reply":"redispatch","packet_id","changes":"<text>"}`: new `run_id`, with `changes` fed to the workers (this replaces round 2's reject → redispatch, which is now the decider's call, not automatic);
+- `{"reply":"next","packet_id","workflow":"<project>/<node>"|null}`: close this node (accept if the verdict was accept) and name what runs next.
+
+Command: `gddp gdad decide <packet_id> <reply.json|->`. It validates against `schemas/gdad/reply.schema.json`, journals `decision` with the reply, and performs it: resume via `workflow_respond`, redispatch, or gate+next. `gddp gdad inbox [--json]` lists open packets. The main agent reads only `inbox` and the packet, and writes only `decide`.
+
+7c. **Roles.** The Opus reviewer (`claude -p --model opus`) still produces `verdict.json`, which becomes packet `evidence`. The decider is a separate role, Fable. In the demo the stand-in is `claude -p --model claude-fable-5-1 --output-format json` (verify it runs headless on this VM). It gets only the rendered packet.md and must answer with one reply JSON, which the demo pipes into `gddp gdad decide`. Gates are issued only after a `next` (or a `resume` past the final acceptance checkpoint) on an accept verdict.
+
+7d. **Host evaluation.** Sab allows bb (`bb-cli`, on PATH as `bb`) threads/workflows as the host *if* they already give durable pause/resume. Spend at most 15 minutes: `bb --help`, `bb workflow`/`thread` subcommands, and where state lives. Write one paragraph: does bb give a durable park plus a structured resume value that's better than pi-extensible-workflows' `checkpoint` + `workflow_respond`? Keep pi unless bb is clearly better; never use both.
+
+7e. **Demo (replaces section 6's sequence).** Your one command `gddp gdad run gdad-demo line-pair` must prove one full pause → packet → decision → resume cycle with Fable deciding:
+1. Workers write three lines, and the reviewer rejects.
+2. A `verdict` packet is written; Fable replies `redispatch` with changes; the workers write two lines; the reviewer accepts.
+3. An `acceptance` packet is written; Fable replies `next` with `null`; the gate is issued.
+4. Separately, show the durable resume: the `after-workers` checkpoint is an `ambiguity` packet; kill the pane; `gddp gdad decide` with `resume` relaunches on the pi session; the workers are not rerun.
+
+`gddp gdad show` prints the journal with the packets and decisions inline.
