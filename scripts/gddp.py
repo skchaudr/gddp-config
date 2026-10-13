@@ -109,6 +109,7 @@ _CLI_COMMANDS = frozenset(
         "runs",
         "steer",
         "timeline",
+        "gdad",
     }
 )
 _ABSTRACT_EXECUTION_MODES = frozenset({"agent", "human"})

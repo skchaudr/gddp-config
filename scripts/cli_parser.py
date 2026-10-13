@@ -7,6 +7,11 @@ import sys
 from pathlib import Path
 
 
+def _cmd_gdad(args):
+    from cli_gdad import cmd_gdad
+    return cmd_gdad(args)
+
+
 def parse_cli_argv(argv: list[str]) -> int:
     """Parse argv (post-dispatch routing) and invoke the selected command."""
     import gddp
@@ -162,6 +167,14 @@ def parse_cli_argv(argv: list[str]) -> int:
     timeline_p.add_argument("--repo-path", default=None, help="Local checkout of the project's repo")
     timeline_p.add_argument("--json", action="store_true", help="Machine-readable output")
     timeline_p.set_defaults(func=gddp.cmd_timeline)
+
+    gdad_p = sub.add_parser(
+        "gdad",
+        help="GDAD decision packets: run, watch, inbox, decide",
+    )
+    gdad_p.add_argument("gdad_args", nargs=argparse.REMAINDER, help="Arguments for gdad_run")
+    gdad_p.set_defaults(func=_cmd_gdad)
+
     jobs_sub = jobs_p.add_subparsers(dest="jobs_command")
 
     jobs_list = jobs_sub.add_parser("list", help="List jobs and queue states")
