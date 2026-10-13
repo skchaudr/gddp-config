@@ -102,3 +102,21 @@ Sab runs:
 ```
 gddp gdad watch gdad-demo line-pair
 ```
+
+## Review 1 (Opus steward, 2026-10-13): REVISE, then build after round 2 if these are closed
+
+This is solid on the good choices: gate reuse through `gate_tokens.write_gate` with the verdict receipt, keeping v1 node YAML untouched, an honest "in the way" list, and pi-extensible-workflows for `parallel` plus checkpoint-replay. Keep all of those. Close the gaps below in the proposal (keep it to 2 pages), then stop again.
+
+1. **One writer for status and journal.** `workflow.js` runs inside pi (JS), while the executor is `gdad_run.py` (Python) in another process. As written, nobody owns the `pause` line when `checkpoint` parks inside pi. Specify one helper, for example `python3 -m gdad_run journal <node> <type> [--note] [--artifact]`, that appends the journal line and rewrites `status` atomically in the same call (flock). Every writer uses it: the executor, `workflow.js` via `shell(...)` before and after `checkpoint`, the reviewer step, and Sab's commands. Derive `status` from the last journal line so the two can never disagree.
+2. **Rejected is not terminal. Review-and-redispatch is the point of GDAD** (Sab: "review or evaluation pipeline"; the steward "re-dispatches grok to dial in its proposal"). Add `rejected -> pending` (who: sab or reviewer) with a `redispatch` journal type that carries the review findings, and a new `run_id`. The next dispatch must feed the previous verdict's `reasons` into the workers' prompt. Only `accepted` is terminal.
+3. **Split dispatch from watch.** `watch` must be read-only, safe to run any number of times, and re-attachable. Add `gddp gdad run <project> <node>`, which dispatches, opens the herdr pane and then follows the journal (this is the one command Sab runs), plus `gddp gdad watch` (tail only), `gddp gdad pause`, `gddp gdad resume`, `gddp gdad steer "<text>"` and `gddp gdad show` (cat BRIEF + status + journal). Say concretely how pause, resume and steer reach the running pi: for example `herdr agent prompt <pane>` to call the workflow tool's pause/resume host action, or `subagents_steer`. Name the exact tool and action names from the 6.2.0 dist.
+4. **Durable resume across a dead pane.** Runs are keyed to the pi session (`session-lease.js`, `listRunIds(cwd, sessionId)`), so resuming needs the same pi session. Record `pi_session_id` and the workflow `runId` in the journal `dispatch` line. `gddp gdad resume` must work after the pane or pi process is gone, by relaunching pi on that session and resuming the run by id. Show that in the demo: pause, kill the pane, resume, and the finished `parallel` workers are not rerun.
+5. **Reviewer contract.** `claude -p --model opus --output-format json` with a fixed prompt file (`schemas/gdad/review-prompt.md`) that gets BRIEF.md (especially Acceptance) plus an artifact listing. Parse strictly. Unparseable output or a non-zero exit means `blocked` with the raw output saved as an artifact, never `accepted`. The reviewer writes `artifacts/verdict.json` itself, including `reasons`. The gate is issued only from that file's sha.
+6. **Where state lives.** The definition (`BRIEF.md`, `workflow.js`) belongs in gddp-config. Runtime state (`status`, `journal.jsonl`, `artifacts/`, per-run dirs) should live in gddp-runtime, next to `jobs/`, so running nodes don't churn the config repo's git. Either do that, or justify keeping it in config with a stated git policy. `gddp gdad show` must still print everything in one call.
+7. **Demo acceptance must be mechanical, so the reviewer can actually reject.** Keep `line-pair`, but in round 2 also say how you'll exercise one reject → redispatch → accept (for example, round 1 workers are told to write three lines). That proves the GDAD loop, not just the happy path.
+8. **Smaller points.**
+   - Verify `claude -p --model opus` runs non-interactively on this VM (auth) and say so.
+   - Say what happens to `herdr` pane focus: open the pane in a new tab, never steal Sab's focused pane.
+   - Pin the extension paths via one config value instead of hard-coding them, because Task 3 will change the conflict fix.
+
+Round 2: update the proposal, keep the review sections in place, commit with the cursor-agent trailer, push, and stop.
