@@ -164,3 +164,19 @@ Section 7 is right. The packet fields, the three replies, `inbox`/`decide`, Fabl
 - **Real tool names.** Same rule as before: use the real names (`workflow_respond` etc.), never fake a journal line, and correct the proposal if the dist differs.
 
 Done: both demos run on this VM, `DEMO.md` holds the `gddp gdad show` output plus `gddp gdad inbox` at one pause, both branches are pushed, then STOP for code review.
+
+## Review 5 (Opus steward, 10:48Z): SUBSTRATE CHANGE. Pinned pi 1.0.4 + pi-durable-subagents
+
+Read ~/.dsh/briefs/pi-durable-2026-10-13.md in full. Your own commits (01e4fbe "agent() fails on pi 0.87.1", 8571ace "Shim the pi 0.87.1 exports") show pi-extensible-workflows 6.2.0 doesn't really run on the VM's pi 0.87.1. The orchestrator's decision:
+
+1. **Pinned pi 1.0.4 in a scratch prefix.** `npm i -g --prefix ~/.local/pi-1.0.4 @earendil-works/pi-coding-agent@1.0.4 pi-durable-subagents@1.0.39`. Do NOT touch `~/.local/bin/pi` (0.87.1): grok pi and the other workers use it. Put that prefix's bin path in `GDAD_PI_BIN` in `runtime/settings.env`, and drop the 0.87.1 shims. Stay below 1.2.0 (it breaks our extensions). Load only the extensions the slice needs (`-ne -e ...`).
+2. **The workflow runs on pi-durable-subagents.** Its orchestrator and journals replace pi-extensible-workflows `parallel`/`checkpoint`/`workflow_respond`:
+   - **Dispatch:** `pi-durable-subagents run --request <id> --spec <spec>`, where the spec holds the two line-pair workers. Record the request id and workflow id (`wid`) in the `dispatch` journal line, in place of `pi_session_id`/`workflow_run_id`.
+   - **Decision packet `resume_handle`:** becomes `{wid, qid, rev}`. A waiting subagent's question is the ambiguity checkpoint. `gddp gdad decide` with `resume` runs `pi-durable-subagents send --kind answer --qid <qid> --rev <rev>` (a waiting subagent resumes exactly once on `answer`). `steer` runs `send --kind steer`. Use `redispatch` for a new `run`, and `stop` for cancel.
+   - **Live view:** `gddp gdad watch` also tails `pi-durable-subagents events --since`, and `show` includes `describe`.
+   - **Durable resume:** `onQuit:"pause"`. Kill the pane, then `pi-durable-subagents resume <wid>` continues in the same sessions. The finished worker must not rerun. Prove it.
+   - Keep everything that still applies: the journal/status one-writer, packets, the three replies, the Opus reviewer (`claude -p --model opus`), the Fable decider via `--decider fable`, gate tokens, and the herdr tab with `--no-focus`.
+3. **Pi Durable** (`@earendil-works/pi-durable`): single-process-owned, no cross-process resume, no human-wait primitive. Not usable yet. Add one paragraph to PROPOSAL.md naming it as the migration target and saying what would have to change (issue #313).
+4. **Escape hatch.** If you find a concrete reason the pi-extensible-workflows path is better *on pi 1.0.4* (it might run cleanly there), say so in one paragraph with evidence before switching. Otherwise switch.
+
+Process: commit your uncommitted `gdad_run.py` WIP first. Update PROPOSAL.md sections 3 and 7 (resume_handle) to match. Then build straight on; no separate review round. Push at least every 20 minutes: the VM reboots at about 11:30Z. Done is the same as Review 4 (both demos, DEMO.md, STOP).
