@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GDAD decision reply",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reply", "packet_id", "option_id"],
+      "properties": {
+        "reply": { "const": "resume" },
+        "packet_id": { "type": "string", "minLength": 1 },
+        "option_id": { "type": "string", "minLength": 1 }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reply", "packet_id", "decision"],
+      "properties": {
+        "reply": { "const": "resume" },
+        "packet_id": { "type": "string", "minLength": 1 },
+        "decision": { "type": "string", "minLength": 1 }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reply", "packet_id", "changes"],
+      "properties": {
+        "reply": { "const": "redispatch" },
+        "packet_id": { "type": "string", "minLength": 1 },
+        "changes": { "type": "string", "minLength": 1 }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reply", "packet_id", "workflow"],
+      "properties": {
+        "reply": { "const": "next" },
+        "packet_id": { "type": "string", "minLength": 1 },
+        "workflow": { "type": ["string", "null"], "minLength": 1 }
+      }
+    }
+  ]
+}

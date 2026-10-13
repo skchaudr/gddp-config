@@ -492,6 +492,36 @@ def heartbeat_health() -> tuple[list[str], list[str]]:
 
 # --------------------------------------------------------------------------- assemble
 
+def gdad_entries(runtime_root: Path, project_id: str, node_filter: str | None) -> list[Entry]:
+    """GDAD journal lines. Read-only. Missing directories contribute nothing."""
+    base = Path(runtime_root) / "gdad" / project_id
+    if not base.is_dir():
+        return []
+    entries: list[Entry] = []
+    nodes = [base / node_filter] if node_filter else sorted(path for path in base.iterdir() if path.is_dir())
+    for directory in nodes:
+        journal = directory / "journal.jsonl"
+        if not journal.is_file():
+            continue
+        for raw in journal.read_text(encoding="utf-8").splitlines():
+            raw = raw.strip()
+            if not raw:
+                continue
+            try:
+                rec = json.loads(raw)
+            except json.JSONDecodeError:
+                continue
+            ts = parse_ts(rec.get("ts"))
+            if ts is None:
+                continue
+            note = rec.get("note") or ""
+            text = f"gdad {rec.get('type')} {rec.get('run_id')} → {rec.get('state')}"
+            if note:
+                text += f" — {note}"
+            entries.append(Entry(ts, str(rec.get("who") or "gdad"), text, directory.name))
+    return entries
+
+
 def build(
     project_id: str,
     node_id: str | None,
@@ -543,6 +573,8 @@ def build(
 
     entries += attempt_entries(attempts or [], project_id, set(graph["nodes"]), node_id)
     entries += receipt_entries(config_root, project_id, node_id)
+    if runtime_root is not None:
+        entries += gdad_entries(runtime_root, project_id, node_id)
 
     since = project_authored_at(config_root, graph) or (datetime.now(timezone.utc) - DEFAULT_REPO_WINDOW)
     repo_label = graph["repo"].split("/")[-1] or graph["repo"]
