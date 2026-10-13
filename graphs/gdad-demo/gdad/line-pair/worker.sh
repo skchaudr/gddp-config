@@ -22,4 +22,4 @@ file="hello-${role}.txt"
 prompt="$(cat "$GDAD_PROMPT_FILE")
 
 You are worker ${role}. Using the write tool, create only ${GDAD_ARTIFACTS}/${file} and no other file. Stop when that file exists."
-exec pi -ne --no-session -p --approve "$prompt"
+exec /home/sab-mini/.local/bin/pi -ne --no-session -p --approve "$prompt"
