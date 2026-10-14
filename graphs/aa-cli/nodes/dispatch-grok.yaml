@@ -1,37 +1,24 @@
 schema_version: '1.0'
 schema_type: node
 node_id: dispatch-grok
-title: Wire sync grok (grk) target dispatch
+title: 'Dispatch Target: Grok'
 type: capability
-why: Operators choose the grk target to run Grok inline; aa must route sync grk packets
-  through the grk wrapper without breaking ledger receipts
+why: Enables dispatching tasks to the Grok agent.
 depends_on:
-- dispatch-router
-acceptance_criteria:
-- id: grk-default-tier
-  criterion: targets.conf registers grk default sync grk and aa_target_lookup resolves
-    it
-- id: grk-tier-variants
-  criterion: grk speed and frontier tiers resolve to distinct grk command variants
-    including --model grok-frontier
-- id: sync-fire-records-ledger
-  criterion: firing a grk sync packet records done or error in ledger.tsv with ref
-    '-'
-- id: prompt-on-stdin
-  criterion: composed prompt.txt is passed to grk on stdin inside packet workdir
-- id: acceptance-test-covers-grk
-  criterion: tests/acceptance.zsh includes at least one grk or sync-target smoke path
+- cli-scaffold
+acceptance:
+- id: aa-dispatch-grok-works
+  criterion: aa dispatch grok works
+- id: handles-real-time-data
+  criterion: handles real-time data
 constraints:
-- grk remains a sync target — do not convert to async without a spec change
-- do not bypass aa_command_owns_clipboard for grk wrapper commands
-- keep tier keys limited to default, speed, frontier
+- Do not exceed agent-specific rate limits
 allowed_execution_modes:
 - jules
-- human
 required_artifacts:
 - decision.md
 - result-summary.md
-- patch.diff
-status: complete
+- graph-update.yaml
+status: pending
 priority: medium
 unlocks: []
