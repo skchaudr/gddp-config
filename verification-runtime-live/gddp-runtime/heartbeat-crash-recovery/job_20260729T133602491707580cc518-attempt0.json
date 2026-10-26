@@ -1,0 +1,201 @@
+{
+  "project_id": "gddp-runtime",
+  "node_id": "heartbeat-crash-recovery",
+  "verdict": "needs-human-review",
+  "criteria_verdict": "needs-more-evidence",
+  "integrity": {
+    "verdict": "unknown",
+    "intent_preserved": false,
+    "graph_integrity_preserved": false,
+    "required_human_review": true,
+    "confidence": 0.0,
+    "findings": [],
+    "reasoning": "pi exited with code 1: file:///opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui/dist/utils.js:34\nconst zeroWidthRegex = /^(?:\\p{Default_Ignorable_Code_Point}|\\p{Control}|\\p{Mark}|\\p{Surrogate})+$/v;\n                       ^\n\nSyntaxError: Invalid regular expression flags\n    at ESMLoader.moduleStrategy (node:internal/modules/esm/translators:119:18)\n    at ESMLoader.moduleProvider (node:internal/modules/esm/loader:468:14)\n\nNode.js v18.16.1\n",
+    "tool_trace": [],
+    "graph_observations": null,
+    "lane_status": "crashed",
+    "harness_error": "pi exited with code 1: file:///opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui/dist/utils.js:34\nconst zeroWidthRegex = /^(?:\\p{Default_Ignorable_Code_Point}|\\p{Control}|\\p{Mark}|\\p{Surrogate})+$/v;\n                       ^\n\nSyntaxError: Invalid regular expression flags\n    at ESMLoader.moduleStrategy (node:internal/modules/esm/translators:119:18)\n    at ESMLoader.moduleProvider (node:internal/modules/esm/loader:468:14)\n\nNode.js v18.16.1\n (preserved logs: stdout=/var/folders/yk/w_pr1y0n6n9523hzzfr4xs1h0000gn/T/gddp-integrity-stdout-3ugazfh0 stderr=/var/folders/yk/w_pr1y0n6n9523hzzfr4xs1h0000gn/T/gddp-integrity-stderr-vv4i6qwx)"
+  },
+  "confidence": 0.16,
+  "criteria_confidence": 0.16,
+  "completeness": 0.5,
+  "graph_readiness": 0.0,
+  "completeness_status": "partial",
+  "deterministic": {
+    "criteria": [
+      {
+        "id": "stale-claim-recovery-tested",
+        "criterion": "a test proves an event stuck in 'claimed' past the stale cutoff is re-claimed and processed by a later heartbeat run",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/adapters/__init__.py, scripts/adapters/executor_protocol.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_api_adapter.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/adapters/__init__.py, scripts/adapters/executor_protocol.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_api_adapter.py...) for identifiers named in the criterion (re-claimed). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "intake-restart-proven",
+        "criterion": "evidence (script output or runbook transcript) shows intake killed mid-run is restarted by launchd and /health returns 200 without operator action",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (scripts/adapters/__init__.py, scripts/adapters/executor_protocol.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_api_adapter.py...)"
+        ],
+        "reasoning": "Scanned source files (scripts/adapters/__init__.py, scripts/adapters/executor_protocol.py, scripts/adapters/jules_action_adapter.py, scripts/adapters/jules_api_adapter.py...) for identifiers named in the criterion (mid-run). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "no-double-processing",
+        "criterion": "a test proves two concurrent heartbeat runs over the same received event produce exactly one job (atomic claim holds)",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "crash-drill-runbook",
+        "criterion": "decision.md documents the crash drill so it can be re-run before any overnight window",
+        "status": "indeterminate",
+        "confidence": 0.2,
+        "method": "keyword_scan_source",
+        "evidence": [
+          "no hit in source scan (decision.md)"
+        ],
+        "reasoning": "Scanned source files (decision.md) for identifiers named in the criterion (re-run). No complete match — absence could mean rewording, missing path, or missing implementation.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      },
+      {
+        "id": "suite-green",
+        "criterion": ".venv/bin/python -m pytest -q scripts passes with no regressions",
+        "status": "indeterminate",
+        "confidence": 0.1,
+        "method": "no_probe",
+        "evidence": [],
+        "reasoning": "No deterministic probe is registered for this criterion and no usable identifiers were found in its text. Needs a human or an explicit probe.",
+        "mismatch_kind": "",
+        "mismatch_detail": "",
+        "needs_evidence": false,
+        "human_question": ""
+      }
+    ],
+    "constraints": [
+      {
+        "constraint": "drills run against a scratch database or clearly-marked synthetic events, never live queue rows",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "do not weaken the 30-minute stale-claim cutoff or the atomic claim UPDATE",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "launchd plists in deploy/mini-heartbeat are config-of-record; do not fork copies",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      },
+      {
+        "constraint": "graph truth stays human-owned; this node produces evidence only",
+        "status": "clear",
+        "confidence": 0.85,
+        "method": "forbidden_pattern_scan",
+        "evidence": [
+          "no forbidden patterns matched"
+        ],
+        "reasoning": "Scanned referenced lib files for forbidden patterns (executor sourcing, runtime deps). No violations."
+      }
+    ],
+    "artifacts_present": {
+      "decision.md": true,
+      "result-summary.md": true,
+      "patch.diff": true,
+      "graph-update.yaml": true
+    },
+    "deps_status": {},
+    "criteria_mismatches": [],
+    "missing_evidence": [],
+    "human_review_questions": []
+  },
+  "semantic": {
+    "judgments": [],
+    "overall_reasoning": "pi exited with code 1: file:///opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui/dist/utils.js:34\nconst zeroWidthRegex = /^(?:\\p{Default_Ignorable_Code_Point}|\\p{Control}|\\p{Mark}|\\p{Surrogate})+$/v;\n                       ^\n\nSyntaxError: Invalid regular expression flags\n    at ESMLoader.moduleStrategy (node:internal/modules/esm/translators:119:18)\n    at ESMLoader.moduleProvider (node:internal/modules/esm/loader:468:14)\n\nNode.js v18.16.1\n",
+    "risks": null,
+    "followup_candidates": null,
+    "budget_exhausted": true,
+    "budget_trace": null,
+    "lane_status": "crashed",
+    "harness_error": "pi exited with code 1: file:///opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui/dist/utils.js:34\nconst zeroWidthRegex = /^(?:\\p{Default_Ignorable_Code_Point}|\\p{Control}|\\p{Mark}|\\p{Surrogate})+$/v;\n                       ^\n\nSyntaxError: Invalid regular expression flags\n    at ESMLoader.moduleStrategy (node:internal/modules/esm/translators:119:18)\n    at ESMLoader.moduleProvider (node:internal/modules/esm/loader:468:14)\n\nNode.js v18.16.1\n (preserved logs: stdout=/var/folders/yk/w_pr1y0n6n9523hzzfr4xs1h0000gn/T/gddp-pi-stdout-z647kza3 stderr=/var/folders/yk/w_pr1y0n6n9523hzzfr4xs1h0000gn/T/gddp-pi-stderr-j05zl117)"
+  },
+  "decision_reasoning": "pi exited with code 1: file:///opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui/dist/utils.js:34\nconst zeroWidthRegex = /^(?:\\p{Default_Ignorable_Code_Point}|\\p{Control}|\\p{Mark}|\\p{Surrogate})+$/v;\n                       ^\n\nSyntaxError: Invalid regular expression flags\n    at ESMLoader.moduleStrategy (node:internal/modules/esm/translators:119:18)\n    at ESMLoader.moduleProvider (node:internal/modules/esm/loader:468:14)\n\nNode.js v18.16.1\n",
+  "required_next_action": "Integrity verdict 'unknown' halts progression (criteria verdict was 'needs-more-evidence'). Human review required; no dependent node may dispatch on this node.",
+  "generated_at": "2026-07-29T13:56:38.833384+00:00",
+  "evaluated_tree_sha": "1b9f22b68e39068c3dee2edd5670104a43c1b205",
+  "evaluated_commit_sha": "509da66fdbe709fec7977c9616b00061ff61221c",
+  "merge_commit_sha": "509da66fdbe709fec7977c9616b00061ff61221c",
+  "pr_ref": null,
+  "job_id": "job_20260729T133602491707580cc518",
+  "canonical_context": {
+    "readme": "/private/var/folders/yk/w_pr1y0n6n9523hzzfr4xs1h0000gn/T/gddp-eval-wt-2okia9pn/README.md",
+    "project_brief": "/private/var/folders/yk/w_pr1y0n6n9523hzzfr4xs1h0000gn/T/gddp-eval-wt-2okia9pn/PROJECT-BRIEF.md",
+    "foundational_node": "/Users/saboor/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml"
+  },
+  "context_coverage": {
+    "criteria": {
+      "rating": "none",
+      "offered": 3,
+      "content_accessed": 0,
+      "not_observed": 3,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/Users/saboor/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml",
+        "/private/var/folders/yk/w_pr1y0n6n9523hzzfr4xs1h0000gn/T/gddp-eval-wt-2okia9pn/PROJECT-BRIEF.md",
+        "/private/var/folders/yk/w_pr1y0n6n9523hzzfr4xs1h0000gn/T/gddp-eval-wt-2okia9pn/README.md"
+      ]
+    },
+    "integrity": {
+      "rating": "none",
+      "offered": 3,
+      "content_accessed": 0,
+      "not_observed": 3,
+      "accessed_paths": [],
+      "not_observed_paths": [
+        "/Users/saboor/repos/gddp-config/graphs/gddp-runtime/nodes/return-router.yaml",
+        "/private/var/folders/yk/w_pr1y0n6n9523hzzfr4xs1h0000gn/T/gddp-eval-wt-2okia9pn/PROJECT-BRIEF.md",
+        "/private/var/folders/yk/w_pr1y0n6n9523hzzfr4xs1h0000gn/T/gddp-eval-wt-2okia9pn/README.md"
+      ]
+    },
+    "overall": "none"
+  }
+}
