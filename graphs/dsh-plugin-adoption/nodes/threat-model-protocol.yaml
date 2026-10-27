@@ -1,37 +1,33 @@
 schema_version: "1.0"
 schema_type: node
+schema_version: '1.0'
+schema_type: node
 node_id: threat-model-protocol
 title: Supply-chain threat model + safe-install protocol
 type: capability
-why: |
-  Third-party plugin code runs inside the harness with credential/API
-  access, HMR can recompose live, and host-shadow deps can hide. The
-  protocol (preflight scans → manifest validation → isolated install →
-  doctor health → smoke) must be written and pinned before any install.
+why: "Third-party plugin code runs inside the harness with credential/API\naccess, HMR can recompose live, and host-shadow\
+  \ deps can hide. The\nprotocol (preflight scans \u2192 manifest validation \u2192 isolated install \u2192\ndoctor health\
+  \ \u2192 smoke) must be written and pinned before any install.\n"
 depends_on:
-  - repo-vetting
+- repo-vetting
 acceptance_criteria:
-  - id: threat-model
-    criterion: A threat model doc enumerates the concrete risk classes for dsh
-      plugin installs (poisoned install scripts, host-shadow node_modules, credential
-      env exfiltration, prompt injection via plugin code, HMR auto-reload exposure),
-      each with a mitigation and the tool that enforces it (dsh-poison-guard,
-      dsh-plugin-check, dsh-plugin-doctor, api-relay-audit where applicable).
-  - id: protocol
-    criterion: The safe-install protocol is written step-by-step (preflight →
-      install-in-isolation → manifest/patch validation → health check → smoke →
-      report), with exact commands and expected outputs.
-  - id: isolation-rule
-    criterion: The protocol states the no-live-~/.dsh rule: nothing touches the
-      real profile until the human rollout node.
+- criterion: A threat model doc enumerates the concrete risk classes for dsh plugin installs (poisoned install scripts, host-shadow
+    node_modules, credential env exfiltration, prompt injection via plugin code, HMR auto-reload exposure), each with a mitigation
+    and the tool that enforces it (dsh-poison-guard, dsh-plugin-check, dsh-plugin-doctor, api-relay-audit where applicable).
+  id: threat-model
+- criterion: "The safe-install protocol is written step-by-step (preflight \u2192 install-in-isolation \u2192 manifest/patch\
+    \ validation \u2192 health check \u2192 smoke \u2192 report), with exact commands and expected outputs."
+  id: protocol
+- criterion: The protocol states the no-live-~/.dsh rule: nothing touches the real profile until the human rollout node.
+  id: isolation-rule
 constraints:
-  - Protocol/threat-model only — no installs in this node.
+- "Protocol/threat-model only \u2014 no installs in this node."
 allowed_execution_modes:
-  - pi
-  - human
+- agent
+- human
 required_artifacts:
-  - evidence/02-threat-model-protocol.md
-status: planned
+- evidence/02-threat-model-protocol.md
+status: pending
 priority: high
 unlocks:
-  - isolated-test-profile
+- isolated-test-profile
